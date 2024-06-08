@@ -22,7 +22,6 @@ import { TreeNode } from "../../../common/tree/models/TreeNode";
 import { ChildrenSelector } from "../../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../../common/tree/services/tree.service";
 import { TreeViewNodeTemplateDirective } from "../../directives/tree-view-node-template.directive";
-import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateContext";
 
 @Component({
     selector: "mona-tree-view",
@@ -37,10 +36,7 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
     }
 })
 export class TreeViewComponent<T> implements OnInit {
-    protected readonly nodeTemplate = contentChild<
-        TreeViewNodeTemplateDirective,
-        TemplateRef<TreeViewNodeTemplateContext<T>>
-    >(TreeViewNodeTemplateDirective, { read: TemplateRef });
+    protected readonly nodeTemplate = contentChild(TreeViewNodeTemplateDirective, { read: TemplateRef });
     protected readonly treeService = inject(TreeService<T>);
 
     /**
@@ -74,25 +70,25 @@ export class TreeViewComponent<T> implements OnInit {
      * Required if the children selector is set to a function that returns an observable.
      * @param value The predicate to determine if a node has children.
      */
-    public hasChildren = input<Predicate<T> | null>(null);
+    public hasChildren = input<Predicate<TreeNode<T>> | null>(null);
 
     /**
      * The field that represents the unique identifier of a node.
-     * This is required if the data structure is set to `flat`.
+     * This is required if the data structure is set to "flat".
      */
     public idField = input<string>("");
 
     /**
      * The data structure of the tree.
      * It can be either of the following:
-     * - `flat`: The tree is a flat list of nodes.
-     * - `hierarchical`: The tree is a hierarchical structure.
+     * - "flat": The tree is a flat list of nodes.
+     * - "hierarchical": The tree is a hierarchical structure.
      *
-     * If the data structure is set to `flat`, the following fields are required:
+     * If the data structure is set to "flat", the following fields are required:
      * - {@link idField}
      * - {@link parentIdField}
      *
-     * If the data structure is set to `hierarchical`, the following fields are required:
+     * If the data structure is set to "hierarchical", the following fields are required:
      * - {@link children}
      * - {@link hasChildren}
      */
@@ -100,7 +96,7 @@ export class TreeViewComponent<T> implements OnInit {
 
     /**
      * The field that represents the parent identifier of a node.
-     * This is required if the data structure is set to `flat`.
+     * This is required if the data structure is set to "flat".
      */
     public parentIdField = input<string>("");
 

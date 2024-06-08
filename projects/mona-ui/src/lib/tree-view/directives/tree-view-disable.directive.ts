@@ -7,15 +7,15 @@ import { TreeService } from "../../common/tree/services/tree.service";
     selector: "mona-tree-view[monaTreeViewDisable]",
     standalone: true
 })
-export class TreeViewDisableDirective<T, K = T> {
+export class TreeViewDisableDirective<T> {
     readonly #defaultOptions: DisableOptions = {
         disableChildren: true,
         enabled: true
     };
     readonly #treeService: TreeService<T> = inject(TreeService);
 
-    public disableBy = input<NodeKeySelector<T, K> | undefined>("");
-    public disabledKeys = input<Iterable<K>>([]);
+    public disableBy = input<NodeKeySelector<T> | undefined>("");
+    public disabledKeys = input<Iterable<any>>([]);
     public options = input<Partial<DisableOptions> | "">("", {
         alias: "monaTreeViewDisable"
     });
