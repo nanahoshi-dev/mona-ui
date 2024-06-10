@@ -1,5 +1,5 @@
 import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { NgClass } from "@angular/common";
 import {
     afterNextRender,
     AfterViewInit,
@@ -21,7 +21,6 @@ import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons
 import { EnumerableSet, from, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { fromEvent, Observable, pairwise, startWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/button.directive";
-import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 import { ContainsPipe } from "../../../pipes/contains.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
 import { Column } from "../../models/Column";
@@ -43,17 +42,15 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         ButtonDirective,
         FaIconComponent,
         SlicePipe,
-        ContainsPipe,
-        NgTemplateOutlet,
-        ContextMenuComponent
+        ContainsPipe
     ],
     templateUrl: "./grid-virtual-list.component.html",
     styleUrl: "./grid-virtual-list.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GridVirtualListComponent implements OnInit, AfterViewInit {
-    readonly #destroyRef = inject(DestroyRef);
-    readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
+    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     readonly #groupColumns$: Observable<ImmutableSet<Column>>;
     readonly #injector = inject(Injector);
     readonly #virtualGridRows = computed(() => {
@@ -65,7 +62,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
     protected readonly collapseIcon = faChevronDown;
     protected readonly collapsedGroups = signal<ImmutableSet<string>>(ImmutableSet.create());
     protected readonly expandIcon = faChevronRight;
-    protected readonly gridService = inject(GridService);
+    protected readonly gridService: GridService = inject(GridService);
     protected readonly groupedGridRows = computed(() => {
         const collapsedGroups = this.collapsedGroups();
         const rows = this.#virtualGridRows();
@@ -108,15 +105,6 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
 
     public onGridRowClick(event: MouseEvent, row: Row): void {
         this.gridService.handleRowClick(event, row);
-    }
-
-    public onToggleDetailClick(event: MouseEvent, row: VirtualGridRow | Row): void {
-        event.stopPropagation();
-        if (row instanceof Row) {
-            row.detailVisible.update(v => !v);
-        } else if (row.type === "row") {
-            row.row.detailVisible.update(v => !v);
-        }
     }
 
     private createGridGroup(rows: Iterable<Row>, columns: Iterable<Column>): VirtualGridGroup[] {
@@ -247,7 +235,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
                 const removedColumns = prev.where(c => !current.contains(c));
                 removedColumns.forEach(c => {
                     this.collapsedGroups.update(groups => {
-                        return groups.where(g => !g.includes(c.field())).toImmutableSet();
+                        return groups.where(g => !g.startsWith(c.field())).toImmutableSet();
                     });
                 });
             });

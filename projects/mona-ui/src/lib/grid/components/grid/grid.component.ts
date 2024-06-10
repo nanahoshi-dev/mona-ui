@@ -14,8 +14,6 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
-    computed,
-    contentChild,
     contentChildren,
     DestroyRef,
     effect,
@@ -27,30 +25,22 @@ import {
     output,
     OutputEmitterRef,
     signal,
-    TemplateRef,
     untracked,
-    viewChild
+    viewChild,
+    WritableSignal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Collections } from "@mirei/ts-collections";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/chip.component";
-import { PlaceholderComponent } from "../../../layout/placeholder/placeholder.component";
-import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
-import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";
-import { MenuItemComponent } from "../../../menus/menu-item/menu-item.component";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
 import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
 import { CompositeFilterDescriptor } from "../../../query/filter/FilterDescriptor";
 import { SortDescriptor, SortDirection } from "../../../query/sort/SortDescriptor";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
-import { GridDetailTemplateDirective } from "../../directives/grid-detail-template.directive";
-import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
 import { CellEditEvent } from "../../models/CellEditEvent";
 import { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
-import { ResizeMethod } from "../../models/ResizeMethod";
 import { SortableOptions } from "../../models/SortableOptions";
 import { GridService } from "../../services/grid.service";
 import { GridColumnComponent } from "../grid-column/grid-column.component";
@@ -77,105 +67,43 @@ import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list
         GridListComponent,
         PagerComponent,
         GridVirtualListComponent,
-        CdkDragPlaceholder,
-        ContextMenuComponent,
-        MenuItemComponent,
-        MenuItemIconTemplateDirective,
-        PlaceholderComponent
+        CdkDragPlaceholder
     ],
     host: {
         class: "mona-grid",
         "[attr.data-uid]": "uid"
     }
 })
-export class GridComponent<T> implements OnInit {
+export class GridComponent implements OnInit {
     readonly #cdr = inject(ChangeDetectorRef);
-    readonly #destroyRef = inject(DestroyRef);
-    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     protected readonly columns = contentChildren(GridColumnComponent);
-    protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
-    protected readonly gridService = inject(GridService);
-    protected readonly gridWidthSet = signal(false);
+    protected readonly gridService: GridService = inject(GridService);
     protected readonly groupColumnList = viewChild<CdkDropList>("groupColumnList");
-    protected readonly groupPanelPlaceholderVisible = signal(true);
-    protected readonly groupable = computed(() => this.gridService.groupableOptions().enabled);
+    protected readonly groupPanelPlaceholderVisible: WritableSignal<boolean> = signal(true);
     protected readonly groupingInProgress = signal(false);
-    protected readonly headerMargin = "0 15px 0 0";
-    protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly resizing = signal(false);
+    protected readonly headerMargin = "0 16px 0 0";
     protected readonly uid = v4();
-    protected columnDragging = false;
+    protected columnDragging: boolean = false;
     protected dragColumn?: Column;
     protected dropColumn?: Column;
     protected gridColumns: Column[] = [];
+    protected resizing: boolean = false;
 
-    /**
-     * Emitted when a cell is edited.
-     */
     public readonly cellEdit: OutputEmitterRef<CellEditEvent> = output();
 
-    /**
-     * The row data to be displayed in the grid.
-     */
-    public data = input<Iterable<T>>([]);
-
-    /**
-     * Initial filter configuration to be applied to the grid when it is loaded.
-     */
+    public data = input<any[]>([]);
     public filter = model<CompositeFilterDescriptor[]>([]);
-
-    /**
-     * Whether the grid is filterable.
-     */
     public filterable = input(false);
-
-    /**
-     * The number of items to be displayed on a page.
-     */
+    public groupable = input(false);
     public pageSize = input<number | undefined>(undefined);
-
-    /**
-     * The page sizes that the user can select from.
-     * These values will be displayed in the page size dropdown.
-     */
     public pageSizeValues = input<number[]>([]);
-
-    /**
-     * Whether the columns of the grid can be reordered.
-     */
     public reorderable = input(false);
-
-    /**
-     * Whether the columns of the grid can be resized.
-     */
     public resizable = input(false);
-
-    /**
-     * The method to be used to set initial column widths.
-     * It can be the following values:
-     * - `fitView`: The columns will be resized to fit the available width.
-     * - `auto`: The columns will be resized based on the content.
-     * - A number representing the width of the columns. All columns except the columns with a specified width
-     *   will have the same width.
-     * @default "fitView"
-     */
-    public resizeMethod = input<ResizeMethod>("fitView");
-
-    /**
-     * Whether the pager is responsive.
-     * If set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.
-     */
     public responsivePager = input(true);
-
-    /**
-     * Initial sort configuration to be applied to the grid when it is loaded.
-     */
     public sort = model<SortDescriptor[]>([]);
-
-    /**
-     * Whether the grid is sortable.
-     */
     public sortable = input<boolean | SortableOptions>(false);
 
     public constructor() {
@@ -185,7 +113,6 @@ export class GridComponent<T> implements OnInit {
         this.setPageSizeEffect();
         this.setColumnEffect();
         this.setGridHeaderElementEffect();
-        this.setGridDetailEffect();
         this.setDataEffect();
     }
 
@@ -206,7 +133,7 @@ export class GridComponent<T> implements OnInit {
     }
 
     public onColumnDragStart(event: CdkDragStart<Column>): void {
-        if (this.resizing()) {
+        if (this.resizing) {
             return;
         }
         this.columnDragging = true;
@@ -214,7 +141,7 @@ export class GridComponent<T> implements OnInit {
     }
 
     public onColumnDrop(event: CdkDragDrop<Column>): void {
-        if (!this.dropColumn || !this.dragColumn || !this.columnDragging || this.resizing() || !this.reorderable()) {
+        if (!this.dropColumn || !this.dragColumn || !this.columnDragging || this.resizing || !this.reorderable()) {
             return;
         }
         const dropColumnIndex = this.gridService
@@ -241,12 +168,10 @@ export class GridComponent<T> implements OnInit {
             return;
         }
 
-        column.groupSortDirection.set("asc");
         this.gridService.groupColumns.update(columns => columns.add(column));
-        this.gridService.appliedGroupSorts.update(dict =>
-            dict.put(column.field(), { sort: { field: column.field(), dir: "asc" } })
-        );
-
+        if (!this.gridService.appliedSorts().containsKey(column.field())) {
+            this.onColumnSort(column);
+        }
         this.columnDragging = false;
         this.dragColumn = undefined;
         this.dropColumn = undefined;
@@ -275,14 +200,14 @@ export class GridComponent<T> implements OnInit {
     }
 
     public onColumnMouseEnter(event: MouseEvent, column: Column): void {
-        if (!this.columnDragging || this.resizing()) {
+        if (!this.columnDragging || this.resizing) {
             return;
         }
         this.dropColumn = column;
     }
 
     public onColumnResizeStart(): void {
-        this.resizing.set(true);
+        this.resizing = true;
     }
 
     public onColumnSort(column: Column): void {
@@ -292,17 +217,24 @@ export class GridComponent<T> implements OnInit {
         if (!column.field()) {
             return;
         }
-        if (column.columnSortDirection() == null) {
-            column.columnSortDirection.set("asc");
-        } else if (column.columnSortDirection() === "asc") {
-            column.columnSortDirection.set("desc");
+        if (column.sortDirection() == null) {
+            column.sortDirection.set("asc");
+        } else if (column.sortDirection() === "asc") {
+            column.sortDirection.set("desc");
+        } else if (
+            this.gridService
+                .groupColumns()
+                .select(c => c.field())
+                .contains(column.field())
+        ) {
+            column.sortDirection.set("asc");
         } else if (this.gridService.sortableOptions.allowUnsort) {
-            column.columnSortDirection.set(null);
+            column.sortDirection.set(null);
             column.sortIndex.set(null);
         } else {
-            column.columnSortDirection.set("asc");
+            column.sortDirection.set("asc");
         }
-        this.applyColumnSort(column, column.columnSortDirection());
+        this.applyColumnSort(column, column.sortDirection());
         const sortDescriptors = this.gridService
             .appliedSorts()
             .values()
@@ -313,8 +245,6 @@ export class GridComponent<T> implements OnInit {
 
     public onGroupingColumnRemove(event: Event, column: Column): void {
         event.stopPropagation();
-        column.groupSortDirection.set(null);
-        this.gridService.appliedGroupSorts.update(dict => dict.remove(column.field()));
         this.gridService.groupColumns.update(columns =>
             columns.where(c => c.field() !== column.field()).toImmutableSet()
         );
@@ -324,35 +254,8 @@ export class GridComponent<T> implements OnInit {
                 p => p.key,
                 p => p.value
             );
+        this.applyColumnSort(column, null);
         this.groupPanelPlaceholderVisible.set(this.gridService.groupColumns().length === 0);
-    }
-
-    public onGroupColumnReorder(column: Column, moveAs: "prev" | "next"): void {
-        this.gridService.groupColumns.update(cols => {
-            const colList = cols.toList();
-            const index = colList.indexOf(column);
-            const newIndex = moveAs === "prev" ? index - 1 : index + 1;
-            if (newIndex < 0 || newIndex >= colList.size()) {
-                return colList.toImmutableSet();
-            }
-            Collections.swap(colList, index, newIndex);
-            return colList.toImmutableSet();
-        });
-    }
-
-    public onGroupingColumnSort(column: Column): void {
-        if (column.groupSortDirection() == null) {
-            column.groupSortDirection.set("asc");
-        } else if (column.groupSortDirection() === "asc") {
-            column.groupSortDirection.set("desc");
-        } else if (column.groupSortDirection() === "desc") {
-            column.groupSortDirection.set("asc");
-        }
-        this.gridService.appliedGroupSorts.update(dict =>
-            dict
-                .remove(column.field())
-                .add(column.field(), { sort: { field: column.field(), dir: column.groupSortDirection() ?? "asc" } })
-        );
     }
 
     public onPageChange(event: PageChangeEvent): void {
@@ -373,21 +276,21 @@ export class GridComponent<T> implements OnInit {
     }
 
     private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {
-        column.columnSortDirection.set(sortDirection);
+        column.sortDirection.set(sortDirection);
         if (this.gridService.sortableOptions.mode === "single") {
             this.gridService
                 .columns()
                 .where(c => c.field() !== column.field())
                 .forEach(c => {
-                    c.columnSortDirection.set(null);
+                    c.sortDirection.set(null);
                     c.sortIndex.set(null);
                     this.gridService.appliedSorts.update(dict => dict.remove(c.field()));
                 });
         }
-        if (column.columnSortDirection() != null) {
+        if (column.sortDirection() != null) {
             const sortDescriptor: SortDescriptor = {
                 field: column.field(),
-                dir: column.columnSortDirection() as SortDirection
+                dir: column.sortDirection() as SortDirection
             };
             this.gridService.appliedSorts.update(dict => dict.put(column.field(), { sort: sortDescriptor }));
         } else {
@@ -403,22 +306,6 @@ export class GridComponent<T> implements OnInit {
                     col.sortIndex.set(fx + 1);
                 }
             });
-    }
-
-    private getTableColumnHeaderCellList(): HTMLTableCellElement[] {
-        const headerElement = this.gridHeaderElement();
-        if (!headerElement) {
-            return [];
-        }
-        const thList = headerElement.nativeElement.querySelectorAll("th");
-        const headerCells = Array.from(thList) as HTMLTableCellElement[];
-        if (this.gridService.masterDetailTemplate()) {
-            headerCells.shift();
-        }
-        for (const _ of this.gridService.groupColumns()) {
-            headerCells.shift();
-        }
-        return headerCells;
     }
 
     private setColumnEffect(): void {
@@ -452,13 +339,6 @@ export class GridComponent<T> implements OnInit {
         });
     }
 
-    private setGridDetailEffect(): void {
-        effect(() => {
-            const detailTemplate = this.gridDetailTemplate() ?? null;
-            untracked(() => this.gridService.masterDetailTemplate.set(detailTemplate));
-        });
-    }
-
     private setGridHeaderElementEffect(): void {
         afterNextRender(() => {
             const headerElement = this.gridHeaderElement();
@@ -474,7 +354,6 @@ export class GridComponent<T> implements OnInit {
                 untracked(() => {
                     window.setTimeout(() => {
                         this.setInitialCalculatedWidthOfColumns();
-                        this.gridWidthSet.set(true);
                     });
                 });
             }
@@ -483,41 +362,18 @@ export class GridComponent<T> implements OnInit {
 
     private setInitialCalculatedWidthOfColumns(): void {
         if (this.gridService.gridHeaderElement()) {
-            const headerElement = this.gridService.gridHeaderElement() as HTMLElement;
-            const headerCells = this.getTableColumnHeaderCellList();
-            let headerWidth = headerElement.clientWidth;
-            const columnsWithWidth = this.gridService.columns().where(c => c.width() != null);
-            if (columnsWithWidth.any()) {
-                headerWidth -= columnsWithWidth.sum(c => c.width() ?? 0);
-            }
-            if (this.gridService.masterDetailTemplate()) {
-                headerWidth -= this.gridService.detailColumnWidth;
-            }
-            headerWidth -= this.gridService.groupColumnWidth * this.gridService.groupColumns().size();
-
-            for (const [cx, columnTh] of headerCells.entries()) {
-                const gridCol = this.gridService.columns().elementAt(cx);
-                let calculatedWidth: number;
-                if (typeof this.resizeMethod() === "number") {
-                    calculatedWidth = this.resizeMethod() as number;
-                } else if (this.resizeMethod() === "fitView") {
-                    calculatedWidth = (headerWidth + 1) / headerCells.length;
-                } else {
-                    calculatedWidth = this.gridService.findTextWidthOfColumn(gridCol, columnTh);
+            window.setTimeout(() => {
+                const headerElement = this.gridService.gridHeaderElement() as HTMLElement;
+                const headerParentElement = headerElement.parentElement as HTMLElement;
+                const thList = headerElement.querySelectorAll("th");
+                const thArray = Array.from(thList);
+                for (const [cx, columnTh] of thArray.entries()) {
+                    const gridCol = this.gridService.columns().elementAt(cx);
+                    const width = headerParentElement.clientWidth / thArray.length;
+                    const offset = 2;
+                    gridCol.calculatedWidth.set(gridCol.width() ?? Math.trunc(width - offset));
                 }
-                if (gridCol.width() != null) {
-                    gridCol.calculatedWidth.set(gridCol.width());
-                } else {
-                    const minWidth = gridCol.minWidth();
-                    const maxWidth = gridCol.maxWidth();
-                    if (minWidth && calculatedWidth < minWidth) {
-                        calculatedWidth = gridCol.minWidth();
-                    } else if (maxWidth && calculatedWidth > maxWidth) {
-                        calculatedWidth = maxWidth;
-                    }
-                    gridCol.calculatedWidth.set(calculatedWidth);
-                }
-            }
+            });
         }
     }
 

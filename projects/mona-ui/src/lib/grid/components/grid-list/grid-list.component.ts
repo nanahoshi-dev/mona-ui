@@ -12,11 +12,10 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faChevronRight, IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { Dictionary, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { fromEvent, mergeWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/button.directive";
-import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 import { ElementAtPipe } from "../../../pipes/element-at.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
 import { Column } from "../../models/Column";
@@ -40,19 +39,18 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         NgTemplateOutlet,
         SlicePipe,
         GridGroupPipe,
-        ElementAtPipe,
-        ContextMenuComponent
+        ElementAtPipe
     ],
     host: {
         class: "mona-grid-list"
     }
 })
 export class GridListComponent implements OnInit {
-    readonly #destroyRef = inject(DestroyRef);
-    readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
-    protected readonly collapseIcon = faChevronDown;
-    protected readonly expandIcon = faChevronRight;
-    protected readonly gridService = inject(GridService);
+    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
+    protected readonly collapseIcon: IconDefinition = faChevronDown;
+    protected readonly expandIcon: IconDefinition = faChevronRight;
+    protected readonly gridService: GridService = inject(GridService);
 
     public columns = input<ImmutableList<Column>>(ImmutableList.create());
     public data = input<ImmutableSet<Row>>(ImmutableSet.create());
@@ -87,11 +85,6 @@ export class GridListComponent implements OnInit {
         } else {
             state.add(this.gridService.pageState.page(), group.collapsed);
         }
-    }
-
-    public onToggleDetailClick(event: MouseEvent, row: Row): void {
-        event.stopPropagation();
-        row.detailVisible.update(v => !v);
     }
 
     private setSubscriptions(): void {

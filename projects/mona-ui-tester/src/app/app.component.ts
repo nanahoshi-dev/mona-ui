@@ -77,18 +77,12 @@ import {
     FilterMenuComponent,
     FilterMenuValue,
     GridCellTemplateDirective,
-    GridCellTooltipTemplateDirective,
     GridColumnComponent,
     GridColumnTitleTemplateDirective,
     GridComponent,
-    GridContextMenuDirective,
-    GridDetailTemplateDirective,
     GridEditableDirective,
-    GridGroupableDirective,
-    GridNoDataTemplateDirective,
     GridSelectableDirective,
     GridVirtualScrollDirective,
-    GroupDescriptor,
     ListBoxActionClickEvent,
     ListBoxComponent,
     ListBoxItemTemplateDirective,
@@ -237,14 +231,9 @@ interface TreeNodeDataItem {
         FormsModule,
         GridComponent,
         GridCellTemplateDirective,
-        GridCellTooltipTemplateDirective,
         GridColumnComponent,
         GridColumnTitleTemplateDirective,
-        GridContextMenuDirective,
-        GridDetailTemplateDirective,
         GridEditableDirective,
-        GridGroupableDirective,
-        GridNoDataTemplateDirective,
         GridSelectableDirective,
         GridVirtualScrollDirective,
         ListBoxComponent,
@@ -524,10 +513,6 @@ export class AppComponent implements OnInit {
         //     ]
         // }
     ];
-    public gridGroups: GroupDescriptor[] = [
-        // { field: "ShipCountry", dir: "desc" },
-        // { field: "ShipCity", dir: "asc" }
-    ];
 
     public gridOrderColumns: any[] = [
         { field: "OrderID", title: "Order ID", filterType: "number" },
@@ -540,10 +525,10 @@ export class AppComponent implements OnInit {
         { field: "ShippedDate", title: "Shipped Date", filterType: "date" },
         { field: "ShipVia", title: "Ship Via", filterType: "boolean" },
         { field: "ShipName", title: "Ship Name", filterType: "string" },
-        { field: "ShipAddress", title: "Ship Address", filterType: "string" },
+        // { field: "ShipAddress", title: "Ship Address", filterType: "string" },
         { field: "ShipCity", title: "Ship City", filterType: "string" },
-        // { field: "ShipRegion", title: "Ship Region", filterType: "string" },
-        { field: "ShipPostalCode", title: "Ship Postal Code", filterType: "string" }
+        { field: "ShipRegion", title: "Ship Region", filterType: "string" }
+        // { field: "ShipPostalCode", title: "Ship Postal Code", filterType: "string" }
     ];
 
     public gridOrderData: any[] = GridOrderData.map(d => {
@@ -559,13 +544,13 @@ export class AppComponent implements OnInit {
         { field: "ProductID", title: "Product ID", filterType: "number" },
         { field: "ProductName", title: "Product Name", filterType: "string" },
         { field: "SupplierID", title: "Supplier ID", filterType: "number" },
-        { field: "CategoryID", title: "Category ID", filterType: "number" },
-        { field: "QuantityPerUnit", title: "Quantity Per Unit", filterType: "string" },
-        { field: "UnitPrice", title: "Unit Price", filterType: "number" },
+        { field: "CategoryID", title: "Category ID", filterType: "number" }
+        // { field: "QuantityPerUnit", title: "Quantity Per Unit", filterType: "string" },
+        // { field: "UnitPrice", title: "Unit Price", filterType: "number" },
         // { field: "UnitsInStock", title: "Units In Stock", filterType: "number" },
         // { field: "UnitsOnOrder", title: "Units On Order", filterType: "number" },
         // { field: "ReorderLevel", title: "Reorder Level", filterType: "number" },
-        { field: "Discontinued", title: "Discontinued", filterType: "boolean" }
+        // { field: "Discontinued", title: "Discontinued", filterType: "boolean" },
         // { field: "FirstOrderedOn", title: "First Ordered On", filterType: "date" }
     ];
 
@@ -712,7 +697,7 @@ export class AppComponent implements OnInit {
             ]
         }
     ];
-    public treeDataRandom: TreeNodeDataItem[] = this.generateRandomTreeData(250);
+    public treeDataRandom: any[] = this.generateRandomTreeData(50);
     public treeFilter: WritableSignal<string> = signal("Apple");
 
     public treeFlatData = [
@@ -736,18 +721,15 @@ export class AppComponent implements OnInit {
     public dropdownTreeSelectedValue = this.treeData[0].items![1].items![0];
 
     public treeChildren = (item: TreeNodeDataItem) => {
-        return of(item.items ?? []).pipe(delay(this.generateRandomNumber(250, 1750)));
+        return of(item.items ?? []).pipe(delay(this.generateRandomNumber(1000, 4000)));
     };
     // public treeChildren = "items";
-    public treeDisabledKeys: string[] = ["1-1-2"];
-    public treeExpandedKeys: string[] = ["1"];
+    public treeDisabledKeys: string[] = ["1-1-1", "1-1-4", "1-5"];
+    public treeExpandedKeys: string[] = ["1", "1-3"];
 
     // item has TreeNode<T> type
-    public treeHasChildren = (item: TreeNodeDataItem) => {
-        const children = item.items ?? [];
-        return children.length > 0;
-    };
-    public treeSelectedKeys: string[] = ["1-1-3"];
+    public treeHasChildren = (item: any) => item.items != null && item.items.length > 0;
+    public treeSelectedKeys: string[] = ["1-3-3"];
 
     public windowHeight: number = 333;
     public windowLeft: number = 444;
@@ -1128,13 +1110,8 @@ export class AppComponent implements OnInit {
     }
 
     public onGridFilterChange(filters: CompositeFilterDescriptor[]): void {
-        console.log("Grid filter Change: ", filters);
+        console.log(filters);
         this.gridFilters = filters;
-    }
-
-    public onGridGroupChange(groups: GroupDescriptor[]): void {
-        console.log("Grid group change: ", groups);
-        this.gridGroups = groups;
     }
 
     public onGridSelectionKeysChange(keys: unknown[]): void {
@@ -1144,7 +1121,7 @@ export class AppComponent implements OnInit {
 
     public onGridSortChange(sort: SortDescriptor[]): void {
         this.gridSort = sort;
-        console.log("Grid sort change: ", sort);
+        console.log(sort);
     }
 
     public onListFilterChange(event: FilterChangeEvent): void {

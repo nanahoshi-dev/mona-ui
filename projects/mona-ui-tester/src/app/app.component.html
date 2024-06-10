@@ -62,12 +62,10 @@
                         <div style="padding: 40px;">
                             <mona-grid [data]="gridOrderDataRandom" [pageSize]="5"
                                        [pageSizeValues]="[5, 10, 15, 20, 25, 50, 100]" style="height: 400px; margin-bottom: 10px;"
-                                       monaGridGroupable
-                                       [group]="gridGroups"
-                                       (groupChange)="onGridGroupChange($event)"
+                                       [groupable]="true"
                                        [filterable]="true" [filter]="gridFilters"
                                        (filterChange)="onGridFilterChange($event)"
-                                       [resizable]="true" [resizeMethod]="'fitView'"
+                                       [resizable]="true"
                                        [sortable]="gridSortOptions" [reorderable]="true" [sort]="gridSort"
                                        (sortChange)="onGridSortChange($event)"
                                        (cellEdit)="onGridCellEdit($event)" [responsivePager]="false"
@@ -76,40 +74,23 @@
                                        [monaGridSelectable]="{enabled: true, mode:'single'}" selectBy="OrderID"
                                        [selectedKeys]="gridSelectionKeys"
                                        (selectedKeysChange)="onGridSelectionKeysChange($event)">
-                                @for (col of gridOrderColumns; track $index) {
-                                    <mona-grid-column [field]="col.field"
-                                                      [title]="col.title" [type]="col.filterType">
-<!--                                        <ng-template monaGridCellTemplate let-row>-->
-<!--                                            <ng-container *ngIf="col.field === 'OrderDate' || col.field==='ShippedDate'">-->
-<!--                                                {{row.data[col.field] | date: 'dd/MM/yyyy'}}-->
-<!--                                            </ng-container>-->
-<!--                                            <ng-container *ngIf="col.field !== 'OrderDate' && col.field!=='ShippedDate'">-->
-<!--                                                {{row.data[col.field]}}-->
-<!--                                            </ng-container>-->
-<!--                                        </ng-template>-->
-                                    </mona-grid-column>
-                                }
-                                <ng-template monaGridDetailTemplate let-dataItem>
-                                    <span style="padding:1rem;">{{dataItem|json}}</span>
-                                </ng-template>
-                                <ng-template monaGridNoDataTemplate>
-                                    <span style="color: #ffcc75; font-weight: bold; height: 100%;
-                                                 display: flex; align-items: center; justify-content: center;">No data found.</span>
-                                </ng-template>
-                                <ng-container monaGridContextMenu>
-                                    <mona-menu-item text="Print" (menuClick)="print($event)"></mona-menu-item>
-                                </ng-container>
-                                <ng-template monaGridCellTooltipTemplate let-text>
-                                    <span style="color: var(--mona-text); font-weight: 600;">{{text}}</span>
-                                </ng-template>
+                                <mona-grid-column *ngFor="let col of gridOrderColumns" [field]="col.field"
+                                                  [title]="col.title" [type]="col.filterType">
+                                    <!--                                    <ng-template monaGridCellTemplate let-row>-->
+                                    <!--                                        <ng-container *ngIf="col.field === 'OrderDate' || col.field==='ShippedDate'">-->
+                                    <!--                                            {{row.data[col.field] | date: 'dd/MM/yyyy'}}-->
+                                    <!--                                        </ng-container>-->
+                                    <!--                                        <ng-container *ngIf="col.field !== 'OrderDate' && col.field!=='ShippedDate'">-->
+                                    <!--                                            {{row.data[col.field]}}-->
+                                    <!--                                        </ng-container>-->
+                                    <!--                                    </ng-template>-->
+                                </mona-grid-column>
                             </mona-grid>
                             <mona-grid [data]="gridProductData" [pageSize]="5" [pageSizeValues]="[5,10,15,20,25,50,100]"
-                                       [resizable]="true" resizeMethod="fitView"
-                                       monaGridGroupable
-                                       [sortable]="{enabled: true, mode: 'multiple'}"
+                                       [resizable]="true" [groupable]="true" [sortable]="{enabled: true, mode: 'multiple'}"
                                        [filterable]="true"
                                        style="height: 400px">
-                                <mona-grid-column title="Avatar" [minWidth]="100" [maxWidth]="200">
+                                <mona-grid-column title="Avatar">
                                     <ng-template monaGridColumnTitleTemplate>
                                         <span style="color: red; width: 100%; display: flex; justify-content: center;">Avatar</span>
                                     </ng-template>
@@ -120,7 +101,7 @@
                                     </ng-template>
                                 </mona-grid-column>
                                 <mona-grid-column *ngFor="let col of gridProductColumns" [field]="col.field"
-                                                  [title]="col.title" [type]="col.filterType"></mona-grid-column>
+                                                  [title]="col.title"></mona-grid-column>
                                 <mona-grid-column title="Slider">
                                     <ng-template monaGridCellTemplate>
                                         <mona-slider style="width: 200px;" [ngModel]="sliderValue"
@@ -138,15 +119,6 @@
                                                            labelPosition="end"></mona-progress-bar>
                                     </ng-template>
                                 </mona-grid-column>
-                                <ng-template monaGridDetailTemplate let-dataItem>
-                                    <span style="padding: 0.25rem 0.5rem;">{{dataItem|json}}</span>
-                                </ng-template>
-                                <ng-template monaGridCellTooltipTemplate let-text>
-                                    <span style="color: var(--mona-text); font-weight: 600;">{{text}}</span>
-                                </ng-template>
-                                <ng-container monaGridContextMenu>
-                                    <mona-menu-item text="Print" (menuClick)="print($event)"></mona-menu-item>
-                                </ng-container>
                             </mona-grid>
                         </div>
                     </ng-template>
