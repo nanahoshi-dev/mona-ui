@@ -7,8 +7,11 @@ import {
     ElementRef,
     inject,
     input,
+    InputSignal,
+    InputSignalWithTransform,
     OnInit,
     output,
+    OutputEmitterRef,
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -20,7 +23,7 @@ import { PopupRef } from "../../popup/models/PopupRef";
 import { ContextMenuContentComponent } from "../context-menu-content/context-menu-content.component";
 import { MenuItemComponent } from "../menu-item/menu-item.component";
 import { ContextMenuCloseEvent } from "../models/ContextMenuCloseEvent";
-import { ContextMenuInjectorData, InternalMenuItemClickEvent } from "../models/ContextMenuInjectorData";
+import { ContextMenuInjectorData } from "../models/ContextMenuInjectorData";
 import { ContextMenuNavigationEvent } from "../models/ContextMenuNavigationEvent";
 import { ContextMenuOpenEvent } from "../models/ContextMenuOpenEvent";
 import { MenuItem } from "../models/MenuItem";
@@ -33,25 +36,25 @@ import { ContextMenuService } from "../services/context-menu.service";
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ContextMenuComponent<C = any> implements OnInit {
+export class ContextMenuComponent implements OnInit {
     readonly #contextMenuInjectorData: Partial<ContextMenuInjectorData> = { isRoot: true };
     readonly #contextMenuService: ContextMenuService = inject(ContextMenuService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #menuClickNotifier = new Subject<InternalMenuItemClickEvent<C>>();
+    readonly #menuClickNotifier: Subject<MenuItem> = new Subject<MenuItem>();
     #contextMenuRef: PopupRef | null = null;
     #precise: boolean = true;
 
     protected readonly menuItemComponents = contentChildren(MenuItemComponent);
     protected readonly menuItemList = signal<ImmutableSet<MenuItem>>(ImmutableSet.create());
 
-    public readonly close = output<ContextMenuCloseEvent>();
-    public readonly navigate = output<ContextMenuNavigationEvent>();
-    public readonly open = output<ContextMenuOpenEvent>();
     public readonly uid: string = v4();
 
-    public context = input<C>();
+    public readonly close: OutputEmitterRef<ContextMenuCloseEvent> = output();
+    public readonly navigate: OutputEmitterRef<ContextMenuNavigationEvent> = output();
+    public readonly open: OutputEmitterRef<ContextMenuOpenEvent> = output();
+
     public menuItems = input<Iterable<MenuItem>>([]);
-    public minWidth = input(undefined, {
+    public minWidth: InputSignalWithTransform<string | undefined, number | string | undefined> = input(undefined, {
         transform: (value: string | number | undefined) => {
             if (typeof value === "number") {
                 return `${value}px`;
@@ -59,8 +62,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
             return value;
         }
     });
-    public offset = input<PopupOffset | undefined>(undefined);
-    public popupClass = input([], {
+    public offset: InputSignal<PopupOffset | undefined> = input<PopupOffset | undefined>(undefined);
+    public popupClass: InputSignalWithTransform<string[], string | string[]> = input([], {
         transform: (value: string | string[]) => {
             if (Array.isArray(value)) {
                 return value;
@@ -68,9 +71,9 @@ export class ContextMenuComponent<C = any> implements OnInit {
             return [value];
         }
     });
-    public target = input.required<ElementRef | Element>();
-    public trigger = input("contextmenu");
-    public width = input(undefined, {
+    public target: InputSignal<ElementRef | Element> = input.required<ElementRef | Element>();
+    public trigger: InputSignal<string> = input("contextmenu");
+    public width: InputSignalWithTransform<string | undefined, number | string | undefined> = input(undefined, {
         transform: (value: number | string | undefined) => {
             if (typeof value === "number") {
                 return `${value}px`;
@@ -98,7 +101,6 @@ export class ContextMenuComponent<C = any> implements OnInit {
     private create(event: MouseEvent): void {
         this.initMenuItems();
 
-        this.#contextMenuInjectorData.context = this.context();
         this.#contextMenuInjectorData.menuClick = this.#menuClickNotifier;
         this.#contextMenuInjectorData.menuItems = this.menuItemList();
         this.#contextMenuInjectorData.navigate = this.navigate;
@@ -112,7 +114,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
                 const rect = anchorElement.getBoundingClientRect();
                 anchor = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
             } else {
-                anchor = { x: event.x + 1, y: event.y + 1 };
+                anchor = { x: event.x, y: event.y };
             }
         } else {
             anchor = anchorElement;
