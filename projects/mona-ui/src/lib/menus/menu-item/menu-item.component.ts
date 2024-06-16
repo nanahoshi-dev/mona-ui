@@ -66,8 +66,10 @@ export class MenuItemComponent<T = unknown> {
     private getMenuItemWithDepth(depth: number = 0): MenuItem {
         this.#menuItem().iconTemplate = this.iconTemplate();
         this.#menuItem().menuClick = (event: InternalMenuItemClickEvent<any>): void => {
-            const clickEvent: MenuItemClickEvent<any, T> = this.data() ? { ...event, data: this.data() } : event;
-            this.menuClick.emit(clickEvent);
+            this.menuClick.emit({
+                ...event,
+                data: this.data()
+            });
         };
         this.#menuItem().subMenuItems = this.submenuItems().map(si => {
             const subMenuItem = si.getMenuItemWithDepth(depth + 1);
