@@ -1,19 +1,57 @@
 /* You can add global styles to this file, and also import other style files */
+@use "tailwindcss";
+@use '@angular/cdk/overlay-prebuilt.css';
+@use 'remixicon/fonts/remixicon.css';
+//@use "projects/mona-ui/src/styles/mona";
+@source ".projects/mona-ui/";
+@source ".projects/mona-ui-tester/";
 @import url("https://use.typekit.net/zop2fdb.css");
-//@import "projects/mona-ui/styles/kafka";
-//@import "projects/mona-ui/styles/lumine";
-@import "projects/mona-ui/src/styles/mona";
-//@import "projects/mona-ui/styles/base-light";
-//@import "projects/mona-ui/styles/noelle-light";
+
+@theme {
+    --color-background: #fff;
+    --color-foreground: #09090b;
+    --color-card: #fff;
+    --color-card-foreground: #09090b;
+    --color-popover: #fff;
+    --color-popover-foreground: #09090b;
+    --color-primary: #18181b;
+    --color-primary-foreground: #fafafa;
+    --color-secondary: #f4f4f5;
+    --color-secondary-foreground: #18181b;
+    --color-muted: #f4f4f5;
+    --color-muted-foreground: #71717a;
+    --color-accent: #f4f4f5;
+    --color-accent-foreground: #18181b;
+    --color-destructive: #ef4444;
+    --color-destructive-foreground: #fafafa;
+    --color-border: #e4e4e7;
+    --color-input: #e4e4e7;
+    --color-ring: #09090b;
+    --color-chart-1: #e76e50;
+    --color-chart-2: #2a9d90;
+    --color-chart-3: #274754;
+    --color-chart-4: #e8c468;
+    --color-chart-5: #f4a462;
+    --color-radius: .6rem;
+    --color-sidebar-background: #fafafa;
+    --color-sidebar-foreground: #3f3f46;
+    --color-sidebar-primary: #18181b;
+    --color-sidebar-primary-foreground: #fafafa;
+    --color-sidebar-accent: #f4f4f5;
+    --color-sidebar-accent-foreground: #18181b;
+    --color-sidebar-border: #e5e7eb;
+    --color-sidebar-ring: #3b82f6;
+}
 
 :root {
     --mona-border-radius: 0;
 }
 
+
 html, body {
     width: 100%;
     height: 100%;
-    background: #202123;
+    //background: hsl(var(--muted));
     //background: #f8f8f8;
     scroll-behavior: smooth;
 }
@@ -21,7 +59,7 @@ html, body {
 //body { font-size: 0.75rem; }
 
 body {
-    font-family: "proxima-nova", Helvetica Neue,Helvetica,Arial,sans-serif !important;
+    font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif !important;
 }
 
 

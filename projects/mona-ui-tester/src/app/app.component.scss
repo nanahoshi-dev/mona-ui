@@ -1,61 +1,61 @@
-div.wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    //align-items: center;
-    //justify-content: center;
-    //flex-direction: column;
-    //& > div {
-    //    margin: 5px;
-    //    display: flex;
-    //}
-}
-
-div.side-bar {
-    width: 350px;
-    height: 100%;
-    //border-right: 1px solid var(--mona-border-color);
-    background: #202020;
-    padding: 20px 10px;
-}
-
-div.content {
-    //width: calc(100% - 350px);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    background: var(--mona-background-light);
-    & > div {
-        margin: 5px;
-        display: flex;
-    }
-}
-
-div.component-container {
-    width: 100%;
-    height: calc(100% - 29px);
-    //display: flex;
-    //align-items: center;
-    //justify-content: center;
-    & > div {
-        margin-bottom: 5px;
-        & > * {
-            margin-right: 5px;
-        }
-    }
-}
-
-mona-tab-strip {
-    border: none;
-}
-
-mona-drop-down-list {
-    width: 150px;
-}
-
-mona-button-group button {
-    min-width: 30px;
-}
+//div.wrapper {
+//    width: 100%;
+//    height: 100%;
+//    display: flex;
+//    //align-items: center;
+//    //justify-content: center;
+//    //flex-direction: column;
+//    //& > div {
+//    //    margin: 5px;
+//    //    display: flex;
+//    //}
+//}
+//
+//div.side-bar {
+//    width: 350px;
+//    height: 100%;
+//    //border-right: 1px solid var(--mona-border-color);
+//    background: #202020;
+//    padding: 20px 10px;
+//}
+//
+//div.content {
+//    //width: calc(100% - 350px);
+//    width: 100%;
+//    height: 100%;
+//    display: flex;
+//    align-items: center;
+//    justify-content: center;
+//    flex-direction: column;
+//    background: var(--mona-background-light);
+//    & > div {
+//        margin: 5px;
+//        display: flex;
+//    }
+//}
+//
+//div.component-container {
+//    width: 100%;
+//    height: calc(100% - 29px);
+//    //display: flex;
+//    //align-items: center;
+//    //justify-content: center;
+//    & > div {
+//        margin-bottom: 5px;
+//        & > * {
+//            margin-right: 5px;
+//        }
+//    }
+//}
+//
+//mona-tab-strip {
+//    border: none;
+//}
+//
+//mona-drop-down-list {
+//    width: 150px;
+//}
+//
+//mona-button-group button {
+//    min-width: 30px;
+//}

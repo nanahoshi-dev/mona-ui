@@ -1,6 +1,19 @@
-import { DestroyRef, Directive, effect, ElementRef, inject, input, model, OnInit, untracked } from "@angular/core";
+import {
+    computed,
+    DestroyRef,
+    Directive,
+    effect,
+    ElementRef,
+    inject,
+    input,
+    model,
+    OnInit,
+    untracked
+} from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ButtonVariantProps, buttonVariants, ButtonVariantsInput } from "mona-ui/buttons/button/button.style";
 import { fromEvent, takeWhile } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { ButtonService } from "../services/button.service";
 
 @Directive({
@@ -14,33 +27,50 @@ import { ButtonService } from "../services/button.service";
         "[attr.aria-labelledby]": "ariaLabelledby()",
         "[attr.aria-pressed]": "toggleable() ? selected() : undefined",
         "[attr.aria-selected]": "selected() ? true : undefined",
+        "[attr.data-look]": "look()",
+        "[attr.data-size]": "size()",
         "[attr.disabled]": "disabled() ? '' : undefined",
         "[attr.role]": "'button'",
         "[attr.tabindex]": "tabindex()",
         "[attr.type]": "'button'",
+        "[class]": "classes()",
         "[class.mona-button]": "true",
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-flat]": "flat()",
-        "[class.mona-primary]": "primary()",
+        // "[class.mona-disabled]": "disabled()",
+        // "[class.mona-flat]": "flat()",
+        // "[class.mona-primary]": "primary()",
         "[class.mona-selected]": "selected()"
     },
     standalone: true
 })
-export class ButtonDirective implements OnInit {
-    readonly #buttonService = inject(ButtonService, { host: true, optional: true });
+export class ButtonDirective implements OnInit, ButtonVariantsInput {
+    readonly #buttonService = inject(ButtonService, { optional: true });
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
-    public ariaLabel = input<string>("");
-    public ariaLabelledby = input<string>("");
-    public ariaDescribedby = input<string>("");
-    public disabled = model<boolean>(false);
-    public flat = input(false);
-    public primary = input(false);
-    public selected = model(false);
-    public tabindex = input<number, number | string>(0, {
+    protected readonly classes = computed(() => {
+        const look = this.look();
+        const size = this.size();
+        const selected = this.selected();
+        const userClass = this.userClass();
+        const variantClasses = buttonVariants({ look, selected, size });
+        return twMerge(variantClasses, userClass);
+    });
+    public readonly ariaDescribedby = input<string>("");
+    public readonly ariaLabel = input<string>("");
+    public readonly ariaLabelledby = input<string>("");
+    public readonly disabled = model<boolean>(false);
+    public readonly flat = input(false);
+    public readonly look = model<ButtonVariantProps["look"]>("default");
+    /**
+     * @deprecated Use `look` instead.
+     */
+    public readonly primary = input(false);
+    public readonly selected = model(false);
+    public readonly size = input<ButtonVariantProps["size"]>("default");
+    public readonly tabindex = input<number, number | string>(0, {
         transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
     });
-    public toggleable = input(false);
+    public readonly toggleable = input(false);
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
         effect(() => {

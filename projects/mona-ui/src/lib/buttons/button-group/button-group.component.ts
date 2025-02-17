@@ -1,16 +1,26 @@
+import { NgTemplateOutlet } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChildren,
     DestroyRef,
-    effect,
     inject,
+    input,
     model,
     OnInit,
-    untracked
+    viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { firstOrDefault } from "@mirei/ts-collections";
+import { ButtonGroupItemComponent } from "mona-ui/buttons/button-group/button-group-item/button-group-item.component";
+import {
+    ButtonGroupVariantProps,
+    buttonGroupVariants,
+    ButtonGroupVariantsInput
+} from "mona-ui/buttons/button-group/button-group.style";
+import { ButtonVariantProps } from "mona-ui/buttons/button/button.style";
+import { twMerge } from "tailwind-merge";
 import { SelectionMode } from "../../models/SelectionMode";
 import { ButtonDirective } from "../button/button.directive";
 import { ButtonService } from "../services/button.service";
@@ -21,28 +31,32 @@ import { ButtonService } from "../services/button.service";
     providers: [ButtonService],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
+    imports: [ButtonDirective, NgTemplateOutlet],
     host: {
+        "[class]": "classes()",
         "[class.mona-button-group]": "true"
     }
 })
-export class ButtonGroupComponent implements OnInit {
-    readonly #buttonService: ButtonService = inject(ButtonService);
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    protected readonly buttons = contentChildren(ButtonDirective);
-    public disabled = model<boolean | undefined>(undefined);
-    public selection = model<SelectionMode>("multiple");
-
-    public constructor() {
-        effect(() => {
-            const disabled = this.disabled();
-            const buttons = this.buttons();
-            untracked(() => {
-                if (typeof disabled === "boolean") {
-                    buttons.forEach(b => b.disabled.set(disabled));
-                }
-            });
-        });
-    }
+export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
+    readonly #buttonService = inject(ButtonService, { self: true });
+    readonly #destroyRef = inject(DestroyRef);
+    protected readonly buttonLook = computed<ButtonVariantProps["look"]>(() => {
+        return this.look() === "default" ? "ghost" : this.look();
+    });
+    protected readonly buttons = viewChildren(ButtonDirective);
+    protected readonly classes = computed(() => {
+        const look = this.look();
+        const size = this.size();
+        const userClass = this.userClass();
+        const variantClasses = buttonGroupVariants({ look, size });
+        return twMerge(variantClasses, userClass);
+    });
+    protected readonly items = contentChildren(ButtonGroupItemComponent);
+    public readonly disabled = model<boolean>(false);
+    public readonly look = input<ButtonGroupVariantProps["look"]>("outline");
+    public readonly size = input<ButtonGroupVariantProps["size"]>("default");
+    public readonly selection = model<SelectionMode>("multiple");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public ngOnInit(): void {
         this.setSubscriptions();
