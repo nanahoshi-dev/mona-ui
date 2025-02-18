@@ -1,26 +1,25 @@
-import { Component, ElementRef, viewChild } from "@angular/core";
+import { Component, ElementRef } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { ButtonGroupItemComponent } from "mona-ui";
 import { SelectionMode } from "../../models/SelectionMode";
 import { ButtonDirective } from "../button/button.directive";
-
 import { ButtonGroupComponent } from "./button-group.component";
 
 @Component({
     template: `
         <mona-button-group [disabled]="disabled" [selection]="selectionMode">
-            <button monaButton [toggleable]="true" [selected]="selectedIndex === 0">Button 1</button>
-            <button monaButton [toggleable]="true" [selected]="selectedIndex === 1">Button 2</button>
-            <button monaButton [toggleable]="true" [selected]="selectedIndex === 2">Button 3</button>
+            <mona-button-group-item monaButton [selected]="selectedIndex === 0">Button 1</mona-button-group-item>
+            <mona-button-group-item monaButton [selected]="selectedIndex === 1">Button 2</mona-button-group-item>
+            <mona-button-group-item monaButton [selected]="selectedIndex === 2">Button 3</mona-button-group-item>
         </mona-button-group>
     `,
-    imports: [ButtonGroupComponent, ButtonDirective]
+    imports: [ButtonGroupComponent, ButtonGroupItemComponent]
 })
 class ButtonGroupComponentSpecHostComponent {
     public disabled: boolean = false;
     public selectionMode: SelectionMode = "single";
     public selectedIndex: number = -1;
-    public buttonGroupComponent = viewChild.required(ButtonGroupComponent);
 }
 
 describe("ButtonGroupComponent", () => {
@@ -129,31 +128,26 @@ describe("ButtonGroupComponent", () => {
         tick();
         hostFixture.detectChanges();
 
-        const buttons = hostFixture.debugElement
-            .queryAll(By.css(".mona-disabled"))
-            .map(button => button.nativeElement) as HTMLButtonElement[];
         const disabledButtons = hostFixture.debugElement
             .queryAll(By.css("button[disabled]"))
             .map(button => button.injector.get(ButtonDirective)) as ButtonDirective[];
-        expect(buttons.length).toBe(3);
         expect(disabledButtons.length).toBe(3);
     }));
 
-    // TODO: Fix this test later
-    // it("should unselect all other buttons when a button is selected", fakeAsync(() => {
-    //     hostComponent.selectionMode = "single";
-    //     hostFixture.detectChanges();
-    //     const buttons = getButtonElementTuple(hostFixture);
-    //     buttons[0][1].nativeElement.click();
-    //     expect(buttons[0][0].selected()).toBeTrue();
-    //
-    //     hostComponent.selectedIndex = 2;
-    //
-    //     tick();
-    //     hostFixture.detectChanges();
-    //     expect(buttons[0][0].selected()).toBeFalse();
-    //     expect(buttons[2][0].selected()).toBeTrue();
-    // }));
+    it("should unselect all other buttons when a button is selected", fakeAsync(() => {
+        hostComponent.selectionMode = "single";
+        hostFixture.detectChanges();
+        const buttons = getButtonElementTuple(hostFixture);
+        buttons[0][1].nativeElement.click();
+        expect(buttons[0][0].selected()).toBeTrue();
+
+        hostComponent.selectedIndex = 2;
+
+        tick();
+        hostFixture.detectChanges();
+        expect(buttons[0][0].selected()).toBeFalse();
+        expect(buttons[2][0].selected()).toBeTrue();
+    }));
 
     const getButtonElementTuple = (hostFixture: ComponentFixture<ButtonGroupComponentSpecHostComponent>) => {
         return hostFixture.debugElement

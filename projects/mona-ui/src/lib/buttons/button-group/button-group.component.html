@@ -1,6 +1,9 @@
 @for (item of items(); track $index) {
-    <button monaButton [look]="buttonLook()" [toggleable]="true"
-            [disabled]="disabled()" (click)="item.click.emit($event)"
+    <button monaButton
+            [look]="buttonLook()"
+            [toggleable]="true"
+            [disabled]="item.disabled() || disabled()"
+            (click)="item.click.emit($event)"
             [selected]="item.selected()"
             (selectedChange)="item.selected.set($event)">
         <ng-container [ngTemplateOutlet]="item.content()"></ng-container>

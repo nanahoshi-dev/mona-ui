@@ -39,8 +39,8 @@ describe("ChipComponent", () => {
         fixture.detectChanges();
 
         let removeSpy = spyOn(component.remove, "emit");
-        let removeButton = de.query(By.css(".mona-chip-remove"));
-        removeButton.triggerEventHandler("click", null);
+        let removeElem = de.query(By.css("i"));
+        removeElem.triggerEventHandler("click", null);
 
         expect(removeSpy).toHaveBeenCalled();
     });
@@ -48,7 +48,14 @@ describe("ChipComponent", () => {
     it("should not show remove button if chip is not removable", () => {
         fixture.componentRef.setInput("removable", false);
         fixture.detectChanges();
-        let removeButton = de.query(By.css(".mona-chip-remove"));
-        expect(removeButton).toBeNull();
+        let removeElem = de.query(By.css("i"));
+        expect(removeElem).toBeNull();
+    });
+
+    it("should show remove button if chip is removable", () => {
+        fixture.componentRef.setInput("removable", true);
+        fixture.detectChanges();
+        let removeElem = de.query(By.css("i"));
+        expect(removeElem).toBeTruthy();
     });
 });

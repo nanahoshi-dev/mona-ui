@@ -1,14 +1,13 @@
-<div class="mona-chip-content" [ngClass]="{'mona-removable-chip': removable()}">
-    @if (label()) {
-        <span class="mona-chip-label">{{label()}}</span>
-    } @else {
-        <ng-content></ng-content>
-    }
-</div>
+@if (label()) {
+    {{ label() }}
+} @else {
+    <ng-content></ng-content>
+}
 @if (removable()) {
-    <button monaButton [tabindex]="-1" [flat]="true" class="mona-chip-remove" (click)="remove.emit($event)">
-        <span class="mona-chip-remove-icon">
-            <fa-icon [icon]="closeIcon"></fa-icon>
-        </span>
-    </button>
+    <i class="cursor-pointer" (click)="remove.emit($event)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="16" height="16">
+            <path fill="currentColor"
+                  d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"/>
+        </svg>
+    </i>
 }

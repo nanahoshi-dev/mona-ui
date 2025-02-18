@@ -860,7 +860,7 @@
 
 <!--&lt;!&ndash;<mona-window (leftChange)="print($event)"></mona-window>&ndash;&gt;-->
 
-<div class="flex items-center justify-center w-full h-full [&>div]:flex [&>div]:gap-2">
+<div class="flex flex-col items-center justify-center w-full h-full [&>div]:flex [&>div]:gap-2">
     <div>
         <button monaButton size="small" look="default">Button 1</button>
         <button monaButton size="small" look="default" [disabled]="true">Button 1</button>
@@ -870,7 +870,7 @@
         <button monaButton size="small" look="link">Button 1</button>
         <button monaButton size="small" look="destructive">Button 1</button>
 
-        <mona-button-group selection="multiple" size="default">
+        <mona-button-group selection="single" size="small">
             <mona-button-group-item [(selected)]="buttonGroupButtonSelected">Bold</mona-button-group-item>
             <mona-button-group-item>Italic</mona-button-group-item>
             <mona-button-group-item>Underlined</mona-button-group-item>
@@ -883,5 +883,12 @@
             <mona-button-group-item>C</mona-button-group-item>
             <mona-button-group-item [(selected)]="buttonGroupButtonSelected">R</mona-button-group-item>
         </mona-button-group>
+    </div>
+    <div>
+        <mona-chip [removable]="false" [disabled]="false" look="outline">
+            <a href="#">Link ⇒</a>
+        </mona-chip>
+        <mona-chip [removable]="true" [label]="'C'" look="default" [disabled]="false" (remove)="print($event)"></mona-chip>
+        <mona-chip [removable]="false" [label]="'R'" look="destructive" [disabled]="false" (remove)="print($event)"></mona-chip>
     </div>
 </div>

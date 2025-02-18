@@ -54,21 +54,63 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         const variantClasses = buttonVariants({ look, selected, size });
         return twMerge(variantClasses, userClass);
     });
+
+    /**
+     * ARIA value for `aria-describedby` attribute.
+     */
     public readonly ariaDescribedby = input<string>("");
+
+    /**
+     * ARIA value for `aria-label` attribute.
+     */
     public readonly ariaLabel = input<string>("");
+
+    /**
+     * ARIA value for `aria-labelledby` attribute
+     */
     public readonly ariaLabelledby = input<string>("");
+
+    /**
+     * Sets the disabled state of the button.
+     */
     public readonly disabled = model<boolean>(false);
+
+    /**
+     * @deprecated Use `ghost` option in `look` instead.
+     */
     public readonly flat = input(false);
+
+    /**
+     * Sets the look of the button.
+     */
     public readonly look = model<ButtonVariantProps["look"]>("default");
+
     /**
      * @deprecated Use `look` instead.
      */
     public readonly primary = input(false);
+
+    /**
+     * Sets the selected state of the button.
+     */
     public readonly selected = model(false);
+
+    /**
+     * Sets the size of the button.
+     */
     public readonly size = input<ButtonVariantProps["size"]>("default");
+
+    /**
+     * Sets the tabindex of the button.
+     */
     public readonly tabindex = input<number, number | string>(0, {
         transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
     });
+
+    /**
+     * Sets the toggleable state of the button.
+     * If set to `true`, the button will toggle its selected state on click.
+     */
     public readonly toggleable = input(false);
     public readonly userClass = input<string>("", { alias: "class" });
 

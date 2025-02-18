@@ -5,6 +5,7 @@ export const buttonGroupVariants = cva(
     `
         inline-flex items-center justify-center rounded-md shadow border border-input
         [&>button]:border-0
+        [&>button]:focus-visible:z-10
         [&>button.mona-selected]:bg-accent [&>button.mona-selected]:text-accent-foreground
         [&>button]:w-full [&>button]:h-full [&>button]:rounded-none [&>button]:shadow-none
         [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md
