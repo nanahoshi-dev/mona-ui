@@ -11,6 +11,7 @@ import {
     TemplateRef,
     untracked
 } from "@angular/core";
+import { MenuItemShortcutTemplateDirective } from "mona-ui/menus/directives/menu-item-shortcut-template.directive";
 import { MenuItemIconTemplateDirective } from "../directives/menu-item-icon-template.directive";
 import { MenuItemTextTemplateDirective } from "../directives/menu-item-text-template.directive";
 import { InternalMenuItemClickEvent, MenuItemClickEvent } from "../models/ContextMenuInjectorData";
@@ -19,8 +20,6 @@ import { MenuItem } from "../models/MenuItem";
 @Component({
     selector: "mona-menu-item",
     template: "",
-    styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuItemComponent<T = unknown> {
@@ -37,10 +36,19 @@ export class MenuItemComponent<T = unknown> {
         };
     });
 
-    protected readonly iconTemplate = contentChild(MenuItemIconTemplateDirective, { read: TemplateRef });
+    protected readonly iconTemplate = contentChild(MenuItemIconTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
+    protected readonly shortcutTemplate = contentChild(MenuItemShortcutTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
     protected readonly submenuItems = contentChildren(MenuItemComponent);
-    protected readonly textTemplate = contentChild(MenuItemTextTemplateDirective, { read: TemplateRef });
-
+    protected readonly textTemplate = contentChild(MenuItemTextTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
     public readonly menuClick = output<MenuItemClickEvent<any, T>>();
 
     public data = input<T>();
@@ -65,6 +73,7 @@ export class MenuItemComponent<T = unknown> {
 
     private getMenuItemWithDepth(depth: number = 0): MenuItem {
         this.#menuItem().iconTemplate = this.iconTemplate();
+        this.#menuItem().shortcutTemplate = this.shortcutTemplate();
         this.#menuItem().menuClick = (event: InternalMenuItemClickEvent<any>): void => {
             const clickEvent: MenuItemClickEvent<any, T> = this.data() ? { ...event, data: this.data() } : event;
             this.menuClick.emit(clickEvent);

@@ -25,6 +25,7 @@ import {
     faTimes
 } from "@fortawesome/free-solid-svg-icons";
 import { Enumerable, ImmutableList, ImmutableSet, List } from "@mirei/ts-collections";
+import { LucideAngularModule, Check } from "lucide-angular";
 import { DateTime } from "luxon";
 import {
     AutoCompleteComponent,
@@ -104,6 +105,7 @@ import {
     MenuComponent,
     MenuItemComponent,
     MenuItemIconTemplateDirective,
+    MenuItemShortcutTemplateDirective,
     MenuItemTextTemplateDirective,
     MultiSelectComponent,
     MultiSelectSummaryTagDirective,
@@ -184,6 +186,7 @@ interface TreeNodeDataItem {
     styleUrls: ["./app.component.scss"],
     changeDetection: ChangeDetectionStrategy.Default,
     imports: [
+        LucideAngularModule,
         AutoCompleteComponent,
         AvatarComponent,
         BreadcrumbComponent,
@@ -246,6 +249,7 @@ interface TreeNodeDataItem {
         MenuComponent,
         MenuItemComponent,
         MenuItemIconTemplateDirective,
+        MenuItemShortcutTemplateDirective,
         MenuItemTextTemplateDirective,
         MultiSelectComponent,
         MultiSelectSummaryTagDirective,
@@ -296,6 +300,7 @@ interface TreeNodeDataItem {
     ]
 })
 export class AppComponent implements OnInit {
+    public readonly checkIcon = Check;
     public readonly closeIcon: IconDefinition = faTimes;
     public readonly filterIcon: IconDefinition = faFilter;
     public readonly heartIcon: IconDefinition = faHeart;

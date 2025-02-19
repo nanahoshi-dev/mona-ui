@@ -83,6 +83,7 @@
         "@tiptap/pm": "^2.11.3",
         "@tiptap/starter-kit": "^2.11.3",
         "class-variance-authority": "^0.7.1",
+        "lucide-angular": "^0.475.0",
         "luxon": "^3.5.0",
         "postcss": "^8.5.2",
         "prosemirror-state": "^1.4.3",

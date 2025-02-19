@@ -1,3 +1,4 @@
+import { AnimationMetadata } from "@angular/animations";
 import { StaticProvider, TemplateRef } from "@angular/core";
 import {
     ComponentType,
@@ -12,9 +13,14 @@ import { PopupCloseEvent } from "./PopupCloseEvent";
 export interface PopupSettings<T = unknown, C = void> {
     /**
      * The anchor element to which the popup will be connected.
-     * @type {ElementRef | Element | Point}
+     * @type {FlexibleConnectedPositionStrategyOrigin}
      */
     anchor: FlexibleConnectedPositionStrategyOrigin;
+
+    /**
+     * Animation settings for the popup.
+     */
+    animation?: boolean | PopupAnimationSettings;
 
     /**
      * Classes to be applied to the backdrop.
@@ -24,7 +30,7 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * The content to display in the popup.
-     * @type {TemplateRef<C> | ComponentType<C>}
+     * @type {TemplateRef | ComponentType}
      */
     content: TemplateRef<C> | ComponentType<C>;
 
@@ -120,4 +126,16 @@ export interface PopupSettings<T = unknown, C = void> {
      */
     width?: number | string;
     withPush?: boolean;
+}
+
+export interface PopupAnimationSettings {
+    /**
+     * Animation that will play when the popup is hidden.
+     */
+    hide?: AnimationMetadata | AnimationMetadata[];
+
+    /**
+     * Animation that will play when the popup is shown.
+     */
+    show?: AnimationMetadata | AnimationMetadata[];
 }

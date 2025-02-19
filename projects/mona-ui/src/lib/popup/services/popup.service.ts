@@ -1,9 +1,11 @@
+import { AnimationBuilder } from "@angular/animations";
 import { Overlay, PositionStrategy } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { DestroyRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dictionary } from "@mirei/ts-collections";
-import { filter, fromEvent, Subject, take, takeUntil } from "rxjs";
+import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "mona-ui/popup/animations/popup.animation";
+import { filter, fromEvent, Subject, take, takeUntil, tap } from "rxjs";
 import { v4 } from "uuid";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { DefaultPositions } from "../models/DefaultPositions";
@@ -11,13 +13,14 @@ import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
-import { PopupSettings } from "../models/PopupSettings";
+import { PopupAnimationSettings, PopupSettings } from "../models/PopupSettings";
 import { PopupState } from "../models/PopupState";
 
 @Injectable({
     providedIn: "root"
 })
 export class PopupService {
+    readonly #animationBuilder = inject(AnimationBuilder);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #injector: Injector = inject(Injector);
     readonly #overlay: Overlay = inject(Overlay);
@@ -69,16 +72,20 @@ export class PopupService {
             ]
         });
 
+        let animationElement: HTMLElement;
         if (settings.content instanceof TemplateRef) {
             const portal = new ComponentPortal(PopupWrapperComponent, null, injector);
             popupReference.componentRef = overlayRef.attach(portal);
             const component = popupReference.componentRef.instance as PopupWrapperComponent;
             component.templateRef.set(settings.content);
+            animationElement = popupReference.componentRef.location.nativeElement;
             popupReference.componentRef.changeDetectorRef.detectChanges();
         } else {
             const portal = new ComponentPortal(settings.content, null, injector);
             popupReference.componentRef = overlayRef.attach(portal);
+            animationElement = popupReference.componentRef.location.nativeElement;
         }
+        this.setAnimations(settings.animation, animationElement, popupReference);
 
         if (settings.hasBackdrop) {
             if (settings.closeOnBackdropClick ?? true) {
@@ -137,6 +144,39 @@ export class PopupService {
         });
         this.setEventListeners(this.#popupStateMap.get(uid) as PopupState);
         return popupReference.popupRef;
+    }
+
+    private getAnimationConfig(config?: boolean | PopupAnimationSettings): Required<PopupAnimationSettings> | null {
+        if (config === undefined) {
+            return { hide: defaultPopupHideAnimation, show: defaultPopupShowAnimation };
+        }
+        if (typeof config === "boolean") {
+            return config ? { hide: defaultPopupHideAnimation, show: defaultPopupShowAnimation } : null;
+        }
+        return {
+            hide: config.hide ?? defaultPopupHideAnimation,
+            show: config.show ?? defaultPopupShowAnimation
+        };
+    }
+
+    private setAnimations(
+        animationSettings: PopupAnimationSettings | boolean | undefined,
+        element: HTMLElement,
+        popupReference: PopupReference
+    ): void {
+        const config = this.getAnimationConfig(animationSettings);
+        if (!config) {
+            return;
+        }
+        if (config && element) {
+            this.#animationBuilder.build(config.show).create(element).play();
+            popupReference.beforeClosed$
+                .pipe(
+                    take(1),
+                    tap(() => this.#animationBuilder.build(config.hide).create(element).play())
+                )
+                .subscribe();
+        }
     }
 
     private setEventListeners(state: PopupState): void {

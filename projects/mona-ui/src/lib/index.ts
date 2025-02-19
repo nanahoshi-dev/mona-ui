@@ -199,7 +199,7 @@ export * from "./list-view/directives/list-view-virtual-scroll.directive";
 // export * from "./menus/models/MenuItem";
 export * from "./menus/menu-item/menu-item.component";
 export * from "./menus/directives/menu-item-icon-template.directive";
-// export * from "./menus/modules/shared-menu/directives/menu-item-link-template.directive";
+export * from "./menus/directives/menu-item-shortcut-template.directive";
 export * from "./menus/directives/menu-item-text-template.directive";
 export * from "./menus/context-menu/context-menu.component";
 export * from "./menus/directives/menu-text-template.directive";

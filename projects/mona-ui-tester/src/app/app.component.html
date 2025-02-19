@@ -860,7 +860,7 @@
 
 <!--&lt;!&ndash;<mona-window (leftChange)="print($event)"></mona-window>&ndash;&gt;-->
 
-<div class="flex flex-col items-center justify-center w-full h-full [&>div]:flex [&>div]:gap-2">
+<div class="flex flex-col items-center justify-center w-full h-full gap-3 [&>div]:flex [&>div]:gap-2">
     <div>
         <button monaButton size="small" look="default">Button 1</button>
         <button monaButton size="small" look="default" [disabled]="true">Button 1</button>
@@ -870,7 +870,7 @@
         <button monaButton size="small" look="link">Button 1</button>
         <button monaButton size="small" look="destructive">Button 1</button>
 
-        <mona-button-group selection="single" size="small">
+        <mona-button-group selection="multiple" size="small">
             <mona-button-group-item [(selected)]="buttonGroupButtonSelected">Bold</mona-button-group-item>
             <mona-button-group-item>Italic</mona-button-group-item>
             <mona-button-group-item>Underlined</mona-button-group-item>
@@ -890,5 +890,87 @@
         </mona-chip>
         <mona-chip [removable]="true" [label]="'C'" look="default" [disabled]="false" (remove)="print($event)"></mona-chip>
         <mona-chip [removable]="false" [label]="'R'" look="destructive" [disabled]="false" (remove)="print($event)"></mona-chip>
+    </div>
+
+    <div>
+        <button monaButton size="small" [disabled]="false" #contextMenuAnchor>
+            <span style="color: lightcoral;">Context Menu Target</span>
+        </button>
+        <button monaButton size="small" #dynamicContextMenuAnchor>
+            Dynamic Context Menu Target
+        </button>
+        <mona-contextmenu [target]="contextMenuAnchor"  (navigate)="print($event)">
+            <mona-menu-item text="Back">
+<!--                <ng-template monaMenuItemTextTemplate let-menuItem>-->
+<!--                    <span style="color: mediumseagreen;">File</span>-->
+<!--                </ng-template>-->
+            </mona-menu-item>
+            <mona-menu-item text="Forward" [disabled]="false">
+<!--                <mona-menu-item text="Undo"-->
+<!--                                (menuClick)="print('Undo clicked.')"></mona-menu-item>-->
+<!--                <mona-menu-item text="Redo"></mona-menu-item>-->
+            </mona-menu-item>
+            <mona-menu-item text="Reload" (menuClick)="print('View clicked.')">
+<!--                <ng-template monaMenuItemIconTemplate>-->
+<!--                    <span style="color: deeppink; font-size: 16px;">♫</span>-->
+<!--                </ng-template>-->
+            </mona-menu-item>
+            <mona-menu-item text="More Tools">
+                <ng-template monaMenuItemIconTemplate>
+                    <fa-icon [icon]="starIcon"></fa-icon>
+                </ng-template>
+                <mona-menu-item text="Save Page As...">
+                </mona-menu-item>
+                <mona-menu-item text="Create Shortcut As Direct Link..." [disabled]="true"></mona-menu-item>
+                <mona-menu-item text="Name Window..."></mona-menu-item>
+                <mona-menu-item [divider]="true"></mona-menu-item>
+                <mona-menu-item text="Developer Tools" [disabled]="false">
+                    <mona-menu-item text="Console"></mona-menu-item>
+                    <mona-menu-item text="Local Storage"></mona-menu-item>
+                    <mona-menu-item text="Cookies"></mona-menu-item>
+                </mona-menu-item>
+                <mona-menu-item [divider]="true"></mona-menu-item>
+                <mona-menu-item>
+                    <ng-template monaMenuItemTextTemplate>
+                        <span class="text-red-800">Clear</span>
+                    </ng-template>
+                </mona-menu-item>
+            </mona-menu-item>
+            <mona-menu-item [divider]="true"></mona-menu-item>
+            <mona-menu-item text="Show Bookmarks Bar">
+                <ng-template monaMenuItemIconTemplate>
+                    <lucide-angular [img]="checkIcon" class="w-4 h-4"></lucide-angular>
+                </ng-template>
+            </mona-menu-item>
+            <mona-menu-item text="Show Full URLs" [disabled]="true"></mona-menu-item>
+            <mona-menu-item [divider]="true"></mona-menu-item>
+            <mona-menu-item>
+                <ng-template monaMenuItemTextTemplate>
+                    <span class="text-indigo-900 font-semibold">Night Mode</span>
+                </ng-template>
+                <ng-template monaMenuItemIconTemplate>
+                    <fa-icon [icon]="moonIcon"></fa-icon>
+                </ng-template>
+                <ng-template monaMenuItemShortcutTemplate>
+                    <kbd>Ctrl+Win+X</kbd>
+                </ng-template>
+            </mona-menu-item>
+            <mona-menu-item text="Refresh Page"></mona-menu-item>
+<!--            <mona-menu-item text="Search" [visible]="contextMenuItemVisible"-->
+<!--                            iconClass="fa fa-star">-->
+<!--                <mona-menu-item text="Find">-->
+<!--                    <mona-menu-item text="Find Next" [disabled]="true"-->
+<!--                                    iconClass="fa fa-arrow-right"></mona-menu-item>-->
+<!--                    <mona-menu-item text="Find Previous" [disabled]="false"-->
+<!--                                    iconClass="fa fa-arrow-left"-->
+<!--                                    (menuClick)="print('Find Previous clicked.')"></mona-menu-item>-->
+<!--                </mona-menu-item>-->
+<!--                <mona-menu-item text="Replace"></mona-menu-item>-->
+<!--            </mona-menu-item>-->
+    </mona-contextmenu>
+        <mona-contextmenu [target]="dynamicContextMenuAnchor"
+                          style="max-width: 70px"
+                          [menuItems]="[{text: 'Dynamic Menu 1', parent: null}]"></mona-contextmenu>
+
     </div>
 </div>

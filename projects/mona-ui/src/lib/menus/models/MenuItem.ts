@@ -12,6 +12,7 @@ export interface MenuItem<T = unknown> {
     iconTemplate?: TemplateRef<ContextMenuItemIconTemplateContext>;
     menuClick?: (event: InternalMenuItemClickEvent<any>) => void;
     parent?: MenuItem | null;
+    shortcutTemplate?: TemplateRef<unknown>;
     subMenuItems?: MenuItem[];
     text?: string;
     textTemplate?: TemplateRef<ContextMenuItemTextTemplateContext>;

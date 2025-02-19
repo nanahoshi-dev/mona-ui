@@ -54,6 +54,8 @@ html, body {
     //background: hsl(var(--muted));
     //background: #f8f8f8;
     scroll-behavior: smooth;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
 }
 
 //body { font-size: 0.75rem; }

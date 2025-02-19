@@ -1,4 +1,4 @@
-import { OutputEmitterRef } from "@angular/core";
+import { OutputEmitterRef, Signal, WritableSignal } from "@angular/core";
 import { Subject } from "rxjs";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { ContextMenuNavigationEvent } from "./ContextMenuNavigationEvent";
@@ -13,6 +13,8 @@ export interface ContextMenuInjectorData<C = any> {
     parentMenuRef?: PopupRef;
     popupClass?: string | string[];
     subMenuClose?: Subject<void>;
+    userClasses: Signal<string>;
+    userStyles: Signal<string>;
     viaKeyboard?: boolean;
 }
 

@@ -13,7 +13,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { any, ImmutableSet } from "@mirei/ts-collections";
-import { fromEvent, mergeWith, Subject, take } from "rxjs";
+import { filter, fromEvent, mergeWith, Subject, take } from "rxjs";
 import { v4 } from "uuid";
 import { PopupOffset } from "../../popup/models/PopupOffset";
 import { PopupRef } from "../../popup/models/PopupRef";
@@ -34,9 +34,9 @@ import { ContextMenuService } from "../services/context-menu.service";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContextMenuComponent<C = any> implements OnInit {
-    readonly #contextMenuInjectorData: Partial<ContextMenuInjectorData> = { isRoot: true };
-    readonly #contextMenuService: ContextMenuService = inject(ContextMenuService);
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #contextMenuInjectorData: Partial<ContextMenuInjectorData> = { isRoot: true, userClasses: signal("") };
+    readonly #contextMenuService = inject(ContextMenuService);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #menuClickNotifier = new Subject<InternalMenuItemClickEvent<C>>();
     #contextMenuRef: PopupRef | null = null;
     #precise: boolean = true;
@@ -48,6 +48,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
     public readonly navigate = output<ContextMenuNavigationEvent>();
     public readonly open = output<ContextMenuOpenEvent>();
     public readonly uid: string = v4();
+    public readonly userClasses = input<string>("", { alias: "class" });
+    public readonly userStyles = input<string>("", { alias: "style" });
 
     public context = input<C>();
     public menuItems = input<Iterable<MenuItem>>([]);
@@ -103,6 +105,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
         this.#contextMenuInjectorData.menuItems = this.menuItemList();
         this.#contextMenuInjectorData.navigate = this.navigate;
         this.#contextMenuInjectorData.popupClass = this.popupClass();
+        this.#contextMenuInjectorData.userClasses = this.userClasses;
+        this.#contextMenuInjectorData.userStyles = this.userStyles;
 
         const target = this.target();
         const anchorElement = target instanceof ElementRef ? target.nativeElement : target;
@@ -124,9 +128,9 @@ export class ContextMenuComponent<C = any> implements OnInit {
             data: this.#contextMenuInjectorData,
             minWidth: this.minWidth(),
             offset: this.offset(),
-            popupClass: ["mona-contextmenu-content", ...this.popupClass()],
             width: this.width()
         });
+        this.setCloseSubscriptions();
         this.#contextMenuInjectorData.parentMenuRef = this.#contextMenuRef;
         this.open.emit({ uid: this.uid, popupRef: this.#contextMenuRef as PopupRef });
         this.#contextMenuRef.closed
@@ -163,6 +167,9 @@ export class ContextMenuComponent<C = any> implements OnInit {
                 event.preventDefault();
                 this.create(event);
             });
+    }
+
+    private setCloseSubscriptions(): void {
         fromEvent<MouseEvent>(window, "click")
             .pipe(
                 mergeWith(
@@ -170,6 +177,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
                     fromEvent<MouseEvent>(window, "auxclick"),
                     fromEvent<MouseEvent>(window, "keydown")
                 ),
+                filter(event => !!this.#contextMenuRef && !(event.target as HTMLElement).closest("[data-contextmenu]")),
                 takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe(event => {
