@@ -1,4 +1,5 @@
 import { Point } from "@angular/cdk/drag-drop";
+import { ConnectedPosition } from "@angular/cdk/overlay";
 import {
     ChangeDetectionStrategy,
     Component,
@@ -12,7 +13,7 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { any, ImmutableSet } from "@mirei/ts-collections";
+import { any, ImmutableSet, toArray } from "@mirei/ts-collections";
 import { filter, fromEvent, mergeWith, Subject, take } from "rxjs";
 import { v4 } from "uuid";
 import { PopupOffset } from "../../popup/models/PopupOffset";
@@ -30,7 +31,6 @@ import { ContextMenuService } from "../services/context-menu.service";
     selector: "mona-contextmenu",
     template: "",
     styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContextMenuComponent<C = any> implements OnInit {
@@ -44,16 +44,26 @@ export class ContextMenuComponent<C = any> implements OnInit {
     protected readonly menuItemComponents = contentChildren(MenuItemComponent);
     protected readonly menuItemList = signal<ImmutableSet<MenuItem>>(ImmutableSet.create());
 
+    /**
+     * Emits when the context menu is closed.
+     */
     public readonly close = output<ContextMenuCloseEvent>();
-    public readonly navigate = output<ContextMenuNavigationEvent>();
-    public readonly open = output<ContextMenuOpenEvent>();
-    public readonly uid: string = v4();
-    public readonly userClasses = input<string>("", { alias: "class" });
-    public readonly userStyles = input<string>("", { alias: "style" });
 
-    public context = input<C>();
-    public menuItems = input<Iterable<MenuItem>>([]);
-    public minWidth = input(undefined, {
+    /**
+     * The context object to be passed to the menu items.
+     */
+    public readonly context = input<C>();
+
+    /**
+     * The menu items to be displayed in the context menu.
+     * If this is set, the menu items from the content children will be ignored.
+     */
+    public readonly menuItems = input<Iterable<MenuItem>>([]);
+
+    /**
+     * Minimum width of the context menu. Only applies to the root context menu.
+     */
+    public readonly minWidth = input(undefined, {
         transform: (value: string | number | undefined) => {
             if (typeof value === "number") {
                 return `${value}px`;
@@ -61,8 +71,26 @@ export class ContextMenuComponent<C = any> implements OnInit {
             return value;
         }
     });
-    public offset = input<PopupOffset | undefined>(undefined);
-    public popupClass = input([], {
+
+    /**
+     * Emits when context menu navigation occurs.
+     */
+    public readonly navigate = output<ContextMenuNavigationEvent>();
+
+    /**
+     * The offset of the context menu.
+     */
+    public readonly offset = input<PopupOffset | undefined>(undefined);
+
+    /**
+     * Emits when the context menu is opened.
+     */
+    public readonly open = output<ContextMenuOpenEvent>();
+
+    /**
+     * The popup class of the context menu.
+     */
+    public readonly popupClass = input([], {
         transform: (value: string | string[]) => {
             if (Array.isArray(value)) {
                 return value;
@@ -70,9 +98,36 @@ export class ContextMenuComponent<C = any> implements OnInit {
             return [value];
         }
     });
-    public target = input.required<ElementRef | Element>();
-    public trigger = input("contextmenu");
-    public width = input(undefined, {
+
+    public readonly positions = input<Iterable<ConnectedPosition> | null>(null);
+
+    /**
+     * The target element that the context menu will be anchored to.
+     */
+    public readonly target = input.required<ElementRef | Element>();
+
+    /**
+     * The event that triggers the context menu.
+     */
+    public readonly trigger = input("contextmenu");
+    public readonly uid = v4();
+
+    /**
+     * The user classes to be applied to the context menu.
+     * These will be applied to the root context menu and all submenus.
+     */
+    public readonly userClasses = input<string>("", { alias: "class" });
+
+    /**
+     * The user styles to be applied to the context menu.
+     * These will be applied to the root context menu and all submenus.
+     */
+    public readonly userStyles = input<string>("", { alias: "style" });
+
+    /**
+     * The width of the context menu. Only applies to the root context menu.
+     */
+    public readonly width = input(undefined, {
         transform: (value: number | string | undefined) => {
             if (typeof value === "number") {
                 return `${value}px`;
@@ -121,6 +176,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
         } else {
             anchor = anchorElement;
         }
+
+        const positions = this.positions() ? toArray(this.positions() as Iterable<ConnectedPosition>) : undefined;
         this.#contextMenuRef = this.#contextMenuService.open({
             anchor,
             closeOnOutsideClick: true,
@@ -128,6 +185,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
             data: this.#contextMenuInjectorData,
             minWidth: this.minWidth(),
             offset: this.offset(),
+            positions,
             width: this.width()
         });
         this.setCloseSubscriptions();

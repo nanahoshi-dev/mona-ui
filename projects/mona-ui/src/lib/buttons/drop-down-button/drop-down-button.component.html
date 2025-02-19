@@ -1,9 +1,11 @@
-<button monaButton [disabled]="disabled()" #dropdownButton>
-    <ng-content></ng-content>
+<button monaButton [look]="look()" [size]="size()" [disabled]="disabled()" #dropdownButton>
+    <ng-content select=":not(mona-menu-item)"></ng-content>
 </button>
 
 @if (!disabled()) {
-    <mona-contextmenu [target]="dropdownButton" [menuItems]="menuItems()" [width]="popupWidth()"
+    <mona-contextmenu [target]="dropdownButton" [menuItems]="menuItems()"
+                      [offset]="{horizontal: 0, vertical: 4}"
+                      [positions]="positions()"
                       trigger="click" popupClass="mona-dropdown-button-popup"
                       #contextMenuComponent></mona-contextmenu>
 }

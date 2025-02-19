@@ -1,16 +1,17 @@
+import { ConnectedPosition } from "@angular/cdk/overlay";
 import {
     AfterViewInit,
     Component,
     computed,
     contentChildren,
     DestroyRef,
-    ElementRef,
     inject,
     input,
-    Signal,
     signal,
+    Signal,
     viewChild
 } from "@angular/core";
+import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/button/button.style";
 import { ContextMenuComponent } from "../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../menus/menu-item/menu-item.component";
 import { ButtonDirective } from "../button/button.directive";
@@ -18,25 +19,47 @@ import { ButtonDirective } from "../button/button.directive";
 @Component({
     selector: "mona-drop-down-button",
     templateUrl: "./drop-down-button.component.html",
-    styleUrls: ["./drop-down-button.component.scss"],
     imports: [ButtonDirective, ContextMenuComponent],
     host: {
         "[class.mona-drop-down-button]": "true"
     }
 })
-export class DropDownButtonComponent implements AfterViewInit {
+export class DropDownButtonComponent implements AfterViewInit, DropdownButtonVariantInputs {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     #resizeObserver: ResizeObserver | null = null;
-
-    protected readonly buttonElement: Signal<ElementRef<HTMLButtonElement>> = viewChild.required("dropdownButton", {
-        read: ElementRef
-    });
     protected readonly contextMenuComponent: Signal<ContextMenuComponent> = viewChild.required("contextMenuComponent");
     protected readonly menuItemComponents: Signal<readonly MenuItemComponent[]> = contentChildren(MenuItemComponent);
     protected readonly menuItems = computed(() => this.menuItemComponents().map(m => m.getMenuItem()));
-
-    public disabled = input(false);
-    public popupWidth = signal(0);
+    protected readonly positions = signal<ConnectedPosition[]>([
+        {
+            originX: "center",
+            originY: "bottom",
+            overlayX: "center",
+            overlayY: "top"
+        },
+        {
+            originX: "center",
+            originY: "top",
+            overlayX: "center",
+            overlayY: "bottom"
+        },
+        {
+            originX: "start",
+            originY: "center",
+            overlayX: "end",
+            overlayY: "center"
+        },
+        {
+            originX: "end",
+            originY: "center",
+            overlayX: "start",
+            overlayY: "center"
+        }
+    ]);
+    public readonly disabled = input(false);
+    public readonly look = input<ButtonVariantProps["look"]>("default");
+    public readonly size = input<ButtonVariantProps["size"]>("default");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
         this.#destroyRef.onDestroy(() => {
@@ -47,11 +70,6 @@ export class DropDownButtonComponent implements AfterViewInit {
     public ngAfterViewInit(): void {
         window.setTimeout(() => {
             this.contextMenuComponent().setPrecise(false);
-            this.popupWidth.set(this.buttonElement().nativeElement.offsetWidth);
         });
-        this.#resizeObserver = new ResizeObserver(() => {
-            this.popupWidth.set(this.buttonElement().nativeElement.offsetWidth);
-        });
-        this.#resizeObserver.observe(this.buttonElement().nativeElement);
     }
 }

@@ -899,7 +899,7 @@
         <button monaButton size="small" #dynamicContextMenuAnchor>
             Dynamic Context Menu Target
         </button>
-        <mona-contextmenu [target]="contextMenuAnchor"  (navigate)="print($event)">
+        <mona-contextmenu [target]="contextMenuAnchor" (navigate)="print($event)">
             <mona-menu-item text="Back">
 <!--                <ng-template monaMenuItemTextTemplate let-menuItem>-->
 <!--                    <span style="color: mediumseagreen;">File</span>-->
@@ -968,9 +968,37 @@
 <!--                <mona-menu-item text="Replace"></mona-menu-item>-->
 <!--            </mona-menu-item>-->
     </mona-contextmenu>
-        <mona-contextmenu [target]="dynamicContextMenuAnchor"
-                          style="max-width: 70px"
-                          [menuItems]="[{text: 'Dynamic Menu 1', parent: null}]"></mona-contextmenu>
+    <mona-contextmenu [target]="dynamicContextMenuAnchor"
+                      style="max-width: 70px"
+                      [menuItems]="[{text: 'Dynamic Menu 1', parent: null}]"></mona-contextmenu>
+
+        <mona-drop-down-button look="outline" [disabled]="false">
+            Dropdown Button
+            <mona-menu-item text="Profile">
+                <ng-template monaMenuItemTextTemplate>
+                    <div>a</div>
+                    <div>b</div> <!-- TODO: Replace Dropdown content with popup instead of contextmenu -->
+                </ng-template>
+            </mona-menu-item>
+            <mona-menu-item text="Billing"></mona-menu-item>
+            <mona-menu-item text="Settings"></mona-menu-item>
+            <mona-menu-item text="Keyboard shortcuts"></mona-menu-item>
+            <mona-menu-item [divider]="true"></mona-menu-item>
+            <mona-menu-item text="Team"></mona-menu-item>
+            <mona-menu-item text="Invite users">
+                <mona-menu-item text="Email"></mona-menu-item>
+                <mona-menu-item text="Message"></mona-menu-item>
+                <mona-menu-item [divider]="true"></mona-menu-item>
+                <mona-menu-item text="More..."></mona-menu-item>
+            </mona-menu-item>
+            <mona-menu-item text="New Team"></mona-menu-item>
+            <mona-menu-item [divider]="true"></mona-menu-item>
+            <mona-menu-item text="GitHub"></mona-menu-item>
+            <mona-menu-item text="Support"></mona-menu-item>
+            <mona-menu-item text="API" [disabled]="true"></mona-menu-item>
+            <mona-menu-item [divider]="true"></mona-menu-item>
+            <mona-menu-item text="Log out"></mona-menu-item>
+        </mona-drop-down-button>
 
     </div>
 </div>

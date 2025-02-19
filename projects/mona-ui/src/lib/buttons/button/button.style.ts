@@ -41,3 +41,5 @@ export const buttonVariants = cva(
 
 export type ButtonVariantProps = VariantProps<typeof buttonVariants>;
 export type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
+
+export type DropdownButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;
