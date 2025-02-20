@@ -18,7 +18,6 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
-import { MenuItem } from "../../../../menus/models/MenuItem";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
 import { ButtonDirective } from "../../../button/button.directive";
 import { SplitButtonTextTemplateDirective } from "../../directives/split-button-text-template.directive";
@@ -26,7 +25,6 @@ import { SplitButtonTextTemplateDirective } from "../../directives/split-button-
 @Component({
     selector: "mona-split-button",
     templateUrl: "./split-button.component.html",
-    styleUrls: ["./split-button.component.scss"],
     imports: [ButtonDirective, NgTemplateOutlet, FontAwesomeModule, ContextMenuComponent],
     host: {
         "[class.mona-split-button]": "true",
@@ -41,9 +39,7 @@ export class SplitButtonComponent {
     protected readonly mainButtonElementRef = viewChild.required<ElementRef>("mainButton");
     protected readonly menuIcon = faChevronDown;
     protected readonly menuItemComponents: Signal<readonly MenuItemComponent[]> = contentChildren(MenuItemComponent);
-    protected readonly menuItems: Signal<readonly MenuItem[]> = computed(() =>
-        this.menuItemComponents().map(m => m.getMenuItem())
-    );
+    protected readonly menuItems = computed(() => this.menuItemComponents().map(m => m.getMenuItem()));
     protected readonly textTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
 
     public disabled = input(false);

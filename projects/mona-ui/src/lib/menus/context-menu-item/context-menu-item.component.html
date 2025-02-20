@@ -1,7 +1,7 @@
 <span [class]="iconContainerClasses()">
     @if (menuItem().iconTemplate) {
         <ng-container [ngTemplateOutlet]="menuItem().iconTemplate??null"
-                      [ngTemplateOutletContext]="{$implicit: menuItem()}"></ng-container>
+                      [ngTemplateOutletContext]="{$implicit: menuItem().options}"></ng-container>
     } @else if (menuItem().iconClass && !menuItem().iconTemplate) {
         <span [ngClass]="menuItem().iconClass"></span>
     }
@@ -9,7 +9,7 @@
 <div [class]="textContainerClasses()">
     @if (menuItem().textTemplate) {
         <ng-container [ngTemplateOutlet]="menuItem().textTemplate??null"
-                      [ngTemplateOutletContext]="{$implicit: menuItem()}"></ng-container>
+                      [ngTemplateOutletContext]="{$implicit: menuItem().options}"></ng-container>
     } @else {
         <span>{{ menuItem().text }}</span>
     }
@@ -21,7 +21,7 @@
     }
 </div>
 
-@if (menuItem().subMenuItems && menuItem().subMenuItems?.length !== 0) {
+@if (menuItem().subMenuItemsSet.length > 0) {
     <span [class]="linkContainerClasses()">
         <lucide-angular [img]="linkIcon" class="w-4 h-4"></lucide-angular>
     </span>

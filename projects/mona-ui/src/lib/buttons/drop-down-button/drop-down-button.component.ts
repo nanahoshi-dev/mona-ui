@@ -8,7 +8,6 @@ import {
     inject,
     input,
     signal,
-    Signal,
     viewChild
 } from "@angular/core";
 import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/button/button.style";
@@ -27,8 +26,8 @@ import { ButtonDirective } from "../button/button.directive";
 export class DropDownButtonComponent implements AfterViewInit, DropdownButtonVariantInputs {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     #resizeObserver: ResizeObserver | null = null;
-    protected readonly contextMenuComponent: Signal<ContextMenuComponent> = viewChild.required("contextMenuComponent");
-    protected readonly menuItemComponents: Signal<readonly MenuItemComponent[]> = contentChildren(MenuItemComponent);
+    protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
+    protected readonly menuItemComponents = contentChildren(MenuItemComponent);
     protected readonly menuItems = computed(() => this.menuItemComponents().map(m => m.getMenuItem()));
     protected readonly positions = signal<ConnectedPosition[]>([
         {

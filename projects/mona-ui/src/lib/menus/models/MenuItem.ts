@@ -1,20 +1,45 @@
 import { TemplateRef } from "@angular/core";
+import { ImmutableSet, select, selectMany } from "@mirei/ts-collections";
 import { InternalMenuItemClickEvent } from "./ContextMenuInjectorData";
 import { ContextMenuItemTextTemplateContext } from "./ContextMenuItemTextTemplateContext";
 import { ContextMenuItemIconTemplateContext } from "./ContextMenuItemIconTemplateContext";
 
-export interface MenuItem<T = unknown> {
-    data?: T;
-    depth?: number;
+export interface MenuItemOptions {
+    data?: unknown;
     disabled?: boolean;
     divider?: boolean;
-    iconClass?: string;
-    iconTemplate?: TemplateRef<ContextMenuItemIconTemplateContext>;
-    menuClick?: (event: InternalMenuItemClickEvent<any>) => void;
-    parent?: MenuItem | null;
-    shortcutTemplate?: TemplateRef<unknown>;
-    subMenuItems?: MenuItem[];
+    group?: string;
+    subMenuItems?: Iterable<MenuItemOptions[]>;
     text?: string;
-    textTemplate?: TemplateRef<ContextMenuItemTextTemplateContext>;
-    visible?: boolean;
+}
+
+export class MenuItem {
+    public data?: unknown;
+    public depth?: number;
+    public disabled?: boolean;
+    public divider?: boolean;
+    public group?: string;
+    public iconClass?: string;
+    public iconTemplate?: TemplateRef<ContextMenuItemIconTemplateContext>;
+    public menuClick?: (event: InternalMenuItemClickEvent<any>) => void;
+    public parent?: MenuItem | null;
+    public shortcutTemplate?: TemplateRef<unknown>;
+    public subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>>;
+    public text?: string;
+    public textTemplate?: TemplateRef<ContextMenuItemTextTemplateContext>;
+
+    public constructor(public readonly options: MenuItemOptions) {
+        this.data = options.data;
+        this.disabled = options.disabled;
+        this.divider = options.divider;
+        this.group = options.group;
+        this.subMenuItemsSet = this.prepareSubMenuItems(options.subMenuItems ?? []);
+        this.text = options.text;
+    }
+
+    private prepareSubMenuItems(submenuItems: Iterable<MenuItemOptions[]>): ImmutableSet<ImmutableSet<MenuItem>> {
+        return select(submenuItems, items => {
+            return ImmutableSet.create(items.map(item => new MenuItem(item)));
+        }).toImmutableSet();
+    }
 }

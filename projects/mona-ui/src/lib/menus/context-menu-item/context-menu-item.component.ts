@@ -3,12 +3,12 @@ import { NgClass, NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, OnDestroy } from "@angular/core";
 import { ChevronRight, LucideAngularModule } from "lucide-angular";
 import {
-    contextMenuItemIconVariants,
-    contextMenuItemLinkVariants,
-    contextMenuItemShortcutVariants,
-    contextMenuItemTextVariants,
-    contextMenuItemVariants
-} from "mona-ui/menus/styles/context-menu.style";
+    contextMenuItemVariants,
+    menuItemIconVariants,
+    menuItemLinkVariants,
+    menuItemShortcutVariants,
+    menuItemTextVariants
+} from "mona-ui/menus/styles/menu.style";
 import { twMerge } from "tailwind-merge";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { MenuItem } from "../models/MenuItem";
@@ -29,18 +29,18 @@ export class ContextMenuItemComponent implements OnDestroy, Highlightable {
         return twMerge(contextMenuItemVariants());
     });
     protected readonly iconContainerClasses = computed(() => {
-        return twMerge(contextMenuItemIconVariants());
+        return twMerge(menuItemIconVariants());
     });
     protected readonly linkContainerClasses = computed(() => {
-        return twMerge(contextMenuItemLinkVariants());
-    });
-    protected readonly shortcutContainerClasses = computed(() => {
-        return twMerge(contextMenuItemShortcutVariants());
-    });
-    protected readonly textContainerClasses = computed(() => {
-        return twMerge(contextMenuItemTextVariants());
+        return twMerge(menuItemLinkVariants());
     });
     protected readonly linkIcon = ChevronRight;
+    protected readonly shortcutContainerClasses = computed(() => {
+        return twMerge(menuItemShortcutVariants());
+    });
+    protected readonly textContainerClasses = computed(() => {
+        return twMerge(menuItemTextVariants());
+    });
     public readonly elementRef = inject(ElementRef<HTMLElement>);
     public readonly itemDisabled = input(false);
     public readonly itemFocused = input(false);

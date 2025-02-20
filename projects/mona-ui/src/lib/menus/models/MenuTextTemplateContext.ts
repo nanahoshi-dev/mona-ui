@@ -1,6 +1,6 @@
-import { MenuItem } from "./MenuItem";
+import { MenuItemOptions } from "./MenuItem";
 
-export interface MenuTextTemplateContext<T> {
+export interface MenuTextTemplateContext {
     $implicit: string;
-    items: MenuItem<T>[];
+    items: MenuItemOptions[];
 }

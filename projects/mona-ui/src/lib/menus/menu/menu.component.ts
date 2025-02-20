@@ -1,57 +1,43 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChild,
     contentChildren,
-    effect,
     input,
-    model,
-    TemplateRef,
-    untracked
+    TemplateRef
 } from "@angular/core";
-import { any, forEach } from "@mirei/ts-collections";
+import { any, select } from "@mirei/ts-collections";
+import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
+import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
+import { prepareSubMenuItems } from "mona-ui/menus/utils/prepareSubMenuItems";
 import { v4 } from "uuid";
 import { ContextMenuComponent } from "../context-menu/context-menu.component";
 import { MenuTextTemplateDirective } from "../directives/menu-text-template.directive";
 import { MenuItemComponent } from "../menu-item/menu-item.component";
-import { MenuItem } from "../models/MenuItem";
+import { MenuItem, MenuItemOptions } from "../models/MenuItem";
 
 @Component({
     selector: "mona-menu",
     template: "",
-    styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuComponent {
-    protected readonly menuItemComponents = contentChildren(MenuItemComponent);
-
+    protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
+        MenuItemInjectionToken
+    );
+    public readonly disabled = input(false);
+    public readonly items = input<Iterable<MenuItemOptions>>([]);
     public readonly textTemplate = contentChild(MenuTextTemplateDirective, { read: TemplateRef });
-    public readonly uid: string = v4();
-
+    public readonly uid = v4();
+    public readonly menuItems = computed(() => {
+        const menuItemComponents = this.menuItemComponents();
+        const items = this.items();
+        if (any(items)) {
+            return select(items, item => select([item], i => new MenuItem(i)).toImmutableSet()).toImmutableSet();
+        }
+        return prepareSubMenuItems(menuItemComponents);
+    });
+    public readonly text = input("");
     public contextMenu: ContextMenuComponent | null = null;
-    public disabled = input(false);
-    public menuItems = model<Iterable<MenuItem>>([]);
-    public text = input("");
-
-    public constructor() {
-        effect(() => {
-            const menuItemComponents = this.menuItemComponents();
-            untracked(() => {
-                const menuItems = this.menuItems();
-                if (any(menuItems)) {
-                    return;
-                }
-                this.menuItems.set(menuItemComponents.map(i => i.getMenuItem()));
-                this.initializeMenuItems(this.menuItems());
-            });
-        });
-    }
-
-    private initializeMenuItems(items: Iterable<MenuItem>): void {
-        forEach(items, i => {
-            i.visible = i.visible !== false;
-            this.initializeMenuItems(i.subMenuItems ?? []);
-        });
-    }
 }

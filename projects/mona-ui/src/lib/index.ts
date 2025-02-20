@@ -196,8 +196,9 @@ export * from "./list-view/directives/list-view-selectable.directive";
 export * from "./list-view/directives/list-view-virtual-scroll.directive";
 
 /** Menus */
-// export * from "./menus/models/MenuItem";
+export { MenuItemOptions } from "./menus/models/MenuItem";
 export * from "./menus/menu-item/menu-item.component";
+export * from "./menus/menu-item-group/menu-item-group.component";
 export * from "./menus/directives/menu-item-icon-template.directive";
 export * from "./menus/directives/menu-item-shortcut-template.directive";
 export * from "./menus/directives/menu-item-text-template.directive";

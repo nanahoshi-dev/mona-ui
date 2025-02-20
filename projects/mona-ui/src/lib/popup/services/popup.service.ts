@@ -1,10 +1,11 @@
 import { AnimationBuilder } from "@angular/animations";
-import { Overlay, PositionStrategy } from "@angular/cdk/overlay";
+import { ConnectionPositionPair, Overlay, PositionStrategy } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { DestroyRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dictionary } from "@mirei/ts-collections";
 import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "mona-ui/popup/animations/popup.animation";
+import { ConnectionPoint, connectionPosition } from "mona-ui/popup/utils/connectionPosition";
 import { filter, fromEvent, Subject, take, takeUntil, tap } from "rxjs";
 import { v4 } from "uuid";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
@@ -30,13 +31,15 @@ export class PopupService {
     public create(settings: PopupSettings): PopupRef {
         const uid = v4();
         let positionStrategy: PositionStrategy;
+        const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+
         if (settings.positionStrategy === "global") {
             positionStrategy = this.#overlay.position().global();
         } else {
             positionStrategy = this.#overlay
                 .position()
                 .flexibleConnectedTo(settings.anchor)
-                .withPositions(settings.positions ?? DefaultPositions)
+                .withPositions(position)
                 .withDefaultOffsetX(settings.offset?.horizontal ?? 0)
                 .withDefaultOffsetY(settings.offset?.vertical ?? 0)
                 .withPush(settings.withPush ?? true);
@@ -157,6 +160,15 @@ export class PopupService {
             hide: config.hide ?? defaultPopupHideAnimation,
             show: config.show ?? defaultPopupShowAnimation
         };
+    }
+
+    private getPosition(
+        anchorConnectionPoint?: ConnectionPoint,
+        popupConnectionPoint?: ConnectionPoint
+    ): ConnectionPositionPair[] {
+        const anchorPoint = anchorConnectionPoint ?? "bottomleft";
+        const popupPoint = popupConnectionPoint ?? "topright";
+        return connectionPosition(anchorPoint, popupPoint);
     }
 
     private setAnimations(

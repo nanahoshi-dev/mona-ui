@@ -1,20 +1,24 @@
 <ul tabindex="0" class="outline-none">
-    @for (menuItem of parentMenuData.menuItems; track menuItem) {
-        @if (menuItem.visible ?? true) {
-            @if (menuItem.divider) {
-                <div role="separator" aria-orientation="horizontal" [class]="dividerClasses()"></div>
-            } @else {
-                <li
-                    [ngClass]="{'mona-disabled': menuItem.disabled, 'mona-focused': keyManager?.activeItem?.menuItem() === menuItem}"
-                    [attr.tabindex]="keyManager?.activeItem?.menuItem() === menuItem ? 0 : -1"
-                    (mouseenter)="onListItemMouseEnter($event, menuItem)"
-                    (click)="onListItemClick($event, menuItem)">
-                    <mona-contextmenu-item [menuItem]="menuItem"
-                                           [itemFocused]="keyManager?.activeItem?.menuItem() === menuItem"
-                                           [itemDisabled]="menuItem.disabled??false"
-                                           [submenuPopupRef]="menuPopupRef()" [attr.tabindex]="0">
-                    </mona-contextmenu-item>
-                </li>
+    @for (group of viewMenuItems(); track group) {
+        @for (entry of group; track entry) {
+            @if (entry.key) {
+                <span [class]="groupHeaderClasses()">{{entry.key}}</span>
+            }
+            @for (menuItem of entry.value; track menuItem) {
+                @if (menuItem.divider) {
+                    <div role="separator" aria-orientation="horizontal" [class]="dividerClasses()"></div>
+                } @else {
+                    <li
+                        [attr.tabindex]="keyManager?.activeItem?.menuItem() === menuItem ? 0 : -1"
+                        (mouseenter)="onListItemMouseEnter($event, menuItem)"
+                        (click)="onListItemClick($event, menuItem)">
+                        <mona-contextmenu-item [menuItem]="menuItem"
+                                               [itemFocused]="keyManager?.activeItem?.menuItem() === menuItem"
+                                               [itemDisabled]="menuItem.disabled??false"
+                                               [submenuPopupRef]="menuPopupRef()" [attr.tabindex]="0">
+                        </mona-contextmenu-item>
+                    </li>
+                }
             }
         }
     }

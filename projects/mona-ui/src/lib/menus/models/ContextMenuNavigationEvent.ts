@@ -1,7 +1,7 @@
-import { MenuItem } from "./MenuItem";
+import { MenuItemOptions } from "./MenuItem";
 
 export interface ContextMenuNavigationEvent {
-    currentItem: MenuItem | null;
+    currentItem: MenuItemOptions | null;
     direction: "down" | "up" | "left" | "right";
-    previousItem: MenuItem | null;
+    previousItem: MenuItemOptions | null;
 }

@@ -1,5 +1,5 @@
-import { MenuItem } from "./MenuItem";
+import { MenuItemOptions } from "./MenuItem";
 
 export interface ContextMenuItemTextTemplateContext {
-    $implicit: MenuItem;
+    $implicit: MenuItemOptions;
 }

@@ -6,6 +6,7 @@ import {
     ConnectionPositionPair,
     FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
+import { ConnectionPoint } from "mona-ui/popup/utils/connectionPosition";
 import { PopupOffset } from "./PopupOffset";
 import { Action } from "../../utils/Action";
 import { PopupCloseEvent } from "./PopupCloseEvent";
@@ -16,6 +17,12 @@ export interface PopupSettings<T = unknown, C = void> {
      * @type {FlexibleConnectedPositionStrategyOrigin}
      */
     anchor: FlexibleConnectedPositionStrategyOrigin;
+
+    /**
+     * The connection point of the anchor element to which the popup will be connected.
+     * @type {ConnectionPoint}
+     */
+    anchorConnectionPoint?: ConnectionPoint;
 
     /**
      * Animation settings for the popup.
@@ -106,6 +113,12 @@ export interface PopupSettings<T = unknown, C = void> {
      * @type {string | string[]}
      */
     popupClass?: string | string[];
+
+    /**
+     * The connection point of the popup element to which the anchor will be connected.
+     * @type {ConnectionPoint}
+     */
+    popupConnectionPoint?: ConnectionPoint;
 
     /**
      * Classes to be applied to the popup wrapper content div.

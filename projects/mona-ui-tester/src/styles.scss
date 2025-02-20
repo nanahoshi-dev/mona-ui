@@ -6,6 +6,7 @@
 @source ".projects/mona-ui/";
 @source ".projects/mona-ui-tester/";
 @import url("https://use.typekit.net/zop2fdb.css");
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 
 @theme {
     --color-background: #fff;
@@ -61,7 +62,7 @@ html, body {
 //body { font-size: 0.75rem; }
 
 body {
-    font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif !important;
+    font-family: "Geist", Helvetica Neue, Helvetica, Arial, sans-serif !important;
 }
 
 

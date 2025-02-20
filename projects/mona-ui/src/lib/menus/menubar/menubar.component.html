@@ -9,10 +9,10 @@
             }
             @if (item.textTemplate()) {
                 <ng-container [ngTemplateOutlet]="item.textTemplate() ?? null"
-                              [ngTemplateOutletContext]="{$implicit: item.text(), items: item.menuItems()}">
+                              [ngTemplateOutletContext]="{$implicit: item.text(), items: item.items()}">
                 </ng-container>
             }
-            <mona-contextmenu [target]="listItemElement" [menuItems]="item.menuItems()" trigger="click"
+            <mona-contextmenu [target]="listItemElement" [menuItems]="item.items()" trigger="click"
                               (navigate)="onContextMenuNavigate($event)"
                               (close)="onContextMenuClose($event)" (open)="onContextMenuOpen($event)"
                               #contextMenuComponent></mona-contextmenu>

@@ -28,18 +28,22 @@ export const contextMenuItemVariants = cva(
     }
 );
 
-export const contextMenuItemIconVariants = cva(`absolute left-2 flex h-3.5 w-3.5 items-center justify-center`, {
+export const menuItemGroupHeaderVariants = cva(`font-semibold inline-flex select-none pl-8 py-1 pr-2 w-full`, {
     variants: {}
 });
 
-export const contextMenuItemLinkVariants = cva(`flex h-3.5 w-3.5 items-center justify-center`, {
+export const menuItemIconVariants = cva(`absolute left-2 flex h-3.5 w-3.5 items-center justify-center`, {
     variants: {}
 });
 
-export const contextMenuItemShortcutVariants = cva(`flex items-center justify-end flex-1 opacity-60 text-xs`, {
+export const menuItemLinkVariants = cva(`flex h-3.5 w-3.5 items-center justify-center`, {
     variants: {}
 });
 
-export const contextMenuItemTextVariants = cva(`flex flex-1 items-center justify-start gap-2`, {
+export const menuItemShortcutVariants = cva(`flex items-center justify-end flex-1 opacity-60 text-xs`, {
+    variants: {}
+});
+
+export const menuItemTextVariants = cva(`flex flex-1 items-center justify-start gap-2`, {
     variants: {}
 });

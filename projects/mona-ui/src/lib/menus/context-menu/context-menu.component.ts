@@ -1,5 +1,4 @@
 import { Point } from "@angular/cdk/drag-drop";
-import { ConnectedPosition } from "@angular/cdk/overlay";
 import {
     ChangeDetectionStrategy,
     Component,
@@ -13,7 +12,11 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { any, ImmutableSet, toArray } from "@mirei/ts-collections";
+import { any, first, from, ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
+import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
+import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
+import { convertToMenuItemSet, prepareSubMenuItems } from "mona-ui/menus/utils/prepareSubMenuItems";
+import { ConnectionPoint } from "mona-ui/popup/utils/connectionPosition";
 import { filter, fromEvent, mergeWith, Subject, take } from "rxjs";
 import { v4 } from "uuid";
 import { PopupOffset } from "../../popup/models/PopupOffset";
@@ -24,25 +27,35 @@ import { ContextMenuCloseEvent } from "../models/ContextMenuCloseEvent";
 import { ContextMenuInjectorData, InternalMenuItemClickEvent } from "../models/ContextMenuInjectorData";
 import { ContextMenuNavigationEvent } from "../models/ContextMenuNavigationEvent";
 import { ContextMenuOpenEvent } from "../models/ContextMenuOpenEvent";
-import { MenuItem } from "../models/MenuItem";
+import { MenuItem, MenuItemOptions } from "../models/MenuItem";
 import { ContextMenuService } from "../services/context-menu.service";
 
 @Component({
     selector: "mona-contextmenu",
     template: "",
-    styleUrls: [],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContextMenuComponent<C = any> implements OnInit {
-    readonly #contextMenuInjectorData: Partial<ContextMenuInjectorData> = { isRoot: true, userClasses: signal("") };
+    readonly #contextMenuInjectorData: ContextMenuInjectorData = {
+        isRoot: true,
+        menuItems: signal(ImmutableSet.create()),
+        userClasses: signal(""),
+        userStyles: signal("")
+    };
     readonly #contextMenuService = inject(ContextMenuService);
     readonly #destroyRef = inject(DestroyRef);
     readonly #menuClickNotifier = new Subject<InternalMenuItemClickEvent<C>>();
     #contextMenuRef: PopupRef | null = null;
     #precise: boolean = true;
+    protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
+        MenuItemInjectionToken
+    );
+    protected readonly menuItemList = signal<ImmutableSet<ImmutableSet<MenuItem>>>(ImmutableSet.create());
 
-    protected readonly menuItemComponents = contentChildren(MenuItemComponent);
-    protected readonly menuItemList = signal<ImmutableSet<MenuItem>>(ImmutableSet.create());
+    /**
+     * The anchor connection point of the context menu.
+     */
+    public readonly anchorConnectionPoint = input<ConnectionPoint | null | undefined>(null);
 
     /**
      * Emits when the context menu is closed.
@@ -58,7 +71,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
      * The menu items to be displayed in the context menu.
      * If this is set, the menu items from the content children will be ignored.
      */
-    public readonly menuItems = input<Iterable<MenuItem>>([]);
+    public readonly menuItems = input<Iterable<MenuItemOptions | MenuItem>>([]);
 
     /**
      * Minimum width of the context menu. Only applies to the root context menu.
@@ -99,7 +112,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
         }
     });
 
-    public readonly positions = input<Iterable<ConnectedPosition> | null>(null);
+    public readonly popupConnectionPoint = input<ConnectionPoint | null | undefined>("topleft");
 
     /**
      * The target element that the context menu will be anchored to.
@@ -157,7 +170,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
 
         this.#contextMenuInjectorData.context = this.context();
         this.#contextMenuInjectorData.menuClick = this.#menuClickNotifier;
-        this.#contextMenuInjectorData.menuItems = this.menuItemList();
+        this.#contextMenuInjectorData.menuItems.set(this.menuItemList());
         this.#contextMenuInjectorData.navigate = this.navigate;
         this.#contextMenuInjectorData.popupClass = this.popupClass();
         this.#contextMenuInjectorData.userClasses = this.userClasses;
@@ -177,7 +190,6 @@ export class ContextMenuComponent<C = any> implements OnInit {
             anchor = anchorElement;
         }
 
-        const positions = this.positions() ? toArray(this.positions() as Iterable<ConnectedPosition>) : undefined;
         this.#contextMenuRef = this.#contextMenuService.open({
             anchor,
             closeOnOutsideClick: true,
@@ -185,7 +197,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
             data: this.#contextMenuInjectorData,
             minWidth: this.minWidth(),
             offset: this.offset(),
-            positions,
+            anchorConnectionPoint: this.anchorConnectionPoint() ?? undefined,
+            popupConnectionPoint: this.popupConnectionPoint() ?? undefined,
             width: this.width()
         });
         this.setCloseSubscriptions();
@@ -199,10 +212,20 @@ export class ContextMenuComponent<C = any> implements OnInit {
     private initMenuItems(): void {
         const menuItemComponents = this.menuItemComponents();
         if (any(this.menuItems())) {
-            this.menuItemList.update(set => set.clear().addAll(this.menuItems()));
+            const firstItem = first(this.menuItems());
+            if (firstItem instanceof MenuItem) {
+                const items = from(this.menuItems())
+                    .select(mi => mi as MenuItem)
+                    .toImmutableSet();
+                this.menuItemList.set(toImmutableSet([items]));
+                return;
+            }
+            const menuSet = convertToMenuItemSet(this.menuItems());
+            this.menuItemList.set(menuSet);
             return;
         }
-        this.menuItemList.set(ImmutableSet.create(menuItemComponents.map(m => m.getMenuItem())));
+        const items = prepareSubMenuItems(menuItemComponents);
+        this.menuItemList.update(set => set.clear().addAll(items));
     }
 
     private onOutsideClick(event: MouseEvent): void {
