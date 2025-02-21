@@ -11,7 +11,7 @@
 <button monaButton [disabled]="disabled()"
         [look]="look()" [size]="size()"
         class="rounded-tl-none rounded-bl-none border-l-0"
-        [tabindex]="-1" #menuButton>
+        [tabindex]="tabindex()" #menuButton>
     <lucide-angular [img]="menuIcon"></lucide-angular>
 </button>
 <mona-contextmenu [target]="menuButton" trigger="click" [minWidth]="popupWidth()"

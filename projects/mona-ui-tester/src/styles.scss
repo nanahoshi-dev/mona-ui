@@ -33,7 +33,7 @@
     --color-chart-3: #274754;
     --color-chart-4: #e8c468;
     --color-chart-5: #f4a462;
-    --color-radius: .6rem;
+    //--color-radius: .6rem;
     --color-sidebar-background: #fafafa;
     --color-sidebar-foreground: #3f3f46;
     --color-sidebar-primary: #18181b;
@@ -42,12 +42,40 @@
     --color-sidebar-accent-foreground: #18181b;
     --color-sidebar-border: #e5e7eb;
     --color-sidebar-ring: #3b82f6;
+    --color-scrollbar-thumb: #d1d5db;
+    --color-scrollbar-thumb-hover: #9ca3af;
+    --color-scrollbar-thumb-active: #6b7280;
+    --color-scrollbar-thumb-focus: #9ca3af;
+    --color-scrollbar-track: #f9fafb;
+    --color-scrollbar-track-hover: #f4f5f7;
+    --color-scrollbar-track-active: #e5e7eb;
+    --color-scrollbar-track-focus: #f4f5f7;
+    --color-scrollbar-corner: #f9fafb;
 }
 
 :root {
     --mona-border-radius: 0;
 }
 
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--color-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+    &:hover {
+        background-color: var(--color-scrollbar-thumb-hover);
+    }
+    &:active {
+        background-color: var(--color-scrollbar-thumb-active);
+    }
+}
+::-webkit-scrollbar-corner {
+    background: var(--color-scrollbar-corner);
+}
 
 html, body {
     width: 100%;

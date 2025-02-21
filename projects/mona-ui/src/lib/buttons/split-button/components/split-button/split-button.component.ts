@@ -35,7 +35,7 @@ import { SplitButtonTextTemplateDirective } from "../../directives/split-button-
     host: {
         "[class]": "classes()",
         "[class.mona-split-button]": "true",
-        "[attr.tabindex]": "tabindex()"
+        "[attr.tabindex]": "-1"
     }
 })
 export class SplitButtonComponent implements SplitButtonVariantInputs {

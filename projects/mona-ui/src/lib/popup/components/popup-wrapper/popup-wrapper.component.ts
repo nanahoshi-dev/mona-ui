@@ -15,11 +15,10 @@ import { PopupSettings } from "../../models/PopupSettings";
 @Component({
     selector: "mona-popup-wrapper",
     templateUrl: "./popup-wrapper.component.html",
-    styleUrls: ["./popup-wrapper.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet],
     host: {
-        class: "mona-popup-wrapper"
+        class: "mona-popup-wrapper w-full h-full"
     }
 })
 export class PopupWrapperComponent implements OnInit, AfterViewInit {

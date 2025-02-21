@@ -6,10 +6,9 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Dictionary } from "@mirei/ts-collections";
 import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "mona-ui/popup/animations/popup.animation";
 import { ConnectionPoint, connectionPosition } from "mona-ui/popup/utils/connectionPosition";
-import { filter, fromEvent, Subject, take, takeUntil, tap } from "rxjs";
+import { filter, fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { v4 } from "uuid";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
-import { DefaultPositions } from "../models/DefaultPositions";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
 import { PopupRef } from "../models/PopupRef";
@@ -51,7 +50,7 @@ export class PopupService {
 
         const overlayRef = this.#overlay.create({
             positionStrategy,
-            hasBackdrop: settings.hasBackdrop ?? true,
+            hasBackdrop: settings.hasBackdrop ?? false,
             height: settings.height,
             maxHeight: settings.maxHeight,
             maxWidth: settings.maxWidth,
@@ -90,10 +89,11 @@ export class PopupService {
         }
         this.setAnimations(settings.animation, animationElement, popupReference);
 
+        let subscription: Subscription | null = null;
         if (settings.hasBackdrop) {
             if (settings.closeOnBackdropClick ?? true) {
-                const backdropSubject: Subject<void> = new Subject<void>();
-                const subscription = overlayRef
+                const backdropSubject = new Subject<void>();
+                subscription = overlayRef
                     .backdropClick()
                     .pipe(takeUntil(backdropSubject))
                     .subscribe(e => {
@@ -110,35 +110,39 @@ export class PopupService {
                             backdropSubject.complete();
                         }
                     });
-                popupReference.closed.pipe(take(1)).subscribe(() => subscription.unsubscribe());
             }
-        } else {
-            if (settings.closeOnOutsideClick ?? true) {
-                const subscription = overlayRef
-                    .outsidePointerEvents()
-                    .pipe(takeUntilDestroyed(this.#destroyRef))
-                    .subscribe(event => {
-                        if (this.#outsideEventsToClose.includes(event.type)) {
-                            const closeEvent = new PopupCloseEvent({
-                                event,
-                                originalEvent: event,
-                                via: PopupCloseSource.OutsideClick
-                            });
-                            const prevented = preventClose
-                                ? preventClose(closeEvent) || closeEvent.isDefaultPrevented()
-                                : false;
-                            if (!prevented) {
-                                popupReference.close(closeEvent);
-                                this.#popupStateMap.remove(uid);
-                                subscription.unsubscribe();
-                            }
+        } else if (settings.closeOnOutsideClick ?? true) {
+            subscription = overlayRef
+                .outsidePointerEvents()
+                .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
+                .subscribe(event => {
+                    const eventTarget = event.target as HTMLElement;
+                    if (settings.anchor instanceof HTMLElement && settings.anchor.contains(eventTarget)) {
+                        return;
+                    }
+                    if (this.#outsideEventsToClose.includes(event.type)) {
+                        const closeEvent = new PopupCloseEvent({
+                            event,
+                            originalEvent: event,
+                            via: PopupCloseSource.OutsideClick
+                        });
+                        const prevented = preventClose
+                            ? preventClose(closeEvent) || closeEvent.isDefaultPrevented()
+                            : false;
+                        if (!prevented) {
+                            popupReference.close(closeEvent);
+                            this.#popupStateMap.remove(uid);
+                            subscription?.unsubscribe();
                         }
-                    });
-                popupReference.closed.pipe(take(1)).subscribe(() => subscription.unsubscribe());
-            }
+                    }
+                });
         }
         popupReference.closed.pipe(take(1)).subscribe(() => {
+            subscription?.unsubscribe();
             this.#popupStateMap.remove(uid);
+            if (settings.anchor instanceof HTMLElement) {
+                settings.anchor.focus();
+            }
         });
         this.#popupStateMap.add(uid, {
             uid,
@@ -192,29 +196,30 @@ export class PopupService {
     }
 
     private setEventListeners(state: PopupState): void {
-        if (state.settings.closeOnEscape ?? true) {
-            fromEvent<KeyboardEvent>(document, "keydown")
-                .pipe(
-                    filter(() => state.popupRef.overlayRef.hasAttached()),
-                    filter(event => event.key === "Escape"),
-                    takeUntil(state.popupRef.closed)
-                )
-                .subscribe(event => {
-                    if (event.key === "Escape") {
-                        const closeEvent = new PopupCloseEvent({
-                            event,
-                            originalEvent: event,
-                            via: PopupCloseSource.Escape
-                        });
-                        const prevented = state.settings.preventClose
-                            ? state.settings.preventClose(closeEvent) || closeEvent.isDefaultPrevented()
-                            : false;
-                        if (!prevented) {
-                            state.popupRef.close(closeEvent);
-                            this.#popupStateMap.remove(state.uid);
-                        }
-                    }
-                });
+        if (state.settings.closeOnEscape === false) {
+            return;
         }
+        fromEvent<KeyboardEvent>(document, "keydown")
+            .pipe(
+                filter(() => state.popupRef.overlayRef.hasAttached()),
+                filter(event => event.key === "Escape"),
+                takeUntil(state.popupRef.closed)
+            )
+            .subscribe(event => {
+                if (event.key === "Escape") {
+                    const closeEvent = new PopupCloseEvent({
+                        event,
+                        originalEvent: event,
+                        via: PopupCloseSource.Escape
+                    });
+                    const prevented = state.settings.preventClose
+                        ? state.settings.preventClose(closeEvent) || closeEvent.isDefaultPrevented()
+                        : false;
+                    if (!prevented) {
+                        state.popupRef.close(closeEvent);
+                        this.#popupStateMap.remove(state.uid);
+                    }
+                }
+            });
     }
 }

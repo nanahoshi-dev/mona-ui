@@ -20,12 +20,20 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate } from "@mirei/ts-collections";
+import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
+import {
+    dropdownPopupHideAnimation,
+    dropdownPopupShowAnimation
+} from "mona-ui/dropdowns/animations/dropdown.animation";
+import {
+    dropdownPopupVariants,
+    DropdownSelectorVariantInput,
+    DropdownSelectorVariantProps,
+    dropdownSelectorVariants
+} from "mona-ui/dropdowns/styles/dropdown.style";
 import { distinctUntilChanged, fromEvent, take, withLatestFrom } from "rxjs";
-import { v4 } from "uuid";
-import { AnimationState } from "../../../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
+import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/button.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
@@ -50,7 +58,6 @@ import { DropDownListValueTemplateDirective } from "../../directives/drop-down-l
 @Component({
     selector: "mona-drop-down-list",
     templateUrl: "./drop-down-list.component.html",
-    styleUrls: ["./drop-down-list.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         ListService,
@@ -71,30 +78,34 @@ import { DropDownListValueTemplateDirective } from "../../directives/drop-down-l
         ListGroupHeaderTemplateDirective,
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
-        ListNoDataTemplateDirective
+        ListNoDataTemplateDirective,
+        LucideAngularModule
     ],
     host: {
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-dropdown]": "true",
-        "[class.mona-dropdown-list]": "true",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-haspopup]": "true",
-        "[attr.tabindex]": "disabled() ? null : 0"
+        "[attr.data-disabled]": "disabled()",
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "classes()"
     }
 })
-export class DropDownListComponent<TData> implements OnInit, ControlValueAccessor {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #listService: ListService<TData> = inject(ListService);
-    readonly #popupAnimationService: PopupAnimationService = inject(PopupAnimationService);
-    readonly #popupService: PopupService = inject(PopupService);
-    readonly #popupUidClass = `mona-dropdown-popup-${v4()}`;
+export class DropDownListComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #listService = inject(ListService<TData>);
+    readonly #popupService = inject(PopupService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<TData | null> | null = null;
     #value: TData | null = null;
 
-    protected readonly clearIcon = faTimes;
-    protected readonly dropdownIcon = faChevronDown;
+    protected readonly classes = computed(() => {
+        const size = this.size();
+        const classes = dropdownSelectorVariants({ size });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
+    protected readonly clearIcon = X;
+    protected readonly dropdownIcon = ChevronDown;
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
         read: TemplateRef
@@ -102,6 +113,9 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly popupClasses = computed(() => {
+        return twMerge(dropdownPopupVariants());
+    });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -123,6 +137,8 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
         }
         return this.#listService.getItemText(listItem);
     });
+    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public data = input<Iterable<TData>>([]);
     public disabled = model(false);
@@ -187,23 +203,22 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
         }
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
-            closeOnOutsideClick: false,
+            animation: {
+                hide: dropdownPopupHideAnimation,
+                show: dropdownPopupShowAnimation
+            },
+            closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
+            offset: { horizontal: 0, vertical: 4 },
             withPush: false,
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            popupClass: ["mona-dropdown-popup-content", this.#popupUidClass],
-            positions: DropDownService.getDefaultPositions()
+            anchorConnectionPoint: "bottomleft",
+            popupConnectionPoint: "topleft"
         });
         this.notifyValueChangeOnPopupClose();
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.#popupRef);
-        this.#popupAnimationService.animateDropdown(this.#popupRef, AnimationState.Show);
         this.#popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef = null;
-            const popupElement = document.querySelector(`.${this.#popupUidClass}`);
-            if (DropDownService.shouldFocusAfterClose(this.#hostElementRef.nativeElement, popupElement)) {
-                this.focus();
-            }
             this.#listService.clearFilter();
         });
     }
@@ -318,6 +333,10 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 if (this.disabled()) {
+                    return;
+                }
+                if (this.#popupRef) {
+                    this.close();
                     return;
                 }
                 this.open();

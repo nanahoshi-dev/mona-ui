@@ -26,7 +26,7 @@
     }
 } @else {
     @if (listService.viewItems().length !== 0) {
-        <ul [tabIndex]="-1">
+        <ul [class]="innerListClasses()" [tabIndex]="-1">
             @for (item of listService.viewItems(); track item.uid) {
                 <ng-container [ngTemplateOutlet]="listItemTemplate"
                               [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
@@ -44,11 +44,12 @@
 
 <ng-template #listItemTemplate let-item>
     @if (item.header) {
-        <li class="mona-list-group-header">
+        <li [class]="groupHeaderClasses()">
             <mona-list-item [item]="item" [template]="groupHeaderTemplate()??null"></mona-list-item>
         </li>
     } @else {
-        <li class="mona-list-item" [attr.data-uid]="item.uid"
+        <li class="px-0.5"
+            [attr.data-uid]="item.uid"
             (click)="onListItemClick(item)"
             monaListItem [item]="item">
             <mona-list-item [item]="item" [template]="itemTemplate()??null"></mona-list-item>

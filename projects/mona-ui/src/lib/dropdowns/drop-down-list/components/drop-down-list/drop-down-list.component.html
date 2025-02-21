@@ -1,4 +1,4 @@
-<div class="mona-dropdown-value">
+<div class="flex-1 truncate">
     @if (!valueTemplate()) {
         @if (selectedListItem()) {
             <span>{{valueText()}}</span>
@@ -10,18 +10,18 @@
                       [ngTemplateOutletContext]="{$implicit: selectedDataItem()}"></ng-container>
     }
 </div>
-@if (showClearButton() && selectedListItem()) {
-    <span class="mona-input-clear-icon" (click)="clearValue($event)">
-        <fa-icon [icon]="clearIcon"></fa-icon>
-    </span>
-}
-<button monaButton [tabindex]="-1" class="mona-input-button">
-    <fa-icon [icon]="dropdownIcon"></fa-icon>
-</button>
+<div class="flex items-center justify-center">
+    @if (selectedListItem()) {
+        <button monaButton look="link" size="small" [tabindex]="-1" (click)="clearValue($event)">
+            <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
+        </button>
+    }
+    <lucide-angular class="opacity-50 size-4" [img]="dropdownIcon"></lucide-angular>
+</div>
 
 <ng-template #popupTemplate>
-    <div class="mona-dropdown-popup-list-wrapper">
-        <mona-list [maxHeight]="200"
+    <div [class]="popupClasses()">
+        <mona-list
                    (itemSelect)="onItemSelect($event)">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>

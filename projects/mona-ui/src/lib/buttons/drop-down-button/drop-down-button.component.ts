@@ -1,4 +1,3 @@
-import { ConnectedPosition } from "@angular/cdk/overlay";
 import {
     afterNextRender,
     Component,
@@ -7,7 +6,6 @@ import {
     DestroyRef,
     inject,
     input,
-    signal,
     viewChild
 } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
@@ -28,7 +26,7 @@ import { ButtonDirective } from "../button/button.directive";
     }
 })
 export class DropDownButtonComponent implements DropdownButtonVariantInputs {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     #resizeObserver: ResizeObserver | null = null;
     protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
     protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
@@ -37,32 +35,6 @@ export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     protected readonly menuItems = computed(() =>
         selectMany(prepareMenuItems(this.menuItemComponents()), i => i).toImmutableSet()
     );
-    protected readonly positions = signal<ConnectedPosition[]>([
-        {
-            originX: "center",
-            originY: "bottom",
-            overlayX: "center",
-            overlayY: "top"
-        },
-        {
-            originX: "center",
-            originY: "top",
-            overlayX: "center",
-            overlayY: "bottom"
-        },
-        {
-            originX: "start",
-            originY: "center",
-            overlayX: "end",
-            overlayY: "center"
-        },
-        {
-            originX: "end",
-            originY: "center",
-            overlayX: "start",
-            overlayY: "center"
-        }
-    ]);
 
     /**
      * Sets the disabled state of the button.

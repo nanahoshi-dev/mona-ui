@@ -19,7 +19,14 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import {
+    listGroupHeaderTextVariants,
+    listGroupHeaderVariants,
+    listInnerListVariants,
+    listVariants
+} from "mona-ui/common/list/styles/list.style";
 import { filter, fromEvent, tap } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder.component";
 import { FilterInputComponent } from "../../../filter-input/components/filter-input/filter-input.component";
 import { FilterChangeEvent } from "../../../filter-input/models/FilterChangeEvent";
@@ -49,24 +56,35 @@ import { ListItemComponent } from "../list-item/list-item.component";
         CdkVirtualForOf
     ],
     templateUrl: "./list.component.html",
-    styleUrl: "./list.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
+        "[attr.tabindex]": "-1",
         "[class.mona-list]": "true",
+        "[class]": "classes()",
         "[style.height]": "listHeight()",
         "[style.max-height]": "listMaxHeight()",
-        "[style.width]": "listWidth()",
-        "[attr.tabindex]": "-1"
+        "[style.width]": "listWidth()"
     }
 })
 export class ListComponent<TData> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-
+    protected readonly classes = computed(() => {
+        const classes = listVariants();
+        return twMerge(classes);
+    });
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
+    protected readonly groupHeaderClasses = computed(() => {
+        const classes = listGroupHeaderVariants();
+        return twMerge(classes);
+    });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
+    protected readonly innerListClasses = computed(() => {
+        const classes = listInnerListVariants();
+        return twMerge(classes);
+    });
     protected readonly listHeight = computed(() => {
         const height = this.height();
         if (height == null) {

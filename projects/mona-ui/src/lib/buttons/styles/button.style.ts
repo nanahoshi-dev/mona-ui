@@ -42,6 +42,7 @@ export const buttonVariants = cva(
 export const splitButtonVariants = cva(
     `
         flex flex-nowrap items-center
+        focus-visible:outline-none
     `,
     {
         variants: {}

@@ -2,5 +2,5 @@
     <ng-container [ngTemplateOutlet]="template()"
                   [ngTemplateOutletContext]="{$implicit: dataItem()}"></ng-container>
 } @else {
-    <span>{{itemText()}}</span>
+    <span [class]="textClasses()">{{itemText()}}</span>
 }

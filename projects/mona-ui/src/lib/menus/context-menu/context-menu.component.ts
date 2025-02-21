@@ -151,6 +151,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
 
     public closeMenu(): void {
         this.#contextMenuRef?.close();
+        this.#contextMenuRef = null;
     }
 
     public ngOnInit(): void {
@@ -204,9 +205,10 @@ export class ContextMenuComponent<C = any> implements OnInit {
         this.setCloseSubscriptions();
         this.#contextMenuInjectorData.parentMenuRef = this.#contextMenuRef;
         this.open.emit({ uid: this.uid, popupRef: this.#contextMenuRef as PopupRef });
-        this.#contextMenuRef.closed
-            .pipe(take(1))
-            .subscribe(() => this.close.emit({ uid: this.uid, popupRef: this.#contextMenuRef as PopupRef }));
+        this.#contextMenuRef.closed.pipe(take(1)).subscribe(() => {
+            this.close.emit({ uid: this.uid });
+            this.#contextMenuRef = null;
+        });
     }
 
     private initMenuItems(): void {
@@ -246,29 +248,33 @@ export class ContextMenuComponent<C = any> implements OnInit {
             .subscribe(event => {
                 event.stopPropagation();
                 event.preventDefault();
+                if (this.#contextMenuRef) {
+                    this.closeMenu();
+                    return;
+                }
                 this.create(event);
             });
     }
 
     private setCloseSubscriptions(): void {
-        fromEvent<MouseEvent>(window, "click")
-            .pipe(
-                mergeWith(
-                    fromEvent<MouseEvent>(window, "contextmenu"),
-                    fromEvent<MouseEvent>(window, "auxclick"),
-                    fromEvent<MouseEvent>(window, "keydown")
-                ),
-                filter(event => !!this.#contextMenuRef && !(event.target as HTMLElement).closest("[data-contextmenu]")),
-                takeUntilDestroyed(this.#destroyRef)
-            )
-            .subscribe(event => {
-                if (event instanceof KeyboardEvent && event.key === "Escape") {
-                    this.#contextMenuRef?.close();
-                }
-                if (event instanceof MouseEvent) {
-                    this.onOutsideClick(event);
-                }
-            });
+        // fromEvent<MouseEvent>(window, "click")
+        //     .pipe(
+        //         mergeWith(
+        //             fromEvent<MouseEvent>(window, "contextmenu"),
+        //             fromEvent<MouseEvent>(window, "auxclick"),
+        //             fromEvent<MouseEvent>(window, "keydown")
+        //         ),
+        //         filter(event => !!this.#contextMenuRef && !(event.target as HTMLElement).closest("[data-contextmenu]")),
+        //         takeUntilDestroyed(this.#destroyRef)
+        //     )
+        //     .subscribe(event => {
+        //         if (event instanceof KeyboardEvent && event.key === "Escape") {
+        //             this.#contextMenuRef?.close();
+        //         }
+        //         if (event instanceof MouseEvent) {
+        //             this.onOutsideClick(event);
+        //         }
+        //     });
 
         this.#menuClickNotifier.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.#contextMenuRef?.close();

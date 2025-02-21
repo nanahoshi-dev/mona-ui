@@ -1,5 +1,11 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, Signal, TemplateRef } from "@angular/core";
+import {
+    listGroupHeaderTextVariants,
+    listItemTextVariants,
+    listItemVariants
+} from "mona-ui/common/list/styles/list.style";
+import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
 import { ListService } from "../../services/list.service";
@@ -8,7 +14,6 @@ import { ListService } from "../../services/list.service";
     selector: "mona-list-item",
     imports: [NgTemplateOutlet],
     templateUrl: "./list-item.component.html",
-    styleUrl: "./list-item.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListItemComponent<TData> {
@@ -23,7 +28,17 @@ export class ListItemComponent<TData> {
         }
         return this.listService.getItemText(item);
     });
+    protected readonly isHeader = computed(() => this.item()?.header ?? false);
     protected readonly listService: ListService<TData> = inject(ListService);
+    protected readonly textClasses = computed(() => {
+        const isHeader = this.isHeader();
+        if (isHeader) {
+            const classes = listGroupHeaderTextVariants();
+            return twMerge(classes);
+        }
+        const classes = listItemTextVariants();
+        return twMerge(classes);
+    });
 
     public item = input.required<ListItem<TData>>();
     public template = input<TemplateRef<ListItemTemplateContext<TData>> | null>(null);
