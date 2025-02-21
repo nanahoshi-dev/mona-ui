@@ -11,7 +11,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ButtonVariantProps, buttonVariants, ButtonVariantsInput } from "mona-ui/buttons/button/button.style";
+import { ButtonVariantProps, buttonVariants, ButtonVariantsInput } from "mona-ui/buttons/styles/button.style";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonService } from "../services/button.service";

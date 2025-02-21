@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     Component,
     computed,
     contentChild,
@@ -9,13 +10,18 @@ import {
     inject,
     input,
     output,
-    Signal,
+    signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { selectMany } from "@mirei/ts-collections";
+import { ChevronDown, LucideAngularModule } from "lucide-angular";
+import { ButtonVariantProps, SplitButtonVariantInputs, splitButtonVariants } from "mona-ui/buttons/styles/button.style";
+import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
+import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
+import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
+import { twMerge } from "tailwind-merge";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
@@ -25,31 +31,59 @@ import { SplitButtonTextTemplateDirective } from "../../directives/split-button-
 @Component({
     selector: "mona-split-button",
     templateUrl: "./split-button.component.html",
-    imports: [ButtonDirective, NgTemplateOutlet, FontAwesomeModule, ContextMenuComponent],
+    imports: [ButtonDirective, NgTemplateOutlet, ContextMenuComponent, LucideAngularModule],
     host: {
+        "[class]": "classes()",
         "[class.mona-split-button]": "true",
-        "[class.mona-disabled]": "disabled()",
         "[attr.tabindex]": "tabindex()"
     }
 })
-export class SplitButtonComponent {
+export class SplitButtonComponent implements SplitButtonVariantInputs {
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     protected readonly buttonClick = output<MouseEvent>();
+    protected readonly classes = computed(() => {
+        const classes = splitButtonVariants();
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
     protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
     protected readonly mainButtonElementRef = viewChild.required<ElementRef>("mainButton");
-    protected readonly menuIcon = faChevronDown;
-    protected readonly menuItemComponents: Signal<readonly MenuItemComponent[]> = contentChildren(MenuItemComponent);
-    protected readonly menuItems = computed(() => this.menuItemComponents().map(m => m.getMenuItem()));
+    protected readonly menuIcon = ChevronDown;
+    protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
+        MenuItemInjectionToken
+    );
+    protected readonly menuItems = computed(() =>
+        selectMany(prepareMenuItems(this.menuItemComponents()), i => i).toImmutableSet()
+    );
     protected readonly textTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
 
-    public disabled = input(false);
-    public popupOffset: PopupOffset = {
-        horizontal: -1,
-        vertical: 0
-    };
-    public popupWidth: number = 0;
-    public tabindex = input<number | string>(0);
-    public text = input("");
+    /**
+     * Sets the disabled state of the button.
+     */
+    public readonly disabled = input(false);
+
+    /**
+     * Sets the look of the button.
+     */
+    public readonly look = input<ButtonVariantProps["look"]>("default");
+    public readonly popupOffset = signal<PopupOffset>({ horizontal: -1, vertical: 4 });
+    public readonly popupWidth = signal(0);
+
+    /**
+     * Sets the size of the button.
+     */
+    public readonly size = input<ButtonVariantProps["size"]>("default");
+
+    /**
+     * Sets the tabindex of the button.
+     */
+    public readonly tabindex = input<number | string>(0);
+
+    /**
+     * Sets the text of the button.
+     */
+    public readonly text = input("");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
         effect(() => {
@@ -60,14 +94,15 @@ export class SplitButtonComponent {
                 }
             });
         });
-        effect(() => {
+        afterNextRender(() => {
             const mainButtonElement = this.mainButtonElementRef().nativeElement;
-            untracked(() => {
-                if (mainButtonElement) {
-                    this.popupWidth = this.#hostElementRef.nativeElement.getBoundingClientRect().width - 1;
-                    this.popupOffset.horizontal = -mainButtonElement.getBoundingClientRect().width;
-                }
-            });
+            if (mainButtonElement) {
+                this.popupWidth.set(this.#hostElementRef.nativeElement.getBoundingClientRect().width - 1);
+                this.popupOffset.update(value => ({
+                    ...value,
+                    horizontal: -mainButtonElement.getBoundingClientRect().width
+                }));
+            }
         });
     }
 }

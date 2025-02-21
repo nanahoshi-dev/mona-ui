@@ -7,10 +7,10 @@ import {
     input,
     TemplateRef
 } from "@angular/core";
-import { any, select } from "@mirei/ts-collections";
+import { any, select, selectMany } from "@mirei/ts-collections";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { prepareSubMenuItems } from "mona-ui/menus/utils/prepareSubMenuItems";
+import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
 import { v4 } from "uuid";
 import { ContextMenuComponent } from "../context-menu/context-menu.component";
 import { MenuTextTemplateDirective } from "../directives/menu-text-template.directive";
@@ -34,9 +34,12 @@ export class MenuComponent {
         const menuItemComponents = this.menuItemComponents();
         const items = this.items();
         if (any(items)) {
-            return select(items, item => select([item], i => new MenuItem(i)).toImmutableSet()).toImmutableSet();
+            return selectMany(
+                select(items, item => select([item], i => new MenuItem(i))),
+                i => i
+            ).toImmutableSet();
         }
-        return prepareSubMenuItems(menuItemComponents);
+        return selectMany(prepareMenuItems(menuItemComponents), i => i).toImmutableSet();
     });
     public readonly text = input("");
     public contextMenu: ContextMenuComponent | null = null;

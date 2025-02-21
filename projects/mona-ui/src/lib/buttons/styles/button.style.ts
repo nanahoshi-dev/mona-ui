@@ -39,7 +39,17 @@ export const buttonVariants = cva(
     }
 );
 
+export const splitButtonVariants = cva(
+    `
+        flex flex-nowrap items-center
+    `,
+    {
+        variants: {}
+    }
+);
+
 export type ButtonVariantProps = VariantProps<typeof buttonVariants>;
 export type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
 
 export type DropdownButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;
+export type SplitButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;

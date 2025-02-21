@@ -1,7 +1,7 @@
 <ul tabindex="0" class="outline-none">
     @for (group of viewMenuItems(); track group) {
         @for (entry of group; track entry) {
-            @if (entry.key) {
+            @if (entry.key && typeof entry.key === 'string') {
                 <span [class]="groupHeaderClasses()">{{entry.key}}</span>
             }
             @for (menuItem of entry.value; track menuItem) {

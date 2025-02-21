@@ -1,4 +1,6 @@
 <button monaButton (click)="buttonClick.emit($event)" [disabled]="disabled()"
+        [look]="look()" [size]="size()"
+        class="rounded-tr-none rounded-br-none"
         [tabindex]="tabindex()" #mainButton>
     @if (textTemplate()) {
         <ng-container [ngTemplateOutlet]="textTemplate()??null"></ng-container>
@@ -6,9 +8,14 @@
         <span class="mona-split-button-text">{{text()}}</span>
     }
 </button>
-<button monaButton [disabled]="disabled()" [tabindex]="-1" #menuButton>
-    <fa-icon [icon]="menuIcon"></fa-icon>
+<button monaButton [disabled]="disabled()"
+        [look]="look()" [size]="size()"
+        class="rounded-tl-none rounded-bl-none border-l-0"
+        [tabindex]="-1" #menuButton>
+    <lucide-angular [img]="menuIcon"></lucide-angular>
 </button>
-<mona-contextmenu [target]="menuButton" trigger="click" [minWidth]="popupWidth"
-                  [offset]="popupOffset" popupClass="mona-split-button-popup"
+<mona-contextmenu [target]="menuButton" trigger="click" [minWidth]="popupWidth()"
+                  [anchorConnectionPoint]="'bottomleft'"
+                  [popupConnectionPoint]="'topleft'"
+                  [offset]="popupOffset()"
                   [menuItems]="menuItems()" #contextMenuComponent ></mona-contextmenu>

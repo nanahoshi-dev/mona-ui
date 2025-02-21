@@ -1,6 +1,6 @@
 import { ConnectedPosition } from "@angular/cdk/overlay";
 import {
-    AfterViewInit,
+    afterNextRender,
     Component,
     computed,
     contentChildren,
@@ -10,7 +10,11 @@ import {
     signal,
     viewChild
 } from "@angular/core";
-import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/button/button.style";
+import { selectMany } from "@mirei/ts-collections";
+import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/styles/button.style";
+import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
+import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
+import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
 import { ContextMenuComponent } from "../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../menus/menu-item/menu-item.component";
 import { ButtonDirective } from "../button/button.directive";
@@ -23,12 +27,16 @@ import { ButtonDirective } from "../button/button.directive";
         "[class.mona-drop-down-button]": "true"
     }
 })
-export class DropDownButtonComponent implements AfterViewInit, DropdownButtonVariantInputs {
+export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     #resizeObserver: ResizeObserver | null = null;
     protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
-    protected readonly menuItemComponents = contentChildren(MenuItemComponent);
-    protected readonly menuItems = computed(() => this.menuItemComponents().map(m => m.getMenuItem()));
+    protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
+        MenuItemInjectionToken
+    );
+    protected readonly menuItems = computed(() =>
+        selectMany(prepareMenuItems(this.menuItemComponents()), i => i).toImmutableSet()
+    );
     protected readonly positions = signal<ConnectedPosition[]>([
         {
             originX: "center",
@@ -55,8 +63,20 @@ export class DropDownButtonComponent implements AfterViewInit, DropdownButtonVar
             overlayY: "center"
         }
     ]);
+
+    /**
+     * Sets the disabled state of the button.
+     */
     public readonly disabled = input(false);
+
+    /**
+     * Sets the look of the button.
+     */
     public readonly look = input<ButtonVariantProps["look"]>("default");
+
+    /**
+     * Sets the size of the button.
+     */
     public readonly size = input<ButtonVariantProps["size"]>("default");
     public readonly userClass = input<string>("", { alias: "class" });
 
@@ -64,10 +84,7 @@ export class DropDownButtonComponent implements AfterViewInit, DropdownButtonVar
         this.#destroyRef.onDestroy(() => {
             this.#resizeObserver?.disconnect();
         });
-    }
-
-    public ngAfterViewInit(): void {
-        window.setTimeout(() => {
+        afterNextRender(() => {
             this.contextMenuComponent().setPrecise(false);
         });
     }

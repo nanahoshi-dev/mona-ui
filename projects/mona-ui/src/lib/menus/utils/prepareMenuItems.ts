@@ -2,7 +2,7 @@ import { concat, from, ImmutableSet, select, toImmutableSet } from "@mirei/ts-co
 import { MenuItemComponent, MenuItemGroupComponent, MenuItemOptions } from "mona-ui";
 import { MenuItem } from "mona-ui/menus/models/MenuItem";
 
-export const prepareSubMenuItems = (items: Iterable<MenuItemComponent | MenuItemGroupComponent>) => {
+export const prepareMenuItems = (items: Iterable<MenuItemComponent | MenuItemGroupComponent>) => {
     return select(items, item => {
         return item instanceof MenuItemGroupComponent
             ? select(item.menuItems(), subItem => {

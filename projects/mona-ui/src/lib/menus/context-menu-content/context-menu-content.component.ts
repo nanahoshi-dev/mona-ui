@@ -65,14 +65,13 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     protected readonly parentMenuData = inject<ContextMenuInjectorData<C>>(PopupDataInjectionToken);
     protected readonly viewMenuItems = computed(() => {
         return select(this.parentMenuData.menuItems(), mi => {
-            const groupDict = new Dictionary<string, ImmutableSet<MenuItem>>();
+            const groupDict = new Dictionary<string | symbol, ImmutableSet<MenuItem>>();
             mi.forEach(item => {
                 if (item.group) {
                     const groupItems = groupDict.get(item.group) ?? ImmutableSet.create();
                     groupDict.put(item.group, groupItems.add(item));
                 } else {
-                    const groupItems = groupDict.get("") ?? ImmutableSet.create();
-                    groupDict.put("", groupItems.add(item));
+                    groupDict.put(Symbol(), ImmutableSet.create([item]));
                 }
             });
             return groupDict;
@@ -185,7 +184,6 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
             this.menuPopupRef()?.close();
             const previousItem = this.keyManager.activeItem;
             if (this.keyManager.activeItem) {
-                console.log(this.keyManager.activeItem.elementRef.nativeElement!.parentElement!);
                 this.create(this.keyManager.activeItem.elementRef.nativeElement!.parentElement!, menuItem, true);
             }
             const submenuItems2 = selectMany(

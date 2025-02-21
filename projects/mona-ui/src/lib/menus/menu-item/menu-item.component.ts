@@ -16,7 +16,7 @@ import { select } from "@mirei/ts-collections";
 import { MenuItemShortcutTemplateDirective } from "mona-ui/menus/directives/menu-item-shortcut-template.directive";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { prepareSubMenuItems } from "mona-ui/menus/utils/prepareSubMenuItems";
+import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
 import { MenuItemIconTemplateDirective } from "../directives/menu-item-icon-template.directive";
 import { MenuItemTextTemplateDirective } from "../directives/menu-item-text-template.directive";
 import { InternalMenuItemClickEvent, MenuItemClickEvent } from "../models/ContextMenuInjectorData";
@@ -91,7 +91,7 @@ export class MenuItemComponent<T = unknown> {
         effect(() => {
             const submenuItems = this.submenuItems();
             untracked(() => {
-                this.#menuItem().subMenuItemsSet = prepareSubMenuItems(submenuItems);
+                this.#menuItem().subMenuItemsSet = prepareMenuItems(submenuItems);
             });
         });
     }

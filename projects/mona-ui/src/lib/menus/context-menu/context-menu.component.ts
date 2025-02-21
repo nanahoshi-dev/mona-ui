@@ -15,7 +15,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { any, first, from, ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { convertToMenuItemSet, prepareSubMenuItems } from "mona-ui/menus/utils/prepareSubMenuItems";
+import { convertToMenuItemSet, prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
 import { ConnectionPoint } from "mona-ui/popup/utils/connectionPosition";
 import { filter, fromEvent, mergeWith, Subject, take } from "rxjs";
 import { v4 } from "uuid";
@@ -224,7 +224,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
             this.menuItemList.set(menuSet);
             return;
         }
-        const items = prepareSubMenuItems(menuItemComponents);
+        const items = prepareMenuItems(menuItemComponents);
         this.menuItemList.update(set => set.clear().addAll(items));
     }
 
