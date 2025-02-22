@@ -31,13 +31,10 @@ import { ButtonService } from "../services/button.service";
         "[attr.data-size]": "size()",
         "[attr.disabled]": "disabled() ? '' : undefined",
         "[attr.role]": "'button'",
-        "[attr.tabindex]": "tabindex()",
+        "[attr.tabindex]": "disabled() ? -1 : tabindex()",
         "[attr.type]": "'button'",
         "[class]": "classes()",
         "[class.mona-button]": "true",
-        // "[class.mona-disabled]": "disabled()",
-        // "[class.mona-flat]": "flat()",
-        // "[class.mona-primary]": "primary()",
         "[class.mona-selected]": "selected()"
     },
     standalone: true
@@ -121,13 +118,6 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
                 if (this.#buttonService) {
                     this.#buttonService.buttonSelected$.next(this);
                 }
-            });
-        });
-        effect(() => {
-            const disabled = this.disabled();
-            const tabindex = this.tabindex();
-            untracked(() => {
-                this.#hostElementRef.nativeElement.tabIndex = disabled ? -1 : tabindex;
             });
         });
         effect(() => {
