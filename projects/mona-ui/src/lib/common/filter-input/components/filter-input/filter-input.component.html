@@ -1,6 +1,7 @@
 <mona-text-box [ngModel]="filterText()"
                [clearButton]="true"
                [placeholder]="placeholder()"
+               class="border-0 border-b border-border rounded-none outline-none shadow-none focus-within:ring-0"
                (ngModelChange)="filter$.next($event)">
     <ng-template monaTextBoxPrefixTemplate>
         <div class="mona-filter-input-icon">

@@ -24,24 +24,19 @@ import { FilterChangeEvent } from "../../models/FilterChangeEvent";
     selector: "mona-filter-input",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [TextBoxComponent, FormsModule, TextBoxPrefixTemplateDirective],
-    templateUrl: "./filter-input.component.html",
-    styleUrl: "./filter-input.component.scss",
-    host: {
-        class: "mona-filter-input"
-    }
+    templateUrl: "./filter-input.component.html"
 })
 export class FilterInputComponent implements OnInit {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #injector: Injector = inject(Injector);
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #injector = inject(Injector);
     protected readonly filter$ = new Subject<string>();
     protected readonly filterText = signal("");
 
+    public readonly filter = input("");
     public readonly filterChange = output<FilterChangeEvent>();
-
-    public filter = input("");
-    public debounce = input(0);
-    public placeholder = input("");
+    public readonly debounce = input(0);
+    public readonly placeholder = input("");
 
     public constructor() {
         effect(() => {
