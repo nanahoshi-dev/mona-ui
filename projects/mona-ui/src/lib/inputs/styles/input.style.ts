@@ -29,6 +29,21 @@ export const inputVariants = cva(
     }
 );
 
+export const textAreaVariants = cva(
+    `
+        rounded-md border bg-transparent px-3 py-1
+        border-input
+        placeholder:text-muted-foreground
+        selection:bg-primary selection:text-primary-foreground
+        text-base shadow-xs
+        transition-[color,box-shadow] ease-in-out duration-300
+        outline-none
+        disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50
+        md:text-sm
+        focus-visible:ring-1 focus-visible:ring-ring/90
+    `
+);
+
 export const textBoxVariants = cva(
     `
         flex items-center w-full min-w-0 rounded-md border bg-transparent px-2 py-1
