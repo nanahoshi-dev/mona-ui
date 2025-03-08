@@ -1,12 +1,12 @@
-<div class="mona-dropdown-value">
+<div class="flex-1 truncate flex items-center">
     <span>{{text()}}</span>
 </div>
-<button monaButton [tabindex]="-1" class="mona-input-button">
-    <fa-icon [icon]="dropdownIcon"></fa-icon>
-</button>
+<div class="flex items-center justify-center">
+    <lucide-angular class="opacity-50 size-4" [img]="dropdownIcon"></lucide-angular>
+</div>
 
 <ng-template #popupTemplate>
-    <div class="mona-dropdown-tree-popup-wrapper">
+    <div [class]="popupClasses()">
         @if (headerTemplate()) {
             <div class="mona-dropdown-tree-header">
                 <ng-container [ngTemplateOutlet]="headerTemplate()??null"></ng-container>

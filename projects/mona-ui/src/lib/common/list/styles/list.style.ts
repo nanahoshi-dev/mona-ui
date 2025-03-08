@@ -45,6 +45,9 @@ export const listItemVariants = cva(
         data-[disabled='false']:cursor-pointer
         data-[disabled='true']:pointer-events-none data-[disabled='true']:opacity-50
         data-[selected='true']:bg-primary data-[selected='true']:text-primary-foreground
+        data-[highlighted='true']:ring-1 data-[highlighted='true']:ring-ring/20
+        data-[highlighted='true']:bg-accent data-[highlighted='true']:text-accent-foreground
+        data-[highlighted='true']:rounded-none
         data-[focused]:bg-accent data-[focused]:text-accent-foreground
     `,
     {

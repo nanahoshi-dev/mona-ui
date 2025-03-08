@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     Component,
+    computed,
     contentChild,
     DestroyRef,
     effect,
@@ -21,7 +22,20 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate, Selector } from "@mirei/ts-collections";
+import { LucideAngularModule, X } from "lucide-angular";
+import { ButtonDirective } from "mona-ui/buttons/button/button.directive";
+import {
+    dropdownPopupHideAnimation,
+    dropdownPopupShowAnimation
+} from "mona-ui/dropdowns/animations/dropdown.animation";
+import {
+    dropdownPopupVariants,
+    DropdownSelectorVariantInput,
+    DropdownSelectorVariantProps,
+    dropdownSelectorVariants
+} from "mona-ui/dropdowns/styles/dropdown.style";
 import { debounceTime, fromEvent, Subject, take, tap } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { AnimationState } from "../../animations/models/AnimationState";
 import { PopupAnimationService } from "../../animations/services/popup-animation.service";
@@ -50,7 +64,6 @@ import { DropDownService } from "../services/drop-down.service";
 @Component({
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
-    styleUrls: ["./auto-complete.component.scss"],
     providers: [
         ListService,
         {
@@ -69,28 +82,36 @@ import { DropDownService } from "../services/drop-down.service";
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        ListItemTemplateDirective
+        ListItemTemplateDirective,
+        ButtonDirective,
+        LucideAngularModule
     ],
     host: {
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-dropdown]": "true",
-        "[class.mona-auto-complete]": "true"
+        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-haspopup]": "true",
+        "[attr.data-disabled]": "disabled()",
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "classes()"
     }
 })
-export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccessor {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #listService: ListService<TData> = inject(ListService);
-    readonly #popupAnimationService: PopupAnimationService = inject(PopupAnimationService);
-    readonly #popupService: PopupService = inject(PopupService);
-    readonly #popupUidClass: string = `mona-dropdown-popup-${v4()}`;
+export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #listService = inject(ListService<TData>);
+    readonly #popupService = inject(PopupService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<string | null> | null = null;
     #value = "";
 
     protected readonly autoCompleteValue = signal("");
     protected readonly autoCompleteValue$ = new Subject<string>();
-    protected readonly clearIcon = faTimes;
+    protected readonly classes = computed(() => {
+        const size = this.size();
+        const classes = dropdownSelectorVariants({ size });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass, ["pr-0"]);
+    });
+    protected readonly clearIcon = X;
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
         read: TemplateRef
@@ -98,6 +119,9 @@ export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccesso
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly popupClasses = computed(() => {
+        return twMerge(dropdownPopupVariants());
+    });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -105,6 +129,9 @@ export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccesso
         toggleable: false
     };
     protected readonly selectedKeysChange = output<any[]>();
+
+    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public data = input<Iterable<TData>>([]);
     public disabled = model(false);
@@ -175,16 +202,19 @@ export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccesso
     public open(): void {
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
+            anchorConnectionPoint: "bottomleft",
+            animation: {
+                hide: dropdownPopupHideAnimation,
+                show: dropdownPopupShowAnimation
+            },
+            closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
-            closeOnOutsideClick: false,
-            withPush: false,
+            offset: { horizontal: 0, vertical: 4 },
+            popupConnectionPoint: "topleft",
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            popupClass: ["mona-dropdown-popup-content", this.#popupUidClass],
-            positions: DropDownService.getDefaultPositions()
+            withPush: false
         });
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.#popupRef);
-        this.#popupAnimationService.animateDropdown(this.#popupRef, AnimationState.Show);
         window.setTimeout(() => {
             const input = this.#hostElementRef.nativeElement.querySelector("input");
             if (input) {
@@ -196,10 +226,6 @@ export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccesso
             this.#popupRef = null;
             this.#listService.clearSelections();
             this.#listService.clearFilter();
-            const popupElement = document.querySelector(`.${this.#popupUidClass}`);
-            if (DropDownService.shouldFocusAfterClose(this.#hostElementRef.nativeElement, popupElement)) {
-                this.focus();
-            }
             const input = this.#hostElementRef.nativeElement.querySelector("input");
             if (input) {
                 input.focus();

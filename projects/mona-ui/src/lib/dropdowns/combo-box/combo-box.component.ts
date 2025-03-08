@@ -22,11 +22,24 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate, Selector } from "@mirei/ts-collections";
+import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import {
+    dropdownPopupHideAnimation,
+    dropdownPopupShowAnimation
+} from "mona-ui/dropdowns/animations/dropdown.animation";
+import {
+    dropdownPopupVariants,
+    DropdownSelectorVariantInput,
+    DropdownSelectorVariantProps,
+    dropdownSelectorVariants
+} from "mona-ui/dropdowns/styles/dropdown.style";
+import {
+    asyncScheduler,
     debounceTime,
+    delay,
     distinctUntilChanged,
+    filter,
     fromEvent,
     map,
     Observable,
@@ -36,9 +49,7 @@ import {
     tap,
     withLatestFrom
 } from "rxjs";
-import { v4 } from "uuid";
-import { AnimationState } from "../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../animations/services/popup-animation.service";
+import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../buttons/button/button.directive";
 import { FilterChangeEvent } from "../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../common/list/components/list/list.component";
@@ -64,7 +75,6 @@ import { DropDownService } from "../services/drop-down.service";
 @Component({
     selector: "mona-combo-box",
     templateUrl: "./combo-box.component.html",
-    styleUrls: ["./combo-box.component.scss"],
     providers: [
         ListService,
         DropDownService,
@@ -86,27 +96,34 @@ import { DropDownService } from "../services/drop-down.service";
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        ListItemTemplateDirective
+        ListItemTemplateDirective,
+        LucideAngularModule
     ],
     host: {
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-combo-box]": "true",
-        "[class.mona-dropdown]": "true"
+        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-haspopup]": "true",
+        "[attr.data-disabled]": "disabled()",
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "classes()"
     }
 })
-export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
+export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService: ListService<TData> = inject(ListService);
-    readonly #popupAnimationService: PopupAnimationService = inject(PopupAnimationService);
     readonly #popupService: PopupService = inject(PopupService);
-    readonly #popupUidClass = `mona-dropdown-popup-${v4()}`;
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<TData | null> | null = null;
     #value: any;
 
-    protected readonly clearIcon = faTimes;
-    protected readonly dropdownIcon = faChevronDown;
+    protected readonly classes = computed(() => {
+        const size = this.size();
+        const classes = dropdownSelectorVariants({ size });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
+    protected readonly clearIcon = X;
+    protected readonly dropdownIcon = ChevronDown;
     protected readonly comboBoxValue$ = new Subject<string>();
     protected readonly comboBoxValue = signal("");
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
@@ -114,6 +131,9 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly popupClasses = computed(() => {
+        return twMerge(dropdownPopupVariants());
+    });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -134,6 +154,9 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
         }
         return this.#listService.getItemText(listItem);
     });
+
+    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public allowCustomValue = input(false);
     public data = input<Iterable<TData>>([]);
@@ -175,8 +198,8 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
         event.stopImmediatePropagation();
         this.updateValue(null);
         this.#listService.clearSelections();
-        this.#propagateChange?.(null);
         this.comboBoxValue.set("");
+        this.#propagateChange?.(null);
     }
 
     public close(): void {
@@ -234,17 +257,19 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
         }
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
+            anchorConnectionPoint: "bottomleft",
+            animation: {
+                hide: dropdownPopupHideAnimation,
+                show: dropdownPopupShowAnimation
+            },
+            closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
-            closeOnOutsideClick: false,
-            withPush: false,
-            width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            popupClass: ["mona-dropdown-popup-content", this.#popupUidClass],
-            positions: DropDownService.getDefaultPositions()
+            offset: { horizontal: 0, vertical: 4 },
+            popupConnectionPoint: "topleft",
+            width: this.#hostElementRef.nativeElement.getBoundingClientRect().width
         });
         this.notifyValueChangeOnPopupClose();
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.#popupRef);
-        this.#popupAnimationService.animateDropdown(this.#popupRef, AnimationState.Show);
         window.setTimeout(() => {
             const input = this.#hostElementRef.nativeElement.querySelector("input");
             if (input) {
@@ -252,13 +277,9 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
                 input.setSelectionRange(-1, -1);
             }
         });
-        this.#popupRef.closed.pipe(take(1)).subscribe(() => {
+        this.#popupRef.closed.pipe(take(1), delay(150, asyncScheduler)).subscribe(() => {
             this.#popupRef = null;
             this.#listService.clearFilter();
-            const popupElement = document.querySelector(`.${this.#popupUidClass}`);
-            if (DropDownService.shouldFocusAfterClose(this.#hostElementRef.nativeElement, popupElement)) {
-                this.focus();
-            }
         });
     }
 
@@ -372,6 +393,22 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor {
                     input.focus();
                     input.setSelectionRange(-1, -1);
                 }
+            });
+        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
+            .pipe(
+                filter(
+                    event =>
+                        !this.disabled() &&
+                        this.#hostElementRef.nativeElement.contains(event.target as Node) &&
+                        (event.target as HTMLElement).tagName !== "INPUT"
+                )
+            )
+            .subscribe(() => {
+                if (this.#popupRef) {
+                    this.close();
+                    return;
+                }
+                this.open();
             });
     }
 

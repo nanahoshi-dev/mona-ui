@@ -20,14 +20,11 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { Selector } from "@mirei/ts-collections";
+import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import { distinctUntilChanged, fromEvent, Observable, take } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
-import { AnimationState } from "../../../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
-import { ButtonDirective } from "../../../../buttons/button/button.directive";
 import { FilterInputComponent } from "../../../../common/filter-input/components/filter-input/filter-input.component";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
 import { TreeComponent } from "../../../../common/tree/components/tree/tree.component";
@@ -39,25 +36,29 @@ import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { Action } from "../../../../utils/Action";
+import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
-import { DropDownService } from "../../../services/drop-down.service";
+import {
+    dropdownPopupVariants,
+    DropdownSelectorVariantInput,
+    DropdownSelectorVariantProps,
+    dropdownSelectorVariants
+} from "../../../styles/dropdown.style";
 import { DropDownTreeNodeTemplateDirective } from "../../directives/drop-down-tree-node-template.directive";
 
 @Component({
     selector: "mona-drop-down-tree",
     imports: [
         CommonModule,
-        ButtonDirective,
-        FaIconComponent,
         TreeComponent,
         FilterInputComponent,
         TreeNodeTemplateDirective,
-        PlaceholderComponent
+        PlaceholderComponent,
+        LucideAngularModule
     ],
     templateUrl: "./drop-down-tree.component.html",
-    styleUrl: "./drop-down-tree.component.scss",
     providers: [
         TreeService,
         {
@@ -67,17 +68,17 @@ import { DropDownTreeNodeTemplateDirective } from "../../directives/drop-down-tr
         }
     ],
     host: {
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-dropdown]": "true",
-        "[class.mona-dropdown-tree]": "true",
-        "[attr.tabindex]": "disabled() ? null : 0"
+        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-haspopup]": "true",
+        "[attr.data-disabled]": "disabled()",
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "classes()"
     }
 })
-export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit {
+export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, DropdownSelectorVariantInput {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #injector: Injector = inject(Injector);
-    readonly #popupAnimationService: PopupAnimationService = inject(PopupAnimationService);
     readonly #popupService: PopupService = inject(PopupService);
     readonly #popupUidClass: string = `mona-dropdown-popup-${v4()}`;
     readonly #selectedNode: Signal<TreeNode<T> | null> = computed(() => {
@@ -86,11 +87,20 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit {
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<any> | null = null;
     #value = signal<any | null>(null);
-    protected readonly dropdownIcon = faChevronDown;
+    protected readonly classes = computed(() => {
+        const size = this.size();
+        const classes = dropdownSelectorVariants({ size });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
+    protected readonly dropdownIcon = ChevronDown;
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly nodeTemplate = contentChild(DropDownTreeNodeTemplateDirective, { read: TemplateRef });
+    protected readonly popupClasses = computed(() => {
+        return twMerge(dropdownPopupVariants());
+    });
     protected readonly popupTemplate: Signal<TemplateRef<any>> = viewChild.required("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -106,6 +116,8 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit {
         return this.treeService.getNodeText(node);
     });
     protected readonly treeService: TreeService<T> = inject(TreeService);
+    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public children = input<string | Selector<T, Iterable<T> | Observable<Iterable<T>>>>("");
     public data = input<Iterable<T>>([]);
@@ -159,24 +171,23 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit {
         }
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
+            anchorConnectionPoint: "bottomleft",
+            animation: {
+                hide: dropdownPopupHideAnimation,
+                show: dropdownPopupShowAnimation
+            },
+            closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
-            withPush: false,
+            offset: { horizontal: 0, vertical: 4 },
+            popupConnectionPoint: "topleft",
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            popupClass: ["mona-dropdown-popup-content", "mona-dropdown-tree-popup-content", this.#popupUidClass],
-            closeOnOutsideClick: false,
-            positions: DropDownService.getDefaultPositions()
+            withPush: false
         });
         this.focusSelectedNode();
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.#popupRef);
-        this.#popupAnimationService.animateDropdown(this.#popupRef, AnimationState.Show);
         this.#popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef = null;
             this.treeService.clearFilter();
-            const popupElement = document.querySelector(`.${this.#popupUidClass}`);
-            if (DropDownService.shouldFocusAfterClose(this.#hostElementRef.nativeElement, popupElement)) {
-                this.focus();
-            }
         });
     }
 
@@ -290,6 +301,10 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 if (this.disabled()) {
+                    return;
+                }
+                if (this.#popupRef) {
+                    this.close();
                     return;
                 }
                 this.open();

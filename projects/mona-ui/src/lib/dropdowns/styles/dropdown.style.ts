@@ -34,5 +34,19 @@ export const dropdownPopupVariants = cva(
         variants: {}
     }
 );
+
+export const multiSelectSelectorVariants = cva(dropdownSelectorVariants(), {
+    variants: {
+        size: {
+            default: "px-1 py-0.5 min-h-9 h-auto",
+            small: "px-1 py-0.5 min-h-8 h-auto",
+            large: "px-1 py-0.5 min-h-10 h-auto"
+        }
+    }
+});
+
 export type DropdownSelectorVariantProps = VariantProps<typeof dropdownSelectorVariants>;
 export type DropdownSelectorVariantInput = VariantInputs<DropdownSelectorVariantProps>;
+
+export type MultiSelectSelectorVariantProps = VariantProps<typeof multiSelectSelectorVariants>;
+export type MultiSelectSelectorVariantInput = VariantInputs<MultiSelectSelectorVariantProps>;

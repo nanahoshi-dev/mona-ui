@@ -114,7 +114,7 @@ export class PopupService {
         } else if (settings.closeOnOutsideClick ?? true) {
             subscription = overlayRef
                 .outsidePointerEvents()
-                .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
+                .pipe(takeUntilDestroyed(this.#destroyRef))
                 .subscribe(event => {
                     const eventTarget = event.target as HTMLElement;
                     if (settings.anchor instanceof HTMLElement && settings.anchor.contains(eventTarget)) {

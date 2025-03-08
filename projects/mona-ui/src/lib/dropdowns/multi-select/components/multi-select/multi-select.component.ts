@@ -22,12 +22,16 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate } from "@mirei/ts-collections";
+import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
+import {
+    dropdownPopupVariants,
+    DropdownSelectorVariantProps,
+    MultiSelectSelectorVariantInput,
+    multiSelectSelectorVariants
+} from "mona-ui/dropdowns/styles/dropdown.style";
 import { fromEvent, take } from "rxjs";
-import { v4 } from "uuid";
-import { AnimationState } from "../../../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
+import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/button.directive";
 import { ChipComponent } from "../../../../buttons/chip/chip.component";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
@@ -42,18 +46,17 @@ import { ListService } from "../../../../common/list/services/list.service";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { Action } from "../../../../utils/Action";
+import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-down-group-header-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
-import { DropDownService } from "../../../services/drop-down.service";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
 
 @Component({
     selector: "mona-multi-select",
     templateUrl: "./multi-select.component.html",
-    styleUrls: ["./multi-select.component.scss"],
     providers: [
         ListService,
         {
@@ -73,29 +76,37 @@ import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-t
         ListItemTemplateDirective,
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
-        ListNoDataTemplateDirective
+        ListNoDataTemplateDirective,
+        LucideAngularModule
     ],
     host: {
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-dropdown]": "true",
-        "[class.mona-multi-select]": "true",
-        "[attr.tabindex]": "disabled() ? null : 0"
+        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-haspopup]": "true",
+        "[attr.data-disabled]": "disabled()",
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "classes()"
     }
 })
-export class MultiSelectComponent<TData> implements OnInit, OnDestroy, ControlValueAccessor {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+export class MultiSelectComponent<TData>
+    implements OnInit, OnDestroy, ControlValueAccessor, MultiSelectSelectorVariantInput
+{
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService: ListService<TData> = inject(ListService);
-    readonly #popupAnimationService: PopupAnimationService = inject(PopupAnimationService);
-    readonly #popupService: PopupService = inject(PopupService);
-    readonly #popupUidClass = `mona-dropdown-popup-${v4()}`;
+    readonly #popupService = inject(PopupService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<TData[]> | null = null;
     #resizeObserver: ResizeObserver | null = null;
     #value: TData[] = [];
 
-    protected readonly clearIcon = faTimes;
-    protected readonly dropdownIcon = faChevronDown;
+    protected readonly classes = computed(() => {
+        const size = this.size();
+        const classes = multiSelectSelectorVariants({ size });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
+    protected readonly clearIcon = X;
+    protected readonly dropdownIcon = ChevronDown;
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
         read: TemplateRef
@@ -103,6 +114,9 @@ export class MultiSelectComponent<TData> implements OnInit, OnDestroy, ControlVa
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly popupClasses = computed(() => {
+        return twMerge(dropdownPopupVariants());
+    });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly tagTemplate = contentChild(MultiSelectTagTemplateDirective, { read: TemplateRef });
     protected readonly selectedDataItems = computed(() => {
@@ -143,8 +157,10 @@ export class MultiSelectComponent<TData> implements OnInit, OnDestroy, ControlVa
         return tagCount;
     });
 
+    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
     public readonly summaryTagTemplate = signal<TemplateRef<any> | null>(null);
     public readonly tagCount = signal(-1);
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public data = input<Iterable<TData>>([]);
     public disabled = model(false);
@@ -226,24 +242,23 @@ export class MultiSelectComponent<TData> implements OnInit, OnDestroy, ControlVa
         this.focus();
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
-            closeOnOutsideClick: false,
+            anchorConnectionPoint: "bottomleft",
+            animation: {
+                hide: dropdownPopupHideAnimation,
+                show: dropdownPopupShowAnimation
+            },
+            closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
-            withPush: false,
+            offset: { horizontal: 0, vertical: 4 },
+            popupConnectionPoint: "topleft",
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            popupClass: ["mona-dropdown-popup-content", this.#popupUidClass],
-            positions: DropDownService.getDefaultPositions()
+            withPush: false
         });
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.#popupRef);
-        this.#popupAnimationService.animateDropdown(this.#popupRef, AnimationState.Show);
         this.#popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef = null;
             this.#listService.highlightedItem.set(null);
             this.#listService.clearFilter();
-            const popupElement = document.querySelector(`.${this.#popupUidClass}`);
-            if (DropDownService.shouldFocusAfterClose(this.#hostElementRef.nativeElement, popupElement)) {
-                this.focus();
-            }
         });
     }
 
@@ -323,6 +338,10 @@ export class MultiSelectComponent<TData> implements OnInit, OnDestroy, ControlVa
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 if (this.disabled()) {
+                    return;
+                }
+                if (this.#popupRef) {
+                    this.close();
                     return;
                 }
                 this.open();

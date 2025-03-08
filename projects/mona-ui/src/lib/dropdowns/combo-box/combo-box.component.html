@@ -1,22 +1,20 @@
-<input monaTextBox class="mona-input-inner"
+<input monaTextBox
+       class="border-0 outline-none shadow-none focus-visible:ring-0 pl-0 pr-0 truncate"
        [disabled]="disabled()"
        [placeholder]="placeholder()"
        [ngModel]="comboBoxValue()"
        (ngModelChange)="comboBoxValue$.next($event)"
        (keydown)="onKeydown($event)">
 @if (showClearButton() && selectedListItem()) {
-    <span class="mona-input-clear-icon" (click)="clearValue($event)">
-        <fa-icon [icon]="clearIcon"></fa-icon>
-    </span>
+    <button monaButton look="link" size="small" [tabindex]="-1" (click)="clearValue($event)">
+        <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
+    </button>
 }
-<button monaButton [tabindex]="-1" class="mona-input-button" (click)="open()">
-    <fa-icon [icon]="dropdownIcon"></fa-icon>
-</button>
+<lucide-angular class="opacity-50 size-4" [img]="dropdownIcon"></lucide-angular>
 
 <ng-template #popupTemplate>
-    <div class="mona-dropdown-popup-list-wrapper">
-        <mona-list [maxHeight]="200"
-                   (itemSelect)="onItemSelect($event)">
+    <div [class]="popupClasses()">
+        <mona-list (itemSelect)="onItemSelect($event)">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>

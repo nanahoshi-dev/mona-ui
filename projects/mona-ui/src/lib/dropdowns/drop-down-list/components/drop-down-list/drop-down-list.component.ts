@@ -203,6 +203,7 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
         }
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
+            anchorConnectionPoint: "bottomleft",
             animation: {
                 hide: dropdownPopupHideAnimation,
                 show: dropdownPopupShowAnimation
@@ -211,10 +212,9 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
             content: this.popupTemplate(),
             hasBackdrop: false,
             offset: { horizontal: 0, vertical: 4 },
-            withPush: false,
+            popupConnectionPoint: "topleft",
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            anchorConnectionPoint: "bottomleft",
-            popupConnectionPoint: "topleft"
+            withPush: false
         });
         this.notifyValueChangeOnPopupClose();
         this.#popupRef.closed.pipe(take(1)).subscribe(() => {
