@@ -1,6 +1,6 @@
 import { computed, Directive, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
-import { textAreaVariants } from "../styles/input.style";
+import { textAreaVariants } from "../styles/textarea.style";
 
 @Directive({
     selector: "textarea[monaTextArea]",

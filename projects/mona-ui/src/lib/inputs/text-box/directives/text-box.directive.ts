@@ -1,5 +1,5 @@
 import { computed, Directive, input } from "@angular/core";
-import { InputVariantInput, InputVariantProps, inputVariants } from "mona-ui/inputs/styles/input.style";
+import { InputVariantInput, InputVariantProps, inputVariants } from "../../styles/textbox.style";
 import { twMerge } from "tailwind-merge";
 
 @Directive({

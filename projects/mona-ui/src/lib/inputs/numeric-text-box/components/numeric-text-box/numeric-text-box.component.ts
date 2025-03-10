@@ -20,11 +20,30 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import { delay, distinctUntilChanged, filter, interval, map, Subject, takeUntil } from "rxjs";
+import { ChevronDown, ChevronUp, LucideAngularModule } from "lucide-angular";
+import {
+    concatMap,
+    delay,
+    distinctUntilChanged,
+    filter,
+    map,
+    of,
+    Subject,
+    switchMap,
+    takeUntil,
+    tap,
+    timer
+} from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/button.directive";
 import { Action } from "../../../../utils/Action";
+import {
+    numericTextBoxInputVariants,
+    numericTextBoxSpinButtonVariants,
+    NumericTextBoxVariantInput,
+    NumericTextBoxVariantProps,
+    numericTextboxVariants
+} from "../../../styles/numeric-textbox.style";
 import { TextBoxDirective } from "../../../text-box/directives/text-box.directive";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
 
@@ -33,7 +52,6 @@ type Sign = "-" | "+";
 @Component({
     selector: "mona-numeric-text-box",
     templateUrl: "./numeric-text-box.component.html",
-    styleUrls: ["./numeric-text-box.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
@@ -42,21 +60,32 @@ type Sign = "-" | "+";
             multi: true
         }
     ],
-    imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, FontAwesomeModule],
+    imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideAngularModule],
     host: {
-        "[class.mona-numeric-text-box]": "true",
-        "[class.mona-disabled]": "disabled()"
+        "[attr.data-disabled]": "disabled()",
+        "[attr.data-readonly]": "readonly()",
+        "[class]": "classes()"
     }
 })
-export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueAccessor {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #focusMonitor: FocusMonitor = inject(FocusMonitor);
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueAccessor, NumericTextBoxVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #focusMonitor = inject(FocusMonitor);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     #propagateChange: Action<number | null> | null = null;
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
-    protected readonly decreaseIcon = faChevronDown;
-    protected readonly increaseIcon = faChevronUp;
+    protected readonly classes = computed(() => {
+        const size = this.size();
+        const classes = numericTextboxVariants({ size });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
+    protected readonly decreaseIcon = ChevronDown;
+    protected readonly increaseIcon = ChevronUp;
+    protected readonly inputClasses = computed(() => {
+        const inputVariants = numericTextBoxInputVariants();
+        return twMerge(inputVariants);
+    });
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
         const value = this.value();
@@ -78,6 +107,8 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
         return value?.toString() ?? "";
     });
     protected readonly keydown$ = new Subject<KeyboardEvent>();
+    protected readonly spinBottomClasses = computed(() => numericTextBoxSpinButtonVariants({ position: "bottom" }));
+    protected readonly spinTopClasses = computed(() => numericTextBoxSpinButtonVariants({ position: "top" }));
     protected readonly spin$ = new Subject<Sign>();
     protected readonly spinStop$ = new Subject<void>();
     protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
@@ -88,21 +119,82 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     protected readonly valueTextBoxRef: Signal<ElementRef<HTMLInputElement>> = viewChild.required("valueTextBox");
     protected readonly wheel$ = new Subject<WheelEvent>();
 
+    /**
+     * Number of decimals to show.
+     * @default 0
+     */
+    public readonly decimals = input(0);
+
+    /**
+     * Sets whether the input is disabled.
+     */
+    public readonly disabled = input(false);
+
+    /**
+     * Formats the value to be displayed in the input when the input is not focused.
+     */
+    public readonly formatter = input<Action<number | null, string> | null>(null);
+
+    /**
+     * Emits when the inner input element is blurred.
+     */
     public readonly inputBlur = output<Event>();
+
+    /**
+     * Emits when the inner input element is focused.
+     */
     public readonly inputFocus = output<Event>();
+
+    /**
+     * Emits when the inner input element loses focus.
+     */
     public readonly inputFocusOut = output<Event>();
 
-    public decimals = input(0);
-    public disabled = input(false);
-    public formatter = input<Action<number | null, string> | null>(null);
-    public max = input<number | undefined>(undefined);
-    public min = input<number | undefined>(undefined);
-    public nullable = input(true);
-    public readonly = input(false);
-    public required = input(false);
-    public spinners = input(true);
-    public step = input(1);
-    public tabindex = input(0);
+    /**
+     * Maximum value that can be entered.
+     */
+    public readonly max = input<number | undefined>(undefined);
+
+    /**
+     * Minimum value that can be entered.
+     */
+    public readonly min = input<number | undefined>(undefined);
+
+    /**
+     * Sets whether the input can be empty.
+     */
+    public readonly nullable = input(true);
+
+    /**
+     * Sets whether the input is readonly.
+     */
+    public readonly readonly = input(false);
+
+    /**
+     * Sets whether the input is required.
+     */
+    public readonly required = input(false);
+
+    /**
+     * Sets the size of the input.
+     */
+    public readonly size = input<NumericTextBoxVariantProps["size"]>(`default`);
+
+    /**
+     * Sets whether the spin buttons are visible.
+     */
+    public readonly spinners = input(true);
+
+    /**
+     * Step value to increment or decrement the value.
+     */
+    public readonly step = input(1);
+
+    /**
+     * Tab index of the input.
+     */
+    public readonly tabindex = input(0);
+    public readonly userClass = input<string>("", { alias: "class" });
 
     private static calculate(value: number, step: number, type: Sign): number {
         const precision = Math.max(
@@ -280,37 +372,45 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     }
 
     private setKeydownSubscription(): void {
-        this.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: KeyboardEvent) => {
-            if (event.key === "ArrowUp") {
-                event.preventDefault();
-                this.increase();
-                return;
-            }
+        this.keydown$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.readonly())
+            )
+            .subscribe((event: KeyboardEvent) => {
+                if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    this.increase();
+                    return;
+                }
 
-            if (event.key === "ArrowDown") {
-                event.preventDefault();
-                this.decrease();
-            }
-        });
+                if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    this.decrease();
+                }
+            });
     }
 
     private setSpinSubscription(): void {
-        this.spin$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((sign: Sign) => {
-            if (sign === "-") {
-                this.decrease();
-            } else {
-                this.increase();
-            }
-            interval(100)
-                .pipe(delay(300), takeUntil(this.spinStop$))
-                .subscribe(() => {
-                    if (sign === "-") {
-                        this.decrease();
-                    } else {
-                        this.increase();
-                    }
-                });
-        });
+        this.spin$
+            .pipe(
+                filter(() => !this.readonly()),
+                switchMap(sign =>
+                    of(sign).pipe(
+                        tap(sign => (sign === "-" ? this.decrease() : this.increase())),
+                        delay(300),
+                        concatMap(() =>
+                            timer(0, 30).pipe(
+                                tap(() => (sign === "-" ? this.decrease() : this.increase())),
+                                takeUntil(this.spinStop$)
+                            )
+                        ),
+                        takeUntil(this.spinStop$)
+                    )
+                ),
+                takeUntilDestroyed(this.#destroyRef)
+            )
+            .subscribe();
     }
 
     private setSubscriptions(): void {
@@ -349,13 +449,18 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     }
 
     private setWheelSubscription(): void {
-        this.wheel$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: WheelEvent) => {
-            event.preventDefault();
-            if (event.deltaY < 0) {
-                this.increase();
-            } else {
-                this.decrease();
-            }
-        });
+        this.wheel$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.readonly())
+            )
+            .subscribe((event: WheelEvent) => {
+                event.preventDefault();
+                if (event.deltaY < 0) {
+                    this.increase();
+                } else {
+                    this.decrease();
+                }
+            });
     }
 }

@@ -17,7 +17,7 @@ import {
     TextBoxVariantInput,
     TextBoxVariantProps,
     textBoxVariants
-} from "mona-ui/inputs/styles/input.style";
+} from "../../../styles/textbox.style";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/button.directive";
 import { Action } from "../../../../utils/Action";

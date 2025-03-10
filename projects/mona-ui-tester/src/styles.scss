@@ -2,9 +2,8 @@
 @use "tailwindcss";
 @use '@angular/cdk/overlay-prebuilt.css';
 @use 'remixicon/fonts/remixicon.css';
-//@use "projects/mona-ui/src/styles/mona";
-@source ".projects/mona-ui/";
-@source ".projects/mona-ui-tester/";
+@source "./projects/mona-ui/";
+@source "./projects/mona-ui-tester/";
 @import url("https://use.typekit.net/zop2fdb.css");
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 

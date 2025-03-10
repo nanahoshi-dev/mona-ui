@@ -15,16 +15,22 @@
        (blur)="onBlur($event)"
        (beforeinput)="beforeInput$.next($event)"
        (wheel)="wheel$.next($event)"
-       autocomplete="off" tabindex="0" class="mona-input-inner" #valueTextBox>
+       [size]="size()"
+       [class]="inputClasses()"
+       autocomplete="off" tabindex="0" #valueTextBox>
 @if (spinners()) {
-    <div class="mona-numeric-text-box-spinners">
+    <div class="h-full flex flex-col border-l overflow-y-hidden border-border w-12">
         <button monaButton [disabled]="disabled()" [tabindex]="-1"
+                look="ghost" [size]="size()"
+                [class]="spinTopClasses()"
                 (mousedown)="spin$.next('+')" (mouseup)="spinStop$.next()">
-            <fa-icon [icon]="increaseIcon"></fa-icon>
+            <lucide-angular [img]="increaseIcon"></lucide-angular>
         </button>
         <button monaButton [disabled]="disabled()" [tabindex]="-1"
+                look="ghost" [size]="size()"
+                [class]="spinBottomClasses()"
                 (mousedown)="spin$.next('-')" (mouseup)="spinStop$.next()">
-            <fa-icon [icon]="decreaseIcon"></fa-icon>
+            <lucide-angular [img]="decreaseIcon"></lucide-angular>
         </button>
     </div>
 }
