@@ -1,4 +1,4 @@
-<span class="mona-switch-label mona-switch-on">
+<span [class]="labelClasses()">
     @if (active() && !onLabelTemplate()) {
         <span @fadeInOut>{{labelOn()}}</span>
     }
@@ -8,7 +8,7 @@
         </span>
     }
 </span>
-<span class="mona-switch-label mona-switch-off">
+<span [class]="labelClasses()">
     @if (!active() && !offLabelTemplate()) {
         <span @fadeInOut>{{labelOff()}}</span>
     }
@@ -18,5 +18,4 @@
         </span>
     }
 </span>
-<span class="mona-switch-handle" [ngClass]="{'mona-switch-on': active(), 'mona-switch-off': !active()}"
-      [attr.tabindex]="disabled()?-1:0"></span>
+<span [class]="handleClasses()" [attr.tabindex]="disabled()?-1:0"></span>

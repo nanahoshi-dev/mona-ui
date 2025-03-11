@@ -1,7 +1,8 @@
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChild,
     DestroyRef,
     ElementRef,
@@ -14,7 +15,9 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { switchHandleVariants, switchLabelVariants, switchVariants } from "mona-ui/inputs/styles/switch.style";
 import { fromEvent } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { FadeAnimation } from "../../../../animations/models/fade.animation";
 import { Action } from "../../../../utils/Action";
 import { SwitchOffLabelTemplateDirective } from "../../directives/switch-off-label-template.directive";
@@ -23,7 +26,6 @@ import { SwitchOnLabelTemplateDirective } from "../../directives/switch-on-label
 @Component({
     selector: "mona-switch",
     templateUrl: "./switch.component.html",
-    styleUrls: ["./switch.component.scss"],
     animations: [FadeAnimation()],
     providers: [
         {
@@ -32,26 +34,42 @@ import { SwitchOnLabelTemplateDirective } from "../../directives/switch-on-label
             multi: true
         }
     ],
-    imports: [NgClass, NgTemplateOutlet],
+    imports: [NgTemplateOutlet],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class.mona-switch]": "true",
-        "[class.mona-disabled]": "disabled()",
-        "[class.mona-switch-active]": "active()"
+        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.data-disabled]": "disabled()",
+        "[class]": "classes()"
     }
 })
 export class SwitchComponent implements OnInit, ControlValueAccessor {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     #propagateChange: Action<boolean> | null = null;
 
     protected readonly active = signal(false);
+    protected readonly classes = computed(() => {
+        const active = this.active();
+        const state = active ? "on" : "off";
+        const classes = switchVariants({ state });
+        return twMerge(classes);
+    });
+    protected readonly handleClasses = computed(() => {
+        const active = this.active();
+        const state = active ? "on" : "off";
+        const classes = switchHandleVariants({ state });
+        return twMerge(classes);
+    });
+    protected readonly labelClasses = computed(() => {
+        const classes = switchLabelVariants();
+        return twMerge(classes);
+    });
     protected readonly offLabelTemplate = contentChild(SwitchOffLabelTemplateDirective, { read: TemplateRef });
     protected readonly onLabelTemplate = contentChild(SwitchOnLabelTemplateDirective, { read: TemplateRef });
 
-    public disabled = input(false);
-    public labelOff = input("OFF");
-    public labelOn = input("ON");
+    public readonly disabled = input(false);
+    public readonly labelOff = input("");
+    public readonly labelOn = input("");
 
     public ngOnInit(): void {
         this.setEventListeners();

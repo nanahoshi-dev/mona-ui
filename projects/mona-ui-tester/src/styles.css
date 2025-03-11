@@ -1,11 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
-@use "tailwindcss";
-@use '@angular/cdk/overlay-prebuilt.css';
-@use 'remixicon/fonts/remixicon.css';
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
+@import url("https://use.typekit.net/zop2fdb.css"); /* You can add global styles to this file, and also import other style files */
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "remixicon/fonts/remixicon.css";
+@import "tailwindcss";
 @source "./projects/mona-ui/";
 @source "./projects/mona-ui-tester/";
-@import url("https://use.typekit.net/zop2fdb.css");
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 
 @theme {
     --color-background: #fff;
@@ -32,7 +31,6 @@
     --color-chart-3: #274754;
     --color-chart-4: #e8c468;
     --color-chart-5: #f4a462;
-    //--color-radius: .6rem;
     --color-sidebar-background: #fafafa;
     --color-sidebar-foreground: #3f3f46;
     --color-sidebar-primary: #18181b;
@@ -76,22 +74,23 @@
     background: var(--color-scrollbar-corner);
 }
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
-    //background: hsl(var(--muted));
-    //background: #f8f8f8;
     scroll-behavior: smooth;
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
 }
 
-//body { font-size: 0.75rem; }
-
 body {
-    font-family: "Geist", Helvetica Neue, Helvetica, Arial, sans-serif !important;
+    font-family:
+        "Geist",
+        Helvetica Neue,
+        Helvetica,
+        Arial,
+        sans-serif !important;
 }
-
 
 .popup-noselect {
     user-select: none;
