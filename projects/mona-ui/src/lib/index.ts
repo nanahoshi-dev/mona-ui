@@ -98,7 +98,6 @@ export * from "./grid/components/grid-column/grid-column.component";
 export * from "./grid/components/grid/grid.component";
 
 /** Inputs */
-export * from "./inputs/check-box/directives/check-box.directive";
 export * from "./inputs/check-box/components/check-box/check-box.component";
 
 export * from "./inputs/color-gradient/components/color-gradient/color-gradient.component";

@@ -33,7 +33,7 @@
                 <mona-date-picker [formControlName]="column().field()"></mona-date-picker>
             }
             @case ("boolean") {
-                <input type="checkbox" [formControlName]="column().field()" monaCheckBox />
+                <mona-check-box [formControlName]="column().field()"></mona-check-box>
             }
         }
     </form>

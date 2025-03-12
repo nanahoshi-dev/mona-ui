@@ -1,6 +1,7 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     effect,
     ElementRef,
     forwardRef,
@@ -11,14 +12,20 @@ import {
     viewChild
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { LucideAngularModule } from "lucide-angular";
 import { Action } from "../../../../utils/Action";
-import { CheckBoxDirective } from "../../directives/check-box.directive";
+import {
+    CheckBoxContainerLabelVariantInput,
+    CheckBoxContainerLabelVariantProps,
+    checkboxContainerLabelVariants,
+    checkboxVariants,
+    checkMarkVariants
+} from "../../../styles/checkbox.style";
 
 @Component({
     selector: "mona-check-box",
-    imports: [CheckBoxDirective, FormsModule],
+    imports: [FormsModule, LucideAngularModule],
     templateUrl: "./check-box.component.html",
-    styleUrl: "./check-box.component.scss",
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -28,23 +35,31 @@ import { CheckBoxDirective } from "../../directives/check-box.directive";
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class.mona-check-box]": "true",
-        "[class.mona-disabled]": "disabled()"
+        "[attr.data-checked]": "checked()",
+        "[attr.data-disabled]": "disabled()",
+        "[attr.data-indeterminate]": "indeterminate()"
     }
 })
-export class CheckBoxComponent implements ControlValueAccessor {
+export class CheckBoxComponent implements ControlValueAccessor, CheckBoxContainerLabelVariantInput {
     #propagateChange: Action<boolean> | null = null;
 
     protected readonly checkBox: Signal<ElementRef<HTMLInputElement>> = viewChild.required("checkBox");
-    protected readonly checked = signal<boolean>(false);
+    protected readonly checkBoxClasses = computed(() => checkboxVariants());
+    protected readonly checkMarkClasses = computed(() => checkMarkVariants());
+    protected readonly checked = signal(false);
+    protected readonly containerLabelClasses = computed(() => {
+        const labelSize = this.labelSize();
+        return checkboxContainerLabelVariants({ labelSize });
+    });
     protected readonly inputBlur = output<FocusEvent>();
     protected readonly inputChange = output<Event>();
     protected readonly inputFocus = output<FocusEvent>();
 
-    public disabled = input<boolean>(false);
-    public indeterminate = input<boolean>(false);
-    public label = input<string>("");
-    public labelPosition = input<"before" | "after">("after");
+    public readonly disabled = input(false);
+    public readonly indeterminate = input(false);
+    public readonly label = input("");
+    public readonly labelPosition = input<"before" | "after">("after");
+    public readonly labelSize = input<CheckBoxContainerLabelVariantProps["labelSize"]>("default");
 
     public constructor() {
         effect(() => {

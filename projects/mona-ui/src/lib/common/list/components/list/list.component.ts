@@ -19,12 +19,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    listGroupHeaderTextVariants,
-    listGroupHeaderVariants,
-    listInnerListVariants,
-    listVariants
-} from "mona-ui/common/list/styles/list.style";
+import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "mona-ui/common/list/styles/list.style";
 import { filter, fromEvent, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder.component";

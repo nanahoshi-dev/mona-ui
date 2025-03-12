@@ -1,14 +1,24 @@
-<label class="mona-check-box-label">
+<label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
     @if (labelPosition() === 'before') {
-        <span>{{label()}}</span>
+        <span>{{ label() }}</span>
     }
-    <input type="checkbox" [disabled]="disabled()" [indeterminate]="indeterminate()"
+    <input type="checkbox"
+           [disabled]="disabled()"
+           [indeterminate]="indeterminate()"
            [ngModel]="checked()"
+           [class]="checkBoxClasses()"
            (blur)="inputBlur.emit($event)"
            (focus)="inputFocus.emit($event)"
            (change)="inputChange.emit($event)"
-           (ngModelChange)="onCheckedChange($event)" monaCheckBox #checkBox/>
+           (ngModelChange)="onCheckedChange($event)" #checkBox/>
+    <span [class]="checkMarkClasses()">
+        @if (checked()) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                 class="lucide lucide-check"><path d="M18 6 9 17l-5-5"/></svg>
+        }
+    </span>
     @if (labelPosition() === 'after') {
-        <span>{{label()}}</span>
+        <span>{{ label() }}</span>
     }
 </label>

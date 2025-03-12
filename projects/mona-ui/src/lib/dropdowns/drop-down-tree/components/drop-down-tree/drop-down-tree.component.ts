@@ -169,6 +169,7 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
         if (this.#popupRef) {
             return;
         }
+        this.treeService.setAnimationEnabled(false);
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             anchorConnectionPoint: "bottomleft",
@@ -184,6 +185,7 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
             withPush: false
         });
+        this.treeService.setAnimationEnabled(true);
         this.focusSelectedNode();
         this.#popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef = null;
