@@ -1,27 +1,31 @@
 import { cva, VariantProps } from "class-variance-authority";
 import { VariantInputs } from "../../utils/VariantInputs";
 
-export const checkboxVariants = cva(
+export const radioButtonVariants = cva(
     `
-        appearance-none outline-none peer hidden
+        appearance-none outline-none
+        peer hidden
     `
 );
 
-export const checkMarkVariants = cva(
+export const radioButtonCircleVariants = cva(
     `
         w-4.5 h-4.5
         flex items-center justify-center
-        pl-0.25 overflow-hidden
-        border border-primary shadow
-        rounded-md text-sm
+        overflow-hidden
+        border border-primary
+        rounded-full
         cursor-pointer
-        data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed data-[disabled='true']:opacity-50
-        peer-checked:bg-primary peer-checked:text-primary-foreground
-        peer-indeterminate:bg-primary
     `
 );
 
-export const checkboxContainerLabelVariants = cva(
+export const radioButtonIndicatorVariants = cva(
+    `
+        flex w-3 h-3 bg-primary rounded-full
+    `
+);
+
+export const radioButtonContainerLabelVariants = cva(
     `
         w-full h-full flex items-center justify-center gap-1
         relative
@@ -43,5 +47,5 @@ export const checkboxContainerLabelVariants = cva(
     }
 );
 
-export type CheckBoxContainerLabelVariantProps = VariantProps<typeof checkboxContainerLabelVariants>;
-export type CheckBoxContainerLabelVariantInput = VariantInputs<CheckBoxContainerLabelVariantProps>;
+export type RadioButtonContainerLabelVariantProps = VariantProps<typeof radioButtonContainerLabelVariants>;
+export type RadioButtonContainerLabelVariantInput = VariantInputs<RadioButtonContainerLabelVariantProps>;

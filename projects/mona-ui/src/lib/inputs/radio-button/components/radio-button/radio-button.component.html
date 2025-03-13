@@ -1,4 +1,4 @@
-<label class="mona-radio-button-label">
+<label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
     @if (labelPosition() === 'before') {
         <span>{{ label() }}</span>
     }
@@ -6,10 +6,16 @@
            [name]="name()"
            [value]="value()"
            [ngModel]="selectedValue()"
+           [class]="radioButtonClasses()"
            (blur)="inputBlur.emit($event)"
            (click)="inputClick.emit($event)"
            (focus)="inputFocus.emit($event)"
-           (ngModelChange)="onCheckedChange($event)" monaRadioButton #radioButton>
+           (ngModelChange)="onCheckedChange($event)" #radioButton>
+    <span [class]="radioButtonCircleClasses()">
+        @if (value() === selectedValue()) {
+            <span [class]="radioButtonIndicatorClasses()"></span>
+        }
+    </span>
     @if (labelPosition() === 'after') {
         <span>{{ label() }}</span>
     }
