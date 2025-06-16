@@ -297,6 +297,6 @@ export class PopoverComponent implements OnInit {
 
     private get popoverTargetElement(): HTMLElement {
         const target = this.target();
-        return target instanceof ElementRef ? target.nativeElement : target;
+        return target instanceof ElementRef ? target.nativeElement : (target as HTMLElement);
     }
 }
