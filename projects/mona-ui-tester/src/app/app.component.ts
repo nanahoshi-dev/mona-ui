@@ -11,6 +11,7 @@ import {
     WritableSignal
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { RouterOutlet } from "@angular/router";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -171,6 +172,7 @@ import { delay, map, Observable, of, take } from "rxjs";
 import { v4 } from "uuid";
 import { GridOrderData } from "./GridOrderData";
 import { GridProductData } from "./GridProductData";
+import { HeaderComponent } from "./layout/components/header/header.component";
 import { TestComponentComponent } from "./test-component/test-component.component";
 
 interface TreeNodeDataItem {
@@ -296,7 +298,9 @@ interface TreeNodeDataItem {
         DropDownTreeNodeTemplateDirective,
         SplitterComponent,
         SplitterPaneComponent,
-        ButtonGroupItemComponent
+        ButtonGroupItemComponent,
+        HeaderComponent,
+        RouterOutlet
     ]
 })
 export class AppComponent implements OnInit {

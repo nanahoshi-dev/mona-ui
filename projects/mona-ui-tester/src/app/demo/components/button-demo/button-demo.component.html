@@ -1,0 +1,8 @@
+<div class="flex flex-col border border-gray-200">
+    <div class="flex-4/5 flex items-center justify-center p-8 border-b border-gray-200 bg-accent">
+        <ng-container [ngComponentOutlet]="ButtonWrapperComponent" [ngComponentOutletInputs]="values()"></ng-container>
+    </div>
+    <div class="flex-1/5 bg-accent/10">
+        <app-config [config]="config()" (valueChange)="onValueChange($event)"></app-config>
+    </div>
+</div>

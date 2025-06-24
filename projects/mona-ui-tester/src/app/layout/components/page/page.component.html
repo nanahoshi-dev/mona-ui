@@ -1,0 +1,9 @@
+<div class="grid md:grid-cols-[16rem_minmax(0,1fr)] sm:grid-cols-1 flex-1 mx-auto max-w-screen-2xl">
+    <app-sidebar class="hidden md:block"></app-sidebar>
+    <main class="overflow-hidden py-4 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[minmax(0,1fr)_16rem]">
+        <div class="px-2">
+            <router-outlet></router-outlet>
+        </div>
+        <app-page-navigation class="hidden xl:block"></app-page-navigation>
+    </main>
+</div>
