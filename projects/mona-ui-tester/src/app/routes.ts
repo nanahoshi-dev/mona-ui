@@ -7,21 +7,21 @@ export const routes: Routes = [
             import("./layout/components/components/components.component").then(m => m.ComponentsComponent),
         children: [
             {
-                path: "buttons",
-                children: [
-                    {
-                        path: "button",
-                        loadComponent: () =>
-                            import("./docs/components/button-doc/button-doc.component").then(m => m.ButtonDocComponent)
-                    }
-                    //                 {
-                    //                     path: "button-group",
-                    //                     loadComponent: () =>
-                    //                         import("./components/button-group-doc/button-group-doc.component").then(
-                    //                             m => m.ButtonGroupDocComponent
-                    //                         )
-                    //                 }
-                ]
+                path: "avatar",
+                loadComponent: () =>
+                    import("./docs/components/avatar-doc/avatar-doc.component").then(m => m.AvatarDocComponent)
+            },
+            {
+                path: "button",
+                loadComponent: () =>
+                    import("./docs/components/button-doc/button-doc.component").then(m => m.ButtonDocComponent)
+            },
+            {
+                path: "button-group",
+                loadComponent: () =>
+                    import("./docs/components/button-group-doc/button-group-doc.component").then(
+                        m => m.ButtonGroupDocComponent
+                    )
             },
             {
                 path: "chip",

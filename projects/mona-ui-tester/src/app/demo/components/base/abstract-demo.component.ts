@@ -4,13 +4,13 @@ import { ComponentConfig, extractConfigValues } from "../../utils/componentConfi
 @Component({ template: "" })
 export abstract class AbstractDemoComponent<TComponent> {
     protected abstract config: WritableSignal<ComponentConfig<TComponent>>;
-    public values = linkedSignal({
+    public inputs = linkedSignal({
         source: signal({}),
         computation: () => extractConfigValues(this.config())
     });
 
-    protected onValueChange(value: any) {
-        this.values.update(currentValues => {
+    protected onInputValueChange(value: any) {
+        this.inputs.update(currentValues => {
             return { ...currentValues, ...value };
         });
     }

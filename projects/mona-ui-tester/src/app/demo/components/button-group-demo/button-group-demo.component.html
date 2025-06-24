@@ -1,6 +1,5 @@
 <app-demo-container [config]="config()"
                     (valueChange)="onInputValueChange($event)">
-    <ng-container [ngComponentOutlet]="ChipComponent"
+    <ng-container [ngComponentOutlet]="ButtonGroupWrapperComponent"
                   [ngComponentOutletInputs]="inputs()"></ng-container>
 </app-demo-container>
-

@@ -1,5 +1,5 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+import { VariantInputs, VariantPropsWithoutNull } from "mona-ui/utils/VariantInputs";
 
 export const buttonGroupVariants = cva(
     `
@@ -31,5 +31,5 @@ export const buttonGroupVariants = cva(
     }
 );
 
-export type ButtonGroupVariantProps = VariantProps<typeof buttonGroupVariants>;
+export type ButtonGroupVariantProps = VariantPropsWithoutNull<VariantProps<typeof buttonGroupVariants>>;
 export type ButtonGroupVariantsInput = VariantInputs<ButtonGroupVariantProps>;

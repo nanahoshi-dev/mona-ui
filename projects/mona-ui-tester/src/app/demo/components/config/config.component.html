@@ -4,37 +4,41 @@
             @for (entry of configObjList(); track $index) {
                 <li class="flex flex-col gap-2 py-2">
                     <div class="flex gap-1">
-                        <div class="flex px-2 items-center justify-start text-sm font-semibold">{{ entry.name }}</div>
+                        <div class="flex flex-col px-2 text-sm">
+                            <div class="font-semibold">{{ entry.name }}</div>
+                            <div class="font-light text-gray-500">
+                                {{ entry.description }}
+                            </div>
+                        </div>
                         <div class="flex px-2 items-center justify-end flex-1">
-                            @switch (entry.configType) {
-                                @case ('single') {
-                                    @switch (entry.valueType) {
-                                        @case ('string') {
-                                            <mona-text-box [ngModel]="entry.value"
-                                                           [style.width.px]="150"
-                                                           size="small"
-                                                           (ngModelChange)="onValueChange(entry.name, $event)"></mona-text-box>
-                                        }
-                                        @case ('number') {
-                                            <mona-numeric-text-box [ngModel]="entry.value"
-                                                                   [style.width.px]="150"
-                                                                   size="small"
-                                                                   (ngModelChange)="onValueChange(entry.name, $event)"></mona-numeric-text-box>
-                                        }
-                                        @case ('boolean') {
-<!--                                            <mona-check-box [ngModel]="entry.value"-->
-<!--                                                            (ngModelChange)="onValueChange(entry.name, $event)"></mona-check-box>-->
-                                            <mona-switch [ngModel]="entry.value"
-                                                         (ngModelChange)="onValueChange(entry.name, $event)"></mona-switch>
-                                        }
+                            @if (entry.configType === 'dropdown') {
+                                <mona-drop-down-list [data]="entry.value" [ngModel]="entry.value[0]"
+                                                     [style.width.px]="150"
+                                                     size="small"
+                                                     [showClearButton]="false"
+                                                     (ngModelChange)="onValueChange(entry.name, $event)"></mona-drop-down-list>
+                            } @else if (entry.configType === "color") {
+                                <mona-color-picker
+                                    [ngModel]="entry.value"
+                                    (ngModelChange)="onValueChange(entry.name, $event)"></mona-color-picker>
+                            } @else {
+                                @switch (entry.valueType) {
+                                    @case ('string') {
+                                        <mona-text-box [ngModel]="entry.value"
+                                                       [style.width.px]="150"
+                                                       size="small"
+                                                       (ngModelChange)="onValueChange(entry.name, $event)"></mona-text-box>
                                     }
-                                }
-                                @case ('dropdown') {
-                                    <mona-drop-down-list [data]="entry.value" [ngModel]="entry.value[0]"
-                                                         [style.width.px]="150"
-                                                         size="small"
-                                                         [showClearButton]="false"
-                                                         (ngModelChange)="onValueChange(entry.name, $event)"></mona-drop-down-list>
+                                    @case ('number') {
+                                        <mona-numeric-text-box [ngModel]="entry.value"
+                                                               [style.width.px]="150"
+                                                               size="small"
+                                                               (ngModelChange)="onValueChange(entry.name, $event)"></mona-numeric-text-box>
+                                    }
+                                    @case ('boolean') {
+                                        <mona-switch [ngModel]="entry.value"
+                                                     (ngModelChange)="onValueChange(entry.name, $event)"></mona-switch>
+                                    }
                                 }
                             }
                         </div>

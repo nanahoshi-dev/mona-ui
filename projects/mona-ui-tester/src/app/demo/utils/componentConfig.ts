@@ -1,4 +1,4 @@
-import { InputSignal, InputSignalWithTransform } from "@angular/core";
+import { InputSignal, InputSignalWithTransform, ModelSignal } from "@angular/core";
 
 type GetInputSignalValue<T> =
     T extends InputSignal<infer V> ? V : T extends InputSignalWithTransform<any, infer U> ? U : never;
@@ -11,23 +11,38 @@ export type ComponentInputs<TComponent> = {
         : never;
 };
 
+type GetSignalType<T> = T extends InputSignalWithTransform<any, any> ? T : T extends ModelSignal<any> ? T : never;
+
+export type ComponentInputsAsSignal<TComponent> = {
+    [K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any>
+        ? K
+        : TComponent[K] extends ModelSignal<any>
+          ? K
+          : never]?: GetSignalType<TComponent[K]>; // This is the correct way to handle multiple conditions
+};
+
+export type ComponentConfigType = "string" | "number" | "boolean" | "dropdown" | "color";
+
 export type ComponentConfig<TComponent> = {
-    [key in keyof ComponentInputs<TComponent>]:
+    [key in keyof ComponentInputs<TComponent>]: (
         | {
-              type: "single";
+              type: Extract<ComponentConfigType, "string" | "number" | "boolean" | "color">;
               value: NonNullable<ComponentInputs<TComponent>[key]>;
           }
         | {
-              type: "dropdown";
+              type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
-          };
+              defaultValue: ComponentInputs<TComponent>[key];
+          }
+    ) & { description: string };
 };
 
 type ProcessedConfigItem<TValue = any> = {
-    name: string;
-    configType: "single" | "dropdown"; // From the input structure
-    valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined"; // Runtime JS type of the value
-    value: TValue;
+    configType: ComponentConfigType;
+    description: string;
+    name: string; // From the input structure
+    value: TValue; // Runtime JS type of the value
+    valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
 };
 
 /**
@@ -56,10 +71,11 @@ export function createComponentInputConfigArray<TComponent>(
             }
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
-                name: String(key), // Ensure key is treated as a string
-                configType: configItem.type, // 'single' or 'dropdown' from the input
-                valueType: runtimeValueType, // The runtime JS type of the value
-                value: configItem.value // The actual value or array of values
+                configType: configItem.type, // Include the description from the input
+                description: configItem.description, // Ensure key is treated as a string
+                name: String(key), // 'single' or 'dropdown' from the input
+                value: configItem.value, // The runtime JS type of the value
+                valueType: runtimeValueType // The actual value or array of values
             });
         }
     }
@@ -95,12 +111,15 @@ export function extractConfigValues<TComponent>(inputConfig: ComponentConfig<TCo
             const configItem = inputConfig[key];
             if (configItem) {
                 let valueToAssign: any;
-
                 // Check if the value is an array and has at least one element
                 if (Array.isArray(configItem.value) && configItem.value.length > 0) {
-                    valueToAssign = configItem.value[0]; // Take the first item
+                    if (configItem.type === "dropdown") {
+                        valueToAssign = configItem.defaultValue;
+                    } else {
+                        valueToAssign = configItem.value[0]; // Take the first item
+                    }
                 } else if (Array.isArray(configItem.value) && configItem.value.length === 0) {
-                    valueToAssign = undefined; // Or null, or a default empty value, depending on desired behavior for empty arrays
+                    valueToAssign = null; // Or null, or a default empty value, depending on desired behavior for empty arrays
                 } else {
                     valueToAssign = configItem.value; // Use the value as is for non-arrays
                 }

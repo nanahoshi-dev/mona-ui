@@ -1,0 +1,11 @@
+import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { AvatarDemoComponent } from "../../../demo/components/avatar-demo/avatar-demo.component";
+import { SectionComponent } from "../../../layout/components/section/section.component";
+
+@Component({
+    selector: "app-avatar-doc",
+    imports: [SectionComponent, AvatarDemoComponent],
+    templateUrl: "./avatar-doc.component.html",
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class AvatarDocComponent {}

@@ -29,12 +29,16 @@ export class SidebarComponent {
             path: "/components",
             items: [
                 {
+                    text: "Avatar",
+                    path: "/avatar"
+                },
+                {
                     text: "Button",
-                    path: "/buttons/button"
+                    path: "/button"
                 },
                 {
                     text: "Button Group",
-                    path: "/buttons/button-group"
+                    path: "/button-group"
                 },
                 {
                     text: "Chip",

@@ -5,6 +5,7 @@ import {
     computed,
     contentChildren,
     DestroyRef,
+    effect,
     inject,
     input,
     model,
@@ -30,7 +31,6 @@ import { ButtonService } from "../services/button.service";
     templateUrl: "./button-group.component.html",
     providers: [ButtonService],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [ButtonDirective, NgTemplateOutlet],
     host: {
         "[class]": "classes()",

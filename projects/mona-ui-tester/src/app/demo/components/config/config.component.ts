@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import {
-    CheckBoxComponent,
+    ColorPickerComponent,
     DropDownListComponent,
     NumericTextBoxComponent,
     SwitchComponent,
@@ -15,9 +15,9 @@ import { ComponentConfig, ComponentInputs, createComponentInputConfigArray } fro
         FormsModule,
         TextBoxComponent,
         NumericTextBoxComponent,
-        CheckBoxComponent,
         DropDownListComponent,
-        SwitchComponent
+        SwitchComponent,
+        ColorPickerComponent
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
