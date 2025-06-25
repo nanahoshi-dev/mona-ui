@@ -1,4 +1,5 @@
 <app-demo-container [config]="config()"
+                    [metadata]="metadata()"
                     (valueChange)="onInputValueChange($event)">
     <ng-container [ngComponentOutlet]="AvatarComponent"
                   [ngComponentOutletInputs]="inputs()"></ng-container>

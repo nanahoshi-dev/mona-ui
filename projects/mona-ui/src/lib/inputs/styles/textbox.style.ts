@@ -21,7 +21,7 @@ export const inputVariants = cva(
     {
         variants: {
             size: {
-                default: "h-9",
+                medium: "h-9",
                 small: "h-8 text-sm",
                 large: "h-10"
             }
@@ -51,7 +51,7 @@ export const textBoxVariants = cva(
     {
         variants: {
             size: {
-                default: "h-9",
+                medium: "h-9",
                 small: "h-8 text-sm",
                 large: "h-10"
             }

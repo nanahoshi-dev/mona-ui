@@ -19,13 +19,13 @@ export const numericTextboxVariants = cva(
     {
         variants: {
             size: {
-                default: "h-9",
+                medium: "h-9",
                 small: "h-8 text-sm",
                 large: "h-10"
             }
         },
         defaultVariants: {
-            size: "default"
+            size: "medium"
         }
     }
 );

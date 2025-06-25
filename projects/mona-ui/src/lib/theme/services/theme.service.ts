@@ -1,0 +1,121 @@
+import { effect, Injectable, signal } from "@angular/core";
+import { ThemeStyle } from "mona-ui/theme/models/Theme";
+
+@Injectable({
+    providedIn: "root"
+})
+export class ThemeService {
+    readonly #theme = signal<ThemeStyle>("shadcn");
+    public readonly theme = this.#theme.asReadonly();
+
+    public setTheme(theme: ThemeStyle): void {
+        if (this.#theme() !== theme) {
+            this.#theme.set(theme);
+        }
+        this.updateThemeVariables();
+    }
+
+    private getActiveThemeVariables(): Record<string, string> {
+        return this.#theme() === "mona" ? this.getMonaLightThemeVariables() : this.getShadcnLightThemeVariables();
+    }
+
+    private getMonaLightThemeVariables(): Record<string, string> {
+        return {
+            "--color-background": "#fff",
+            "--color-foreground": "#09090b",
+            "--color-card": "#fff",
+            "--color-card-foreground": "#09090b",
+            "--color-popover": "#fff",
+            "--color-popover-foreground": "#09090b",
+            "--color-primary": "#18181b",
+            "--color-primary-foreground": "#00a86b",
+            "--color-secondary": "#f4f4f5",
+            "--color-secondary-foreground": "#18181b",
+            "--color-muted": "#f4f4f5",
+            "--color-muted-foreground": "#71717a",
+            "--color-accent": "#f4f4f5",
+            "--color-accent-foreground": "#18181b",
+            "--color-destructive": "#ef4444",
+            "--color-destructive-foreground": "#fafafa",
+            "--color-border": "#e4e4e7",
+            "--color-input": "#e4e4e7",
+            "--color-ring": "#09090b",
+            "--color-chart-1": "#e76e50",
+            "--color-chart-2": "#2a9d90",
+            "--color-chart-3": "#274754",
+            "--color-chart-4": "#e8c468",
+            "--color-chart-5": "#f4a462",
+            "--color-sidebar-background": "#fafafa",
+            "--color-sidebar-foreground": "#3f3f46",
+            "--color-sidebar-primary": "#18181b",
+            "--color-sidebar-primary-foreground": "#fafafa",
+            "--color-sidebar-accent": "#f4f4f5",
+            "--color-sidebar-accent-foreground": "#18181b",
+            "--color-sidebar-border": "#e5e7eb",
+            "--color-sidebar-ring": "#3b82f6",
+            "--color-scrollbar-thumb": "#d1d5db",
+            "--color-scrollbar-thumb-hover": "#9ca3af",
+            "--color-scrollbar-thumb-active": "#6b7280",
+            "--color-scrollbar-thumb-focus": "#9ca3af",
+            "--color-scrollbar-track": "#f9fafb",
+            "--color-scrollbar-track-hover": "#f4f5f7",
+            "--color-scrollbar-track-active": "#e5e7eb",
+            "--color-scrollbar-track-focus": "#f4f5f7",
+            "--color-scrollbar-corner": "#f9fafb"
+        };
+    }
+
+    private getShadcnLightThemeVariables(): Record<string, string> {
+        return {
+            "--color-background": "#fff",
+            "--color-foreground": "#09090b",
+            "--color-card": "#fff",
+            "--color-card-foreground": "#09090b",
+            "--color-popover": "#fff",
+            "--color-popover-foreground": "#09090b",
+            "--color-primary": "#18181b",
+            "--color-primary-foreground": "#fafafa",
+            "--color-secondary": "#f4f4f5",
+            "--color-secondary-foreground": "#18181b",
+            "--color-muted": "#f4f4f5",
+            "--color-muted-foreground": "#71717a",
+            "--color-accent": "#f4f4f5",
+            "--color-accent-foreground": "#18181b",
+            "--color-destructive": "#ef4444",
+            "--color-destructive-foreground": "#fafafa",
+            "--color-border": "#e4e4e7",
+            "--color-input": "#e4e4e7",
+            "--color-ring": "#09090b",
+            "--color-chart-1": "#e76e50",
+            "--color-chart-2": "#2a9d90",
+            "--color-chart-3": "#274754",
+            "--color-chart-4": "#e8c468",
+            "--color-chart-5": "#f4a462",
+            "--color-sidebar-background": "#fafafa",
+            "--color-sidebar-foreground": "#3f3f46",
+            "--color-sidebar-primary": "#18181b",
+            "--color-sidebar-primary-foreground": "#fafafa",
+            "--color-sidebar-accent": "#f4f4f5",
+            "--color-sidebar-accent-foreground": "#18181b",
+            "--color-sidebar-border": "#e5e7eb",
+            "--color-sidebar-ring": "#3b82f6",
+            "--color-scrollbar-thumb": "#d1d5db",
+            "--color-scrollbar-thumb-hover": "#9ca3af",
+            "--color-scrollbar-thumb-active": "#6b7280",
+            "--color-scrollbar-thumb-focus": "#9ca3af",
+            "--color-scrollbar-track": "#f9fafb",
+            "--color-scrollbar-track-hover": "#f4f5f7",
+            "--color-scrollbar-track-active": "#e5e7eb",
+            "--color-scrollbar-track-focus": "#f4f5f7",
+            "--color-scrollbar-corner": "#f9fafb"
+        };
+    }
+
+    private updateThemeVariables(): void {
+        const themeVariables = this.getActiveThemeVariables();
+        const root = document.querySelector(":root") as HTMLElement;
+        Object.entries(themeVariables).forEach(([key, value]) => {
+            root.style.setProperty(key, value);
+        });
+    }
+}

@@ -1,9 +1,14 @@
-import { Component, linkedSignal, signal, WritableSignal } from "@angular/core";
+import { Component, computed, inject, Injector, linkedSignal, Signal, signal, WritableSignal } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { filter, map } from "rxjs";
+import { ComponentMetadata } from "../../models/ComponentMetadata";
+import { DemoService } from "../../services/demo.service";
 import { ComponentConfig, extractConfigValues } from "../../utils/componentConfig";
 
 @Component({ template: "" })
 export abstract class AbstractDemoComponent<TComponent> {
-    protected abstract config: WritableSignal<ComponentConfig<TComponent>>;
+    readonly #injector = inject(Injector);
+    protected readonly demoService = inject(DemoService);
     public inputs = linkedSignal({
         source: signal({}),
         computation: () => extractConfigValues(this.config())
@@ -14,4 +19,17 @@ export abstract class AbstractDemoComponent<TComponent> {
             return { ...currentValues, ...value };
         });
     }
+
+    protected getMetadata(name: string): Signal<ComponentMetadata> {
+        return toSignal(
+            this.demoService.metadata$.pipe(
+                map(metadata => metadata?.[name] ?? ({} as ComponentMetadata)),
+                filter(metadata => !!metadata)
+            ),
+            { injector: this.#injector, initialValue: {} as ComponentMetadata }
+        );
+    }
+
+    protected abstract config: WritableSignal<ComponentConfig<TComponent>>;
+    protected abstract metadata: Signal<ComponentMetadata>;
 }

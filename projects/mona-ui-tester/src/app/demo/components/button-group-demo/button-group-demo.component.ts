@@ -13,32 +13,36 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupComponent> {
     protected readonly ButtonGroupComponent = ButtonGroupComponent;
-    protected readonly config = signal<ComponentConfig<ButtonGroupComponent>>({
-        disabled: {
-            type: "boolean",
-            description: "Disables the button group",
-            value: false
-        },
-        look: {
-            type: "dropdown",
-            description: "Sets the look of the button group",
-            value: ["default", "outline"],
-            defaultValue: "outline"
-        },
-        selection: {
-            type: "dropdown",
-            description: "Sets the selection mode of the button group",
-            value: ["single", "multiple"],
-            defaultValue: "single"
-        },
-        size: {
-            type: "dropdown",
-            description: "Sets the size of the button group",
-            value: ["default", "small", "large", "icon"],
-            defaultValue: "default"
-        }
-    });
     protected readonly ButtonGroupWrapperComponent = ButtonGroupWrapperComponent;
+    protected readonly config = signal<ComponentConfig<ButtonGroupComponent>>({
+        inputs: {
+            disabled: {
+                type: "boolean",
+                description: "Disables the button group",
+                value: false
+            },
+            look: {
+                type: "dropdown",
+                description: "Sets the look of the button group",
+                value: ["default", "outline"],
+                defaultValue: "outline"
+            },
+            selection: {
+                type: "dropdown",
+                description: "Sets the selection mode of the button group",
+                value: ["single", "multiple"],
+                defaultValue: "single"
+            },
+            size: {
+                type: "dropdown",
+                description: "Sets the size of the button group",
+                value: ["default", "small", "large", "icon"],
+                defaultValue: "default"
+            }
+        },
+        outputs: {}
+    });
+    protected readonly metadata = this.getMetadata("ButtonGroupComponent");
 }
 
 @Component({

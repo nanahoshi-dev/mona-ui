@@ -23,8 +23,14 @@ export const buttonVariants = cva(
                 ghost: "hover:bg-accent hover:text-accent-foreground",
                 link: "text-primary underline-offset-4 hover:underline"
             },
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full"
+            },
             size: {
-                default: "h-9 px-4 py-2",
+                medium: "h-9 px-4 py-2",
                 small: "h-8 px-3 text-xs",
                 large: "h-10 px-8",
                 icon: "h-9 w-9"
@@ -35,7 +41,8 @@ export const buttonVariants = cva(
         },
         defaultVariants: {
             look: "default",
-            size: "default"
+            rounded: "medium",
+            size: "medium"
         }
     }
 );

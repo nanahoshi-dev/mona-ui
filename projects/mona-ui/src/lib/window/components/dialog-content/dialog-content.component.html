@@ -43,7 +43,7 @@
     <div class="mona-dialog-actions">
         @for (action of actions(); track $index) {
             <button monaButton class="mona-dialog-action" [ngClass]="{'mona-dialog-action-primary': action.primary}"
-                    [primary]="action.primary ?? false"
+                    [look]="action.primary ? 'default' : 'secondary'"
                     (click)="onActionClick($event, action, inputType()==='number' ? valueNumber() : valueString())">
                 {{ action.text }}
             </button>

@@ -17,7 +17,11 @@ import {
 } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule } from "lucide-angular";
-import { ButtonVariantProps, SplitButtonVariantInputs, splitButtonVariants } from "mona-ui/buttons/styles/button.style";
+import {
+    ButtonVariantProps,
+    SplitButtonVariantInputs,
+    splitButtonVariants
+} from "mona-ui/buttons/styles/button.shadcn.styles";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
 import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
@@ -70,9 +74,14 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     public readonly popupWidth = signal(0);
 
     /**
+     * Sets the border radius of the button.
+     */
+    public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
+
+    /**
      * Sets the size of the button.
      */
-    public readonly size = input<ButtonVariantProps["size"]>("default");
+    public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
      * Sets the tabindex of the button.

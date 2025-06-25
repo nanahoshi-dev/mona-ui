@@ -178,7 +178,7 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     /**
      * Sets the size of the input.
      */
-    public readonly size = input<NumericTextBoxVariantProps["size"]>(`default`);
+    public readonly size = input<NumericTextBoxVariantProps["size"]>(`medium`);
 
     /**
      * Sets whether the spin buttons are visible.

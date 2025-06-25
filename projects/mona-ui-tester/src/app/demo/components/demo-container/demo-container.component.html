@@ -1,8 +1,19 @@
 <div class="flex flex-col border border-gray-200">
-    <div class="flex-4/5 flex items-center justify-center p-8 border-b border-gray-200 bg-accent">
-        <ng-content></ng-content>
+    <div class="flex flex-col border-b border-gray-200 bg-accent">
+        <div class="flex items-center justify-end p-2">
+            <mona-drop-down-list [data]="themeDropdownData()" [ngModel]="selectedTheme()"
+                                 size="small"
+                                 (ngModelChange)="onThemeChange($event)">
+                <ng-template monaDropDownListValueTemplate let-dataItem>
+                    <span [style.text-transform]="'capitalize'">{{dataItem}}</span>
+                </ng-template>
+            </mona-drop-down-list>
+        </div>
+        <div class="flex flex-1 items-center justify-center p-8 pb-20">
+            <ng-content></ng-content>
+        </div>
     </div>
-    <div class="flex-1/5 bg-accent/10">
-        <app-config [config]="config()" (valueChange)="valueChange.emit($event)"></app-config>
+    <div class="bg-accent/10">
+        <app-config [config]="config()" [metadata]="metadata()" (valueChange)="valueChange.emit($event)"></app-config>
     </div>
 </div>

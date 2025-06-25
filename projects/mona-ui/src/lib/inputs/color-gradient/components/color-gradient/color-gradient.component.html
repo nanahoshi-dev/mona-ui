@@ -121,8 +121,8 @@
     }
     @if (showButtons()) {
         <div class="mona-color-gradient-buttons">
-            <button monaButton [primary]="true" (click)="onApply()">Apply</button>
-            <button monaButton (click)="onCancel()">Cancel</button>
+            <button monaButton (click)="onApply()">Apply</button>
+            <button monaButton [look]="'secondary'" (click)="onCancel()">Cancel</button>
         </div>
     }
 </div>

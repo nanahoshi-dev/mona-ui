@@ -15,6 +15,6 @@ export class TextBoxDirective implements InputVariantInput {
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    public readonly size = input<InputVariantProps["size"]>("default");
+    public readonly size = input<InputVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
 }

@@ -11,7 +11,8 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ButtonVariantProps, buttonVariants, ButtonVariantsInput } from "mona-ui/buttons/styles/button.style";
+import { ButtonVariantProps, ButtonVariantsInput, themeVariants } from "mona-ui/buttons/styles/button.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonService } from "../services/button.service";
@@ -36,19 +37,22 @@ import { ButtonService } from "../services/button.service";
         "[class]": "classes()",
         "[class.mona-button]": "true",
         "[class.mona-selected]": "selected()"
-    },
-    standalone: true
+    }
 })
 export class ButtonDirective implements OnInit, ButtonVariantsInput {
     readonly #buttonService = inject(ButtonService, { optional: true });
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
+    readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
         const look = this.look();
+        const rounded = this.rounded();
         const size = this.size();
         const selected = this.selected();
         const userClass = this.userClass();
-        const variantClasses = buttonVariants({ look, selected, size });
+        const theme = this.#themeService.theme();
+        const variants = themeVariants(theme);
+        const variantClasses = variants({ look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
 
@@ -83,9 +87,9 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
     public readonly look = model<ButtonVariantProps["look"]>("default");
 
     /**
-     * @deprecated Use `look` instead.
+     * Sets the border radius of the button.
      */
-    public readonly primary = input(false);
+    public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
 
     /**
      * Sets the selected state of the button.
@@ -95,7 +99,7 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
     /**
      * Sets the size of the button.
      */
-    public readonly size = input<ButtonVariantProps["size"]>("default");
+    public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
      * Sets the tabindex of the button.

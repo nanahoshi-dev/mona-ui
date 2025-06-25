@@ -10,8 +10,8 @@
                       [ngTemplateOutletContext]="{$implicit: selectedDataItem()}"></ng-container>
     }
 </div>
-<div class="flex items-center justify-center">
-    @if (selectedListItem()) {
+<div class="flex items-center justify-center ml-2">
+    @if (selectedListItem() && showClearButton()) {
         <button monaButton look="link" size="small" [tabindex]="-1" (click)="clearValue($event)">
             <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
         </button>

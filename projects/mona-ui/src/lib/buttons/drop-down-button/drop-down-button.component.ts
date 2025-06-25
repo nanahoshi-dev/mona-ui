@@ -9,7 +9,7 @@ import {
     viewChild
 } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
-import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/styles/button.style";
+import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/styles/button.shadcn.styles";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
 import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
@@ -47,9 +47,14 @@ export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     public readonly look = input<ButtonVariantProps["look"]>("default");
 
     /**
+     * Sets the border radius of the button.
+     */
+    public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
+
+    /**
      * Sets the size of the button.
      */
-    public readonly size = input<ButtonVariantProps["size"]>("default");
+    public readonly size = input<ButtonVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

@@ -275,4 +275,6 @@ export * from "./window/components/window/window.component";
 export * from "./pipes/slice.pipe";
 export * from "./pipes/type-cast.pipe";
 
-/** Main Module */
+/** Theme */
+export * from "./theme/models/Theme";
+export * from "./theme/services/theme.service";

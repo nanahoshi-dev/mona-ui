@@ -16,10 +16,13 @@
         "preinstall": "npx only-allow pnpm",
         "ng": "ng",
         "start": "ng serve",
+        "prebuild": "npm run build:metadata",
+        "prewatch": "npm run build:metadata",
         "build": "pnpm build:prod",
         "build:dev": "ng build mona-ui --configuration development",
         "build:prod": "ng build mona-ui --configuration production",
         "build:watch": "ng build mona-ui --watch --configuration development",
+        "build:metadata": "tsx ./projects/mona-ui-tester/scripts/extract-metadata.ts",
         "watch": "ng build mona-ui --watch --configuration development",
         "test:lib": "ng test mona-ui --code-coverage --watch=false",
         "test:lib:watch": "ng test mona-ui --code-coverage --watch",
@@ -124,6 +127,8 @@
         "karma-jasmine-html-reporter": "~2.1.0",
         "ng-packagr": "^19.2.2",
         "prettier": "^3.5.3",
+        "ts-morph": "^26.0.0",
+        "tsx": "^4.20.3",
         "typescript": "~5.8.3"
     }
 }

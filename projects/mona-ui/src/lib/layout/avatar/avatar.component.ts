@@ -35,8 +35,21 @@ export class AvatarComponent {
         };
     });
 
+    /**
+     * Sets the background color of the avatar.
+     * If an image is provided, this will be ignored.
+     */
     public backgroundColor = input("var(--mona-primary)");
+
+    /**
+     * Sets the border color of the avatar.
+     */
     public borderColor = input("var(--mona-border-color)");
+
+    /**
+     * Sets the border radius of the avatar.
+     * Can be a percentage or pixel value.
+     */
     public borderRadius = input("0", {
         transform: (value: string | number) => {
             if (typeof value === "number") {
@@ -45,6 +58,11 @@ export class AvatarComponent {
             return value;
         }
     });
+
+    /**
+     * Sets the border width of the avatar.
+     * Can be a pixel value.
+     */
     public borderWidth = input("1px", {
         transform: (value: string | number) => {
             if (typeof value === "number") {
@@ -53,7 +71,17 @@ export class AvatarComponent {
             return value;
         }
     });
+
+    /**
+     * Custom styles to apply to the avatar.
+     * This can be used to override default styles or add additional styles.
+     */
     public customStyles = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * Sets the height of the avatar.
+     * Can be a pixel value or a string with units (e.g., "64px").
+     */
     public height = input("64px", {
         transform: (value: string | number) => {
             if (typeof value === "string") {
@@ -62,11 +90,41 @@ export class AvatarComponent {
             return `${value}px`;
         }
     });
+
+    /**
+     * Sets the image URL for the avatar.
+     * If an image is provided, the avatar will display the image instead of a label.
+     */
     public image = input("");
+
+    /**
+     * Sets the label for the avatar.
+     * If an image is provided, this will be ignored.
+     */
     public label = input("");
+
+    /**
+     * Sets the color of the label text.
+     * If an image is provided, this will be ignored.
+     */
     public labelColor = input("var(--mona-text)");
+
+    /**
+     * Sets the font size of the label text.
+     * If an image is provided, this will be ignored.
+     */
     public labelFontSize = input("1rem");
+
+    /**
+     * Sets the font weight of the label text.
+     * If an image is provided, this will be ignored.
+     */
     public labelFontWeight = input("700");
+
+    /**
+     * Sets the width of the avatar.
+     * Can be a pixel value or a string with units (e.g., "64px").
+     */
     public width = input("64px", {
         transform: (value: string | number) => {
             if (typeof value === "string") {

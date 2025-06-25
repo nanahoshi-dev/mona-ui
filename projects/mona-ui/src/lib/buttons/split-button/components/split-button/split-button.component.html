@@ -1,5 +1,5 @@
 <button monaButton (click)="buttonClick.emit($event)" [disabled]="disabled()"
-        [look]="look()" [size]="size()"
+        [look]="look()" [size]="size()" [rounded]="rounded()"
         class="rounded-tr-none rounded-br-none"
         [tabindex]="tabindex()" #mainButton>
     @if (textTemplate()) {
@@ -9,7 +9,7 @@
     }
 </button>
 <button monaButton [disabled]="disabled()"
-        [look]="look()" [size]="size()"
+        [look]="look()" [size]="size()" [rounded]="rounded()"
         class="rounded-tl-none rounded-bl-none border-l-0"
         [tabindex]="tabindex()" #menuButton>
     <lucide-angular [img]="menuIcon"></lucide-angular>

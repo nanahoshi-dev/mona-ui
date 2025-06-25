@@ -14,26 +14,35 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     protected readonly ChipComponent = ChipComponent;
     protected readonly config = signal<ComponentConfig<ChipComponent>>({
-        disabled: {
-            type: "boolean",
-            description: "Disables the chip, preventing interaction.",
-            value: false
+        inputs: {
+            disabled: {
+                type: "boolean",
+                description: "Disables the chip, preventing interaction.",
+                value: false
+            },
+            look: {
+                type: "dropdown",
+                description: "Defines the visual style of the chip.",
+                value: ["default", "destructive", "outline", "secondary"],
+                defaultValue: "default"
+            },
+            label: {
+                type: "string",
+                description: "Sets the text label for the chip.",
+                value: "Chip Label"
+            },
+            removable: {
+                type: "boolean",
+                description: "Enables the chip to be removable, allowing users to delete it.",
+                value: false
+            }
         },
-        look: {
-            type: "dropdown",
-            description: "Defines the visual style of the chip.",
-            value: ["default", "destructive", "outline", "secondary"],
-            defaultValue: "default"
-        },
-        label: {
-            type: "string",
-            description: "Sets the text label for the chip.",
-            value: "Chip Label"
-        },
-        removable: {
-            type: "boolean",
-            description: "Enables the chip to be removable, allowing users to delete it.",
-            value: true
+        outputs: {
+            remove: {
+                type: "event",
+                description: "Emitted when the chip is removed, typically by clicking the remove icon."
+            }
         }
     });
+    protected readonly metadata = this.getMetadata("ChipComponent");
 }

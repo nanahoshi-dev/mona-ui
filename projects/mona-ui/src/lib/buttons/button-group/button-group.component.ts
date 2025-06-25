@@ -20,7 +20,7 @@ import {
     buttonGroupVariants,
     ButtonGroupVariantsInput
 } from "mona-ui/buttons/button-group/button-group.style";
-import { ButtonVariantProps } from "mona-ui/buttons/styles/button.style";
+import { ButtonVariantProps } from "mona-ui/buttons/styles/button.shadcn.styles";
 import { twMerge } from "tailwind-merge";
 import { SelectionMode } from "../../models/SelectionMode";
 import { ButtonDirective } from "../button/button.directive";

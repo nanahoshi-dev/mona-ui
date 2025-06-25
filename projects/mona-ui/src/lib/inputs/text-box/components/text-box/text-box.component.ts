@@ -64,7 +64,7 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
 
     public readonly inputBlur = output<Event>();
     public readonly inputFocus = output<Event>();
-    public readonly size = input<TextBoxVariantProps["size"]>("default");
+    public readonly size = input<TextBoxVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
 
     public clearButton = input<boolean>(false);

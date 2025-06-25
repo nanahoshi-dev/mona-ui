@@ -7,7 +7,9 @@ import {
     SwitchComponent,
     TextBoxComponent
 } from "mona-ui";
-import { ComponentConfig, ComponentInputs, createComponentInputConfigArray } from "../../utils/componentConfig";
+import { ComponentMetadata } from "../../models/ComponentMetadata";
+import { InputPropertyPipe } from "../../pipes/input-type.pipe";
+import { ComponentConfig, ComponentInputs, createComponentPropertyConfigArray } from "../../utils/componentConfig";
 
 @Component({
     selector: "app-config",
@@ -17,7 +19,8 @@ import { ComponentConfig, ComponentInputs, createComponentInputConfigArray } fro
         NumericTextBoxComponent,
         DropDownListComponent,
         SwitchComponent,
-        ColorPickerComponent
+        ColorPickerComponent,
+        InputPropertyPipe
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,8 +29,9 @@ export class ConfigComponent<C> {
     public readonly config = input.required<ComponentConfig<C>>();
     public readonly configObjList = computed(() => {
         const config = this.config();
-        return createComponentInputConfigArray(config);
+        return createComponentPropertyConfigArray(config);
     });
+    public readonly metadata = input.required<ComponentMetadata>();
     public readonly outputObject = signal<ComponentInputs<C>>({});
     public readonly valueChange = output<ComponentInputs<C>>();
 
