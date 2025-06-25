@@ -17,30 +17,25 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
         inputs: {
             disabled: {
                 type: "boolean",
-                description: "Disables the chip, preventing interaction.",
                 value: false
             },
             look: {
                 type: "dropdown",
-                description: "Defines the visual style of the chip.",
                 value: ["default", "destructive", "outline", "secondary"],
                 defaultValue: "default"
             },
             label: {
                 type: "string",
-                description: "Sets the text label for the chip.",
                 value: "Chip Label"
             },
             removable: {
                 type: "boolean",
-                description: "Enables the chip to be removable, allowing users to delete it.",
                 value: false
             }
         },
         outputs: {
             remove: {
-                type: "event",
-                description: "Emitted when the chip is removed, typically by clicking the remove icon."
+                type: "event"
             }
         }
     });

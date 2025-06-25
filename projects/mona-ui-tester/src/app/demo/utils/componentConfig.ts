@@ -32,7 +32,7 @@ export type ComponentInputsAsSignal<TComponent> = {
 export type ComponentConfigType = "string" | "number" | "boolean" | "dropdown" | "color" | "event";
 
 export type ComponentConfigInputType<TComponent> = {
-    [key in keyof ComponentInputs<TComponent>]: (
+    [key in keyof ComponentInputs<TComponent>]:
         | {
               type: Extract<ComponentConfigType, "string" | "number" | "boolean" | "color">;
               value: NonNullable<ComponentInputs<TComponent>[key]>;
@@ -41,13 +41,11 @@ export type ComponentConfigInputType<TComponent> = {
               type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
               defaultValue: ComponentInputs<TComponent>[key];
-          }
-    ) & { description: string };
+          };
 };
 
 export type ComponentConfigOutputType<TComponent> = {
     [key in keyof ComponentOutputs<TComponent>]?: {
-        description: string;
         type: "event";
     };
 };
@@ -59,7 +57,6 @@ export type ComponentConfig<TComponent> = {
 
 type ProcessedConfigItem<TValue = any> = {
     configType: ComponentConfigType;
-    description: string;
     name: string; // From the input structure
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
@@ -101,7 +98,6 @@ export function createComponentInputConfigArray<TComponent>(
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
                 configType: configItem.type,
-                description: configItem.description,
                 name: String(key),
                 value: configItem.value,
                 valueType: runtimeValueType
@@ -124,13 +120,6 @@ export function createComponentOutputConfigArray<TComponent>(
     configInput: ComponentConfigOutputType<TComponent>
 ): ProcessedConfigItem[] {
     const processedArray: ProcessedConfigItem[] = [];
-    const getRuntimeValueType = (val: any): ProcessedConfigItem["valueType"] => {
-        if (Array.isArray(val)) {
-            return "array";
-        }
-        return typeof val;
-    };
-
     for (const key in configInput) {
         if (Object.prototype.hasOwnProperty.call(configInput, key)) {
             const configItem = configInput[key];
@@ -139,7 +128,6 @@ export function createComponentOutputConfigArray<TComponent>(
             }
             processedArray.push({
                 configType: "event",
-                description: configItem.description,
                 name: String(key),
                 valueType: "function"
             });

@@ -18,49 +18,36 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
         inputs: {
             ariaDescribedby: {
                 type: "string",
-                description:
-                    "Sets the aria-describedby attribute for the button, which provides additional descriptive text for screen readers.",
                 value: "Aria described by"
             },
             ariaLabel: {
                 type: "string",
-                description:
-                    "Sets the aria-label attribute for the button, which provides a label for screen readers when the button does not have visible text.",
                 value: "Button"
             },
             ariaLabelledby: {
                 type: "string",
-                description:
-                    "Sets the aria-labelledby attribute for the button, which references another element that labels the button for screen readers.",
                 value: "Aria labelled by"
             },
             disabled: {
                 type: "boolean",
-                description: "Disables the button, preventing user interaction.",
                 value: false
             },
             look: {
                 type: "dropdown",
-                description: "Sets the visual style of the button.",
                 value: ["default", "destructive", "link", "secondary", "ghost", "outline"],
                 defaultValue: "default"
             },
             selected: {
                 type: "boolean",
-                description:
-                    "Sets the selected state of the button, which can be used to indicate an active or chosen state.",
                 value: false
             },
             size: {
                 type: "dropdown",
-                description: "Sets the size of the button.",
                 value: ["medium", "small", "large"],
                 defaultValue: "medium"
             },
             toggleable: {
                 type: "boolean",
-                description:
-                    "If set to true, the button will toggle its selected state on click, allowing it to be used as a toggle button.",
                 value: false
             }
         },

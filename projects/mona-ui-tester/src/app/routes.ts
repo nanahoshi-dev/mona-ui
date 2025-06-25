@@ -27,6 +27,13 @@ export const routes: Routes = [
                 path: "chip",
                 loadComponent: () =>
                     import("./docs/components/chip-doc/chip-doc.component").then(m => m.ChipDocComponent)
+            },
+            {
+                path: "split-button",
+                loadComponent: () =>
+                    import("./docs/components/split-button-doc/split-button-doc.component").then(
+                        m => m.SplitButtonDocComponent
+                    )
             }
         ]
     }
