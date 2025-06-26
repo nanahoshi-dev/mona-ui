@@ -33,7 +33,7 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { Collections } from "@mirei/ts-collections";
 import { v4 } from "uuid";
-import { ChipComponent } from "../../../buttons/chip/chip.component";
+import { ChipComponent } from "../../../buttons/chip/component/chip.component";
 import { PlaceholderComponent } from "../../../layout/placeholder/placeholder.component";
 import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";

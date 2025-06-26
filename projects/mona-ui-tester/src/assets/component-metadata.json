@@ -1,52 +1,4 @@
 {
-  "ChipComponent": {
-    "name": "ChipComponent",
-    "selector": "\"mona-chip\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of the chip.",
-        "kind": "input"
-      },
-      {
-        "name": "label",
-        "type": "string",
-        "description": "Sets the label of the chip.\rIf the label is set, the chip will display the label instead of the content.",
-        "kind": "input"
-      },
-      {
-        "name": "look",
-        "type": "ChipVariantProps[\"look\"]",
-        "description": "Sets the look of the chip.",
-        "kind": "input"
-      },
-      {
-        "name": "removable",
-        "type": "boolean",
-        "description": "Sets the removable state of the chip.\rIf true, the chip will display a remove icon.",
-        "kind": "input"
-      },
-      {
-        "name": "remove",
-        "type": "Event",
-        "description": "Emits when the {@link removable} is set to true and the remove icon is clicked.",
-        "kind": "output"
-      },
-      {
-        "name": "tabindex",
-        "type": "number | string",
-        "description": "Sets the tabindex of the chip.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "DropDownButtonComponent": {
     "name": "DropDownButtonComponent",
     "selector": "\"mona-drop-down-button\"",
@@ -1307,6 +1259,66 @@
       }
     ]
   },
+  "ChipComponent": {
+    "name": "ChipComponent",
+    "selector": "\"mona-chip\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the chip.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "Sets the label of the chip.\nIf the label is set, the chip will display the label instead of the content.",
+        "kind": "input"
+      },
+      {
+        "name": "look",
+        "type": "ChipVariantProps[\"look\"]",
+        "description": "Sets the look of the chip.",
+        "kind": "input"
+      },
+      {
+        "name": "removable",
+        "type": "boolean",
+        "description": "Sets the removable state of the chip.\nIf true, the chip will display a remove icon.",
+        "kind": "input"
+      },
+      {
+        "name": "remove",
+        "type": "Event",
+        "description": "Emits when the {@link removable} is set to true and the remove icon is clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "rounded",
+        "type": "ChipVariantProps[\"rounded\"]",
+        "description": "Sets the rounded state of the chip.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ChipVariantProps[\"size\"]",
+        "description": "Sets the size of the chip.",
+        "kind": "input"
+      },
+      {
+        "name": "tabindex",
+        "type": "number | string",
+        "description": "Sets the tabindex of the chip.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "DropDownTreeDisableDirective": {
     "name": "DropDownTreeDisableDirective",
     "selector": "\"mona-drop-down-tree[monaDropDownTreeDisable]\"",
@@ -1560,7 +1572,7 @@
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "The page sizes that the user can select from.\rThese values will be displayed in the page size dropdown.",
+        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
         "kind": "input"
       },
       {
@@ -1578,13 +1590,13 @@
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "The method to be used to set initial column widths.\rIt can be the following values:\r- `fitView`: The columns will be resized to fit the available width.\r- `auto`: The columns will be resized based on the content.\r- A number representing the width of the columns. All columns except the columns with a specified width\r  will have the same width.\r@default \"fitView\"",
+        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\n  will have the same width.\n@default \"fitView\"",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "Whether the pager is responsive.\rIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
+        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input"
       },
       {

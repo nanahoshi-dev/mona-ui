@@ -74,11 +74,11 @@ export const buttonVariants = cva(
                 `
             },
             rounded: {
-                small: "rounded-sm",
+                full: "rounded-full",
+                large: "rounded-lg",
                 medium: "rounded-md",
                 none: "rounded-none",
-                large: "rounded-lg",
-                full: "rounded-full"
+                small: "rounded-sm"
             },
             size: {
                 large: "px-6 py-3",

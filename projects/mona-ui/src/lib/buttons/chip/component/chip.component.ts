@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from "@angular/core";
-import { ChipVariantInputs, ChipVariantProps, chipVariants } from "mona-ui/buttons/chip/chip.style";
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from "@angular/core";
+import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "mona-ui/buttons/chip/styles/chip.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 
 @Component({
@@ -15,10 +16,14 @@ import { twMerge } from "tailwind-merge";
     }
 })
 export class ChipComponent implements ChipVariantInputs {
+    readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
+        const theme = this.#themeService.theme();
         const look = this.look();
+        const rounded = this.rounded();
+        const size = this.size();
         const userClass = this.userClass();
-        const variantClasses = chipVariants({ look });
+        const variantClasses = chipThemeVariants(theme)({ look, rounded, size });
         return twMerge(variantClasses, userClass);
     });
 
@@ -49,6 +54,16 @@ export class ChipComponent implements ChipVariantInputs {
      * Emits when the {@link removable} is set to true and the remove icon is clicked.
      */
     public readonly remove = output<Event>();
+
+    /**
+     * Sets the rounded state of the chip.
+     */
+    public readonly rounded = input<ChipVariantProps["rounded"]>("full");
+
+    /**
+     * Sets the size of the chip.
+     */
+    public readonly size = input<ChipVariantProps["size"]>("medium");
 
     /**
      * Sets the tabindex of the chip.

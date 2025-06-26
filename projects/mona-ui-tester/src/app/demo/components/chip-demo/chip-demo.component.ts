@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
 import { ChipComponent } from "mona-ui";
-import { ComponentConfig } from "../../utils/componentConfig";
+import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -12,7 +12,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
-    protected readonly ChipComponent = ChipComponent;
+    protected readonly ChipWrapperComponent = ChipWrapperComponent;
     protected readonly config = signal<ComponentConfig<ChipComponent>>({
         inputs: {
             disabled: {
@@ -21,7 +21,7 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
             },
             look: {
                 type: "dropdown",
-                value: ["default", "destructive", "outline", "secondary"],
+                value: ["default", "outline", "primary", "success", "error", "warning", "info", "secondary", "ghost"],
                 defaultValue: "default"
             },
             label: {
@@ -31,6 +31,16 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
             removable: {
                 type: "boolean",
                 value: false
+            },
+            rounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "medium"
+            },
+            size: {
+                type: "dropdown",
+                value: ["small", "medium", "large"],
+                defaultValue: "medium"
             }
         },
         outputs: {
@@ -40,4 +50,30 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
         }
     });
     protected readonly metadata = this.getMetadata("ChipComponent");
+}
+
+@Component({
+    imports: [ChipComponent],
+    template: `
+        <mona-chip
+            [look]="look()"
+            [disabled]="disabled()"
+            [removable]="removable()"
+            [rounded]="rounded()"
+            [size]="size()"
+            [label]="label()"
+            (remove)="onRemove($event)"></mona-chip>
+    `
+})
+export class ChipWrapperComponent implements ComponentInputsAsSignal<ChipComponent> {
+    public readonly disabled = input(false);
+    public readonly label = input("Mona Chip");
+    public readonly look = input<ReturnType<ChipComponent["look"]>>("default");
+    public readonly removable = input(false);
+    public readonly rounded = input<ReturnType<ChipComponent["rounded"]>>("medium");
+    public readonly size = input<ReturnType<ChipComponent["size"]>>("medium");
+
+    protected onRemove(event: Event): void {
+        console.log("Chip removed", event);
+    }
 }
