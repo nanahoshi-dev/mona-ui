@@ -10,8 +10,8 @@ import {
     untracked
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ButtonGroupComponent } from "../../../buttons/button-group/button-group.component";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonGroupComponent } from "../../../buttons/button-group/components/button-group/button-group.component";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/date-picker.component";
 import { DateTimePickerComponent } from "../../../date-inputs/date-time-picker/date-time-picker.component";
 import { TimePickerComponent } from "../../../date-inputs/time-picker/time-picker.component";

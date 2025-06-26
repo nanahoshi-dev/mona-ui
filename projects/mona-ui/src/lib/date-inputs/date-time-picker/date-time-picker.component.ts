@@ -22,7 +22,7 @@ import { DateTime } from "luxon";
 import { fromEvent, take } from "rxjs";
 import { AnimationState } from "../../animations/models/AnimationState";
 import { PopupAnimationService } from "../../animations/services/popup-animation.service";
-import { ButtonDirective } from "../../buttons/button/button.directive";
+import { ButtonDirective } from "../../buttons/button/directives/button.directive";
 import { DropDownService } from "../../dropdowns/services/drop-down.service";
 import { TextBoxDirective } from "../../inputs/text-box/directives/text-box.directive";
 import { PopupRef } from "../../popup/models/PopupRef";

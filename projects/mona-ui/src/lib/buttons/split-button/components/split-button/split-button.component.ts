@@ -21,7 +21,7 @@ import {
     ButtonVariantProps,
     SplitButtonVariantInputs,
     splitButtonVariants
-} from "mona-ui/buttons/styles/button.shadcn.styles";
+} from "mona-ui/buttons/button/styles/button.shadcn.styles";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
 import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
@@ -29,7 +29,7 @@ import { twMerge } from "tailwind-merge";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
-import { ButtonDirective } from "../../../button/button.directive";
+import { ButtonDirective } from "../../../button/directives/button.directive";
 import { SplitButtonTextTemplateDirective } from "../../directives/split-button-text-template.directive";
 
 @Component({

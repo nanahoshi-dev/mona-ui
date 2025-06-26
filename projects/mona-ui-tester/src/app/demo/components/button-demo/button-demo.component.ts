@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
 import { ButtonDirective, ThemeService } from "mona-ui";
-import { ComponentConfig } from "../../utils/componentConfig";
+import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -34,8 +34,24 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             },
             look: {
                 type: "dropdown",
-                value: ["default", "destructive", "link", "secondary", "ghost", "outline"],
+                value: [
+                    "default",
+                    "primary",
+                    "success",
+                    "error",
+                    "warning",
+                    "info",
+                    "link",
+                    "secondary",
+                    "ghost",
+                    "outline"
+                ],
                 defaultValue: "default"
+            },
+            rounded: {
+                type: "dropdown",
+                value: ["small", "medium", "large", "full", "none"],
+                defaultValue: "medium"
             },
             selected: {
                 type: "boolean",
@@ -73,21 +89,23 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             [ariaLabel]="ariaLabel()"
             [ariaLabelledby]="ariaLabelledby()"
             [disabled]="disabled()"
-            [look]="$any(look())"
+            [look]="look()"
+            [rounded]="rounded()"
             [selected]="selected()"
-            [size]="$any(size())"
+            [size]="size()"
             [toggleable]="toggleable()">
-            TEST
+            Mona Button
         </button>
     `
 })
-export class ButtonWrapperComponent {
-    public readonly ariaDescribedby = input<string>("aria-describedby");
-    public readonly ariaLabel = input<string>("Button");
-    public readonly ariaLabelledby = input<string>("aria-labelledby");
-    public readonly disabled = input<boolean>(false);
-    public readonly look = input<string>("default");
-    public readonly selected = input<boolean>(false);
-    public readonly size = input<string>("default");
+export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDirective> {
+    public readonly ariaDescribedby = input("aria-describedby");
+    public readonly ariaLabel = input("Button");
+    public readonly ariaLabelledby = input("aria-labelledby");
+    public readonly disabled = model(false);
+    public readonly look = model<ReturnType<ButtonDirective["look"]>>("default");
+    public readonly rounded = input<ReturnType<ButtonDirective["rounded"]>>("medium");
+    public readonly selected = model<ReturnType<ButtonDirective["selected"]>>(false);
+    public readonly size = input<ReturnType<ButtonDirective["size"]>>("medium");
     public readonly toggleable = input<boolean>(false);
 }

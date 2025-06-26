@@ -5,7 +5,6 @@ import {
     computed,
     contentChildren,
     DestroyRef,
-    effect,
     inject,
     input,
     model,
@@ -14,17 +13,18 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { firstOrDefault } from "@mirei/ts-collections";
-import { ButtonGroupItemComponent } from "mona-ui/buttons/button-group/button-group-item/button-group-item.component";
+import { ButtonGroupItemComponent } from "mona-ui/buttons/button-group/components/button-group-item/button-group-item.component";
 import {
+    buttonGroupThemeVariants,
     ButtonGroupVariantProps,
-    buttonGroupVariants,
     ButtonGroupVariantsInput
-} from "mona-ui/buttons/button-group/button-group.style";
-import { ButtonVariantProps } from "mona-ui/buttons/styles/button.shadcn.styles";
+} from "mona-ui/buttons/button-group/styles/button-group.styles";
+import { ButtonVariantProps } from "mona-ui/buttons/button/styles/button.shadcn.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
-import { SelectionMode } from "../../models/SelectionMode";
-import { ButtonDirective } from "../button/button.directive";
-import { ButtonService } from "../services/button.service";
+import { SelectionMode } from "../../../../models/SelectionMode";
+import { ButtonDirective } from "../../../button/directives/button.directive";
+import { ButtonService } from "../../../services/button.service";
 
 @Component({
     selector: "mona-button-group",
@@ -40,15 +40,18 @@ import { ButtonService } from "../services/button.service";
 export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
     readonly #buttonService = inject(ButtonService, { self: true });
     readonly #destroyRef = inject(DestroyRef);
+    readonly #themeService = inject(ThemeService);
     protected readonly buttonLook = computed<ButtonVariantProps["look"]>(() => {
         return this.look() === "default" ? "ghost" : this.look();
     });
     protected readonly buttons = viewChildren(ButtonDirective);
     protected readonly classes = computed(() => {
+        const theme = this.#themeService.theme();
         const look = this.look();
+        const rounded = this.rounded();
         const size = this.size();
         const userClass = this.userClass();
-        const variantClasses = buttonGroupVariants({ look, size });
+        const variantClasses = buttonGroupThemeVariants(theme)({ look, rounded, size });
         return twMerge(variantClasses, userClass);
     });
     protected readonly items = contentChildren(ButtonGroupItemComponent);
@@ -65,9 +68,14 @@ export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
     public readonly look = input<ButtonGroupVariantProps["look"]>("outline");
 
     /**
+     * Sets the rounded style of the button group.
+     */
+    public readonly rounded = input<ButtonGroupVariantProps["rounded"]>("medium");
+
+    /**
      * Sets the size of the button group.
      */
-    public readonly size = input<ButtonGroupVariantProps["size"]>("default");
+    public readonly size = input<ButtonGroupVariantProps["size"]>("medium");
 
     /**
      * Sets the selection mode of the button group.

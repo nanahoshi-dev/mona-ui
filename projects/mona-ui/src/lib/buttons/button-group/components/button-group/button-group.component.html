@@ -1,6 +1,7 @@
 @for (item of items(); track $index) {
     <button monaButton
             [look]="buttonLook()"
+            [rounded]="rounded()"
             [toggleable]="true"
             [disabled]="item.disabled() || disabled()"
             (click)="item.click.emit($event)"

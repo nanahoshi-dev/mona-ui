@@ -34,7 +34,7 @@ import {
 } from "mona-ui/dropdowns/styles/dropdown.style";
 import { distinctUntilChanged, fromEvent, take, withLatestFrom } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, output } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
 import { EditorImageFormOptions } from "../../models/EditorImageFormOptions";

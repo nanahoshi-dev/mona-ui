@@ -55,8 +55,9 @@ export type ComponentConfig<TComponent> = {
     outputs: ComponentConfigOutputType<TComponent>;
 };
 
-type ProcessedConfigItem<TValue = any> = {
+type ProcessedConfigItem<TValue = any, TDefault = any> = {
     configType: ComponentConfigType;
+    defaultValue?: TDefault;
     name: string; // From the input structure
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
@@ -98,6 +99,7 @@ export function createComponentInputConfigArray<TComponent>(
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
                 configType: configItem.type,
+                defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 name: String(key),
                 value: configItem.value,
                 valueType: runtimeValueType
@@ -174,11 +176,9 @@ export function extractConfigValues<TComponent>(inputConfig: ComponentConfig<TCo
                 } else {
                     valueToAssign = configItem.value;
                 }
-
                 result[key as keyof ComponentInputs<TComponent>] = valueToAssign as ReturnType[typeof key];
             }
         }
     }
-
     return result;
 }

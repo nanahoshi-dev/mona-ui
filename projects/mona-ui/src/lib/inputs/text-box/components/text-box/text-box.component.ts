@@ -19,7 +19,7 @@ import {
     textBoxVariants
 } from "../../../styles/textbox.style";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { Action } from "../../../../utils/Action";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";

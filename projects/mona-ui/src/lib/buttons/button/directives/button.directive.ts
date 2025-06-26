@@ -11,11 +11,11 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ButtonVariantProps, ButtonVariantsInput, themeVariants } from "mona-ui/buttons/styles/button.styles";
+import { ButtonVariantProps, ButtonVariantsInput, themeVariants } from "mona-ui/buttons/button/styles/button.styles";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ButtonService } from "../services/button.service";
+import { ButtonService } from "../../services/button.service";
 
 @Directive({
     selector: "button[monaButton]",

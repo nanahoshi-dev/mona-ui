@@ -21,7 +21,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
 import { filter, fromEvent } from "rxjs";
 import { AnimationService } from "../../../animations/services/animation.service";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PopupCloseSource } from "../../../popup/models/PopupCloseEvent";
 import { PopupDataInjectionToken } from "../../../popup/models/PopupInjectionToken";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";

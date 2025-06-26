@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faCheck, faExclamation, faInfo, faQuestion, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Subject, take } from "rxjs";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
 import { DialogAction } from "../../models/DialogAction";

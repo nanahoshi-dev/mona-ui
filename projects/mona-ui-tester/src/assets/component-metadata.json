@@ -94,6 +94,12 @@
         "kind": "input"
       },
       {
+        "name": "rounded",
+        "type": "ButtonGroupVariantProps[\"rounded\"]",
+        "description": "Sets the rounded style of the button group.",
+        "kind": "input"
+      },
+      {
         "name": "size",
         "type": "ButtonGroupVariantProps[\"size\"]",
         "description": "Sets the size of the button group.",

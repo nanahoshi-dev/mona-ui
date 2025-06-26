@@ -15,7 +15,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Dictionary, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { fromEvent, mergeWith } from "rxjs";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 import { ElementAtPipe } from "../../../pipes/element-at.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";

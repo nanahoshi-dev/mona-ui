@@ -1,6 +1,6 @@
 <div class="flex overflow-auto">
     <div class="flex-1">
-        <ul class=" rounded-md divide-y divide-gray-200 mt-2">
+        <ul class=" bg-demo-background/10 divide-y divide-border">
             @for (entry of configObjList(); track $index) {
                 <li class="flex flex-col gap-2 py-2">
                     <div class="flex gap-1">
@@ -20,7 +20,8 @@
                         </div>
                         <div class="flex px-2 items-center justify-end flex-1">
                             @if (entry.configType === 'dropdown') {
-                                <mona-drop-down-list [data]="entry.value" [ngModel]="entry.value[0]"
+                                <mona-drop-down-list [data]="entry.value"
+                                                     [ngModel]="entry.defaultValue"
                                                      [style.width.px]="150"
                                                      size="small"
                                                      [showClearButton]="false"

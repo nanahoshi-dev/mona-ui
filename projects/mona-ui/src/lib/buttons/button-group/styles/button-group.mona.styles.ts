@@ -4,6 +4,7 @@ import { VariantInputs, VariantPropsWithoutNull } from "mona-ui/utils/VariantInp
 export const buttonGroupVariants = cva(
     `
         inline-flex items-center justify-center rounded-md shadow border border-input
+        overflow-hidden
         [&>button]:border-0
         [&>button]:focus-visible:z-10
         [&>button.mona-selected]:bg-accent [&>button.mona-selected]:text-accent-foreground
@@ -17,8 +18,15 @@ export const buttonGroupVariants = cva(
                 default: "shadow-none border-none bg-transparent",
                 outline: "[&>button:not(:last-child)]:border-r"
             },
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full",
+                none: "rounded-none"
+            },
             size: {
-                default: "h-9 [&>button]:px-4 [&>button]:py-2",
+                medium: "h-9 [&>button]:px-4 [&>button]:py-2",
                 small: `h-8 [&>button]:px-3 text-xs`,
                 large: `h-10 rounded-md [&>button]:px-8`,
                 icon: "h-9 [&>button]:flex-1"
@@ -26,10 +34,7 @@ export const buttonGroupVariants = cva(
         },
         defaultVariants: {
             look: "default",
-            size: "default"
+            size: "medium"
         }
     }
 );
-
-export type ButtonGroupVariantProps = VariantPropsWithoutNull<VariantProps<typeof buttonGroupVariants>>;
-export type ButtonGroupVariantsInput = VariantInputs<ButtonGroupVariantProps>;

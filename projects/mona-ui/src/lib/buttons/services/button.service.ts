@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ReplaySubject, Subject } from "rxjs";
-import { ButtonDirective } from "../button/button.directive";
+import { ButtonDirective } from "../button/directives/button.directive";
 
 @Injectable()
 export class ButtonService {

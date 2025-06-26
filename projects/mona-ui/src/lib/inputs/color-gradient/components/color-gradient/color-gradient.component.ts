@@ -19,7 +19,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
-import { ButtonDirective } from "../../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
 import { ColorMode, ColorOutputFormat } from "../../../models/ColorMode";

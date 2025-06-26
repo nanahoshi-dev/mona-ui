@@ -2,7 +2,7 @@ import { animate, AnimationBuilder, style } from "@angular/animations";
 import { NgClass } from "@angular/common";
 import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, inject, input, output } from "@angular/core";
 import { take } from "rxjs";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
 import { DataType } from "../../../models/DataType";
 import { PopupRef } from "../../../popup/models/PopupRef";

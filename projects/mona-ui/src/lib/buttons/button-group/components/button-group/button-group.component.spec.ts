@@ -2,8 +2,8 @@ import { Component, ElementRef } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { ButtonGroupItemComponent } from "mona-ui";
-import { SelectionMode } from "../../models/SelectionMode";
-import { ButtonDirective } from "../button/button.directive";
+import { SelectionMode } from "../../../../models/SelectionMode";
+import { ButtonDirective } from "../../../button/directives/button.directive";
 import { ButtonGroupComponent } from "./button-group.component";
 
 @Component({

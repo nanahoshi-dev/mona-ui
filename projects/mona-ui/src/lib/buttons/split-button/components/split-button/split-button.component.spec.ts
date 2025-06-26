@@ -5,7 +5,7 @@ import { BrowserModule, By } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
-import { ButtonDirective } from "../../../button/button.directive";
+import { ButtonDirective } from "../../../button/directives/button.directive";
 
 import { SplitButtonComponent } from "./split-button.component";
 

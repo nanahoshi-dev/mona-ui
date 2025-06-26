@@ -2,7 +2,7 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testin
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { DropDownListComponent, NumericTextBoxComponent } from "mona-ui";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PagerComponent } from "./pager.component";
 
 describe("PagerComponent", () => {

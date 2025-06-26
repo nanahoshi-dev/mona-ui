@@ -24,6 +24,11 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
                 value: ["default", "outline"],
                 defaultValue: "outline"
             },
+            rounded: {
+                type: "dropdown",
+                value: ["small", "medium", "large", "full", "none"],
+                defaultValue: "medium"
+            },
             selection: {
                 type: "dropdown",
                 value: ["single", "multiple"],
@@ -31,8 +36,8 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
             },
             size: {
                 type: "dropdown",
-                value: ["default", "small", "large", "icon"],
-                defaultValue: "default"
+                value: ["medium", "small", "large", "icon"],
+                defaultValue: "medium"
             }
         },
         outputs: {}
@@ -43,7 +48,12 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
 @Component({
     imports: [ButtonGroupComponent, ButtonGroupItemComponent],
     template: `
-        <mona-button-group [disabled]="disabled()" [selection]="selection()" [look]="look()" [size]="size()">
+        <mona-button-group
+            [disabled]="disabled()"
+            [selection]="selection()"
+            [look]="look()"
+            [rounded]="rounded()"
+            [size]="size()">
             <mona-button-group-item>B1</mona-button-group-item>
             <mona-button-group-item>B2</mona-button-group-item>
             <mona-button-group-item>B3</mona-button-group-item>
@@ -53,6 +63,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
 export class ButtonGroupWrapperComponent implements ComponentInputsAsSignal<ButtonGroupComponent> {
     public readonly disabled = model(false);
     public readonly look = input<ReturnType<ButtonGroupComponent["look"]>>("default");
+    public readonly rounded = input<ReturnType<ButtonGroupComponent["rounded"]>>("medium");
     public readonly selection = model<ReturnType<ButtonGroupComponent["selection"]>>("single");
-    public readonly size = input<ReturnType<ButtonGroupComponent["size"]>>("default");
+    public readonly size = input<ReturnType<ButtonGroupComponent["size"]>>("medium");
 }

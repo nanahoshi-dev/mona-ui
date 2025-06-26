@@ -21,12 +21,12 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             },
             look: {
                 type: "dropdown",
-                value: ["default", "destructive", "outline", "secondary"],
+                value: ["default", "error", "outline", "secondary"],
                 defaultValue: "default"
             },
             rounded: {
                 type: "dropdown",
-                value: ["small", "small", "medium", "large"],
+                value: ["small", "medium", "large", "full", "none"],
                 defaultValue: "medium"
             },
             size: {

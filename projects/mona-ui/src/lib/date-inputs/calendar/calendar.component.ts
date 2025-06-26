@@ -5,7 +5,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Dictionary } from "@mirei/ts-collections";
 import { DateTime, DurationObjectUnits } from "luxon";
-import { ButtonDirective } from "../../buttons/button/button.directive";
+import { ButtonDirective } from "../../buttons/button/directives/button.directive";
 import { DateComparerPipe } from "../../pipes/date-comparer.pipe";
 import { DateIncludePipe } from "../../pipes/date-include.pipe";
 import { SlicePipe } from "../../pipes/slice.pipe";

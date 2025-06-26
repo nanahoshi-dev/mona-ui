@@ -3,9 +3,9 @@
  */
 
 /** Buttons */
-export * from "./buttons/button/button.directive";
-export * from "./buttons/button-group/button-group.component";
-export * from "./buttons/button-group/button-group-item/button-group-item.component";
+export * from "./buttons/button/directives/button.directive";
+export * from "./buttons/button-group/components/button-group/button-group.component";
+export * from "mona-ui/buttons/button-group/components/button-group-item/button-group-item.component";
 export * from "./buttons/chip/chip.component";
 export * from "./buttons/drop-down-button/drop-down-button.component";
 export * from "./buttons/split-button/directives/split-button-text-template.directive";

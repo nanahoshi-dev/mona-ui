@@ -26,7 +26,7 @@ import {
     faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { Collections, Enumerable, ImmutableList, List } from "@mirei/ts-collections";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ListViewComponent } from "../../../list-view/components/list-view/list-view.component";
 import { ListViewItemTemplateDirective } from "../../../list-view/directives/list-view-item-template.directive";
 import { ListViewNavigableDirective } from "../../../list-view/directives/list-view-navigable.directive";

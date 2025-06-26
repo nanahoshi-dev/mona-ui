@@ -20,7 +20,7 @@ import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { EnumerableSet, from, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { fromEvent, pairwise, startWith } from "rxjs";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 import { ContainsPipe } from "../../../pipes/contains.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";

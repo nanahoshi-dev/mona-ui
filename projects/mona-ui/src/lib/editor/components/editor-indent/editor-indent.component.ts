@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
-import { ButtonGroupComponent } from "../../../buttons/button-group/button-group.component";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonGroupComponent } from "../../../buttons/button-group/components/button-group/button-group.component";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { EditorService } from "../../services/editor.service";
 
 @Component({

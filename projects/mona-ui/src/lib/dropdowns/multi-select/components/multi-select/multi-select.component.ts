@@ -32,7 +32,7 @@ import {
 } from "mona-ui/dropdowns/styles/dropdown.style";
 import { fromEvent, take } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ChipComponent } from "../../../../buttons/chip/chip.component";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";

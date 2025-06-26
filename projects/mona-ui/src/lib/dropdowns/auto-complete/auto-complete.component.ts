@@ -23,7 +23,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { LucideAngularModule, X } from "lucide-angular";
-import { ButtonDirective } from "mona-ui/buttons/button/button.directive";
+import { ButtonDirective } from "mona-ui/buttons/button/directives/button.directive";
 import {
     dropdownPopupHideAnimation,
     dropdownPopupShowAnimation

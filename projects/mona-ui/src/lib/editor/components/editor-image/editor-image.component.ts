@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from "@angular/core";
-import { ButtonDirective } from "../../../buttons/button/button.directive";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { WindowComponent } from "../../../window/components/window/window.component";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
 import { EditorService } from "../../services/editor.service";

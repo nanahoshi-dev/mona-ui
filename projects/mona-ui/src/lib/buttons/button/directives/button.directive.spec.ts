@@ -1,7 +1,7 @@
 import { Component, viewChild, ViewChild } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ButtonGroupComponent } from "../button-group/button-group.component";
+import { ButtonGroupComponent } from "../../button-group/components/button-group/button-group.component";
 import { ButtonDirective } from "./button.directive";
 
 @Component({

@@ -50,7 +50,7 @@ import {
     withLatestFrom
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../buttons/button/button.directive";
+import { ButtonDirective } from "../../buttons/button/directives/button.directive";
 import { FilterChangeEvent } from "../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../common/list/directives/list-footer-template.directive";
