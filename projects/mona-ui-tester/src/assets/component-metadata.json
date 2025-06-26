@@ -1,124 +1,4 @@
 {
-  "ButtonDirective": {
-    "name": "ButtonDirective",
-    "selector": "\"button[monaButton]\"",
-    "inputs": [
-      {
-        "name": "ariaDescribedby",
-        "type": "string",
-        "description": "ARIA value for `aria-describedby` attribute.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaLabel",
-        "type": "string",
-        "description": "ARIA value for `aria-label` attribute.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaLabelledby",
-        "type": "string",
-        "description": "ARIA value for `aria-labelledby` attribute",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of the button.",
-        "kind": "model"
-      },
-      {
-        "name": "flat",
-        "type": "boolean",
-        "description": "@deprecated Use `ghost` option in `look` instead.",
-        "kind": "input"
-      },
-      {
-        "name": "look",
-        "type": "ButtonVariantProps[\"look\"]",
-        "description": "Sets the look of the button.",
-        "kind": "model"
-      },
-      {
-        "name": "rounded",
-        "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "selected",
-        "type": "boolean",
-        "description": "Sets the selected state of the button.",
-        "kind": "model"
-      },
-      {
-        "name": "size",
-        "type": "ButtonVariantProps[\"size\"]",
-        "description": "Sets the size of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "tabindex",
-        "type": "number",
-        "description": "Sets the tabindex of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "toggleable",
-        "type": "boolean",
-        "description": "Sets the toggleable state of the button.\nIf set to `true`, the button will toggle its selected state on click.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "ButtonGroupComponent": {
-    "name": "ButtonGroupComponent",
-    "selector": "\"mona-button-group\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
-        "kind": "model"
-      },
-      {
-        "name": "look",
-        "type": "ButtonGroupVariantProps[\"look\"]",
-        "description": "Sets the look of the button group.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "ButtonGroupVariantProps[\"rounded\"]",
-        "description": "Sets the rounded style of the button group.",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "ButtonGroupVariantProps[\"size\"]",
-        "description": "Sets the size of the button group.",
-        "kind": "input"
-      },
-      {
-        "name": "selection",
-        "type": "SelectionMode",
-        "description": "Sets the selection mode of the button group.",
-        "kind": "model"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "ChipComponent": {
     "name": "ChipComponent",
     "selector": "\"mona-chip\"",
@@ -1349,27 +1229,81 @@
       }
     ]
   },
-  "ButtonGroupItemComponent": {
-    "name": "ButtonGroupItemComponent",
-    "selector": "\"mona-button-group-item\"",
+  "ButtonDirective": {
+    "name": "ButtonDirective",
+    "selector": "\"button[monaButton]\"",
     "inputs": [
       {
-        "name": "click",
-        "type": "MouseEvent",
-        "description": "Emits when the button is clicked.",
-        "kind": "output"
+        "name": "ariaDescribedby",
+        "type": "string",
+        "description": "ARIA value for `aria-describedby` attribute.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "ARIA value for `aria-label` attribute.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledby",
+        "type": "string",
+        "description": "ARIA value for `aria-labelledby` attribute",
+        "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the button is disabled.",
+        "description": "Sets the disabled state of the button.",
         "kind": "model"
+      },
+      {
+        "name": "flat",
+        "type": "boolean",
+        "description": "@deprecated Use `ghost` option in `look` instead.",
+        "kind": "input"
+      },
+      {
+        "name": "look",
+        "type": "ButtonVariantProps[\"look\"]",
+        "description": "Sets the look of the button.",
+        "kind": "model"
+      },
+      {
+        "name": "rounded",
+        "type": "ButtonVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the button.",
+        "kind": "input"
       },
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Whether the button is selected.",
+        "description": "Sets the selected state of the button.",
         "kind": "model"
+      },
+      {
+        "name": "size",
+        "type": "ButtonVariantProps[\"size\"]",
+        "description": "Sets the size of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "tabindex",
+        "type": "number",
+        "description": "Sets the tabindex of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "toggleable",
+        "type": "boolean",
+        "description": "Sets the toggleable state of the button.\nIf set to `true`, the button will toggle its selected state on click.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
       }
     ]
   },
@@ -2189,6 +2123,72 @@
       }
     ]
   },
+  "ButtonGroupComponent": {
+    "name": "ButtonGroupComponent",
+    "selector": "\"mona-button-group\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
+        "kind": "model"
+      },
+      {
+        "name": "look",
+        "type": "ButtonGroupVariantProps[\"look\"]",
+        "description": "Sets the look of the button group.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ButtonGroupVariantProps[\"rounded\"]",
+        "description": "Sets the rounded style of the button group.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ButtonGroupVariantProps[\"size\"]",
+        "description": "Sets the size of the button group.",
+        "kind": "input"
+      },
+      {
+        "name": "selection",
+        "type": "SelectionMode",
+        "description": "Sets the selection mode of the button group.",
+        "kind": "model"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "ButtonGroupItemComponent": {
+    "name": "ButtonGroupItemComponent",
+    "selector": "\"mona-button-group-item\"",
+    "inputs": [
+      {
+        "name": "click",
+        "type": "MouseEvent",
+        "description": "Emits when the button is clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Whether the button is disabled.",
+        "kind": "model"
+      },
+      {
+        "name": "selected",
+        "type": "boolean",
+        "description": "Whether the button is selected.",
+        "kind": "model"
+      }
+    ]
+  },
   "SplitButtonComponent": {
     "name": "SplitButtonComponent",
     "selector": "\"mona-split-button\"",
@@ -2207,19 +2207,19 @@
       },
       {
         "name": "look",
-        "type": "ButtonVariantProps[\"look\"]",
+        "type": "SplitButtonVariantProps[\"look\"]",
         "description": "Sets the look of the button.",
         "kind": "input"
       },
       {
         "name": "rounded",
-        "type": "ButtonVariantProps[\"rounded\"]",
+        "type": "SplitButtonVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the button.",
         "kind": "input"
       },
       {
         "name": "size",
-        "type": "ButtonVariantProps[\"size\"]",
+        "type": "SplitButtonVariantProps[\"size\"]",
         "description": "Sets the size of the button.",
         "kind": "input"
       },
@@ -2664,25 +2664,25 @@
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the alpha slider.\r@default true",
+        "description": "Specifies whether the color picker should display the alpha slider.\n@default true",
         "kind": "input"
       },
       {
         "name": "showButtons",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the buttons.\rWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\rWhen set to false, the color picker will not display the buttons and will emit the color value on change.\r@default true",
+        "description": "Specifies whether the color picker should display the buttons.\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.\n@default true",
         "kind": "input"
       },
       {
         "name": "showHexInput",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the hex input.\r@default true",
+        "description": "Specifies whether the color picker should display the hex input.\n@default true",
         "kind": "input"
       },
       {
         "name": "showRgbInput",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the RGB input.\r@default true",
+        "description": "Specifies whether the color picker should display the RGB input.\n@default true",
         "kind": "input"
       }
     ]
@@ -2694,19 +2694,19 @@
       {
         "name": "closeOnSelect",
         "type": "boolean",
-        "description": "Whether to close the color picker when a color is selected.\rOnly applies when {@link view} is set to \"palette\".\r@default true",
+        "description": "Whether to close the color picker when a color is selected.\nOnly applies when {@link view} is set to \"palette\".\n@default true",
         "kind": "input"
       },
       {
         "name": "columns",
         "type": "number",
-        "description": "The number of columns to display in the color palette.\rOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.\r@default 10",
+        "description": "The number of columns to display in the color palette.\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.\n@default 10",
         "kind": "input"
       },
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "Whether to display the opacity slider.\rOnly applies when the view is set to \"gradient\".\r@default true",
+        "description": "Whether to display the opacity slider.\nOnly applies when the view is set to \"gradient\".\n@default true",
         "kind": "input"
       },
       {

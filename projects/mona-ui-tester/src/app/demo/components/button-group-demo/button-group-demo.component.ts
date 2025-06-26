@@ -21,8 +21,8 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
             },
             look: {
                 type: "dropdown",
-                value: ["default", "outline"],
-                defaultValue: "outline"
+                value: ["default", "outline", "primary", "secondary", "success", "error", "warning", "info", "ghost"],
+                defaultValue: "default"
             },
             rounded: {
                 type: "dropdown",
@@ -36,7 +36,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
             },
             size: {
                 type: "dropdown",
-                value: ["medium", "small", "large", "icon"],
+                value: ["medium", "small", "large"],
                 defaultValue: "medium"
             }
         },

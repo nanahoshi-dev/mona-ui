@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { ButtonGroupComponent, ButtonGroupItemComponent, MenuItemComponent, SplitButtonComponent } from "mona-ui";
+import { MenuItemComponent, SplitButtonComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -21,7 +21,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             },
             look: {
                 type: "dropdown",
-                value: ["default", "error", "outline", "secondary"],
+                value: ["default", "error", "outline", "secondary", "success", "warning", "info", "ghost", "primary"],
                 defaultValue: "default"
             },
             rounded: {

@@ -107,7 +107,7 @@ export function generatePrimaryColorPalette(primaryOklchString: string): ColorPa
     });
 
     colorPalette["--color-primary-hover"] = formatOklch({
-        l: primaryColor.l + 4,
+        l: primaryColor.l + 6,
         c: primaryColor.c,
         h: primaryColor.h
     });

@@ -1,14 +1,10 @@
-import { cva, VariantProps } from "class-variance-authority";
-import { VariantInputs, VariantPropsWithoutNull } from "mona-ui/utils/VariantInputs";
+import { cva } from "class-variance-authority";
 
-export const buttonGroupVariants = cva(
+export const splitButtonVariants = cva(
     `
-        inline-flex items-center justify-center
-        border border-border
-        [&>button]:border-0
-        [&>button]:focus-visible:ring-2
+        inline-flex flex-nowrap items-center
         [&>button]:focus-visible:z-10
-        [&>button]:w-full [&>button]:h-full [&>button]:rounded-none
+        [&_svg]:w-5 [&_svg]:h-5
     `,
     {
         variants: {
@@ -49,14 +45,21 @@ export const buttonGroupVariants = cva(
                 `
             },
             size: {
-                large: ``,
-                medium: "",
-                small: ``
+                large: `
+                    [&_svg]:w-5 [&_svg]:h-5
+                `,
+                medium: `
+                    [&_svg]:w-5 [&_svg]:h-5
+                `,
+                small: `
+                    [&_svg]:w-4 [&_svg]:h-4
+                `
             }
         },
         defaultVariants: {
             look: "default",
-            size: "medium"
+            size: "medium",
+            rounded: "medium"
         }
     }
 );

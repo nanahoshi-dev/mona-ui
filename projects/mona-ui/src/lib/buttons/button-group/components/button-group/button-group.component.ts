@@ -19,10 +19,9 @@ import {
     ButtonGroupVariantProps,
     ButtonGroupVariantsInput
 } from "mona-ui/buttons/button-group/styles/button-group.styles";
-import { ButtonVariantProps } from "mona-ui/buttons/button/styles/button.shadcn.styles";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
-import { SelectionMode } from "../../../../models/SelectionMode";
+import { SelectionMode } from "mona-ui/models/SelectionMode";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { ButtonService } from "../../../services/button.service";
 
@@ -41,9 +40,6 @@ export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
     readonly #buttonService = inject(ButtonService, { self: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #themeService = inject(ThemeService);
-    protected readonly buttonLook = computed<ButtonVariantProps["look"]>(() => {
-        return this.look() === "default" ? "ghost" : this.look();
-    });
     protected readonly buttons = viewChildren(ButtonDirective);
     protected readonly classes = computed(() => {
         const theme = this.#themeService.theme();
@@ -92,6 +88,7 @@ export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
             if (this.selection() === "single") {
                 const selectedButton = firstOrDefault(this.buttons(), b => b.selected());
                 if (selectedButton === button) {
+                    button.selected.set(!button.selected());
                     return;
                 }
                 this.buttons().forEach(b => {

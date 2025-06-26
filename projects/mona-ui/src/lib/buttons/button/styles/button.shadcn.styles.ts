@@ -19,7 +19,7 @@ export const buttonVariants = cva(
                     border border-border
                     hover:bg-accent hover:text-foreground
                     active:bg-accent-dark active:text-foreground
-                    focus-visible:ring-2 focus-visible:ring-ring/40
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 primary: `
                     bg-primary text-primary-foreground
@@ -61,7 +61,7 @@ export const buttonVariants = cva(
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-secondary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 ghost: `
                     hover:bg-secondary-hover hover:text-secondary-foreground
@@ -82,9 +82,9 @@ export const buttonVariants = cva(
                 full: "rounded-full"
             },
             size: {
-                medium: "h-9 px-4 py-2",
-                small: "h-8 px-3 text-xs",
-                large: "h-10 px-8"
+                large: "px-6 py-3",
+                medium: "px-4 py-2",
+                small: "px-3 py-2 text-xs"
             },
             selected: {
                 true: "bg-accent text-accent-foreground hover:bg-accent/90 hover:text-accent-foreground"
@@ -95,9 +95,9 @@ export const buttonVariants = cva(
                 look: "default",
                 selected: true,
                 class: `
-                    bg-selected text-foreground
-                    hover:bg-selected/95 hover:text-foreground
-                    active:bg-selected/100 active:text-foreground
+                    bg-primary-selected text-primary-foreground
+                    hover:bg-primary-selected/95 hover:text-primary-foreground
+                    active:bg-primary-selected/100 active:text-primary-foreground
                 `
             },
             {
@@ -190,18 +190,7 @@ export const buttonVariants = cva(
     }
 );
 
-export const splitButtonVariants = cva(
-    `
-        flex flex-nowrap items-center
-        focus-visible:outline-none
-    `,
-    {
-        variants: {}
-    }
-);
-
 export type ButtonVariantProps = VariantProps<typeof buttonVariants>;
 export type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
 
 export type DropdownButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;
-export type SplitButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;

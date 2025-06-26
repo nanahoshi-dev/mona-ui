@@ -18,11 +18,11 @@ export const buttonVariants = cva(
                     border border-border
                     hover:bg-accent hover:text-foreground
                     active:bg-accent-dark active:text-foreground
-                    focus-visible:ring-background
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 primary: `
                     bg-primary text-primary-foreground
-                    over:bg-primary-hover hover:text-primary-foreground
+                    hover:bg-primary-hover hover:text-primary-foreground
                     active:bg-primary-active active:text-primary-foreground
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
@@ -60,7 +60,7 @@ export const buttonVariants = cva(
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-secondary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 ghost: `
                     hover:bg-secondary-hover hover:text-secondary-foreground
@@ -94,9 +94,9 @@ export const buttonVariants = cva(
                 look: "default",
                 selected: true,
                 class: `
-                    bg-selected text-foreground
-                    hover:bg-selected/95 hover:text-foreground
-                    active:bg-selected/100 active:text-foreground
+                    bg-primary-selected text-primary-foreground
+                    hover:bg-primary-selected/95 hover:text-primary-foreground
+                    active:bg-primary-selected/100 active:text-primary-foreground
                 `
             },
             {

@@ -1,11 +1,12 @@
 @for (item of items(); track $index) {
     <button monaButton
-            [look]="buttonLook()"
+            [look]="look()"
             [rounded]="rounded()"
             [toggleable]="true"
             [disabled]="item.disabled() || disabled()"
             (click)="item.click.emit($event)"
             [selected]="item.selected()"
+            [size]="size()"
             (selectedChange)="item.selected.set($event)">
         <ng-container [ngTemplateOutlet]="item.content()"></ng-container>
     </button>

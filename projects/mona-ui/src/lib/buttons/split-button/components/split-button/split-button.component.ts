@@ -18,13 +18,14 @@ import {
 import { selectMany } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import {
-    ButtonVariantProps,
+    splitButtonThemeVariants,
     SplitButtonVariantInputs,
-    splitButtonVariants
-} from "mona-ui/buttons/button/styles/button.shadcn.styles";
+    SplitButtonVariantProps
+} from "mona-ui/buttons/split-button/styles/split-button.styles";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
 import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
@@ -43,10 +44,19 @@ import { SplitButtonTextTemplateDirective } from "../../directives/split-button-
     }
 })
 export class SplitButtonComponent implements SplitButtonVariantInputs {
-    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #themeService = inject(ThemeService);
     protected readonly buttonClick = output<MouseEvent>();
     protected readonly classes = computed(() => {
-        const classes = splitButtonVariants();
+        const theme = this.#themeService.theme();
+        const look = this.look();
+        const rounded = this.rounded();
+        const size = this.size();
+        const classes = splitButtonThemeVariants(theme)({
+            look,
+            rounded,
+            size
+        });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
@@ -69,19 +79,19 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     /**
      * Sets the look of the button.
      */
-    public readonly look = input<ButtonVariantProps["look"]>("default");
+    public readonly look = input<SplitButtonVariantProps["look"]>("default");
     public readonly popupOffset = signal<PopupOffset>({ horizontal: -1, vertical: 4 });
     public readonly popupWidth = signal(0);
 
     /**
      * Sets the border radius of the button.
      */
-    public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
+    public readonly rounded = input<SplitButtonVariantProps["rounded"]>("medium");
 
     /**
      * Sets the size of the button.
      */
-    public readonly size = input<ButtonVariantProps["size"]>("medium");
+    public readonly size = input<SplitButtonVariantProps["size"]>("medium");
 
     /**
      * Sets the tabindex of the button.

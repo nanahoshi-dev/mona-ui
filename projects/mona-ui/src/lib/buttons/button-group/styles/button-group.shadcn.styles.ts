@@ -3,33 +3,55 @@ import { VariantInputs, VariantPropsWithoutNull } from "mona-ui/utils/VariantInp
 
 export const buttonGroupVariants = cva(
     `
-        inline-flex items-center justify-center rounded-md shadow border border-input
-        overflow-hidden
+        inline-flex items-center justify-center
+        border border-border
         [&>button]:border-0
+        [&>button]:focus-visible:ring-2
         [&>button]:focus-visible:z-10
-        [&>button.mona-selected]:bg-accent [&>button.mona-selected]:text-accent-foreground
-        [&>button]:w-full [&>button]:h-full [&>button]:rounded-none [&>button]:shadow-none
-        [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md
-        [&>button]:last:rounded-tr-md [&>button]:last:rounded-br-md
+        [&>button]:w-full [&>button]:h-full [&>button]:rounded-none
     `,
     {
         variants: {
             look: {
-                default: "shadow-none border-none bg-transparent",
-                outline: "[&>button:not(:last-child)]:border-r"
+                default: "",
+                error: "",
+                ghost: "border-transparent",
+                info: "",
+                outline: "[&>button:not(:last-child)]:border-r",
+                primary: "",
+                secondary: "",
+                success: "",
+                warning: ""
             },
             rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full",
-                none: "rounded-none"
+                full: `
+                    rounded-full
+                    [&>button]:first:rounded-tl-full [&>button]:first:rounded-bl-full
+                    [&>button]:last:rounded-tr-full [&>button]:last:rounded-br-full
+                `,
+                large: `
+                    rounded-lg
+                    [&>button]:first:rounded-tl-lg [&>button]:first:rounded-bl-lg
+                    [&>button]:last:rounded-tr-lg [&>button]:last:rounded-br-lg
+                `,
+                medium: `
+                    rounded-md
+                    [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md
+                    [&>button]:last:rounded-tr-md [&>button]:last:rounded-br-md
+                `,
+                none: `
+                    rounded-none
+                `,
+                small: `
+                    rounded-sm
+                    [&>button]:first:rounded-tl-sm [&>button]:first:rounded-bl-sm
+                    [&>button]:last:rounded-tr-sm [&>button]:last:rounded-br-sm
+                `
             },
             size: {
-                medium: "h-9 [&>button]:px-4 [&>button]:py-2",
-                small: `h-8 [&>button]:px-3 text-xs`,
-                large: `h-10 rounded-md [&>button]:px-8`,
-                icon: "h-9 [&>button]:flex-1"
+                large: ``,
+                medium: "",
+                small: ``
             }
         },
         defaultVariants: {

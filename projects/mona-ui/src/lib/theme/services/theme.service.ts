@@ -23,7 +23,12 @@ export class ThemeService {
         return {
             "--color-background": "oklch(0.22 0 0)",
             "--color-foreground": "oklch(100% 0.001 106.424)",
+            "--color-hover": "oklch(0.23 0 0)",
+            "--color-active": "oklch(0.21 0 0)",
             "--color-selected": "oklch(24% 0 0)",
+            "--color-accent": "oklch(0.23 0 0)",
+            "--color-accent-dark": "oklch(0.21 0 0)",
+            "--color-accent-foreground": "oklch(97% 0 0)",
 
             "--color-popover": "#fff",
             "--color-popover-foreground": "#09090b",
@@ -69,10 +74,6 @@ export class ThemeService {
             "--color-muted": "#f4f4f5",
             "--color-muted-foreground": "#71717a",
 
-            "--color-accent": "oklch(0.23 0 0)",
-            "--color-accent-dark": "oklch(0.21 0 0)",
-            "--color-accent-foreground": "oklch(97% 0 0)",
-
             "--color-border": "oklch(0.1689 0.0021 286.18)",
             "--color-input": "#e4e4e7",
 
@@ -102,6 +103,12 @@ export class ThemeService {
         return {
             "--color-background": "oklch(100% 0.001 106.424)",
             "--color-foreground": "oklch(20% 0 0)",
+            "--color-hover": "oklch(98% 0.001 106.424)",
+            "--color-active": "oklch(96% 0.001 106.424)",
+            "--color-selected": "#f4f5f7",
+            "--color-accent": "oklch(98% 0.001 106.424)",
+            "--color-accent-dark": "oklch(96% 0.001 106.424)",
+            "--color-accent-foreground": "oklch(14.1% 0.005 285.823)",
 
             "--color-popover": "#fff",
             "--color-popover-foreground": "#09090b",
@@ -140,10 +147,6 @@ export class ThemeService {
             "--color-muted": "#f4f4f5",
             "--color-muted-foreground": "#71717a",
 
-            "--color-accent": "oklch(98% 0.001 106.424)",
-            "--color-accent-dark": "oklch(96% 0.001 106.424)",
-            "--color-accent-foreground": "oklch(14.1% 0.005 285.823)",
-
             "--color-border": "oklch(0.9197 0.004 286.32)",
             "--color-input": "#e4e4e7",
 
@@ -171,9 +174,14 @@ export class ThemeService {
 
     private getShadcnLightThemeVariables(): Record<string, string> {
         return {
-            "--color-background": "#fff",
+            "--color-background": "oklch(1 0 0)",
             "--color-foreground": "#09090b",
+            "--color-hover": "oklch(0.97 0 0)",
+            "--color-active": "oklch(0.95 0 0)",
             "--color-selected": "#f4f5f7",
+            "--color-accent": "oklch(0.97 0 0)",
+            "--color-accent-dark": "oklch(0.95 0 0)",
+            "--color-accent-foreground": "oklch(0.21 0 0)",
 
             "--color-popover": "#fff",
             "--color-popover-foreground": "#09090b",
@@ -211,10 +219,6 @@ export class ThemeService {
 
             "--color-muted": "#f4f4f5",
             "--color-muted-foreground": "#71717a",
-
-            "--color-accent": "oklch(0.97 0 0)",
-            "--color-accent-dark": "oklch(0.95 0 0)",
-            "--color-accent-foreground": "oklch(0.21 0 0)",
 
             "--color-destructive": "#ef4444",
             "--color-destructive-foreground": "#fafafa",

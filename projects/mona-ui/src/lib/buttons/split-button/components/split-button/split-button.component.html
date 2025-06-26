@@ -5,7 +5,7 @@
     @if (textTemplate()) {
         <ng-container [ngTemplateOutlet]="textTemplate()??null"></ng-container>
     } @else {
-        <span class="mona-split-button-text">{{text()}}</span>
+        <span>{{text()}}</span>
     }
 </button>
 <button monaButton [disabled]="disabled()"
