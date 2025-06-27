@@ -65,7 +65,7 @@ export const buttonVariants = cva(
                 ghost: `
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground,
-                    focus-visible:ring-2 focus-visible:ring-secondary-foreground/40
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 link: `
                     text-primary underline-offset-4

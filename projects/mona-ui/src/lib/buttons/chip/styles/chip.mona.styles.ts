@@ -54,7 +54,7 @@ export const chipVariants = cva(
                 `,
                 ghost: `
                     hover:bg-secondary-hover hover:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-secondary-foreground/40
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `
             },
             rounded: {
