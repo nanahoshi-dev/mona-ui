@@ -29,6 +29,13 @@ export const routes: Routes = [
                     import("./docs/components/chip-doc/chip-doc.component").then(m => m.ChipDocComponent)
             },
             {
+                path: "dropdown-button",
+                loadComponent: () =>
+                    import("./docs/components/drop-down-button-doc/drop-down-button-doc.component").then(
+                        m => m.DropDownButtonDocComponent
+                    )
+            },
+            {
                 path: "split-button",
                 loadComponent: () =>
                     import("./docs/components/split-button-doc/split-button-doc.component").then(

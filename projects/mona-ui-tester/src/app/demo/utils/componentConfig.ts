@@ -1,4 +1,5 @@
 import { InputSignal, InputSignalWithTransform, ModelSignal, OutputEmitterRef } from "@angular/core";
+import { TemplateConfigHandler } from "./templateInjection";
 
 type GetInputSignalValue<T> =
     T extends InputSignal<infer V> ? V : T extends InputSignalWithTransform<any, infer U> ? U : never;
@@ -50,12 +51,23 @@ export type ComponentConfigOutputType<TComponent> = {
     };
 };
 
+export interface ComponentConfigTemplateItem {
+    [key: string]: {
+        active: boolean;
+        code: string;
+        codeVisible?: boolean;
+        description: string;
+        name: string;
+    };
+}
+
 export type ComponentConfig<TComponent> = {
     inputs: ComponentConfigInputType<TComponent>;
     outputs: ComponentConfigOutputType<TComponent>;
+    templateHandler?: TemplateConfigHandler;
 };
 
-type ProcessedConfigItem<TValue = any, TDefault = any> = {
+export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     configType: ComponentConfigType;
     defaultValue?: TDefault;
     name: string; // From the input structure
@@ -63,12 +75,19 @@ type ProcessedConfigItem<TValue = any, TDefault = any> = {
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
 };
 
-export function createComponentPropertyConfigArray<TComponent>(
+export interface ComponentPropertyConfig {
+    inputs: ProcessedConfigItem[];
+    outputs: ProcessedConfigItem[];
+    templates?: TemplateConfigHandler;
+}
+
+export function createComponentPropertyConfig<TComponent>(
     config: ComponentConfig<TComponent>
-): ProcessedConfigItem[] {
+): ComponentPropertyConfig {
     const inputs = createComponentInputConfigArray(config.inputs);
     const outputs = createComponentOutputConfigArray(config.outputs);
-    return [...inputs, ...outputs];
+    const templates = config.templateHandler;
+    return { inputs, outputs, templates };
 }
 
 /**

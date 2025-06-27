@@ -1,4 +1,6 @@
-<button monaButton [look]="look()" [size]="size()" [disabled]="disabled()" #dropdownButton>
+<button monaButton [look]="look()" [size]="size()"
+        [rounded]="rounded()"
+        [disabled]="disabled()" #dropdownButton>
     <ng-content select=":not(mona-menu-item):not(mona-menu-item-group)"></ng-content>
 </button>
 

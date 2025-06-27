@@ -1,5 +1,4 @@
-import { cva, VariantProps } from "class-variance-authority";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+import { cva } from "class-variance-authority";
 
 export const buttonVariants = cva(
     `
@@ -189,8 +188,3 @@ export const buttonVariants = cva(
         }
     }
 );
-
-export type ButtonVariantProps = VariantProps<typeof buttonVariants>;
-export type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
-
-export type DropdownButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;

@@ -1,58 +1,44 @@
+@let handler = templateHandler();
+
 <div class="flex overflow-auto">
-    <div class="flex-1">
+    <div class="flex-1 w-full">
         <ul class=" bg-demo-background/10 divide-y divide-border">
-            @for (entry of configObjList(); track $index) {
+            @for (entry of inputProperties(); track $index) {
                 <li class="flex flex-col gap-2 py-2">
-                    <div class="flex gap-1">
-                        <div class="flex flex-col px-2 text-sm gap-2">
-                            <div class="flex gap-1 items-center flex-wrap">
-                                <div class="font-semibold mr-4">{{ entry.name }}</div>
-                                <div class="px-2 py-0.25 flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
-                                    {{metadata().inputs|inputProperty:entry.name:'type'}}
-                                </div>
-                                <div class="px-2 py-0.25 flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
-                                    {{metadata().inputs|inputProperty:entry.name:"kind"}}
-                                </div>
-                            </div>
-                            <div class="font-light text-gray-500">
-                                {{metadata().inputs|inputProperty:entry.name:"description"}}
-                            </div>
-                        </div>
-                        <div class="flex px-2 items-center justify-end flex-1">
-                            @if (entry.configType === 'dropdown') {
-                                <mona-drop-down-list [data]="entry.value"
-                                                     [ngModel]="entry.defaultValue"
-                                                     [style.width.px]="150"
-                                                     size="small"
-                                                     [showClearButton]="false"
-                                                     (ngModelChange)="onValueChange(entry.name, $event)"></mona-drop-down-list>
-                            } @else if (entry.configType === "color") {
-                                <mona-color-picker
-                                    [ngModel]="entry.value"
-                                    (ngModelChange)="onValueChange(entry.name, $event)"></mona-color-picker>
-                            } @else {
-                                @switch (entry.valueType) {
-                                    @case ('string') {
-                                        <mona-text-box [ngModel]="entry.value"
-                                                       [style.width.px]="150"
-                                                       size="small"
-                                                       (ngModelChange)="onValueChange(entry.name, $event)"></mona-text-box>
-                                    }
-                                    @case ('number') {
-                                        <mona-numeric-text-box [ngModel]="entry.value"
-                                                               [style.width.px]="150"
-                                                               size="small"
-                                                               (ngModelChange)="onValueChange(entry.name, $event)"></mona-numeric-text-box>
-                                    }
-                                    @case ('boolean') {
-                                        <mona-switch [ngModel]="entry.value"
-                                                     (ngModelChange)="onValueChange(entry.name, $event)"></mona-switch>
-                                    }
-                                }
-                            }
-                        </div>
-                    </div>
+                    <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
+                                             (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
                 </li>
+            }
+            @for (entry of outputProperties(); track $index) {
+                <li class="flex flex-col gap-2 py-2">
+                    <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
+                                             (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
+                </li>
+            }
+            @if (handler) {
+                @for (entry of templateProperties(); track $index) {
+                    <li class="flex flex-col gap-2 py-2">
+                        <div class="flex">
+                            <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
+                                <div class="font-semibold">{{ entry[1].name }}</div>
+                                <div class="font-light text-gray-500">{{entry[1].description}}</div>
+                            </div>
+                            <div class="flex items-center justify-center px-2 gap-2">
+                                <button monaButton look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
+                                    <lucide-angular [name]="Code" [size]="20"></lucide-angular>
+                                </button>
+                                <mona-switch [ngModel]="entry[1].active"
+                                             (ngModelChange)="handler.updateProperty(entry[0], $event)"></mona-switch>
+                            </div>
+                        </div>
+                        @if (entry[1].codeVisible) {
+                            <div class="px-2">
+                                <app-code-viewer [code]="entry[1].code"
+                                                 language="html"></app-code-viewer>
+                            </div>
+                        }
+                    </li>
+                }
             }
         </ul>
     </div>

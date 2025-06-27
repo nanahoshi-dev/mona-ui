@@ -17,3 +17,4 @@ export const themeVariants = (theme: ThemeStyle) => {
 
 export type ButtonVariantProps = VariantProps<ReturnType<typeof themeVariants>>;
 export type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
+export type DropdownButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;

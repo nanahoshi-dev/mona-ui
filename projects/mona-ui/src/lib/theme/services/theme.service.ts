@@ -23,11 +23,11 @@ export class ThemeService {
         return {
             "--color-background": "oklch(0.22 0 0)",
             "--color-foreground": "oklch(100% 0.001 106.424)",
-            "--color-hover": "oklch(0.23 0 0)",
-            "--color-active": "oklch(0.21 0 0)",
+            "--color-hover": "oklch(24.5% 0 0)",
+            "--color-active": "oklch(21.5% 0 0)",
             "--color-selected": "oklch(24% 0 0)",
-            "--color-accent": "oklch(0.23 0 0)",
-            "--color-accent-dark": "oklch(0.21 0 0)",
+            "--color-accent": "oklch(24.5% 0 0)",
+            "--color-accent-dark": "oklch(21.5% 0 0)",
             "--color-accent-foreground": "oklch(97% 0 0)",
 
             "--color-popover": "#fff",

@@ -1,21 +1,12 @@
-import {
-    afterNextRender,
-    Component,
-    computed,
-    contentChildren,
-    DestroyRef,
-    inject,
-    input,
-    viewChild
-} from "@angular/core";
+import { Component, computed, contentChildren, DestroyRef, effect, inject, input, viewChild } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
-import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/button/styles/button.shadcn.styles";
+import { ButtonVariantProps, DropdownButtonVariantInputs } from "mona-ui/buttons/button/styles/button.styles";
 import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
 import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
-import { ContextMenuComponent } from "../../menus/context-menu/context-menu.component";
-import { MenuItemComponent } from "../../menus/menu-item/menu-item.component";
-import { ButtonDirective } from "../button/directives/button.directive";
+import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
+import { MenuItemComponent } from "../../../menus/menu-item/menu-item.component";
+import { ButtonDirective } from "../../button/directives/button.directive";
 
 @Component({
     selector: "mona-drop-down-button",
@@ -28,7 +19,7 @@ import { ButtonDirective } from "../button/directives/button.directive";
 export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     #resizeObserver: ResizeObserver | null = null;
-    protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
+    protected readonly contextMenuComponent = viewChild<ContextMenuComponent>("contextMenuComponent");
     protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
         MenuItemInjectionToken
     );
@@ -61,8 +52,11 @@ export class DropDownButtonComponent implements DropdownButtonVariantInputs {
         this.#destroyRef.onDestroy(() => {
             this.#resizeObserver?.disconnect();
         });
-        afterNextRender(() => {
-            this.contextMenuComponent().setPrecise(false);
+        effect(() => {
+            const contextMenu = this.contextMenuComponent();
+            if (contextMenu) {
+                contextMenu.setPrecise(false);
+            }
         });
     }
 }
