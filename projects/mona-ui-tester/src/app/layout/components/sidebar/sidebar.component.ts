@@ -51,6 +51,10 @@ export class SidebarComponent {
                 {
                     text: "Split Button",
                     path: "/split-button"
+                },
+                {
+                    text: "Text Box",
+                    path: "/textbox"
                 }
             ]
         }

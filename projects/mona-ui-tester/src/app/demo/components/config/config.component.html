@@ -25,7 +25,7 @@
                             </div>
                             <div class="flex items-center justify-center px-2 gap-2">
                                 <button monaButton look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
-                                    <lucide-angular [name]="Code" [size]="20"></lucide-angular>
+                                    <lucide-angular [name]="codeIcon" [size]="20"></lucide-angular>
                                 </button>
                                 <mona-switch [ngModel]="entry[1].active"
                                              (ngModelChange)="handler.updateProperty(entry[0], $event)"></mona-switch>
@@ -41,5 +41,44 @@
                 }
             }
         </ul>
+        <div class="border-t border-t-border">
+            @for (subComponentEntry of subComponentPropertyConfig(); track $index) {
+                <div class="flex flex-col">
+                    <div class="p-2 text-sm font-semibold flex w-full">
+                        <div class="flex-1 flex items-center">{{subComponentEntry[0]}}</div>
+                        <div>
+                            <button monaButton look="ghost"
+                                    (click)="subComponentEntry[1].expanded = !subComponentEntry[1].expanded">
+                                <lucide-angular [name]="expandIcon" [size]="16"></lucide-angular>
+                            </button>
+                        </div>
+                    </div>
+                    @if (subComponentEntry[1].expanded) {
+                        <ul>
+                            @for (property of subComponentEntry[1].inputs; track $index) {
+                                <li class="flex flex-col gap-2 py-2">
+                                    <div class="flex flex-col px-2 text-sm gap-2">
+                                        <div class="flex gap-1 items-center flex-wrap">
+                                            <div class="font-semibold mr-4">{{ property.name }}</div>
+                                            <div
+                                                class="px-2 py-0.25 flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
+                                                {{ subComponentEntry[1].inputs|inputProperty:property.name:'type' }}
+                                            </div>
+                                            <div
+                                                class="px-2 py-0.25 flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
+                                                {{ subComponentEntry[1].inputs|inputProperty:property.name:"kind" }}
+                                            </div>
+                                        </div>
+                                        <div class="font-light text-gray-500 whitespace-pre-line">
+                                            {{ subComponentEntry[1].inputs|inputProperty:property.name:"description" }}
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        </div>
     </div>
 </div>

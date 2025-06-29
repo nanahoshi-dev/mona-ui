@@ -14,6 +14,18 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupComponent> {
     protected readonly ButtonGroupWrapperComponent = ButtonGroupWrapperComponent;
     protected readonly config = signal<ComponentConfig<ButtonGroupComponent>>({
+        code: `
+            <mona-button-group
+                [disabled]="disabled()"
+                [selection]="selection()"
+                [look]="look()"
+                [rounded]="rounded()"
+                [size]="size()">
+                <mona-button-group-item>B1</mona-button-group-item>
+                <mona-button-group-item>B2</mona-button-group-item>
+                <mona-button-group-item>B3</mona-button-group-item>
+            </mona-button-group>
+        `,
         inputs: {
             disabled: {
                 type: "boolean",
@@ -43,6 +55,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
         outputs: {}
     });
     protected readonly metadata = this.getMetadata("ButtonGroupComponent");
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["ButtonGroupItemComponent"]);
 }
 
 @Component({

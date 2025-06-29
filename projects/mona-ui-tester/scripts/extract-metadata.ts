@@ -113,9 +113,11 @@ async function extractComponentMetadata() {
 
                         let kind: "input" | "model" | "output" | null = null;
 
-                        if (functionName === "input") {
+                        if (functionName.startsWith("input")) {
+                            // Changed from functionName === "input"
                             kind = "input";
-                        } else if (functionName === "model") {
+                        } else if (functionName.startsWith("model")) {
+                            // Changed from functionName === "model"
                             kind = "model";
                         } else if (functionName === "output") {
                             kind = "output";
@@ -125,77 +127,39 @@ async function extractComponentMetadata() {
                             const inputName = property.getName();
                             let inputType = "any"; // Default to any if type cannot be determined
 
-                            // Try to get type from generic argument (e.g., input<string>())
+                            // Try to get type from the explicit generic argument first
                             const typeArguments = callExpression.getTypeArguments();
                             if (typeArguments.length > 0) {
-                                // If there's a generic type argument, use its text representation
+                                // If there's an explicit generic like input<string>(), its text is the exact type.
+                                // No further simplification is needed.
                                 inputType = typeArguments[0].getText();
                             } else {
-                                // Fallback: If no generic, try to infer from the property's declared type
-                                const declaredType = property.getTypeNode();
-                                if (declaredType) {
-                                    inputType = declaredType.getText();
-                                } else {
-                                    // Fallback to the full resolved type text from ts-morph
-                                    inputType = property.getType().getText();
-                                }
+                                // Fallback for when type is inferred, e.g., `myInput = input("value")`.
+                                // In this case, `property.getType().getText()` will return the full type,
+                                // e.g., "InputSignal<string>", which DOES need simplification.
+                                const fullType = property.getType().getText();
+                                inputType = simplifyType(fullType);
                             }
 
-                            // Apply simplification to the extracted type
-                            inputType = simplifyType(inputType);
-
-                            let jsDocDescription = "";
+                            let description = "";
                             const jsDocs = property.getJsDocs();
                             if (jsDocs.length > 0) {
-                                // Concatenate all JSDoc texts for simplicity, or parse structured tags
-                                jsDocDescription = jsDocs
-                                    .map(doc => doc.getFullText())
-                                    .join("\n")
-                                    .trim();
-                                // Remove the JSDoc block delimiters (/** ... */) and leading asterisks/spaces
-                                jsDocDescription = jsDocDescription
-                                    .replace(/^\/\*\*\s*|\s*\*\/$/g, "")
-                                    .replace(/^\s*\*\s?/gm, "");
+                                const mainDoc = jsDocs[0]; // Use the first JSDoc block
+                                const descriptionTag = mainDoc
+                                    .getTags()
+                                    .find(tag => tag.getTagName() === "description");
+                                if (descriptionTag) {
+                                    description = descriptionTag.getCommentText()?.toString().trim() || "";
+                                }
                             }
 
                             componentInputs.push({
                                 name: inputName,
                                 type: inputType,
-                                description: jsDocDescription,
+                                description: description,
                                 kind: kind
                             });
                         }
-                    }
-                }
-
-                // Also include properties with @Input decorator for backward compatibility
-                for (const property of classDeclaration.getProperties()) {
-                    const inputDecorator = property.getDecorator("Input");
-                    if (inputDecorator) {
-                        const inputName = property.getName();
-                        let inputType = property.getType().getText(); // Get the full type text
-
-                        // Apply simplification to the extracted type
-                        inputType = simplifyType(inputType);
-
-                        let jsDocDescription = "";
-                        const jsDocs = property.getJsDocs();
-                        if (jsDocs.length > 0) {
-                            jsDocDescription = jsDocs
-                                .map(doc => doc.getFullText())
-                                .join("\n")
-                                .trim();
-                            jsDocDescription = jsDocDescription
-                                .replace(/^\/\*\*\s*|\s*\*\/$/g, "")
-                                .replace(/^\s*\*\s?/gm, "");
-                        }
-
-                        componentInputs.push({
-                            name: inputName,
-                            type: inputType,
-                            description: jsDocDescription,
-                            kind: "input" // Explicitly mark as @Input decorator type
-                        });
                     }
                 }
 

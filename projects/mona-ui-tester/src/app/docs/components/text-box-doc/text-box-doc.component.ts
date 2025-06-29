@@ -1,16 +1,16 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
-import { ButtonDemoComponent } from "../../../demo/components/button-demo/button-demo.component";
 import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
+import { TextBoxDemoComponent } from "../../../demo/components/text-box-demo/text-box-demo.component";
 import { SectionComponent } from "../../../layout/components/section/section.component";
 
 @Component({
-    selector: "app-button-doc",
-    imports: [SectionComponent, ButtonDemoComponent, CodeViewerComponent],
-    templateUrl: "./button-doc.component.html",
+    selector: "app-text-box-doc",
+    imports: [CodeViewerComponent, SectionComponent, TextBoxDemoComponent],
+    templateUrl: "./text-box-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ButtonDocComponent {
+export class TextBoxDocComponent {
     protected readonly importCode = `
-        import { ButtonDirective } from "mona-ui";
+        import { TextBoxComponent } from "mona-ui";
     `;
 }

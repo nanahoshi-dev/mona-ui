@@ -1,14 +1,14 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { ComponentInputMetadata } from "../models/ComponentMetadata";
+import { ComponentPropertyMetadata } from "../models/ComponentMetadata";
 
 @Pipe({
     name: "inputProperty"
 })
 export class InputPropertyPipe implements PipeTransform {
     public transform(
-        value: ComponentInputMetadata[],
+        value: ComponentPropertyMetadata[],
         propertyName: string,
-        propertyType: keyof ComponentInputMetadata
+        propertyType: keyof ComponentPropertyMetadata
     ): string {
         if (!value || !propertyName) {
             return "";
@@ -17,6 +17,6 @@ export class InputPropertyPipe implements PipeTransform {
         if (!input) {
             return "";
         }
-        return input[propertyType] || "";
+        return input[propertyType].replaceAll("\r", "\n") || "";
     }
 }

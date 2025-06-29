@@ -12,7 +12,10 @@ HighlightJS.registerLanguage("html", html);
     selector: "app-code-viewer",
     templateUrl: "./code-viewer.component.html",
     imports: [LucideAngularModule],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        "[class]": "'mona-code-viewer block relative overflow-auto'"
+    }
 })
 export class CodeViewerComponent {
     readonly #clipboard = inject(Clipboard);

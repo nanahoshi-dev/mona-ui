@@ -1,4 +1,5 @@
 import { InputSignal, InputSignalWithTransform, ModelSignal, OutputEmitterRef } from "@angular/core";
+import { ComponentMetadata } from "../models/ComponentMetadata";
 import { TemplateConfigHandler } from "./templateInjection";
 
 type GetInputSignalValue<T> =
@@ -62,6 +63,7 @@ export interface ComponentConfigTemplateItem {
 }
 
 export type ComponentConfig<TComponent> = {
+    code?: string; // TODO: Remove this
     inputs: ComponentConfigInputType<TComponent>;
     outputs: ComponentConfigOutputType<TComponent>;
     templateHandler?: TemplateConfigHandler;

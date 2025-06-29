@@ -28,22 +28,22 @@ export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     );
 
     /**
-     * Sets the disabled state of the button.
+     * @description Sets the disabled state of the button.
      */
     public readonly disabled = input(false);
 
     /**
-     * Sets the look of the button.
+     * @description Sets the look of the button.
      */
     public readonly look = input<ButtonVariantProps["look"]>("default");
 
     /**
-     * Sets the border radius of the button.
+     * @description Sets the border radius of the button.
      */
     public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
 
     /**
-     * Sets the size of the button.
+     * @description Sets the size of the button.
      */
     public readonly size = input<ButtonVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });

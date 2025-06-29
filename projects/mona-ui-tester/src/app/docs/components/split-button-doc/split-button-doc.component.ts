@@ -1,11 +1,16 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
 import { SplitButtonDemoComponent } from "../../../demo/components/split-button-demo/split-button-demo.component";
 import { SectionComponent } from "../../../layout/components/section/section.component";
 
 @Component({
     selector: "app-split-button-doc",
-    imports: [SectionComponent, SplitButtonDemoComponent],
+    imports: [SectionComponent, SplitButtonDemoComponent, CodeViewerComponent],
     templateUrl: "./split-button-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SplitButtonDocComponent {}
+export class SplitButtonDocComponent {
+    protected readonly importCode = `
+        import { SplitButtonComponent } from "mona-ui";
+    `;
+}

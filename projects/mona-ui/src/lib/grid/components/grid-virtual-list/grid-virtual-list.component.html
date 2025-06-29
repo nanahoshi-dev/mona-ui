@@ -17,7 +17,7 @@
                             @if (gridService.masterDetailTemplate()) {
                                 <td [style.width.px]="gridService.detailColumnWidth">
                                     <span class="mona-grid-detail-toggle-wrapper">
-                                        <button monaButton [flat]="true" (click)="onToggleDetailClick($event, row)">
+                                        <button monaButton look="ghost" (click)="onToggleDetailClick($event, row)">
                                             @if (row.detailVisible()) {
                                                 <i class="ri-subtract-line"></i>
                                             } @else {
@@ -63,7 +63,7 @@
                                         @if ($index === rowItem.level) {
                                             <span class="mona-grid-grouping-toggle-wrapper"
                                                   [style.width.px]="gridService.groupColumnWidth">
-                                                <button monaButton [flat]="true" (click)="onGroupExpandChange(rowItem)">
+                                                <button monaButton look="ghost" (click)="onGroupExpandChange(rowItem)">
                                                     @if (collapsedGroups()|monaContains:rowItem.groupId) {
                                                         <fa-icon [icon]="expandIcon"></fa-icon>
                                                     } @else {
@@ -92,7 +92,7 @@
                                 @if (gridService.masterDetailTemplate()) {
                                     <td [style.width.px]="gridService.detailColumnWidth">
                                         <span class="mona-grid-detail-toggle-wrapper">
-                                            <button monaButton [flat]="true"
+                                            <button monaButton look="ghost"
                                                     (click)="onToggleDetailClick($event, rowItem)">
                                                 @if (rowItem.row.detailVisible()) {
                                                     <i class="ri-subtract-line"></i>

@@ -36,14 +36,12 @@ class ContextMenuComponentTestComponent {}
 })
 class ContextMenuComponentTestComponentWithMenuItems {
     public menuItems: MenuItem[] = [
-        {
-            text: "First dynamic item",
-            parent: null
-        },
-        {
-            text: "Second dynamic item",
-            parent: null
-        }
+        new MenuItem({
+            text: "First dynamic item"
+        }),
+        new MenuItem({
+            text: "Second dynamic item"
+        })
     ];
 }
 

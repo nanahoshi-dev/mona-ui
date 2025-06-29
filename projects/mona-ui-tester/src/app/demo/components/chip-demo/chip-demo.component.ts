@@ -14,6 +14,18 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     protected readonly ChipWrapperComponent = ChipWrapperComponent;
     protected readonly config = signal<ComponentConfig<ChipComponent>>({
+        code: `
+             <mona-chip
+                [look]="look()"
+                [disabled]="disabled()"
+                [removable]="removable()"
+                [rounded]="rounded()"
+                [size]="size()"
+                [label]="label()"
+                (remove)="onRemove($event)">
+                Chip
+            </mona-chip>
+        `,
         inputs: {
             disabled: {
                 type: "boolean",
@@ -50,6 +62,7 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
         }
     });
     protected readonly metadata = this.getMetadata("ChipComponent");
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({
@@ -62,7 +75,9 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
             [rounded]="rounded()"
             [size]="size()"
             [label]="label()"
-            (remove)="onRemove($event)"></mona-chip>
+            (remove)="onRemove($event)">
+            Chip
+        </mona-chip>
     `
 })
 export class ChipWrapperComponent implements ComponentInputsAsSignal<ChipComponent> {

@@ -1,40 +1,4 @@
 {
-  "DropDownButtonComponent": {
-    "name": "DropDownButtonComponent",
-    "selector": "\"mona-drop-down-button\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "look",
-        "type": "ButtonVariantProps[\"look\"]",
-        "description": "Sets the look of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "ButtonVariantProps[\"size\"]",
-        "description": "Sets the size of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "CalendarComponent": {
     "name": "CalendarComponent",
     "selector": "\"mona-calendar\"",
@@ -77,7 +41,7 @@
       },
       {
         "name": "disabledDates",
-        "type": "Date",
+        "type": "Iterable<Date>",
         "description": "",
         "kind": "input"
       },
@@ -119,7 +83,7 @@
       },
       {
         "name": "disabledDates",
-        "type": "Date",
+        "type": "Iterable<Date>",
         "description": "",
         "kind": "input"
       },
@@ -275,7 +239,7 @@
       },
       {
         "name": "data",
-        "type": "TData",
+        "type": "Iterable<TData>",
         "description": "",
         "kind": "input"
       },
@@ -347,7 +311,7 @@
       },
       {
         "name": "data",
-        "type": "TData",
+        "type": "Iterable<TData>",
         "description": "",
         "kind": "input"
       },
@@ -389,7 +353,7 @@
       },
       {
         "name": "valueNormalizer",
-        "type": "Action<Observable<string>, Observable<any>>",
+        "type": "any>>",
         "description": "",
         "kind": "input"
       }
@@ -470,6 +434,18 @@
         "type": "void",
         "description": "",
         "kind": "output"
+      },
+      {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "gridId",
+        "type": "string",
+        "description": "",
+        "kind": "input"
       }
     ]
   },
@@ -497,7 +473,7 @@
       },
       {
         "name": "group",
-        "type": "GroupDescriptor",
+        "type": "Iterable<GroupDescriptor>",
         "description": "",
         "kind": "input"
       },
@@ -533,7 +509,7 @@
       },
       {
         "name": "selectedKeys",
-        "type": "unknown",
+        "type": "Iterable<unknown>",
         "description": "",
         "kind": "input"
       }
@@ -563,7 +539,7 @@
       },
       {
         "name": "palette",
-        "type": "string",
+        "type": "PaletteType | Iterable<string>",
         "description": "",
         "kind": "input"
       },
@@ -594,7 +570,7 @@
       {
         "name": "backgroundColor",
         "type": "string",
-        "description": "Sets the background color of the avatar.\nIf an image is provided, this will be ignored.",
+        "description": "Sets the background color of the avatar.\n\nIf an image is provided, this will be ignored.",
         "kind": "input"
       },
       {
@@ -617,7 +593,7 @@
       },
       {
         "name": "customStyles",
-        "type": "CSSStyleDeclaration",
+        "type": "Partial<CSSStyleDeclaration>",
         "description": "Custom styles to apply to the avatar.\nThis can be used to override default styles or add additional styles.",
         "kind": "input"
       },
@@ -725,7 +701,7 @@
     "inputs": [
       {
         "name": "selectedKeysChange",
-        "type": "K",
+        "type": "Array<K>",
         "description": "",
         "kind": "output"
       },
@@ -737,13 +713,25 @@
       },
       {
         "name": "selectedKeys",
-        "type": "K",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       },
       {
         "name": "selectionKey",
         "type": "ListKeySelector<T, K> | undefined",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "ListViewVirtualScrollDirective": {
+    "name": "ListViewVirtualScrollDirective",
+    "selector": "\"mona-list-view[monaListViewVirtualScroll]\"",
+    "inputs": [
+      {
+        "name": "options",
+        "type": "VirtualScrollOptions",
         "description": "",
         "kind": "input"
       }
@@ -756,55 +744,55 @@
       {
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint | null | undefined",
-        "description": "The anchor connection point of the context menu.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "close",
         "type": "ContextMenuCloseEvent",
-        "description": "Emits when the context menu is closed.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "context",
         "type": "C",
-        "description": "The context object to be passed to the menu items.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "menuItems",
-        "type": "MenuItemOptions | MenuItem",
-        "description": "The menu items to be displayed in the context menu.\rIf this is set, the menu items from the content children will be ignored.",
+        "type": "Iterable<MenuItemOptions | MenuItem>",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "minWidth",
         "type": "string | number | undefined",
-        "description": "Minimum width of the context menu. Only applies to the root context menu.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "navigate",
         "type": "ContextMenuNavigationEvent",
-        "description": "Emits when context menu navigation occurs.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "offset",
         "type": "PopupOffset | undefined",
-        "description": "The offset of the context menu.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "open",
         "type": "ContextMenuOpenEvent",
-        "description": "Emits when the context menu is opened.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "popupClass",
         "type": "string | string[]",
-        "description": "The popup class of the context menu.",
+        "description": "",
         "kind": "input"
       },
       {
@@ -814,27 +802,33 @@
         "kind": "input"
       },
       {
+        "name": "target",
+        "type": "ElementRef | Element",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "trigger",
         "type": "string",
-        "description": "The event that triggers the context menu.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "userClasses",
         "type": "string",
-        "description": "The user classes to be applied to the context menu.\rThese will be applied to the root context menu and all submenus.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "userStyles",
         "type": "string",
-        "description": "The user styles to be applied to the context menu.\rThese will be applied to the root context menu and all submenus.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number | undefined",
-        "description": "The width of the context menu. Only applies to the root context menu.",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -852,6 +846,12 @@
       {
         "name": "itemFocused",
         "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "menuItem",
+        "type": "MenuItem",
         "description": "",
         "kind": "input"
       },
@@ -875,7 +875,7 @@
       },
       {
         "name": "items",
-        "type": "MenuItemOptions",
+        "type": "Iterable<MenuItemOptions>",
         "description": "",
         "kind": "input"
       },
@@ -894,7 +894,7 @@
       {
         "name": "data",
         "type": "T",
-        "description": "",
+        "description": "The data associated with the menu item.\nThis can be any type of data that you want to associate with the menu item.",
         "kind": "input"
       },
       {
@@ -906,7 +906,7 @@
       {
         "name": "divider",
         "type": "boolean",
-        "description": "Sets the menu item as a divider.\rA divider is a horizontal line that separates menu items.",
+        "description": "Sets the menu item as a divider.\nA divider is a horizontal line that separates menu items.",
         "kind": "input"
       },
       {
@@ -917,7 +917,7 @@
       },
       {
         "name": "menuClick",
-        "type": "any, T",
+        "type": "MenuItemClickEvent<any, T>",
         "description": "Emits when the menu item is clicked.",
         "kind": "output"
       },
@@ -925,6 +925,18 @@
         "name": "text",
         "type": "string",
         "description": "The text to display for the menu item.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MenuItemGroupComponent": {
+    "name": "MenuItemGroupComponent",
+    "selector": "\"mona-menu-item-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title of the menu item group.",
         "kind": "input"
       }
     ]
@@ -938,6 +950,12 @@
         "type": "Position",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "target",
+        "type": "Element | ElementRef",
+        "description": "",
+        "kind": "input"
       }
     ]
   },
@@ -947,13 +965,13 @@
     "inputs": [
       {
         "name": "checkedKeysChange",
-        "type": "K",
+        "type": "Array<K>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeCheck",
-        "type": "T",
+        "type": "NodeCheckEvent<T>",
         "description": "",
         "kind": "output"
       },
@@ -965,7 +983,7 @@
       },
       {
         "name": "checkedKeys",
-        "type": "K",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       },
@@ -989,7 +1007,7 @@
       },
       {
         "name": "disabledKeys",
-        "type": "K",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       },
@@ -1007,25 +1025,25 @@
     "inputs": [
       {
         "name": "nodeDrag",
-        "type": "T",
+        "type": "NodeDragEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDragEnd",
-        "type": "T",
+        "type": "NodeDragEndEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDragStart",
-        "type": "T",
+        "type": "NodeDragStartEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDrop",
-        "type": "T",
+        "type": "NodeDropEvent<T>",
         "description": "",
         "kind": "output"
       },
@@ -1043,7 +1061,7 @@
     "inputs": [
       {
         "name": "expandedKeysChange",
-        "type": "K",
+        "type": "Array<K>",
         "description": "",
         "kind": "output"
       },
@@ -1055,7 +1073,7 @@
       },
       {
         "name": "expandedKeys",
-        "type": "K",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       },
@@ -1103,19 +1121,19 @@
     "inputs": [
       {
         "name": "nodeSelect",
-        "type": "T",
+        "type": "NodeSelectEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "selectedKeysChange",
-        "type": "K",
+        "type": "Array<K>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "selectionChange",
-        "type": "T",
+        "type": "NodeItem<T>",
         "description": "",
         "kind": "output"
       },
@@ -1127,7 +1145,7 @@
       },
       {
         "name": "selectedKeys",
-        "type": "K",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       },
@@ -1148,6 +1166,12 @@
         "type": "boolean",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "windowRef",
+        "type": "WindowReference",
+        "description": "",
+        "kind": "input"
       }
     ]
   },
@@ -1155,6 +1179,12 @@
     "name": "WindowResizeHandlerDirective",
     "selector": "\"div[monaWindowResizeHandler]\"",
     "inputs": [
+      {
+        "name": "direction",
+        "type": "WindowResizeHandlerDirection",
+        "description": "",
+        "kind": "input"
+      },
       {
         "name": "maxHeight",
         "type": "number | undefined",
@@ -1176,6 +1206,12 @@
       {
         "name": "minWidth",
         "type": "number | undefined",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "windowRef",
+        "type": "WindowReference",
         "description": "",
         "kind": "input"
       }
@@ -1210,12 +1246,6 @@
         "kind": "model"
       },
       {
-        "name": "flat",
-        "type": "boolean",
-        "description": "@deprecated Use `ghost` option in `look` instead.",
-        "kind": "input"
-      },
-      {
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
         "description": "Sets the look of the button.",
@@ -1248,7 +1278,7 @@
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Sets the toggleable state of the button.\n\nIf set to `true`, the button will toggle its selected state on click.",
         "kind": "input"
       },
       {
@@ -1272,7 +1302,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the chip.\nIf the label is set, the chip will display the label instead of the content.",
+        "description": "Sets the label of the chip.\n\nIf the label is set, the chip will display the label instead of the content.",
         "kind": "input"
       },
       {
@@ -1319,6 +1349,54 @@
       }
     ]
   },
+  "DropDownButtonComponent": {
+    "name": "DropDownButtonComponent",
+    "selector": "\"mona-drop-down-button\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "look",
+        "type": "ButtonVariantProps[\"look\"]",
+        "description": "Sets the look of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ButtonVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ButtonVariantProps[\"size\"]",
+        "description": "Sets the size of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "ListItemDirective": {
+    "name": "ListItemDirective",
+    "selector": "\"li[monaListItem]\"",
+    "inputs": [
+      {
+        "name": "item",
+        "type": "ListItem<TData>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "DropDownTreeDisableDirective": {
     "name": "DropDownTreeDisableDirective",
     "selector": "\"mona-drop-down-tree[monaDropDownTreeDisable]\"",
@@ -1331,7 +1409,7 @@
       },
       {
         "name": "disabledKeys",
-        "type": "any",
+        "type": "Iterable<any>",
         "description": "",
         "kind": "input"
       },
@@ -1361,7 +1439,7 @@
       },
       {
         "name": "expandedKeys",
-        "type": "unknown",
+        "type": "Iterable<unknown>",
         "description": "",
         "kind": "input"
       },
@@ -1422,43 +1500,43 @@
       {
         "name": "blur",
         "type": "void",
-        "description": "Emits when the editor loses focus.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "create",
         "type": "void",
-        "description": "Emits when the editor is created for the first time and is ready to be used.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "focus",
         "type": "void",
-        "description": "Emits when the editor gains focus.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "selectionUpdate",
         "type": "void",
-        "description": "Emits when the selection of the editor changes.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "update",
         "type": "ContentChangeEvent",
-        "description": "Emits when the content of the editor changes.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "content",
         "type": "string | JSONContent",
-        "description": "The initial content of the editor.\rAccepted values are:\r- A string representing the HTML content.\r- A {@link JSONContent} representing the content.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "settings",
-        "type": "EditorSettings",
-        "description": "The settings of the editor.",
+        "type": "Partial<EditorSettings>",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -1517,7 +1595,7 @@
       },
       {
         "name": "operators",
-        "type": "FilterOperators",
+        "type": "Iterable<FilterOperators>",
         "description": "",
         "kind": "model"
       },
@@ -1542,73 +1620,91 @@
       {
         "name": "cellEdit",
         "type": "CellEditEvent",
-        "description": "Emitted when a cell is edited.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "data",
-        "type": "T",
-        "description": "The row data to be displayed in the grid.",
+        "type": "Iterable<T>",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "filter",
         "type": "CompositeFilterDescriptor[]",
-        "description": "Initial filter configuration to be applied to the grid when it is loaded.",
+        "description": "",
         "kind": "model"
       },
       {
         "name": "filterable",
         "type": "boolean",
-        "description": "Whether the grid is filterable.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "pageSize",
         "type": "number | undefined",
-        "description": "The number of items to be displayed on a page.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "reorderable",
         "type": "boolean",
-        "description": "Whether the columns of the grid can be reordered.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "resizable",
         "type": "boolean",
-        "description": "Whether the columns of the grid can be resized.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\n  will have the same width.\n@default \"fitView\"",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "sort",
         "type": "SortDescriptor[]",
-        "description": "Initial sort configuration to be applied to the grid when it is loaded.",
+        "description": "",
         "kind": "model"
       },
       {
         "name": "sortable",
         "type": "boolean | SortableOptions",
-        "description": "Whether the grid is sortable.",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridCellComponent": {
+    "name": "GridCellComponent",
+    "selector": "\"mona-grid-cell\"",
+    "inputs": [
+      {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "row",
+        "type": "Row",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -1672,6 +1768,12 @@
         "kind": "output"
       },
       {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "type",
         "type": "DataType",
         "description": "",
@@ -1685,13 +1787,13 @@
     "inputs": [
       {
         "name": "columns",
-        "type": "Column",
+        "type": "ImmutableList<Column>",
         "description": "",
         "kind": "input"
       },
       {
         "name": "data",
-        "type": "Row",
+        "type": "ImmutableSet<Row>",
         "description": "",
         "kind": "input"
       }
@@ -1703,13 +1805,13 @@
     "inputs": [
       {
         "name": "columns",
-        "type": "Column",
+        "type": "ImmutableList<Column>",
         "description": "",
         "kind": "input"
       },
       {
         "name": "data",
-        "type": "Row",
+        "type": "ImmutableSet<Row>",
         "description": "",
         "kind": "input"
       }
@@ -1769,7 +1871,7 @@
       },
       {
         "name": "toolbar",
-        "type": "ToolbarOptions",
+        "type": "boolean | Partial<ToolbarOptions>",
         "description": "",
         "kind": "input"
       }
@@ -1793,7 +1895,7 @@
       },
       {
         "name": "items",
-        "type": "T",
+        "type": "ImmutableSet<T>",
         "description": "",
         "kind": "input"
       },
@@ -1806,6 +1908,18 @@
       {
         "name": "width",
         "type": "ListSizeType",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "NotificationComponent": {
+    "name": "NotificationComponent",
+    "selector": "\"mona-notification\"",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "NotificationData",
         "description": "",
         "kind": "input"
       }
@@ -1906,6 +2020,12 @@
         "kind": "output"
       },
       {
+        "name": "anchor",
+        "type": "FlexibleConnectedPositionStrategyOrigin",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "closeOnEscape",
         "type": "boolean",
         "description": "",
@@ -1979,56 +2099,56 @@
     "inputs": [
       {
         "name": "nodeClick",
-        "type": "T",
+        "type": "NodeClickEvent<T>",
         "description": "The node click event emitter.",
         "kind": "output"
       },
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Whether to animate the tree.\rIf true, the tree will animate when expanding or collapsing nodes.",
+        "description": "Whether to animate the tree.\n\nIf true, the tree will animate when expanding or collapsing nodes.",
         "kind": "input"
       },
       {
         "name": "children",
-        "type": "T",
-        "description": "The children selector for the tree.\rIt can be either of the following:\r- A string representing the property name of the children.\r- A function that returns the children of a node.\r- A function that returns an observable that emits the children of a node.\r@param value The children selector for the tree.",
+        "type": "ChildrenSelector<T>",
+        "description": "The children selector for the tree.\n\nIt can be either of the following:\n- A string representing the property name of the children.\n- A function that returns the children of a node.\n- A function that returns an observable that emits the children of a node.",
         "kind": "input"
       },
       {
         "name": "data",
-        "type": "T",
+        "type": "Iterable<T>",
         "description": "The data for the tree.",
         "kind": "input"
       },
       {
         "name": "hasChildren",
         "type": "Predicate<T> | null",
-        "description": "The predicate to determine if a node has children.\rRequired if the children selector is set to a function that returns an observable.\r@param value The predicate to determine if a node has children.",
+        "description": "The predicate to determine if a node has children.\n\nRequired if the children selector is set to a function that returns an observable.",
         "kind": "input"
       },
       {
         "name": "idField",
         "type": "string",
-        "description": "The field that represents the unique identifier of a node.\rThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the unique identifier of a node.\n\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "DataStructure",
-        "description": "The data structure of the tree.\rIt can be either of the following:\r- `flat`: The tree is a flat list of nodes.\r- `hierarchical`: The tree is a hierarchical structure.\rIf the data structure is set to `flat`, the following fields are required:\r- {@link idField}\r- {@link parentIdField}\rIf the data structure is set to `hierarchical`, the following fields are required:\r- {@link children}\r- {@link hasChildren}",
+        "description": "The data structure of the tree.\n\nIt can be either of the following:\n- `flat`: The tree is a flat list of nodes.\n- `hierarchical`: The tree is a hierarchical structure.\n\nIf the data structure is set to `flat`, the following fields are required:\n- idField\n- parentIdField\n\nIf the data structure is set to `hierarchical`, the following fields are required:\n- children\n- hasChildren",
         "kind": "input"
       },
       {
         "name": "parentIdField",
         "type": "string",
-        "description": "The field that represents the parent identifier of a node.\rThis is required if the data structure is set to `flat`.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "textField",
-        "type": "T, string",
-        "description": "The text field for the tree.\rIt can be either of the following:\r- A string representing the property name of the text.\r- A function that returns the text of a node.",
+        "type": "string | Selector<T, string>",
+        "description": "The text field for the tree.\n\nIt can be either of the following:\n- A string representing the property name of the text.\n- A function that returns the text of a node.",
         "kind": "input"
       }
     ]
@@ -2291,7 +2411,7 @@
     "inputs": [
       {
         "name": "itemSelect",
-        "type": "TData",
+        "type": "SelectionChangeEvent<TData>",
         "description": "",
         "kind": "output"
       },
@@ -2332,8 +2452,38 @@
     "selector": "\"mona-list-item\"",
     "inputs": [
       {
+        "name": "item",
+        "type": "ListItem<TData>",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "template",
         "type": "TemplateRef<ListItemTemplateContext<TData>> | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "SubTreeComponent": {
+    "name": "SubTreeComponent",
+    "selector": "\"mona-sub-tree\"",
+    "inputs": [
+      {
+        "name": "depth",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "nodes",
+        "type": "ImmutableSet<TreeNode<T>>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "parent",
+        "type": "TreeNode<T> | null",
         "description": "",
         "kind": "input"
       }
@@ -2345,49 +2495,49 @@
     "inputs": [
       {
         "name": "nodeCheck",
-        "type": "T",
+        "type": "NodeCheckEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeClick",
-        "type": "T",
+        "type": "NodeClickEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDrag",
-        "type": "T",
+        "type": "NodeDragEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDragEnd",
-        "type": "T",
+        "type": "NodeDragStartEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDragStart",
-        "type": "T",
+        "type": "NodeDragStartEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeDrop",
-        "type": "T",
+        "type": "NodeDropEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "nodeSelect",
-        "type": "T",
+        "type": "NodeSelectEvent<T>",
         "description": "",
         "kind": "output"
       },
       {
         "name": "data",
-        "type": "T",
+        "type": "Iterable<T>",
         "description": "",
         "kind": "input"
       }
@@ -2435,7 +2585,7 @@
       },
       {
         "name": "data",
-        "type": "TData",
+        "type": "Iterable<TData>",
         "description": "",
         "kind": "input"
       },
@@ -2495,13 +2645,13 @@
       },
       {
         "name": "children",
-        "type": "T, Iterable<T> | Observable<Iterable<T>>",
+        "type": "string | Selector<T, Iterable<T> | Observable<Iterable<T>>>",
         "description": "",
         "kind": "input"
       },
       {
         "name": "data",
-        "type": "T",
+        "type": "Iterable<T>",
         "description": "",
         "kind": "input"
       },
@@ -2549,7 +2699,7 @@
       },
       {
         "name": "data",
-        "type": "TData",
+        "type": "Iterable<TData>",
         "description": "",
         "kind": "input"
       },
@@ -2670,31 +2820,31 @@
       {
         "name": "format",
         "type": "ColorOutputFormat",
-        "description": "Specifies the format of the color output.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the alpha slider.\n@default true",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "showButtons",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the buttons.\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.\n@default true",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "showHexInput",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the hex input.\n@default true",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "showRgbInput",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the RGB input.\n@default true",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -2706,19 +2856,19 @@
       {
         "name": "closeOnSelect",
         "type": "boolean",
-        "description": "Whether to close the color picker when a color is selected.\nOnly applies when {@link view} is set to \"palette\".\n@default true",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "columns",
         "type": "number",
-        "description": "The number of columns to display in the color palette.\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.\n@default 10",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "Whether to display the opacity slider.\nOnly applies when the view is set to \"gradient\".\n@default true",
+        "description": "",
         "kind": "input"
       },
       {
@@ -2742,91 +2892,91 @@
       {
         "name": "decimals",
         "type": "number",
-        "description": "Number of decimals to show.\n@default 0",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets whether the input is disabled.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "formatter",
         "type": "Action<number | null, string> | null",
-        "description": "Formats the value to be displayed in the input when the input is not focused.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "inputBlur",
         "type": "Event",
-        "description": "Emits when the inner input element is blurred.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "Event",
-        "description": "Emits when the inner input element is focused.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "inputFocusOut",
         "type": "Event",
-        "description": "Emits when the inner input element loses focus.",
+        "description": "",
         "kind": "output"
       },
       {
         "name": "max",
         "type": "number | undefined",
-        "description": "Maximum value that can be entered.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "min",
         "type": "number | undefined",
-        "description": "Minimum value that can be entered.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "nullable",
         "type": "boolean",
-        "description": "Sets whether the input can be empty.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "Sets whether the input is readonly.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets whether the input is required.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "NumericTextBoxVariantProps[\"size\"]",
-        "description": "Sets the size of the input.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "spinners",
         "type": "boolean",
-        "description": "Sets whether the spin buttons are visible.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "step",
         "type": "number",
-        "description": "Step value to increment or decrement the value.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "tabindex",
         "type": "number",
-        "description": "Tab index of the input.",
+        "description": "",
         "kind": "input"
       },
       {
@@ -3058,68 +3208,68 @@
     "selector": "\"mona-text-box\"",
     "inputs": [
       {
-        "name": "inputBlur",
-        "type": "Event",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "inputFocus",
-        "type": "Event",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "size",
-        "type": "TextBoxVariantProps[\"size\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
         "name": "clearButton",
         "type": "boolean",
-        "description": "",
+        "description": "Displays a button to clear the input value.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the text box.",
         "kind": "input"
+      },
+      {
+        "name": "inputBlur",
+        "type": "Event",
+        "description": "Emits an event when the input loses focus.",
+        "kind": "output"
+      },
+      {
+        "name": "inputFocus",
+        "type": "Event",
+        "description": "Emits an event when the input gains focus.",
+        "kind": "output"
       },
       {
         "name": "inputClass",
         "type": "string | string[]",
-        "description": "",
+        "description": "Sets the class for the input element.",
         "kind": "input"
       },
       {
         "name": "inputStyle",
-        "type": "CSSStyleDeclaration | null | undefined",
-        "description": "",
+        "type": "string | Partial<CSSStyleDeclaration> | null",
+        "description": "Sets the style for the input element.\nCan be a string or a partial CSSStyleDeclaration.",
         "kind": "input"
       },
       {
         "name": "placeholder",
         "type": "string",
-        "description": "",
+        "description": "Sets the placeholder text for the input.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the readonly state of the text box.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "TextBoxVariantProps[\"size\"]",
+        "description": "Sets the size of the text box.",
         "kind": "input"
       },
       {
         "name": "type",
         "type": "InputType",
+        "description": "Sets the type of the input element.\nDefaults to \"text\".",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }
@@ -3172,6 +3322,12 @@
         "kind": "input"
       },
       {
+        "name": "height",
+        "type": "string | number",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "index",
         "type": "number",
         "description": "",
@@ -3198,6 +3354,12 @@
       {
         "name": "pagerOverlay",
         "type": "PagerOverlay",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number",
         "description": "",
         "kind": "input"
       }
@@ -3230,6 +3392,30 @@
         "type": "string | number",
         "description": "",
         "kind": "model"
+      }
+    ]
+  },
+  "SplitterResizerComponent": {
+    "name": "SplitterResizerComponent",
+    "selector": "\"mona-splitter-resizer\"",
+    "inputs": [
+      {
+        "name": "nextPane",
+        "type": "SplitterPaneComponent",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "orientation",
+        "type": "Orientation",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "previousPane",
+        "type": "SplitterPaneComponent",
+        "description": "",
+        "kind": "input"
       }
     ]
   },
@@ -3347,8 +3533,8 @@
     "inputs": [
       {
         "name": "color",
-        "type": "number, string",
-        "description": "Color of progress bar. Can be string or function that takes progress value and returns color.",
+        "type": "string | Action<number, string>",
+        "description": "",
         "kind": "input"
       },
       {
@@ -3378,7 +3564,7 @@
       {
         "name": "progress",
         "type": "number",
-        "description": "Progress value in percentage. Value must be between 0 and 100.\rDo not use together with the {@link value} input.",
+        "description": "",
         "kind": "input"
       },
       {
@@ -3396,7 +3582,7 @@
       {
         "name": "value",
         "type": "number",
-        "description": "Progress value in absolute value. Value must be between min and max.\rDo not use together with the {@link progress} input.",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -3407,7 +3593,7 @@
     "inputs": [
       {
         "name": "color",
-        "type": "number, string",
+        "type": "string | Action<number, string>",
         "description": "",
         "kind": "input"
       },
@@ -3437,7 +3623,7 @@
       },
       {
         "name": "labelStyles",
-        "type": "CSSStyleDeclaration",
+        "type": "Partial<CSSStyleDeclaration>",
         "description": "",
         "kind": "input"
       },
@@ -3500,6 +3686,12 @@
         "type": "PopoverShownEvent",
         "description": "",
         "kind": "output"
+      },
+      {
+        "name": "target",
+        "type": "Element | ElementRef",
+        "description": "",
+        "kind": "input"
       },
       {
         "name": "title",

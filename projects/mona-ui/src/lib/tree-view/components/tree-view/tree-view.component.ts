@@ -43,57 +43,60 @@ export class TreeViewComponent<T> implements OnInit {
     protected readonly treeService = inject(TreeService<T>);
 
     /**
-     * The node click event emitter.
+     * @description The node click event emitter.
      */
     public readonly nodeClick = output<NodeClickEvent<T>>();
 
     /**
-     * Whether to animate the tree.
+     * @description Whether to animate the tree.
+     *
      * If true, the tree will animate when expanding or collapsing nodes.
      */
     public animate = input<boolean>(true);
 
     /**
-     * The children selector for the tree.
+     * @description The children selector for the tree.
+     *
      * It can be either of the following:
      * - A string representing the property name of the children.
      * - A function that returns the children of a node.
      * - A function that returns an observable that emits the children of a node.
-     * @param value The children selector for the tree.
      */
     public children = input<ChildrenSelector<T>>("");
 
     /**
-     * The data for the tree.
+     * @description The data for the tree.
      */
     public data = input<Iterable<T>>([]);
 
     /**
-     * The predicate to determine if a node has children.
+     * @description The predicate to determine if a node has children.
+     *
      * Required if the children selector is set to a function that returns an observable.
-     * @param value The predicate to determine if a node has children.
      */
     public hasChildren = input<Predicate<T> | null>(null);
 
     /**
-     * The field that represents the unique identifier of a node.
+     * @description The field that represents the unique identifier of a node.
+     *
      * This is required if the data structure is set to `flat`.
      */
     public idField = input<string>("");
 
     /**
-     * The data structure of the tree.
+     * @description The data structure of the tree.
+     *
      * It can be either of the following:
      * - `flat`: The tree is a flat list of nodes.
      * - `hierarchical`: The tree is a hierarchical structure.
      *
      * If the data structure is set to `flat`, the following fields are required:
-     * - {@link idField}
-     * - {@link parentIdField}
+     * - idField
+     * - parentIdField
      *
      * If the data structure is set to `hierarchical`, the following fields are required:
-     * - {@link children}
-     * - {@link hasChildren}
+     * - children
+     * - hasChildren
      */
     public mode = input<DataStructure>("hierarchical");
 
@@ -104,7 +107,8 @@ export class TreeViewComponent<T> implements OnInit {
     public parentIdField = input<string>("");
 
     /**
-     * The text field for the tree.
+     * @description The text field for the tree.
+     *
      * It can be either of the following:
      * - A string representing the property name of the text.
      * - A function that returns the text of a node.
@@ -120,7 +124,7 @@ export class TreeViewComponent<T> implements OnInit {
         this.treeService.nodeClick = this.nodeClick;
     }
 
-    public onFilterChange(event: FilterChangeEvent): void {
+    protected onFilterChange(event: FilterChangeEvent): void {
         if (this.treeService.filterChange) {
             this.treeService.filterChange.emit(event);
         }

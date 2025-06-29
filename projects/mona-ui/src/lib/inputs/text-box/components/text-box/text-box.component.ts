@@ -51,6 +51,7 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly clearIcon = X;
     protected readonly prefixClasses = computed(() => {
         const classes = textBoxAdornmentVariants({ position: "start" });
         return twMerge(classes);
@@ -62,19 +63,63 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
 
-    public readonly inputBlur = output<Event>();
-    public readonly inputFocus = output<Event>();
-    public readonly size = input<TextBoxVariantProps["size"]>("medium");
-    public readonly userClass = input<string>("", { alias: "class" });
+    /**
+     * @description Displays a button to clear the input value.
+     */
+    public readonly clearButton = input<boolean>(false);
 
-    public clearButton = input<boolean>(false);
-    public disabled = input<boolean>(false);
-    public inputClass = input<string | string[]>("");
-    public inputStyle = input<string | Partial<CSSStyleDeclaration | null | undefined>>(undefined);
-    public placeholder = input<string>("");
-    public readonly = input<boolean>(false);
-    public type = input<InputType>("text");
-    public value = signal<string>("");
+    /**
+     * @description Sets the disabled state of the text box.
+     */
+    public readonly disabled = input<boolean>(false);
+
+    /**
+     * @description Emits an event when the input loses focus.
+     */
+    public readonly inputBlur = output<Event>();
+
+    /**
+     * @description Emits an event when the input gains focus.
+     */
+    public readonly inputFocus = output<Event>();
+
+    /**
+     * @description Sets the class for the input element.
+     */
+    public readonly inputClass = input<string | string[]>("");
+
+    /**
+     * @description Sets the style for the input element.
+     * Can be a string or a partial CSSStyleDeclaration.
+     */
+    public readonly inputStyle = input<string | Partial<CSSStyleDeclaration> | null>(null);
+
+    /**
+     * @description Sets the placeholder text for the input.
+     */
+    public readonly placeholder = input<string>("");
+
+    /**
+     * @description Sets the readonly state of the text box.
+     */
+    public readonly readonly = input<boolean>(false);
+
+    /**
+     * @description Sets the size of the text box.
+     */
+    public readonly size = input<TextBoxVariantProps["size"]>("medium");
+
+    /**
+     * @description Sets the type of the input element.
+     * Defaults to "text".
+     */
+    public readonly type = input<InputType>("text");
+
+    /**
+     * @description Sets the value of the text box.
+     */
+    public readonly value = signal<string>("");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public onClearClick(): void {
         this.value.set("");
@@ -99,6 +144,4 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
             this.value.set(obj);
         }
     }
-
-    protected readonly clearIcon = X;
 }

@@ -1,6 +1,9 @@
 <div class="flex flex-col border border-border">
     <div class="flex flex-col border-b border-border bg-demo-background">
         <div class="flex items-center justify-end p-2">
+            <button monaButton look="ghost" (click)="onCodeToggle()">
+                <lucide-angular [name]="Code" [size]="20"></lucide-angular>
+            </button>
             <mona-drop-down-list [data]="themeDropdownData()" [ngModel]="selectedTheme()"
                                  size="small"
                                  (ngModelChange)="onThemeChange($event)">
@@ -13,7 +16,14 @@
             <ng-content></ng-content>
         </div>
     </div>
+    @if (codeVisible()) {
+        <div class="overflow-hidden p-2 border-b border-b-border" @slideDown>
+            <app-code-viewer [code]="config().code||''" language="html"></app-code-viewer>
+        </div>
+    }
     <div>
-        <app-config [config]="config()" [metadata]="metadata()" (valueChange)="valueChange.emit($event)"></app-config>
+        <app-config [config]="config()" [metadata]="metadata()"
+                    [subComponentMetadata]="subComponentMetadata()"
+                    (valueChange)="valueChange.emit($event)"></app-config>
     </div>
 </div>

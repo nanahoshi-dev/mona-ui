@@ -59,31 +59,36 @@ export class MenuItemComponent<T = unknown> {
         read: TemplateRef,
         descendants: false
     });
+
+    /**
+     * @description The data associated with the menu item.
+     * This can be any type of data that you want to associate with the menu item.
+     */
     public readonly data = input<T>();
 
     /**
-     * Sets the menu item as disabled.
+     * @description Sets the menu item as disabled.
      */
     public readonly disabled = input<boolean>(false);
 
     /**
-     * Sets the menu item as a divider.
+     * @description Sets the menu item as a divider.
      * A divider is a horizontal line that separates menu items.
      */
     public readonly divider = input<boolean>(false);
 
     /**
-     * The icon class to use for the menu item.
+     * @description The icon class to use for the menu item.
      */
     public readonly iconClass = input<string>("");
 
     /**
-     * Emits when the menu item is clicked.
+     * @description Emits when the menu item is clicked.
      */
     public readonly menuClick = output<MenuItemClickEvent<any, T>>();
 
     /**
-     * The text to display for the menu item.
+     * @description The text to display for the menu item.
      */
     public readonly text = input<string>("");
 

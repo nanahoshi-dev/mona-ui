@@ -13,7 +13,11 @@ import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionTo
         }
     ]
 })
-export class MenuItemGroupComponent<T = unknown> {
-    public readonly menuItems = contentChildren(MenuItemComponent<T>);
+export class MenuItemGroupComponent {
+    public readonly menuItems = contentChildren(forwardRef(() => MenuItemComponent<unknown>));
+
+    /**
+     * @description The title of the menu item group.
+     */
     public readonly title = input.required<string>();
 }

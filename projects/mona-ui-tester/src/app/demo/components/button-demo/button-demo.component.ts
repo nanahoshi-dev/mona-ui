@@ -15,6 +15,20 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
     readonly #themeService = inject(ThemeService);
     protected readonly ButtonWrapperComponent = ButtonWrapperComponent;
     protected readonly config = signal<ComponentConfig<ButtonDirective>>({
+        code: `
+            <button
+                monaButton
+                [ariaDescribedby]="ariaDescribedby()"
+                [ariaLabel]="ariaLabel()"
+                [ariaLabelledby]="ariaLabelledby()"
+                [disabled]="disabled()"
+                [look]="look()"
+                [rounded]="rounded()"
+                [selected]="selected()"
+                [size]="size()"
+                [toggleable]="toggleable()">
+                Mona Button
+            </button>`,
         inputs: {
             ariaDescribedby: {
                 type: "string",
@@ -70,6 +84,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
         outputs: {}
     });
     protected readonly metadata = this.getMetadata("ButtonDirective");
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 
     // public constructor() {
     //     super();

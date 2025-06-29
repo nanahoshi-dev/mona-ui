@@ -16,7 +16,10 @@ import { PageService } from "../../services/page.service";
     selector: "app-section",
     imports: [],
     templateUrl: "./section.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        class: "[&_p]:font-medium [&_p]:text-sm"
+    }
 })
 export class SectionComponent {
     readonly #pageService = inject(PageService);

@@ -1,7 +1,17 @@
 <app-section id="dropdownButton" [header]="'Dropdown Button'" headerType="H1">
-    <p>Documentation for DropDownButton component</p>
+    <p>
+        Displays a button that will display a menu when clicked.
+        <br/>
+        <br/>
+        The menu items are configured using the MenuItemComponent.
+        The menu items can be grouped using the MenuItemGroupComponent.
+    </p>
+    <app-section id="usage" [header]="'Usage'" headerType="H2">
+        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
+    </app-section>
+    <app-section id="demo" [header]="'Demo'" headerType="H2">
+        <app-drop-down-button-demo></app-drop-down-button-demo>
+    </app-section>
 </app-section>
 
-<app-section id="demo" [header]="'Demo'" headerType="H2">
-    <app-drop-down-button-demo></app-drop-down-button-demo>
-</app-section>
+

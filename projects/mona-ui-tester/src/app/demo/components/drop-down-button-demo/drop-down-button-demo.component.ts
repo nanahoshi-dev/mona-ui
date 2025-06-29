@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { Heart, LucideAngularModule, Settings } from "lucide-angular";
+import { LucideAngularModule, Settings } from "lucide-angular";
 import {
     DropDownButtonComponent,
     MenuItemComponent,
@@ -52,6 +52,34 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
     });
     readonly #templateHandler = this.#injector.get(TemplateConfigHandler);
     protected readonly config = signal<ComponentConfig<DropDownButtonComponent>>({
+        code: `
+            <mona-drop-down-button [disabled]="disabled()" [look]="look()"
+                                   [rounded]="rounded()" [size]="size()">
+                Drop Down
+                <mona-menu-item-group title="Names">
+                    <mona-menu-item text="Mona"></mona-menu-item>
+                    <mona-menu-item text="Lisa"></mona-menu-item>
+                    <mona-menu-item text="Rosaria">
+                        <mona-menu-item text="Setsuna"></mona-menu-item>
+                        <mona-menu-item text="Fleur"></mona-menu-item>
+                        <mona-menu-item text="Ayana"></mona-menu-item>
+                    </mona-menu-item>
+                </mona-menu-item-group>
+                <mona-menu-item [divider]="true"></mona-menu-item>
+                <mona-menu-item text="Settings">
+                    <ng-template monaMenuItemIconTemplate let-item>
+                        <lucide-angular [name]="settingsIcon" size="14"></lucide-angular>
+                    </ng-template>
+                </mona-menu-item>
+                <mona-menu-item text="Help">
+                    <ng-template monaMenuItemTextTemplate let-item>
+                        <span class="text-green-500">{{ item.text }}</span>
+                    </ng-template>
+                </mona-menu-item>
+                <mona-menu-item text="About"></mona-menu-item>
+                <mona-menu-item [disabled]="true" text="Disabled"></mona-menu-item>
+            </mona-drop-down-button>
+        `,
         inputs: {
             disabled: {
                 type: "boolean",
@@ -88,6 +116,10 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
         templateHandler: this.#templateHandler
     });
     protected readonly metadata = this.getMetadata("SplitButtonComponent");
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
+        "MenuItemGroupComponent",
+        "MenuItemComponent"
+    ]);
     protected readonly templateInjector = this.#injector;
     protected readonly DropDownButtonWrapperComponent = DropDownButtonWrapperComponent;
 }
@@ -110,13 +142,7 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
                 <mona-menu-item text="Lisa"></mona-menu-item>
                 <mona-menu-item text="Rosaria">
                     <mona-menu-item text="Setsuna"></mona-menu-item>
-                    <mona-menu-item text="Fleur">
-                        @if (templateData && templateData["iconTemplate"].active) {
-                            <ng-template monaMenuItemIconTemplate let-item>
-                                <lucide-angular [name]="heartIcon" size="14" class="text-red-500"></lucide-angular>
-                            </ng-template>
-                        }
-                    </mona-menu-item>
+                    <mona-menu-item text="Fleur"></mona-menu-item>
                     <mona-menu-item text="Ayana"></mona-menu-item>
                 </mona-menu-item>
             </mona-menu-item-group>
@@ -141,7 +167,6 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
     `
 })
 export class DropDownButtonWrapperComponent implements ComponentInputsAsSignal<DropDownButtonComponent> {
-    protected readonly heartIcon = Heart;
     protected readonly settingsIcon = Settings;
     public readonly disabled = input(false);
     public readonly look = input<ReturnType<DropDownButtonComponent["look"]>>("default");

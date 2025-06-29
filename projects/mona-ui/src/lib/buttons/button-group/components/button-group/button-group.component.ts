@@ -53,28 +53,28 @@ export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
     protected readonly items = contentChildren(ButtonGroupItemComponent);
 
     /**
-     * Sets the disabled state of the button group.
+     * @description Sets the disabled state of the button group.
      * If true, all buttons in the group will be disabled.
      */
     public readonly disabled = model<boolean>(false);
 
     /**
-     * Sets the look of the button group.
+     * @description Sets the look of the button group.
      */
     public readonly look = input<ButtonGroupVariantProps["look"]>("outline");
 
     /**
-     * Sets the rounded style of the button group.
+     * @description Sets the rounded style of the button group.
      */
     public readonly rounded = input<ButtonGroupVariantProps["rounded"]>("medium");
 
     /**
-     * Sets the size of the button group.
+     * @description Sets the size of the button group.
      */
     public readonly size = input<ButtonGroupVariantProps["size"]>("medium");
 
     /**
-     * Sets the selection mode of the button group.
+     * @description Sets the selection mode of the button group.
      */
     public readonly selection = model<SelectionMode>("multiple");
     public readonly userClass = input<string>("", { alias: "class" });

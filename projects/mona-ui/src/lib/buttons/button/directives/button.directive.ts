@@ -57,59 +57,55 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
     });
 
     /**
-     * ARIA value for `aria-describedby` attribute.
+     * @description ARIA value for `aria-describedby` attribute.
      */
     public readonly ariaDescribedby = input<string>("");
 
     /**
-     * ARIA value for `aria-label` attribute.
+     * @description ARIA value for `aria-label` attribute.
      */
     public readonly ariaLabel = input<string>("");
 
     /**
-     * ARIA value for `aria-labelledby` attribute
+     * @description ARIA value for `aria-labelledby` attribute
      */
     public readonly ariaLabelledby = input<string>("");
 
     /**
-     * Sets the disabled state of the button.
+     * @description Sets the disabled state of the button.
      */
     public readonly disabled = model<boolean>(false);
 
     /**
-     * @deprecated Use `ghost` option in `look` instead.
-     */
-    public readonly flat = input(false);
-
-    /**
-     * Sets the look of the button.
+     * @description Sets the look of the button.
      */
     public readonly look = model<ButtonVariantProps["look"]>("default");
 
     /**
-     * Sets the border radius of the button.
+     * @description Sets the border radius of the button.
      */
     public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
 
     /**
-     * Sets the selected state of the button.
+     * @description Sets the selected state of the button.
      */
     public readonly selected = model(false);
 
     /**
-     * Sets the size of the button.
+     * @description Sets the size of the button.
      */
     public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
-     * Sets the tabindex of the button.
+     * @description Sets the tabindex of the button.
      */
     public readonly tabindex = input<number, number | string>(0, {
         transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
     });
 
     /**
-     * Sets the toggleable state of the button.
+     * @description Sets the toggleable state of the button.
+     *
      * If set to `true`, the button will toggle its selected state on click.
      */
     public readonly toggleable = input(false);

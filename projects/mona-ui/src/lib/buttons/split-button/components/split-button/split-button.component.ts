@@ -72,34 +72,42 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     protected readonly textTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
 
     /**
-     * Sets the disabled state of the button.
+     * @description Sets the disabled state of the button.
      */
     public readonly disabled = input(false);
 
     /**
-     * Sets the look of the button.
+     * @description Sets the look of the button.
      */
     public readonly look = input<SplitButtonVariantProps["look"]>("default");
+
+    /**
+     * @description Sets the offset of the popup relative to the button.
+     */
     public readonly popupOffset = signal<PopupOffset>({ horizontal: -1, vertical: 4 });
+
+    /**
+     * @description Sets the width of the popup.
+     */
     public readonly popupWidth = signal(0);
 
     /**
-     * Sets the border radius of the button.
+     * @description Sets the border radius of the button.
      */
     public readonly rounded = input<SplitButtonVariantProps["rounded"]>("medium");
 
     /**
-     * Sets the size of the button.
+     * @description Sets the size of the button.
      */
     public readonly size = input<SplitButtonVariantProps["size"]>("medium");
 
     /**
-     * Sets the tabindex of the button.
+     * @description Sets the tabindex of the button.
      */
     public readonly tabindex = input<number | string>(0);
 
     /**
-     * Sets the text of the button.
+     * @description Sets the text of the button.
      */
     public readonly text = input("");
     public readonly userClass = input<string>("", { alias: "class" });

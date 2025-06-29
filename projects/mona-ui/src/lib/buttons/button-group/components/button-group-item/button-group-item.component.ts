@@ -12,22 +12,23 @@ import { ChangeDetectionStrategy, Component, model, output, TemplateRef, viewChi
 })
 export class ButtonGroupItemComponent {
     /**
-     * Emits when the button is clicked.
+     * @description Emits when the button is clicked.
      */
     public readonly click = output<MouseEvent>();
 
     /**
+     * @internal
      * The content of the button.
      */
     public readonly content = viewChild.required(TemplateRef);
 
     /**
-     * Whether the button is disabled.
+     * @description Whether the button is disabled.
      */
     public readonly disabled = model(false);
 
     /**
-     * Whether the button is selected.
+     * @description Whether the button is selected.
      */
     public readonly selected = model(false);
 }

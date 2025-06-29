@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { Code, LucideAngularModule } from "lucide-angular";
+import { ChevronsUpDown, Code, LucideAngularModule } from "lucide-angular";
 import { ButtonDirective, SwitchComponent } from "mona-ui";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
+import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ComponentConfig, ComponentInputs, createComponentPropertyConfig } from "../../utils/componentConfig";
 import { ApiInputListItemComponent } from "../api-input-list-item/api-input-list-item.component";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
@@ -15,7 +16,8 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         ApiInputListItemComponent,
         CodeViewerComponent,
         ButtonDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        InputPropertyPipe
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +27,8 @@ export class ConfigComponent<C> {
         const config = this.config();
         return createComponentPropertyConfig(config);
     });
+    protected readonly codeIcon = Code;
+    protected readonly expandIcon = ChevronsUpDown;
     public readonly config = input.required<ComponentConfig<C>>();
     public readonly inputProperties = computed(() => {
         return this.#componentPropertyConfig().inputs;
@@ -33,6 +37,19 @@ export class ConfigComponent<C> {
     public readonly outputObject = signal<ComponentInputs<C>>({});
     public readonly outputProperties = computed(() => {
         return this.#componentPropertyConfig().outputs;
+    });
+    public readonly subComponentMetadata = input<Record<string, ComponentMetadata>>();
+    public readonly subComponentPropertyConfig = computed(() => {
+        const subComponents = this.subComponentMetadata();
+        return Object.entries(
+            Object.entries(subComponents || {}).reduce(
+                (acc, [key, metadata]) => {
+                    acc[key] = { ...metadata, expanded: false };
+                    return acc;
+                },
+                {} as Record<string, ComponentMetadata & { expanded: boolean }>
+            )
+        );
     });
     public readonly templateHandler = computed(() => {
         return this.#componentPropertyConfig().templates;
@@ -47,7 +64,7 @@ export class ConfigComponent<C> {
         effect(() => {
             const oo = this.outputObject();
             if (Object.keys(oo).length > 0) {
-                this.valueChange.emit(oo);
+                untracked(() => this.valueChange.emit(oo));
             }
         });
     }
@@ -55,7 +72,4 @@ export class ConfigComponent<C> {
     public onValueChange(key: string, value: unknown): void {
         this.outputObject.update(o => ({ ...o, [key]: value }));
     }
-
-    protected readonly Object = Object;
-    protected readonly Code = Code;
 }

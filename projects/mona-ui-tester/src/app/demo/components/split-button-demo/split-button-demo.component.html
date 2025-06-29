@@ -1,6 +1,8 @@
 <app-demo-container [config]="config()"
                     [metadata]="metadata()"
+                    [subComponentMetadata]="subComponentsMetadata()"
                     (valueChange)="onInputValueChange($event)">
     <ng-container [ngComponentOutlet]="SplitButtonWrapperComponent"
+                  [ngComponentOutletInjector]="templateInjector"
                   [ngComponentOutletInputs]="inputs()"></ng-container>
 </app-demo-container>

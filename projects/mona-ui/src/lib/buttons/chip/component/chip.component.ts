@@ -28,45 +28,45 @@ export class ChipComponent implements ChipVariantInputs {
     });
 
     /**
-     * Sets the disabled state of the chip.
+     * @description Sets the disabled state of the chip.
      */
     public readonly disabled = input(false);
 
     /**
-     * Sets the label of the chip.
+     * @description Sets the label of the chip.
      *
      * If the label is set, the chip will display the label instead of the content.
      */
     public readonly label = input("");
 
     /**
-     * Sets the look of the chip.
+     * @description Sets the look of the chip.
      */
     public readonly look = input<ChipVariantProps["look"]>("default");
 
     /**
-     * Sets the removable state of the chip.
+     * @description Sets the removable state of the chip.
      * If true, the chip will display a remove icon.
      */
     public readonly removable = input(false);
 
     /**
-     * Emits when the {@link removable} is set to true and the remove icon is clicked.
+     * @description Emits when the {@link removable} is set to true and the remove icon is clicked.
      */
     public readonly remove = output<Event>();
 
     /**
-     * Sets the rounded state of the chip.
+     * @description Sets the rounded state of the chip.
      */
     public readonly rounded = input<ChipVariantProps["rounded"]>("full");
 
     /**
-     * Sets the size of the chip.
+     * @description Sets the size of the chip.
      */
     public readonly size = input<ChipVariantProps["size"]>("medium");
 
     /**
-     * Sets the tabindex of the chip.
+     * @description Sets the tabindex of the chip.
      */
     public readonly tabindex = input<number | string>(0);
     public readonly userClass = input<string>("", { alias: "class" });

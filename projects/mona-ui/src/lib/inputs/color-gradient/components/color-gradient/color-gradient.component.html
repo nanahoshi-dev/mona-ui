@@ -15,7 +15,7 @@
              (click)="onResetColorClick()"
              [style.background-color]="lastSelectedColor()"></div>
     }
-    <button monaButton [flat]="true" (click)="onClearClick()">
+    <button monaButton look="ghost" (click)="onClearClick()">
         <i class="ri-blur-off-line"></i>
     </button>
 </div>
@@ -92,7 +92,7 @@
                 }
             </div>
             <div class="mona-color-gradient-channel-switch">
-                <button monaButton [flat]="true" title="Switch color mode"
+                <button monaButton look="ghost" title="Switch color mode"
                         (click)="onSwitchColorModeClick()">
                     <i class="ri-expand-up-down-line"></i>
                 </button>
@@ -107,7 +107,7 @@
                 </ng-template>
                 <ng-template monaTextBoxSuffixTemplate>
                 <span class="mona-color-gradient-hex-input-suffix">
-                    <button monaButton [flat]="true" title="Copy color" #copyButton>
+                    <button monaButton look="ghost" title="Copy color" #copyButton>
                         <i class="ri-file-copy-line"></i>
                     </button>
                     <mona-contextmenu [target]="copyButton" trigger="click">
