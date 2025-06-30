@@ -1,18 +1,18 @@
 import { assertInInjectionContext, inject, Injectable, Injector, signal, WritableSignal } from "@angular/core";
-import { ComponentConfigTemplateItem } from "./componentConfig";
+import { ComponentConfigFeatureItem } from "./componentConfig";
 
 @Injectable()
-export class TemplateConfigHandler {
-    readonly #data = signal<ComponentConfigTemplateItem>({});
+export class FeatureConfigHandler {
+    readonly #data = signal<ComponentConfigFeatureItem>({});
 
-    public updateData(data: ComponentConfigTemplateItem): void {
+    public updateData(data: ComponentConfigFeatureItem): void {
         this.#data.set(data);
     }
 
-    public updateProperty<K extends keyof ComponentConfigTemplateItem>(property: K, value: boolean): void {
+    public updateProperty<K extends keyof ComponentConfigFeatureItem>(property: K, value: boolean): void {
         const currentData = this.#data();
         if (currentData) {
-            const updatedData: ComponentConfigTemplateItem = {
+            const updatedData: ComponentConfigFeatureItem = {
                 ...currentData,
                 [property]: {
                     ...currentData[property],
@@ -23,29 +23,26 @@ export class TemplateConfigHandler {
         }
     }
 
-    public get data(): WritableSignal<ComponentConfigTemplateItem> {
+    public get data(): WritableSignal<ComponentConfigFeatureItem> {
         return this.#data;
     }
 }
 
-export const createTemplateInjector = (
-    initialData: ComponentConfigTemplateItem,
-    parentInjector?: Injector
-): Injector => {
+export const createFeatureInjector = (initialData: ComponentConfigFeatureItem, parentInjector?: Injector): Injector => {
     let contextInjector = parentInjector;
     if (!contextInjector) {
-        assertInInjectionContext(createTemplateInjector);
+        assertInInjectionContext(createFeatureInjector);
         contextInjector = inject(Injector);
     }
 
-    const handler = new TemplateConfigHandler();
+    const handler = new FeatureConfigHandler();
     handler.updateData(initialData);
 
     return Injector.create({
         parent: contextInjector,
         providers: [
             {
-                provide: TemplateConfigHandler,
+                provide: FeatureConfigHandler,
                 useValue: handler
             }
         ]

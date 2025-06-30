@@ -36,6 +36,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "input",
+                loadComponent: () =>
+                    import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
+            },
+            {
                 path: "split-button",
                 loadComponent: () =>
                     import("./docs/components/split-button-doc/split-button-doc.component").then(

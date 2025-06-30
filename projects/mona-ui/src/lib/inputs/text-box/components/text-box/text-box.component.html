@@ -1,5 +1,5 @@
 @for (prefixTemplate of prefixTemplateList(); track $index) {
-    <span [class]="prefixClasses()">
+    <span class="flex items-center flex-wrap h-full">
         <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
     </span>
 }
@@ -11,17 +11,17 @@
        [style]="inputStyle()"
        [ngModel]="value()"
        (ngModelChange)="onValueChange($event)"
-       (blur)="inputBlur.emit($event)"
+       (blur)="onInputBlur($event)"
        (focus)="inputFocus.emit($event)" />
 
 @if (clearButton() && value().length !== 0) {
-    <button monaButton look="link" size="small" class="px-0" [tabindex]="-1" (click)="onClearClick()">
+    <button monaButton look="link" size="small" class="p-0" [tabindex]="-1" (click)="onClearClick()">
         <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
     </button>
 }
 
 @for (suffixTemplate of suffixTemplateList(); track $index) {
-    <span [class]="suffixClasses()">
+    <span class="flex items-center flex-wrap h-full">
         <ng-container *ngTemplateOutlet="suffixTemplate"></ng-container>
     </span>
 }

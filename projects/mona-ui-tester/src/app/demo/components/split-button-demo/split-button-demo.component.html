@@ -3,6 +3,6 @@
                     [subComponentMetadata]="subComponentsMetadata()"
                     (valueChange)="onInputValueChange($event)">
     <ng-container [ngComponentOutlet]="SplitButtonWrapperComponent"
-                  [ngComponentOutletInjector]="templateInjector"
+                  [ngComponentOutletInjector]="featureInjector"
                   [ngComponentOutletInputs]="inputs()"></ng-container>
 </app-demo-container>

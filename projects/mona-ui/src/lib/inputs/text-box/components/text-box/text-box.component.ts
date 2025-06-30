@@ -5,6 +5,7 @@ import {
     computed,
     contentChildren,
     forwardRef,
+    inject,
     input,
     output,
     signal,
@@ -13,11 +14,11 @@ import {
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { LucideAngularModule, X } from "lucide-angular";
 import {
-    textBoxAdornmentVariants,
+    textBoxThemeVariants,
     TextBoxVariantInput,
-    TextBoxVariantProps,
-    textBoxVariants
-} from "../../../styles/textbox.style";
+    TextBoxVariantProps
+} from "mona-ui/inputs/text-box/styles/textbox.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { Action } from "../../../../utils/Action";
@@ -44,23 +45,19 @@ import { InputType } from "../../models/InputType";
     }
 })
 export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInput {
+    readonly #themeService = inject(ThemeService);
     #propagateChange: Action<string, any> | null = null;
+    #propagateTouch: Action<Event, any> | null = null;
     protected readonly classes = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
         const size = this.size();
-        const classes = textBoxVariants({ size });
+        const classes = textBoxThemeVariants(theme)({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
     protected readonly clearIcon = X;
-    protected readonly prefixClasses = computed(() => {
-        const classes = textBoxAdornmentVariants({ position: "start" });
-        return twMerge(classes);
-    });
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
-    protected readonly suffixClasses = computed(() => {
-        const classes = textBoxAdornmentVariants({ position: "end" });
-        return twMerge(classes);
-    });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
 
     /**
@@ -76,12 +73,12 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     /**
      * @description Emits an event when the input loses focus.
      */
-    public readonly inputBlur = output<Event>();
+    public readonly inputBlur = output<FocusEvent>();
 
     /**
      * @description Emits an event when the input gains focus.
      */
-    public readonly inputFocus = output<Event>();
+    public readonly inputFocus = output<FocusEvent>();
 
     /**
      * @description Sets the class for the input element.
@@ -105,6 +102,11 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     public readonly readonly = input<boolean>(false);
 
     /**
+     * @description Sets the border radius of the text box.
+     */
+    public readonly rounded = input<TextBoxVariantProps["rounded"]>("medium");
+
+    /**
      * @description Sets the size of the text box.
      */
     public readonly size = input<TextBoxVariantProps["size"]>("medium");
@@ -112,6 +114,7 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     /**
      * @description Sets the type of the input element.
      * Defaults to "text".
+     * @default text
      */
     public readonly type = input<InputType>("text");
 
@@ -126,6 +129,11 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
         this.#propagateChange?.(this.value());
     }
 
+    public onInputBlur(event: FocusEvent): void {
+        this.inputBlur.emit(event);
+        this.#propagateTouch?.(event);
+    }
+
     public onValueChange(value: string): void {
         this.value.set(value);
         this.#propagateChange?.(value);
@@ -136,7 +144,7 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     }
 
     public registerOnTouched(fn: any): void {
-        void 0;
+        this.#propagateTouch = fn;
     }
 
     public writeValue(obj: string): void {

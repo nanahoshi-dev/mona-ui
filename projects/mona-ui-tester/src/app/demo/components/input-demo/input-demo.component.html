@@ -1,6 +1,5 @@
 <app-demo-container [config]="config()" [metadata]="metadata()"
                     (valueChange)="onInputValueChange($event)">
-    <ng-container [ngComponentOutlet]="TextBoxWrapperComponent"
-                  [ngComponentOutletInjector]="featureInjector"
+    <ng-container [ngComponentOutlet]="InputWrapperComponent"
                   [ngComponentOutletInputs]="inputs()"></ng-container>
 </app-demo-container>

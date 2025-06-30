@@ -21,14 +21,19 @@ export class ThemeService {
 
     private getMonaDarkThemeVariables(): Record<string, string> {
         return {
-            "--color-background": "oklch(0.22 0 0)",
+            "--color-background": "oklch(0.20 0 0)",
             "--color-foreground": "oklch(100% 0.001 106.424)",
-            "--color-hover": "oklch(24.5% 0 0)",
-            "--color-active": "oklch(21.5% 0 0)",
+            "--color-hover": "oklch(22.5% 0 0)",
+            "--color-active": "oklch(19.5% 0 0)",
             "--color-selected": "oklch(24% 0 0)",
             "--color-accent": "oklch(24.5% 0 0)",
             "--color-accent-dark": "oklch(21.5% 0 0)",
             "--color-accent-foreground": "oklch(97% 0 0)",
+
+            "--color-input-background": "oklch(0.20 0 0)",
+            "--color-input-border": "oklch(0.12 0 0)",
+            "--color-input-hover": "oklch(0.22 0 0)",
+            "--color-input-active": "oklch(0.21 0 0)",
 
             "--color-popover": "#fff",
             "--color-popover-foreground": "#09090b",
@@ -96,6 +101,7 @@ export class ThemeService {
             // Temporary variables for testing purposes
             "--page-background": "#1a1b1c",
             "--color-demo-background": "#202122"
+            // "--color-demo-background": "oklch(0.24 0 0)"
         };
     }
 
@@ -175,13 +181,17 @@ export class ThemeService {
     private getShadcnLightThemeVariables(): Record<string, string> {
         return {
             "--color-background": "oklch(1 0 0)",
-            "--color-foreground": "#09090b",
+            "--color-foreground": "oklch(0.1407 0.0044 285.82)",
             "--color-hover": "oklch(0.97 0 0)",
             "--color-active": "oklch(0.95 0 0)",
             "--color-selected": "#f4f5f7",
             "--color-accent": "oklch(0.97 0 0)",
             "--color-accent-dark": "oklch(0.95 0 0)",
             "--color-accent-foreground": "oklch(0.21 0 0)",
+            "--color-input-background": "oklch(1 0 0)",
+            "--color-input-border": "oklch(0.92 0 0)",
+            "--color-input-hover": "oklch(0.95 0 0)",
+            "--color-input-active": "oklch(0.98 0 0)",
 
             "--color-popover": "#fff",
             "--color-popover-foreground": "#09090b",

@@ -12,9 +12,14 @@
     --color-hover: oklch(0.97 0 0);
     --color-active: oklch(0.95 0 0);
     --color-selected: #f4f5f7;
+
     --color-accent: oklch(0.97 0 0);
     --color-accent-dark: oklch(0.95 0 0);
     --color-accent-foreground: oklch(0.21 0 0);
+    --color-input-background: oklch(1 0 0);
+    --color-input-border: oklch(0.92 0 0);
+    --color-input-hover: oklch(0.95 0 0);
+    --color-input-active: oklch(0.98 0 0);
 
     --color-popover: #fff;
     --color-popover-foreground: #09090b;
@@ -57,10 +62,6 @@
 
     --color-muted: #f4f4f5;
     --color-muted-foreground: #71717a;
-
-    --color-accent: oklch(0.97 0 0);
-    --color-accent-dark: oklch(0.95 0 0);
-    --color-accent-foreground: oklch(0.21 0 0);
 
     --color-destructive: #ef4444;
     --color-destructive-foreground: #fafafa;

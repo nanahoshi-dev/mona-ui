@@ -11,7 +11,7 @@ import {
 } from "mona-ui";
 import { MenuItemClickEvent } from "mona-ui/menus/models/ContextMenuInjectorData";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
-import { createTemplateInjector, TemplateConfigHandler } from "../../utils/templateInjection";
+import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -22,7 +22,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonComponent> {
-    readonly #injector = createTemplateInjector({
+    readonly #injector = createFeatureInjector({
         textTemplate: {
             active: false,
             code: `
@@ -67,7 +67,6 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             name: "Menu Item Text Template"
         }
     });
-    readonly #templateHandler = this.#injector.get(TemplateConfigHandler);
     protected readonly SplitButtonWrapperComponent = SplitButtonWrapperComponent;
     protected readonly config = signal<ComponentConfig<SplitButtonComponent>>({
         code: `
@@ -135,14 +134,14 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             }
         },
         outputs: {},
-        templateHandler: this.#templateHandler
+        featureHandler: this.#injector.get(FeatureConfigHandler)
     });
+    protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitButtonComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
         "MenuItemComponent",
         "MenuItemGroupComponent"
     ]);
-    protected readonly templateInjector = this.#injector;
 }
 
 @Component({
@@ -156,7 +155,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
         LucideAngularModule
     ],
     template: `
-        @let templateData = templates();
+        @let featureData = features();
         <mona-split-button
             [disabled]="disabled()"
             [look]="look()"
@@ -166,9 +165,9 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             <mona-menu-item text="Option A"></mona-menu-item>
             <mona-menu-item text="Option B"></mona-menu-item>
             <mona-menu-item text="Option C">
-                @if (templateData && templateData["menuItemIconTemplate"].active) {
+                @if (featureData && featureData["menuItemIconTemplate"].active) {
                     <ng-template monaMenuItemIconTemplate>
-                        <lucide-angular [name]="Copy" [size]="14"></lucide-angular>
+                        <lucide-angular [name]="copyIcon" [size]="14"></lucide-angular>
                     </ng-template>
                 }
             </mona-menu-item>
@@ -186,7 +185,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             <mona-menu-item-group title="Group 2">
                 <mona-menu-item text="Option G"></mona-menu-item>
                 <mona-menu-item text="Option H" (menuClick)="onMenuItemClick($event)" [data]="{ key: 'OptionKey' }">
-                    @if (templateData && templateData["menuItemTextTemplate"].active) {
+                    @if (featureData && featureData["menuItemTextTemplate"].active) {
                         <ng-template monaMenuItemTextTemplate let-item>
                             <span class="text-red-500">{{ item.data.key }}</span>
                         </ng-template>
@@ -194,7 +193,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
                 </mona-menu-item>
                 <mona-menu-item text="Option I"></mona-menu-item>
             </mona-menu-item-group>
-            @if (templateData && templateData["textTemplate"].active) {
+            @if (featureData && featureData["textTemplate"].active) {
                 <ng-template monaSplitButtonTextTemplate>
                     <span class="text-blue-500">{{ text() }}</span>
                 </ng-template>
@@ -203,8 +202,8 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
     `
 })
 export class SplitButtonWrapperComponent implements ComponentInputsAsSignal<SplitButtonComponent> {
-    protected readonly Copy = Copy;
-    protected readonly templates = inject(TemplateConfigHandler).data;
+    protected readonly copyIcon = Copy;
+    protected readonly features = inject(FeatureConfigHandler).data;
     public readonly disabled = input(false);
     public readonly look = input<ReturnType<SplitButtonComponent["look"]>>("default");
     public readonly rounded = input<ReturnType<SplitButtonComponent["rounded"]>>("medium");

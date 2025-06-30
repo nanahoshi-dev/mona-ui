@@ -15,9 +15,9 @@ export const buttonVariants = cva(
             look: {
                 default: `
                     bg-background text-foreground
-                    border border-border
-                    hover:bg-accent hover:text-foreground
-                    active:bg-accent-dark active:text-foreground
+                    border border-input-border
+                    hover:bg-hover hover:text-foreground
+                    active:bg-active active:text-foreground
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 primary: `
@@ -68,9 +68,8 @@ export const buttonVariants = cva(
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 link: `
-                    text-primary underline-offset-4
-                    hover:underline hover:text-primary-hover
-                    active:text-primary-active
+                    underline-offset-4 hover:underline
+                    focus-visible:ring-2 focus-visible:ring-primary/40
                 `
             },
             rounded: {

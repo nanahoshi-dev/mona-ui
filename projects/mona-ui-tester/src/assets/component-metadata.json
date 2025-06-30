@@ -1822,9 +1822,15 @@
     "selector": "\"input[monaTextBox]\"",
     "inputs": [
       {
+        "name": "rounded",
+        "type": "InputVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the input.",
+        "kind": "input"
+      },
+      {
         "name": "size",
         "type": "InputVariantProps[\"size\"]",
-        "description": "",
+        "description": "Sets the size of the input.",
         "kind": "input"
       },
       {
@@ -3221,13 +3227,13 @@
       },
       {
         "name": "inputBlur",
-        "type": "Event",
+        "type": "FocusEvent",
         "description": "Emits an event when the input loses focus.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
-        "type": "Event",
+        "type": "FocusEvent",
         "description": "Emits an event when the input gains focus.",
         "kind": "output"
       },
@@ -3253,6 +3259,12 @@
         "name": "readonly",
         "type": "boolean",
         "description": "Sets the readonly state of the text box.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "TextBoxVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the text box.",
         "kind": "input"
       },
       {

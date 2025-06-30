@@ -9,7 +9,7 @@ import {
     MenuItemTextTemplateDirective
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
-import { createTemplateInjector, TemplateConfigHandler } from "../../utils/templateInjection";
+import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -20,7 +20,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownButtonComponent> {
-    readonly #injector = createTemplateInjector({
+    readonly #injector = createFeatureInjector({
         iconTemplate: {
             active: false,
             code: `
@@ -50,7 +50,6 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
             name: "Text Template"
         }
     });
-    readonly #templateHandler = this.#injector.get(TemplateConfigHandler);
     protected readonly config = signal<ComponentConfig<DropDownButtonComponent>>({
         code: `
             <mona-drop-down-button [disabled]="disabled()" [look]="look()"
@@ -113,14 +112,14 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
             }
         },
         outputs: {},
-        templateHandler: this.#templateHandler
+        featureHandler: this.#injector.get(FeatureConfigHandler)
     });
+    protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitButtonComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
         "MenuItemGroupComponent",
         "MenuItemComponent"
     ]);
-    protected readonly templateInjector = this.#injector;
     protected readonly DropDownButtonWrapperComponent = DropDownButtonWrapperComponent;
 }
 
@@ -134,7 +133,7 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
         MenuItemTextTemplateDirective
     ],
     template: `
-        @let templateData = templates();
+        @let featureData = features();
         <mona-drop-down-button [disabled]="disabled()" [look]="look()" [rounded]="rounded()" [size]="size()">
             Drop Down
             <mona-menu-item-group title="Names">
@@ -148,14 +147,14 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
             </mona-menu-item-group>
             <mona-menu-item [divider]="true"></mona-menu-item>
             <mona-menu-item text="Settings">
-                @if (templateData && templateData["iconTemplate"].active) {
+                @if (featureData && featureData["iconTemplate"].active) {
                     <ng-template monaMenuItemIconTemplate let-item>
                         <lucide-angular [name]="settingsIcon" size="14"></lucide-angular>
                     </ng-template>
                 }
             </mona-menu-item>
             <mona-menu-item text="Help">
-                @if (templateData && templateData["textTemplate"].active) {
+                @if (featureData && featureData["textTemplate"].active) {
                     <ng-template monaMenuItemTextTemplate let-item>
                         <span class="text-green-500">{{ item.text }}</span>
                     </ng-template>
@@ -167,10 +166,10 @@ export class DropDownButtonDemoComponent extends AbstractDemoComponent<DropDownB
     `
 })
 export class DropDownButtonWrapperComponent implements ComponentInputsAsSignal<DropDownButtonComponent> {
+    protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly settingsIcon = Settings;
     public readonly disabled = input(false);
     public readonly look = input<ReturnType<DropDownButtonComponent["look"]>>("default");
     public readonly rounded = input<ReturnType<DropDownButtonComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<DropDownButtonComponent["size"]>>("medium");
-    public readonly templates = inject(TemplateConfigHandler).data;
 }

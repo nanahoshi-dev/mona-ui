@@ -49,6 +49,10 @@ export class SidebarComponent {
                     path: "/dropdown-button"
                 },
                 {
+                    text: "Input",
+                    path: "/input"
+                },
+                {
                     text: "Split Button",
                     path: "/split-button"
                 },
