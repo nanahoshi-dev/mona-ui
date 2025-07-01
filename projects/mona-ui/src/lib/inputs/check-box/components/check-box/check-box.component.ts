@@ -54,7 +54,6 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckBoxContaine
     protected readonly inputBlur = output<FocusEvent>();
     protected readonly inputChange = output<Event>();
     protected readonly inputFocus = output<FocusEvent>();
-
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
     public readonly label = input("");

@@ -551,18 +551,6 @@
       }
     ]
   },
-  "TextAreaDirective": {
-    "name": "TextAreaDirective",
-    "selector": "\"textarea[monaTextArea]\"",
-    "inputs": [
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "AvatarComponent": {
     "name": "AvatarComponent",
     "selector": "\"mona-avatar\"",
@@ -1812,6 +1800,24 @@
       {
         "name": "data",
         "type": "ImmutableSet<Row>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "TextAreaDirective": {
+    "name": "TextAreaDirective",
+    "selector": "\"textarea[monaTextArea]\"",
+    "inputs": [
+      {
+        "name": "rounded",
+        "type": "TextAreaVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the textarea.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }

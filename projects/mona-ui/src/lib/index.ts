@@ -123,7 +123,7 @@ export * from "./inputs/switch/directives/switch-off-label-template.directive";
 export * from "./inputs/switch/directives/switch-on-label-template.directive";
 export * from "./inputs/switch/components/switch/switch.component";
 
-export * from "./inputs/text-area/text-area.directive";
+export * from "./inputs/text-area/directives/text-area.directive";
 
 export * from "./inputs/text-box/models/InputType";
 export * from "./inputs/text-box/directives/text-box.directive";

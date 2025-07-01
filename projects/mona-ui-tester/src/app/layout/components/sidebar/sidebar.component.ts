@@ -57,6 +57,10 @@ export class SidebarComponent {
                     path: "/split-button"
                 },
                 {
+                    text: "Text Area",
+                    path: "/textarea"
+                },
+                {
                     text: "Text Box",
                     path: "/textbox"
                 }

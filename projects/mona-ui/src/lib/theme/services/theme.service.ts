@@ -38,7 +38,7 @@ export class ThemeService {
             "--color-popover": "#fff",
             "--color-popover-foreground": "#09090b",
 
-            ...generatePrimaryColorPalette(themeColorMap.mona),
+            ...generatePrimaryColorPalette(themeColorMap.flora),
 
             // "--color-primary": "oklch(39.8% 0.195 277.366)",
             // "--color-primary-foreground": "oklch(94.3% 0.029 294.588)",
