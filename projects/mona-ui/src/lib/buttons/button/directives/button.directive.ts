@@ -11,7 +11,11 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ButtonVariantProps, ButtonVariantsInput, themeVariants } from "mona-ui/buttons/button/styles/button.styles";
+import {
+    ButtonVariantProps,
+    ButtonVariantsInput,
+    buttonThemeVariants
+} from "mona-ui/buttons/button/styles/button.styles";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -51,7 +55,7 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         const selected = this.selected();
         const userClass = this.userClass();
         const theme = this.#themeService.theme();
-        const variants = themeVariants(theme);
+        const variants = buttonThemeVariants(theme);
         const variantClasses = variants({ look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });

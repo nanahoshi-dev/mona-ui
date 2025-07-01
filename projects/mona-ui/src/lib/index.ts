@@ -98,7 +98,9 @@ export * from "./grid/components/grid-column/grid-column.component";
 export * from "./grid/components/grid/grid.component";
 
 /** Inputs */
+export * from "./inputs/check-box/directives/checkbox.directive";
 export * from "./inputs/check-box/components/check-box/check-box.component";
+export * from "./inputs/check-box/directives/checkbox-label-template.directive";
 
 export * from "./inputs/color-gradient/components/color-gradient/color-gradient.component";
 

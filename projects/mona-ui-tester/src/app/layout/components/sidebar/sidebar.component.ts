@@ -41,6 +41,10 @@ export class SidebarComponent {
                     path: "/button-group"
                 },
                 {
+                    text: "Checkbox",
+                    path: "/checkbox"
+                },
+                {
                     text: "Chip",
                     path: "/chip"
                 },

@@ -2754,48 +2754,60 @@
       {
         "name": "inputBlur",
         "type": "FocusEvent",
-        "description": "",
+        "description": "Emits when the checkbox is blurred.",
         "kind": "output"
       },
       {
         "name": "inputChange",
         "type": "Event",
-        "description": "",
+        "description": "Emits when the checkbox value changes.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "FocusEvent",
-        "description": "",
+        "description": "Emits when the checkbox is focused.",
         "kind": "output"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the checkbox.",
         "kind": "input"
       },
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the indeterminate state of the checkbox.",
         "kind": "input"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "",
+        "description": "Sets the label text of the checkbox.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "\"before\" | \"after\"",
-        "description": "",
+        "description": "Sets the position of the label relative to the checkbox.",
         "kind": "input"
       },
       {
         "name": "labelSize",
-        "type": "CheckBoxContainerLabelVariantProps[\"labelSize\"]",
+        "type": "CheckboxVariantProps[\"labelSize\"]",
+        "description": "Sets the size of the label text.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "CheckmarkVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the checkmark.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }

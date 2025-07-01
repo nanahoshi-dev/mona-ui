@@ -1,16 +1,16 @@
 import { VariantProps } from "class-variance-authority";
 import { ThemeStyle } from "mona-ui";
-import { splitButtonVariants as mona } from "mona-ui/buttons/split-button/styles/split-button.mona.styles";
+import { splitButtonVariants as monaSplitButtonVariants } from "mona-ui/buttons/split-button/styles/split-button.mona.styles";
 import { VariantInputs } from "mona-ui/utils/VariantInputs";
 
 export const splitButtonThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return mona;
+            return monaSplitButtonVariants;
         case "shadcn":
-            return mona; // Placeholder for Shadcn styles, if available
+            return monaSplitButtonVariants; // Placeholder for Shadcn styles, if available
         default:
-            return mona; // Default to Mona styles
+            return monaSplitButtonVariants; // Default to Mona styles
     }
 };
 

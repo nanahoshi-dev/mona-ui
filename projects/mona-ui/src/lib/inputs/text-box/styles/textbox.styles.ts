@@ -1,28 +1,28 @@
 import { VariantProps } from "class-variance-authority";
 import { ThemeStyle } from "mona-ui";
-import { textBoxVariants as mona } from "mona-ui/inputs/text-box/styles/textbox.mona.styles";
-import { inputVariants as monaInput } from "mona-ui/inputs/text-box/styles/textbox.mona.styles";
+import { textBoxVariants as monaTextBoxVariants } from "mona-ui/inputs/text-box/styles/textbox.mona.styles";
+import { inputVariants as monaInputVariants } from "mona-ui/inputs/text-box/styles/textbox.mona.styles";
 import { VariantInputs } from "mona-ui/utils/VariantInputs";
 
 export const textBoxThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return mona;
+            return monaTextBoxVariants;
         case "shadcn":
-            return mona; // Placeholder for Shadcn styles, if available
+            return monaTextBoxVariants; // Placeholder for Shadcn styles, if available
         default:
-            return mona; // Default to Mona styles
+            return monaTextBoxVariants; // Default to Mona styles
     }
 };
 
 export const inputThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return monaInput;
+            return monaInputVariants;
         case "shadcn":
-            return monaInput; // Placeholder for Shadcn styles, if available
+            return monaInputVariants; // Placeholder for Shadcn styles, if available
         default:
-            return monaInput; // Default to Mona styles
+            return monaInputVariants; // Default to Mona styles
     }
 };
 
