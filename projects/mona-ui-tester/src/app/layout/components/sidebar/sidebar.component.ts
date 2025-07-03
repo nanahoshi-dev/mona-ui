@@ -65,6 +65,10 @@ export class SidebarComponent {
                     path: "/split-button"
                 },
                 {
+                    text: "Switch",
+                    path: "/switch"
+                },
+                {
                     text: "Text Area",
                     path: "/textarea"
                 },

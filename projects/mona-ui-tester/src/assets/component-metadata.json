@@ -3270,19 +3270,31 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the switch.",
         "kind": "input"
       },
       {
-        "name": "labelOff",
+        "name": "offLabel",
         "type": "string",
-        "description": "",
+        "description": "Sets the off label of the switch.",
         "kind": "input"
       },
       {
-        "name": "labelOn",
+        "name": "onLabel",
         "type": "string",
-        "description": "",
+        "description": "Sets the on label of the switch.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "SwitchVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the switch.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "SwitchVariantProps[\"size\"]",
+        "description": "Sets the size of the switch.",
         "kind": "input"
       }
     ]

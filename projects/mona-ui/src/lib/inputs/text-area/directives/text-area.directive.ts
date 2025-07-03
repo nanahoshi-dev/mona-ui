@@ -6,7 +6,6 @@ import {
 } from "mona-ui/inputs/text-area/styles/textarea.styles";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
-import { textAreaVariants } from "../../styles/textarea.style";
 
 @Directive({
     selector: "textarea[monaTextArea]",

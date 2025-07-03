@@ -1,21 +1,27 @@
 <span [class]="labelClasses()">
     @if (active() && !onLabelTemplate()) {
-        <span @fadeInOut>{{labelOn()}}</span>
+        <span @fadeInOut>{{ onLabel() }}</span>
     }
     @if (active() && onLabelTemplate()) {
         <span @fadeInOut>
-            <ng-template [ngTemplateOutlet]="onLabelTemplate()??null"></ng-template>
+            <ng-container [ngTemplateOutlet]="onLabelTemplate()??null"></ng-container>
         </span>
     }
 </span>
 <span [class]="labelClasses()">
     @if (!active() && !offLabelTemplate()) {
-        <span @fadeInOut>{{labelOff()}}</span>
+        <span @fadeInOut>{{ offLabel() }}</span>
     }
     @if (!active() && offLabelTemplate()) {
         <span @fadeInOut>
-            <ng-template [ngTemplateOutlet]="offLabelTemplate()??null"></ng-template>
+            <ng-container [ngTemplateOutlet]="offLabelTemplate()??null"></ng-container>
         </span>
     }
 </span>
-<span [class]="handleClasses()" [attr.tabindex]="disabled()?-1:0"></span>
+<div [class]="handleClasses()"
+     [attr.data-active]="active()">
+    @if (handleContentTemplate()) {
+        <ng-container [ngTemplateOutlet]="handleContentTemplate()??null"
+                      [ngTemplateOutletContext]="{$implicit: active()}"></ng-container>
+    }
+</div>

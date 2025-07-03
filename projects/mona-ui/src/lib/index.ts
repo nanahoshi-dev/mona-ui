@@ -120,6 +120,7 @@ export * from "./inputs/range-slider/components/range-slider/range-slider.compon
 export * from "./inputs/slider/directives/slider-tick-value-template.directive";
 export * from "./inputs/slider/components/slider/slider.component";
 
+export * from "./inputs/switch/directives/switch-handle-content-template.directive";
 export * from "./inputs/switch/directives/switch-off-label-template.directive";
 export * from "./inputs/switch/directives/switch-on-label-template.directive";
 export * from "./inputs/switch/components/switch/switch.component";

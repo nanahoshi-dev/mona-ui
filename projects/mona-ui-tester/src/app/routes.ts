@@ -60,6 +60,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "switch",
+                loadComponent: () =>
+                    import("./docs/components/switch-doc/switch-doc.component").then(m => m.SwitchDocComponent)
+            },
+            {
                 path: "textarea",
                 loadComponent: () =>
                     import("./docs/components/text-area-doc/text-area-doc.component").then(m => m.TextAreaDocComponent)
