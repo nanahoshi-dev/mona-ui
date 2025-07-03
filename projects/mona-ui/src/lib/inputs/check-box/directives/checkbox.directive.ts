@@ -16,7 +16,6 @@ import { twMerge } from "tailwind-merge";
     }
 })
 export class CheckboxDirective implements CheckboxDirectiveVariantInput {
-    readonly #elementRef = inject(ElementRef<HTMLInputElement>);
     readonly #themeService = inject(ThemeService);
 
     protected readonly classes = computed(() => {

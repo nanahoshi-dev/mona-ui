@@ -57,6 +57,10 @@ export class SidebarComponent {
                     path: "/input"
                 },
                 {
+                    text: "Radio Button",
+                    path: "/radio-button"
+                },
+                {
                     text: "Split Button",
                     path: "/split-button"
                 },

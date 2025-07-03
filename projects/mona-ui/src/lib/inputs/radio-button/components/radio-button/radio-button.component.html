@@ -1,22 +1,31 @@
 <label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
     @if (labelPosition() === 'before') {
-        <span>{{ label() }}</span>
+        @if (label()) {
+            <span>{{ label() }}</span>
+        } @else {
+            <ng-content></ng-content>
+        }
     }
-    <input type="radio" [disabled]="disabled()"
+    <input type="radio"
+           [disabled]="disabled()"
            [name]="name()"
            [value]="value()"
            [ngModel]="selectedValue()"
            [class]="radioButtonClasses()"
-           (blur)="inputBlur.emit($event)"
+           (blur)="onBlur($event)"
            (click)="inputClick.emit($event)"
            (focus)="inputFocus.emit($event)"
-           (ngModelChange)="onCheckedChange($event)" #radioButton>
+           (ngModelChange)="onSelectionChange($event)">
     <span [class]="radioButtonCircleClasses()">
         @if (value() === selectedValue()) {
             <span [class]="radioButtonIndicatorClasses()"></span>
         }
     </span>
     @if (labelPosition() === 'after') {
-        <span>{{ label() }}</span>
+        @if (label()) {
+            <span>{{ label() }}</span>
+        } @else {
+            <ng-content></ng-content>
+        }
     }
 </label>

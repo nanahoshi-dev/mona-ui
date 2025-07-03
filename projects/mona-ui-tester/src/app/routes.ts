@@ -46,6 +46,13 @@ export const routes: Routes = [
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
             },
             {
+                path: "radio-button",
+                loadComponent: () =>
+                    import("./docs/components/radio-button-doc/radio-button-doc.component").then(
+                        m => m.RadioButtonDocComponent
+                    )
+            },
+            {
                 path: "split-button",
                 loadComponent: () =>
                     import("./docs/components/split-button-doc/split-button-doc.component").then(

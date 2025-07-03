@@ -1,7 +1,28 @@
-import { Directive } from "@angular/core";
+import { computed, Directive, inject, input } from "@angular/core";
+import {
+    RadioButtonDirectiveInput,
+    RadioButtonDirectiveProps,
+    radioButtonDirectiveThemeVariants
+} from "mona-ui/inputs/radio-button/styles/radio.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 
 @Directive({
     selector: "input[type='radio'][monaRadioButton]",
-    standalone: true
+    host: {
+        "[class]": "classes()",
+        "[attr.role]": "'radio'"
+    }
 })
-export class RadioButtonDirective {}
+export class RadioButtonDirective implements RadioButtonDirectiveInput {
+    readonly #themeService = inject(ThemeService);
+    protected readonly classes = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        return radioButtonDirectiveThemeVariants(theme)({ rounded });
+    });
+
+    /**
+     * @description Sets the border radius of the radio button.
+     */
+    public readonly rounded = input<RadioButtonDirectiveProps["rounded"]>("none");
+}

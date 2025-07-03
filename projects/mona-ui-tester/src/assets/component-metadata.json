@@ -1805,6 +1805,36 @@
       }
     ]
   },
+  "CheckboxDirective": {
+    "name": "CheckboxDirective",
+    "selector": "\"input[type='checkbox'][monaCheckbox]\"",
+    "inputs": [
+      {
+        "name": "rounded",
+        "type": "CheckboxDirectiveVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "RadioButtonDirective": {
+    "name": "RadioButtonDirective",
+    "selector": "\"input[type='radio'][monaRadioButton]\"",
+    "inputs": [
+      {
+        "name": "rounded",
+        "type": "RadioButtonVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the radio button.",
+        "kind": "input"
+      }
+    ]
+  },
   "TextAreaDirective": {
     "name": "TextAreaDirective",
     "selector": "\"textarea[monaTextArea]\"",
@@ -2752,6 +2782,18 @@
     "selector": "\"mona-check-box\"",
     "inputs": [
       {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the checkbox.",
+        "kind": "input"
+      },
+      {
+        "name": "indeterminate",
+        "type": "boolean",
+        "description": "Sets the indeterminate state of the checkbox.",
+        "kind": "input"
+      },
+      {
         "name": "inputBlur",
         "type": "FocusEvent",
         "description": "Emits when the checkbox is blurred.",
@@ -2770,18 +2812,6 @@
         "kind": "output"
       },
       {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of the checkbox.",
-        "kind": "input"
-      },
-      {
-        "name": "indeterminate",
-        "type": "boolean",
-        "description": "Sets the indeterminate state of the checkbox.",
-        "kind": "input"
-      },
-      {
         "name": "label",
         "type": "string",
         "description": "Sets the label text of the checkbox.",
@@ -2797,6 +2827,12 @@
         "name": "labelSize",
         "type": "CheckboxVariantProps[\"labelSize\"]",
         "description": "Sets the size of the label text.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the checkbox.",
         "kind": "input"
       },
       {
@@ -3018,54 +3054,66 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the radio button.",
         "kind": "input"
       },
       {
         "name": "inputBlur",
         "type": "FocusEvent",
-        "description": "",
+        "description": "emits when the input loses focus.",
         "kind": "output"
       },
       {
         "name": "inputClick",
-        "type": "FocusEvent",
-        "description": "",
+        "type": "MouseEvent",
+        "description": "emits when the input is clicked.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "FocusEvent",
-        "description": "",
+        "description": "emits when the input receives focus.",
         "kind": "output"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "",
+        "description": "Sets the label of the radio button.\nIf provided, it will take precedence over the content projection.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "\"before\" | \"after\"",
-        "description": "",
+        "description": "Sets the position of the label relative to the radio button.",
         "kind": "input"
       },
       {
         "name": "labelSize",
-        "type": "RadioButtonContainerLabelVariantProps[\"labelSize\"]",
-        "description": "",
+        "type": "RadioButtonVariantProps[\"labelSize\"]",
+        "description": "Sets the size of the label.",
         "kind": "input"
       },
       {
         "name": "name",
         "type": "string",
-        "description": "",
+        "description": "Sets the name of the radio button, useful for grouping radio buttons together.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "RadioButtonVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the radio button.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "any",
+        "description": "Sets the value of the radio button.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }
