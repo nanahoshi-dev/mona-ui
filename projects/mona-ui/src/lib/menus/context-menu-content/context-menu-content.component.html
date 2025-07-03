@@ -13,6 +13,7 @@
                         (mouseenter)="onListItemMouseEnter($event, menuItem)"
                         (click)="onListItemClick($event, menuItem)">
                         <mona-contextmenu-item [menuItem]="menuItem"
+                                               [iconVisible]="iconAreaVisible()"
                                                [itemFocused]="keyManager?.activeItem?.menuItem() === menuItem"
                                                [itemDisabled]="menuItem.disabled??false"
                                                [submenuPopupRef]="menuPopupRef()" [attr.tabindex]="0">

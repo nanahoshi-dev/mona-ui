@@ -15,7 +15,117 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonComponent> {
     protected readonly RadioButtonWrapperComponent = RadioButtonWrapperComponent;
     protected readonly config = signal<ComponentConfig<RadioButtonComponent>>({
-        code: ``,
+        code: `
+            <div class="flex gap-4">
+                <mona-radio-button
+                    [disabled]="disabled()"
+                    [labelPosition]="labelPosition()"
+                    [labelSize]="labelSize()"
+                    [label]="label()"
+                    [name]="name()"
+                    [rounded]="rounded()"
+                    [value]="value()"
+                    (inputBlur)="onInputBlur($event)"
+                    (inputClick)="onInputClick($event)"
+                    (inputFocus)="onInputFocus($event)"
+                    [ngModel]="selectedSeason()"
+                    (ngModelChange)="selectedSeason.set($event)">
+                    <span class="text-yellow-900">Autumn</span>
+                </mona-radio-button>
+                <mona-radio-button
+                    [disabled]="disabled()"
+                    [labelPosition]="labelPosition()"
+                    [labelSize]="labelSize()"
+                    label="Winter"
+                    [name]="name()"
+                    [rounded]="rounded()"
+                    value="Winter"
+                    (inputBlur)="onInputBlur($event)"
+                    (inputClick)="onInputClick($event)"
+                    (inputFocus)="onInputFocus($event)"
+                    [ngModel]="selectedSeason()"
+                    (ngModelChange)="selectedSeason.set($event)">
+                </mona-radio-button>
+                <mona-radio-button
+                    [disabled]="true"
+                    [labelPosition]="labelPosition()"
+                    [labelSize]="labelSize()"
+                    label="Spring"
+                    [name]="name()"
+                    [rounded]="rounded()"
+                    value="Spring"
+                    (inputBlur)="onInputBlur($event)"
+                    (inputClick)="onInputClick($event)"
+                    (inputFocus)="onInputFocus($event)"
+                    [ngModel]="selectedSeason()"
+                    (ngModelChange)="selectedSeason.set($event)"></mona-radio-button>
+                <mona-radio-button
+                    [disabled]="disabled()"
+                    [labelPosition]="labelPosition()"
+                    [labelSize]="labelSize()"
+                    [name]="name()"
+                    [rounded]="rounded()"
+                    value="Summer"
+                    (inputBlur)="onInputBlur($event)"
+                    (inputClick)="onInputClick($event)"
+                    (inputFocus)="onInputFocus($event)"
+                    [ngModel]="selectedSeason()"
+                    (ngModelChange)="selectedSeason.set($event)">
+                    <span class="text-rose-800">Summer</span>
+                </mona-radio-button>
+            </div>
+
+            <div class="flex gap-4 mt-4">
+                <label class="flex items-center gap-2">
+                    <input
+                        type="radio"
+                        monaRadioButton
+                        name="directions"
+                        value="East"
+                        [disabled]="disabled()"
+                        [rounded]="rounded()"
+                        [ngModel]="selectedDirection()"
+                        (ngModelChange)="selectedDirection.set($event)" />
+                    <span class="text-blue-800">East</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input
+                        type="radio"
+                        monaRadioButton
+                        name="directions"
+                        value="West"
+                        [disabled]="disabled()"
+                        [rounded]="rounded()"
+                        [ngModel]="selectedDirection()"
+                        (ngModelChange)="selectedDirection.set($event)" />
+                    <span class="text-blue-800">West</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input
+                        type="radio"
+                        monaRadioButton
+                        name="directions"
+                        value="North"
+                        [disabled]="disabled()"
+                        [rounded]="rounded()"
+                        [ngModel]="selectedDirection()"
+                        (ngModelChange)="selectedDirection.set($event)" />
+                    <span class="text-blue-800">North</span>
+                </label>
+                <label class="flex items-center gap-2">
+                    <input
+                        type="radio"
+                        monaRadioButton
+                        name="directions"
+                        value="South"
+                        [disabled]="disabled()"
+                        [rounded]="rounded()"
+                        [ngModel]="selectedDirection()"
+                        (ngModelChange)="selectedDirection.set($event)" />
+                    <span class="text-blue-800">South</span>
+                </label>
+            </div>
+        `,
         inputs: {
             disabled: {
                 type: "boolean",

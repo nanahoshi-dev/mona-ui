@@ -1,11 +1,13 @@
-<span [class]="iconContainerClasses()">
-    @if (menuItem().iconTemplate) {
-        <ng-container [ngTemplateOutlet]="menuItem().iconTemplate??null"
-                      [ngTemplateOutletContext]="{$implicit: menuItem().options}"></ng-container>
-    } @else if (menuItem().iconClass && !menuItem().iconTemplate) {
-        <span [ngClass]="menuItem().iconClass"></span>
-    }
-</span>
+@if (iconVisible()) {
+    <span [class]="iconContainerClasses()">
+        @if (menuItem().iconTemplate) {
+            <ng-container [ngTemplateOutlet]="menuItem().iconTemplate??null"
+                          [ngTemplateOutletContext]="{$implicit: menuItem().options}"></ng-container>
+        } @else if (menuItem().iconClass && !menuItem().iconTemplate) {
+            <span [ngClass]="menuItem().iconClass"></span>
+        }
+    </span>
+}
 <div [class]="textContainerClasses()">
     @if (menuItem().textTemplate) {
         <ng-container [ngTemplateOutlet]="menuItem().textTemplate??null"

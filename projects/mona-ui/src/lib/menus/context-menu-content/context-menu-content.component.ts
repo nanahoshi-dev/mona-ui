@@ -59,7 +59,15 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     });
     protected readonly groupHeaderClasses = computed(() => {
         const classes = menuItemGroupHeaderVariants();
-        return twMerge(classes);
+        const iconAreaVisible = this.iconAreaVisible();
+        const padding = iconAreaVisible ? "pl-8" : "pl-2";
+        return twMerge(classes, [padding]);
+    });
+    protected readonly iconAreaVisible = computed(() => {
+        const viewMenuItems = this.viewMenuItems();
+        return select(viewMenuItems, group =>
+            any(group.values(), groupItems => groupItems.any(i => i.iconTemplate != null || !!i.iconClass))
+        ).any(f => f);
     });
     protected readonly menuPopupRef = signal<PopupRef | null>(null);
     protected readonly parentMenuData = inject<ContextMenuInjectorData<C>>(PopupDataInjectionToken);

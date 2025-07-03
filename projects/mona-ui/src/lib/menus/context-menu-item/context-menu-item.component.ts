@@ -26,7 +26,9 @@ import { MenuItem } from "../models/MenuItem";
 })
 export class ContextMenuItemComponent implements OnDestroy, Highlightable {
     protected readonly classes = computed(() => {
-        return twMerge(contextMenuItemVariants());
+        const iconAreaVisible = this.iconVisible();
+        const padding = iconAreaVisible ? "pl-8" : "pl-2";
+        return twMerge(contextMenuItemVariants(), padding);
     });
     protected readonly iconContainerClasses = computed(() => {
         return twMerge(menuItemIconVariants());
@@ -42,6 +44,7 @@ export class ContextMenuItemComponent implements OnDestroy, Highlightable {
         return twMerge(menuItemTextVariants());
     });
     public readonly elementRef = inject(ElementRef<HTMLElement>);
+    public readonly iconVisible = input(false);
     public readonly itemDisabled = input(false);
     public readonly itemFocused = input(false);
     public readonly menuItem = input.required<MenuItem>();

@@ -1,10 +1,6 @@
 <label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
     @if (labelPosition() === 'before') {
-        @if (label()) {
-            <span>{{ label() }}</span>
-        } @else {
-            <ng-content></ng-content>
-        }
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
     <input type="radio"
            [disabled]="disabled()"
@@ -22,10 +18,14 @@
         }
     </span>
     @if (labelPosition() === 'after') {
-        @if (label()) {
-            <span>{{ label() }}</span>
-        } @else {
-            <ng-content></ng-content>
-        }
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 </label>
+
+<ng-template #labelTemplate>
+    @if (label()) {
+        <span>{{ label() }}</span>
+    } @else {
+        <ng-content></ng-content>
+    }
+</ng-template>

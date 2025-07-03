@@ -1,11 +1,6 @@
 <label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
     @if (labelPosition() === 'before') {
-        @if (labelTemplate()) {
-            <ng-container [ngTemplateOutlet]="labelTemplate()??null"
-                          [ngTemplateOutletContext]="{$implicit: label()}"></ng-container>
-        } @else {
-            <span>{{ label() }}</span>
-        }
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 
     <input type="checkbox"
@@ -32,11 +27,14 @@
         }
     </span>
     @if (labelPosition() === 'after') {
-        @if (labelTemplate()) {
-            <ng-container [ngTemplateOutlet]="labelTemplate()??null"
-                          [ngTemplateOutletContext]="{$implicit: label()}"></ng-container>
-        } @else {
-            <span>{{ label() }}</span>
-        }
+        <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 </label>
+
+<ng-template #labelTemplate>
+    @if (label()) {
+        <span>{{ label() }}</span>
+    } @else {
+        <ng-content></ng-content>
+    }
+</ng-template>

@@ -21,7 +21,7 @@ export const contextMenuItemVariants = cva(
         outline-none focus:bg-accent focus:text-accent-foreground
         data-[disabled='true']:pointer-events-none data-[disabled='true']:opacity-50
         hover:bg-hover hover:text-hover-foreground
-        pl-8 pr-2 gap-4
+        pl-2 pr-2 gap-4
         data-[focused]:bg-accent data-[focused]:text-accent-foreground
     `,
     {
@@ -29,7 +29,7 @@ export const contextMenuItemVariants = cva(
     }
 );
 
-export const menuItemGroupHeaderVariants = cva(`font-bold inline-flex select-none pl-8 py-1 pr-2 w-full`, {
+export const menuItemGroupHeaderVariants = cva(`font-bold inline-flex select-none pl-2 py-1 pr-2 w-full`, {
     variants: {}
 });
 

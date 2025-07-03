@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, output, signal } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import {
@@ -14,7 +15,7 @@ import { Action } from "../../../../utils/Action";
 
 @Component({
     selector: "mona-radio-button",
-    imports: [FormsModule],
+    imports: [FormsModule, NgTemplateOutlet],
     templateUrl: "./radio-button.component.html",
     providers: [
         {
@@ -75,7 +76,7 @@ export class RadioButtonComponent implements ControlValueAccessor, RadioButtonVa
 
     /**
      * @description Sets the label of the radio button.
-     * If provided, it will take precedence over the content projection.
+     * If provided, it will take precedence over the content inside the radio button.
      */
     public readonly label = input("");
 

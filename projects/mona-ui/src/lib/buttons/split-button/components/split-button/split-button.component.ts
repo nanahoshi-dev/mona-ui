@@ -44,7 +44,6 @@ import { SplitButtonTextTemplateDirective } from "../../directives/split-button-
     }
 })
 export class SplitButtonComponent implements SplitButtonVariantInputs {
-    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
     protected readonly buttonClick = output<MouseEvent>();
     protected readonly classes = computed(() => {
@@ -69,6 +68,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     protected readonly menuItems = computed(() =>
         selectMany(prepareMenuItems(this.menuItemComponents()), i => i).toImmutableSet()
     );
+    protected readonly popupOffset = signal<PopupOffset>({ horizontal: -1, vertical: 4 });
     protected readonly textTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
 
     /**
@@ -82,14 +82,9 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     public readonly look = input<SplitButtonVariantProps["look"]>("default");
 
     /**
-     * @description Sets the offset of the popup relative to the button.
-     */
-    public readonly popupOffset = signal<PopupOffset>({ horizontal: -1, vertical: 4 });
-
-    /**
      * @description Sets the width of the popup.
      */
-    public readonly popupWidth = signal(0);
+    public readonly popupWidth = input(0);
 
     /**
      * @description Sets the border radius of the button.
@@ -124,7 +119,6 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         afterNextRender(() => {
             const mainButtonElement = this.mainButtonElementRef().nativeElement;
             if (mainButtonElement) {
-                this.popupWidth.set(this.#hostElementRef.nativeElement.getBoundingClientRect().width - 1);
                 this.popupOffset.update(value => ({
                     ...value,
                     horizontal: -mainButtonElement.getBoundingClientRect().width

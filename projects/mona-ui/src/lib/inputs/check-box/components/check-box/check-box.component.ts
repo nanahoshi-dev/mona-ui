@@ -3,7 +3,6 @@ import {
     ChangeDetectionStrategy,
     Component,
     computed,
-    contentChild,
     effect,
     ElementRef,
     forwardRef,
@@ -11,12 +10,10 @@ import {
     input,
     output,
     signal,
-    TemplateRef,
     viewChild
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { LucideAngularModule } from "lucide-angular";
-import { CheckboxLabelTemplateDirective } from "mona-ui/inputs/check-box/directives/checkbox-label-template.directive";
 import {
     checkboxContainerLabelThemeVariants,
     checkboxInputThemeVariants,
@@ -71,7 +68,6 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
         const variantClasses = checkboxContainerLabelThemeVariants(theme)({ labelSize });
         return twMerge(variantClasses, classes);
     });
-    protected readonly labelTemplate = contentChild(CheckboxLabelTemplateDirective, { read: TemplateRef });
 
     /**
      * @description Sets the disabled state of the checkbox.
@@ -100,6 +96,7 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
 
     /**
      * @description Sets the label text of the checkbox.
+     * If provided, it will take precedence over the content inside the checkbox.
      */
     public readonly label = input("");
 

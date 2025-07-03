@@ -826,6 +826,12 @@
     "selector": "\"mona-contextmenu-item\"",
     "inputs": [
       {
+        "name": "iconVisible",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "itemDisabled",
         "type": "boolean",
         "description": "",
@@ -1829,7 +1835,7 @@
     "inputs": [
       {
         "name": "rounded",
-        "type": "RadioButtonVariantProps[\"rounded\"]",
+        "type": "RadioButtonDirectiveProps[\"rounded\"]",
         "description": "Sets the border radius of the radio button.",
         "kind": "input"
       }
@@ -2386,6 +2392,12 @@
         "kind": "input"
       },
       {
+        "name": "popupWidth",
+        "type": "number",
+        "description": "Sets the width of the popup.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "SplitButtonVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the button.",
@@ -2814,7 +2826,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label text of the checkbox.",
+        "description": "Sets the label text of the checkbox.\nIf provided, it will take precedence over the content inside the checkbox.",
         "kind": "input"
       },
       {
@@ -3078,7 +3090,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the radio button.\nIf provided, it will take precedence over the content projection.",
+        "description": "Sets the label of the radio button.\nIf provided, it will take precedence over the content inside the radio button.",
         "kind": "input"
       },
       {

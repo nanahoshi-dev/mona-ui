@@ -1,8 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { CheckBoxComponent, CheckboxDirective, CheckboxLabelTemplateDirective } from "mona-ui";
+import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { CheckBoxComponent, CheckboxDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
-import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
@@ -13,18 +12,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxComponent> {
-    readonly #injector = createFeatureInjector({
-        labelTemplate: {
-            code: `
-                <ng-template monaCheckboxLabelTemplate let-label>
-                    <span class="text-primary font-semibold">{{ label }} </span>
-                </ng-template>
-            `,
-            description: `This template is used to customize the label of the checkbox.`,
-            name: "Label Template",
-            active: false
-        }
-    });
     protected readonly config = signal<ComponentConfig<CheckBoxComponent>>({
         code: `
             <mona-check-box
@@ -36,7 +23,9 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
                 [rounded]="rounded()"
                 (inputBlur)="onInputBlur($event)"
                 (inputChange)="onInputChange($event)"
-                (inputFocus)="onInputFocus($event)"></mona-check-box>
+                (inputFocus)="onInputFocus($event)">
+                <span class="text-emerald-700">Checkbox Component</span>
+            </mona-check-box>
 
             <label class="flex items-center gap-2">
                 <input
@@ -91,19 +80,16 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
                 type: "event",
                 description: "Emitted when the checkbox gains focus."
             }
-        },
-        featureHandler: this.#injector.get(FeatureConfigHandler)
+        }
     });
-    protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("CheckBoxComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly CheckBoxWrapperComponent = CheckBoxWrapperComponent;
 }
 
 @Component({
-    imports: [CheckBoxComponent, CheckboxLabelTemplateDirective, CheckboxDirective],
+    imports: [CheckBoxComponent, CheckboxDirective],
     template: `
-        @let featureData = features();
         <mona-check-box
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
@@ -114,11 +100,7 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
             (inputBlur)="onInputBlur($event)"
             (inputChange)="onInputChange($event)"
             (inputFocus)="onInputFocus($event)">
-            @if (featureData && featureData["labelTemplate"].active) {
-                <ng-template monaCheckboxLabelTemplate let-label>
-                    <span class="text-rose-700 ">{{ label }} </span>
-                </ng-template>
-            }
+            <span class="text-emerald-700">Checkbox Component</span>
         </mona-check-box>
 
         <label class="flex items-center gap-2">
@@ -134,7 +116,6 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
     `
 })
 export class CheckBoxWrapperComponent implements ComponentInputsAsSignal<CheckBoxComponent> {
-    protected readonly features = inject(FeatureConfigHandler).data;
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
     public readonly label = input("Checkbox Label");
