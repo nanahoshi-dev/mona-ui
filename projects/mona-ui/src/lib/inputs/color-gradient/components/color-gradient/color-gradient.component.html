@@ -110,7 +110,7 @@
                     <button monaButton look="ghost" title="Copy color" #copyButton>
                         <i class="ri-file-copy-line"></i>
                     </button>
-                    <mona-contextmenu [target]="copyButton" trigger="click">
+                    <mona-contextmenu [anchor]="copyButton" trigger="click">
                         <mona-menu-item text="Copy as HEX" (menuClick)="onCopyColorSelect('hex')"></mona-menu-item>
                         <mona-menu-item text="Copy as RGB" (menuClick)="onCopyColorSelect('rgb')"></mona-menu-item>
                     </mona-contextmenu>

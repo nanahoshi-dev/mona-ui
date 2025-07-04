@@ -5,7 +5,7 @@
     @if (textTemplate()) {
         <ng-container [ngTemplateOutlet]="textTemplate()??null"></ng-container>
     } @else {
-        <span>{{text()}}</span>
+        <span>{{ text() }}</span>
     }
 </button>
 <button monaButton [disabled]="disabled()"
@@ -14,8 +14,13 @@
         [tabindex]="tabindex()" #menuButton>
     <lucide-angular [img]="menuIcon"></lucide-angular>
 </button>
-<mona-contextmenu [target]="menuButton" trigger="click" [minWidth]="popupWidth()"
+<mona-contextmenu [anchor]="mainButton"
+                  [target]="menuButton"
+                  trigger="click" [minWidth]="popupWidth()"
                   [anchorConnectionPoint]="'bottomleft'"
                   [popupConnectionPoint]="'topleft'"
                   [offset]="popupOffset()"
-                  [menuItems]="menuItems()" #contextMenuComponent ></mona-contextmenu>
+                  [menuItems]="menuItems()"
+                  (open)="menuOpen.set(true)"
+                  (close)="menuOpen.set(false)"
+                  #contextMenuComponent></mona-contextmenu>

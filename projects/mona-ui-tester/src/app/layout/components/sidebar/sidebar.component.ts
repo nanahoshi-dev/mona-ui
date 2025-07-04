@@ -57,6 +57,10 @@ export class SidebarComponent {
                     path: "/input"
                 },
                 {
+                    text: "Numeric Text Box",
+                    path: "/numeric-textbox"
+                },
+                {
                     text: "Radio Button",
                     path: "/radio-button"
                 },

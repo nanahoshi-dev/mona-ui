@@ -5,7 +5,7 @@
 </button>
 
 @if (!disabled()) {
-    <mona-contextmenu [target]="dropdownButton" [menuItems]="menuItems()"
+    <mona-contextmenu [anchor]="dropdownButton" [menuItems]="menuItems()"
                       [offset]="{horizontal: 0, vertical: 4}"
                       [anchorConnectionPoint]="'bottomcenter'"
                       [popupConnectionPoint]="'topcenter'"

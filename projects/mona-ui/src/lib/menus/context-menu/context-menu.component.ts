@@ -17,7 +17,7 @@ import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-
 import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
 import { convertToMenuItemSet, prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
 import { ConnectionPoint } from "mona-ui/popup/utils/connectionPosition";
-import { filter, fromEvent, mergeWith, Subject, take } from "rxjs";
+import { delay, filter, fromEvent, Subject, take } from "rxjs";
 import { v4 } from "uuid";
 import { PopupOffset } from "../../popup/models/PopupOffset";
 import { PopupRef } from "../../popup/models/PopupRef";
@@ -51,6 +51,11 @@ export class ContextMenuComponent<C = any> implements OnInit {
         MenuItemInjectionToken
     );
     protected readonly menuItemList = signal<ImmutableSet<ImmutableSet<MenuItem>>>(ImmutableSet.create());
+
+    /**
+     * The anchor element that the context menu will be anchored to.
+     */
+    public readonly anchor = input.required<ElementRef | Element>();
 
     /**
      * The anchor connection point of the context menu.
@@ -115,14 +120,15 @@ export class ContextMenuComponent<C = any> implements OnInit {
     public readonly popupConnectionPoint = input<ConnectionPoint | null | undefined>("topleft");
 
     /**
-     * The target element that the context menu will be anchored to.
+     * @description The target element that will be used to trigger the context menu.
      */
-    public readonly target = input.required<ElementRef | Element>();
+    public readonly target = input<ElementRef | Element | null>(null);
 
     /**
      * The event that triggers the context menu.
      */
     public readonly trigger = input("contextmenu");
+
     public readonly uid = v4();
 
     /**
@@ -177,8 +183,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
         this.#contextMenuInjectorData.userClasses = this.userClasses;
         this.#contextMenuInjectorData.userStyles = this.userStyles;
 
-        const target = this.target();
-        const anchorElement = target instanceof ElementRef ? target.nativeElement : target;
+        const anchorInput = this.anchor();
+        const anchorElement = anchorInput instanceof ElementRef ? anchorInput.nativeElement : anchorInput;
         let anchor: Point | Element;
         if (this.#precise) {
             if (event.button < 0) {
@@ -205,7 +211,7 @@ export class ContextMenuComponent<C = any> implements OnInit {
         this.setCloseSubscriptions();
         this.#contextMenuInjectorData.parentMenuRef = this.#contextMenuRef;
         this.open.emit({ uid: this.uid, popupRef: this.#contextMenuRef as PopupRef });
-        this.#contextMenuRef.closed.pipe(take(1)).subscribe(() => {
+        this.#contextMenuRef.closed.pipe(take(1), delay(100)).subscribe(() => {
             this.close.emit({ uid: this.uid });
             this.#contextMenuRef = null;
         });
@@ -230,18 +236,8 @@ export class ContextMenuComponent<C = any> implements OnInit {
         this.menuItemList.update(set => set.clear().addAll(items));
     }
 
-    private onOutsideClick(event: MouseEvent): void {
-        if (!this.#contextMenuRef) {
-            return;
-        }
-        if (this.#contextMenuRef.overlayRef.overlayElement?.contains(event.target as HTMLElement)) {
-            return;
-        }
-        this.#contextMenuRef.close();
-    }
-
     private setEventListeners(): void {
-        const target = this.target();
+        const target = this.target() || this.anchor();
         const eventTarget = target instanceof ElementRef ? target.nativeElement : target;
         fromEvent<MouseEvent>(eventTarget, this.trigger())
             .pipe(takeUntilDestroyed(this.#destroyRef))
@@ -257,25 +253,6 @@ export class ContextMenuComponent<C = any> implements OnInit {
     }
 
     private setCloseSubscriptions(): void {
-        // fromEvent<MouseEvent>(window, "click")
-        //     .pipe(
-        //         mergeWith(
-        //             fromEvent<MouseEvent>(window, "contextmenu"),
-        //             fromEvent<MouseEvent>(window, "auxclick"),
-        //             fromEvent<MouseEvent>(window, "keydown")
-        //         ),
-        //         filter(event => !!this.#contextMenuRef && !(event.target as HTMLElement).closest("[data-contextmenu]")),
-        //         takeUntilDestroyed(this.#destroyRef)
-        //     )
-        //     .subscribe(event => {
-        //         if (event instanceof KeyboardEvent && event.key === "Escape") {
-        //             this.#contextMenuRef?.close();
-        //         }
-        //         if (event instanceof MouseEvent) {
-        //             this.onOutsideClick(event);
-        //         }
-        //     });
-
         this.#menuClickNotifier.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.#contextMenuRef?.close();
         });

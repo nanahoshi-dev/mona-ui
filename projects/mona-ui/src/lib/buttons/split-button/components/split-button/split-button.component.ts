@@ -1,12 +1,10 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
     Component,
     computed,
     contentChild,
     contentChildren,
     effect,
-    ElementRef,
     inject,
     input,
     output,
@@ -40,6 +38,10 @@ import { SplitButtonTextTemplateDirective } from "../../directives/split-button-
     host: {
         "[class]": "classes()",
         "[class.mona-split-button]": "true",
+        "[aria-haspopup]": "menuOpen()",
+        "[attr.aria-expanded]": "menuOpen()",
+        "[attr.aria-label]": "text()",
+        "[attr.aria-disabled]": "disabled()",
         "[attr.tabindex]": "-1"
     }
 })
@@ -60,7 +62,6 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         return twMerge(classes, userClass);
     });
     protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
-    protected readonly mainButtonElementRef = viewChild.required<ElementRef>("mainButton");
     protected readonly menuIcon = ChevronDown;
     protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
         MenuItemInjectionToken
@@ -68,6 +69,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     protected readonly menuItems = computed(() =>
         selectMany(prepareMenuItems(this.menuItemComponents()), i => i).toImmutableSet()
     );
+    protected readonly menuOpen = signal(false);
     protected readonly popupOffset = signal<PopupOffset>({ horizontal: -1, vertical: 4 });
     protected readonly textTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
 
@@ -115,15 +117,6 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
                     contextMenuComponent.setPrecise(false);
                 }
             });
-        });
-        afterNextRender(() => {
-            const mainButtonElement = this.mainButtonElementRef().nativeElement;
-            if (mainButtonElement) {
-                this.popupOffset.update(value => ({
-                    ...value,
-                    horizontal: -mainButtonElement.getBoundingClientRect().width
-                }));
-            }
         });
     }
 }

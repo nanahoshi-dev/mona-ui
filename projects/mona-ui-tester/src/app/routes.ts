@@ -46,6 +46,13 @@ export const routes: Routes = [
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
             },
             {
+                path: "numeric-textbox",
+                loadComponent: () =>
+                    import("./docs/components/numeric-textbox-doc/numeric-textbox-doc.component").then(
+                        m => m.NumericTextboxDocComponent
+                    )
+            },
+            {
                 path: "radio-button",
                 loadComponent: () =>
                     import("./docs/components/radio-button-doc/radio-button-doc.component").then(

@@ -16,7 +16,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { SwitchHandleContentTemplateDirective } from "mona-ui/inputs/switch/directives/switch-handle-content-template.directive";
-import { switchVariants } from "mona-ui/inputs/switch/styles/switch.mona.styles";
 import {
     switchHandleThemeVariants,
     switchLabelThemeVariants,

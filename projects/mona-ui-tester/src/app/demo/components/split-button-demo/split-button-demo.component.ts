@@ -27,11 +27,8 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             active: false,
             code: `
                 <mona-split-button>
-                    <mona-menu-item text="Option A"></mona-menu-item>
-                    <mona-menu-item text="Option B"></mona-menu-item>
-                    <mona-menu-item text="Option C"></mona-menu-item>
-                    <ng-template monaSplitButtonTextTemplate let-text>
-                        <span class="text-blue-500">{{ text }}</span>
+                    <ng-template monaSplitButtonTextTemplate>
+                        <span class="text-blue-500">{{ text() }}</span>
                     </ng-template>
                 </mona-split-button>
             `,
@@ -42,9 +39,9 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             active: false,
             code: `
                 <mona-split-button>
-                    <mona-menu-item text="Settings">
-                        <ng-template monaMenuItemIconTemplate let-item>
-                            <span class="icon-settings"></span>
+                    <mona-menu-item text="Option C">
+                        <ng-template monaMenuItemIconTemplate>
+                            <lucide-angular [name]="copyIcon" [size]="14"></lucide-angular>
                         </ng-template>
                     </mona-menu-item>
                 </mona-split-button>
@@ -56,11 +53,12 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             active: false,
             code: `
                 <mona-split-button>
-                        <mona-menu-item text="Help">
-                            <ng-template monaMenuItemTextTemplate let-item>
-                                <span class="text-green-500">{{ item.text }}</span>
-                            </ng-template>
-                        </mona-menu-item>
+                    <mona-menu-item text="Option H" (menuClick)="onMenuItemClick($event)"
+                        [data]="{ key: 'OptionKey' }">
+                        <ng-template monaMenuItemTextTemplate let-item>
+                            <span class="text-red-500">{{ item.data.key }}</span>
+                        </ng-template>
+                    </mona-menu-item>
                 </mona-split-button>
             `,
             description: `This template is used to customize the text of menu items.`,

@@ -22,6 +22,14 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ChevronDown, ChevronUp, LucideAngularModule } from "lucide-angular";
 import {
+    numericTextboxButtonThemeVariants,
+    numericTextboxInputThemeVariants,
+    numericTextboxThemeVariants,
+    NumericTextboxVariantInputs,
+    NumericTextboxVariantProps
+} from "mona-ui/inputs/numeric-text-box/styles/numeric-textbox.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
+import {
     concatMap,
     delay,
     distinctUntilChanged,
@@ -37,13 +45,6 @@ import {
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { Action } from "../../../../utils/Action";
-import {
-    numericTextBoxInputVariants,
-    numericTextBoxSpinButtonVariants,
-    NumericTextBoxVariantInput,
-    NumericTextBoxVariantProps,
-    numericTextboxVariants
-} from "../../../styles/numeric-textbox.style";
 import { TextBoxDirective } from "../../../text-box/directives/text-box.directive";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
 
@@ -62,53 +63,62 @@ type Sign = "-" | "+";
     ],
     imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideAngularModule],
     host: {
+        "[role]": "'spinbutton'",
+        "[class]": "classes()",
         "[attr.data-disabled]": "disabled()",
         "[attr.data-readonly]": "readonly()",
-        "[class]": "classes()"
+        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-readonly]": "readonly()",
+        "[attr.aria-required]": "required()"
     }
 })
-export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueAccessor, NumericTextBoxVariantInput {
+export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueAccessor, NumericTextboxVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #themeService = inject(ThemeService);
     #propagateChange: Action<number | null> | null = null;
+    #propagateTouched: Action | null = null;
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
     protected readonly classes = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
         const size = this.size();
-        const classes = numericTextboxVariants({ size });
+        const classes = numericTextboxThemeVariants(theme)({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
     protected readonly decreaseIcon = ChevronDown;
     protected readonly increaseIcon = ChevronUp;
     protected readonly inputClasses = computed(() => {
-        const inputVariants = numericTextBoxInputVariants();
+        const theme = this.#themeService.theme();
+        const hasPrefixTemplate = this.prefixTemplateList().length > 0;
+        const rounded = hasPrefixTemplate ? "none" : this.rounded();
+        const inputVariants = numericTextboxInputThemeVariants(theme)({ rounded });
         return twMerge(inputVariants);
     });
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
         const value = this.value();
         const focused = this.focused();
-        const decimals = this.decimals();
-        const formatter = this.formatter();
-        if (value == null) {
-            return "";
-        }
         if (focused && !this.readonly()) {
-            return value?.toString() ?? "";
+            return this.rawInputValue();
         }
-        if (formatter) {
-            return formatter(value);
-        }
-        if (decimals > 0) {
-            return value?.toFixed(decimals) ?? "";
-        }
-        return value?.toString() ?? "";
+        return this.formatValueForDisplay(value);
     });
     protected readonly keydown$ = new Subject<KeyboardEvent>();
-    protected readonly spinBottomClasses = computed(() => numericTextBoxSpinButtonVariants({ position: "bottom" }));
-    protected readonly spinTopClasses = computed(() => numericTextBoxSpinButtonVariants({ position: "top" }));
+    protected readonly rawInputValue = signal("");
+    protected readonly spinButtonClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        return numericTextboxButtonThemeVariants(theme)({ rounded, size });
+    });
+    protected readonly spinButtonIconSize = computed(() => {
+        const size = this.size();
+        return size === "large" ? 20 : size === "medium" ? 16 : 14;
+    });
     protected readonly spin$ = new Subject<Sign>();
     protected readonly spinStop$ = new Subject<void>();
     protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
@@ -120,78 +130,88 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     protected readonly wheel$ = new Subject<WheelEvent>();
 
     /**
-     * Number of decimals to show.
+     * @description ARIA label for the input.
+     */
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+
+    /**
+     * @description Number of decimals to show.
      * @default 0
      */
     public readonly decimals = input(0);
 
     /**
-     * Sets whether the input is disabled.
+     * @description Sets whether the input is disabled.
      */
     public readonly disabled = input(false);
 
     /**
-     * Formats the value to be displayed in the input when the input is not focused.
+     * @description Formats the value to be displayed in the input when the input is not focused.
      */
     public readonly formatter = input<Action<number | null, string> | null>(null);
 
     /**
-     * Emits when the inner input element is blurred.
+     * @description Emits when the inner input element is blurred.
      */
-    public readonly inputBlur = output<Event>();
+    public readonly inputBlur = output<FocusEvent>();
 
     /**
-     * Emits when the inner input element is focused.
+     * @description Emits when the inner input element is focused.
      */
-    public readonly inputFocus = output<Event>();
+    public readonly inputFocus = output<FocusEvent>();
 
     /**
-     * Emits when the inner input element loses focus.
+     * @description Emits when the inner input element loses focus.
      */
-    public readonly inputFocusOut = output<Event>();
+    public readonly inputFocusOut = output<FocusEvent>();
 
     /**
-     * Maximum value that can be entered.
+     * @description Maximum value that can be entered.
      */
-    public readonly max = input<number | undefined>(undefined);
+    public readonly max = input<number | null>(null);
 
     /**
-     * Minimum value that can be entered.
+     * @description Minimum value that can be entered.
      */
-    public readonly min = input<number | undefined>(undefined);
+    public readonly min = input<number | null>(null);
 
     /**
-     * Sets whether the input can be empty.
+     * @description Sets whether the input can be empty.
      */
     public readonly nullable = input(true);
 
     /**
-     * Sets whether the input is readonly.
+     * @description Sets whether the input is readonly.
      */
     public readonly readonly = input(false);
 
     /**
-     * Sets whether the input is required.
+     * @description Sets whether the input is required.
      */
     public readonly required = input(false);
 
     /**
-     * Sets the size of the input.
+     * @description Sets the border radius of the input.
      */
-    public readonly size = input<NumericTextBoxVariantProps["size"]>(`medium`);
+    public readonly rounded = input<NumericTextboxVariantProps["rounded"]>(`medium`);
 
     /**
-     * Sets whether the spin buttons are visible.
+     * @description Sets the size of the input.
+     */
+    public readonly size = input<NumericTextboxVariantProps["size"]>(`medium`);
+
+    /**
+     * @description Sets whether the spin buttons are visible.
      */
     public readonly spinners = input(true);
 
     /**
-     * Step value to increment or decrement the value.
+     * @description Step value to increment or decrement the value.
      */
     public readonly step = input(1);
 
     /**
-     * Tab index of the input.
+     * @description Tab index of the input.
      */
     public readonly tabindex = input(0);
     public readonly userClass = input<string>("", { alias: "class" });
@@ -217,6 +237,9 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     }
 
     private static isNumeric(value: unknown): boolean {
+        if (value === "" || value === "-") {
+            return true;
+        }
         return (
             (typeof value === "number" || (typeof value === "string" && value.trim() !== "")) && !isNaN(value as number)
         );
@@ -262,12 +285,20 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
             .monitor(this.#hostElementRef, true)
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((focusOrigin: FocusOrigin) => {
-                this.focused.set(focusOrigin !== null);
+                const isFocused = focusOrigin !== null;
+                this.focused.set(isFocused);
+                if (isFocused && !this.readonly()) {
+                    const currentValue = this.value();
+                    const rawValue = currentValue?.toString() ?? "";
+                    this.rawInputValue.set(rawValue);
+                }
             });
     }
 
-    public onBlur(event: Event): void {
+    public onBlur(event: FocusEvent): void {
+        this.#propagateTouched?.();
         this.correctValue();
+        this.rawInputValue.set(this.formatValueForDisplay(this.value()));
         this.inputBlur.emit(event);
     }
 
@@ -275,14 +306,14 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
         this.#propagateChange = fn;
     }
 
-    public registerOnTouched(fn: any): void {}
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
 
     public writeValue(obj: number | null | undefined) {
-        if (obj == null) {
-            this.value.set(null);
-            return;
-        }
-        this.value.set(Number(obj));
+        const value = obj == null ? null : Number(obj);
+        this.value.set(value);
+        this.rawInputValue.set(this.formatValueForDisplay(value));
     }
 
     private correctValue(): void {
@@ -312,57 +343,62 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
         this.#focusMonitor.focusVia(this.valueTextBoxRef(), "keyboard");
     }
 
+    private formatValueForDisplay(value: number | null): string {
+        if (value == null) {
+            return "";
+        }
+        const formatter = this.formatter();
+        if (formatter) {
+            return formatter(value);
+        }
+        const decimals = this.decimals();
+        if (decimals > 0) {
+            return value.toFixed(decimals);
+        }
+        return value.toString();
+    }
+
     private setBeforeInputSubscription(): void {
         this.beforeInput$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe((event: InputEvent): void => {
             const inputElement = event.target as HTMLInputElement;
 
             const insertedText = event.data;
-            if (insertedText == null || insertedText === "") {
-                return;
-            }
-            if (!RegExp(/[0-9.-]/).exec(insertedText)) {
-                event.preventDefault();
+            if (insertedText == null) {
                 return;
             }
 
-            const value = inputElement.value;
-            const selectionStart = inputElement.selectionStart;
-            const selectionEnd = inputElement.selectionEnd;
+            const { value, selectionStart, selectionEnd } = inputElement;
             if (selectionStart == null || selectionEnd == null) {
+                return;
+            }
+
+            const proposedValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
+            if (proposedValue.lastIndexOf("-") > 0) {
                 event.preventDefault();
                 return;
             }
 
-            if (insertedText === "-") {
-                if ((selectionStart !== 0 || value.includes("-")) && selectionEnd - selectionStart !== value.length) {
-                    event.preventDefault();
-                    return;
-                }
-            }
-
-            if (insertedText === ".") {
-                if (this.decimals() === 0 || value.includes(".")) {
-                    event.preventDefault();
-                    return;
-                }
-            }
-
-            const newValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
-            if (
-                selectionEnd - selectionStart === value.length &&
-                newValue !== "-" &&
-                !NumericTextBoxComponent.isNumeric(newValue)
-            ) {
+            if ((proposedValue.match(/\./g) || []).length > 1) {
                 event.preventDefault();
                 return;
             }
 
-            if (newValue.includes(".")) {
-                const decimals = newValue.split(".")[1];
-                if (decimals.length > String(this.decimals).length) {
+            if (this.decimals() === 0 && proposedValue.includes(".")) {
+                event.preventDefault();
+                return;
+            }
+
+            if (proposedValue.includes(".")) {
+                const decimalPart = proposedValue.split(".")[1];
+                if (decimalPart && decimalPart.length > this.decimals()) {
                     event.preventDefault();
                     return;
                 }
+            }
+
+            const numericRegex = new RegExp(`^-?\\d*\\.?\\d{0,${this.decimals()}}$`);
+            if (!numericRegex.test(proposedValue)) {
+                event.preventDefault();
             }
         });
     }
@@ -427,9 +463,11 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 distinctUntilChanged(),
-                filter(v => v == null || v === "" || NumericTextBoxComponent.isNumeric(v)),
+                tap(text => this.rawInputValue.set(text)),
+                map(v => (v === "" || v === "-" ? v : v.toString().replace(/,/g, ""))),
+                filter(v => v === "" || v === "-" || v == null || NumericTextBoxComponent.isNumeric(v)),
                 map(v => {
-                    if (v == null || v === "") {
+                    if (v == null || v === "" || v === "-") {
                         return null;
                     }
                     return parseFloat(v.toString());
@@ -437,11 +475,8 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
             )
             .subscribe(value => {
                 const previousValue = this.value();
-                if (value == null) {
-                    this.value.set(null);
-                } else {
-                    this.value.set(value);
-                }
+                this.value.set(value);
+
                 if (previousValue !== this.value()) {
                     this.#propagateChange?.(this.value());
                 }

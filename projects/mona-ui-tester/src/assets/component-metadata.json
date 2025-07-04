@@ -2964,91 +2964,97 @@
       {
         "name": "decimals",
         "type": "number",
-        "description": "",
+        "description": "Number of decimals to show.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the input is disabled.",
         "kind": "input"
       },
       {
         "name": "formatter",
         "type": "Action<number | null, string> | null",
-        "description": "",
+        "description": "Formats the value to be displayed in the input when the input is not focused.",
         "kind": "input"
       },
       {
         "name": "inputBlur",
         "type": "Event",
-        "description": "",
+        "description": "Emits when the inner input element is blurred.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "Event",
-        "description": "",
+        "description": "Emits when the inner input element is focused.",
         "kind": "output"
       },
       {
         "name": "inputFocusOut",
         "type": "Event",
-        "description": "",
+        "description": "Emits when the inner input element loses focus.",
         "kind": "output"
       },
       {
         "name": "max",
-        "type": "number | undefined",
-        "description": "",
+        "type": "number | null",
+        "description": "Maximum value that can be entered.",
         "kind": "input"
       },
       {
         "name": "min",
-        "type": "number | undefined",
-        "description": "",
+        "type": "number | null",
+        "description": "Minimum value that can be entered.",
         "kind": "input"
       },
       {
         "name": "nullable",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the input can be empty.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the input is readonly.",
         "kind": "input"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the input is required.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "NumericTextboxVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the input.",
         "kind": "input"
       },
       {
         "name": "size",
-        "type": "NumericTextBoxVariantProps[\"size\"]",
-        "description": "",
+        "type": "NumericTextboxVariantProps[\"size\"]",
+        "description": "Sets the size of the input.",
         "kind": "input"
       },
       {
         "name": "spinners",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the spin buttons are visible.",
         "kind": "input"
       },
       {
         "name": "step",
         "type": "number",
-        "description": "",
+        "description": "Step value to increment or decrement the value.",
         "kind": "input"
       },
       {
         "name": "tabindex",
         "type": "number",
-        "description": "",
+        "description": "Tab index of the input.",
         "kind": "input"
       },
       {

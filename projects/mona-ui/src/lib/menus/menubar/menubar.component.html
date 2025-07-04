@@ -12,7 +12,7 @@
                               [ngTemplateOutletContext]="{$implicit: item.text(), items: item.items()}">
                 </ng-container>
             }
-            <mona-contextmenu [target]="listItemElement" [menuItems]="item.menuItems()" trigger="click"
+            <mona-contextmenu [anchor]="listItemElement" [menuItems]="item.menuItems()" trigger="click"
                               (navigate)="onContextMenuNavigate($event)"
                               (close)="onContextMenuClose($event)" (open)="onContextMenuOpen($event)"
                               #contextMenuComponent></mona-contextmenu>

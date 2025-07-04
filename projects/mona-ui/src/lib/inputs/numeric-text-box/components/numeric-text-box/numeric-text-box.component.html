@@ -1,5 +1,7 @@
 @for (prefixTemplate of prefixTemplateList(); track $index) {
-    <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
+    <span class="flex items-center flex-none flex-wrap h-full border-r border-r-input-border">
+        <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
+    </span>
 }
 <input monaTextBox [disabled]="disabled()"
        [required]="required()"
@@ -17,20 +19,30 @@
        (wheel)="wheel$.next($event)"
        [size]="size()"
        [class]="inputClasses()"
-       autocomplete="off" tabindex="0" #valueTextBox>
+       autocomplete="off"
+       [attr.aria-label]="ariaLabel()"
+       [attr.aria-valuenow]="value()"
+       [attr.aria-valuemin]="min()"
+       [attr.aria-valuemax]="max()"
+       [attr.aria-valuetext]="formattedValue()"
+       #valueTextBox>
 @if (spinners()) {
-    <div class="h-full flex flex-col border-l overflow-y-hidden border-border w-12">
+    <div [class]="spinButtonClasses()">
         <button monaButton [disabled]="disabled()" [tabindex]="-1"
-                look="ghost" [size]="size()"
-                [class]="spinTopClasses()"
-                (mousedown)="spin$.next('+')" (mouseup)="spinStop$.next()">
-            <lucide-angular [img]="increaseIcon"></lucide-angular>
+                look="secondary" [size]="size()"
+                (pointerdown)="spin$.next('+')"
+                (pointerup)="spinStop$.next()"
+                (pointerleave)="spinStop$.next()"
+                aria-label="Increase value">
+            <lucide-angular [img]="increaseIcon" [size]="spinButtonIconSize()"></lucide-angular>
         </button>
         <button monaButton [disabled]="disabled()" [tabindex]="-1"
-                look="ghost" [size]="size()"
-                [class]="spinBottomClasses()"
-                (mousedown)="spin$.next('-')" (mouseup)="spinStop$.next()">
-            <lucide-angular [img]="decreaseIcon"></lucide-angular>
+                look="secondary" [size]="size()"
+                (pointerdown)="spin$.next('-')"
+                (pointerup)="spinStop$.next()"
+                (pointerleave)="spinStop$.next()"
+                aria-label="Decrease value">
+            <lucide-angular [img]="decreaseIcon" [size]="spinButtonIconSize()"></lucide-angular>
         </button>
     </div>
 }
