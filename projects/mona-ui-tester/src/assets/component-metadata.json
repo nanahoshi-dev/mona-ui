@@ -730,6 +730,12 @@
     "selector": "\"mona-contextmenu\"",
     "inputs": [
       {
+        "name": "anchor",
+        "type": "ElementRef | Element",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint | null | undefined",
         "description": "",
@@ -791,8 +797,8 @@
       },
       {
         "name": "target",
-        "type": "ElementRef | Element",
-        "description": "",
+        "type": "ElementRef | Element | null",
+        "description": "The target element that will be used to trigger the context menu.",
         "kind": "input"
       },
       {
@@ -2962,6 +2968,12 @@
     "selector": "\"mona-numeric-text-box\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "description": "ARIA label for the input.",
+        "kind": "input"
+      },
+      {
         "name": "decimals",
         "type": "number",
         "description": "Number of decimals to show.",
@@ -2981,19 +2993,19 @@
       },
       {
         "name": "inputBlur",
-        "type": "Event",
+        "type": "FocusEvent",
         "description": "Emits when the inner input element is blurred.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
-        "type": "Event",
+        "type": "FocusEvent",
         "description": "Emits when the inner input element is focused.",
         "kind": "output"
       },
       {
         "name": "inputFocusOut",
-        "type": "Event",
+        "type": "FocusEvent",
         "description": "Emits when the inner input element loses focus.",
         "kind": "output"
       },
@@ -3210,61 +3222,61 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the slider.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "SliderLabelPosition",
-        "description": "",
+        "description": "Sets the position of the labels relative to the slider track.",
         "kind": "input"
       },
       {
         "name": "labelStep",
         "type": "number",
-        "description": "",
+        "description": "Sets the step size for the labels on the slider.",
         "kind": "input"
       },
       {
         "name": "max",
         "type": "number",
-        "description": "",
+        "description": "Sets the maximum value of the slider.",
         "kind": "input"
       },
       {
         "name": "min",
         "type": "number",
-        "description": "",
+        "description": "Sets the minimum value of the slider.",
         "kind": "input"
       },
       {
         "name": "orientation",
         "type": "\"horizontal\" | \"vertical\"",
-        "description": "",
+        "description": "Sets the orientation of the slider, either horizontal or vertical.",
         "kind": "input"
       },
       {
         "name": "showLabels",
         "type": "boolean",
-        "description": "",
+        "description": "Determines whether to show labels on the slider.",
         "kind": "input"
       },
       {
         "name": "showTicks",
         "type": "boolean",
-        "description": "",
+        "description": "Determines whether to show ticks on the slider.\nIf true, clicking on the slider will snap to the nearest tick.",
         "kind": "input"
       },
       {
         "name": "step",
         "type": "number",
-        "description": "",
+        "description": "Sets the step size for the slider's value.",
         "kind": "input"
       },
       {
         "name": "tickStep",
         "type": "number",
-        "description": "",
+        "description": "Sets the step size for the ticks on the slider.",
         "kind": "input"
       }
     ]

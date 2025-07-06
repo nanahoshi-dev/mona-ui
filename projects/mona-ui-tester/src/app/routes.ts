@@ -60,6 +60,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "slider",
+                loadComponent: () =>
+                    import("./docs/components/slider-doc/slider-doc.component").then(m => m.SliderDocComponent)
+            },
+            {
                 path: "split-button",
                 loadComponent: () =>
                     import("./docs/components/split-button-doc/split-button-doc.component").then(

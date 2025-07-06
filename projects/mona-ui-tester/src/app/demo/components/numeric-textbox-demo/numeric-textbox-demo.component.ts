@@ -159,7 +159,7 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
     protected readonly formatterFn = computed(() => {
         const featureData = this.features();
         return featureData && featureData["formatter"].active
-            ? (value: number | null) => (value == null ? "" : `$ ${value.toString()}`)
+            ? (value: number | null) => (value == null ? "" : `$ ${value}`)
             : null;
     });
     public readonly decimals = input(0);

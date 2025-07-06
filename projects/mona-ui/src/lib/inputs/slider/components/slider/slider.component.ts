@@ -14,10 +14,24 @@ import {
     Signal,
     signal,
     TemplateRef,
-    viewChild
+    viewChild,
+    viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { SliderTickDirective } from "mona-ui/inputs/slider/directives/slider-tick.directive";
+import {
+    sliderBaseThemeVariants,
+    sliderHandleThemeVariants,
+    sliderSelectionThemeVariants,
+    sliderTickLabelListThemeVariants,
+    sliderTickLabelThemeVariants,
+    sliderTickListThemeVariants,
+    sliderTickThemeVariants,
+    sliderTrackThemeVariants,
+    SliderVariantInputs
+} from "mona-ui/inputs/slider/styles/slider.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { filter, fromEvent, mergeMap, take, takeUntil, tap } from "rxjs";
 import { Action } from "../../../../utils/Action";
 import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
@@ -27,7 +41,6 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
 @Component({
     selector: "mona-slider",
     templateUrl: "./slider.component.html",
-    styleUrls: ["./slider.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
@@ -36,23 +49,53 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
             multi: true
         }
     ],
-    imports: [NgClass, NgTemplateOutlet],
+    imports: [NgClass, NgTemplateOutlet, SliderTickDirective],
     host: {
+        "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
-        "[class.mona-slider-horizontal]": "orientation() === 'horizontal'",
-        "[class.mona-slider-vertical]": "orientation() === 'vertical'",
-        "[class.mona-disabled]": "disabled()"
+        "[attr.data-disabled]": "disabled()",
+        "[attr.data-orientation]": "orientation()"
     }
 })
-export class SliderComponent implements AfterViewInit, ControlValueAccessor {
+export class SliderComponent implements AfterViewInit, ControlValueAccessor, SliderVariantInputs {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
+    readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
     #propagateChange: Action<number> | null = null;
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderBaseThemeVariants(theme)();
+    });
     protected readonly dragging = signal(false);
+    protected readonly handleClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderHandleThemeVariants(theme)();
+    });
     protected readonly handlePosition = signal(0);
     protected readonly handleValue = signal(0);
+    protected readonly selectionClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderSelectionThemeVariants(theme)();
+    });
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
+    protected readonly tickClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderTickThemeVariants(theme)();
+    });
+    protected readonly tickElements = viewChildren(SliderTickDirective);
+    protected readonly tickLabelClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderTickLabelThemeVariants(theme)();
+    });
+    protected readonly tickLabelListClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderTickLabelListThemeVariants(theme)();
+    });
+    protected readonly tickListClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderTickListThemeVariants(theme)();
+    });
     protected readonly tickValueTemplate = contentChild(SliderTickValueTemplateDirective, { read: TemplateRef });
     protected readonly ticks = computed(() => {
         const min = this.min();
@@ -71,17 +114,66 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor {
         }
         return tickList;
     });
+    protected readonly trackClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return sliderTrackThemeVariants(theme)();
+    });
 
-    public disabled = input(false);
-    public labelPosition = input<SliderLabelPosition>("after");
-    public labelStep = input(1);
-    public max = input(10);
-    public min = input(0);
-    public orientation = input<"horizontal" | "vertical">("horizontal");
-    public showLabels = input(false);
-    public showTicks = input(false);
-    public step = input(1);
-    public tickStep = input(1);
+    /**
+     * @description Sets the disabled state of the slider.
+     */
+    public readonly disabled = input(false);
+
+    /**
+     * @description Sets the position of the labels relative to the slider track.
+     */
+    public readonly labelPosition = input<SliderLabelPosition>("after");
+
+    /**
+     * @description Sets the step size for the labels on the slider.
+     * @deprecated
+     */
+    public readonly labelStep = input(1);
+
+    /**
+     * @description Sets the maximum value of the slider.
+     */
+    public readonly max = input(10);
+
+    /**
+     * @description Sets the minimum value of the slider.
+     */
+    public readonly min = input(0);
+
+    /**
+     * @description Sets the orientation of the slider, either horizontal or vertical.
+     */
+    public readonly orientation = input<"horizontal" | "vertical">("horizontal");
+
+    /**
+     * @description Determines whether to show labels on the slider.
+     */
+    public readonly showLabels = input(false);
+
+    /**
+     * @description Determines whether to show ticks on the slider.
+     * If true, clicking on the slider will snap to the nearest tick.
+     */
+    public readonly showTicks = input(false);
+
+    /**
+     * @description Sets the step size for the slider's value.
+     */
+    public readonly step = input(1, {
+        transform: (value: number) => Math.max(1, value)
+    });
+
+    /**
+     * @description Sets the step size for the ticks on the slider.
+     */
+    public readonly tickStep = input(1, {
+        transform: (value: number) => Math.max(1, value)
+    });
 
     public ngAfterViewInit(): void {
         this.setSubscription();
@@ -229,7 +321,7 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor {
     }
 
     private findClosestTickElement(event: MouseEvent): HTMLSpanElement {
-        const elements = Array.from(this.#hostElementRef.nativeElement.querySelectorAll(".mona-slider-tick > span"));
+        const elements = this.tickElements().map(tick => tick.host.nativeElement);
         let maxDistance = Number.MAX_VALUE;
         let index = 0;
         for (const [ex, element] of elements.entries()) {
