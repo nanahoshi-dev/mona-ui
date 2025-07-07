@@ -23,7 +23,9 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { SliderTickDirective } from "mona-ui/inputs/slider/directives/slider-tick.directive";
 import { LabelStyleArgs } from "mona-ui/inputs/slider/models/LabelStyleArgs";
+import { TickStyleArgs } from "mona-ui/inputs/slider/models/TickStyleArgs";
 import { LabelStylePipe } from "mona-ui/inputs/slider/pipes/label-style.pipe";
+import { TickStylePipe } from "mona-ui/inputs/slider/pipes/tick-style.pipe";
 import {
     sliderBaseThemeVariants,
     sliderHandleThemeVariants,
@@ -54,7 +56,7 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
             multi: true
         }
     ],
-    imports: [NgClass, NgTemplateOutlet, SliderTickDirective, LabelStylePipe],
+    imports: [NgClass, NgTemplateOutlet, SliderTickDirective, LabelStylePipe, TickStylePipe],
     host: {
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
@@ -127,24 +129,6 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         return sliderTickThemeVariants(theme)();
     });
     protected readonly tickElements = viewChildren(SliderTickDirective);
-    protected readonly tickIntervalsStyle = computed(() => {
-        const ticks = this.renderTicks();
-        if (ticks.length <= 1) {
-            return {};
-        }
-        const diffs = [];
-        for (let i = 0; i < ticks.length - 1; i++) {
-            const diff = Math.abs(ticks[i + 1].value - ticks[i].value);
-            diffs.push(`${diff}fr`);
-        }
-        const gridTemplate = diffs.join(" ");
-
-        if (this.orientation() === "horizontal") {
-            return { "grid-template-columns": gridTemplate };
-        } else {
-            return { "grid-template-rows": gridTemplate };
-        }
-    });
     protected readonly tickLabelClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderTickLabelThemeVariants(theme)();
@@ -156,6 +140,13 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     protected readonly tickListClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderTickListThemeVariants(theme)();
+    });
+    protected readonly tickStyleArgs = computed<TickStyleArgs>(() => {
+        const max = this.max();
+        const min = this.min();
+        const orientation = this.orientation();
+        const tickStep = this.tickStep();
+        return { max, min, orientation, tickStep };
     });
     protected readonly tickValueTemplate = contentChild(SliderTickValueTemplateDirective, { read: TemplateRef });
     protected readonly ticks = computed(() => {

@@ -12,8 +12,7 @@
          [attr.data-orientation]="orientation()">
         @for (tick of renderTicks(); track tick.index) {
             <span [class]="tickClasses()"
-                  [style.height.px]="(tick.index % tickStep() === 0) ? 28 : 20"
-                  [style]="getTickPositionStyle(tick)"
+                  [style]="tick|tickStyle:tickStyleArgs()"
                   [attr.data-orientation]="orientation()"
                   [attr.data-value]="tick.value"
                   monaSliderTick>
