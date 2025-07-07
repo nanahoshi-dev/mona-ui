@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { SliderComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -66,7 +67,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
 }
 
 @Component({
-    imports: [SliderComponent],
+    imports: [SliderComponent, FormsModule],
     template: `
         <mona-slider
             [disabled]="disabled()"
@@ -79,11 +80,14 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             [showTicks]="showTicks()"
             [step]="step()"
             [tickStep]="tickStep()"
+            [ngModel]="value()"
+            (ngModelChange)="onValueChange($event)"
             style="width: 400px;"
             class="!w-100"></mona-slider>
     `
 })
 export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderComponent> {
+    protected readonly value = signal(0);
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);
@@ -94,4 +98,9 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly showTicks = input(false);
     public readonly step = input(1);
     public readonly tickStep = input(1);
+
+    public onValueChange(value: number): void {
+        console.log("Slider value changed:", value);
+        this.value.set(value);
+    }
 }

@@ -10,20 +10,15 @@
 @if (showTicks()) {
     <div
         [class]="tickListClasses()"
-        [attr.data-orientation]="orientation()">
-        @for (tick of ticks(); track $index) {
-            @if ($index !== 0) {
+        [attr.data-orientation]="orientation()"
+        [style]="tickIntervalsStyle()">
+        @for (tick of renderTicks(); track $index) {
+            @if ($index < renderTicks().length - 1) {
                 <span [class]="tickClasses()"
-                      [class.invisible]="$index % tickStep() !== 0"
+                      [style.height.%]="$index % tickStep() === 0 ? 150 : 100"
                       [attr.data-orientation]="orientation()">
                     <span [attr.data-value]="tick.value" monaSliderTick></span>
-                </span>
-            }
-            @if ($index !== ticks().length - 1) {
-                <span [class]="tickClasses()"
-                      [class.invisible]="$index % tickStep() !== 0"
-                      [attr.data-orientation]="orientation()">
-                    <span [attr.data-value]="tick.value" monaSliderTick></span>
+                    <span [attr.data-value]="renderTicks()[$index + 1].value" monaSliderTick></span>
                 </span>
             }
         }
@@ -32,14 +27,12 @@
 @if (showTicks() && showLabels()) {
     <div [class]="tickLabelListClasses()"
          [attr.data-orientation]="orientation()"
-         [attr.data-label-position]="labelPosition()"
-         [ngClass]="{'mona-slider-position-before': labelPosition()==='before',
-                     'mona-slider-position-after': labelPosition()==='after'}">
-        @for (tick of ticks(); track $index) {
+         [attr.data-label-position]="labelPosition()">
+        @for (tick of labelTicks(); track tick.index) {
             <span class="mona-slider-tick-label"
                   [class]="tickLabelClasses()"
                   [attr.data-orientation]="orientation()"
-                  [class.invisible]="$index % tickStep() !== 0">
+                  [style]="tick|labelStyle:labelStyleArgs()">
                 @if (!tickValueTemplate()) {
                     <span>{{ tick.value }}</span>
                 } @else {

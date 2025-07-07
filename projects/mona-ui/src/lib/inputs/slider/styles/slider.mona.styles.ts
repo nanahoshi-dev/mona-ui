@@ -4,11 +4,11 @@ export const sliderBaseVariants = cva(
     `
         flex relative select-none
 
-        data-[orientation="horizontal"]:h-15
+        data-[orientation="horizontal"]:h-6
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:items-center
 
-        data-[orientation="vertical"]:w-15
+        data-[orientation="vertical"]:w-6
         data-[orientation="vertical"]:h-full
         data-[orientation="vertical"]:justify-center
 
@@ -47,7 +47,7 @@ export const sliderSelectionVariants = cva(
         data-[orientation="horizontal"]:data-[dragging="true"]:transition-none
 
         data-[orientation="vertical"]:left-0
-        data-[orientation="vertical"]:top-0
+        data-[orientation="vertical"]:bottom-0
         data-[orientation="vertical"]:right-0
         data-[orientation="vertical"]:transition-[height]
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
@@ -61,35 +61,32 @@ export const sliderTickListVariants = cva(
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:h-4.25
         data-[orientation="horizontal"]:grid-flow-col
-        data-[orientation="horizontal"]:grid-cols-[minmax(0, 1fr)]
         data-[orientation="horizontal"]:items-center
 
         data-[orientation="vertical"]:w-4.25
         data-[orientation="vertical"]:h-full
         data-[orientation="vertical"]:grid-flow-row
-        data-[orientation="vertical"]:grid-rows-[minmax(0, 1fr)]
     `
 );
 
 export const sliderTickVariants = cva(
     `
-        flex
+        flex relative
         [&>span]:flex-1
         [&>span]:cursor-pointer
 
         data-[orientation="horizontal"]:h-full
+        data-[orientation="horizontal"]:border-r
+        data-[orientation="horizontal"]:border-r-border
         data-[orientation="horizontal"]:first:border-l
         data-[orientation="horizontal"]:first:border-l-border
-        data-[orientation="horizontal"]:even:border-r
-        data-[orientation="horizontal"]:even:border-r-border
 
+        data-[orientation="vertical"]:w-full
         data-[orientation="vertical"]:flex-col
-        data-[orientation="vertical"]:first:border-l-none
+        data-[orientation="vertical"]:border-b
+        data-[orientation="vertical"]:border-b-border
         data-[orientation="vertical"]:first:border-t
         data-[orientation="vertical"]:first:border-t-border
-        data-[orientation="vertical"]:even:border-r-none
-        data-[orientation="vertical"]:even:border-b
-        data-[orientation="vertical"]:even:border-b-border
     `
 );
 
@@ -97,30 +94,20 @@ export const sliderTickLabelListVariants = cva(
     `
         absolute
         w-full h-full
-        flex justify-between
         select-none
-
-        data-[orientation="horizontal"]:flex-row
-        data-[orientation="vertical"]:flex-col
-
-        data-[label-position="after"]:items-end
-        data-[label-position="before"]:items-start
     `
 );
 
 export const sliderTickLabelVariants = cva(
     `
-        relative flex
+        absolute flex
         items-center justify-center
 
         text-xs/[1.667]
         text-foreground
 
-        data-[orientation="horizontal"]:w-0
-        data-[orientation="horizontal"]:h-4.25
-
         data-[orientation="vertical"]:w-4.25
-        data-[orientation="vertical"]:h-0
+        data-[orientation="vertical"]:h-auto
     `
 );
 

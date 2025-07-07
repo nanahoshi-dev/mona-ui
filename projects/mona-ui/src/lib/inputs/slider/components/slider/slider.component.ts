@@ -1,3 +1,5 @@
+// slider.component.ts
+
 import { NgClass, NgTemplateOutlet } from "@angular/common";
 import {
     AfterViewInit,
@@ -20,6 +22,8 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { SliderTickDirective } from "mona-ui/inputs/slider/directives/slider-tick.directive";
+import { LabelStyleArgs } from "mona-ui/inputs/slider/models/LabelStyleArgs";
+import { LabelStylePipe } from "mona-ui/inputs/slider/pipes/label-style.pipe";
 import {
     sliderBaseThemeVariants,
     sliderHandleThemeVariants,
@@ -31,6 +35,7 @@ import {
     sliderTrackThemeVariants,
     SliderVariantInputs
 } from "mona-ui/inputs/slider/styles/slider.styles";
+import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { filter, fromEvent, mergeMap, take, takeUntil, tap } from "rxjs";
 import { Action } from "../../../../utils/Action";
@@ -49,7 +54,7 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
             multi: true
         }
     ],
-    imports: [NgClass, NgTemplateOutlet, SliderTickDirective],
+    imports: [NgClass, NgTemplateOutlet, SliderTickDirective, LabelStylePipe],
     host: {
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
@@ -74,6 +79,44 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     });
     protected readonly handlePosition = signal(0);
     protected readonly handleValue = signal(0);
+    protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
+        const labelPosition = this.labelPosition();
+        const max = this.max();
+        const min = this.min();
+        const orientation = this.orientation();
+        const tickCount = this.labelTicks().length;
+        return { labelPosition, max, min, orientation, tickCount };
+    });
+    protected readonly labelTicks = computed(() => {
+        const allTicks = this.ticks();
+        if (allTicks.length === 0) {
+            return [];
+        }
+
+        const tickStep = this.labelStep();
+        const lastTick = allTicks[allTicks.length - 1];
+        let labels = allTicks.filter(t => t.index % tickStep === 0);
+        if (labels.length === 0 || labels[labels.length - 1].value !== lastTick.value) {
+            labels.push(lastTick);
+        }
+        if (labels.length >= 2) {
+            const penultimate = labels[labels.length - 2];
+            const last = labels[labels.length - 1];
+            const penultimatePos = valueToPosition(penultimate.value, this.min(), this.max());
+            const lastPos = valueToPosition(last.value, this.min(), this.max());
+            if (this.step() !== 1 && lastPos - penultimatePos < 4) {
+                labels.splice(labels.length - 2, 1);
+            }
+        }
+        return labels;
+    });
+    protected readonly renderTicks = computed(() => {
+        const ticks = this.ticks();
+        if (this.orientation() === "vertical") {
+            return ticks.slice().reverse();
+        }
+        return ticks;
+    });
     protected readonly selectionClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderSelectionThemeVariants(theme)();
@@ -84,6 +127,24 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         return sliderTickThemeVariants(theme)();
     });
     protected readonly tickElements = viewChildren(SliderTickDirective);
+    protected readonly tickIntervalsStyle = computed(() => {
+        const ticks = this.renderTicks();
+        if (ticks.length <= 1) {
+            return {};
+        }
+        const diffs = [];
+        for (let i = 0; i < ticks.length - 1; i++) {
+            const diff = Math.abs(ticks[i + 1].value - ticks[i].value);
+            diffs.push(`${diff}fr`);
+        }
+        const gridTemplate = diffs.join(" ");
+
+        if (this.orientation() === "horizontal") {
+            return { "grid-template-columns": gridTemplate };
+        } else {
+            return { "grid-template-rows": gridTemplate };
+        }
+    });
     protected readonly tickLabelClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderTickLabelThemeVariants(theme)();
@@ -100,19 +161,17 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     protected readonly ticks = computed(() => {
         const min = this.min();
         const max = this.max();
-        const tickList: SliderTick[] = [];
-        let value = min;
-        let index = 0;
-        while (value < max) {
-            tickList.push({ index, value });
-            value += this.step();
-            index++;
+        const step = this.step();
+        const ticks: SliderTick[] = [];
+        const count = Math.floor((max - min) / step);
+        for (let i = 0; i <= count; i++) {
+            const value = min + i * step;
+            ticks.push({ index: i, value });
         }
-        tickList.push({ index, value: Math.min(value + this.step(), max) });
-        if (this.orientation() === "vertical") {
-            tickList.reverse();
+        if (ticks[ticks.length - 1].value < max) {
+            ticks.push({ index: ticks.length, value: max });
         }
-        return tickList;
+        return ticks;
     });
     protected readonly trackClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -125,13 +184,12 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the position of the labels relative to the slider track.
+     * @description Sets the position of the label relative to the slider track.
      */
     public readonly labelPosition = input<SliderLabelPosition>("after");
 
     /**
-     * @description Sets the step size for the labels on the slider.
-     * @deprecated
+     * @description Display every n<sup>th</sup> label on the slider.
      */
     public readonly labelStep = input(1);
 
@@ -146,30 +204,30 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly min = input(0);
 
     /**
-     * @description Sets the orientation of the slider, either horizontal or vertical.
+     * @description Sets the orientation of the slider.
      */
     public readonly orientation = input<"horizontal" | "vertical">("horizontal");
 
     /**
-     * @description Determines whether to show labels on the slider.
+     * @description Sets whether to show labels on the slider.
+     * Only applicable if `showTicks` is `true`.
      */
     public readonly showLabels = input(false);
 
     /**
-     * @description Determines whether to show ticks on the slider.
-     * If true, clicking on the slider will snap to the nearest tick.
+     * @description Sets whether to show ticks on the slider.
      */
     public readonly showTicks = input(false);
 
     /**
-     * @description Sets the step size for the slider's value.
+     * @description Sets the step size for the slider.
      */
     public readonly step = input(1, {
         transform: (value: number) => Math.max(1, value)
     });
 
     /**
-     * @description Sets the step size for the ticks on the slider.
+     * @description Displays every n<sup>th</sup> tick on the slider.
      */
     public readonly tickStep = input(1, {
         transform: (value: number) => Math.max(1, value)
@@ -188,25 +246,28 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public writeValue(obj: number): void {
         if (obj != null) {
             const value = Math.max(this.min(), Math.min(obj, this.max()));
-            const position = this.getPositionFromValue(value);
+            const position = valueToPosition(value, this.min(), this.max());
             this.handleValue.set(value);
             this.handlePosition.set(position);
         }
     }
 
-    private getPositionFromValue(value: number): number {
-        if (value === this.min()) {
-            return 0;
-        }
-        if (value === this.max()) {
-            return 100;
-        }
-        return ((value - this.min()) / (this.max() - this.min())) * 100;
-    }
-
     private getValueFromPosition(position: number): number {
-        const value = position / 100;
-        return Math.max(this.min(), Math.min(this.max(), Math.round(value * this.max())));
+        const min = this.min();
+        const max = this.max();
+        const step = this.step();
+
+        if (position >= 100) {
+            return max;
+        }
+        if (position <= 0) {
+            return min;
+        }
+
+        const range = max - min;
+        const rawValue = min + (position / 100) * range;
+        const value = Math.round((rawValue - min) / step) * step + min;
+        return Math.max(min, Math.min(max, value));
     }
 
     private handleHandleMove(event: MouseEvent, direction: "horizontal" | "vertical"): void {
@@ -214,7 +275,7 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
             const tick = this.findClosestTickElement(event);
             const valueStr = tick.getAttribute("data-value");
             const value = valueStr ? Number(valueStr) : 0;
-            const position = this.getPositionFromValue(value);
+            const position = valueToPosition(value, this.min(), this.max());
             if (position !== this.handlePosition()) {
                 this.#zone.run(() => {
                     this.handlePosition.set(position);
@@ -226,36 +287,35 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         }
 
         const containerRect = this.#hostElementRef.nativeElement.getBoundingClientRect();
-        let handlePos =
-            direction === "horizontal" ? event.clientX - containerRect.left : event.clientY - containerRect.top;
-        let normalizedHandlePos = 0;
+        let normalizedHandlePos: number;
+
         if (direction === "horizontal") {
-            normalizedHandlePos = Math.max(0, Math.min((handlePos / containerRect.width) * 100, 100));
+            const handlePos = event.clientX - containerRect.left;
+            normalizedHandlePos = (handlePos / containerRect.width) * 100;
         } else {
-            normalizedHandlePos = Math.max(0, Math.min(100 - (handlePos / containerRect.height) * 100, 100));
+            const handlePos = event.clientY - containerRect.top;
+            normalizedHandlePos = 100 - (handlePos / containerRect.height) * 100;
+        }
+        normalizedHandlePos = Math.max(0, Math.min(normalizedHandlePos, 100));
+
+        if (Math.abs(normalizedHandlePos - this.handlePosition()) < 0.01) {
+            return;
         }
 
-        const maxPos = direction === "horizontal" ? containerRect.width : containerRect.height;
-        if (
-            normalizedHandlePos >= 0 &&
-            normalizedHandlePos <= maxPos &&
-            normalizedHandlePos !== this.handlePosition()
-        ) {
-            const value = this.getValueFromPosition(normalizedHandlePos);
-            if (!this.showTicks()) {
-                this.#zone.run(() => {
+        const value = this.getValueFromPosition(normalizedHandlePos);
+        if (!this.showTicks()) {
+            this.#zone.run(() => {
+                this.handlePosition.set(normalizedHandlePos);
+            });
+        }
+        if (value !== this.handleValue()) {
+            this.#zone.run(() => {
+                if (this.showTicks() && this.handlePosition() !== normalizedHandlePos) {
                     this.handlePosition.set(normalizedHandlePos);
-                });
-            }
-            if (value !== this.handleValue()) {
-                this.#zone.run(() => {
-                    if (this.showTicks() && this.handlePosition() !== normalizedHandlePos) {
-                        this.handlePosition.set(normalizedHandlePos);
-                    }
-                    this.handleValue.set(value);
-                    this.#propagateChange?.(value);
-                });
-            }
+                }
+                this.handleValue.set(value);
+                this.#propagateChange?.(value);
+            });
         }
     }
 
@@ -310,7 +370,7 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
                         const newValue = Math.max(this.min(), Math.min(this.max(), value + step));
                         this.#zone.run(() => {
                             this.handleValue.set(newValue);
-                            this.handlePosition.set(this.getPositionFromValue(newValue));
+                            this.handlePosition.set(valueToPosition(newValue, this.min(), this.max()));
                             this.#propagateChange?.(newValue);
                         });
                     }),
