@@ -8,19 +8,16 @@
     ></div>
 </div>
 @if (showTicks()) {
-    <div
-        [class]="tickListClasses()"
-        [attr.data-orientation]="orientation()"
-        [style]="tickIntervalsStyle()">
-        @for (tick of renderTicks(); track $index) {
-            @if ($index < renderTicks().length - 1) {
-                <span [class]="tickClasses()"
-                      [style.height.%]="$index % tickStep() === 0 ? 150 : 100"
-                      [attr.data-orientation]="orientation()">
-                    <span [attr.data-value]="tick.value" monaSliderTick></span>
-                    <span [attr.data-value]="renderTicks()[$index + 1].value" monaSliderTick></span>
-                </span>
-            }
+    <div [class]="tickListClasses()"
+         [attr.data-orientation]="orientation()">
+        @for (tick of renderTicks(); track tick.index) {
+            <span [class]="tickClasses()"
+                  [style.height.px]="(tick.index % tickStep() === 0) ? 28 : 20"
+                  [style]="getTickPositionStyle(tick)"
+                  [attr.data-orientation]="orientation()"
+                  [attr.data-value]="tick.value"
+                  monaSliderTick>
+            </span>
         }
     </div>
 }

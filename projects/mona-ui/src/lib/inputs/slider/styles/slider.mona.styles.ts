@@ -56,37 +56,24 @@ export const sliderSelectionVariants = cva(
 
 export const sliderTickListVariants = cva(
     `
-        grid absolute
+        absolute
 
         data-[orientation="horizontal"]:w-full
-        data-[orientation="horizontal"]:h-4.25
-        data-[orientation="horizontal"]:grid-flow-col
-        data-[orientation="horizontal"]:items-center
+        data-[orientation="horizontal"]:h-6
+        data-[orientation="horizontal"]:top-0
+        data-[orientation="horizontal"]:left-0
 
-        data-[orientation="vertical"]:w-4.25
+        data-[orientation="vertical"]:w-6
         data-[orientation="vertical"]:h-full
-        data-[orientation="vertical"]:grid-flow-row
+        data-[orientation="vertical"]:top-0
+        data-[orientation="vertical"]:left-0
     `
 );
 
 export const sliderTickVariants = cva(
     `
-        flex relative
-        [&>span]:flex-1
-        [&>span]:cursor-pointer
-
-        data-[orientation="horizontal"]:h-full
-        data-[orientation="horizontal"]:border-r
-        data-[orientation="horizontal"]:border-r-border
-        data-[orientation="horizontal"]:first:border-l
-        data-[orientation="horizontal"]:first:border-l-border
-
-        data-[orientation="vertical"]:w-full
-        data-[orientation="vertical"]:flex-col
-        data-[orientation="vertical"]:border-b
-        data-[orientation="vertical"]:border-b-border
-        data-[orientation="vertical"]:first:border-t
-        data-[orientation="vertical"]:first:border-t-border
+        cursor-pointer
+        bg-input-border
     `
 );
 

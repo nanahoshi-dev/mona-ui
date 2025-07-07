@@ -252,6 +252,30 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         }
     }
 
+    protected getTickPositionStyle(tick: SliderTick): Partial<CSSStyleDeclaration> {
+        const position = valueToPosition(tick.value, this.min(), this.max());
+
+        if (this.orientation() === "horizontal") {
+            return {
+                position: "absolute",
+                left: `${position}%`,
+                top: "50%",
+                transform: "translateX(-75%) translateY(-50%)",
+                width: "1px",
+                height: "8px" // Base height for 100% ticks
+            };
+        } else {
+            return {
+                position: "absolute",
+                bottom: `${position}%`,
+                left: "50%",
+                transform: "translateX(-50%) translateY(50%)",
+                width: "8px",
+                height: "1px"
+            };
+        }
+    }
+
     private getValueFromPosition(position: number): number {
         const min = this.min();
         const max = this.max();
