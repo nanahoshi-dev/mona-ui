@@ -3228,13 +3228,19 @@
       {
         "name": "labelPosition",
         "type": "SliderLabelPosition",
-        "description": "Sets the position of the labels relative to the slider track.",
+        "description": "Sets the position of the label relative to the slider track.",
         "kind": "input"
       },
       {
         "name": "labelStep",
         "type": "number",
-        "description": "Sets the step size for the labels on the slider.",
+        "description": "Display every n<sup>th</sup> label on the slider.",
+        "kind": "input"
+      },
+      {
+        "name": "largeTickStep",
+        "type": "number | null",
+        "description": "Display every n<sup>th</sup> tick as large.",
         "kind": "input"
       },
       {
@@ -3251,32 +3257,32 @@
       },
       {
         "name": "orientation",
-        "type": "\"horizontal\" | \"vertical\"",
-        "description": "Sets the orientation of the slider, either horizontal or vertical.",
+        "type": "Orientation",
+        "description": "Sets the orientation of the slider.",
         "kind": "input"
       },
       {
         "name": "showLabels",
         "type": "boolean",
-        "description": "Determines whether to show labels on the slider.",
+        "description": "Sets whether to show labels on the slider.\nOnly applicable if `showTicks` is `true`.",
         "kind": "input"
       },
       {
         "name": "showTicks",
         "type": "boolean",
-        "description": "Determines whether to show ticks on the slider.\nIf true, clicking on the slider will snap to the nearest tick.",
+        "description": "Sets whether to show ticks on the slider.",
+        "kind": "input"
+      },
+      {
+        "name": "smallTickStep",
+        "type": "number",
+        "description": "Displays every n<sup>th</sup> tick on the slider.",
         "kind": "input"
       },
       {
         "name": "step",
         "type": "number",
-        "description": "Sets the step size for the slider's value.",
-        "kind": "input"
-      },
-      {
-        "name": "tickStep",
-        "type": "number",
-        "description": "Sets the step size for the ticks on the slider.",
+        "description": "Sets the step size for the slider.",
         "kind": "input"
       }
     ]

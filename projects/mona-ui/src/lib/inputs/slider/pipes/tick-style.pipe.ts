@@ -8,20 +8,21 @@ import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
 })
 export class TickStylePipe implements PipeTransform {
     public transform(tick: SliderTick, args: TickStyleArgs): Partial<CSSStyleDeclaration> {
-        const { min, max, orientation, tickStep } = args;
+        const { largeTickStep, min, max, orientation, smallTickStep } = args;
         const position = valueToPosition(tick.value, min, max);
-        const height = orientation === "horizontal" ? (tick.index % tickStep === 0 ? 28 : 20) : 8;
-        const width = orientation === "horizontal" ? 8 : tick.index % tickStep === 0 ? 28 : 20;
+        const height = this.getHeight(tick, smallTickStep, largeTickStep, orientation);
+        const width = this.getWidth(tick, smallTickStep, largeTickStep, orientation);
 
         if (orientation === "horizontal") {
             return {
                 position: "absolute",
                 left: `${position}%`,
                 top: "50%",
-                transform: "translateX(-75%) translateY(-50%) translateZ(0)",
+                transform: "translateX(-50%) translateY(-50%) translateZ(0)",
                 width: "1px",
                 height: `${height}px`,
-                backfaceVisibility: "hidden"
+                backfaceVisibility: "hidden",
+                willChange: "transform"
             };
         } else {
             return {
@@ -34,5 +35,44 @@ export class TickStylePipe implements PipeTransform {
                 backfaceVisibility: "hidden"
             };
         }
+    }
+
+    private getHeight(
+        tick: SliderTick,
+        smallStep: number,
+        largeStep: number | null,
+        orientation: "horizontal" | "vertical"
+    ): number {
+        if (orientation === "vertical") {
+            return 8;
+        }
+        if (smallStep === 1 && largeStep === null) {
+            return 16;
+        }
+        if (smallStep === 1 && largeStep !== null) {
+            return tick.index % largeStep !== 0 ? 16 : 24;
+        }
+        if (smallStep > 1 && largeStep === null) {
+            return tick.index % smallStep !== 0 ? 0 : 16;
+        }
+        if (smallStep > 1 && largeStep !== null) {
+            return tick.index % smallStep !== 0 ? 0 : tick.index % largeStep !== 0 ? 16 : 24;
+        }
+        return 8;
+    }
+
+    private getWidth(
+        tick: SliderTick,
+        smallStep: number,
+        largeStep: number | null,
+        orientation: "horizontal" | "vertical"
+    ): number {
+        if (orientation === "vertical") {
+            if (smallStep === 1) {
+                return 16; // Default width for vertical orientation with no step
+            }
+            return tick.index % smallStep !== 0 ? 0 : 16;
+        }
+        return 8; // Default width for horizontal orientation
     }
 }

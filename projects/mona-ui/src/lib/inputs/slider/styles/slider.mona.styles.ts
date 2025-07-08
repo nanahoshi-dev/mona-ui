@@ -6,10 +6,11 @@ export const sliderBaseVariants = cva(
 
         data-[orientation="horizontal"]:h-6
         data-[orientation="horizontal"]:w-full
+        data-[orientation="horizontal"]:min-w-[200px]
         data-[orientation="horizontal"]:items-center
 
         data-[orientation="vertical"]:w-6
-        data-[orientation="vertical"]:h-full
+        data-[orientation="vertical"]:h-[200px]
         data-[orientation="vertical"]:justify-center
 
         data-[disabled="true"]:pointer-events-none
@@ -74,6 +75,7 @@ export const sliderTickVariants = cva(
     `
         cursor-pointer
         bg-input-border
+        brightness-75
     `
 );
 

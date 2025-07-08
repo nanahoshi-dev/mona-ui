@@ -1,5 +1,3 @@
-// slider.component.ts
-
 import { NgClass, NgTemplateOutlet } from "@angular/common";
 import {
     AfterViewInit,
@@ -38,8 +36,9 @@ import {
     SliderVariantInputs
 } from "mona-ui/inputs/slider/styles/slider.styles";
 import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
+import { Orientation } from "mona-ui/models/Orientation";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
-import { filter, fromEvent, mergeMap, take, takeUntil, tap } from "rxjs";
+import { filter, fromEvent, map, switchMap, takeUntil, tap } from "rxjs";
 import { Action } from "../../../../utils/Action";
 import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
 import { SliderTick } from "../../../models/SliderTick";
@@ -142,11 +141,12 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         return sliderTickListThemeVariants(theme)();
     });
     protected readonly tickStyleArgs = computed<TickStyleArgs>(() => {
+        const largeTickStep = this.largeTickStep();
         const max = this.max();
         const min = this.min();
         const orientation = this.orientation();
-        const tickStep = this.tickStep();
-        return { max, min, orientation, tickStep };
+        const smallTickStep = this.smallTickStep();
+        return { largeTickStep, max, min, orientation, smallTickStep };
     });
     protected readonly tickValueTemplate = contentChild(SliderTickValueTemplateDirective, { read: TemplateRef });
     protected readonly ticks = computed(() => {
@@ -185,6 +185,11 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly labelStep = input(1);
 
     /**
+     * @description Display every n<sup>th</sup> tick as large.
+     */
+    public readonly largeTickStep = input<number | null>(null);
+
+    /**
      * @description Sets the maximum value of the slider.
      */
     public readonly max = input(10);
@@ -197,7 +202,7 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     /**
      * @description Sets the orientation of the slider.
      */
-    public readonly orientation = input<"horizontal" | "vertical">("horizontal");
+    public readonly orientation = input<Orientation>("horizontal");
 
     /**
      * @description Sets whether to show labels on the slider.
@@ -211,17 +216,17 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly showTicks = input(false);
 
     /**
-     * @description Sets the step size for the slider.
+     * @description Displays every n<sup>th</sup> tick on the slider.
      */
-    public readonly step = input(1, {
-        transform: (value: number) => Math.max(1, value)
+    public readonly smallTickStep = input(1, {
+        transform: (value: number) => Math.max(value, 1)
     });
 
     /**
-     * @description Displays every n<sup>th</sup> tick on the slider.
+     * @description Sets the step size for the slider.
      */
-    public readonly tickStep = input(1, {
-        transform: (value: number) => Math.max(1, value)
+    public readonly step = input(1, {
+        transform: (value: number) => (value <= 0 ? 1 : value)
     });
 
     public ngAfterViewInit(): void {
@@ -243,30 +248,6 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         }
     }
 
-    protected getTickPositionStyle(tick: SliderTick): Partial<CSSStyleDeclaration> {
-        const position = valueToPosition(tick.value, this.min(), this.max());
-
-        if (this.orientation() === "horizontal") {
-            return {
-                position: "absolute",
-                left: `${position}%`,
-                top: "50%",
-                transform: "translateX(-75%) translateY(-50%)",
-                width: "1px",
-                height: "8px" // Base height for 100% ticks
-            };
-        } else {
-            return {
-                position: "absolute",
-                bottom: `${position}%`,
-                left: "50%",
-                transform: "translateX(-50%) translateY(50%)",
-                width: "8px",
-                height: "1px"
-            };
-        }
-    }
-
     private getValueFromPosition(position: number): number {
         const min = this.min();
         const max = this.max();
@@ -285,7 +266,7 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         return Math.max(min, Math.min(max, value));
     }
 
-    private handleHandleMove(event: MouseEvent, direction: "horizontal" | "vertical"): void {
+    private handleHandleMove(event: MouseEvent, orientation: Orientation): void {
         if (this.showTicks()) {
             const tick = this.findClosestTickElement(event);
             const valueStr = tick.getAttribute("data-value");
@@ -304,94 +285,92 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         const containerRect = this.#hostElementRef.nativeElement.getBoundingClientRect();
         let normalizedHandlePos: number;
 
-        if (direction === "horizontal") {
+        if (orientation === "horizontal") {
             const handlePos = event.clientX - containerRect.left;
             normalizedHandlePos = (handlePos / containerRect.width) * 100;
         } else {
             const handlePos = event.clientY - containerRect.top;
             normalizedHandlePos = 100 - (handlePos / containerRect.height) * 100;
         }
+
         normalizedHandlePos = Math.max(0, Math.min(normalizedHandlePos, 100));
 
-        if (Math.abs(normalizedHandlePos - this.handlePosition()) < 0.01) {
-            return;
-        }
-
         const value = this.getValueFromPosition(normalizedHandlePos);
-        if (!this.showTicks()) {
-            this.#zone.run(() => {
-                this.handlePosition.set(normalizedHandlePos);
-            });
-        }
+        const snappedPosition = valueToPosition(value, this.min(), this.max());
+
         if (value !== this.handleValue()) {
+            this.handlePosition.set(snappedPosition);
             this.#zone.run(() => {
-                if (this.showTicks() && this.handlePosition() !== normalizedHandlePos) {
-                    this.handlePosition.set(normalizedHandlePos);
-                }
                 this.handleValue.set(value);
                 this.#propagateChange?.(value);
             });
         }
     }
 
+    private setClickSubscription(): void {
+        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                tap(() => this.dragging.set(false)),
+                filter(() => !this.disabled())
+            )
+            .subscribe((event: MouseEvent) => {
+                this.handleHandleMove(event, this.orientation());
+            });
+    }
+
+    private setKeydownSubscription(): void {
+        fromEvent<KeyboardEvent>(this.sliderHandle().nativeElement, "keydown")
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.disabled()),
+                filter(event => ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)),
+                tap(event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }),
+                map((event: KeyboardEvent) => {
+                    const currentValue = this.handleValue();
+                    const stepDirection = event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1;
+                    const stepAmount = this.step() * stepDirection;
+                    const newValue = currentValue + stepAmount;
+                    return Math.max(this.min(), Math.min(this.max(), newValue));
+                })
+            )
+            .subscribe(newValue => {
+                this.#zone.run(() => {
+                    this.handleValue.set(newValue);
+                    this.handlePosition.set(valueToPosition(newValue, this.min(), this.max()));
+                    this.#propagateChange?.(newValue);
+                });
+            });
+    }
+
+    private setMouseMoveSubscription(): void {
+        const mouseDown$ = fromEvent<MouseEvent>(this.sliderHandle().nativeElement, "mousedown");
+        const mouseMove$ = fromEvent<MouseEvent>(document, "mousemove");
+        const mouseUp$ = fromEvent<MouseEvent>(document, "mouseup");
+
+        mouseDown$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.disabled()),
+                tap(() => this.dragging.set(true)),
+                switchMap(() =>
+                    mouseMove$.pipe(
+                        tap((event: MouseEvent) => this.handleHandleMove(event, this.orientation())), // Action is here
+                        takeUntil(mouseUp$.pipe(tap(() => this.#zone.run(() => this.dragging.set(false)))))
+                    )
+                )
+            )
+            .subscribe();
+    }
+
     private setSubscription(): void {
         this.#zone.runOutsideAngular(() => {
-            fromEvent<MouseEvent>(this.sliderHandle().nativeElement, "mousedown")
-                .pipe(
-                    takeUntilDestroyed(this.#destroyRef),
-                    filter(() => !this.disabled()),
-                    mergeMap(() => {
-                        this.dragging.set(true);
-                        return fromEvent<MouseEvent>(document, "mousemove").pipe(
-                            tap((event: MouseEvent) => this.handleHandleMove(event, this.orientation())),
-                            takeUntil(
-                                fromEvent<MouseEvent>(document, "mouseup").pipe(
-                                    take(1),
-                                    tap(() => this.#zone.run(() => this.dragging.set(false)))
-                                )
-                            )
-                        );
-                    })
-                )
-                .subscribe();
-
-            fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
-                .pipe(
-                    takeUntilDestroyed(this.#destroyRef),
-                    tap(() => this.dragging.set(false)),
-                    filter(() => !this.disabled())
-                )
-                .subscribe((event: MouseEvent) => {
-                    this.handleHandleMove(event, this.orientation());
-                });
-
-            fromEvent<KeyboardEvent>(this.sliderHandle().nativeElement, "keydown")
-                .pipe(
-                    filter(
-                        (event: KeyboardEvent) =>
-                            event.key === "ArrowLeft" ||
-                            event.key === "ArrowRight" ||
-                            event.key === "ArrowUp" ||
-                            (event.key === "ArrowDown" && !this.disabled())
-                    ),
-                    tap((event: KeyboardEvent) => {
-                        event.stopPropagation();
-                        this.#zone.run(() => {
-                            this.dragging.set(true);
-                        });
-                        const value = this.handleValue();
-                        const step =
-                            event.key === "ArrowLeft" || event.key === "ArrowDown" ? -this.step() : this.step();
-                        const newValue = Math.max(this.min(), Math.min(this.max(), value + step));
-                        this.#zone.run(() => {
-                            this.handleValue.set(newValue);
-                            this.handlePosition.set(valueToPosition(newValue, this.min(), this.max()));
-                            this.#propagateChange?.(newValue);
-                        });
-                    }),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe();
+            this.setClickSubscription();
+            this.setKeydownSubscription();
+            this.setMouseMoveSubscription();
         });
     }
 

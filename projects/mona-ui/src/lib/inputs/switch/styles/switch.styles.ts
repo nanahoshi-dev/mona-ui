@@ -11,8 +11,6 @@ export const switchThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaSwitchVariants;
-        case "shadcn":
-            return monaSwitchVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaSwitchVariants; // Default to Mona styles
     }
@@ -22,8 +20,6 @@ export const switchHandleThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaSwitchHandleVariants;
-        case "shadcn":
-            return monaSwitchHandleVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaSwitchHandleVariants; // Default to Mona styles
     }
@@ -33,8 +29,6 @@ export const switchLabelThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaSwitchLabelVariants;
-        case "shadcn":
-            return monaSwitchLabelVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaSwitchLabelVariants; // Default to Mona styles
     }

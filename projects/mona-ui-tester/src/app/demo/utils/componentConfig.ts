@@ -1,5 +1,4 @@
 import { InputSignal, InputSignalWithTransform, ModelSignal, OutputEmitterRef } from "@angular/core";
-import { ComponentMetadata } from "../models/ComponentMetadata";
 import { FeatureConfigHandler } from "./featureInjection";
 
 type GetInputSignalValue<T> =
@@ -36,8 +35,15 @@ export type ComponentConfigType = "string" | "number" | "boolean" | "dropdown" |
 export type ComponentConfigInputType<TComponent> = {
     [key in keyof ComponentInputs<TComponent>]:
         | {
-              type: Extract<ComponentConfigType, "string" | "number" | "boolean" | "color">;
+              type: Extract<ComponentConfigType, "string" | "boolean" | "color">;
               value: NonNullable<ComponentInputs<TComponent>[key]>;
+          }
+        | {
+              type: Extract<ComponentConfigType, "number">;
+              min?: number | null; // Optional, only for number inputs
+              max?: number | null; // Optional, only for number inputs
+              nullable?: boolean; // Optional, only for number inputs
+              value: ComponentInputs<TComponent>[key];
           }
         | {
               type: Extract<ComponentConfigType, "dropdown">;
@@ -76,6 +82,9 @@ export type ComponentConfig<TComponent> = {
 export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     configType: ComponentConfigType;
     defaultValue?: TDefault;
+    max?: number | null; // Optional, only for number inputs
+    min?: number | null; // Optional, only for number inputs
+    nullable?: boolean; // Optional, only for number inputs
     name: string; // From the input structure
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
