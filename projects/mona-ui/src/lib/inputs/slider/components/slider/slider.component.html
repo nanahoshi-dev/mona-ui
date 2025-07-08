@@ -25,8 +25,7 @@
          [attr.data-orientation]="orientation()"
          [attr.data-label-position]="labelPosition()">
         @for (tick of labelTicks(); track tick.index) {
-            <span class="mona-slider-tick-label"
-                  [class]="tickLabelClasses()"
+            <span [class]="tickLabelClasses()"
                   [attr.data-orientation]="orientation()"
                   [style]="tick|labelStyle:labelStyleArgs()">
                 @if (!tickValueTemplate()) {
@@ -41,8 +40,7 @@
         }
     </div>
 }
-<div class="mona-slider-handle"
-     [class]="handleClasses()"
+<div [class]="handleClasses()"
      [attr.data-orientation]="orientation()"
      [attr.data-dragging]="dragging()"
      [ngClass]="{'mona-slider-dragging': dragging()}"
