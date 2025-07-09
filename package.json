@@ -13,12 +13,11 @@
     },
     "typings": "dist/mona-ui/index.d.ts",
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
         "ng": "ng",
         "start": "ng serve",
         "prebuild": "npm run build:metadata",
         "prewatch": "npm run build:metadata",
-        "build": "pnpm build:prod",
+        "build": "npm run build:prod",
         "build:dev": "ng build mona-ui --configuration development",
         "build:prod": "ng build mona-ui --configuration production",
         "build:watch": "ng build mona-ui --watch --configuration development",
@@ -40,6 +39,9 @@
     "publishConfig": {
         "access": "public"
     },
+    "workspaces": [
+        "projects/*"
+    ],
     "release": {
         "plugins": [
             "@semantic-release/commit-analyzer",

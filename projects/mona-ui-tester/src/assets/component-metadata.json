@@ -1278,7 +1278,7 @@
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\n\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Sets the toggleable state of the button.\r\n\r\nIf set to `true`, the button will toggle its selected state on click.",
         "kind": "input"
       },
       {
