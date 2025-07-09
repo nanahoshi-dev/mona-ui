@@ -7,7 +7,6 @@ import { ButtonDirective } from "./button.directive";
 @Component({
     template: ` <button
         monaButton
-        [primary]="primary"
         [selected]="selected"
         [tabindex]="tabIndex"
         [toggleable]="toggleable"
@@ -17,7 +16,6 @@ import { ButtonDirective } from "./button.directive";
     imports: [ButtonDirective]
 })
 class TestButtonDirectiveComponent {
-    public primary: boolean = true;
     public selected: boolean = false;
     public tabIndex: number = 0;
     public toggleable: boolean = false;
@@ -67,14 +65,8 @@ describe("ButtonDirective", () => {
         buttonHostComponent.buttonDirective().disabled.set(true);
         buttonHostFixture.detectChanges();
         const button = buttonHostFixture.debugElement.nativeElement.querySelector("button");
-        expect(button).toHaveClass("mona-disabled");
-    });
-
-    it("should have class primary", () => {
-        buttonHostComponent.primary = true;
-        buttonHostFixture.detectChanges();
-        const button = buttonHostFixture.debugElement.nativeElement.querySelector("button");
-        expect(button).toHaveClass("mona-primary");
+        const disabled = button.getAttribute("disabled");
+        expect(disabled).toBe("true");
     });
 
     it("should contain text TEST BUTTON", () => {

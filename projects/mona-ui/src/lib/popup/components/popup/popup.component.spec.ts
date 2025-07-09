@@ -1,5 +1,6 @@
 import { Component, viewChild } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed } from "@angular/core/testing";
+import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { PopupComponent } from "./popup.component";
 
@@ -25,7 +26,8 @@ describe("PopupComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [PopupComponent, PopupComponentTestComponent]
+            imports: [PopupComponent, PopupComponentTestComponent],
+            providers: [provideAnimations()]
         });
         hostFixture = TestBed.createComponent(PopupComponentTestComponent);
         hostComponent = hostFixture.componentInstance;

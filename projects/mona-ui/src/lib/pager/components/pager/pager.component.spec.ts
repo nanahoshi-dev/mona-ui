@@ -387,5 +387,5 @@ function setupBigPager(fixture: ComponentFixture<PagerComponent>, skip: number =
 }
 
 function getDropdownList(): HTMLUListElement {
-    return document.querySelector(".mona-dropdown-popup-content ul") as HTMLUListElement;
+    return document.querySelector("mona-contextmenu-content ul") as HTMLUListElement;
 }

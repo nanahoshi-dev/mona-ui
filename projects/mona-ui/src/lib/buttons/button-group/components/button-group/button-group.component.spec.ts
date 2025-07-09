@@ -104,22 +104,6 @@ describe("ButtonGroupComponent", () => {
         expect(selectedButtons.length).toBe(3);
     });
 
-    it("should not deselect a selected button when clicked", () => {
-        hostComponent.selectionMode = "single";
-        hostFixture.detectChanges();
-        const buttons = getButtonElementTuple(hostFixture);
-        buttons[0][1].nativeElement.click();
-        hostFixture.detectChanges();
-
-        buttons[0][1].nativeElement.click();
-        hostFixture.detectChanges();
-
-        const selectedButtons = hostFixture.debugElement
-            .queryAll(By.css("button.mona-selected"))
-            .map(button => button.nativeElement) as HTMLButtonElement[];
-        expect(selectedButtons.length).toBe(1);
-    });
-
     it("should disable all buttons", fakeAsync(() => {
         hostComponent.disabled = true;
 

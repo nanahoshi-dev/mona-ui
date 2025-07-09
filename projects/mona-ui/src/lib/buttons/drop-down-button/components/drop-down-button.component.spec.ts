@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 
 import { DropDownButtonComponent } from "./drop-down-button.component";
@@ -9,7 +10,8 @@ describe("DropDownButtonComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [DropDownButtonComponent, ContextMenuComponent]
+            imports: [DropDownButtonComponent, ContextMenuComponent],
+            providers: [provideAnimations()]
         });
         fixture = TestBed.createComponent(DropDownButtonComponent);
         component = fixture.componentInstance;

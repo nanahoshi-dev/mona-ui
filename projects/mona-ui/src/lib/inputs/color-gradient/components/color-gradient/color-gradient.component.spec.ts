@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { NumericTextBoxComponent } from "../../../numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { NumericTextBoxPrefixTemplateDirective } from "../../../numeric-text-box/directives/numeric-text-box-prefix-template.directive";
@@ -18,7 +19,8 @@ describe("ColorGradientComponent", () => {
                 NumericTextBoxComponent,
                 NumericTextBoxPrefixTemplateDirective,
                 FormsModule
-            ]
+            ],
+            providers: [provideAnimations()]
         });
         fixture = TestBed.createComponent(ColorGradientComponent);
         component = fixture.componentInstance;

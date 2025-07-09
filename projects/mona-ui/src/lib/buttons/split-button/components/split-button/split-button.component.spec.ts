@@ -1,5 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { ApplicationRef, Component } from "@angular/core";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { BrowserModule, By } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -11,7 +12,7 @@ import { SplitButtonComponent } from "./split-button.component";
 
 @Component({
     template: `
-        <mona-split-button [text]="'Split Button'">
+        <mona-split-button text="Split Button">
             <mona-menu-item text="Item 1"></mona-menu-item>
             <mona-menu-item text="Item 2" (menuClick)="onItemClick($event)"></mona-menu-item>
             <mona-menu-item text="Item 3">
@@ -48,13 +49,12 @@ describe("SplitButtonComponent", () => {
             imports: [
                 SplitButtonComponent,
                 TestHostComponent,
-                BrowserAnimationsModule,
                 CommonModule,
                 BrowserModule,
                 ContextMenuComponent,
                 ButtonDirective
             ],
-            providers: [ApplicationRef]
+            providers: [ApplicationRef, provideAnimations()]
         });
         fixture = TestBed.createComponent(SplitButtonComponent);
         hostFixture = TestBed.createComponent(TestHostComponent);
@@ -74,7 +74,7 @@ describe("SplitButtonComponent", () => {
             .queryAll(By.css("button"))
             .map(button => button.nativeElement) as HTMLButtonElement[];
         expect(buttons.length).toBe(2);
-        expect(buttons[1].querySelector("fa-icon")).not.toBeNull();
+        expect(buttons[1].querySelector("lucide-angular")).not.toBeNull();
     });
 
     it("should have the text 'Split Button'", () => {
@@ -85,21 +85,23 @@ describe("SplitButtonComponent", () => {
         expect(buttons[0].textContent).toBe("Split Button");
     });
 
-    it("should show the menu when the menu icon is clicked", () => {
+    it("should show the menu when the menu icon is clicked", fakeAsync(() => {
         const buttons = hostFixture.debugElement
             .queryAll(By.css("button"))
             .map(button => button.nativeElement) as HTMLButtonElement[];
         expect(buttons.length).toBe(2);
         buttons[1].click();
         appRef.tick();
-        const menu = document.querySelector("ul.mona-contextmenu-list");
+        tick();
+
+        const menu = document.querySelector("mona-contextmenu-content ul");
         expect(menu).not.toBeNull();
         const menuItems = menu?.querySelectorAll("li.mona-contextmenu-list-item");
         expect(menuItems?.length).toBe(3);
         expect(menuItems?.item(0)?.textContent).toBe("Item 1");
         expect(menuItems?.item(1)?.textContent).toBe("Item 2");
         expect(menuItems?.item(2)?.textContent).toBe("Item 3");
-    });
+    }));
 
     it("should show the sub menu when the third menu item is hovered", fakeAsync(() => {
         const buttons = hostFixture.debugElement
@@ -108,12 +110,12 @@ describe("SplitButtonComponent", () => {
         expect(buttons.length).toBe(2);
         buttons[1].click();
         appRef.tick();
-        const menu = document.querySelector("ul.mona-contextmenu-list");
+        const menu = document.querySelector("mona-contextmenu-content ul");
         expect(menu).not.toBeNull();
         const thirdMenuItem = menu?.querySelectorAll("li.mona-contextmenu-list-item")[2] as HTMLLIElement;
         thirdMenuItem.dispatchEvent(new MouseEvent("mouseenter"));
         appRef.tick();
-        const subMenu = document.querySelectorAll("ul.mona-contextmenu-list")[1];
+        const subMenu = document.querySelectorAll("mona-contextmenu-content ul")[1];
         expect(subMenu).not.toBeNull();
 
         const subMenuItems = subMenu?.querySelectorAll("li.mona-contextmenu-list-item");
@@ -130,7 +132,7 @@ describe("SplitButtonComponent", () => {
         expect(buttons.length).toBe(2);
         buttons[1].click();
         appRef.tick();
-        const menu = document.querySelector("ul.mona-contextmenu-list");
+        const menu = document.querySelector("mona-contextmenu-content ul");
         expect(menu).not.toBeNull();
         const menuItems = menu?.querySelectorAll("li.mona-contextmenu-list-item");
         expect(menuItems?.length).toBe(3);

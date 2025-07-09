@@ -1,4 +1,5 @@
 import { TestBed } from "@angular/core/testing";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { TreeService } from "../../../common/tree/services/tree.service";
 import { DropDownTreeExpandableDirective } from "./drop-down-tree-expandable.directive";
 
@@ -7,7 +8,7 @@ describe("DropDownTreeExpandableDirective", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [TreeService]
+            providers: [TreeService, provideAnimations()]
         });
         directive = TestBed.runInInjectionContext(() => new DropDownTreeExpandableDirective());
     });

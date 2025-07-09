@@ -1,4 +1,5 @@
 import { TestBed } from "@angular/core/testing";
+import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { ContextMenuService } from "./context-menu.service";
 
@@ -6,7 +7,9 @@ describe("ContextMenuService", () => {
     let service: ContextMenuService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        TestBed.configureTestingModule({
+            providers: [provideAnimations()]
+        });
         service = TestBed.inject(ContextMenuService);
     });
 

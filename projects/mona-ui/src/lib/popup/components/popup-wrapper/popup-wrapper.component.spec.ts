@@ -1,5 +1,6 @@
 import { Component, TemplateRef, viewChild, ViewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
 import { PopupSettings } from "../../models/PopupSettings";
 
@@ -32,7 +33,7 @@ describe("PopupWrapperComponent", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PopupWrapperComponent],
-            providers: [POPUP_TOKEN]
+            providers: [POPUP_TOKEN, provideAnimations()]
         });
         fixture = TestBed.createComponent(PopupWrapperComponent);
         component = fixture.componentInstance;

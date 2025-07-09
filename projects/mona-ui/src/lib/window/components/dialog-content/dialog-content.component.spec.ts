@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { DialogContentComponent } from "./dialog-content.component";
 
@@ -8,7 +9,8 @@ describe("DialogContentComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [DialogContentComponent]
+            imports: [DialogContentComponent],
+            providers: [provideAnimations()]
         });
         fixture = TestBed.createComponent(DialogContentComponent);
         component = fixture.componentInstance;
