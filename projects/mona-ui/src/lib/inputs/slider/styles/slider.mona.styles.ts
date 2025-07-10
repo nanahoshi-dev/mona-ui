@@ -117,5 +117,16 @@ export const sliderHandleVariants = cva(
         data-[orientation="vertical"]:translate-y-[50%]
         data-[orientation="vertical"]:transition-[bottom]
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-lg",
+                medium: "rounded-md",
+                none: "rounded-none",
+                small: "rounded-sm"
+            }
+        }
+    }
 );

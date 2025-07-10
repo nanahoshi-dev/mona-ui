@@ -33,7 +33,8 @@ import {
     sliderTickListThemeVariants,
     sliderTickThemeVariants,
     sliderTrackThemeVariants,
-    SliderVariantInputs
+    SliderVariantInputs,
+    SliderVariantProps
 } from "mona-ui/inputs/slider/styles/slider.styles";
 import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
 import { Orientation } from "mona-ui/models/Orientation";
@@ -76,7 +77,8 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     protected readonly dragging = signal(false);
     protected readonly handleClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return sliderHandleThemeVariants(theme)();
+        const rounded = this.rounded();
+        return sliderHandleThemeVariants(theme)({ rounded });
     });
     protected readonly handlePosition = signal(0);
     protected readonly handleValue = signal(0);
@@ -205,6 +207,16 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly orientation = input<Orientation>("horizontal");
 
     /**
+     * @description Sets the border radius of the slider handle.
+     */
+    public readonly rounded = input<SliderVariantProps["rounded"]>("full");
+
+    /**
+     * @description Sets the background color of the selection area of the slider.
+     */
+    public readonly selectionBackground = input<string | Partial<CSSStyleDeclaration> | null>(null);
+
+    /**
      * @description Sets whether to show labels on the slider.
      * Only applicable if `showTicks` is `true`.
      */
@@ -228,6 +240,11 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly step = input(1, {
         transform: (value: number) => (value <= 0 ? 1 : value)
     });
+
+    /**
+     * @description Sets the background color of the slider track.
+     */
+    public readonly trackBackground = input<string | Partial<CSSStyleDeclaration> | null>(null);
 
     public ngAfterViewInit(): void {
         this.setSubscription();

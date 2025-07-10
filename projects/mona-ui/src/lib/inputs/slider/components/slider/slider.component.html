@@ -1,10 +1,11 @@
 <div [class]="trackClasses()"
-     [attr.data-orientation]="orientation()">
+     [attr.data-orientation]="orientation()" [style.background]="trackBackground()">
     <div [class]="selectionClasses()"
          [attr.data-orientation]="orientation()"
          [attr.data-dragging]="dragging()"
          [style.width.%]="orientation()==='horizontal' ? handlePosition():undefined"
          [style.height.%]="orientation()==='vertical' ? handlePosition():undefined"
+         [style.background]="selectionBackground()"
     ></div>
 </div>
 @if (showTicks()) {

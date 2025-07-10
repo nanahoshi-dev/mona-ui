@@ -90,6 +90,15 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 value: ["horizontal", "vertical"],
                 defaultValue: "horizontal"
             },
+            rounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "full"
+            },
+            selectionBackground: {
+                type: "color",
+                value: "var(--color-primary)"
+            },
             showLabels: {
                 type: "boolean",
                 value: true
@@ -105,6 +114,10 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             step: {
                 type: "number",
                 value: 4
+            },
+            trackBackground: {
+                type: "color",
+                value: "var(--color-background)"
             }
         },
         outputs: {},
@@ -128,10 +141,13 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             [max]="max()"
             [min]="min()"
             [orientation]="orientation()"
+            [rounded]="rounded()"
+            [selectionBackground]="selectionBackground()"
             [showLabels]="showLabels()"
             [showTicks]="showTicks()"
             [smallTickStep]="smallTickStep()"
             [step]="step()"
+            [trackBackground]="trackBackground()"
             [ngModel]="value()"
             (ngModelChange)="onValueChange($event)"
             style="width: 400px;">
@@ -159,10 +175,13 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly max = input(23);
     public readonly min = input(0);
     public readonly orientation = input<ReturnType<SliderComponent["orientation"]>>("horizontal");
+    public readonly rounded = input<ReturnType<SliderComponent["rounded"]>>("full");
+    public readonly selectionBackground = input<ReturnType<SliderComponent["selectionBackground"]>>("transparent");
     public readonly showLabels = input(false);
     public readonly showTicks = input(false);
     public readonly smallTickStep = input(1);
     public readonly step = input(1);
+    public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>("transparent");
 
     public onValueChange(value: number): void {
         console.log("Slider value changed:", value);

@@ -3262,6 +3262,18 @@
         "kind": "input"
       },
       {
+        "name": "rounded",
+        "type": "SliderVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the slider handle.",
+        "kind": "input"
+      },
+      {
+        "name": "selectionBackground",
+        "type": "string | Partial<CSSStyleDeclaration> | null",
+        "description": "Sets the background color of the selection area of the slider.",
+        "kind": "input"
+      },
+      {
         "name": "showLabels",
         "type": "boolean",
         "description": "Sets whether to show labels on the slider.\nOnly applicable if `showTicks` is `true`.",
@@ -3283,6 +3295,12 @@
         "name": "step",
         "type": "number",
         "description": "Sets the step size for the slider.",
+        "kind": "input"
+      },
+      {
+        "name": "trackBackground",
+        "type": "string | Partial<CSSStyleDeclaration> | null",
+        "description": "Sets the background color of the slider track.",
         "kind": "input"
       }
     ]
