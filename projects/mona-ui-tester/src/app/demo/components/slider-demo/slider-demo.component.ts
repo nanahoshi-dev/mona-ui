@@ -2,8 +2,8 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
-import { SliderComponent, SliderTickValueTemplateDirective } from "mona-ui";
+import { faMoon, faStar, faSun } from "@fortawesome/free-solid-svg-icons";
+import { SliderComponent, SliderHandleTemplateDirective, SliderTickValueTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -17,6 +17,16 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> {
     readonly #injector = createFeatureInjector({
+        handleTemplate: {
+            code: `
+                <ng-template monaSliderHandleTemplate let-value>
+                    <fa-icon [icon]="starIcon" style="color: darkgoldenrod;"></fa-icon>
+                </ng-template>
+            `,
+            name: "Handle Template",
+            description: "This template allows you to customize the handle displayed on the slider.",
+            active: false
+        },
         labelTemplate: {
             code: `
                 <ng-template monaSliderTickValueTemplate let-value>
@@ -130,7 +140,13 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
 }
 
 @Component({
-    imports: [SliderComponent, FormsModule, SliderTickValueTemplateDirective, FaIconComponent],
+    imports: [
+        SliderComponent,
+        FormsModule,
+        SliderTickValueTemplateDirective,
+        FaIconComponent,
+        SliderHandleTemplateDirective
+    ],
     template: `
         @let featureData = features();
         <mona-slider
@@ -160,12 +176,18 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                     }
                 </ng-template>
             }
+            @if (featureData && featureData["handleTemplate"].active) {
+                <ng-template monaSliderHandleTemplate let-value>
+                    <fa-icon [icon]="starIcon" style="color: darkgoldenrod;" [title]="value"></fa-icon>
+                </ng-template>
+            }
         </mona-slider>
     `
 })
 export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly moonIcon = faMoon;
+    protected readonly starIcon = faStar;
     protected readonly sunIcon = faSun;
     protected readonly value = signal(0);
     public readonly disabled = input(false);

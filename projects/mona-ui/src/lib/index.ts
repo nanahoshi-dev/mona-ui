@@ -118,6 +118,7 @@ export * from "./inputs/range-slider/directives/range-slider-tick-value-template
 export * from "./inputs/range-slider/components/range-slider/range-slider.component";
 
 export * from "./inputs/slider/directives/slider-tick-value-template.directive";
+export * from "./inputs/slider/directives/slider-handle-template.directive";
 export * from "./inputs/slider/components/slider/slider.component";
 
 export * from "./inputs/switch/directives/switch-handle-content-template.directive";

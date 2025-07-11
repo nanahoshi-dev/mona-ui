@@ -102,7 +102,7 @@ export const sliderTickLabelVariants = cva(
 
 export const sliderHandleVariants = cva(
     `
-        absolute z-2
+        absolute z-2 flex items-center justify-center
         w-4.25 h-4.25
         cursor-pointer
         outline-none

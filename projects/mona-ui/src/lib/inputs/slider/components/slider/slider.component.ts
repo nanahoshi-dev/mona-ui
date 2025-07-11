@@ -19,6 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { SliderHandleTemplateDirective } from "mona-ui/inputs/slider/directives/slider-handle-template.directive";
 import { SliderTickDirective } from "mona-ui/inputs/slider/directives/slider-tick.directive";
 import { LabelStyleArgs } from "mona-ui/inputs/slider/models/LabelStyleArgs";
 import { TickStyleArgs } from "mona-ui/inputs/slider/models/TickStyleArgs";
@@ -81,6 +82,14 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         return sliderHandleThemeVariants(theme)({ rounded });
     });
     protected readonly handlePosition = signal(0);
+    protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
+    protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
+        const template = this.handleTemplate();
+        if (!template) {
+            return {};
+        }
+        return { background: "transparent", border: "none", boxShadow: "none" };
+    });
     protected readonly handleValue = signal(0);
     protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
         const labelPosition = this.labelPosition();

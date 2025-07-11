@@ -45,7 +45,12 @@
      [attr.data-orientation]="orientation()"
      [attr.data-dragging]="dragging()"
      [ngClass]="{'mona-slider-dragging': dragging()}"
+     [style]="handleTemplateStyles()"
      [style.left.%]="orientation()==='horizontal' ? handlePosition() : undefined"
      [style.bottom.%]="orientation()==='vertical' ? handlePosition() : undefined"
      [attr.tabindex]="disabled()?-1:0"
-     #sliderHandle></div>
+     #sliderHandle>
+    @if (handleTemplate()) {
+        <ng-container *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValue()}"></ng-container>
+    }
+</div>
