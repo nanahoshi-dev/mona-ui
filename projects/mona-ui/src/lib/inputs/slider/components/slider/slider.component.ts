@@ -132,7 +132,12 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         return labels;
     });
     protected readonly primaryHandleFocused = signal(false);
-    protected readonly primaryHandlePosition = computed(() => this.rangeSelection().left);
+    protected readonly primaryHandlePosition = computed(() => {
+        if (this.ranged()) {
+            return this.rangeSelection().left;
+        }
+        return this.handlePositions()[0];
+    });
     protected readonly primaryHandleStyle = computed(() => {
         const baseStyle = this.handleTemplateStyles();
         if (this.ranged() && this.handlesOverlap()) {

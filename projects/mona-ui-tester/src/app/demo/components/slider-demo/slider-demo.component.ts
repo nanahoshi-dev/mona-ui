@@ -103,7 +103,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             },
             ranged: {
                 type: "boolean",
-                value: true
+                value: false
             },
             rounded: {
                 type: "dropdown",
@@ -195,7 +195,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     protected readonly moonIcon = faMoon;
     protected readonly starIcon = faStar;
     protected readonly sunIcon = faSun;
-    protected readonly value = signal<number | [number, number]>([4, 4]);
+    protected readonly value = signal<number | [number, number]>(4);
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);

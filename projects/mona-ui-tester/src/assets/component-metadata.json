@@ -1278,7 +1278,7 @@
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\r\n\r\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Sets the toggleable state of the button.\n\nIf set to `true`, the button will toggle its selected state on click.",
         "kind": "input"
       },
       {
@@ -3149,72 +3149,6 @@
       }
     ]
   },
-  "RangeSliderComponent": {
-    "name": "RangeSliderComponent",
-    "selector": "\"mona-range-slider\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "labelPosition",
-        "type": "SliderLabelPosition",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "labelStep",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "orientation",
-        "type": "Orientation",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showLabels",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showTicks",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "step",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "tickStep",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "SliderComponent": {
     "name": "SliderComponent",
     "selector": "\"mona-slider\"",
@@ -3259,6 +3193,12 @@
         "name": "orientation",
         "type": "Orientation",
         "description": "Sets the orientation of the slider.",
+        "kind": "input"
+      },
+      {
+        "name": "ranged",
+        "type": "boolean",
+        "description": "Enables ranged mode with two handles for min/max value selection.",
         "kind": "input"
       },
       {
