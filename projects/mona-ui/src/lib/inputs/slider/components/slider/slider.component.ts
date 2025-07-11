@@ -70,6 +70,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     #propagateChange: Action<number | [number, number]> | null = null;
+    #propagateTouched: Action | null = null;
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
     protected readonly baseClasses = computed(() => {
@@ -93,7 +94,9 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     });
     protected readonly handleValues = signal<[number, number]>([0, 0]);
     protected readonly handlesOverlap = computed(() => {
-        if (!this.ranged()) return false;
+        if (!this.ranged()) {
+            return false;
+        }
         const values = this.handleValues();
         return values[0] === values[1];
     });
@@ -140,22 +143,14 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     protected readonly rangeSelection = computed(() => {
         const handlePositions = this.handlePositions();
         if (this.ranged()) {
-            // For ranged mode, use fixed left and right positions instead of position + size
-            // This prevents the immediate jump when one handle moves
             return {
                 left: handlePositions[0],
-                right: handlePositions[1],
-                // Keep legacy properties for backward compatibility
-                position: Math.min(handlePositions[0], handlePositions[1]),
-                size: Math.abs(handlePositions[1] - handlePositions[0])
+                right: handlePositions[1]
             };
         }
-        // For non-ranged mode, position is always 0 and size goes from 0 to handle position
         return {
             left: 0,
-            right: handlePositions[0],
-            position: 0,
-            size: handlePositions[0]
+            right: handlePositions[0]
         };
     });
     protected readonly renderTicks = computed(() => {
@@ -319,7 +314,9 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         this.#propagateChange = fn;
     }
 
-    public registerOnTouched(fn: any): void {}
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
 
     public writeValue(obj: number | [number, number]): void {
         if (obj != null) {
@@ -501,6 +498,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             .subscribe(() => {
                 this.#zone.run(() => {
                     this.primaryHandleFocused.set(false);
+                    this.#propagateTouched?.();
                 });
             });
 
@@ -520,6 +518,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
                 .subscribe(() => {
                     this.#zone.run(() => {
                         this.secondaryHandleFocused.set(false);
+                        this.#propagateTouched?.();
                     });
                 });
         }
@@ -633,25 +632,20 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         const currentMaxValue = currentValues[1];
 
         if (isSecondary) {
-            // Update secondary handle (max value)
             let newMaxValue = value;
             let newMinValue = currentMinValue;
 
-            // Constraint: secondary handle cannot be less than primary
             if (newMaxValue < currentMinValue) {
                 newMaxValue = currentMinValue;
             }
 
             if (newMaxValue !== currentMaxValue) {
                 const maxPosition = valueToPosition(newMaxValue, this.min(), this.max());
-
                 const currentPositions = this.handlePositions();
+
                 this.handleValues.set([newMinValue, newMaxValue]);
                 this.handlePositions.set([currentPositions[0], maxPosition]);
-
-                this.#zone.run(() => {
-                    this.#propagateChange?.([newMinValue, newMaxValue]);
-                });
+                this.#zone.run(() => this.#propagateChange?.([newMinValue, newMaxValue]));
             }
         } else {
             let newMinValue = value;
@@ -673,10 +667,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
 
                 this.handleValues.set([newMinValue, newMaxValue]);
                 this.handlePositions.set([minPosition, maxPosition]);
-
-                this.#zone.run(() => {
-                    this.#propagateChange?.([newMinValue, newMaxValue]);
-                });
+                this.#zone.run(() => this.#propagateChange?.([newMinValue, newMaxValue]));
             }
         }
     }
