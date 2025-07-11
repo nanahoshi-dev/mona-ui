@@ -52,6 +52,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 [max]="max()"
                 [min]="min()"
                 [orientation]="orientation()"
+                [ranged]="ranged()"
                 [showLabels]="showLabels()"
                 [showTicks]="showTicks()"
                 [smallTickStep]="smallTickStep()"
@@ -99,6 +100,10 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 type: "dropdown",
                 value: ["horizontal", "vertical"],
                 defaultValue: "horizontal"
+            },
+            ranged: {
+                type: "boolean",
+                value: true
             },
             rounded: {
                 type: "dropdown",
@@ -157,6 +162,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             [max]="max()"
             [min]="min()"
             [orientation]="orientation()"
+            [ranged]="ranged()"
             [rounded]="rounded()"
             [selectionBackground]="selectionBackground()"
             [showLabels]="showLabels()"
@@ -189,7 +195,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     protected readonly moonIcon = faMoon;
     protected readonly starIcon = faStar;
     protected readonly sunIcon = faSun;
-    protected readonly value = signal(0);
+    protected readonly value = signal<number | [number, number]>([4, 4]);
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);
@@ -197,6 +203,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly max = input(23);
     public readonly min = input(0);
     public readonly orientation = input<ReturnType<SliderComponent["orientation"]>>("horizontal");
+    public readonly ranged = input(false);
     public readonly rounded = input<ReturnType<SliderComponent["rounded"]>>("full");
     public readonly selectionBackground = input<ReturnType<SliderComponent["selectionBackground"]>>("transparent");
     public readonly showLabels = input(false);
@@ -205,7 +212,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly step = input(1);
     public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>("transparent");
 
-    public onValueChange(value: number): void {
+    public onValueChange(value: number | [number, number]): void {
         console.log("Slider value changed:", value);
         this.value.set(value);
     }

@@ -5,7 +5,7 @@
 /** Buttons */
 export * from "./buttons/button/directives/button.directive";
 export * from "./buttons/button-group/components/button-group/button-group.component";
-export * from "mona-ui/buttons/button-group/components/button-group-item/button-group-item.component";
+export * from "./buttons/button-group/components/button-group-item/button-group-item.component";
 export * from "./buttons/chip/component/chip.component";
 export * from "./buttons/drop-down-button/components/drop-down-button.component";
 export * from "./buttons/split-button/directives/split-button-text-template.directive";
@@ -113,9 +113,6 @@ export * from "./inputs/numeric-text-box/components/numeric-text-box/numeric-tex
 
 export * from "./inputs/radio-button/directives/radio-button.directive";
 export * from "./inputs/radio-button/components/radio-button/radio-button.component";
-
-export * from "./inputs/range-slider/directives/range-slider-tick-value-template.directive";
-export * from "./inputs/range-slider/components/range-slider/range-slider.component";
 
 export * from "./inputs/slider/directives/slider-tick-value-template.directive";
 export * from "./inputs/slider/directives/slider-handle-template.directive";

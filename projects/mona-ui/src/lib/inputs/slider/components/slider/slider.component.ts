@@ -1,6 +1,6 @@
 import { NgClass, NgTemplateOutlet } from "@angular/common";
 import {
-    AfterViewInit,
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -40,7 +40,7 @@ import {
 import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
 import { Orientation } from "mona-ui/models/Orientation";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
-import { filter, fromEvent, map, switchMap, takeUntil, tap } from "rxjs";
+import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
 import { Action } from "../../../../utils/Action";
 import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
 import { SliderTick } from "../../../models/SliderTick";
@@ -62,15 +62,16 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
         "[attr.data-disabled]": "disabled()",
-        "[attr.data-orientation]": "orientation()"
+        "[attr.data-orientation]": "orientation()",
+        "(focus)": "onFocus()"
     }
 })
-export class SliderComponent implements AfterViewInit, ControlValueAccessor, SliderVariantInputs {
+export class SliderComponent implements ControlValueAccessor, SliderVariantInputs {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
+    #propagateChange: Action<number | [number, number]> | null = null;
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
-    #propagateChange: Action<number> | null = null;
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderBaseThemeVariants(theme)();
@@ -81,7 +82,7 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         const rounded = this.rounded();
         return sliderHandleThemeVariants(theme)({ rounded });
     });
-    protected readonly handlePosition = signal(0);
+    protected readonly handlePositions = signal<[number, number]>([0, 0]);
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
         const template = this.handleTemplate();
@@ -90,7 +91,12 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         }
         return { background: "transparent", border: "none", boxShadow: "none" };
     });
-    protected readonly handleValue = signal(0);
+    protected readonly handleValues = signal<[number, number]>([0, 0]);
+    protected readonly handlesOverlap = computed(() => {
+        if (!this.ranged()) return false;
+        const values = this.handleValues();
+        return values[0] === values[1];
+    });
     protected readonly labelStyleArgs = computed<LabelStyleArgs>(() => {
         const labelPosition = this.labelPosition();
         const max = this.max();
@@ -122,6 +128,36 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         }
         return labels;
     });
+    protected readonly primaryHandleFocused = signal(false);
+    protected readonly primaryHandlePosition = computed(() => this.rangeSelection().left);
+    protected readonly primaryHandleStyle = computed(() => {
+        const baseStyle = this.handleTemplateStyles();
+        if (this.ranged() && this.handlesOverlap()) {
+            return { ...baseStyle, zIndex: "1" };
+        }
+        return baseStyle;
+    });
+    protected readonly rangeSelection = computed(() => {
+        const handlePositions = this.handlePositions();
+        if (this.ranged()) {
+            // For ranged mode, use fixed left and right positions instead of position + size
+            // This prevents the immediate jump when one handle moves
+            return {
+                left: handlePositions[0],
+                right: handlePositions[1],
+                // Keep legacy properties for backward compatibility
+                position: Math.min(handlePositions[0], handlePositions[1]),
+                size: Math.abs(handlePositions[1] - handlePositions[0])
+            };
+        }
+        // For non-ranged mode, position is always 0 and size goes from 0 to handle position
+        return {
+            left: 0,
+            right: handlePositions[0],
+            position: 0,
+            size: handlePositions[0]
+        };
+    });
     protected readonly renderTicks = computed(() => {
         const ticks = this.ticks();
         if (this.orientation() === "vertical") {
@@ -129,10 +165,23 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         }
         return ticks;
     });
+    protected readonly secondaryHandleFocused = signal(false);
+    protected readonly secondaryHandlePosition = computed(() => this.rangeSelection().right);
+    protected readonly secondaryHandleStyle = computed(() => {
+        const baseStyle = this.handleTemplateStyles();
+        if (this.ranged() && this.handlesOverlap()) {
+            return { ...baseStyle, zIndex: "2" };
+        }
+        return baseStyle;
+    });
+    protected readonly secondarySliderHandle: Signal<ElementRef<HTMLDivElement> | undefined> =
+        viewChild("secondarySliderHandle");
     protected readonly selectionClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderSelectionThemeVariants(theme)();
     });
+    protected readonly selectionLeft = computed(() => this.rangeSelection().left);
+    protected readonly selectionRight = computed(() => this.rangeSelection().right);
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
     protected readonly tickClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -216,6 +265,11 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
     public readonly orientation = input<Orientation>("horizontal");
 
     /**
+     * @description Enables ranged mode with two handles for min/max value selection.
+     */
+    public readonly ranged = input(false);
+
+    /**
      * @description Sets the border radius of the slider handle.
      */
     public readonly rounded = input<SliderVariantProps["rounded"]>("full");
@@ -255,8 +309,10 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
      */
     public readonly trackBackground = input<string | Partial<CSSStyleDeclaration> | null>(null);
 
-    public ngAfterViewInit(): void {
-        this.setSubscription();
+    public constructor() {
+        afterNextRender({
+            read: () => this.setSubscription()
+        });
     }
 
     public registerOnChange(fn: any): void {
@@ -265,13 +321,88 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
 
     public registerOnTouched(fn: any): void {}
 
-    public writeValue(obj: number): void {
+    public writeValue(obj: number | [number, number]): void {
         if (obj != null) {
-            const value = Math.max(this.min(), Math.min(obj, this.max()));
-            const position = valueToPosition(value, this.min(), this.max());
-            this.handleValue.set(value);
-            this.handlePosition.set(position);
+            if (this.ranged()) {
+                if (Array.isArray(obj) && obj.length === 2) {
+                    const [minVal, maxVal] = obj;
+                    const clampedMin = Math.max(this.min(), Math.min(minVal, this.max()));
+                    const clampedMax = Math.max(this.min(), Math.min(maxVal, this.max()));
+                    const sortedMin = Math.min(clampedMin, clampedMax);
+                    const sortedMax = Math.max(clampedMin, clampedMax);
+                    const minPosition = valueToPosition(sortedMin, this.min(), this.max());
+                    const maxPosition = valueToPosition(sortedMax, this.min(), this.max());
+
+                    this.handleValues.set([sortedMin, sortedMax]);
+                    this.handlePositions.set([minPosition, maxPosition]);
+                }
+            } else {
+                const value = Math.max(this.min(), Math.min(obj as number, this.max()));
+                const position = valueToPosition(value, this.min(), this.max());
+                // In non-ranged mode, only use the first position, second is unused
+                this.handleValues.set([value, value]);
+                this.handlePositions.set([position, position]);
+            }
         }
+    }
+
+    protected onFocus(): void {
+        if (!this.disabled()) {
+            this.sliderHandle().nativeElement.focus();
+        }
+    }
+
+    private findClosestTickElement(event: MouseEvent): HTMLSpanElement {
+        const elements = this.tickElements().map(tick => tick.host.nativeElement);
+        let maxDistance = Number.MAX_VALUE;
+        let index = 0;
+        for (const [ex, element] of elements.entries()) {
+            const rect = element.getBoundingClientRect();
+            const distance = Math.sqrt(Math.pow(rect.left - event.clientX, 2) + Math.pow(rect.top - event.clientY, 2));
+            if (distance < maxDistance) {
+                maxDistance = distance;
+                index = ex;
+            }
+        }
+        return elements[index] as HTMLSpanElement;
+    }
+
+    private getClosestHandle(event: MouseEvent): boolean {
+        if (!this.ranged() || !this.secondarySliderHandle()) {
+            return false;
+        }
+
+        const currentValues = this.handleValues();
+        if (currentValues[0] === currentValues[1]) {
+            const containerRect = this.#hostElementRef.nativeElement.getBoundingClientRect();
+            let normalizedClickPos: number;
+
+            if (this.orientation() === "horizontal") {
+                const clickPos = event.clientX - containerRect.left;
+                normalizedClickPos = (clickPos / containerRect.width) * 100;
+            } else {
+                const clickPos = event.clientY - containerRect.top;
+                normalizedClickPos = 100 - (clickPos / containerRect.height) * 100;
+            }
+
+            const clickValue = this.getValueFromPosition(normalizedClickPos);
+            // If clicking to a greater value than current, use secondary handle
+            // If clicking to a lesser value, use primary handle
+            return clickValue > currentValues[0];
+        }
+
+        const primaryRect = this.sliderHandle().nativeElement.getBoundingClientRect();
+        const secondaryRect = this.secondarySliderHandle()!.nativeElement.getBoundingClientRect();
+        const primaryDistance = Math.sqrt(
+            Math.pow(primaryRect.left + primaryRect.width / 2 - event.clientX, 2) +
+                Math.pow(primaryRect.top + primaryRect.height / 2 - event.clientY, 2)
+        );
+        const secondaryDistance = Math.sqrt(
+            Math.pow(secondaryRect.left + secondaryRect.width / 2 - event.clientX, 2) +
+                Math.pow(secondaryRect.top + secondaryRect.height / 2 - event.clientY, 2)
+        );
+
+        return secondaryDistance < primaryDistance;
     }
 
     private getValueFromPosition(position: number): number {
@@ -292,18 +423,23 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         return Math.max(min, Math.min(max, value));
     }
 
-    private handleHandleMove(event: MouseEvent, orientation: Orientation): void {
+    private handleHandleMove(event: MouseEvent, orientation: Orientation, isSecondary: boolean = false): void {
         if (this.showTicks()) {
             const tick = this.findClosestTickElement(event);
             const valueStr = tick.getAttribute("data-value");
             const value = valueStr ? Number(valueStr) : 0;
             const position = valueToPosition(value, this.min(), this.max());
-            if (position !== this.handlePosition()) {
-                this.#zone.run(() => {
-                    this.handlePosition.set(position);
-                    this.handleValue.set(value);
-                    this.#propagateChange?.(value);
-                });
+
+            if (this.ranged()) {
+                this.updateRangedValue(value, isSecondary);
+            } else {
+                if (position !== this.handlePositions()[0]) {
+                    this.#zone.run(() => {
+                        this.handlePositions.set([position, position]);
+                        this.handleValues.set([value, value]);
+                        this.#propagateChange?.(value);
+                    });
+                }
             }
             return;
         }
@@ -324,12 +460,16 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
         const value = this.getValueFromPosition(normalizedHandlePos);
         const snappedPosition = valueToPosition(value, this.min(), this.max());
 
-        if (value !== this.handleValue()) {
-            this.handlePosition.set(snappedPosition);
-            this.#zone.run(() => {
-                this.handleValue.set(value);
-                this.#propagateChange?.(value);
-            });
+        if (this.ranged()) {
+            this.updateRangedValue(value, isSecondary);
+        } else {
+            if (value !== this.handleValues()[0]) {
+                this.#zone.run(() => {
+                    this.handlePositions.set([snappedPosition, snappedPosition]);
+                    this.handleValues.set([value, value]);
+                    this.#propagateChange?.(value);
+                });
+            }
         }
     }
 
@@ -341,8 +481,48 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
                 filter(() => !this.disabled())
             )
             .subscribe((event: MouseEvent) => {
-                this.handleHandleMove(event, this.orientation());
+                const isSecondary = this.getClosestHandle(event);
+                this.handleHandleMove(event, this.orientation(), isSecondary);
             });
+    }
+
+    private setFocusSubscription(): void {
+        fromEvent(this.sliderHandle().nativeElement, "focus")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                this.#zone.run(() => {
+                    this.primaryHandleFocused.set(true);
+                    this.secondaryHandleFocused.set(false);
+                });
+            });
+
+        fromEvent(this.sliderHandle().nativeElement, "blur")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                this.#zone.run(() => {
+                    this.primaryHandleFocused.set(false);
+                });
+            });
+
+        const secondaryHandle = this.secondarySliderHandle();
+        if (this.ranged() && secondaryHandle) {
+            fromEvent(secondaryHandle.nativeElement, "focus")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => {
+                    this.#zone.run(() => {
+                        this.secondaryHandleFocused.set(true);
+                        this.primaryHandleFocused.set(false);
+                    });
+                });
+
+            fromEvent(secondaryHandle.nativeElement, "blur")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => {
+                    this.#zone.run(() => {
+                        this.secondaryHandleFocused.set(false);
+                    });
+                });
+        }
     }
 
     private setKeydownSubscription(): void {
@@ -354,42 +534,88 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
                 tap(event => {
                     event.preventDefault();
                     event.stopPropagation();
-                }),
-                map((event: KeyboardEvent) => {
-                    const currentValue = this.handleValue();
-                    const stepDirection = event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1;
-                    const stepAmount = this.step() * stepDirection;
-                    const newValue = currentValue + stepAmount;
-                    return Math.max(this.min(), Math.min(this.max(), newValue));
                 })
             )
-            .subscribe(newValue => {
-                this.#zone.run(() => {
-                    this.handleValue.set(newValue);
-                    this.handlePosition.set(valueToPosition(newValue, this.min(), this.max()));
-                    this.#propagateChange?.(newValue);
-                });
+            .subscribe(event => {
+                const stepDirection = event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1;
+                const stepAmount = this.step() * stepDirection;
+
+                if (this.ranged()) {
+                    const currentValues = this.handleValues();
+                    const currentValue = currentValues[0];
+                    const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
+                    this.updateRangedValue(newValue, false);
+                } else {
+                    const currentValue = this.handleValues()[0];
+                    const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
+                    this.#zone.run(() => {
+                        this.handleValues.set([newValue, newValue]);
+                        this.handlePositions.set([
+                            valueToPosition(newValue, this.min(), this.max()),
+                            valueToPosition(newValue, this.min(), this.max())
+                        ]);
+                        this.#propagateChange?.(newValue);
+                    });
+                }
             });
+
+        const secondaryHandle = this.secondarySliderHandle();
+        if (this.ranged() && secondaryHandle) {
+            fromEvent<KeyboardEvent>(secondaryHandle.nativeElement, "keydown")
+                .pipe(
+                    takeUntilDestroyed(this.#destroyRef),
+                    filter(() => !this.disabled()),
+                    filter(event => ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)),
+                    tap(event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    })
+                )
+                .subscribe(event => {
+                    const stepDirection = event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1;
+                    const stepAmount = this.step() * stepDirection;
+                    const currentValues = this.handleValues();
+                    const currentValue = currentValues[1];
+                    const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
+                    this.updateRangedValue(newValue, true);
+                });
+        }
     }
 
     private setMouseMoveSubscription(): void {
-        const mouseDown$ = fromEvent<MouseEvent>(this.sliderHandle().nativeElement, "mousedown");
         const mouseMove$ = fromEvent<MouseEvent>(document, "mousemove");
         const mouseUp$ = fromEvent<MouseEvent>(document, "mouseup");
 
-        mouseDown$
+        fromEvent<MouseEvent>(this.sliderHandle().nativeElement, "mousedown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 filter(() => !this.disabled()),
                 tap(() => this.dragging.set(true)),
                 switchMap(() =>
                     mouseMove$.pipe(
-                        tap((event: MouseEvent) => this.handleHandleMove(event, this.orientation())), // Action is here
+                        tap((event: MouseEvent) => this.handleHandleMove(event, this.orientation(), false)),
                         takeUntil(mouseUp$.pipe(tap(() => this.#zone.run(() => this.dragging.set(false)))))
                     )
                 )
             )
             .subscribe();
+
+        const secondaryHandle = this.secondarySliderHandle();
+        if (this.ranged() && secondaryHandle) {
+            fromEvent<MouseEvent>(secondaryHandle.nativeElement, "mousedown")
+                .pipe(
+                    takeUntilDestroyed(this.#destroyRef),
+                    filter(() => !this.disabled()),
+                    tap(() => this.dragging.set(true)),
+                    switchMap(() =>
+                        mouseMove$.pipe(
+                            tap((event: MouseEvent) => this.handleHandleMove(event, this.orientation(), true)),
+                            takeUntil(mouseUp$.pipe(tap(() => this.#zone.run(() => this.dragging.set(false)))))
+                        )
+                    )
+                )
+                .subscribe();
+        }
     }
 
     private setSubscription(): void {
@@ -397,21 +623,61 @@ export class SliderComponent implements AfterViewInit, ControlValueAccessor, Sli
             this.setClickSubscription();
             this.setKeydownSubscription();
             this.setMouseMoveSubscription();
+            this.setFocusSubscription();
         });
     }
 
-    private findClosestTickElement(event: MouseEvent): HTMLSpanElement {
-        const elements = this.tickElements().map(tick => tick.host.nativeElement);
-        let maxDistance = Number.MAX_VALUE;
-        let index = 0;
-        for (const [ex, element] of elements.entries()) {
-            const rect = element.getBoundingClientRect();
-            const distance = Math.sqrt(Math.pow(rect.left - event.clientX, 2) + Math.pow(rect.top - event.clientY, 2));
-            if (distance < maxDistance) {
-                maxDistance = distance;
-                index = ex;
+    private updateRangedValue(value: number, isSecondary: boolean): void {
+        const currentValues = this.handleValues();
+        const currentMinValue = currentValues[0];
+        const currentMaxValue = currentValues[1];
+
+        if (isSecondary) {
+            // Update secondary handle (max value)
+            let newMaxValue = value;
+            let newMinValue = currentMinValue;
+
+            // Constraint: secondary handle cannot be less than primary
+            if (newMaxValue < currentMinValue) {
+                newMaxValue = currentMinValue;
+            }
+
+            if (newMaxValue !== currentMaxValue) {
+                const maxPosition = valueToPosition(newMaxValue, this.min(), this.max());
+
+                const currentPositions = this.handlePositions();
+                this.handleValues.set([newMinValue, newMaxValue]);
+                this.handlePositions.set([currentPositions[0], maxPosition]);
+
+                this.#zone.run(() => {
+                    this.#propagateChange?.([newMinValue, newMaxValue]);
+                });
+            }
+        } else {
+            let newMinValue = value;
+            let newMaxValue = currentMaxValue;
+
+            if (currentMinValue === currentMaxValue) {
+                if (newMinValue > currentMinValue) {
+                    newMinValue = currentMinValue;
+                }
+            } else {
+                if (newMinValue > currentMaxValue) {
+                    newMinValue = currentMaxValue;
+                }
+            }
+
+            if (newMinValue !== currentMinValue || newMaxValue !== currentMaxValue) {
+                const minPosition = valueToPosition(newMinValue, this.min(), this.max());
+                const maxPosition = valueToPosition(newMaxValue, this.min(), this.max());
+
+                this.handleValues.set([newMinValue, newMaxValue]);
+                this.handlePositions.set([minPosition, maxPosition]);
+
+                this.#zone.run(() => {
+                    this.#propagateChange?.([newMinValue, newMaxValue]);
+                });
             }
         }
-        return elements[index] as HTMLSpanElement;
     }
 }

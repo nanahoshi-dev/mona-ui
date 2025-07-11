@@ -3,8 +3,10 @@
     <div [class]="selectionClasses()"
          [attr.data-orientation]="orientation()"
          [attr.data-dragging]="dragging()"
-         [style.width.%]="orientation()==='horizontal' ? handlePosition():undefined"
-         [style.height.%]="orientation()==='vertical' ? handlePosition():undefined"
+         [style.left.%]="orientation()==='horizontal' ? selectionLeft():undefined"
+         [style.right.%]="orientation()==='horizontal' ? (100 - selectionRight()):undefined"
+         [style.bottom.%]="orientation()==='vertical' ? selectionLeft():undefined"
+         [style.top.%]="orientation()==='vertical' ? (100 - selectionRight()):undefined"
          [style.background]="selectionBackground()"
     ></div>
 </div>
@@ -44,13 +46,30 @@
 <div [class]="handleClasses()"
      [attr.data-orientation]="orientation()"
      [attr.data-dragging]="dragging()"
+     [attr.data-focused]="primaryHandleFocused()"
      [ngClass]="{'mona-slider-dragging': dragging()}"
-     [style]="handleTemplateStyles()"
-     [style.left.%]="orientation()==='horizontal' ? handlePosition() : undefined"
-     [style.bottom.%]="orientation()==='vertical' ? handlePosition() : undefined"
+     [style]="primaryHandleStyle()"
+     [style.left.%]="orientation()==='horizontal' ? primaryHandlePosition() : undefined"
+     [style.bottom.%]="orientation()==='vertical' ? primaryHandlePosition() : undefined"
      [attr.tabindex]="disabled()?-1:0"
      #sliderHandle>
     @if (handleTemplate()) {
-        <ng-container *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValue()}"></ng-container>
+        <ng-container *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValues()[0]}"></ng-container>
     }
 </div>
+@if (ranged()) {
+    <div [class]="handleClasses()"
+         [attr.data-orientation]="orientation()"
+         [attr.data-dragging]="dragging()"
+         [attr.data-focused]="secondaryHandleFocused()"
+         [ngClass]="{'mona-slider-dragging': dragging()}"
+         [style]="secondaryHandleStyle()"
+         [style.left.%]="orientation()==='horizontal' ? secondaryHandlePosition() : undefined"
+         [style.bottom.%]="orientation()==='vertical' ? secondaryHandlePosition() : undefined"
+         [attr.tabindex]="disabled()?-1:0"
+         #secondarySliderHandle>
+        @if (handleTemplate()) {
+            <ng-container *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValues()[1]}"></ng-container>
+        }
+    </div>
+}
