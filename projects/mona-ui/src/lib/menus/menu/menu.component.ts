@@ -8,9 +8,9 @@ import {
     TemplateRef
 } from "@angular/core";
 import { any, select, selectMany } from "@mirei/ts-collections";
-import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
-import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
+import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
+import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
+import { prepareMenuItems } from "../utils/prepareMenuItems";
 import { v4 } from "uuid";
 import { ContextMenuComponent } from "../context-menu/context-menu.component";
 import { MenuTextTemplateDirective } from "../directives/menu-text-template.directive";

@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, Signal, TemplateRef } from "@angular/core";
-import { listGroupHeaderTextVariants, listItemTextVariants } from "mona-ui/common/list/styles/list.style";
+import { listGroupHeaderTextVariants, listItemTextVariants } from "../../styles/list.style";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";

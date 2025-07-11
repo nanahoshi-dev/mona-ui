@@ -1,6 +1,7 @@
-import { concat, from, ImmutableSet, select, toImmutableSet } from "@mirei/ts-collections";
-import { MenuItemComponent, MenuItemGroupComponent, MenuItemOptions } from "mona-ui";
-import { MenuItem } from "mona-ui/menus/models/MenuItem";
+import { from, ImmutableSet, select, toImmutableSet } from "@mirei/ts-collections";
+import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
+import { MenuItemComponent } from "../menu-item/menu-item.component";
+import { MenuItem, MenuItemOptions } from "../models/MenuItem";
 
 export const prepareMenuItems = (items: Iterable<MenuItemComponent | MenuItemGroupComponent>) => {
     return select(items, item => {

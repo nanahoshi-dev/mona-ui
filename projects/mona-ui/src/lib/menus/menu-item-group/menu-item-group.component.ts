@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, contentChildren, forwardRef, input } from "@angular/core";
-import { MenuItemComponent } from "mona-ui";
-import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
+import { MenuItemComponent } from "../menu-item/menu-item.component";
+import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
 
 @Component({
     selector: "mona-menu-item-group",

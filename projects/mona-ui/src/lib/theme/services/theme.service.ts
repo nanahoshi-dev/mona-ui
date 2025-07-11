@@ -1,7 +1,7 @@
 import { Injectable, signal } from "@angular/core";
-import { ThemeStyle } from "mona-ui/theme/models/Theme";
-import { generatePrimaryColorPalette } from "mona-ui/theme/utils/generateThemeColors";
-import { themeColorMap } from "mona-ui/theme/utils/themeColorMap";
+import { ThemeStyle } from "../models/Theme";
+import { generatePrimaryColorPalette } from "../utils/generateThemeColors";
+import { themeColorMap } from "../utils/themeColorMap";
 
 @Injectable({
     providedIn: "root"

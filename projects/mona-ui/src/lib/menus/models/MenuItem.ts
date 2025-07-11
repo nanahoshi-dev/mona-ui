@@ -1,8 +1,8 @@
 import { TemplateRef } from "@angular/core";
-import { ImmutableSet, select, selectMany } from "@mirei/ts-collections";
-import { InternalMenuItemClickEvent } from "./ContextMenuInjectorData";
-import { ContextMenuItemTextTemplateContext } from "./ContextMenuItemTextTemplateContext";
+import { ImmutableSet, select } from "@mirei/ts-collections";
 import { ContextMenuItemIconTemplateContext } from "./ContextMenuItemIconTemplateContext";
+import { ContextMenuItemTextTemplateContext } from "./ContextMenuItemTextTemplateContext";
+import { InternalMenuItemClickEvent } from "./MenuItemClickEvent";
 
 export interface MenuItemOptions {
     data?: unknown;

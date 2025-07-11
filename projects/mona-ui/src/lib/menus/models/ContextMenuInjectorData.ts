@@ -4,6 +4,7 @@ import { Subject } from "rxjs";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { ContextMenuNavigationEvent } from "./ContextMenuNavigationEvent";
 import { MenuItem } from "./MenuItem";
+import { InternalMenuItemClickEvent } from "./MenuItemClickEvent";
 
 export interface ContextMenuInjectorData<C = any> {
     context?: C;
@@ -17,13 +18,4 @@ export interface ContextMenuInjectorData<C = any> {
     userClasses: Signal<string>;
     userStyles: Signal<string>;
     viaKeyboard?: boolean;
-}
-
-export interface InternalMenuItemClickEvent<C> {
-    context?: C;
-    originalEvent: MouseEvent | KeyboardEvent;
-}
-
-export interface MenuItemClickEvent<C, T> extends InternalMenuItemClickEvent<C> {
-    data?: T;
 }

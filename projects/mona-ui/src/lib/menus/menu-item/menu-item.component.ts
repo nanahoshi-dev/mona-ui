@@ -13,13 +13,13 @@ import {
     untracked
 } from "@angular/core";
 import { select } from "@mirei/ts-collections";
-import { MenuItemShortcutTemplateDirective } from "mona-ui/menus/directives/menu-item-shortcut-template.directive";
-import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
-import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
+import { MenuItemShortcutTemplateDirective } from "../directives/menu-item-shortcut-template.directive";
+import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
+import { InternalMenuItemClickEvent, MenuItemClickEvent } from "../models/MenuItemClickEvent";
+import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
+import { prepareMenuItems } from "../utils/prepareMenuItems";
 import { MenuItemIconTemplateDirective } from "../directives/menu-item-icon-template.directive";
 import { MenuItemTextTemplateDirective } from "../directives/menu-item-text-template.directive";
-import { InternalMenuItemClickEvent, MenuItemClickEvent } from "../models/ContextMenuInjectorData";
 import { MenuItem } from "../models/MenuItem";
 
 @Component({

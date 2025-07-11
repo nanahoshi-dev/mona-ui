@@ -1,10 +1,10 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
-import { ThemeService } from "mona-ui";
+import { ThemeService } from "../../../theme/services/theme.service";
 import {
     checkboxDirectiveThemeVariants,
     CheckboxDirectiveVariantInput,
     CheckboxDirectiveVariantProps
-} from "mona-ui/inputs/check-box/styles/checkbox.styles";
+} from "../styles/checkbox.styles";
 import { twMerge } from "tailwind-merge";
 
 @Directive({

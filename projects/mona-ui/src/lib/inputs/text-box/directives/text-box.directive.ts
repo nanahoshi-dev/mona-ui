@@ -3,8 +3,8 @@ import {
     inputThemeVariants,
     InputVariantInput,
     InputVariantProps
-} from "mona-ui/inputs/text-box/styles/textbox.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../styles/textbox.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 
 @Directive({

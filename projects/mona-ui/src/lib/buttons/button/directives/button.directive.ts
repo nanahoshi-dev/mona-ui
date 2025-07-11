@@ -15,8 +15,8 @@ import {
     ButtonVariantProps,
     ButtonVariantsInput,
     buttonThemeVariants
-} from "mona-ui/buttons/button/styles/button.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../styles/button.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonService } from "../../services/button.service";

@@ -6,7 +6,7 @@ import {
     ConnectionPositionPair,
     FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
-import { ConnectionPoint } from "mona-ui/popup/utils/connectionPosition";
+import { ConnectionPoint } from "../utils/connectionPosition";
 import { PopupOffset } from "./PopupOffset";
 import { Action } from "../../utils/Action";
 import { PopupCloseEvent } from "./PopupCloseEvent";

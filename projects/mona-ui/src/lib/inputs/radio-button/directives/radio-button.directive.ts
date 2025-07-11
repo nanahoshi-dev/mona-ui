@@ -3,8 +3,8 @@ import {
     RadioButtonDirectiveInput,
     RadioButtonDirectiveProps,
     radioButtonDirectiveThemeVariants
-} from "mona-ui/inputs/radio-button/styles/radio.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../styles/radio.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
 
 @Directive({
     selector: "input[type='radio'][monaRadioButton]",

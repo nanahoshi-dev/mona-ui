@@ -1,6 +1,6 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "mona-ui/theme/models/Theme";
-import { VariantInputs, VariantPropsWithoutNull } from "mona-ui/utils/VariantInputs";
+import { ThemeStyle } from "../../../theme/models/Theme";
+import { VariantInputs, VariantPropsWithoutNull } from "../../../utils/VariantInputs";
 import { buttonGroupVariants, buttonGroupVariants as monaButtonGroupVariants } from "./button-group.mona.styles";
 import { buttonGroupVariants as shadcnButtonGroupVariants } from "./button-group.shadcn.styles";
 

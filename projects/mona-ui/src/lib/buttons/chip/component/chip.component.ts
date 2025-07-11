@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from "@angular/core";
-import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "mona-ui/buttons/chip/styles/chip.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 
 @Component({

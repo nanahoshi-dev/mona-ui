@@ -1,6 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, output, signal } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { Action } from "../../../../utils/Action";
 import {
     radioButtonCircleThemeVariants,
     radioButtonContainerLabelThemeVariants,
@@ -8,10 +11,7 @@ import {
     radioButtonThemeVariants,
     RadioButtonVariantInput,
     RadioButtonVariantProps
-} from "mona-ui/inputs/radio-button/styles/radio.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
-import { twMerge } from "tailwind-merge";
-import { Action } from "../../../../utils/Action";
+} from "../../styles/radio.styles";
 
 @Component({
     selector: "mona-radio-button",

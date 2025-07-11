@@ -15,21 +15,21 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { SwitchHandleContentTemplateDirective } from "mona-ui/inputs/switch/directives/switch-handle-content-template.directive";
+import { filter, fromEvent, merge, tap } from "rxjs";
+import { twMerge } from "tailwind-merge";
+import { FadeAnimation } from "../../../../animations/models/fade.animation";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { Action } from "../../../../utils/Action";
+import { SwitchHandleContentTemplateDirective } from "../../directives/switch-handle-content-template.directive";
+import { SwitchOffLabelTemplateDirective } from "../../directives/switch-off-label-template.directive";
+import { SwitchOnLabelTemplateDirective } from "../../directives/switch-on-label-template.directive";
 import {
     switchHandleThemeVariants,
     switchLabelThemeVariants,
     switchThemeVariants,
     SwitchVariantInputs,
     SwitchVariantProps
-} from "mona-ui/inputs/switch/styles/switch.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
-import { filter, fromEvent, merge, tap } from "rxjs";
-import { twMerge } from "tailwind-merge";
-import { FadeAnimation } from "../../../../animations/models/fade.animation";
-import { Action } from "../../../../utils/Action";
-import { SwitchOffLabelTemplateDirective } from "../../directives/switch-off-label-template.directive";
-import { SwitchOnLabelTemplateDirective } from "../../directives/switch-on-label-template.directive";
+} from "../../styles/switch.styles";
 
 @Component({
     selector: "mona-switch",

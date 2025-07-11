@@ -5,9 +5,9 @@ import {
     radioButtonDirectiveVariants,
     radioButtonIndicatorVariants as monaRadioButtonIndicatorVariants,
     radioButtonVariants as monaRadioButtonVariants
-} from "mona-ui/inputs/radio-button/styles/radio.mona.styles";
-import { ThemeStyle } from "mona-ui/theme/models/Theme";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+} from "./radio.mona.styles";
+import { ThemeStyle } from "../../../theme/models/Theme";
+import { VariantInputs } from "../../../utils/VariantInputs";
 
 export const radioButtonThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

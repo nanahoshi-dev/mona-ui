@@ -1,7 +1,7 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "mona-ui";
-import { chipVariants as monaChipVariants } from "mona-ui/buttons/chip/styles/chip.mona.styles";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+import { ThemeStyle } from "../../../theme/models/Theme";
+import { chipVariants as monaChipVariants } from "./chip.mona.styles";
+import { VariantInputs } from "../../../utils/VariantInputs";
 
 export const chipThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

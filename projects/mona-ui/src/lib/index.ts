@@ -196,6 +196,7 @@ export * from "./list-view/directives/list-view-virtual-scroll.directive";
 
 /** Menus */
 export { MenuItemOptions } from "./menus/models/MenuItem";
+export { MenuItemClickEvent } from "./menus/models/MenuItemClickEvent";
 export * from "./menus/menu-item/menu-item.component";
 export * from "./menus/menu-item-group/menu-item-group.component";
 export * from "./menus/directives/menu-item-icon-template.directive";

@@ -1,5 +1,5 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "mona-ui";
+import { ThemeStyle } from "../../../theme/models/Theme";
 import {
     sliderBaseVariants as monaSliderBaseVariants,
     sliderTrackVariants as monaSliderTrackVariants,
@@ -9,8 +9,8 @@ import {
     sliderTickLabelListVariants as monaSliderTickLabelListVariants,
     sliderTickLabelVariants as monaSliderTickLabelVariants,
     sliderHandleVariants as monaSliderHandleVariants
-} from "mona-ui/inputs/slider/styles/slider.mona.styles";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+} from "./slider.mona.styles";
+import { VariantInputs } from "../../../utils/VariantInputs";
 
 export const sliderBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

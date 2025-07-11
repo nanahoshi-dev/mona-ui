@@ -23,17 +23,17 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { LucideAngularModule, X } from "lucide-angular";
-import { ButtonDirective } from "mona-ui/buttons/button/directives/button.directive";
+import { ButtonDirective } from "../../buttons/button/directives/button.directive";
 import {
     dropdownPopupHideAnimation,
     dropdownPopupShowAnimation
-} from "mona-ui/dropdowns/animations/dropdown.animation";
+} from "../animations/dropdown.animation";
 import {
     dropdownPopupVariants,
     DropdownSelectorVariantInput,
     DropdownSelectorVariantProps,
     dropdownSelectorVariants
-} from "mona-ui/dropdowns/styles/dropdown.style";
+} from "../styles/dropdown.style";
 import { debounceTime, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";

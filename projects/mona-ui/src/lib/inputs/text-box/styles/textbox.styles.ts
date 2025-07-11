@@ -1,8 +1,8 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "mona-ui";
-import { textBoxVariants as monaTextBoxVariants } from "mona-ui/inputs/text-box/styles/textbox.mona.styles";
-import { inputVariants as monaInputVariants } from "mona-ui/inputs/text-box/styles/textbox.mona.styles";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+import { ThemeStyle } from "../../../theme/models/Theme";
+import { textBoxVariants as monaTextBoxVariants } from "./textbox.mona.styles";
+import { inputVariants as monaInputVariants } from "./textbox.mona.styles";
+import { VariantInputs } from "../../../utils/VariantInputs";
 
 export const textBoxThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

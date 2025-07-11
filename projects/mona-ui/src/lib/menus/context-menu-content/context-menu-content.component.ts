@@ -11,17 +11,18 @@ import {
     viewChildren
 } from "@angular/core";
 import { any, Dictionary, ImmutableSet, select, selectMany, toArray, toImmutableSet } from "@mirei/ts-collections";
+import { ContextMenuInjectorData } from "../models/ContextMenuInjectorData";
+import { InternalMenuItemClickEvent } from "../models/MenuItemClickEvent";
 import {
     contextMenuContentVariants,
     contextMenuDividerVariants,
     menuItemGroupHeaderVariants
-} from "mona-ui/menus/styles/menu.style";
+} from "../styles/menu.style";
 import { filter, fromEvent, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupDataInjectionToken } from "../../popup/models/PopupInjectionToken";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { ContextMenuItemComponent } from "../context-menu-item/context-menu-item.component";
-import { ContextMenuInjectorData, InternalMenuItemClickEvent } from "../models/ContextMenuInjectorData";
 import { MenuItem } from "../models/MenuItem";
 import { ContextMenuService } from "../services/context-menu.service";
 

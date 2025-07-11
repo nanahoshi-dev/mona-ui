@@ -1,11 +1,11 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "mona-ui";
+import { ThemeStyle } from "../../../theme/models/Theme";
 import {
     numericTextboxInputVariants as monaNumericTextboxInputVariants,
     numericTextboxVariants as monaNumericTextboxVariants,
     numericTextboxButtonVariants as monaNumericTextboxButtonVariants
-} from "mona-ui/inputs/numeric-text-box/styles/numeric-textbox.mona.styles";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+} from "./numeric-textbox.mona.styles";
+import { VariantInputs } from "../../../utils/VariantInputs";
 
 export const numericTextboxThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

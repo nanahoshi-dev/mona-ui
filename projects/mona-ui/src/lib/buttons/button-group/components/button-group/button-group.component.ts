@@ -13,17 +13,18 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { firstOrDefault } from "@mirei/ts-collections";
-import { ButtonGroupItemComponent } from "mona-ui/buttons/button-group/components/button-group-item/button-group-item.component";
+
+import { twMerge } from "tailwind-merge";
+import { SelectionMode } from "../../../../models/SelectionMode";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { ButtonDirective } from "../../../button/directives/button.directive";
+import { ButtonService } from "../../../services/button.service";
 import {
     buttonGroupThemeVariants,
     ButtonGroupVariantProps,
     ButtonGroupVariantsInput
-} from "mona-ui/buttons/button-group/styles/button-group.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
-import { twMerge } from "tailwind-merge";
-import { SelectionMode } from "mona-ui/models/SelectionMode";
-import { ButtonDirective } from "../../../button/directives/button.directive";
-import { ButtonService } from "../../../services/button.service";
+} from "../../styles/button-group.styles";
+import { ButtonGroupItemComponent } from "../button-group-item/button-group-item.component";
 
 @Component({
     selector: "mona-button-group",

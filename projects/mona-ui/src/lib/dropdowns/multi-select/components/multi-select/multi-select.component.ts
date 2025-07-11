@@ -29,7 +29,7 @@ import {
     DropdownSelectorVariantProps,
     MultiSelectSelectorVariantInput,
     multiSelectSelectorVariants
-} from "mona-ui/dropdowns/styles/dropdown.style";
+} from "../../../styles/dropdown.style";
 import { fromEvent, take } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";

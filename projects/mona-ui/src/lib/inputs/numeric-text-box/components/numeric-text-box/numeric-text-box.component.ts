@@ -22,14 +22,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ChevronDown, ChevronUp, LucideAngularModule } from "lucide-angular";
 import {
-    numericTextboxButtonThemeVariants,
-    numericTextboxInputThemeVariants,
-    numericTextboxThemeVariants,
-    NumericTextboxVariantInputs,
-    NumericTextboxVariantProps
-} from "mona-ui/inputs/numeric-text-box/styles/numeric-textbox.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
-import {
     concatMap,
     delay,
     distinctUntilChanged,
@@ -44,9 +36,17 @@ import {
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { TextBoxDirective } from "../../../text-box/directives/text-box.directive";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
+import {
+    numericTextboxButtonThemeVariants,
+    numericTextboxInputThemeVariants,
+    numericTextboxThemeVariants,
+    NumericTextboxVariantInputs,
+    NumericTextboxVariantProps
+} from "../../styles/numeric-textbox.styles";
 
 type Sign = "-" | "+";
 

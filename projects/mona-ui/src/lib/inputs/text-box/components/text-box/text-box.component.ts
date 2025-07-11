@@ -13,18 +13,14 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { LucideAngularModule, X } from "lucide-angular";
-import {
-    textBoxThemeVariants,
-    TextBoxVariantInput,
-    TextBoxVariantProps
-} from "mona-ui/inputs/text-box/styles/textbox.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { InputType } from "../../models/InputType";
+import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "../../styles/textbox.styles";
 
 @Component({
     selector: "mona-text-box",

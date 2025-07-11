@@ -2,6 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { LucideAngularModule, Copy } from "lucide-angular";
 import {
+    MenuItemClickEvent,
     MenuItemComponent,
     MenuItemGroupComponent,
     MenuItemIconTemplateDirective,
@@ -9,7 +10,6 @@ import {
     SplitButtonComponent,
     SplitButtonTextTemplateDirective
 } from "mona-ui";
-import { MenuItemClickEvent } from "mona-ui/menus/models/ContextMenuInjectorData";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

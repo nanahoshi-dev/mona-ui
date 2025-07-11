@@ -22,8 +22,8 @@ import {
     checkmarkThemeVariants,
     CheckmarkVariantInput,
     CheckmarkVariantProps
-} from "mona-ui/inputs/check-box/styles/checkbox.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../../styles/checkbox.styles";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { Action } from "../../../../utils/Action";
 

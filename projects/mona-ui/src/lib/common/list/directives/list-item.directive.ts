@@ -1,5 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { listItemVariants } from "mona-ui/common/list/styles/list.style";
+import { listItemVariants } from "../styles/list.style";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";

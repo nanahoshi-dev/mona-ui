@@ -19,11 +19,11 @@ import {
     splitButtonThemeVariants,
     SplitButtonVariantInputs,
     SplitButtonVariantProps
-} from "mona-ui/buttons/split-button/styles/split-button.styles";
-import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
-import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../../styles/split-button.styles";
+import { MenuItemGroupComponent } from "../../../../menus/menu-item-group/menu-item-group.component";
+import { MenuItemInjectionToken } from "../../../../menus/models/MenuItemInjectionToken";
+import { prepareMenuItems } from "../../../../menus/utils/prepareMenuItems";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";

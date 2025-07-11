@@ -1,7 +1,7 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { SliderTick } from "mona-ui/inputs/models/SliderTick";
-import { LabelStyleArgs } from "mona-ui/inputs/slider/models/LabelStyleArgs";
-import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
+import { SliderTick } from "../../models/SliderTick";
+import { LabelStyleArgs } from "../models/LabelStyleArgs";
+import { valueToPosition } from "../utils/valueToPosition";
 
 @Pipe({
     name: "labelStyle"

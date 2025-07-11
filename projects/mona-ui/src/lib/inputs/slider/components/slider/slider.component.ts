@@ -1,4 +1,4 @@
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ChangeDetectionStrategy,
@@ -19,12 +19,19 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { SliderHandleTemplateDirective } from "mona-ui/inputs/slider/directives/slider-handle-template.directive";
-import { SliderTickDirective } from "mona-ui/inputs/slider/directives/slider-tick.directive";
-import { LabelStyleArgs } from "mona-ui/inputs/slider/models/LabelStyleArgs";
-import { TickStyleArgs } from "mona-ui/inputs/slider/models/TickStyleArgs";
-import { LabelStylePipe } from "mona-ui/inputs/slider/pipes/label-style.pipe";
-import { TickStylePipe } from "mona-ui/inputs/slider/pipes/tick-style.pipe";
+import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
+import { Orientation } from "../../../../models/Orientation";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { Action } from "../../../../utils/Action";
+import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
+import { SliderTick } from "../../../models/SliderTick";
+import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
+import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
+import { SliderTickDirective } from "../../directives/slider-tick.directive";
+import { LabelStyleArgs } from "../../models/LabelStyleArgs";
+import { TickStyleArgs } from "../../models/TickStyleArgs";
+import { LabelStylePipe } from "../../pipes/label-style.pipe";
+import { TickStylePipe } from "../../pipes/tick-style.pipe";
 import {
     sliderBaseThemeVariants,
     sliderHandleThemeVariants,
@@ -36,15 +43,8 @@ import {
     sliderTrackThemeVariants,
     SliderVariantInputs,
     SliderVariantProps
-} from "mona-ui/inputs/slider/styles/slider.styles";
-import { valueToPosition } from "mona-ui/inputs/slider/utils/valueToPosition";
-import { Orientation } from "mona-ui/models/Orientation";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
-import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
-import { Action } from "../../../../utils/Action";
-import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
-import { SliderTick } from "../../../models/SliderTick";
-import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
+} from "../../styles/slider.styles";
+import { valueToPosition } from "../../utils/valueToPosition";
 
 @Component({
     selector: "mona-slider",
@@ -57,7 +57,7 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
             multi: true
         }
     ],
-    imports: [NgClass, NgTemplateOutlet, SliderTickDirective, LabelStylePipe, TickStylePipe],
+    imports: [NgTemplateOutlet, SliderTickDirective, LabelStylePipe, TickStylePipe],
     host: {
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
@@ -67,7 +67,7 @@ import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-v
     }
 })
 export class SliderComponent implements ControlValueAccessor, SliderVariantInputs {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     #propagateChange: Action<number | [number, number]> | null = null;
     #propagateTouched: Action | null = null;
@@ -136,7 +136,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     protected readonly primaryHandleStyle = computed(() => {
         const baseStyle = this.handleTemplateStyles();
         if (this.ranged() && this.handlesOverlap()) {
-            return { ...baseStyle, zIndex: "1" };
+            return { ...baseStyle, zIndex: this.secondaryHandleOnTop() ? "1" : "2" };
         }
         return baseStyle;
     });
@@ -162,10 +162,11 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     });
     protected readonly secondaryHandleFocused = signal(false);
     protected readonly secondaryHandlePosition = computed(() => this.rangeSelection().right);
+    protected readonly secondaryHandleOnTop = signal(true);
     protected readonly secondaryHandleStyle = computed(() => {
         const baseStyle = this.handleTemplateStyles();
         if (this.ranged() && this.handlesOverlap()) {
-            return { ...baseStyle, zIndex: "2" };
+            return { ...baseStyle, zIndex: this.secondaryHandleOnTop() ? "2" : "1" };
         }
         return baseStyle;
     });
@@ -306,7 +307,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
 
     public constructor() {
         afterNextRender({
-            read: () => this.setSubscription()
+            read: () => this.setSubscriptions()
         });
     }
 
@@ -332,6 +333,11 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
 
                     this.handleValues.set([sortedMin, sortedMax]);
                     this.handlePositions.set([minPosition, maxPosition]);
+
+                    // Initialize handle z-index - secondary handle on top by default when overlapping
+                    if (sortedMin === sortedMax) {
+                        this.secondaryHandleOnTop.set(true);
+                    }
                 }
             } else {
                 const value = Math.max(this.min(), Math.min(obj as number, this.max()));
@@ -383,8 +389,8 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             }
 
             const clickValue = this.getValueFromPosition(normalizedClickPos);
-            // If clicking to a greater value than current, use secondary handle
-            // If clicking to a lesser value, use primary handle
+            // Clicking to greater value uses secondary handle
+            // Clicking to smaller value uses primary handle
             return clickValue > currentValues[0];
         }
 
@@ -428,7 +434,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             const position = valueToPosition(value, this.min(), this.max());
 
             if (this.ranged()) {
-                this.updateRangedValue(value, isSecondary);
+                this.updateRangedValue(value, isSecondary, true);
             } else {
                 if (position !== this.handlePositions()[0]) {
                     this.#zone.run(() => {
@@ -458,7 +464,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         const snappedPosition = valueToPosition(value, this.min(), this.max());
 
         if (this.ranged()) {
-            this.updateRangedValue(value, isSecondary);
+            this.updateRangedValue(value, isSecondary, true);
         } else {
             if (value !== this.handleValues()[0]) {
                 this.#zone.run(() => {
@@ -543,7 +549,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
                     const currentValues = this.handleValues();
                     const currentValue = currentValues[0];
                     const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
-                    this.updateRangedValue(newValue, false);
+                    this.updateRangedValue(newValue, false, false);
                 } else {
                     const currentValue = this.handleValues()[0];
                     const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
@@ -576,7 +582,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
                     const currentValues = this.handleValues();
                     const currentValue = currentValues[1];
                     const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
-                    this.updateRangedValue(newValue, true);
+                    this.updateRangedValue(newValue, true, false);
                 });
         }
     }
@@ -617,7 +623,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         }
     }
 
-    private setSubscription(): void {
+    private setSubscriptions(): void {
         this.#zone.runOutsideAngular(() => {
             this.setClickSubscription();
             this.setKeydownSubscription();
@@ -626,49 +632,45 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         });
     }
 
-    private updateRangedValue(value: number, isSecondary: boolean): void {
+    private updateRangedValue(value: number, isSecondary: boolean, isDragging: boolean = false): void {
         const currentValues = this.handleValues();
         const currentMinValue = currentValues[0];
         const currentMaxValue = currentValues[1];
 
+        let newMinValue = currentMinValue;
+        let newMaxValue = currentMaxValue;
+
         if (isSecondary) {
-            let newMaxValue = value;
-            let newMinValue = currentMinValue;
-
-            if (newMaxValue < currentMinValue) {
-                newMaxValue = currentMinValue;
-            }
-
-            if (newMaxValue !== currentMaxValue) {
-                const maxPosition = valueToPosition(newMaxValue, this.min(), this.max());
-                const currentPositions = this.handlePositions();
-
-                this.handleValues.set([newMinValue, newMaxValue]);
-                this.handlePositions.set([currentPositions[0], maxPosition]);
-                this.#zone.run(() => this.#propagateChange?.([newMinValue, newMaxValue]));
+            if (isDragging && value < currentMinValue) {
+                newMinValue = value;
+                newMaxValue = value;
+                this.secondaryHandleOnTop.set(true);
+            } else {
+                newMaxValue = Math.max(value, currentMinValue);
+                if (newMaxValue === currentMinValue) {
+                    this.secondaryHandleOnTop.set(true);
+                }
             }
         } else {
-            let newMinValue = value;
-            let newMaxValue = currentMaxValue;
-
-            if (currentMinValue === currentMaxValue) {
-                if (newMinValue > currentMinValue) {
-                    newMinValue = currentMinValue;
-                }
+            if (isDragging && value > currentMaxValue) {
+                newMinValue = value;
+                newMaxValue = value;
+                this.secondaryHandleOnTop.set(false);
             } else {
-                if (newMinValue > currentMaxValue) {
-                    newMinValue = currentMaxValue;
+                newMinValue = Math.min(value, currentMaxValue);
+                if (newMinValue === currentMaxValue) {
+                    this.secondaryHandleOnTop.set(false);
                 }
             }
+        }
 
-            if (newMinValue !== currentMinValue || newMaxValue !== currentMaxValue) {
-                const minPosition = valueToPosition(newMinValue, this.min(), this.max());
-                const maxPosition = valueToPosition(newMaxValue, this.min(), this.max());
+        if (newMinValue !== currentMinValue || newMaxValue !== currentMaxValue) {
+            const minPosition = valueToPosition(newMinValue, this.min(), this.max());
+            const maxPosition = valueToPosition(newMaxValue, this.min(), this.max());
 
-                this.handleValues.set([newMinValue, newMaxValue]);
-                this.handlePositions.set([minPosition, maxPosition]);
-                this.#zone.run(() => this.#propagateChange?.([newMinValue, newMaxValue]));
-            }
+            this.handleValues.set([newMinValue, newMaxValue]);
+            this.handlePositions.set([minPosition, maxPosition]);
+            this.#zone.run(() => this.#propagateChange?.([newMinValue, newMaxValue]));
         }
     }
 }

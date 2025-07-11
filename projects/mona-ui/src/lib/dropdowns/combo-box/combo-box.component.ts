@@ -27,13 +27,13 @@ import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import {
     dropdownPopupHideAnimation,
     dropdownPopupShowAnimation
-} from "mona-ui/dropdowns/animations/dropdown.animation";
+} from "../animations/dropdown.animation";
 import {
     dropdownPopupVariants,
     DropdownSelectorVariantInput,
     DropdownSelectorVariantProps,
     dropdownSelectorVariants
-} from "mona-ui/dropdowns/styles/dropdown.style";
+} from "../styles/dropdown.style";
 import {
     asyncScheduler,
     debounceTime,

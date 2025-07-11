@@ -8,7 +8,7 @@ import {
     menuItemLinkVariants,
     menuItemShortcutVariants,
     menuItemTextVariants
-} from "mona-ui/menus/styles/menu.style";
+} from "../styles/menu.style";
 import { twMerge } from "tailwind-merge";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { MenuItem } from "../models/MenuItem";

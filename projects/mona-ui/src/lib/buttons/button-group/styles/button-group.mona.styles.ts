@@ -1,5 +1,4 @@
-import { cva, VariantProps } from "class-variance-authority";
-import { VariantInputs, VariantPropsWithoutNull } from "mona-ui/utils/VariantInputs";
+import { cva } from "class-variance-authority";
 
 export const buttonGroupVariants = cva(
     `

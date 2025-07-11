@@ -13,22 +13,23 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { any, first, from, ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
-import { MenuItemGroupComponent } from "mona-ui/menus/menu-item-group/menu-item-group.component";
-import { MenuItemInjectionToken } from "mona-ui/menus/models/MenuItemInjectionToken";
-import { convertToMenuItemSet, prepareMenuItems } from "mona-ui/menus/utils/prepareMenuItems";
-import { ConnectionPoint } from "mona-ui/popup/utils/connectionPosition";
-import { delay, filter, fromEvent, Subject, take } from "rxjs";
+import { delay, fromEvent, Subject, take } from "rxjs";
 import { v4 } from "uuid";
 import { PopupOffset } from "../../popup/models/PopupOffset";
 import { PopupRef } from "../../popup/models/PopupRef";
+import { ConnectionPoint } from "../../popup/utils/connectionPosition";
 import { ContextMenuContentComponent } from "../context-menu-content/context-menu-content.component";
+import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
 import { MenuItemComponent } from "../menu-item/menu-item.component";
 import { ContextMenuCloseEvent } from "../models/ContextMenuCloseEvent";
-import { ContextMenuInjectorData, InternalMenuItemClickEvent } from "../models/ContextMenuInjectorData";
+import { ContextMenuInjectorData } from "../models/ContextMenuInjectorData";
 import { ContextMenuNavigationEvent } from "../models/ContextMenuNavigationEvent";
 import { ContextMenuOpenEvent } from "../models/ContextMenuOpenEvent";
 import { MenuItem, MenuItemOptions } from "../models/MenuItem";
+import { InternalMenuItemClickEvent } from "../models/MenuItemClickEvent";
+import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
 import { ContextMenuService } from "../services/context-menu.service";
+import { convertToMenuItemSet, prepareMenuItems } from "../utils/prepareMenuItems";
 
 @Component({
     selector: "mona-contextmenu",

@@ -1,7 +1,7 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "mona-ui";
-import { splitButtonVariants as monaSplitButtonVariants } from "mona-ui/buttons/split-button/styles/split-button.mona.styles";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+import { ThemeStyle } from "../../../theme/models/Theme";
+import { splitButtonVariants as monaSplitButtonVariants } from "./split-button.mona.styles";
+import { VariantInputs } from "../../../utils/VariantInputs";
 
 export const splitButtonThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
