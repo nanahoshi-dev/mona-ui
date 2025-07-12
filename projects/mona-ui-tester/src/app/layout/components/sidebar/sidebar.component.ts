@@ -49,6 +49,10 @@ export class SidebarComponent {
                     path: "/chip"
                 },
                 {
+                    text: "Color Gradient",
+                    path: "/color-gradient"
+                },
+                {
                     text: "Dropdown Button",
                     path: "/dropdown-button"
                 },

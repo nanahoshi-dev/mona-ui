@@ -94,8 +94,9 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     protected readonly inputClasses = computed(() => {
         const theme = this.#themeService.theme();
         const hasPrefixTemplate = this.prefixTemplateList().length > 0;
-        const rounded = hasPrefixTemplate ? "none" : this.rounded();
-        const inputVariants = numericTextboxInputThemeVariants(theme)({ rounded });
+        const leftRounded = hasPrefixTemplate ? "none" : this.rounded();
+        const rightRounded = this.spinners() ? "none" : this.rounded();
+        const inputVariants = numericTextboxInputThemeVariants(theme)({ leftRounded, rightRounded });
         return twMerge(inputVariants);
     });
     protected readonly focused = signal(false);
@@ -111,9 +112,8 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     protected readonly rawInputValue = signal("");
     protected readonly spinButtonClasses = computed(() => {
         const theme = this.#themeService.theme();
-        const rounded = this.rounded();
         const size = this.size();
-        return numericTextboxButtonThemeVariants(theme)({ rounded, size });
+        return numericTextboxButtonThemeVariants(theme)({ size });
     });
     protected readonly spinButtonIconSize = computed(() => {
         const size = this.size();

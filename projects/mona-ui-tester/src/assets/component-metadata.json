@@ -2867,18 +2867,6 @@
       }
     ]
   },
-  "AlphaSliderComponent": {
-    "name": "AlphaSliderComponent",
-    "selector": "\"mona-alpha-slider\"",
-    "inputs": [
-      {
-        "name": "color",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "ColorGradientComponent": {
     "name": "ColorGradientComponent",
     "selector": "\"mona-color-gradient\"",
@@ -2886,43 +2874,49 @@
       {
         "name": "apply",
         "type": "void",
-        "description": "",
+        "description": "Emits when the Apply button is clicked.\nThe `Apply` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
         "name": "cancel",
         "type": "void",
-        "description": "",
+        "description": "Emits when the Cancel button is clicked.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
         "name": "format",
         "type": "ColorOutputFormat",
-        "description": "",
+        "description": "Specifies the format of the color output.",
         "kind": "input"
       },
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "",
+        "description": "Specifies whether the color picker should display the alpha slider.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ColorGradientVariantProps[\"rounded\"]",
+        "description": "Specifies the rounded variant of the color picker.",
         "kind": "input"
       },
       {
         "name": "showButtons",
         "type": "boolean",
-        "description": "",
+        "description": "Specifies whether the color picker should display the buttons.\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
         "kind": "input"
       },
       {
         "name": "showHexInput",
         "type": "boolean",
-        "description": "",
+        "description": "Specifies whether the color picker should display the hex input.",
         "kind": "input"
       },
       {
         "name": "showRgbInput",
         "type": "boolean",
-        "description": "",
+        "description": "Specifies whether the color picker should display the RGB input.",
         "kind": "input"
       }
     ]

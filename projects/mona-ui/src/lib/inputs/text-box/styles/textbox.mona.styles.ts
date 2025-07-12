@@ -3,8 +3,9 @@ import { cva } from "class-variance-authority";
 export const textBoxVariants = cva(
     `
         flex items-center w-full min-w-0
-        bg-input-background
+        overflow-hidden
 
+        bg-input-background
         border border-input-border outline-none
         selection:bg-primary selection:text-primary-foreground
 
@@ -21,22 +22,23 @@ export const textBoxVariants = cva(
         [&>input]:bg-transparent
         [&>input]:border-0 [&>input]:outline-none
         [&>input]:placeholder:text-muted-foreground
+        [&>input]:px-2
 
         [&.ng-touched.ng-invalid]:border-error
     `,
     {
         variants: {
             rounded: {
-                full: "rounded-full px-4",
+                full: "rounded-full",
                 large: "rounded-lg",
                 medium: "rounded-md",
                 none: "rounded-none",
                 small: "rounded-sm"
             },
             size: {
-                large: "[&>input]:px-2 [&>input]:py-3 text-md",
-                medium: "[&>input]:px-2 [&>input]:py-2 text-sm",
-                small: "[&>input]:px-2 [&>input]:py-2 text-xs"
+                large: "h-11.5 text-md",
+                medium: "h-8.75 text-sm",
+                small: "h-8.25 text-xs"
             }
         }
     }
@@ -45,6 +47,7 @@ export const textBoxVariants = cva(
 export const inputVariants = cva(
     `
         bg-input-background
+        px-2
 
         border border-input-border outline-none
         selection:bg-primary selection:text-primary-foreground
@@ -75,9 +78,9 @@ export const inputVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "px-2 py-3 text-md",
-                medium: "px-2 py-2 text-sm",
-                small: "px-2 py-2 text-xs"
+                large: "h-11.5 text-md",
+                medium: "h-8.75 text-sm",
+                small: "h-8.25 text-xs"
             }
         },
         compoundVariants: [

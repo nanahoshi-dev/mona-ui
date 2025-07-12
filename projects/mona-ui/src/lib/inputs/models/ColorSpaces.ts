@@ -1,5 +1,3 @@
-import { WritableSignal } from "@angular/core";
-
 export interface RGB {
     r: number | null;
     g: number | null;
@@ -8,12 +6,6 @@ export interface RGB {
 
 export interface RGBA extends RGB {
     a: number | null;
-}
-
-export interface RGBSignal {
-    r: WritableSignal<number | null>;
-    g: WritableSignal<number | null>;
-    b: WritableSignal<number | null>;
 }
 
 export interface HSV {
@@ -26,13 +18,11 @@ export interface HSVA extends HSV {
     a: number | null;
 }
 
-export interface HSVSignal {
-    h: WritableSignal<number | null>;
-    s: WritableSignal<number | null>;
-    v: WritableSignal<number | null>;
-}
+export type RGBChannel = keyof RGB;
+export type RGBAChannel = keyof RGBA;
+export type HSVChannel = keyof HSV;
 
-export type Channel = keyof RGBA | keyof HSV;
+export type Channel = RGBAChannel | HSVChannel;
 
 export interface HSL {
     h: number | null;

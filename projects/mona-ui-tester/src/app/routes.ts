@@ -34,6 +34,13 @@ export const routes: Routes = [
                     import("./docs/components/chip-doc/chip-doc.component").then(m => m.ChipDocComponent)
             },
             {
+                path: "color-gradient",
+                loadComponent: () =>
+                    import("./docs/components/color-gradient-doc/color-gradient-doc.component").then(
+                        m => m.ColorGradientDocComponent
+                    )
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/drop-down-button-doc/drop-down-button-doc.component").then(

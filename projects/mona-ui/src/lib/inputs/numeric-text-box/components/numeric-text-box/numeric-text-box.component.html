@@ -1,5 +1,5 @@
 @for (prefixTemplate of prefixTemplateList(); track $index) {
-    <span class="flex items-center flex-none flex-wrap h-full border-r border-r-input-border">
+    <span class="flex items-center flex-none flex-wrap h-full overflow-hidden border-none">
         <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
     </span>
 }
@@ -25,6 +25,7 @@
        [attr.aria-valuemin]="min()"
        [attr.aria-valuemax]="max()"
        [attr.aria-valuetext]="formattedValue()"
+       [attr.data-spinners]="spinners()"
        #valueTextBox>
 @if (spinners()) {
     <div [class]="spinButtonClasses()">

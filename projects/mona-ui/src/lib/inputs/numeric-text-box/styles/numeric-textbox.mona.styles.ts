@@ -5,7 +5,7 @@ export const numericTextboxVariants = cva(
         flex items-center w-full min-w-0
         bg-transparent
         border border-input-border p-0
-        outline-none
+        outline-none overflow-hidden
 
         placeholder:text-muted-foreground
 
@@ -47,12 +47,44 @@ export const numericTextboxInputVariants = cva(
     `,
     {
         variants: {
-            rounded: {
-                full: "rounded-tl-full rounded-bl-full",
-                large: "rounded-tl-lg rounded-bl-lg",
-                medium: "rounded-tl-md rounded-bl-md",
-                none: "rounded-none",
-                small: "rounded-tl-sm rounded-bl-sm"
+            leftRounded: {
+                full: `
+                    rounded-tl-full rounded-bl-full
+                `,
+                large: `
+                    rounded-tl-lg rounded-bl-lg
+                `,
+                medium: `
+                    rounded-tl-md rounded-bl-md
+                `,
+                none: `
+                    rounded-tl-none rounded-bl-none
+                `,
+                small: `
+                    rounded-tl-sm rounded-bl-sm
+                `
+            },
+            rightRounded: {
+                full: `
+                    rounded-tr-full rounded-br-full
+                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                `,
+                large: `
+                    rounded-tr-lg rounded-br-lg
+                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                `,
+                medium: `
+                    rounded-tr-md rounded-br-md
+                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                `,
+                none: `
+                    rounded-tr-none rounded-br-none
+                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                `,
+                small: `
+                    rounded-tr-sm rounded-br-sm
+                    data-[spinners='true']:rounded-tr-none data-[spinners='true']:rounded-br-none
+                `
             }
         }
     }
@@ -79,13 +111,6 @@ export const numericTextboxButtonVariants = cva(
     `,
     {
         variants: {
-            rounded: {
-                full: "[&>button]:rounded-tr-full [&>button]:rounded-br-full",
-                large: "[&>button]:rounded-tr-lg [&>button]:rounded-br-lg",
-                medium: "[&>button]:rounded-tr-md [&>button]:rounded-br-md",
-                none: "[&>button]:rounded-none",
-                small: "[&>button]:rounded-tr-sm [&>button]:rounded-br-sm"
-            },
             size: {
                 large: "min-w-16 w-16",
                 medium: "min-w-10 w-10",
