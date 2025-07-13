@@ -41,6 +41,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "color-palette",
+                loadComponent: () =>
+                    import("./docs/components/color-palette-doc/color-palette-doc.component").then(
+                        m => m.ColorPaletteDocComponent
+                    )
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/drop-down-button-doc/drop-down-button-doc.component").then(

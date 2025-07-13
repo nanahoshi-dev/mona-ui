@@ -16,6 +16,10 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
     protected readonly config = signal<ComponentConfig<ColorGradientComponent>>({
         code: ``,
         inputs: {
+            disabled: {
+                type: "boolean",
+                value: false
+            },
             format: {
                 type: "dropdown",
                 value: ["hex", "rgb"],
@@ -53,6 +57,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
     imports: [ColorGradientComponent],
     template: `
         <mona-color-gradient
+            [disabled]="disabled()"
             [format]="format()"
             [opacity]="opacity()"
             [rounded]="rounded()"
@@ -64,6 +69,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
     `
 })
 export class ColorGradientWrapperComponent implements ComponentInputsAsSignal<ColorGradientComponent> {
+    public readonly disabled = input<ReturnType<ColorGradientComponent["disabled"]>>(false);
     public readonly format = input<ReturnType<ColorGradientComponent["format"]>>("hex");
     public readonly opacity = input<ReturnType<ColorGradientComponent["opacity"]>>(true);
     public readonly rounded = input<ReturnType<ColorGradientComponent["rounded"]>>("medium");

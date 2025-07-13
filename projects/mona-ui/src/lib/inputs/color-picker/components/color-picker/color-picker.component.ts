@@ -25,7 +25,7 @@ import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { Action } from "../../../../utils/Action";
 import { ColorGradientComponent } from "../../../color-gradient/components/color-gradient/color-gradient.component";
-import { ColorPaletteComponent } from "../../../color-palette/color-palette.component";
+import { ColorPaletteComponent } from "../../../color-palette/components/color-palette/color-palette.component";
 import { PaletteType } from "../../../models/PaletteType";
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
 import { ColorPickerValueTemplateContext } from "../../models/ColorPickerValueTemplateContext";

@@ -2,7 +2,16 @@
      [style.background-color]="hsvRectangleBackground()" #hsvRectangle>
     <div [class]="hsvRectangleHandleClasses()"
          [style.left.px]="hsvHandleLeft()"
-         [style.top.px]="hsvHandleTop()" #hsvPointer></div>
+         [style.top.px]="hsvHandleTop()"
+         [attr.tabindex]="disabled() ? -1 : 0"
+         [attr.role]="'slider'"
+         [attr.aria-label]="'Color saturation and value'"
+         [attr.aria-valuemin]="0"
+         [attr.aria-valuemax]="100"
+         [attr.aria-valuenow]="hsv().s"
+         [attr.aria-valuetext]="'Saturation ' + hsv().s + '%, Value ' + hsv().v + '%'"
+         (keydown)="onHsvHandleKeyDown($event)"
+         (blur)="onHsvHandleBlur()" #hsvPointer></div>
 </div>
 <div class="flex items-center gap-2">
     <div class="flex flex-1 flex-col gap-1 mr-2">
@@ -11,15 +20,19 @@
                      [selectionBackground]="'transparent'"
                      [handleClasses]="sliderHandleClasses()"
                      [trackSize]="sliderHeight"
+                     [rounded]="rounded()"
                      [ngModel]="hsv().h"
-                     (ngModelChange)="hueValue$.next($event)"></mona-slider>
+                     (ngModelChange)="hueValue$.next($event)"
+                     (blur)="onSliderBlur()"></mona-slider>
         @if (opacity()) {
             <mona-slider [min]="0" [max]="255" [trackBackground]="alphaSliderBackground()"
                          [selectionBackground]="'transparent'"
                          [handleClasses]="sliderHandleClasses()"
                          [trackSize]="sliderHeight"
+                         [rounded]="rounded()"
                          [ngModel]="alpha()"
-                         (ngModelChange)="onAlphaChange($event)"></mona-slider>
+                         (ngModelChange)="onAlphaChange($event)"
+                         (blur)="onSliderBlur()"></mona-slider>
         }
     </div>
     @for (preview of colorPreviews(); track preview.type) {
@@ -48,7 +61,8 @@
                         [rounded]="rounded()"
                         [size]="'small'"
                         class="w-18"
-                        (ngModelChange)="input.change($event)">
+                        (ngModelChange)="input.change($event)"
+                        (inputBlur)="onNumericInputBlur()">
                         <ng-template monaNumericTextBoxPrefixTemplate>
                             <ng-container [ngTemplateOutlet]="numericInputPrefixTemplate"
                                           [ngTemplateOutletContext]="{$implicit: input.label}"></ng-container>

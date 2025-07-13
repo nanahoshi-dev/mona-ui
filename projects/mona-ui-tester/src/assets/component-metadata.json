@@ -527,30 +527,6 @@
       }
     ]
   },
-  "ColorPaletteComponent": {
-    "name": "ColorPaletteComponent",
-    "selector": "\"mona-color-palette\"",
-    "inputs": [
-      {
-        "name": "columns",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "palette",
-        "type": "PaletteType | Iterable<string>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "tileSize",
-        "type": "number",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "AvatarComponent": {
     "name": "AvatarComponent",
     "selector": "\"mona-avatar\"",
@@ -2884,6 +2860,12 @@
         "kind": "output"
       },
       {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the color gradient.",
+        "kind": "input"
+      },
+      {
         "name": "format",
         "type": "ColorOutputFormat",
         "description": "Specifies the format of the color output.",
@@ -2917,6 +2899,42 @@
         "name": "showRgbInput",
         "type": "boolean",
         "description": "Specifies whether the color picker should display the RGB input.",
+        "kind": "input"
+      }
+    ]
+  },
+  "ColorPaletteComponent": {
+    "name": "ColorPaletteComponent",
+    "selector": "\"mona-color-palette\"",
+    "inputs": [
+      {
+        "name": "columns",
+        "type": "number",
+        "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the color palette.",
+        "kind": "input"
+      },
+      {
+        "name": "palette",
+        "type": "PaletteType | Iterable<string>",
+        "description": "The type of color palette to use.\nThis can be either \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.\nIf the provided palette is empty, it defaults to the flat color scheme.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ColorPaletteVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the color palette items.",
+        "kind": "input"
+      },
+      {
+        "name": "tileSize",
+        "type": "number",
+        "description": "The size of each tile in the color palette grid.",
         "kind": "input"
       }
     ]

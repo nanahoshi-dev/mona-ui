@@ -80,7 +80,8 @@ import {
         LucideAngularModule
     ],
     host: {
-        "[class]": "baseClasses()"
+        "[class]": "baseClasses()",
+        "[attr.data-disabled]": "disabled()"
     }
 })
 export class ColorGradientComponent implements OnInit, AfterViewInit, ControlValueAccessor, ColorGradientVariantInputs {
@@ -200,6 +201,11 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
     public readonly cancel = output<void>();
 
     /**
+     * @description Sets the disabled state of the color gradient.
+     */
+    public readonly disabled = input(false);
+
+    /**
      * @description Specifies the format of the color output.
      */
     public readonly format = input<ColorOutputFormat>("hex");
@@ -302,11 +308,11 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
 
     public onHexInputBlur(): void {
         this.updateHexInputValue();
+        this.#propagateTouched();
     }
 
     public onHexInputFocus(): void {
         this.hexFocused.set(true);
-        this.#propagateTouched();
     }
 
     public onHsvChange(value: number, channel: HSVChannel): void {
@@ -328,6 +334,82 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         if (!this.showButtons()) {
             this.emitValue();
         }
+    }
+
+    public onHsvHandleBlur(): void {
+        this.#propagateTouched();
+    }
+
+    public onHsvHandleKeyDown(event: KeyboardEvent): void {
+        if (this.disabled()) {
+            return;
+        }
+
+        const step = event.shiftKey ? 10 : 1;
+        const largeStep = 25;
+        let handled = false;
+
+        const currentLeft = this.hsvHandleLeft();
+        const currentTop = this.hsvHandleTop();
+        const containerRect = this.hsvRectangle().nativeElement.getBoundingClientRect();
+        const handleRect = this.hsvHandle().nativeElement.getBoundingClientRect();
+        const maxLeft = containerRect.width - handleRect.width / 2;
+        const maxTop = containerRect.height - handleRect.height / 2;
+        const minLeft = -handleRect.width / 2;
+        const minTop = -handleRect.height / 2;
+
+        let newLeft = currentLeft;
+        let newTop = currentTop;
+
+        switch (event.key) {
+            case "ArrowLeft":
+                newLeft = Math.max(minLeft, currentLeft - step);
+                handled = true;
+                break;
+            case "ArrowRight":
+                newLeft = Math.min(maxLeft, currentLeft + step);
+                handled = true;
+                break;
+            case "ArrowUp":
+                newTop = Math.max(minTop, currentTop - step);
+                handled = true;
+                break;
+            case "ArrowDown":
+                newTop = Math.min(maxTop, currentTop + step);
+                handled = true;
+                break;
+            case "Home":
+                newLeft = minLeft;
+                newTop = minTop;
+                handled = true;
+                break;
+            case "End":
+                newLeft = maxLeft;
+                newTop = maxTop;
+                handled = true;
+                break;
+            case "PageUp":
+                newTop = Math.max(minTop, currentTop - largeStep);
+                handled = true;
+                break;
+            case "PageDown":
+                newTop = Math.min(maxTop, currentTop + largeStep);
+                handled = true;
+                break;
+        }
+
+        if (handled) {
+            event.preventDefault();
+            event.stopPropagation();
+            this.hsvHandleLeft.set(newLeft);
+            this.hsvHandleTop.set(newTop);
+            this.updateHsvValues();
+            this.updateHexInputValue();
+        }
+    }
+
+    public onNumericInputBlur(): void {
+        this.#propagateTouched();
     }
 
     public onResetColorClick(): void {
@@ -353,6 +435,10 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         if (!this.showButtons()) {
             this.emitValue();
         }
+    }
+
+    public onSliderBlur(): void {
+        this.#propagateTouched();
     }
 
     public onSwitchColorModeClick(): void {
@@ -561,22 +647,16 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         );
         const mouseMove$ = fromEvent<MouseEvent>(document, "mousemove").pipe(takeUntilDestroyed(this.#destroyRef));
         const mouseUp$ = fromEvent<MouseEvent>(document, "mouseup").pipe(takeUntilDestroyed(this.#destroyRef));
-        mouseDown$
-            .pipe(
-                tap(() => this.#propagateTouched()),
-                switchMap(() => mouseMove$.pipe(takeUntil(mouseUp$)))
-            )
-            .subscribe((event: MouseEvent) => {
-                this.#zone.run(() => {
-                    this.updateHsvRectPointerPosition(event);
-                    this.updateHsvValues();
-                    this.updateHexInputValue();
-                });
+        mouseDown$.pipe(switchMap(() => mouseMove$.pipe(takeUntil(mouseUp$)))).subscribe((event: MouseEvent) => {
+            this.#zone.run(() => {
+                this.updateHsvRectPointerPosition(event);
+                this.updateHsvValues();
+                this.updateHexInputValue();
             });
+        });
         fromEvent<MouseEvent>(this.hsvRectangle().nativeElement, "click")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((event: MouseEvent) => {
-                this.#propagateTouched();
                 this.updateHsvRectPointerPosition(event);
                 window.setTimeout(() => {
                     this.updateHsvValues();

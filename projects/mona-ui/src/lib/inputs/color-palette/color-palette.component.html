@@ -1,4 +1,0 @@
-@for (color of colorScheme().colors; track color) {
-    <div class="mona-color-cell" [ngClass]="{'mona-selected': color===selectedColor()}"
-         [style.background-color]="color" (click)="onColorSelect(color)"></div>
-}

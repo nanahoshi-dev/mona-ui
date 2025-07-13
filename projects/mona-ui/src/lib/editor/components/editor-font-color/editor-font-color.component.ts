@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/c
 import { FormsModule } from "@angular/forms";
 import { ColorPickerComponent } from "../../../inputs/color-picker/components/color-picker/color-picker.component";
 import { ColorPickerValueTemplateDirective } from "../../../inputs/color-picker/directives/color-picker-value-template.directive";
-import { ColorService } from "../../../inputs/services/color.service";
 import { EditorService } from "../../services/editor.service";
+import { htmlColorCode } from "../../utils/htmlColorCode";
 
 @Component({
     selector: "mona-editor-font-color",
@@ -19,7 +19,7 @@ export class EditorFontColorComponent {
         this.#editorService.state();
         const attributes = this.#editorService.editor.getAttributes("textStyle");
         const color = attributes["color"] || this.#lastColor;
-        return ColorService.getHtmlColorCode(color);
+        return htmlColorCode(color);
     });
 
     public onColorChange(color: string): void {

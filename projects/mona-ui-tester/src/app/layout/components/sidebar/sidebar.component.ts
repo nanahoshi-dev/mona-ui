@@ -53,6 +53,10 @@ export class SidebarComponent {
                     path: "/color-gradient"
                 },
                 {
+                    text: "Color Palette",
+                    path: "/color-palette"
+                },
+                {
                     text: "Dropdown Button",
                     path: "/dropdown-button"
                 },

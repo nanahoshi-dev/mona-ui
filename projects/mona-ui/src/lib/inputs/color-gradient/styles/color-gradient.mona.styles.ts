@@ -5,6 +5,10 @@ export const colorGradientBaseVariants = cva(
         flex flex-col min-w-7.5
         p-2 gap-2
         select-none
+
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:opacity-50
+        data-[disabled='true']:pointer-events-none
     `
 );
 
@@ -35,6 +39,10 @@ export const colorGradientHsvRectangleHandleVariants = cva(
         border border-foreground
         outline outline-background
         shadow-md
+
+        focus:ring-2
+        focus:ring-primary/40
+        focus:ring-offset-2
     `,
     {
         variants: {
