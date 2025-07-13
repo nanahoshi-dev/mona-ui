@@ -20,7 +20,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { Copy, LucideAngularModule } from "lucide-angular";
-import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
+import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil, tap } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
@@ -49,6 +49,7 @@ import {
     colorGradientHsvRectangleHandleThemeVariants,
     colorGradientHsvRectangleThemeVariants,
     colorGradientPreviewThemeVariants,
+    colorGradientSliderHandleThemeVariants,
     ColorGradientVariantInputs,
     ColorGradientVariantProps
 } from "../../styles/color-gradient.styles";
@@ -89,6 +90,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
     readonly #valueChange$ = new Subject<string | null>();
     readonly #zone: NgZone = inject(NgZone);
     #propagateChange: Action<string | null> = () => {};
+    #propagateTouched: Action = () => {};
     protected readonly alpha = signal(255);
     protected readonly alphaInputColor = computed(() => {
         const rgb = this.rgb();
@@ -179,6 +181,11 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         }
         return `rgba(${red}, ${green}, ${blue}, ${this.alpha() / 255})`;
     });
+    protected readonly sliderHandleClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return colorGradientSliderHandleThemeVariants(theme)();
+    });
+    protected readonly sliderHeight = 10;
 
     /**
      * @description Emits when the Apply button is clicked.
@@ -299,6 +306,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
 
     public onHexInputFocus(): void {
         this.hexFocused.set(true);
+        this.#propagateTouched();
     }
 
     public onHsvChange(value: number, channel: HSVChannel): void {
@@ -355,7 +363,9 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         this.#propagateChange = fn;
     }
 
-    public registerOnTouched(fn: any): void {}
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
 
     public writeValue(value: string): void {
         if (!this.hsvRectangle() || !this.hsvHandle()) {
@@ -551,16 +561,22 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         );
         const mouseMove$ = fromEvent<MouseEvent>(document, "mousemove").pipe(takeUntilDestroyed(this.#destroyRef));
         const mouseUp$ = fromEvent<MouseEvent>(document, "mouseup").pipe(takeUntilDestroyed(this.#destroyRef));
-        mouseDown$.pipe(switchMap(() => mouseMove$.pipe(takeUntil(mouseUp$)))).subscribe((event: MouseEvent) => {
-            this.#zone.run(() => {
-                this.updateHsvRectPointerPosition(event);
-                this.updateHsvValues();
-                this.updateHexInputValue();
+        mouseDown$
+            .pipe(
+                tap(() => this.#propagateTouched()),
+                switchMap(() => mouseMove$.pipe(takeUntil(mouseUp$)))
+            )
+            .subscribe((event: MouseEvent) => {
+                this.#zone.run(() => {
+                    this.updateHsvRectPointerPosition(event);
+                    this.updateHsvValues();
+                    this.updateHexInputValue();
+                });
             });
-        });
         fromEvent<MouseEvent>(this.hsvRectangle().nativeElement, "click")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((event: MouseEvent) => {
+                this.#propagateTouched();
                 this.updateHsvRectPointerPosition(event);
                 window.setTimeout(() => {
                     this.updateHsvValues();

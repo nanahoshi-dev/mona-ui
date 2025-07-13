@@ -1,5 +1,8 @@
 <div [class]="trackClasses()"
-     [attr.data-orientation]="orientation()" [style.background]="trackBackground()">
+     [attr.data-orientation]="orientation()"
+     [style.height]="orientation()==='horizontal' ? trackSize():undefined"
+     [style.width]="orientation()==='vertical' ? trackSize():undefined"
+     [style.background]="trackBackground()">
     <div [class]="selectionClasses()"
          [attr.data-orientation]="orientation()"
          [attr.data-dragging]="dragging()"
@@ -43,7 +46,7 @@
         }
     </div>
 }
-<div [class]="handleClasses()"
+<div [class]="sliderHandleClasses()"
      [attr.data-orientation]="orientation()"
      [attr.data-dragging]="dragging()"
      [attr.data-focused]="primaryHandleFocused()"
@@ -53,11 +56,12 @@
      [attr.tabindex]="disabled()?-1:0"
      #sliderHandle>
     @if (handleTemplate()) {
-        <ng-container *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValues()[0]}"></ng-container>
+        <ng-container
+            *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValues()[0]}"></ng-container>
     }
 </div>
 @if (ranged()) {
-    <div [class]="handleClasses()"
+    <div [class]="sliderHandleClasses()"
          [attr.data-orientation]="orientation()"
          [attr.data-dragging]="dragging()"
          [attr.data-focused]="secondaryHandleFocused()"
@@ -67,7 +71,8 @@
          [attr.tabindex]="disabled()?-1:0"
          #secondarySliderHandle>
         @if (handleTemplate()) {
-            <ng-container *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValues()[1]}"></ng-container>
+            <ng-container
+                *ngTemplateOutlet="handleTemplate()??null; context: {$implicit: handleValues()[1]}"></ng-container>
         }
     </div>
 }

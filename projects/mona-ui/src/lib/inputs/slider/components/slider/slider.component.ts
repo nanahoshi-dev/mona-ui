@@ -20,6 +20,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { Orientation } from "../../../../models/Orientation";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
@@ -78,11 +79,6 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         return sliderBaseThemeVariants(theme)();
     });
     protected readonly dragging = signal(false);
-    protected readonly handleClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        const rounded = this.rounded();
-        return sliderHandleThemeVariants(theme)({ rounded });
-    });
     protected readonly handlePositions = signal<[number, number]>([0, 0]);
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
@@ -140,8 +136,9 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     });
     protected readonly primaryHandleStyle = computed(() => {
         const baseStyle = this.handleTemplateStyles();
+        const customStyle = this.handleStyles();
         if (this.ranged() && this.handlesOverlap()) {
-            return { ...baseStyle, zIndex: this.secondaryHandleOnTop() ? "1" : "2" };
+            return { ...baseStyle, ...customStyle, zIndex: this.secondaryHandleOnTop() ? "1" : "2" };
         }
         return baseStyle;
     });
@@ -170,8 +167,9 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     protected readonly secondaryHandleOnTop = signal(true);
     protected readonly secondaryHandleStyle = computed(() => {
         const baseStyle = this.handleTemplateStyles();
+        const customStyle = this.handleStyles();
         if (this.ranged() && this.handlesOverlap()) {
-            return { ...baseStyle, zIndex: this.secondaryHandleOnTop() ? "2" : "1" };
+            return { ...baseStyle, ...customStyle, zIndex: this.secondaryHandleOnTop() ? "2" : "1" };
         }
         return baseStyle;
     });
@@ -184,6 +182,13 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     protected readonly selectionLeft = computed(() => this.rangeSelection().left);
     protected readonly selectionRight = computed(() => this.rangeSelection().right);
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
+    protected readonly sliderHandleClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const handleClasses = this.handleClasses();
+        const variants = sliderHandleThemeVariants(theme)({ rounded });
+        return twMerge(variants, handleClasses);
+    });
     protected readonly tickClasses = computed(() => {
         const theme = this.#themeService.theme();
         return sliderTickThemeVariants(theme)();
@@ -234,6 +239,18 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
      * @description Sets the disabled state of the slider.
      */
     public readonly disabled = input(false);
+
+    /**
+     * @internal
+     * Sets the classes for the slider handle.
+     */
+    public readonly handleClasses = input<string | string[]>([]);
+
+    /**
+     * @internal
+     * Sets the styles for the slider handle.
+     */
+    public readonly handleStyles = input<Partial<CSSStyleDeclaration>>({});
 
     /**
      * @description Sets the position of the label relative to the slider track.
@@ -309,6 +326,24 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
      * @description Sets the background color of the slider track.
      */
     public readonly trackBackground = input<string | Partial<CSSStyleDeclaration> | null>(null);
+
+    /**
+     * @description Sets the size of the slider track.
+     * For horizontal sliders, this sets the height.
+     * For vertical sliders, this sets the width.
+     */
+    public readonly trackSize = input(null, {
+        transform: (value: string | number | null) => {
+            if (value == null || value === "") {
+                return null;
+            }
+            if (typeof value === "number") {
+                return `${value}px`;
+            }
+            const number = Number(value);
+            return isNaN(number) ? value : `${number}px`;
+        }
+    });
 
     public constructor() {
         afterNextRender({

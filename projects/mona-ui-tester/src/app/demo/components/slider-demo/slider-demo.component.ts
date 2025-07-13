@@ -133,6 +133,10 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             trackBackground: {
                 type: "color",
                 value: "var(--color-background)"
+            },
+            trackSize: {
+                type: "string",
+                value: ""
             }
         },
         outputs: {},
@@ -170,6 +174,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             [smallTickStep]="smallTickStep()"
             [step]="step()"
             [trackBackground]="trackBackground()"
+            [trackSize]="trackSize()"
             [ngModel]="value()"
             (ngModelChange)="onValueChange($event)"
             style="width: 400px;">
@@ -211,6 +216,18 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly smallTickStep = input(1);
     public readonly step = input(1);
     public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>("transparent");
+    public readonly trackSize = input(null, {
+        transform: (value: string | number | null) => {
+            if (value == null || value === "") {
+                return null;
+            }
+            if (typeof value === "number") {
+                return `${value}px`;
+            }
+            const number = Number(value);
+            return isNaN(number) ? value : `${number}px`;
+        }
+    });
 
     public onValueChange(value: number | [number, number]): void {
         console.log("Slider value changed:", value);

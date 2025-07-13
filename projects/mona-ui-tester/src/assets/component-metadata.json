@@ -3154,6 +3154,18 @@
         "kind": "input"
       },
       {
+        "name": "handleClasses",
+        "type": "string | string[]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "handleStyles",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "labelPosition",
         "type": "SliderLabelPosition",
         "description": "Sets the position of the label relative to the slider track.",
@@ -3235,6 +3247,12 @@
         "name": "trackBackground",
         "type": "string | Partial<CSSStyleDeclaration> | null",
         "description": "Sets the background color of the slider track.",
+        "kind": "input"
+      },
+      {
+        "name": "trackSize",
+        "type": "string | number | null",
+        "description": "Sets the size of the slider track.\nFor horizontal sliders, this sets the height.\nFor vertical sliders, this sets the width.",
         "kind": "input"
       }
     ]

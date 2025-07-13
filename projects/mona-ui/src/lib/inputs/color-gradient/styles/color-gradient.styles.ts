@@ -3,9 +3,10 @@ import { ThemeStyle } from "../../../theme/models/Theme";
 import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     colorGradientBaseVariants as monaColorGradientBaseVariants,
-    colorGradientHsvRectangleVariants as monaColorGradientHsvRectangleVariants,
     colorGradientHsvRectangleHandleVariants as monaColorGradientHsvRectangleHandleVariants,
-    colorGradientPreviewVariants as monaColorGradientPreviewVariants
+    colorGradientHsvRectangleVariants as monaColorGradientHsvRectangleVariants,
+    colorGradientPreviewVariants as monaColorGradientPreviewVariants,
+    colorGradientSliderHandleVariants as monaColorGradientSliderHandleVariants
 } from "./color-gradient.mona.styles";
 
 export const colorGradientBaseThemeVariants = (theme: ThemeStyle) => {
@@ -44,6 +45,15 @@ export const colorGradientPreviewThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const colorGradientSliderHandleThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaColorGradientSliderHandleVariants;
+        default:
+            return monaColorGradientSliderHandleVariants;
+    }
+};
+
 type ColorGradientBaseVariantProps = VariantProps<ReturnType<typeof colorGradientBaseThemeVariants>>;
 type ColorGradientVaseVariantInput = VariantInputs<ColorGradientBaseVariantProps>;
 
@@ -58,12 +68,17 @@ type ColorGradientHsvRectangleHandleVariantInput = VariantInputs<ColorGradientHs
 type ColorGradientPreviewVariantProps = VariantProps<ReturnType<typeof colorGradientPreviewThemeVariants>>;
 type ColorGradientPreviewVariantInput = VariantInputs<ColorGradientPreviewVariantProps>;
 
+type ColorGradientSliderHandleVariantProps = VariantProps<ReturnType<typeof colorGradientSliderHandleThemeVariants>>;
+type ColorGradientSliderHandleVariantInput = VariantInputs<ColorGradientSliderHandleVariantProps>;
+
 export type ColorGradientVariantProps = ColorGradientBaseVariantProps &
     ColorGradientHsvRectangleVariantProps &
     ColorGradientHsvRectangleHandleVariantProps &
-    ColorGradientPreviewVariantProps;
+    ColorGradientPreviewVariantProps &
+    ColorGradientSliderHandleVariantProps;
 
 export type ColorGradientVariantInputs = ColorGradientVaseVariantInput &
     ColorGradientHsvRectangleVariantInput &
     ColorGradientHsvRectangleHandleVariantInput &
-    ColorGradientPreviewVariantInput;
+    ColorGradientPreviewVariantInput &
+    ColorGradientSliderHandleVariantInput;

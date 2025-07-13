@@ -8,11 +8,17 @@
     <div class="flex flex-1 flex-col gap-1 mr-2">
         <mona-slider [min]="0" [max]="360"
                      [trackBackground]="'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'"
-                     [selectionBackground]="'transparent'" [ngModel]="hsv().h"
+                     [selectionBackground]="'transparent'"
+                     [handleClasses]="sliderHandleClasses()"
+                     [trackSize]="sliderHeight"
+                     [ngModel]="hsv().h"
                      (ngModelChange)="hueValue$.next($event)"></mona-slider>
         @if (opacity()) {
             <mona-slider [min]="0" [max]="255" [trackBackground]="alphaSliderBackground()"
-                         [selectionBackground]="'transparent'" [ngModel]="alpha()"
+                         [selectionBackground]="'transparent'"
+                         [handleClasses]="sliderHandleClasses()"
+                         [trackSize]="sliderHeight"
+                         [ngModel]="alpha()"
                          (ngModelChange)="onAlphaChange($event)"></mona-slider>
         }
     </div>

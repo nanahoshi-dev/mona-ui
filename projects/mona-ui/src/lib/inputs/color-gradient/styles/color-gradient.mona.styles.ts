@@ -66,3 +66,12 @@ export const colorGradientPreviewVariants = cva(
         }
     }
 );
+
+export const colorGradientSliderHandleVariants = cva(
+    `
+        border-3 border-white/90
+        outline outline-solid outline-black/90
+        bg-transparent
+        w-3 h-3
+    `
+);
