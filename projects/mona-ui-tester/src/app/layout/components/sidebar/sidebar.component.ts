@@ -57,6 +57,10 @@ export class SidebarComponent {
                     path: "/color-palette"
                 },
                 {
+                    text: "Color Picker",
+                    path: "/color-picker"
+                },
+                {
                     text: "Dropdown Button",
                     path: "/dropdown-button"
                 },

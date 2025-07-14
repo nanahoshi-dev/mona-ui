@@ -2,25 +2,38 @@
     <ng-container [ngTemplateOutlet]="valueTemplate()??null"
                   [ngTemplateOutletContext]="{$implicit: color()}"></ng-container>
 } @else {
-    <div [style.background]="color()" class="mona-input-selector-value">
+    <div [style.background]="color()" [class]="colorClasses()">
         @if (!color()) {
             <fa-icon [icon]="noColorIcon"></fa-icon>
         }
     </div>
 }
-<div class="mona-input-selector-icon">
-    <button monaButton look="ghost" [tabindex]="-1" class="mona-input-button">
+<div>
+    <button monaButton look="link" [tabindex]="-1" class="px-2 py-1">
         <fa-icon [icon]="dropdownIcon"></fa-icon>
     </button>
 </div>
 
 <ng-template #popupTemplate>
     @if (view() === 'palette') {
-        <mona-color-palette [palette]="palette()" [columns]="columns()" [ngModel]="color()"
-                            (ngModelChange)="onColorPaletteValueChange($event)"></mona-color-palette>
+        <div class="flex flex-col border border-input-border bg-background shadow-lg p-0.5 outline-none"
+             tabindex="0"
+             role="dialog"
+             aria-label="Color palette picker"
+             (keydown)="onPaletteContainerKeyDown($event)">
+            <div class="flex items-center justify-end p-1">
+                <button monaButton look="ghost" size="small" (click)="onClearClick()">
+                    <i class="ri-blur-off-line"></i>
+                </button>
+            </div>
+            <mona-color-palette [palette]="palette()" [columns]="columns()" [ngModel]="color()"
+                                (ngModelChange)="onColorPaletteValueChange($event)"
+            ></mona-color-palette>
+        </div>
     } @else if (view() === 'gradient') {
         <mona-color-gradient [opacity]="opacity()"
                              [ngModel]="color()" (ngModelChange)="onColorGradientValueChange($event)"
+                             class="border border-input-border bg-background shadow-lg"
                              (apply)="onColorGradientApply()" (cancel)="onColorGradientCancel()"
         ></mona-color-gradient>
     }

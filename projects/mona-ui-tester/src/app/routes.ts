@@ -48,6 +48,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "color-picker",
+                loadComponent: () =>
+                    import("./docs/components/color-picker-doc/color-picker-doc.component").then(
+                        m => m.ColorPickerDocComponent
+                    )
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/drop-down-button-doc/drop-down-button-doc.component").then(

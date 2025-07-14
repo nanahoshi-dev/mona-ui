@@ -2946,31 +2946,43 @@
       {
         "name": "closeOnSelect",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to close the color picker when a color is selected.\nOnly applies when view is set to \"palette\".",
         "kind": "input"
       },
       {
         "name": "columns",
         "type": "number",
-        "description": "",
+        "description": "The number of columns to display in the color palette.\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the color picker.",
         "kind": "input"
       },
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to display the opacity slider.\nOnly applies when the view is set to \"gradient\".",
         "kind": "input"
       },
       {
         "name": "palette",
-        "type": "string[] | PaletteType",
-        "description": "",
+        "type": "Iterable<string> | PaletteType",
+        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ColorPickerVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the color picker.",
         "kind": "input"
       },
       {
         "name": "view",
         "type": "ColorPickerView",
-        "description": "",
+        "description": "The view mode of the color picker.\nThis can be either \"palette\" or \"gradient\".",
         "kind": "input"
       }
     ]
