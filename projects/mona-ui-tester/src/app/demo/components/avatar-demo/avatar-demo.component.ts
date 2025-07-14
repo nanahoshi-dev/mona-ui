@@ -38,15 +38,15 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
                 value: "#121315"
             },
             borderRadius: {
-                type: "number",
+                type: "string",
                 value: "50%"
             },
             borderWidth: {
-                type: "number",
+                type: "string",
                 value: "0.15em"
             },
             height: {
-                type: "number",
+                type: "string",
                 value: "100px"
             },
             image: {

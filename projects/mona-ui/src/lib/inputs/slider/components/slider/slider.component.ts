@@ -395,6 +395,49 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         }
     }
 
+    private calculateNewValue(event: KeyboardEvent, isSecondary: boolean): number {
+        const currentValues = this.handleValues();
+        const currentValue = isSecondary && this.ranged() ? currentValues[1] : currentValues[0];
+        const min = this.min();
+        const max = this.max();
+        const step = this.step();
+
+        let newValue = currentValue;
+
+        switch (event.key) {
+            case "ArrowLeft":
+            case "ArrowDown":
+                const backwardStep = event.shiftKey ? step * 10 : step;
+                newValue = currentValue - backwardStep;
+                break;
+            case "ArrowRight":
+            case "ArrowUp":
+                const forwardStep = event.shiftKey ? step * 10 : step;
+                newValue = currentValue + forwardStep;
+                break;
+            case "Home":
+                newValue = min;
+                break;
+            case "End":
+                newValue = max;
+                break;
+            case "PageDown":
+                const largeBackwardStep = (max - min) * 0.1;
+                newValue = currentValue - largeBackwardStep;
+                break;
+            case "PageUp":
+                const largeForwardStep = (max - min) * 0.1;
+                newValue = currentValue + largeForwardStep;
+                break;
+        }
+
+        // Clamp to min/max and snap to step
+        newValue = Math.max(min, Math.min(max, newValue));
+        newValue = Math.round((newValue - min) / step) * step + min;
+
+        return Math.max(min, Math.min(max, newValue));
+    }
+
     private findClosestTickElement(event: MouseEvent): HTMLSpanElement {
         const elements = this.tickElements().map(tick => tick.host.nativeElement);
         let maxDistance = Number.MAX_VALUE;
@@ -575,24 +618,22 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 filter(() => !this.disabled()),
-                filter(event => ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)),
+                filter(event =>
+                    ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(
+                        event.key
+                    )
+                ),
                 tap(event => {
                     event.preventDefault();
                     event.stopPropagation();
                 })
             )
             .subscribe(event => {
-                const stepDirection = event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1;
-                const stepAmount = this.step() * stepDirection;
+                const newValue = this.calculateNewValue(event, false);
 
                 if (this.ranged()) {
-                    const currentValues = this.handleValues();
-                    const currentValue = currentValues[0];
-                    const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
                     this.updateRangedValue(newValue, false, false);
                 } else {
-                    const currentValue = this.handleValues()[0];
-                    const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
                     this.#zone.run(() => {
                         this.handleValues.set([newValue, newValue]);
                         this.handlePositions.set([
@@ -610,18 +651,25 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
                 .pipe(
                     takeUntilDestroyed(this.#destroyRef),
                     filter(() => !this.disabled()),
-                    filter(event => ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)),
+                    filter(event =>
+                        [
+                            "ArrowLeft",
+                            "ArrowRight",
+                            "ArrowUp",
+                            "ArrowDown",
+                            "Home",
+                            "End",
+                            "PageUp",
+                            "PageDown"
+                        ].includes(event.key)
+                    ),
                     tap(event => {
                         event.preventDefault();
                         event.stopPropagation();
                     })
                 )
                 .subscribe(event => {
-                    const stepDirection = event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1 : 1;
-                    const stepAmount = this.step() * stepDirection;
-                    const currentValues = this.handleValues();
-                    const currentValue = currentValues[1];
-                    const newValue = Math.max(this.min(), Math.min(this.max(), currentValue + stepAmount));
+                    const newValue = this.calculateNewValue(event, true);
                     this.updateRangedValue(newValue, true, false);
                 });
         }

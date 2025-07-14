@@ -14,7 +14,18 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradientComponent> {
     protected readonly ColorGradientWrapperComponent = ColorGradientWrapperComponent;
     protected readonly config = signal<ComponentConfig<ColorGradientComponent>>({
-        code: ``,
+        code: `
+            <mona-color-gradient
+                [disabled]="disabled()"
+                [format]="format()"
+                [opacity]="opacity()"
+                [rounded]="rounded()"
+                [showButtons]="showButtons()"
+                [showHexInput]="showHexInput()"
+                [showRgbInput]="showRgbInput()"
+                class="bg-accent-dark border border-border">
+            </mona-color-gradient>
+        `,
         inputs: {
             disabled: {
                 type: "boolean",

@@ -54,6 +54,13 @@
      [style.left.%]="orientation()==='horizontal' ? primaryHandlePosition() : undefined"
      [style.bottom.%]="orientation()==='vertical' ? primaryHandlePosition() : undefined"
      [attr.tabindex]="disabled()?-1:0"
+     [attr.role]="'slider'"
+     [attr.aria-valuemin]="min()"
+     [attr.aria-valuemax]="max()"
+     [attr.aria-valuenow]="handleValues()[0]"
+     [attr.aria-orientation]="orientation()"
+     [attr.aria-disabled]="disabled()"
+     [attr.aria-label]="ranged() ? 'Minimum value' : 'Slider value'"
      #sliderHandle>
     @if (handleTemplate()) {
         <ng-container
@@ -69,6 +76,13 @@
          [style.left.%]="orientation()==='horizontal' ? secondaryHandlePosition() : undefined"
          [style.bottom.%]="orientation()==='vertical' ? secondaryHandlePosition() : undefined"
          [attr.tabindex]="disabled()?-1:0"
+         [attr.role]="'slider'"
+         [attr.aria-valuemin]="min()"
+         [attr.aria-valuemax]="max()"
+         [attr.aria-valuenow]="handleValues()[1]"
+         [attr.aria-orientation]="orientation()"
+         [attr.aria-disabled]="disabled()"
+         [attr.aria-label]="'Maximum value'"
          #secondarySliderHandle>
         @if (handleTemplate()) {
             <ng-container
