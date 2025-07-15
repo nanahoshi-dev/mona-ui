@@ -22,7 +22,14 @@
                                  [style.width.px]="150"
                                  size="small"
                                  [showClearButton]="false"
-                                 (ngModelChange)="onValueChange(entry().name, $event)"></mona-drop-down-list>
+                                 (ngModelChange)="onValueChange(entry().name, $event)">
+                <ng-template monaDropDownListItemTemplate let-dataItem>
+                    <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                </ng-template>
+                <ng-template monaDropDownListValueTemplate let-dataItem>
+                    <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                </ng-template>
+            </mona-drop-down-list>
         } @else if (entry().configType === "color") {
             <mona-color-picker
                 [ngModel]="entry().value"

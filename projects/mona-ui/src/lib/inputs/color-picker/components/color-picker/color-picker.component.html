@@ -21,11 +21,13 @@
              role="dialog"
              aria-label="Color palette picker"
              (keydown)="onPaletteContainerKeyDown($event)">
-            <div class="flex items-center justify-end p-1">
-                <button monaButton look="ghost" size="small" (click)="onClearClick()">
-                    <i class="ri-blur-off-line"></i>
-                </button>
-            </div>
+            @if (showClearButton()) {
+                <div class="flex items-center justify-end p-1">
+                    <button monaButton look="ghost" size="small" (click)="onClearClick()">
+                        <i class="ri-blur-off-line"></i>
+                    </button>
+                </div>
+            }
             <mona-color-palette [palette]="palette()" [columns]="columns()" [ngModel]="color()"
                                 (ngModelChange)="onColorPaletteValueChange($event)"
             ></mona-color-palette>

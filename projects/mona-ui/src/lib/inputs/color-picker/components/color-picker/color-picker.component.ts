@@ -136,6 +136,12 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
     public readonly rounded = input<ColorPickerVariantProps["rounded"]>("medium");
 
     /**
+     * @description Whether to show the clear button to reset the color.
+     * This is only applicable when the view is set to "palette".
+     */
+    public readonly showClearButton = input(false);
+
+    /**
      * @description The view mode of the color picker.
      * This can be either "palette" or "gradient".
      */

@@ -1,4 +1,8 @@
-import { FlexibleConnectedPositionStrategyOrigin } from "@angular/cdk/overlay";
+import {
+    ConnectedPosition,
+    ConnectionPositionPair,
+    FlexibleConnectedPositionStrategyOrigin
+} from "@angular/cdk/overlay";
 import {
     AfterViewInit,
     ChangeDetectionStrategy,
@@ -10,48 +14,177 @@ import {
     input,
     OnDestroy,
     output,
-    TemplateRef
+    StaticProvider,
+    TemplateRef,
+    viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, take } from "rxjs";
+import { Action } from "../../../utils/Action";
+import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupOffset } from "../../models/PopupOffset";
 import { PopupRef } from "../../models/PopupRef";
-import { PopupSettings } from "../../models/PopupSettings";
+import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSettings";
 import { PopupService } from "../../services/popup.service";
+import { ConnectionPoint } from "../../utils/connectionPosition";
 
 @Component({
     selector: "mona-popup",
     templateUrl: "./popup.component.html",
-    styleUrls: ["./popup.component.scss"],
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {
-        class: "mona-popup"
-    }
+    host: {}
 })
-export class PopupComponent implements OnDestroy, AfterViewInit {
+export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #popupService: PopupService = inject(PopupService);
     #popupOpened: boolean = false;
-    #popupRef: PopupRef | null = null;
+    protected readonly contentTemplate = viewChild.required(TemplateRef);
+    protected popupRef: PopupRef | null = null;
 
-    protected readonly contentTemplate = contentChild.required(TemplateRef);
+    /**
+     * @description The anchor element or point for the popup.
+     */
+    public readonly anchor = input.required<FlexibleConnectedPositionStrategyOrigin>();
 
+    /**
+     * @description The connection point for the popup anchor.
+     */
+    public readonly anchorConnectionPoint = input<ConnectionPoint>("bottomcenter");
+
+    /**
+     * @description The animation settings for the popup.
+     */
+    public readonly animation = input<boolean | PopupAnimationSettings>(true);
+
+    /**
+     * @description The class or classes to apply to the backdrop of the popup.
+     */
+    public readonly backdropClass = input<string | string[]>([]);
+
+    /**
+     * @description Emits when the popup is closed.
+     */
     public readonly close = output();
+
+    /**
+     * @description Whether to close the popup when clicking on the backdrop.
+     * Only applies when the popup has a backdrop.
+     */
+    public readonly closeOnBackdropClick = input(true);
+
+    /**
+     * @description Whether to close the popup when the escape key is pressed.
+     */
+    public readonly closeOnEscape = input(true);
+
+    /**
+     * @description Whether to close the popup when clicking outside of it.
+     */
+    public readonly closeOnOutsideClick = input(true);
+
+    /**
+     * @description Arbitrary data to pass to the popup.
+     */
+    public readonly data = input<T>();
+
+    /**
+     * @description Whether to disable the animation of the popup.
+     * If set to true, the popup will not animate when opening or closing.
+     */
+    public readonly disableAnimation = input(false);
+
+    /**
+     * @description Whether the popup should have a backdrop.
+     */
+    public readonly hasBackdrop = input(false);
+
+    /**
+     * @description The height of the popup.
+     */
+    public readonly height = input<number | string>();
+
+    /**
+     * @description The maximum height of the popup.
+     */
+    public readonly maxHeight = input<number | string>();
+
+    /**
+     * @description The maximum width of the popup.
+     */
+    public readonly maxWidth = input<number | string>();
+
+    /**
+     * @description The minimum height of the popup.
+     */
+    public readonly minHeight = input<number | string>();
+
+    /**
+     * @description The minimum width of the popup.
+     */
+    public readonly minWidth = input<number | string>();
+
+    /**
+     * @description The offset of the popup from the anchor.
+     */
+    public readonly offset = input<PopupOffset>();
+
+    /**
+     * @description Emits when the popup is opened.
+     */
     public readonly open = output<PopupRef>();
 
-    public anchor = input.required<FlexibleConnectedPositionStrategyOrigin>();
-    public closeOnEscape = input(true);
-    public height = input<number | string | undefined>(undefined);
-    public maxHeight = input<number | string | undefined>(undefined);
-    public maxWidth = input<number | string | undefined>(undefined);
-    public minHeight = input<number | string | undefined>(undefined);
-    public minWidth = input<number | string | undefined>(undefined);
-    public offset = input<PopupOffset | undefined>(undefined);
-    public popupClass = input<string | string[]>([]);
-    public popupWrapperClass = input<string | string[]>([]);
-    public trigger = input("click");
-    public width = input<number | string | undefined>(undefined);
+    /**
+     * @description The class or classes to apply to the popup.
+     */
+    public readonly popupClass = input<string | string[]>([]);
+
+    /**
+     * @description The connection point for the popup.
+     */
+    public readonly popupConnectionPoint = input<ConnectionPoint>("topcenter");
+
+    /**
+     * @description The class or classes to apply to the popup wrapper.
+     */
+    public readonly popupWrapperClass = input<string | string[]>([]);
+
+    /**
+     * @description The position strategy for the popup.
+     */
+    public readonly positionStrategy = input<"global" | "connected">("connected");
+
+    /**
+     * @description The positions to use for the popup.
+     * The popup will try to position itself in the first position that fits.
+     */
+    public readonly positions = input<Array<ConnectedPosition | ConnectionPositionPair>>();
+
+    /**
+     * @description Called when the popup is requested to close.
+     * This can be used to prevent the popup from closing.
+     */
+    public readonly preventClose = input<Action<PopupCloseEvent, boolean>>();
+
+    /**
+     * @description The providers that will be injected into the popup.
+     */
+    public readonly providers = input<StaticProvider[]>([]);
+
+    /**
+     * @description The trigger event for opening the popup.
+     */
+    public readonly trigger = input("click");
+
+    /**
+     * @description The width of the popup.
+     */
+    public readonly width = input<number | string | undefined>(undefined);
+
+    /**
+     * @description Whether to push the popup into the screen when it is opened.
+     */
+    public readonly withPush = input<boolean>(true);
 
     public ngAfterViewInit(): void {
         window.setTimeout(() => {
@@ -60,7 +193,7 @@ export class PopupComponent implements OnDestroy, AfterViewInit {
     }
 
     public ngOnDestroy(): void {
-        this.#popupRef?.close();
+        this.popupRef?.close();
     }
 
     private getPopupWidth(): string | number | undefined {
@@ -102,8 +235,15 @@ export class PopupComponent implements OnDestroy, AfterViewInit {
                 }
                 const popupSettings: PopupSettings = {
                     anchor,
+                    anchorConnectionPoint: this.anchorConnectionPoint(),
+                    animation: this.animation(),
+                    backdropClass: this.backdropClass(),
+                    closeOnBackdropClick: this.closeOnBackdropClick(),
                     closeOnEscape: this.closeOnEscape(),
+                    closeOnOutsideClick: this.closeOnOutsideClick(),
                     content: this.contentTemplate(),
+                    data: this.data(),
+                    disableAnimation: this.disableAnimation(),
                     hasBackdrop: false,
                     height: this.height(),
                     maxHeight: this.maxHeight(),
@@ -112,12 +252,18 @@ export class PopupComponent implements OnDestroy, AfterViewInit {
                     minWidth: this.minWidth(),
                     offset: this.offset(),
                     popupClass: this.popupClass(),
+                    popupConnectionPoint: this.popupConnectionPoint(),
                     popupWrapperClass: this.popupWrapperClass(),
-                    width
+                    positionStrategy: this.positionStrategy(),
+                    positions: this.positions(),
+                    preventClose: this.preventClose(),
+                    providers: this.providers(),
+                    width,
+                    withPush: this.withPush()
                 };
-                this.#popupRef = this.#popupService.create(popupSettings);
-                this.#popupRef.closed.pipe(take(1)).subscribe(result => {
-                    this.#popupRef = null;
+                this.popupRef = this.#popupService.create(popupSettings);
+                this.popupRef.closed.pipe(take(1)).subscribe(result => {
+                    this.popupRef = null;
                     this.close.emit();
                     if (result instanceof PointerEvent && result.type === this.trigger()) {
                         this.#popupOpened =
@@ -129,7 +275,7 @@ export class PopupComponent implements OnDestroy, AfterViewInit {
                 if (pointAnchor) {
                     this.#popupOpened = true;
                 }
-                this.open.emit(this.#popupRef);
+                this.open.emit(this.popupRef);
             });
     }
 }

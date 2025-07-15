@@ -74,6 +74,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "popup",
+                loadComponent: () =>
+                    import("./docs/components/popup-doc/popup-doc.component").then(m => m.PopupDocComponent)
+            },
+            {
                 path: "radio-button",
                 loadComponent: () =>
                     import("./docs/components/radio-button-doc/radio-button-doc.component").then(

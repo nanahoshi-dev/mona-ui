@@ -2038,87 +2038,171 @@
     "selector": "\"mona-popup\"",
     "inputs": [
       {
-        "name": "close",
-        "type": "void",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "open",
-        "type": "PopupRef",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "anchor",
         "type": "FlexibleConnectedPositionStrategyOrigin",
-        "description": "",
+        "description": "The anchor element or point for the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "anchorConnectionPoint",
+        "type": "ConnectionPoint",
+        "description": "The connection point for the popup anchor.",
+        "kind": "input"
+      },
+      {
+        "name": "animation",
+        "type": "boolean | PopupAnimationSettings",
+        "description": "The animation settings for the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "backdropClass",
+        "type": "string | string[]",
+        "description": "The class or classes to apply to the backdrop of the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "void",
+        "description": "Emits when the popup is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "closeOnBackdropClick",
+        "type": "boolean",
+        "description": "Whether to close the popup when clicking on the backdrop.\nOnly applies when the popup has a backdrop.",
         "kind": "input"
       },
       {
         "name": "closeOnEscape",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to close the popup when the escape key is pressed.",
+        "kind": "input"
+      },
+      {
+        "name": "closeOnOutsideClick",
+        "type": "boolean",
+        "description": "Whether to close the popup when clicking outside of it.",
+        "kind": "input"
+      },
+      {
+        "name": "data",
+        "type": "T",
+        "description": "Arbitrary data to pass to the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "disableAnimation",
+        "type": "boolean",
+        "description": "Whether to disable the animation of the popup.\nIf set to true, the popup will not animate when opening or closing.",
+        "kind": "input"
+      },
+      {
+        "name": "hasBackdrop",
+        "type": "boolean",
+        "description": "Whether the popup should have a backdrop.",
         "kind": "input"
       },
       {
         "name": "height",
-        "type": "number | string | undefined",
-        "description": "",
+        "type": "number | string",
+        "description": "The height of the popup.",
         "kind": "input"
       },
       {
         "name": "maxHeight",
-        "type": "number | string | undefined",
-        "description": "",
+        "type": "number | string",
+        "description": "The maximum height of the popup.",
         "kind": "input"
       },
       {
         "name": "maxWidth",
-        "type": "number | string | undefined",
-        "description": "",
+        "type": "number | string",
+        "description": "The maximum width of the popup.",
         "kind": "input"
       },
       {
         "name": "minHeight",
-        "type": "number | string | undefined",
-        "description": "",
+        "type": "number | string",
+        "description": "The minimum height of the popup.",
         "kind": "input"
       },
       {
         "name": "minWidth",
-        "type": "number | string | undefined",
-        "description": "",
+        "type": "number | string",
+        "description": "The minimum width of the popup.",
         "kind": "input"
       },
       {
         "name": "offset",
-        "type": "PopupOffset | undefined",
-        "description": "",
+        "type": "PopupOffset",
+        "description": "The offset of the popup from the anchor.",
         "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PopupRef",
+        "description": "Emits when the popup is opened.",
+        "kind": "output"
       },
       {
         "name": "popupClass",
         "type": "string | string[]",
-        "description": "",
+        "description": "The class or classes to apply to the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "popupConnectionPoint",
+        "type": "ConnectionPoint",
+        "description": "The connection point for the popup.",
         "kind": "input"
       },
       {
         "name": "popupWrapperClass",
         "type": "string | string[]",
-        "description": "",
+        "description": "The class or classes to apply to the popup wrapper.",
+        "kind": "input"
+      },
+      {
+        "name": "positionStrategy",
+        "type": "\"global\" | \"connected\"",
+        "description": "The position strategy for the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "positions",
+        "type": "Array<ConnectedPosition | ConnectionPositionPair>",
+        "description": "The positions to use for the popup.\nThe popup will try to position itself in the first position that fits.",
+        "kind": "input"
+      },
+      {
+        "name": "preventClose",
+        "type": "Action<PopupCloseEvent, boolean>",
+        "description": "Called when the popup is requested to close.\nThis can be used to prevent the popup from closing.",
+        "kind": "input"
+      },
+      {
+        "name": "providers",
+        "type": "StaticProvider[]",
+        "description": "The providers that will be injected into the popup.",
         "kind": "input"
       },
       {
         "name": "trigger",
         "type": "string",
-        "description": "",
+        "description": "The trigger event for opening the popup.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "number | string | undefined",
-        "description": "",
+        "description": "The width of the popup.",
+        "kind": "input"
+      },
+      {
+        "name": "withPush",
+        "type": "boolean",
+        "description": "Whether to push the popup into the screen when it is opened.",
         "kind": "input"
       }
     ]
@@ -2977,6 +3061,12 @@
         "name": "rounded",
         "type": "ColorPickerVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the color picker.",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "Whether to show the clear button to reset the color.\nThis is only applicable when the view is set to \"palette\".",
         "kind": "input"
       },
       {

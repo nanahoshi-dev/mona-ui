@@ -1,8 +1,11 @@
+import { JsonPipe } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import {
     ColorPickerComponent,
+    DropDownItemTemplateDirective,
     DropDownListComponent,
+    DropDownListValueTemplateDirective,
     NumericTextBoxComponent,
     SwitchComponent,
     TextBoxComponent
@@ -20,7 +23,10 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
         NumericTextBoxComponent,
         FormsModule,
         TextBoxComponent,
-        SwitchComponent
+        SwitchComponent,
+        DropDownItemTemplateDirective,
+        JsonPipe,
+        DropDownListValueTemplateDirective
     ],
     templateUrl: "./api-input-list-item.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -30,7 +30,15 @@ export type ComponentInputsAsSignal<TComponent> = {
           : never]?: GetSignalType<TComponent[K]>;
 };
 
-export type ComponentConfigType = "string" | "number" | "boolean" | "dropdown" | "color" | "event" | "function";
+export type ComponentConfigType =
+    | "string"
+    | "number"
+    | "boolean"
+    | "dropdown"
+    | "color"
+    | "event"
+    | "function"
+    | "object";
 
 export type ComponentConfigInputType<TComponent> = {
     [key in keyof ComponentInputs<TComponent>]:
@@ -53,6 +61,10 @@ export type ComponentConfigInputType<TComponent> = {
         | {
               type: Extract<ComponentConfigType, "function">;
               value: Function;
+          }
+        | {
+              type: Extract<ComponentConfigType, "object">;
+              value: ComponentInputs<TComponent>[key];
           };
 };
 
