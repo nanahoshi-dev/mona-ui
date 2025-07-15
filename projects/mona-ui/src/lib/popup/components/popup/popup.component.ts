@@ -88,11 +88,6 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
      */
     public readonly data = input<T>();
 
-    /**
-     * @description Whether to disable the animation of the popup.
-     * If set to true, the popup will not animate when opening or closing.
-     */
-    public readonly disableAnimation = input(false);
 
     /**
      * @description Whether the popup should have a backdrop.
@@ -243,8 +238,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     closeOnOutsideClick: this.closeOnOutsideClick(),
                     content: this.contentTemplate(),
                     data: this.data(),
-                    disableAnimation: this.disableAnimation(),
-                    hasBackdrop: false,
+                    hasBackdrop: this.hasBackdrop(),
                     height: this.height(),
                     maxHeight: this.maxHeight(),
                     maxWidth: this.maxWidth(),

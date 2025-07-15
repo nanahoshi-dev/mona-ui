@@ -163,7 +163,7 @@ export class PopoverComponent implements OnInit {
         this.#popupRef = this.#popupService.create({
             content: this.templateRef(),
             anchor: this.popoverTargetElement,
-            disableAnimation: true,
+            animation: false,
             popupClass: "mona-popover-popup-content",
             popupWrapperClass: "mona-popover-popup-wrapper",
             hasBackdrop: false,

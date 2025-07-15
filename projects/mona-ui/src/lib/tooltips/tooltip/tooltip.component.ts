@@ -95,7 +95,7 @@ export class TooltipComponent implements OnInit {
         this.#popupRef = this.#popupService.create({
             content: this.templateRef(),
             anchor: target,
-            disableAnimation: true,
+            animation: false,
             popupClass: "mona-tooltip-popup-content",
             popupWrapperClass: "mona-tooltip-popup-wrapper",
             hasBackdrop: false,

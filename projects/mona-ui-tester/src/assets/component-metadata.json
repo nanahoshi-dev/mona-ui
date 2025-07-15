@@ -2092,12 +2092,6 @@
         "kind": "input"
       },
       {
-        "name": "disableAnimation",
-        "type": "boolean",
-        "description": "Whether to disable the animation of the popup.\nIf set to true, the popup will not animate when opening or closing.",
-        "kind": "input"
-      },
-      {
         "name": "hasBackdrop",
         "type": "boolean",
         "description": "Whether the popup should have a backdrop.",

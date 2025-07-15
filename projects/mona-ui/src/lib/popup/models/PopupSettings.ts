@@ -62,11 +62,6 @@ export interface PopupSettings<T = unknown, C = void> {
     data?: T;
 
     /**
-     * Disable the default animation of the popup.
-     */
-    disableAnimation?: boolean;
-
-    /**
      * Whether the popup will have a backdrop.
      * Default: true.
      */
@@ -139,6 +134,13 @@ export interface PopupSettings<T = unknown, C = void> {
      */
     width?: number | string;
     withPush?: boolean;
+
+    /**
+     * Whether the popup should track scroll events and reposition itself.
+     * Default: true.
+     * @type {boolean}
+     */
+    withScrollTracking?: boolean;
 }
 
 export interface PopupAnimationSettings {

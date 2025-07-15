@@ -1,54 +1,114 @@
 import { AnimationBuilder } from "@angular/animations";
-import { ConnectionPositionPair, Overlay, PositionStrategy } from "@angular/cdk/overlay";
+import {
+    ComponentType,
+    ConnectionPositionPair,
+    FlexibleConnectedPositionStrategyOrigin,
+    Overlay,
+    OverlayRef,
+    PositionStrategy
+} from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
+import { CdkScrollable, ScrollDispatcher } from "@angular/cdk/scrolling";
 import { DestroyRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Dictionary } from "@mirei/ts-collections";
-import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "../animations/popup.animation";
-import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition";
 import { filter, fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
-import { v4 } from "uuid";
+import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "../animations/popup.animation";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
 import { PopupAnimationSettings, PopupSettings } from "../models/PopupSettings";
-import { PopupState } from "../models/PopupState";
+import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition";
 
 @Injectable({
     providedIn: "root"
 })
 export class PopupService {
     readonly #animationBuilder = inject(AnimationBuilder);
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #injector: Injector = inject(Injector);
-    readonly #overlay: Overlay = inject(Overlay);
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #injector = inject(Injector);
+    readonly #overlay = inject(Overlay);
+    readonly #scrollDispatcher = inject(ScrollDispatcher);
     readonly #outsideEventsToClose = ["click", "mousedown", "dblclick", "contextmenu", "auxclick"];
-    readonly #popupStateMap = new Dictionary<string, PopupState>();
 
     public create(settings: PopupSettings): PopupRef {
-        const uid = v4();
-        let positionStrategy: PositionStrategy;
-        const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+        const overlayRef = this.createOverlay(settings);
+        const popupReference = new PopupReference(overlayRef);
 
-        if (settings.positionStrategy === "global") {
-            positionStrategy = this.#overlay.position().global();
-        } else {
-            positionStrategy = this.#overlay
-                .position()
-                .flexibleConnectedTo(settings.anchor)
-                .withPositions(position)
-                .withDefaultOffsetX(settings.offset?.horizontal ?? 0)
-                .withDefaultOffsetY(settings.offset?.vertical ?? 0)
-                .withPush(settings.withPush ?? true);
+        const injector = this.createInjector(settings, popupReference);
+        const animationElement = this.attachContent(settings, popupReference, overlayRef, injector);
+
+        this.setupAnimations(settings.animation, animationElement, popupReference);
+        const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
+        this.setupCleanupSubscription(popupReference, subscription, settings);
+        this.setupScrollTracking(settings, overlayRef, popupReference);
+        this.setupEscapeKeyListener(settings, popupReference);
+
+        return popupReference.popupRef;
+    }
+
+    private attachComponentContent(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef,
+        injector: Injector
+    ): HTMLElement {
+        const portal = new ComponentPortal(settings.content as ComponentType<any>, null, injector);
+        popupReference.componentRef = overlayRef.attach(portal);
+        return popupReference.componentRef.location.nativeElement;
+    }
+
+    private attachContent(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef,
+        injector: Injector
+    ): HTMLElement {
+        if (settings.content instanceof TemplateRef) {
+            return this.attachTemplateContent(settings, popupReference, overlayRef, injector);
         }
+        return this.attachComponentContent(settings, popupReference, overlayRef, injector);
+    }
 
-        const panelClass = settings.popupClass
-            ? ["mona-popup-content"].concat(settings.popupClass)
-            : "mona-popup-content";
+    private attachTemplateContent(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef,
+        injector: Injector
+    ): HTMLElement {
+        const portal = new ComponentPortal(PopupWrapperComponent, null, injector);
+        popupReference.componentRef = overlayRef.attach(portal);
+        const component = popupReference.componentRef.instance as PopupWrapperComponent;
+        component.templateRef.set(settings.content as TemplateRef<any>);
+        popupReference.componentRef.changeDetectorRef.detectChanges();
+        return popupReference.componentRef.location.nativeElement;
+    }
 
-        const overlayRef = this.#overlay.create({
+    private buildPanelClass(popupClass?: string | string[]): string | string[] {
+        if (!popupClass) {
+            return "mona-popup-content";
+        }
+        return ["mona-popup-content"].concat(popupClass);
+    }
+
+    private createInjector(settings: PopupSettings, popupReference: PopupReference): Injector {
+        return Injector.create({
+            parent: this.#injector,
+            providers: [
+                { provide: PopupRef, useFactory: () => popupReference.popupRef },
+                { provide: PopupDataInjectionToken, useValue: settings.data },
+                { provide: PopupSettingsInjectionToken, useValue: settings },
+                ...(settings.providers ?? [])
+            ]
+        });
+    }
+
+    private createOverlay(settings: PopupSettings): OverlayRef {
+        const positionStrategy = this.createPositionStrategy(settings);
+        const panelClass = this.buildPanelClass(settings.popupClass);
+
+        return this.#overlay.create({
             positionStrategy,
             hasBackdrop: settings.hasBackdrop ?? false,
             height: settings.height,
@@ -60,97 +120,28 @@ export class PopupService {
             panelClass,
             backdropClass: settings.backdropClass ?? "transparent"
         });
+    }
 
-        const preventClose = settings.preventClose;
-        const popupReference = new PopupReference(overlayRef);
-
-        const injector = Injector.create({
-            parent: this.#injector,
-            providers: [
-                { provide: PopupRef, useFactory: () => popupReference.popupRef },
-                { provide: PopupDataInjectionToken, useValue: settings.data },
-                { provide: PopupSettingsInjectionToken, useValue: settings },
-                ...(settings.providers ?? [])
-            ]
-        });
-
-        let animationElement: HTMLElement;
-        if (settings.content instanceof TemplateRef) {
-            const portal = new ComponentPortal(PopupWrapperComponent, null, injector);
-            popupReference.componentRef = overlayRef.attach(portal);
-            const component = popupReference.componentRef.instance as PopupWrapperComponent;
-            component.templateRef.set(settings.content);
-            animationElement = popupReference.componentRef.location.nativeElement;
-            popupReference.componentRef.changeDetectorRef.detectChanges();
-        } else {
-            const portal = new ComponentPortal(settings.content, null, injector);
-            popupReference.componentRef = overlayRef.attach(portal);
-            animationElement = popupReference.componentRef.location.nativeElement;
+    private createPositionStrategy(settings: PopupSettings): PositionStrategy {
+        if (settings.positionStrategy === "global") {
+            return this.#overlay.position().global();
         }
-        this.setAnimations(settings.animation, animationElement, popupReference);
 
-        let subscription: Subscription | null = null;
-        if (settings.hasBackdrop) {
-            if (settings.closeOnBackdropClick ?? true) {
-                const backdropSubject = new Subject<void>();
-                subscription = overlayRef
-                    .backdropClick()
-                    .pipe(takeUntil(backdropSubject))
-                    .subscribe(e => {
-                        const event = new PopupCloseEvent({
-                            event: e,
-                            originalEvent: e,
-                            via: PopupCloseSource.BackdropClick
-                        });
-                        const prevented = preventClose ? preventClose(event) || event.isDefaultPrevented() : false;
-                        if (!prevented) {
-                            popupReference.close(event);
-                            this.#popupStateMap.remove(uid);
-                            backdropSubject.next();
-                            backdropSubject.complete();
-                        }
-                    });
-            }
-        } else if (settings.closeOnOutsideClick ?? true) {
-            subscription = overlayRef
-                .outsidePointerEvents()
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(event => {
-                    const eventTarget = event.target as HTMLElement;
-                    if (settings.anchor instanceof HTMLElement && settings.anchor.contains(eventTarget)) {
-                        return;
-                    }
-                    if (this.#outsideEventsToClose.includes(event.type)) {
-                        const closeEvent = new PopupCloseEvent({
-                            event,
-                            originalEvent: event,
-                            via: PopupCloseSource.OutsideClick
-                        });
-                        const prevented = preventClose
-                            ? preventClose(closeEvent) || closeEvent.isDefaultPrevented()
-                            : false;
-                        if (!prevented) {
-                            popupReference.close(closeEvent);
-                            this.#popupStateMap.remove(uid);
-                            subscription?.unsubscribe();
-                        }
-                    }
-                });
+        const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+        const strategy = this.#overlay
+            .position()
+            .flexibleConnectedTo(settings.anchor)
+            .withPositions(position)
+            .withDefaultOffsetX(settings.offset?.horizontal ?? 0)
+            .withDefaultOffsetY(settings.offset?.vertical ?? 0)
+            .withPush(settings.withPush ?? true);
+
+        if (settings.withScrollTracking ?? true) {
+            const scrollableContainers = this.getScrollableContainers(settings.anchor);
+            strategy.withScrollableContainers(scrollableContainers);
         }
-        popupReference.closed.pipe(take(1)).subscribe(() => {
-            subscription?.unsubscribe();
-            this.#popupStateMap.remove(uid);
-            if (settings.anchor instanceof HTMLElement) {
-                settings.anchor.focus();
-            }
-        });
-        this.#popupStateMap.add(uid, {
-            uid,
-            popupRef: popupReference.popupRef,
-            settings
-        });
-        this.setEventListeners(this.#popupStateMap.get(uid) as PopupState);
-        return popupReference.popupRef;
+
+        return strategy;
     }
 
     private getAnimationConfig(config?: boolean | PopupAnimationSettings): Required<PopupAnimationSettings> | null {
@@ -175,51 +166,205 @@ export class PopupService {
         return connectionPosition(anchorPoint, popupPoint);
     }
 
-    private setAnimations(
+    private getScrollableContainers(anchor: FlexibleConnectedPositionStrategyOrigin): CdkScrollable[] {
+        const scrollables: CdkScrollable[] = [];
+        if (anchor instanceof HTMLElement) {
+            const ancestorScrollables = this.#scrollDispatcher.getAncestorScrollContainers(anchor);
+            scrollables.push(...ancestorScrollables);
+        }
+        return scrollables;
+    }
+
+    private restoreFocusToAnchor(anchor: any): void {
+        if (anchor instanceof HTMLElement) {
+            anchor.focus();
+        }
+    }
+
+    private setupAnimations(
         animationSettings: PopupAnimationSettings | boolean | undefined,
         element: HTMLElement,
         popupReference: PopupReference
     ): void {
         const config = this.getAnimationConfig(animationSettings);
-        if (!config) {
+        if (!config || !element) {
             return;
         }
-        if (config && element) {
-            this.#animationBuilder.build(config.show).create(element).play();
-            popupReference.beforeClosed$
-                .pipe(
-                    take(1),
-                    tap(() => this.#animationBuilder.build(config.hide).create(element).play())
-                )
-                .subscribe();
-        }
+
+        this.#animationBuilder.build(config.show).create(element).play();
+        popupReference.beforeClosed$
+            .pipe(
+                take(1),
+                tap(() => this.#animationBuilder.build(config.hide).create(element).play())
+            )
+            .subscribe();
     }
 
-    private setEventListeners(state: PopupState): void {
-        if (state.settings.closeOnEscape === false) {
+    private setupBackdropCloseSubscription(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef
+    ): Subscription | null {
+        if (!(settings.closeOnBackdropClick ?? true)) {
+            return null;
+        }
+
+        const backdropSubject = new Subject<void>();
+        return overlayRef
+            .backdropClick()
+            .pipe(takeUntil(backdropSubject))
+            .subscribe(e => {
+                const event = new PopupCloseEvent({
+                    event: e,
+                    originalEvent: e,
+                    via: PopupCloseSource.BackdropClick
+                });
+
+                if (this.shouldPreventClose(settings.preventClose, event)) {
+                    return;
+                }
+
+                popupReference.close(event);
+                backdropSubject.next();
+                backdropSubject.complete();
+            });
+    }
+
+    private setupCleanupSubscription(
+        popupReference: PopupReference,
+        subscription: Subscription | null,
+        settings: PopupSettings
+    ): void {
+        popupReference.closed.pipe(take(1)).subscribe(() => {
+            subscription?.unsubscribe();
+            this.restoreFocusToAnchor(settings.anchor);
+        });
+    }
+
+    private setupCloseSubscriptions(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef
+    ): Subscription | null {
+        if (settings.hasBackdrop) {
+            return this.setupBackdropCloseSubscription(settings, popupReference, overlayRef);
+        }
+
+        if (settings.closeOnOutsideClick ?? true) {
+            return this.setupOutsideClickSubscription(settings, popupReference, overlayRef);
+        }
+
+        return null;
+    }
+
+    private setupEscapeKeyListener(settings: PopupSettings, popupReference: PopupReference): void {
+        if (settings.closeOnEscape === false) {
             return;
         }
+
         fromEvent<KeyboardEvent>(document, "keydown")
             .pipe(
-                filter(() => state.popupRef.overlayRef.hasAttached()),
+                filter(() => popupReference.overlayRef.hasAttached()),
                 filter(event => event.key === "Escape"),
-                takeUntil(state.popupRef.closed)
+                takeUntil(popupReference.closed),
+                takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe(event => {
-                if (event.key === "Escape") {
-                    const closeEvent = new PopupCloseEvent({
-                        event,
-                        originalEvent: event,
-                        via: PopupCloseSource.Escape
-                    });
-                    const prevented = state.settings.preventClose
-                        ? state.settings.preventClose(closeEvent) || closeEvent.isDefaultPrevented()
-                        : false;
-                    if (!prevented) {
-                        state.popupRef.close(closeEvent);
-                        this.#popupStateMap.remove(state.uid);
-                    }
+                const closeEvent = new PopupCloseEvent({
+                    event,
+                    originalEvent: event,
+                    via: PopupCloseSource.Escape
+                });
+
+                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
+                    return;
                 }
+
+                popupReference.popupRef.close(closeEvent);
             });
+    }
+
+    private setupOutsideClickSubscription(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef
+    ): Subscription {
+        return overlayRef
+            .outsidePointerEvents()
+            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => {
+                if (this.shouldIgnoreOutsideClick(settings, event)) {
+                    return;
+                }
+
+                const closeEvent = new PopupCloseEvent({
+                    event,
+                    originalEvent: event,
+                    via: PopupCloseSource.OutsideClick
+                });
+
+                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
+                    return;
+                }
+
+                popupReference.close(closeEvent);
+            });
+    }
+
+    private setupScrollTracking(settings: PopupSettings, overlayRef: OverlayRef, popupReference: PopupReference): void {
+        if (!(settings.withScrollTracking ?? true) || settings.positionStrategy === "global") {
+            return;
+        }
+
+        const subscriptions: Subscription[] = [];
+        const updatePosition = () => {
+            if (overlayRef.hasAttached()) {
+                overlayRef.updatePosition();
+            }
+        };
+
+        const windowScrollSubscription = fromEvent(window, "scroll", { passive: true })
+            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(updatePosition);
+        subscriptions.push(windowScrollSubscription);
+
+        const resizeSubscription = fromEvent(window, "resize", { passive: true })
+            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(updatePosition);
+        subscriptions.push(resizeSubscription);
+
+        if (settings.anchor instanceof HTMLElement) {
+            const scrollableContainers = this.getScrollableContainers(settings.anchor);
+
+            scrollableContainers.forEach(scrollable => {
+                const containerScrollSubscription = scrollable
+                    .elementScrolled()
+                    .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                    .subscribe(updatePosition);
+                subscriptions.push(containerScrollSubscription);
+            });
+        }
+
+        popupReference.closed.pipe(take(1)).subscribe(() => {
+            subscriptions.forEach(sub => sub.unsubscribe());
+        });
+    }
+
+    private shouldIgnoreOutsideClick(settings: PopupSettings, event: Event): boolean {
+        const eventTarget = event.target as HTMLElement;
+        const isAnchorClick = settings.anchor instanceof HTMLElement && settings.anchor.contains(eventTarget);
+        const isRelevantEventType = this.#outsideEventsToClose.includes(event.type);
+
+        return isAnchorClick || !isRelevantEventType;
+    }
+
+    private shouldPreventClose(
+        preventClose: ((event: PopupCloseEvent) => boolean) | undefined,
+        event: PopupCloseEvent
+    ): boolean {
+        if (!preventClose) {
+            return false;
+        }
+        return preventClose(event) || event.isDefaultPrevented();
     }
 }

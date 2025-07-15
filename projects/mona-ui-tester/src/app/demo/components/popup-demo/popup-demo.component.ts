@@ -65,10 +65,6 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
                 type: "object",
                 value: {}
             },
-            disableAnimation: {
-                type: "boolean",
-                value: false
-            },
             hasBackdrop: {
                 type: "boolean",
                 value: false
@@ -169,7 +165,6 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             [closeOnEscape]="closeOnEscape()"
             [closeOnOutsideClick]="closeOnOutsideClick()"
             [data]="data()"
-            [disableAnimation]="disableAnimation()"
             [hasBackdrop]="hasBackdrop()"
             [height]="height()"
             [maxHeight]="maxHeight()"
@@ -203,7 +198,6 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
     public readonly closeOnEscape = input<ReturnType<PopupComponent["closeOnEscape"]>>(true);
     public readonly closeOnOutsideClick = input<ReturnType<PopupComponent["closeOnOutsideClick"]>>(true);
     public readonly data = input<ReturnType<PopupComponent["data"]>>({});
-    public readonly disableAnimation = input<ReturnType<PopupComponent["disableAnimation"]>>(false);
     public readonly hasBackdrop = input<ReturnType<PopupComponent["hasBackdrop"]>>(false);
     public readonly height = input<ReturnType<PopupComponent["height"]>>("auto");
     public readonly maxHeight = input<ReturnType<PopupComponent["maxHeight"]>>("100%");
