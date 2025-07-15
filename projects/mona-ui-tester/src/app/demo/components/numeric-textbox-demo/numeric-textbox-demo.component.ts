@@ -71,11 +71,13 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
             },
             max: {
                 type: "number",
-                value: 100
+                value: 100,
+                nullable: true
             },
             min: {
                 type: "number",
-                value: 0
+                value: 0,
+                nullable: true
             },
             nullable: {
                 type: "boolean",

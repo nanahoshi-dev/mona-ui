@@ -146,6 +146,9 @@ export function createComponentInputConfigArray<TComponent>(
             processedArray.push({
                 configType: configItem.type,
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
+                max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
+                min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
+                nullable: configItem.type === "number" ? (configItem.nullable ?? false) : undefined,
                 name: String(key),
                 value: configItem.value,
                 valueType: runtimeValueType
