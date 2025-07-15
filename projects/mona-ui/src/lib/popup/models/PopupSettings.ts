@@ -51,6 +51,13 @@ export interface PopupSettings<T = unknown, C = void> {
     closeOnEscape?: boolean;
 
     /**
+     * Whether the popup will be closed when the mouse leaves the anchor element.
+     * Default: false.
+     * @type {boolean}
+     */
+    closeOnMouseLeave?: boolean;
+
+    /**
      * Whether the popup will be closed when the user clicks outside of it.
      * @type {boolean}
      */
@@ -120,8 +127,19 @@ export interface PopupSettings<T = unknown, C = void> {
      */
     popupWrapperClass?: string | string[];
 
+    /**
+     * The strategy for positioning the popup.
+     * `global` means the popup will be positioned relative to the viewport,
+     * `connected` means the popup will be positioned relative to the anchor element.
+     * @type {"global" | "connected"}
+     */
     positionStrategy?: "global" | "connected";
 
+    /**
+     * @description The positions to use for the popup.
+     * The popup will try to position itself in the first position that fits.
+     * This is only used when `positionStrategy` is set to `connected`.
+     */
     positions?: Array<ConnectedPosition | ConnectionPositionPair>;
 
     preventClose?: Action<PopupCloseEvent, boolean>;

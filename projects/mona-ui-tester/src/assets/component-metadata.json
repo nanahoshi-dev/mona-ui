@@ -2080,6 +2080,12 @@
         "kind": "input"
       },
       {
+        "name": "closeOnMouseLeave",
+        "type": "boolean",
+        "description": "Whether to close the popup when the mouse leaves the anchor element.",
+        "kind": "input"
+      },
+      {
         "name": "closeOnOutsideClick",
         "type": "boolean",
         "description": "Whether to close the popup when clicking outside of it.",

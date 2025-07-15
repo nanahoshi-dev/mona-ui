@@ -61,6 +61,10 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
                 type: "boolean",
                 value: true
             },
+            closeOnMouseLeave: {
+                type: "boolean",
+                value: false
+            },
             data: {
                 type: "object",
                 value: {}
@@ -138,7 +142,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             },
             trigger: {
                 type: "dropdown",
-                value: ["click", "contextmenu", "mouseover"],
+                value: ["click", "contextmenu", "pointerover"],
                 defaultValue: "click"
             },
             width: {
@@ -172,6 +176,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             [backdropClass]="backdropClass()"
             [closeOnBackdropClick]="closeOnBackdropClick()"
             [closeOnEscape]="closeOnEscape()"
+            [closeOnMouseLeave]="closeOnMouseLeave()"
             [closeOnOutsideClick]="closeOnOutsideClick()"
             [data]="data()"
             [hasBackdrop]="hasBackdrop()"
@@ -207,6 +212,7 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
     public readonly backdropClass = input<ReturnType<PopupComponent["backdropClass"]>>("");
     public readonly closeOnBackdropClick = input<ReturnType<PopupComponent["closeOnBackdropClick"]>>(false);
     public readonly closeOnEscape = input<ReturnType<PopupComponent["closeOnEscape"]>>(true);
+    public readonly closeOnMouseLeave = input<ReturnType<PopupComponent["closeOnMouseLeave"]>>(false);
     public readonly closeOnOutsideClick = input<ReturnType<PopupComponent["closeOnOutsideClick"]>>(true);
     public readonly data = input<ReturnType<PopupComponent["data"]>>({});
     public readonly hasBackdrop = input<ReturnType<PopupComponent["hasBackdrop"]>>(false);

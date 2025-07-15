@@ -175,6 +175,16 @@ export class PopupService {
         return scrollables;
     }
 
+    private getAnchorElement(anchor: FlexibleConnectedPositionStrategyOrigin): HTMLElement | null {
+        if (anchor instanceof HTMLElement) {
+            return anchor;
+        }
+        if (typeof anchor === "object" && "nativeElement" in anchor && anchor.nativeElement instanceof HTMLElement) {
+            return anchor.nativeElement;
+        }
+        return null;
+    }
+
     private restoreFocusToAnchor(anchor: any): void {
         if (anchor instanceof HTMLElement) {
             anchor.focus();
@@ -246,15 +256,59 @@ export class PopupService {
         popupReference: PopupReference,
         overlayRef: OverlayRef
     ): Subscription | null {
+        const subscriptions: Subscription[] = [];
+
         if (settings.hasBackdrop) {
-            return this.setupBackdropCloseSubscription(settings, popupReference, overlayRef);
+            const backdropSub = this.setupBackdropCloseSubscription(settings, popupReference, overlayRef);
+            if (backdropSub) subscriptions.push(backdropSub);
         }
 
         if (settings.closeOnOutsideClick ?? true) {
-            return this.setupOutsideClickSubscription(settings, popupReference, overlayRef);
+            const outsideClickSub = this.setupOutsideClickSubscription(settings, popupReference, overlayRef);
+            if (outsideClickSub) subscriptions.push(outsideClickSub);
         }
 
-        return null;
+        if (settings.closeOnMouseLeave) {
+            const mouseLeaveSubscription = this.setupMouseLeaveSubscription(settings, popupReference);
+            if (mouseLeaveSubscription) subscriptions.push(mouseLeaveSubscription);
+        }
+
+        if (subscriptions.length === 0) {
+            return null;
+        }
+
+        const combinedSubscription = new Subscription();
+        subscriptions.forEach(sub => combinedSubscription.add(sub));
+        return combinedSubscription;
+    }
+
+    private setupMouseLeaveSubscription(
+        settings: PopupSettings,
+        popupReference: PopupReference
+    ): Subscription | null {
+        const anchorElement = this.getAnchorElement(settings.anchor);
+        if (!anchorElement) {
+            return null;
+        }
+
+        return fromEvent<PointerEvent>(anchorElement, "pointerleave")
+            .pipe(
+                takeUntil(popupReference.closed),
+                takeUntilDestroyed(this.#destroyRef)
+            )
+            .subscribe(event => {
+                const closeEvent = new PopupCloseEvent({
+                    event,
+                    originalEvent: event,
+                    via: PopupCloseSource.MouseLeave
+                });
+
+                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
+                    return;
+                }
+
+                popupReference.close(closeEvent);
+            });
     }
 
     private setupEscapeKeyListener(settings: PopupSettings, popupReference: PopupReference): void {

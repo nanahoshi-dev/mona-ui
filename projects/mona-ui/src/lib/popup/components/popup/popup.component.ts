@@ -80,6 +80,11 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     public readonly closeOnEscape = input(true);
 
     /**
+     * @description Whether to close the popup when the mouse leaves the anchor element.
+     */
+    public readonly closeOnMouseLeave = input(false);
+
+    /**
      * @description Whether to close the popup when clicking outside of it.
      */
     public readonly closeOnOutsideClick = input(true);
@@ -145,13 +150,16 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     public readonly popupWrapperClass = input<string | string[]>([]);
 
     /**
-     * @description The position strategy for the popup.
+     * @description The strategy for positioning the popup.
+     * `global` means the popup will be positioned relative to the viewport,
+     * `connected` means the popup will be positioned relative to the anchor element.
      */
     public readonly positionStrategy = input<"global" | "connected">("connected");
 
     /**
      * @description The positions to use for the popup.
      * The popup will try to position itself in the first position that fits.
+     * This is only used when the `positionStrategy` is set to `connected`.
      */
     public readonly positions = input<Array<ConnectedPosition | ConnectionPositionPair>>();
 
@@ -241,7 +249,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
 
         const width = this.getPopupWidth();
 
-        fromEvent<MouseEvent>(target, trigger)
+        fromEvent<PointerEvent>(target, trigger)
             .pipe(takeUntil(this.#eventListenerCleanup$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 event.preventDefault();
@@ -256,6 +264,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     backdropClass: this.backdropClass(),
                     closeOnBackdropClick: this.closeOnBackdropClick(),
                     closeOnEscape: this.closeOnEscape(),
+                    closeOnMouseLeave: this.closeOnMouseLeave(),
                     closeOnOutsideClick: this.closeOnOutsideClick(),
                     content: this.contentTemplate(),
                     data: this.data(),

@@ -114,12 +114,12 @@ export class TooltipComponent implements OnInit {
     private setSubscriptions(): void {
         const target = this.target();
         const tooltipTarget = target instanceof ElementRef ? target.nativeElement : target;
-        fromEvent<MouseEvent>(tooltipTarget, "mouseenter")
+        fromEvent<PointerEvent>(tooltipTarget, "pointerenter")
             .pipe(
                 filter(() => !this.#popupRef),
                 takeUntilDestroyed(this.#destroyRef),
                 tap(() => {
-                    fromEvent(tooltipTarget, "mouseleave")
+                    fromEvent(tooltipTarget, "pointerleave")
                         .pipe(take(1))
                         .subscribe(() => {
                             this.animateLeave();

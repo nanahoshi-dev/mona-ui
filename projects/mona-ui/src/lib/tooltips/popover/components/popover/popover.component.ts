@@ -66,7 +66,7 @@ export class PopoverComponent implements OnInit {
                     triggerString = "click";
                     break;
                 case "hover":
-                    triggerString = "mouseenter";
+                    triggerString = "pointerenter";
                     break;
                 case "none":
                     triggerString = "";
@@ -242,7 +242,7 @@ export class PopoverComponent implements OnInit {
 
     private setSubscriptions(): void {
         if (this.trigger()) {
-            fromEvent<MouseEvent>(this.popoverTargetElement, this.trigger())
+            fromEvent<PointerEvent>(this.popoverTargetElement, this.trigger())
                 .pipe(
                     filter(() => !this.#popupRef),
                     takeUntilDestroyed(this.#destroyRef)

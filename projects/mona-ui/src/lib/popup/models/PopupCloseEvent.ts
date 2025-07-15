@@ -28,6 +28,7 @@ export enum PopupCloseSource {
     BackdropClick = "backdropClick",
     CloseButton = "closeButton",
     Escape = "escape",
+    MouseLeave = "mouseLeave",
     Programmatic = "programmatic",
     OutsideClick = "outsideClick"
 }
