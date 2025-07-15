@@ -2198,6 +2198,12 @@
         "type": "boolean",
         "description": "Whether to push the popup into the screen when it is opened.",
         "kind": "input"
+      },
+      {
+        "name": "withScrollTracking",
+        "type": "boolean",
+        "description": "Whether the popup should track scroll events and reposition itself.",
+        "kind": "input"
       }
     ]
   },

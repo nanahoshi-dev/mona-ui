@@ -136,6 +136,11 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
                 type: "object",
                 value: []
             },
+            trigger: {
+                type: "dropdown",
+                value: ["click", "contextmenu", "mouseover"],
+                defaultValue: "click"
+            },
             width: {
                 type: "string",
                 value: "auto"
@@ -143,6 +148,10 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             withPush: {
                 type: "boolean",
                 value: false
+            },
+            withScrollTracking: {
+                type: "boolean",
+                value: true
             }
         },
         outputs: {}
@@ -179,8 +188,10 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             [positions]="positions()"
             [preventClose]="preventClose()"
             [providers]="providers()"
+            [trigger]="trigger()"
             [width]="width()"
-            [withPush]="withPush()">
+            [withPush]="withPush()"
+            [withScrollTracking]="withScrollTracking()">
             <div
                 class="flex flex-col items-center justify-center w-full h-full bg-background border border-border shadow-md">
                 <h3 class="text-lg font-semibold">Popup Content</h3>
@@ -214,6 +225,8 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
         return false;
     });
     public readonly providers = input<ReturnType<PopupComponent["providers"]>>([]);
+    public readonly trigger = input<ReturnType<PopupComponent["trigger"]>>("click");
     public readonly width = input<ReturnType<PopupComponent["width"]>>("auto");
     public readonly withPush = input<ReturnType<PopupComponent["withPush"]>>(false);
+    public readonly withScrollTracking = input<ReturnType<PopupComponent["withScrollTracking"]>>(true);
 }

@@ -9,6 +9,7 @@ import {
     Component,
     contentChild,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
@@ -19,7 +20,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { fromEvent, take } from "rxjs";
+import { fromEvent, Subject, take, takeUntil } from "rxjs";
 import { Action } from "../../../utils/Action";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupOffset } from "../../models/PopupOffset";
@@ -32,13 +33,13 @@ import { ConnectionPoint } from "../../utils/connectionPosition";
     selector: "mona-popup",
     templateUrl: "./popup.component.html",
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {}
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #popupService: PopupService = inject(PopupService);
     #popupOpened: boolean = false;
+    #eventListenerCleanup$ = new Subject<void>();
     protected readonly contentTemplate = viewChild.required(TemplateRef);
     protected popupRef: PopupRef | null = null;
 
@@ -87,7 +88,6 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
      * @description Arbitrary data to pass to the popup.
      */
     public readonly data = input<T>();
-
 
     /**
      * @description Whether the popup should have a backdrop.
@@ -181,14 +181,23 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
      */
     public readonly withPush = input<boolean>(true);
 
+    /**
+     * @description Whether the popup should track scroll events and reposition itself.
+     */
+    public readonly withScrollTracking = input<boolean>(true);
+
+    public constructor() {
+        effect(() => this.setupEventListeners());
+    }
+
     public ngAfterViewInit(): void {
-        window.setTimeout(() => {
-            this.setEventListeners();
-        });
+        window.setTimeout(() => this.setupEventListeners());
     }
 
     public ngOnDestroy(): void {
         this.popupRef?.close();
+        this.#eventListenerCleanup$.next();
+        this.#eventListenerCleanup$.complete();
     }
 
     private getPopupWidth(): string | number | undefined {
@@ -207,10 +216,20 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
         return undefined;
     }
 
-    private setEventListeners(): void {
+    private setupEventListeners(): void {
+        // Clean up previous event listeners
+        this.#eventListenerCleanup$.next();
+
+        const trigger = this.trigger();
+        const anchor = this.anchor();
+
+        if (!trigger || !anchor) {
+            return;
+        }
+
         let pointAnchor = false;
         let target: HTMLElement;
-        const anchor = this.anchor();
+
         if (anchor instanceof ElementRef) {
             target = anchor.nativeElement;
         } else if (anchor instanceof HTMLElement) {
@@ -219,9 +238,11 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
             target = document.body;
             pointAnchor = true;
         }
+
         const width = this.getPopupWidth();
-        fromEvent<MouseEvent>(target, this.trigger())
-            .pipe(takeUntilDestroyed(this.#destroyRef))
+
+        fromEvent<MouseEvent>(target, trigger)
+            .pipe(takeUntil(this.#eventListenerCleanup$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 event.preventDefault();
                 if (this.#popupOpened) {
@@ -253,16 +274,17 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     preventClose: this.preventClose(),
                     providers: this.providers(),
                     width,
-                    withPush: this.withPush()
+                    withPush: this.withPush(),
+                    withScrollTracking: this.withScrollTracking()
                 };
                 this.popupRef = this.#popupService.create(popupSettings);
                 this.popupRef.closed.pipe(take(1)).subscribe(result => {
                     this.popupRef = null;
                     this.close.emit();
-                    if (result instanceof PointerEvent && result.type === this.trigger()) {
+                    if (result instanceof PointerEvent && result.type === trigger) {
                         this.#popupOpened =
                             target instanceof HTMLElement && target.contains(result.target as HTMLElement);
-                    } else if (result instanceof PointerEvent && pointAnchor && result.type !== this.trigger()) {
+                    } else if (result instanceof PointerEvent && pointAnchor && result.type !== trigger) {
                         this.#popupOpened = false;
                     }
                 });
