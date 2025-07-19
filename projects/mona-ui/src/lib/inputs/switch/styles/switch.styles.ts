@@ -34,14 +34,14 @@ export const switchLabelThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
-export type SwitchBaseVariantProps = VariantProps<ReturnType<typeof switchThemeVariants>>;
-export type SwitchBaseVariantInput = VariantInputs<SwitchBaseVariantProps>;
+type SwitchBaseVariantProps = VariantProps<ReturnType<typeof switchThemeVariants>>;
+type SwitchBaseVariantInput = VariantInputs<SwitchBaseVariantProps>;
 
-export type SwitchHandleVariantProps = VariantProps<ReturnType<typeof switchHandleThemeVariants>>;
-export type SwitchHandleVariantInput = VariantInputs<SwitchHandleVariantProps>;
+type SwitchHandleVariantProps = VariantProps<ReturnType<typeof switchHandleThemeVariants>>;
+type SwitchHandleVariantInput = VariantInputs<SwitchHandleVariantProps>;
 
-export type SwitchLabelVariantProps = VariantProps<ReturnType<typeof switchLabelThemeVariants>>;
-export type SwitchLabelVariantInput = VariantInputs<SwitchLabelVariantProps>;
+type SwitchLabelVariantProps = VariantProps<ReturnType<typeof switchLabelThemeVariants>>;
+type SwitchLabelVariantInput = VariantInputs<SwitchLabelVariantProps>;
 
 export type SwitchVariantProps = SwitchBaseVariantProps & SwitchHandleVariantProps & SwitchLabelVariantProps;
 export type SwitchVariantInputs = SwitchBaseVariantInput & SwitchHandleVariantInput & SwitchLabelVariantInput;

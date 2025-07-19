@@ -5,7 +5,18 @@ export const tooltipBaseVariants = cva(
         flex items-center justify-center relative
         bg-background border border-border
         shadow-sm z-1
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-lg",
+                medium: "rounded-md",
+                none: "rounded-none",
+                small: "rounded-sm"
+            }
+        }
+    }
 );
 
 export const tooltipArrowVariants = cva(

@@ -19,14 +19,19 @@ import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ConnectionPoint } from "../../../../popup/utils/connectionPosition";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { tooltipArrowThemeVariants, tooltipBaseThemeVariants } from "../../styles/tooltip.styles";
+import {
+    tooltipArrowThemeVariants,
+    tooltipBaseThemeVariants,
+    TooltipVariantInputs,
+    TooltipVariantProps
+} from "../../styles/tooltip.styles";
 
 @Component({
     selector: "mona-tooltip",
     templateUrl: "./tooltip.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TooltipComponent implements OnInit {
+export class TooltipComponent implements OnInit, TooltipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
@@ -36,12 +41,14 @@ export class TooltipComponent implements OnInit {
     });
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return tooltipBaseThemeVariants(theme)();
+        const rounded = this.rounded();
+        return tooltipBaseThemeVariants(theme)({ rounded });
     });
     protected readonly templateRef = viewChild.required(TemplateRef);
     protected popupRef: PopupRef | null = null;
 
     public readonly position = input<Position>("top");
+    public readonly rounded = input<TooltipVariantProps["rounded"]>("medium");
     public readonly target = input.required<Element | ElementRef>();
 
     public ngOnInit(): void {
