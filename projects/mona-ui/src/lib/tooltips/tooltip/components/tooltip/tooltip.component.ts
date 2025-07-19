@@ -7,11 +7,12 @@ import {
     inject,
     input,
     OnInit,
+    signal,
     TemplateRef,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { concat, exhaustMap, filter, fromEvent, of, take, tap } from "rxjs";
+import { concat, exhaustMap, filter, fromEvent, of, take, takeUntil, tap } from "rxjs";
 import { fadeIn, fadeOut } from "../../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../../models/Position";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
@@ -25,6 +26,7 @@ import {
     TooltipVariantInputs,
     TooltipVariantProps
 } from "../../styles/tooltip.styles";
+import { getArrowPositionFromConnectionPair, getOffsetForPosition } from "../../utils/tooltip.utils";
 
 @Component({
     selector: "mona-tooltip",
@@ -51,11 +53,14 @@ export class TooltipComponent implements OnInit, TooltipVariantInputs {
     public readonly rounded = input<TooltipVariantProps["rounded"]>("medium");
     public readonly target = input.required<Element | ElementRef>();
 
+    protected readonly currentArrowPosition = signal<Position>(this.position());
+
     public ngOnInit(): void {
         this.setSubscriptions();
     }
 
     private createTooltipPopup(target: Element): void {
+        this.currentArrowPosition.set(this.position());
         const connectionPoints = this.getPositionConnectionPoints();
         const offset = this.getPositionOffset();
         this.popupRef = this.#popupService.create({
@@ -73,6 +78,14 @@ export class TooltipComponent implements OnInit, TooltipVariantInputs {
             offset,
             withPush: false
         });
+
+        const currentPopupRef = this.popupRef;
+        currentPopupRef.positionChanges
+            .pipe(takeUntil(currentPopupRef.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(connectionPair => {
+                const newArrowPosition = getArrowPositionFromConnectionPair(connectionPair);
+                this.currentArrowPosition.set(newArrowPosition);
+            });
     }
 
     private getPositionConnectionPoints(): { anchor: ConnectionPoint; popup: ConnectionPoint } {
@@ -89,16 +102,7 @@ export class TooltipComponent implements OnInit, TooltipVariantInputs {
     }
 
     private getPositionOffset(): PopupOffset {
-        switch (this.position()) {
-            case "top":
-                return { horizontal: 0, vertical: -12 };
-            case "bottom":
-                return { horizontal: 0, vertical: 12 };
-            case "right":
-                return { horizontal: 12, vertical: 0 };
-            case "left":
-                return { horizontal: -12, vertical: 0 };
-        }
+        return getOffsetForPosition(this.position());
     }
 
     private setSubscriptions(): void {

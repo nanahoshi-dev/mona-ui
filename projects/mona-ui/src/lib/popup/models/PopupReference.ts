@@ -1,4 +1,4 @@
-import { OverlayRef } from "@angular/cdk/overlay";
+import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentRef } from "@angular/core";
 import { asyncScheduler, Observable, Subject } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "./PopupCloseEvent";
@@ -9,8 +9,9 @@ import { PopupRefParams } from "./PopupRefParams";
  * @internal - used by the popup service. Do not use directly or export.
  */
 export class PopupReference implements PopupRefParams {
-    public readonly beforeClosed$: Subject<PopupCloseEvent> = new Subject<PopupCloseEvent>();
-    public readonly closed$: Subject<PopupCloseEvent> = new Subject<PopupCloseEvent>();
+    public readonly beforeClosed$ = new Subject<PopupCloseEvent>();
+    public readonly closed$ = new Subject<PopupCloseEvent>();
+    public readonly positionChanges$ = new Subject<ConnectionPositionPair>();
     public componentRef?: ComponentRef<any>;
 
     public constructor(public readonly overlayReference: OverlayRef) {}
@@ -26,7 +27,10 @@ export class PopupReference implements PopupRefParams {
         /**
          * A delay is added to allow animations to complete before the overlay is disposed.
          */
-        asyncScheduler.schedule(() => this.overlayRef.dispose(), delay);
+        asyncScheduler.schedule(() => {
+            this.positionChanges$.complete();
+            this.overlayRef.dispose();
+        }, delay);
     }
 
     public get closed(): Observable<PopupCloseEvent> {

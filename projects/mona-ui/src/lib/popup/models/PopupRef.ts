@@ -1,7 +1,7 @@
 import { asapScheduler, Observable } from "rxjs";
 import { PopupCloseEvent } from "./PopupCloseEvent";
 import { ComponentRef } from "@angular/core";
-import { OverlayRef } from "@angular/cdk/overlay";
+import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 import { PopupRefParams } from "./PopupRefParams";
 
 export class PopupRef {
@@ -39,5 +39,9 @@ export class PopupRef {
 
     public get overlayRef(): OverlayRef {
         return this.#options.overlayRef;
+    }
+
+    public get positionChanges(): Observable<ConnectionPositionPair> {
+        return this.#options.positionChanges$;
     }
 }

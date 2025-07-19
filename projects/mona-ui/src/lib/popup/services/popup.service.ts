@@ -2,6 +2,7 @@ import { AnimationBuilder } from "@angular/animations";
 import {
     ComponentType,
     ConnectionPositionPair,
+    FlexibleConnectedPositionStrategy,
     FlexibleConnectedPositionStrategyOrigin,
     Overlay,
     OverlayRef,
@@ -44,6 +45,7 @@ export class PopupService {
         this.setupCleanupSubscription(popupReference, subscription, settings);
         this.setupScrollTracking(settings, overlayRef, popupReference);
         this.setupEscapeKeyListener(settings, popupReference);
+        this.setupPositionChangeTracking(settings, overlayRef, popupReference);
 
         return popupReference.popupRef;
     }
@@ -282,20 +284,14 @@ export class PopupService {
         return combinedSubscription;
     }
 
-    private setupMouseLeaveSubscription(
-        settings: PopupSettings,
-        popupReference: PopupReference
-    ): Subscription | null {
+    private setupMouseLeaveSubscription(settings: PopupSettings, popupReference: PopupReference): Subscription | null {
         const anchorElement = this.getAnchorElement(settings.anchor);
         if (!anchorElement) {
             return null;
         }
 
         return fromEvent<PointerEvent>(anchorElement, "pointerleave")
-            .pipe(
-                takeUntil(popupReference.closed),
-                takeUntilDestroyed(this.#destroyRef)
-            )
+            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 const closeEvent = new PopupCloseEvent({
                     event,
@@ -420,5 +416,22 @@ export class PopupService {
             return false;
         }
         return preventClose(event) || event.isDefaultPrevented();
+    }
+
+    private setupPositionChangeTracking(
+        settings: PopupSettings,
+        overlayRef: OverlayRef,
+        popupReference: PopupReference
+    ): void {
+        if (settings.positionStrategy === "global") {
+            return;
+        }
+
+        const positionStrategy = overlayRef.getConfig().positionStrategy as FlexibleConnectedPositionStrategy;
+        if (positionStrategy && positionStrategy.positionChanges) {
+            positionStrategy.positionChanges
+                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
+        }
     }
 }
