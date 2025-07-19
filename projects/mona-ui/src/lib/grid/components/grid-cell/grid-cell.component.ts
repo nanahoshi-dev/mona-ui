@@ -17,7 +17,7 @@ import { DatePickerComponent } from "../../../date-inputs/date-picker/date-picke
 import { CheckBoxComponent } from "../../../inputs/check-box/components/check-box/check-box.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
-import { TooltipComponent } from "../../../tooltips/tooltip/tooltip.component";
+import { TooltipComponent } from "../../../tooltips/tooltip/components/tooltip/tooltip.component";
 import { CellEditEvent } from "../../models/CellEditEvent";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";

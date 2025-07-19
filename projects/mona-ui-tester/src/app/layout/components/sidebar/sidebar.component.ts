@@ -99,6 +99,10 @@ export class SidebarComponent {
                 {
                     text: "Text Box",
                     path: "/textbox"
+                },
+                {
+                    text: "Tooltip",
+                    path: "/tooltip"
                 }
             ]
         }

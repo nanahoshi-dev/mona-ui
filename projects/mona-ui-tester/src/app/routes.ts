@@ -111,6 +111,11 @@ export const routes: Routes = [
                 path: "textbox",
                 loadComponent: () =>
                     import("./docs/components/text-box-doc/text-box-doc.component").then(m => m.TextBoxDocComponent)
+            },
+            {
+                path: "tooltip",
+                loadComponent: () =>
+                    import("./docs/components/tooltip-doc/tooltip-doc.component").then(m => m.TooltipDocComponent)
             }
         ]
     }

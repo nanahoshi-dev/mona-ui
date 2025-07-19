@@ -1,0 +1,8 @@
+<ng-template>
+    <div [class]="baseClasses()">
+        <div>
+            <ng-content></ng-content>
+        </div>
+        <div [class]="arrowClasses()" [attr.data-position]="position()"></div>
+    </div>
+</ng-template>

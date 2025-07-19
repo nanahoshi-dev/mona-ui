@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { PopupAnimationService } from "../../animations/services/popup-animation.service";
+import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
 
 import { TooltipComponent } from "./tooltip.component";
 
