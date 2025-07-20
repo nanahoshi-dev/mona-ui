@@ -11,12 +11,21 @@ import { PopupOffset } from "./PopupOffset";
 import { Action } from "../../utils/Action";
 import { PopupCloseEvent } from "./PopupCloseEvent";
 
+/**
+ * Extended anchor type that supports CSS selectors in addition to elements.
+ * When used with PopupService directly, CSS selectors will resolve to the first matching element.
+ * When used with TooltipComponent, CSS selectors will apply tooltips to all matching elements.
+ */
+export type PopupAnchor = FlexibleConnectedPositionStrategyOrigin | string;
+
 export interface PopupSettings<T = unknown, C = void> {
     /**
      * The anchor element to which the popup will be connected.
-     * @type {FlexibleConnectedPositionStrategyOrigin}
+     * Can be an element, ElementRef, or CSS selector string.
+     * When using a CSS selector, the first matching element will be used.
+     * @type {PopupAnchor}
      */
-    anchor: FlexibleConnectedPositionStrategyOrigin;
+    anchor: PopupAnchor;
 
     /**
      * The connection point of the anchor element to which the popup will be connected.

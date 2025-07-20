@@ -24,6 +24,11 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
                 type: "dropdown",
                 value: ["full", "large", "medium", "none", "small"],
                 defaultValue: "medium"
+            },
+            target: {
+                type: "dropdown",
+                value: ["button", "a"],
+                defaultValue: "a"
             }
         },
         outputs: {}
@@ -36,8 +41,13 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
 @Component({
     imports: [ButtonDirective, TooltipComponent],
     template: `
-        <button monaButton #tooltipAnchor>Tooltip</button>
-        <mona-tooltip [target]="tooltipAnchor" [position]="position()" [rounded]="rounded()">
+        <div class="flex flex-row gap-10">
+            <button monaButton #tooltipAnchor>Button</button>
+            <a href="#" class="ml-2">Link</a>
+            <span href="#" class="ml-2">Link</span>
+        </div>
+
+        <mona-tooltip [target]="target()" [position]="position()" [rounded]="rounded()">
             <div class="p-2">This is a <span class="text-green-600 font-semibold">tooltip</span>.</div>
         </mona-tooltip>
     `
@@ -45,4 +55,5 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
 class TooltipWrapperComponent implements ComponentInputsAsSignal<TooltipComponent> {
     public readonly position = input<ReturnType<TooltipComponent["position"]>>("top");
     public readonly rounded = input<ReturnType<TooltipComponent["rounded"]>>("medium");
+    public readonly target = input<ReturnType<TooltipComponent["target"]>>("button");
 }
