@@ -917,24 +917,6 @@
       }
     ]
   },
-  "TooltipComponent": {
-    "name": "TooltipComponent",
-    "selector": "\"mona-tooltip\"",
-    "inputs": [
-      {
-        "name": "position",
-        "type": "Position",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "target",
-        "type": "Element | ElementRef",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "TreeViewCheckableDirective": {
     "name": "TreeViewCheckableDirective",
     "selector": "\"mona-tree-view[monaTreeViewCheckable]\"",
@@ -2070,7 +2052,7 @@
       {
         "name": "closeOnBackdropClick",
         "type": "boolean",
-        "description": "Whether to close the popup when clicking on the backdrop.\nOnly applies when the popup has a backdrop.",
+        "description": "Whether to close the popup when clicking on the backdrop.\r\nOnly applies when the popup has a backdrop.",
         "kind": "input"
       },
       {
@@ -2166,19 +2148,19 @@
       {
         "name": "positionStrategy",
         "type": "\"global\" | \"connected\"",
-        "description": "The position strategy for the popup.",
+        "description": "The strategy for positioning the popup.\r\n`global` means the popup will be positioned relative to the viewport,\r\n`connected` means the popup will be positioned relative to the anchor element.",
         "kind": "input"
       },
       {
         "name": "positions",
         "type": "Array<ConnectedPosition | ConnectionPositionPair>",
-        "description": "The positions to use for the popup.\nThe popup will try to position itself in the first position that fits.",
+        "description": "The positions to use for the popup.\r\nThe popup will try to position itself in the first position that fits.\r\nThis is only used when the `positionStrategy` is set to `connected`.",
         "kind": "input"
       },
       {
         "name": "preventClose",
         "type": "Action<PopupCloseEvent, boolean>",
-        "description": "Called when the popup is requested to close.\nThis can be used to prevent the popup from closing.",
+        "description": "Called when the popup is requested to close.\r\nThis can be used to prevent the popup from closing.",
         "kind": "input"
       },
       {
@@ -3925,6 +3907,30 @@
         "name": "trigger",
         "type": "PopoverTrigger>",
         "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "TooltipComponent": {
+    "name": "TooltipComponent",
+    "selector": "\"mona-tooltip\"",
+    "inputs": [
+      {
+        "name": "position",
+        "type": "Position",
+        "description": "The position of the tooltip relative to the target element.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "TooltipVariantProps[\"rounded\"]",
+        "description": "The border radius of the tooltip.",
+        "kind": "input"
+      },
+      {
+        "name": "target",
+        "type": "PopupAnchor",
+        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

@@ -85,6 +85,24 @@ export class PopupService {
         return ["mona-popup-content"].concat(popupClass);
     }
 
+    private captureOriginalFocus(settings: PopupSettings): HTMLElement | null {
+        if (typeof settings.anchor === "string" || settings.restoreFocus === false) {
+            return null;
+        }
+
+        const activeElement = document.activeElement;
+        if (!(activeElement instanceof HTMLElement)) {
+            return null;
+        }
+
+        if (settings.restoreFocus === "auto") {
+            const anchorElement = this.getAnchorElement(settings.anchor);
+            return activeElement === anchorElement ? activeElement : null;
+        }
+
+        return this.getAnchorElement(settings.anchor);
+    }
+
     private cleanupEventDelegation(selector: string): void {
         const subscriptions = this.#selectorSubscriptions.get(selector);
         if (subscriptions) {
@@ -168,13 +186,13 @@ export class PopupService {
     private createSingleElementPopup(settings: PopupSettings): PopupRef {
         const overlayRef = this.createOverlay(settings);
         const popupReference = new PopupReference(overlayRef);
-
+        const originallyFocusedElement = this.captureOriginalFocus(settings);
         const injector = this.createInjector(settings, popupReference);
         const animationElement = this.attachContent(settings, popupReference, overlayRef, injector);
 
         this.setupAnimations(settings.animation, animationElement, popupReference);
         const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
-        this.setupCleanupSubscription(popupReference, subscription, settings);
+        this.setupCleanupSubscription(popupReference, subscription, settings, originallyFocusedElement);
         this.setupScrollTracking(settings, overlayRef, popupReference);
         this.setupEscapeKeyListener(settings, popupReference);
         this.setupPositionChangeTracking(settings, overlayRef, popupReference);
@@ -221,6 +239,22 @@ export class PopupService {
             scrollables.push(...ancestorScrollables);
         }
         return scrollables;
+    }
+
+    private handleFocusRestoration(settings: PopupSettings, originallyFocusedElement?: HTMLElement | null): void {
+        const restoreFocus = settings.restoreFocus ?? "auto";
+
+        if (restoreFocus === false) {
+            return;
+        }
+
+        if (restoreFocus === "auto") {
+            if (originallyFocusedElement) {
+                originallyFocusedElement.focus();
+            }
+            return;
+        }
+        this.restoreFocusToAnchor(settings.anchor);
     }
 
     /**
@@ -303,11 +337,12 @@ export class PopupService {
     private setupCleanupSubscription(
         popupReference: PopupReference,
         subscription: Subscription | null,
-        settings: PopupSettings
+        settings: PopupSettings,
+        originallyFocusedElement?: HTMLElement | null
     ): void {
         popupReference.closed.pipe(take(1)).subscribe(() => {
             subscription?.unsubscribe();
-            this.restoreFocusToAnchor(settings.anchor);
+            this.handleFocusRestoration(settings, originallyFocusedElement);
         });
     }
 

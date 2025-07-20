@@ -11,18 +11,12 @@ import { PopupOffset } from "./PopupOffset";
 import { Action } from "../../utils/Action";
 import { PopupCloseEvent } from "./PopupCloseEvent";
 
-/**
- * Extended anchor type that supports CSS selectors in addition to elements.
- * When used with PopupService directly, CSS selectors will resolve to the first matching element.
- * When used with TooltipComponent, CSS selectors will apply tooltips to all matching elements.
- */
 export type PopupAnchor = FlexibleConnectedPositionStrategyOrigin | string;
 
 export interface PopupSettings<T = unknown, C = void> {
     /**
      * The anchor element to which the popup will be connected.
      * Can be an element, ElementRef, or CSS selector string.
-     * When using a CSS selector, the first matching element will be used.
      * @type {PopupAnchor}
      */
     anchor: PopupAnchor;
@@ -156,10 +150,21 @@ export interface PopupSettings<T = unknown, C = void> {
     providers?: StaticProvider[];
 
     /**
+     * Controls focus restoration behavior when the popup is closed.
+     * - true: Always restore focus to anchor
+     * - false: Never restore focus (recommended for tooltips)
+     * - "auto": Only restore focus if anchor was focused when popup opened (smart behavior)
+     * Default: "auto".
+     * @type {boolean | "auto"}
+     */
+    restoreFocus?: boolean | "auto";
+
+    /**
      * Width of the popup.
      * @type {number | string}
      */
     width?: number | string;
+
     withPush?: boolean;
 
     /**

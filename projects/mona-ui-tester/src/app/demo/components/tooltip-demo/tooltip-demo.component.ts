@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { ButtonDirective, TooltipComponent } from "mona-ui";
+import { ButtonDirective, TextBoxDirective, TooltipComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -13,7 +13,19 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent> {
     protected readonly config = signal<ComponentConfig<TooltipComponent>>({
-        code: ``,
+        code: `
+            <div class="flex flex-row flex-wrap items-center justify-center gap-8 tooltip-demo">
+                <button monaButton look="primary" #primary>Primary Button</button>
+                <button monaButton>Button</button>
+                <a href="#" class="ml-2">Link 1</a>
+                <a href="#" class="ml-2">Link 2</a>
+                <input type="text" class="w-32 text-box" monaTextBox />
+                <input type="text" class="w-32 text-box" monaTextBox />
+            </div>
+            <mona-tooltip [target]="target()" [position]="position()" [rounded]="rounded()">
+                <div class="p-2">This is a <span class="text-green-600 font-semibold">tooltip</span>.</div>
+            </mona-tooltip>
+        `,
         inputs: {
             position: {
                 type: "dropdown",
@@ -27,7 +39,7 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
             },
             target: {
                 type: "dropdown",
-                value: ["button", "a"],
+                value: ["button[look='primary']", "button", "a", ".text-box"],
                 defaultValue: "a"
             }
         },
@@ -39,14 +51,16 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
 }
 
 @Component({
-    imports: [ButtonDirective, TooltipComponent],
+    imports: [ButtonDirective, TooltipComponent, TextBoxDirective],
     template: `
-        <div class="flex flex-row gap-10">
-            <button monaButton #tooltipAnchor>Button</button>
-            <a href="#" class="ml-2">Link</a>
-            <span href="#" class="ml-2">Link</span>
+        <div class="flex flex-row flex-wrap items-center justify-center gap-8 tooltip-demo">
+            <button monaButton look="primary" #primary>Primary Button</button>
+            <button monaButton>Button</button>
+            <a href="#" class="ml-2">Link 1</a>
+            <a href="#" class="ml-2">Link 2</a>
+            <input type="text" class="w-32 text-box" monaTextBox />
+            <input type="text" class="w-32 text-box" monaTextBox />
         </div>
-
         <mona-tooltip [target]="target()" [position]="position()" [rounded]="rounded()">
             <div class="p-2">This is a <span class="text-green-600 font-semibold">tooltip</span>.</div>
         </mona-tooltip>
