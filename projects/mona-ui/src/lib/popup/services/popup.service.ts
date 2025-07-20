@@ -41,90 +41,6 @@ export class PopupService {
         return this.createSingleElementPopup(settings);
     }
 
-    private createSingleElementPopup(settings: PopupSettings): PopupRef {
-        const overlayRef = this.createOverlay(settings);
-        const popupReference = new PopupReference(overlayRef);
-
-        const injector = this.createInjector(settings, popupReference);
-        const animationElement = this.attachContent(settings, popupReference, overlayRef, injector);
-
-        this.setupAnimations(settings.animation, animationElement, popupReference);
-        const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
-        this.setupCleanupSubscription(popupReference, subscription, settings);
-        this.setupScrollTracking(settings, overlayRef, popupReference);
-        this.setupEscapeKeyListener(settings, popupReference);
-        this.setupPositionChangeTracking(settings, overlayRef, popupReference);
-
-        return popupReference.popupRef;
-    }
-
-    private createMultiElementPopup(settings: PopupSettings): PopupRef {
-        const selector = settings.anchor as string;
-
-        // Create a virtual PopupRef that manages multi-element interactions
-        const virtualOverlayRef = this.#overlay.create({ hasBackdrop: false });
-        const virtualPopupReference = new PopupReference(virtualOverlayRef);
-
-        // Set up event delegation internally
-        this.setupInternalEventDelegation(selector, settings);
-
-        // Clean up when the virtual popup is closed
-        virtualPopupReference.popupRef.closed.subscribe(() => {
-            this.cleanupEventDelegation(selector);
-        });
-
-        return virtualPopupReference.popupRef;
-    }
-
-    private setupInternalEventDelegation(selector: string, settings: PopupSettings): void {
-        // Clean up any existing subscriptions for this selector
-        this.cleanupEventDelegation(selector);
-
-        // Find all elements matching the selector and set up individual listeners
-        const elements = document.querySelectorAll(selector);
-
-        let currentPopupRef: PopupRef | null = null;
-        const subscriptions: Subscription[] = [];
-
-        elements.forEach(element => {
-            if (!(element instanceof HTMLElement)) return;
-
-            const pointerEnter$ = fromEvent<PointerEvent>(element, "pointerenter");
-            const pointerLeave$ = fromEvent<PointerEvent>(element, "pointerleave");
-
-            const subscription = pointerEnter$
-                .pipe(
-                    filter(() => !currentPopupRef),
-                    tap(() => {
-                        const elementSettings = { ...settings, anchor: element };
-                        currentPopupRef = this.createSingleElementPopup(elementSettings);
-                    }),
-                    exhaustMap(() => pointerLeave$.pipe(take(1))),
-                    tap(() => {
-                        if (currentPopupRef) {
-                            currentPopupRef.close();
-                            currentPopupRef = null;
-                        }
-                    }),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe();
-
-            subscriptions.push(subscription);
-        });
-
-        // Store subscriptions for cleanup
-        this.#selectorSubscriptions.set(selector, subscriptions);
-    }
-
-    private cleanupEventDelegation(selector: string): void {
-        const subscriptions = this.#selectorSubscriptions.get(selector);
-        if (subscriptions) {
-            subscriptions.forEach(sub => sub.unsubscribe());
-            this.#selectorSubscriptions.delete(selector);
-        }
-    }
-
     private attachComponentContent(
         settings: PopupSettings,
         popupReference: PopupReference,
@@ -169,6 +85,14 @@ export class PopupService {
         return ["mona-popup-content"].concat(popupClass);
     }
 
+    private cleanupEventDelegation(selector: string): void {
+        const subscriptions = this.#selectorSubscriptions.get(selector);
+        if (subscriptions) {
+            subscriptions.forEach(sub => sub.unsubscribe());
+            this.#selectorSubscriptions.delete(selector);
+        }
+    }
+
     private createInjector(settings: PopupSettings, popupReference: PopupReference): Injector {
         return Injector.create({
             parent: this.#injector,
@@ -179,6 +103,24 @@ export class PopupService {
                 ...(settings.providers ?? [])
             ]
         });
+    }
+
+    private createMultiElementPopup(settings: PopupSettings): PopupRef {
+        const selector = settings.anchor as string;
+
+        // Create a virtual PopupRef that manages multi-element interactions
+        const virtualOverlayRef = this.#overlay.create({ hasBackdrop: false });
+        const virtualPopupReference = new PopupReference(virtualOverlayRef);
+
+        // Set up event delegation internally
+        this.setupInternalEventDelegation(selector, settings);
+
+        // Clean up when the virtual popup is closed
+        virtualPopupReference.popupRef.closed.subscribe(() => {
+            this.cleanupEventDelegation(selector);
+        });
+
+        return virtualPopupReference.popupRef;
     }
 
     private createOverlay(settings: PopupSettings): OverlayRef {
@@ -205,13 +147,6 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        if (!resolvedAnchor) {
-            throw new Error(
-                typeof settings.anchor === "string"
-                    ? `No elements found for CSS selector: "${settings.anchor}"`
-                    : "Invalid anchor provided to PopupService"
-            );
-        }
 
         const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
         const strategy = this.#overlay
@@ -228,6 +163,33 @@ export class PopupService {
         }
 
         return strategy;
+    }
+
+    private createSingleElementPopup(settings: PopupSettings): PopupRef {
+        const overlayRef = this.createOverlay(settings);
+        const popupReference = new PopupReference(overlayRef);
+
+        const injector = this.createInjector(settings, popupReference);
+        const animationElement = this.attachContent(settings, popupReference, overlayRef, injector);
+
+        this.setupAnimations(settings.animation, animationElement, popupReference);
+        const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
+        this.setupCleanupSubscription(popupReference, subscription, settings);
+        this.setupScrollTracking(settings, overlayRef, popupReference);
+        this.setupEscapeKeyListener(settings, popupReference);
+        this.setupPositionChangeTracking(settings, overlayRef, popupReference);
+
+        return popupReference.popupRef;
+    }
+
+    private getAnchorElement(anchor: PopupAnchor): HTMLElement | null {
+        if (anchor instanceof HTMLElement) {
+            return anchor;
+        }
+        if (typeof anchor === "object" && "nativeElement" in anchor && anchor.nativeElement instanceof HTMLElement) {
+            return anchor.nativeElement;
+        }
+        return null;
     }
 
     private getAnimationConfig(config?: boolean | PopupAnimationSettings): Required<PopupAnimationSettings> | null {
@@ -261,41 +223,29 @@ export class PopupService {
         return scrollables;
     }
 
-    private getAnchorElement(anchor: PopupAnchor): HTMLElement | null {
-        if (anchor instanceof HTMLElement) {
-            return anchor;
-        }
-        if (typeof anchor === "object" && "nativeElement" in anchor && anchor.nativeElement instanceof HTMLElement) {
-            return anchor.nativeElement;
-        }
-        return null;
-    }
-
     /**
      * Resolves a PopupAnchor to a FlexibleConnectedPositionStrategyOrigin.
-     * If the anchor is a CSS selector string, it queries the DOM for the first matching element.
-     * @param anchor The anchor to resolve
-     * @returns The resolved anchor or null if selector doesn't match any elements
+     * This method should only receive actual elements or ElementRefs, not CSS selector strings.
+     * CSS selectors are handled by the multi-element popup creation path.
+     * @param anchor The anchor to resolve (should be Element or ElementRef)
+     * @returns The resolved anchor
      */
-    private resolveAnchor(anchor: PopupAnchor): FlexibleConnectedPositionStrategyOrigin | null {
+    private resolveAnchor(anchor: PopupAnchor): FlexibleConnectedPositionStrategyOrigin {
         if (typeof anchor === "string") {
-            try {
-                const element = document.querySelector(anchor);
-                if (element instanceof HTMLElement) {
-                    return element;
-                }
-                return null;
-            } catch (error) {
-                console.warn(`Invalid CSS selector provided to PopupService: "${anchor}"`);
-                return null;
-            }
+            throw new Error(
+                `CSS selector "${anchor}" should not reach resolveAnchor(). ` +
+                    `CSS selectors should be handled by createMultiElementPopup().`
+            );
         }
         return anchor;
     }
 
     private restoreFocusToAnchor(anchor: PopupAnchor): void {
+        if (typeof anchor === "string") {
+            return;
+        }
         const resolvedAnchor = this.resolveAnchor(anchor);
-        const anchorElement = resolvedAnchor ? this.getAnchorElement(resolvedAnchor) : null;
+        const anchorElement = this.getAnchorElement(resolvedAnchor);
         if (anchorElement) {
             anchorElement.focus();
         }
@@ -392,30 +342,6 @@ export class PopupService {
         return combinedSubscription;
     }
 
-    private setupMouseLeaveSubscription(settings: PopupSettings, popupReference: PopupReference): Subscription | null {
-        const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        const anchorElement = resolvedAnchor ? this.getAnchorElement(resolvedAnchor) : null;
-        if (!anchorElement) {
-            return null;
-        }
-
-        return fromEvent<PointerEvent>(anchorElement, "pointerleave")
-            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                const closeEvent = new PopupCloseEvent({
-                    event,
-                    originalEvent: event,
-                    via: PopupCloseSource.MouseLeave
-                });
-
-                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
-                    return;
-                }
-
-                popupReference.close(closeEvent);
-            });
-    }
-
     private setupEscapeKeyListener(settings: PopupSettings, popupReference: PopupReference): void {
         if (settings.closeOnEscape === false) {
             return;
@@ -440,6 +366,72 @@ export class PopupService {
                 }
 
                 popupReference.popupRef.close(closeEvent);
+            });
+    }
+
+    private setupInternalEventDelegation(selector: string, settings: PopupSettings): void {
+        this.cleanupEventDelegation(selector);
+
+        let currentPopupRef: PopupRef | null = null;
+        const subscriptions: Subscription[] = [];
+        const elements = document.querySelectorAll(selector);
+
+        elements.forEach(element => {
+            if (!(element instanceof HTMLElement)) {
+                return;
+            }
+
+            const pointerEnter$ = fromEvent<PointerEvent>(element, "pointerenter");
+            const pointerLeave$ = fromEvent<PointerEvent>(element, "pointerleave");
+
+            const subscription = pointerEnter$
+                .pipe(
+                    filter(() => !currentPopupRef),
+                    tap(() => {
+                        const elementSettings = { ...settings, anchor: element };
+                        currentPopupRef = this.createSingleElementPopup(elementSettings);
+                    }),
+                    exhaustMap(() => pointerLeave$.pipe(take(1))),
+                    tap(() => {
+                        if (currentPopupRef) {
+                            currentPopupRef.close();
+                            currentPopupRef = null;
+                        }
+                    }),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
+                .subscribe();
+
+            subscriptions.push(subscription);
+        });
+        this.#selectorSubscriptions.set(selector, subscriptions);
+    }
+
+    private setupMouseLeaveSubscription(settings: PopupSettings, popupReference: PopupReference): Subscription | null {
+        if (typeof settings.anchor === "string") {
+            return null;
+        }
+
+        const resolvedAnchor = this.resolveAnchor(settings.anchor);
+        const anchorElement = this.getAnchorElement(resolvedAnchor);
+        if (!anchorElement) {
+            return null;
+        }
+
+        return fromEvent<PointerEvent>(anchorElement, "pointerleave")
+            .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => {
+                const closeEvent = new PopupCloseEvent({
+                    event,
+                    originalEvent: event,
+                    via: PopupCloseSource.MouseLeave
+                });
+
+                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
+                    return;
+                }
+
+                popupReference.close(closeEvent);
             });
     }
 
@@ -470,8 +462,28 @@ export class PopupService {
             });
     }
 
+    private setupPositionChangeTracking(
+        settings: PopupSettings,
+        overlayRef: OverlayRef,
+        popupReference: PopupReference
+    ): void {
+        if (settings.positionStrategy === "global") {
+            return;
+        }
+
+        const positionStrategy = overlayRef.getConfig().positionStrategy as FlexibleConnectedPositionStrategy;
+        if (positionStrategy && positionStrategy.positionChanges) {
+            positionStrategy.positionChanges
+                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
+        }
+    }
+
     private setupScrollTracking(settings: PopupSettings, overlayRef: OverlayRef, popupReference: PopupReference): void {
         if (!(settings.withScrollTracking ?? true) || settings.positionStrategy === "global") {
+            return;
+        }
+        if (typeof settings.anchor === "string") {
             return;
         }
 
@@ -504,7 +516,6 @@ export class PopupService {
                 subscriptions.push(containerScrollSubscription);
             });
         }
-
         popupReference.closed.pipe(take(1)).subscribe(() => {
             subscriptions.forEach(sub => sub.unsubscribe());
         });
@@ -512,8 +523,13 @@ export class PopupService {
 
     private shouldIgnoreOutsideClick(settings: PopupSettings, event: Event): boolean {
         const eventTarget = event.target as HTMLElement;
+
+        if (typeof settings.anchor === "string") {
+            return !this.#outsideEventsToClose.includes(event.type);
+        }
+
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        const anchorElement = resolvedAnchor ? this.getAnchorElement(resolvedAnchor) : null;
+        const anchorElement = this.getAnchorElement(resolvedAnchor);
         const isAnchorClick = anchorElement && anchorElement.contains(eventTarget);
         const isRelevantEventType = this.#outsideEventsToClose.includes(event.type);
 
@@ -528,22 +544,5 @@ export class PopupService {
             return false;
         }
         return preventClose(event) || event.isDefaultPrevented();
-    }
-
-    private setupPositionChangeTracking(
-        settings: PopupSettings,
-        overlayRef: OverlayRef,
-        popupReference: PopupReference
-    ): void {
-        if (settings.positionStrategy === "global") {
-            return;
-        }
-
-        const positionStrategy = overlayRef.getConfig().positionStrategy as FlexibleConnectedPositionStrategy;
-        if (positionStrategy && positionStrategy.positionChanges) {
-            positionStrategy.positionChanges
-                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
-                .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
-        }
     }
 }
