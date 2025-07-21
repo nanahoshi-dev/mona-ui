@@ -23,7 +23,7 @@
     }
 </div>
 
-@if (menuItem().subMenuItemsSet.length > 0) {
+@if (hasAnySubMenuItems()) {
     <span [class]="linkContainerClasses()">
         <lucide-angular [img]="linkIcon" class="w-4 h-4"></lucide-angular>
     </span>

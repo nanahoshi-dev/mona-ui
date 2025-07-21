@@ -1,9 +1,9 @@
 import { Component, computed, contentChildren, DestroyRef, effect, inject, input, viewChild } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
+import { prepareMenuItems } from "../../../menus/utils/menu.utils";
 import { ButtonVariantProps, DropdownButtonVariantInputs } from "../../button/styles/button.styles";
 import { MenuItemGroupComponent } from "../../../menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "../../../menus/models/MenuItemInjectionToken";
-import { prepareMenuItems } from "../../../menus/utils/prepareMenuItems";
 import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../menus/menu-item/menu-item.component";
 import { ButtonDirective } from "../../button/directives/button.directive";

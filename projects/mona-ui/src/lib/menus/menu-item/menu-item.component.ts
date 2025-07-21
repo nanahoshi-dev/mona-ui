@@ -4,23 +4,20 @@ import {
     computed,
     contentChild,
     contentChildren,
-    effect,
     forwardRef,
     input,
     output,
-    Signal,
-    TemplateRef,
-    untracked
+    TemplateRef
 } from "@angular/core";
-import { select } from "@mirei/ts-collections";
+import { ImmutableSet, select } from "@mirei/ts-collections";
+import { MenuItemIconTemplateDirective } from "../directives/menu-item-icon-template.directive";
 import { MenuItemShortcutTemplateDirective } from "../directives/menu-item-shortcut-template.directive";
+import { MenuItemTextTemplateDirective } from "../directives/menu-item-text-template.directive";
 import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
+import { MenuItem } from "../models/MenuItem";
 import { InternalMenuItemClickEvent, MenuItemClickEvent } from "../models/MenuItemClickEvent";
 import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
-import { prepareMenuItems } from "../utils/prepareMenuItems";
-import { MenuItemIconTemplateDirective } from "../directives/menu-item-icon-template.directive";
-import { MenuItemTextTemplateDirective } from "../directives/menu-item-text-template.directive";
-import { MenuItem } from "../models/MenuItem";
+import { createMenuItems } from "../utils/menu.utils";
 
 @Component({
     selector: "mona-menu-item",
@@ -34,15 +31,13 @@ import { MenuItem } from "../models/MenuItem";
     ]
 })
 export class MenuItemComponent<T = unknown> {
-    readonly #menuItem: Signal<MenuItem> = computed(() => {
-        return new MenuItem({
-            data: this.data(),
-            disabled: this.disabled(),
-            divider: this.divider(),
-            subMenuItems: [],
-            text: this.text()
-        });
-    });
+    readonly #baseMenuItemOptions = computed(() => ({
+        data: this.data(),
+        disabled: this.disabled(),
+        divider: this.divider(),
+        subMenuItems: [],
+        text: this.text()
+    }));
     protected readonly iconTemplate = contentChild(MenuItemIconTemplateDirective, {
         read: TemplateRef,
         descendants: false
@@ -92,40 +87,40 @@ export class MenuItemComponent<T = unknown> {
      */
     public readonly text = input<string>("");
 
-    public constructor() {
-        effect(() => {
-            const submenuItems = this.submenuItems();
-            untracked(() => {
-                this.#menuItem().subMenuItemsSet = prepareMenuItems(submenuItems);
-            });
-        });
-    }
-
     public getMenuItem(): MenuItem {
         return this.getMenuItemWithDepth(0);
     }
 
-    private getMenuItemWithDepth(depth: number = 0): MenuItem {
-        this.#menuItem().iconClass = this.iconClass();
-        this.#menuItem().iconTemplate = this.iconTemplate();
-        this.#menuItem().shortcutTemplate = this.shortcutTemplate();
-        this.#menuItem().menuClick = (event: InternalMenuItemClickEvent<any>): void => {
-            const clickEvent: MenuItemClickEvent<any, T> = this.data() ? { ...event, data: this.data() } : event;
-            this.menuClick.emit(clickEvent);
-        };
+    private createSubMenuItemsSet(depth: number): ImmutableSet<ImmutableSet<MenuItem>> {
         const items = select(this.submenuItems(), si => (si instanceof MenuItemGroupComponent ? si.menuItems() : [si]));
-        this.#menuItem().subMenuItemsSet = items
+        return items
             .select(i => {
                 return select(i, mi => {
                     const subMenuItem = mi.getMenuItemWithDepth(depth + 1);
-                    subMenuItem.parent = this.#menuItem();
-                    return subMenuItem;
+                    return {
+                        ...subMenuItem,
+                        parent: null // Will be set by parent if needed
+                    };
                 }).toImmutableSet();
             })
             .toImmutableSet();
+    }
 
-        this.#menuItem().depth = depth;
-        this.#menuItem().textTemplate = this.textTemplate();
-        return this.#menuItem();
+    private getMenuItemWithDepth(depth: number = 0): MenuItem {
+        const submenuItemsSet = this.createSubMenuItemsSet(depth);
+        const baseOptions = this.#baseMenuItemOptions();
+        const menuItem = createMenuItems(baseOptions, submenuItemsSet);
+        return {
+            ...menuItem,
+            depth,
+            iconClass: this.iconClass(),
+            iconTemplate: this.iconTemplate(),
+            shortcutTemplate: this.shortcutTemplate(),
+            textTemplate: this.textTemplate(),
+            menuClick: (event: InternalMenuItemClickEvent<any>): void => {
+                const clickEvent: MenuItemClickEvent<any, T> = this.data() ? { ...event, data: this.data() } : event;
+                this.menuClick.emit(clickEvent);
+            }
+        };
     }
 }

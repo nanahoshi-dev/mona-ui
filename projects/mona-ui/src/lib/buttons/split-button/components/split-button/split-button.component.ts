@@ -15,6 +15,7 @@ import {
 } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule } from "lucide-angular";
+import { prepareMenuItems } from "../../../../menus/utils/menu.utils";
 import {
     splitButtonThemeVariants,
     SplitButtonVariantInputs,
@@ -22,7 +23,6 @@ import {
 } from "../../styles/split-button.styles";
 import { MenuItemGroupComponent } from "../../../../menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "../../../../menus/models/MenuItemInjectionToken";
-import { prepareMenuItems } from "../../../../menus/utils/prepareMenuItems";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";

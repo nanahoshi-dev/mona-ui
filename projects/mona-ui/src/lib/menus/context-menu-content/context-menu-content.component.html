@@ -15,7 +15,7 @@
                         <mona-contextmenu-item [menuItem]="menuItem"
                                                [iconVisible]="iconAreaVisible()"
                                                [itemFocused]="keyManager?.activeItem?.menuItem() === menuItem"
-                                               [itemDisabled]="menuItem.disabled??false"
+                                               [itemDisabled]="menuItem.disabled || menuItem.divider"
                                                [submenuPopupRef]="menuPopupRef()" [attr.tabindex]="0">
                         </mona-contextmenu-item>
                     </li>

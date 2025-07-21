@@ -2,6 +2,9 @@ import { Highlightable } from "@angular/cdk/a11y";
 import { NgClass, NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, OnDestroy } from "@angular/core";
 import { ChevronRight, LucideAngularModule } from "lucide-angular";
+import { twMerge } from "tailwind-merge";
+import { PopupRef } from "../../popup/models/PopupRef";
+import { MenuItem } from "../models/MenuItem";
 import {
     contextMenuItemVariants,
     menuItemIconVariants,
@@ -9,9 +12,7 @@ import {
     menuItemShortcutVariants,
     menuItemTextVariants
 } from "../styles/menu.style";
-import { twMerge } from "tailwind-merge";
-import { PopupRef } from "../../popup/models/PopupRef";
-import { MenuItem } from "../models/MenuItem";
+import { hasSubMenuItems } from "../utils/menu.utils";
 
 @Component({
     selector: "mona-contextmenu-item",
@@ -29,6 +30,10 @@ export class ContextMenuItemComponent implements OnDestroy, Highlightable {
         const iconAreaVisible = this.iconVisible();
         const padding = iconAreaVisible ? "pl-8" : "pl-2";
         return twMerge(contextMenuItemVariants(), padding);
+    });
+    protected readonly hasAnySubMenuItems = computed(() => {
+        const menuItem = this.menuItem();
+        return hasSubMenuItems(menuItem);
     });
     protected readonly iconContainerClasses = computed(() => {
         return twMerge(menuItemIconVariants());

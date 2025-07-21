@@ -11,20 +11,21 @@ import {
     viewChildren
 } from "@angular/core";
 import { any, Dictionary, ImmutableSet, select, selectMany, toArray, toImmutableSet } from "@mirei/ts-collections";
-import { ContextMenuInjectorData } from "../models/ContextMenuInjectorData";
-import { InternalMenuItemClickEvent } from "../models/MenuItemClickEvent";
-import {
-    contextMenuContentVariants,
-    contextMenuDividerVariants,
-    menuItemGroupHeaderVariants
-} from "../styles/menu.style";
 import { filter, fromEvent, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupDataInjectionToken } from "../../popup/models/PopupInjectionToken";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { ContextMenuItemComponent } from "../context-menu-item/context-menu-item.component";
+import { ContextMenuInjectorData } from "../models/ContextMenuInjectorData";
 import { MenuItem } from "../models/MenuItem";
+import { InternalMenuItemClickEvent } from "../models/MenuItemClickEvent";
 import { ContextMenuService } from "../services/context-menu.service";
+import {
+    contextMenuContentVariants,
+    contextMenuDividerVariants,
+    menuItemGroupHeaderVariants
+} from "../styles/menu.style";
+import { hasSubMenuItems, isInteractive } from "../utils/menu.utils";
 
 @Component({
     selector: "mona-contextmenu-content",
@@ -108,7 +109,7 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     public onListItemClick(event: MouseEvent, menuItem: MenuItem): void {
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (menuItem.disabled || menuItem.divider || (menuItem.subMenuItemsSet && any(menuItem.subMenuItemsSet))) {
+        if (!isInteractive(menuItem) || hasSubMenuItems(menuItem)) {
             return;
         }
         const clickEvent: InternalMenuItemClickEvent<C> = {
@@ -122,7 +123,7 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     public onListItemMouseEnter(event: MouseEvent, menuItem: MenuItem): void {
         this.#currentMenuItem = menuItem;
         this.menuPopupRef()?.close();
-        if (this.#currentMenuItem.subMenuItemsSet && any(this.#currentMenuItem.subMenuItemsSet)) {
+        if (hasSubMenuItems(this.#currentMenuItem)) {
             this.create(event.target as HTMLElement, this.#currentMenuItem);
         }
     }
@@ -189,19 +190,19 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
 
     private handleArrowRightKey(): void {
         const menuItem = this.keyManager.activeItem?.menuItem();
-        if (menuItem?.subMenuItemsSet && any(menuItem.subMenuItemsSet)) {
+        if (menuItem && hasSubMenuItems(menuItem)) {
             this.menuPopupRef()?.close();
             const previousItem = this.keyManager.activeItem;
             if (this.keyManager.activeItem) {
                 this.create(this.keyManager.activeItem.elementRef.nativeElement!.parentElement!, menuItem, true);
             }
-            const submenuItems2 = selectMany(
+            const submenuItems = selectMany(
                 toArray(this.keyManager.activeItem?.menuItem().subMenuItemsSet ?? []),
                 i => i
             ).toArray();
             this.parentMenuData.navigate?.emit({
                 previousItem: previousItem?.menuItem().options ?? null,
-                currentItem: submenuItems2.find(mi => !mi.disabled && !mi.divider)?.options ?? null,
+                currentItem: submenuItems.find(mi => isInteractive(mi))?.options ?? null,
                 direction: "right"
             });
         } else {
@@ -216,7 +217,7 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     private handleInputKeys(event: KeyboardEvent): void {
         const menuItem = this.keyManager.activeItem?.menuItem();
         if (menuItem) {
-            if (menuItem.subMenuItemsSet && any(menuItem.subMenuItemsSet)) {
+            if (hasSubMenuItems(menuItem)) {
                 return;
             }
             if (this.keyManager.activeItem) {

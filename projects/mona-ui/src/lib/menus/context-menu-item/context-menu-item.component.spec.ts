@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { ImmutableSet } from "@mirei/ts-collections";
 import { MenuItem } from "../models/MenuItem";
 import { ContextMenuService } from "../services/context-menu.service";
+import { createMenuItems } from "../utils/menu.utils";
 
 import { ContextMenuItemComponent } from "./context-menu-item.component";
 
@@ -18,7 +18,7 @@ describe("ContextMenuItemComponent", () => {
         });
         fixture = TestBed.createComponent(ContextMenuItemComponent);
         component = fixture.componentInstance;
-        menuItem = new MenuItem({});
+        menuItem = createMenuItems({});
         fixture.componentRef.setInput("menuItem", menuItem);
         fixture.detectChanges();
     });

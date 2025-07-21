@@ -29,7 +29,7 @@ import { MenuItem, MenuItemOptions } from "../models/MenuItem";
 import { InternalMenuItemClickEvent } from "../models/MenuItemClickEvent";
 import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
 import { ContextMenuService } from "../services/context-menu.service";
-import { convertToMenuItemSet, prepareMenuItems } from "../utils/prepareMenuItems";
+import { convertToMenuItemSet, prepareMenuItems } from "../utils/menu.utils";
 
 @Component({
     selector: "mona-contextmenu",
@@ -222,19 +222,23 @@ export class ContextMenuComponent<C = any> implements OnInit {
         const menuItemComponents = this.menuItemComponents();
         if (any(this.menuItems())) {
             const firstItem = first(this.menuItems());
-            if (firstItem instanceof MenuItem) {
+            if (this.isMenuItem(firstItem)) {
                 const items = from(this.menuItems())
                     .select(mi => mi as MenuItem)
                     .toImmutableSet();
                 this.menuItemList.set(toImmutableSet([items]));
                 return;
             }
-            const menuSet = convertToMenuItemSet(this.menuItems());
+            const menuSet = convertToMenuItemSet(this.menuItems() as Iterable<MenuItemOptions>);
             this.menuItemList.set(menuSet);
             return;
         }
         const items = prepareMenuItems(menuItemComponents);
         this.menuItemList.update(set => set.clear().addAll(items));
+    }
+
+    private isMenuItem(item: any): item is MenuItem {
+        return item && typeof item === "object" && "options" in item && "subMenuItemsSet" in item;
     }
 
     private setEventListeners(): void {

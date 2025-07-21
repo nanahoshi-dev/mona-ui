@@ -8,14 +8,14 @@ import {
     TemplateRef
 } from "@angular/core";
 import { any, select, selectMany } from "@mirei/ts-collections";
-import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
-import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
-import { prepareMenuItems } from "../utils/prepareMenuItems";
 import { v4 } from "uuid";
 import { ContextMenuComponent } from "../context-menu/context-menu.component";
 import { MenuTextTemplateDirective } from "../directives/menu-text-template.directive";
+import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
 import { MenuItemComponent } from "../menu-item/menu-item.component";
-import { MenuItem, MenuItemOptions } from "../models/MenuItem";
+import { MenuItemOptions } from "../models/MenuItem";
+import { MenuItemInjectionToken } from "../models/MenuItemInjectionToken";
+import { createMenuItems, createSubMenuItemsSet, prepareMenuItems } from "../utils/menu.utils";
 
 @Component({
     selector: "mona-menu",
@@ -35,7 +35,10 @@ export class MenuComponent {
         const items = this.items();
         if (any(items)) {
             return selectMany(
-                select(items, item => select([item], i => new MenuItem(i))),
+                select(items, item => {
+                    const subMenuItemsSet = createSubMenuItemsSet(item.subMenuItems);
+                    return select([createMenuItems(item, subMenuItemsSet)], i => i);
+                }),
                 i => i
             ).toImmutableSet();
         }
