@@ -116,6 +116,13 @@ export const routes: Routes = [
                 path: "tooltip",
                 loadComponent: () =>
                     import("./docs/components/tooltip-doc/tooltip-doc.component").then(m => m.TooltipDocComponent)
+            },
+            {
+                path: "tooltip-directive",
+                loadComponent: () =>
+                    import("./docs/components/tooltip-directive-doc/tooltip-directive-doc.component").then(
+                        m => m.TooltipDirectiveDocComponent
+                    )
             }
         ]
     }

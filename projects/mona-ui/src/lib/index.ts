@@ -246,6 +246,7 @@ export * from "./tooltips/popover/directives/popover-title-template.directive";
 export * from "./tooltips/popover/components/popover/popover.component";
 
 /** Tooltip */
+export * from "./tooltips/tooltip/directives/tooltip.directive";
 export * from "./tooltips/tooltip/components/tooltip/tooltip.component";
 
 /** TreeView */

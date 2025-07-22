@@ -2195,6 +2195,60 @@
       }
     ]
   },
+  "TooltipDirective": {
+    "name": "TooltipDirective",
+    "selector": "\"[monaTooltip]\"",
+    "inputs": [
+      {
+        "name": "filter",
+        "type": "string",
+        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element.\nOnly applies when `mode` is set to `content`.",
+        "kind": "input"
+      },
+      {
+        "name": "mode",
+        "type": "\"host\" | \"content\"",
+        "description": "The mode of the tooltip.\n\"host\" mode receives the tooltip from the host element's title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "kind": "input"
+      },
+      {
+        "name": "position",
+        "type": "Position",
+        "description": "The position of the tooltip relative to the target element.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "TooltipVariantProps[\"rounded\"]",
+        "description": "The border radius of the tooltip.",
+        "kind": "input"
+      }
+    ]
+  },
+  "TooltipTemplateComponent": {
+    "name": "TooltipTemplateComponent",
+    "selector": "",
+    "inputs": [
+      {
+        "name": "content",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "position",
+        "type": "Position",
+        "description": "The position of the tooltip relative to the target element.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "TooltipVariantProps[\"rounded\"]",
+        "description": "The border radius of the tooltip.",
+        "kind": "input"
+      }
+    ]
+  },
   "TreeViewComponent": {
     "name": "TreeViewComponent",
     "selector": "\"mona-tree-view\"",

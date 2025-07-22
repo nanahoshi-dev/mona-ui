@@ -14,11 +14,9 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { takeUntil } from "rxjs";
 import { fadeIn, fadeOut } from "../../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../../models/Position";
-import { PopupOffset } from "../../../../popup/models/PopupOffset";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupAnchor } from "../../../../popup/models/PopupSettings";
 import { PopupService } from "../../../../popup/services/popup.service";
-import { ConnectionPoint } from "../../../../popup/utils/connectionPosition";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import {
     tooltipArrowThemeVariants,
@@ -26,7 +24,11 @@ import {
     TooltipVariantInputs,
     TooltipVariantProps
 } from "../../styles/tooltip.styles";
-import { getArrowPositionFromConnectionPair, getOffsetForPosition } from "../../utils/tooltip.utils";
+import {
+    getArrowPositionFromConnectionPair,
+    getOffsetForPosition,
+    getPositionConnectionPoints
+} from "../../utils/tooltip.utils";
 
 @Component({
     selector: "mona-tooltip",
@@ -81,8 +83,8 @@ export class TooltipComponent implements TooltipVariantInputs {
 
     private createTooltip(): void {
         this.currentArrowPosition.set(this.position());
-        const connectionPoints = this.getPositionConnectionPoints();
-        const offset = this.getPositionOffset();
+        const connectionPoints = getPositionConnectionPoints(this.position());
+        const offset = getOffsetForPosition(this.position());
 
         this.popupRef = this.#popupService.create({
             anchor: this.target(),
@@ -109,22 +111,5 @@ export class TooltipComponent implements TooltipVariantInputs {
                     this.currentArrowPosition.set(newArrowPosition);
                 });
         }
-    }
-
-    private getPositionConnectionPoints(): { anchor: ConnectionPoint; popup: ConnectionPoint } {
-        switch (this.position()) {
-            case "top":
-                return { anchor: "topcenter", popup: "bottomcenter" };
-            case "bottom":
-                return { anchor: "bottomcenter", popup: "topcenter" };
-            case "right":
-                return { anchor: "centerright", popup: "centerleft" };
-            case "left":
-                return { anchor: "centerleft", popup: "centerright" };
-        }
-    }
-
-    private getPositionOffset(): PopupOffset {
-        return getOffsetForPosition(this.position());
     }
 }

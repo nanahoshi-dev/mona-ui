@@ -1,6 +1,7 @@
 import { ConnectionPositionPair } from "@angular/cdk/overlay";
 import { Position } from "../../../models/Position";
 import { PopupOffset } from "../../../popup/models/PopupOffset";
+import { ConnectionPoint } from "../../../popup/utils/connectionPosition";
 
 /**
  * Derives the tooltip arrow position from a ConnectionPositionPair.
@@ -61,5 +62,18 @@ export function getOffsetForPosition(position: Position): PopupOffset {
             return { horizontal: 12, vertical: 0 };
         case "left":
             return { horizontal: -12, vertical: 0 };
+    }
+}
+
+export function getPositionConnectionPoints(position: Position): { anchor: ConnectionPoint; popup: ConnectionPoint } {
+    switch (position) {
+        case "top":
+            return { anchor: "topcenter", popup: "bottomcenter" };
+        case "bottom":
+            return { anchor: "bottomcenter", popup: "topcenter" };
+        case "right":
+            return { anchor: "centerright", popup: "centerleft" };
+        case "left":
+            return { anchor: "centerleft", popup: "centerright" };
     }
 }

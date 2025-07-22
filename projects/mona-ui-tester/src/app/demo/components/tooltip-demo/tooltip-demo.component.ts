@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { ButtonDirective, TextBoxDirective, TooltipComponent } from "mona-ui";
+import { RouterLink } from "@angular/router";
+import { ButtonDirective, ChipComponent, TextBoxDirective, TooltipComponent, TooltipDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -46,21 +47,30 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
         outputs: {}
     });
     protected readonly metadata = this.getMetadata("TooltipComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["TooltipDirective"]);
     protected readonly TooltipWrapperComponent = TooltipWrapperComponent;
 }
 
 @Component({
-    imports: [ButtonDirective, TooltipComponent, TextBoxDirective],
+    imports: [ButtonDirective, TooltipComponent, TextBoxDirective, ChipComponent, TooltipDirective, RouterLink],
     template: `
-        <div class="flex flex-row flex-wrap items-center justify-center gap-8 tooltip-demo">
+        <div class="flex flex-row flex-wrap items-center justify-center gap-8 border border-border p-4 mb-4">
             <button monaButton look="primary" #primary>Primary Button</button>
             <button monaButton>Button</button>
             <a href="#" class="ml-2">Link 1</a>
             <a href="#" class="ml-2">Link 2</a>
             <input type="text" class="w-32 text-box" monaTextBox />
-            <input type="text" class="w-32 text-box" monaTextBox />
         </div>
+        <div
+            class="flex flex-row flex-wrap items-center justify-center gap-8 border border-border p-4"
+            monaTooltip
+            mode="content">
+            <mona-chip title="Chip 1" look="primary">Primary Chip</mona-chip>
+            <mona-chip title="Chip 2">Normal Chip</mona-chip>
+            <span routerLink="/components/button" title="Button Link">Button</span>
+            <span routerLink="/components/tooltip" title="Tooltip Link">Tooltip</span>
+        </div>
+
         <mona-tooltip [target]="target()" [position]="position()" [rounded]="rounded()">
             <div class="p-2">This is a <span class="text-green-600 font-semibold">tooltip</span>.</div>
         </mona-tooltip>

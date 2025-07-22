@@ -103,6 +103,10 @@ export class SidebarComponent {
                 {
                     text: "Tooltip",
                     path: "/tooltip"
+                },
+                {
+                    text: "Tooltip Directive",
+                    path: "/tooltip-directive"
                 }
             ]
         }
