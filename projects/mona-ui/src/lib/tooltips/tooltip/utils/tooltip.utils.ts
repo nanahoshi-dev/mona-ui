@@ -52,16 +52,17 @@ export function getArrowPositionFromConnectionPair(connectionPair: ConnectionPos
  * Gets the appropriate offset for a tooltip based on its position.
  * The offset ensures proper spacing between the tooltip and its anchor element.
  */
-export function getOffsetForPosition(position: Position): PopupOffset {
+export function getOffsetForPosition(position: Position, arrowVisible: boolean): PopupOffset {
+    const arrowOffset = arrowVisible ? 12 : 4;
     switch (position) {
         case "top":
-            return { horizontal: 0, vertical: -12 };
+            return { horizontal: 0, vertical: -arrowOffset };
         case "bottom":
-            return { horizontal: 0, vertical: 12 };
+            return { horizontal: 0, vertical: arrowOffset };
         case "right":
-            return { horizontal: 12, vertical: 0 };
+            return { horizontal: arrowOffset, vertical: 0 };
         case "left":
-            return { horizontal: -12, vertical: 0 };
+            return { horizontal: -arrowOffset, vertical: 0 };
     }
 }
 

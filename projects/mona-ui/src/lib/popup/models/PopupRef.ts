@@ -29,6 +29,10 @@ export class PopupRef {
         asapScheduler.schedule(() => this.close(result), delay);
     }
 
+    public get beforeClose(): Observable<PopupCloseEvent> {
+        return this.#options.beforeClose$;
+    }
+
     public get closed(): Observable<PopupCloseEvent> {
         return this.#options.closed$;
     }

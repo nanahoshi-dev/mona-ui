@@ -74,6 +74,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "popover",
+                loadComponent: () =>
+                    import("./docs/components/popover-doc/popover-doc.component").then(m => m.PopoverDocComponent)
+            },
+            {
                 path: "popup",
                 loadComponent: () =>
                     import("./docs/components/popup-doc/popup-doc.component").then(m => m.PopupDocComponent)

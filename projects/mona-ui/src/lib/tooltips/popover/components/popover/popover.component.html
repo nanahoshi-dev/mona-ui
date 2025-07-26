@@ -1,8 +1,8 @@
 <ng-template>
-    <div class="mona-popover" [attr.data-uid]="uid">
-        <div class="mona-popover-content">
+    <div [class]="baseClasses()" [attr.data-uid]="uid">
+        <div>
             @if (title() || titleTemplateRef()) {
-                <div class="mona-popover-title">
+                <div [class]="headerClasses()">
                     @if (titleTemplateRef()) {
                         <ng-container [ngTemplateOutlet]="titleTemplateRef()??null"></ng-container>
                     } @else {
@@ -10,7 +10,7 @@
                     }
                 </div>
             }
-            <div class="mona-popover-body">
+            <div [class]="contentClasses()">
                 <ng-content></ng-content>
             </div>
             @if (footerTemplateRef()) {
@@ -19,7 +19,8 @@
                 </div>
             }
         </div>
-        <div class="mona-popover-arrow"
-             [ngClass]="{'top':popupPosition()==='top', 'bottom': popupPosition()==='bottom', 'left': popupPosition()==='left', 'right': popupPosition()==='right'}"></div>
+        @if (displayArrow()) {
+            <div [class]="arrowClasses()" [attr.data-position]="currentArrowPosition()"></div>
+        }
     </div>
 </ng-template>

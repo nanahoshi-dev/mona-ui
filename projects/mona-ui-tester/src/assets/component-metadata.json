@@ -3916,51 +3916,63 @@
     "selector": "\"mona-popover\"",
     "inputs": [
       {
+        "name": "displayArrow",
+        "type": "boolean",
+        "description": "Display the arrow of the popover.",
+        "kind": "input"
+      },
+      {
         "name": "hide",
         "type": "PopoverHideEvent",
-        "description": "",
+        "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
         "kind": "output"
       },
       {
         "name": "hidden",
         "type": "void",
-        "description": "",
+        "description": "Emits when the popover is hidden.",
         "kind": "output"
       },
       {
         "name": "position",
         "type": "Position",
-        "description": "",
+        "description": "The position of the popover relative to the target element.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "PopoverVariantProps[\"rounded\"]",
+        "description": "The border radius of the popover.",
         "kind": "input"
       },
       {
         "name": "show",
         "type": "PopoverShowEvent",
-        "description": "",
+        "description": "Emits when the popover is about to be shown.\nThis event is preventable.",
         "kind": "output"
       },
       {
         "name": "shown",
         "type": "PopoverShownEvent",
-        "description": "",
+        "description": "Emits when the popover is shown.",
         "kind": "output"
       },
       {
         "name": "target",
         "type": "Element | ElementRef",
-        "description": "",
+        "description": "The target element(s) to which the popover is attached.",
         "kind": "input"
       },
       {
         "name": "title",
         "type": "string",
-        "description": "",
+        "description": "The title of the popover.",
         "kind": "input"
       },
       {
         "name": "trigger",
-        "type": "PopoverTrigger>",
-        "description": "",
+        "type": "string",
+        "description": "The trigger event for showing the popover.\nCan be a suitable pointer event like \"click\" or \"pointerenter\";",
         "kind": "input"
       }
     ]

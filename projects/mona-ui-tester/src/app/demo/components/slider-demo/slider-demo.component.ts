@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faMoon, faStar, faSun } from "@fortawesome/free-solid-svg-icons";
@@ -177,7 +177,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             [trackSize]="trackSize()"
             [ngModel]="value()"
             (ngModelChange)="onValueChange($event)"
-            style="width: 400px;">
+            [style]="size()">
             @if (featureData && featureData["labelTemplate"].active) {
                 <ng-template monaSliderTickValueTemplate let-value>
                     @if (value < 8 || value > 20) {
@@ -198,6 +198,9 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
 export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly moonIcon = faMoon;
+    protected readonly size = computed(() =>
+        this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
+    );
     protected readonly starIcon = faStar;
     protected readonly sunIcon = faSun;
     protected readonly value = signal<number | [number, number]>(4);

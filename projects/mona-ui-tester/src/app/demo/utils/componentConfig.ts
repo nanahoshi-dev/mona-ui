@@ -64,7 +64,7 @@ export type ComponentConfigInputType<TComponent> = {
           }
         | {
               type: Extract<ComponentConfigType, "object">;
-              value: ComponentInputs<TComponent>[key];
+              value?: ComponentInputs<TComponent>[key];
           }
     );
 };

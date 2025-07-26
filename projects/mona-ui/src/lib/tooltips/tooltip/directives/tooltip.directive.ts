@@ -101,7 +101,7 @@ export class TooltipDirective implements TooltipVariantInputs {
         }
 
         const connectionPoints = getPositionConnectionPoints(this.position());
-        const offset = getOffsetForPosition(this.position());
+        const offset = getOffsetForPosition(this.position(), true);
         this.#popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint: connectionPoints.anchor,

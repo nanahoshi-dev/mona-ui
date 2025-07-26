@@ -10,6 +10,7 @@ import { PopupRefParams } from "./PopupRefParams";
  */
 export class PopupReference implements PopupRefParams {
     public readonly beforeClosed$ = new Subject<PopupCloseEvent>();
+    public readonly closeStart$ = new Subject<PopupCloseEvent>();
     public readonly closed$ = new Subject<PopupCloseEvent>();
     public readonly positionChanges$ = new Subject<ConnectionPositionPair>();
     public componentRef?: ComponentRef<any>;
@@ -17,7 +18,13 @@ export class PopupReference implements PopupRefParams {
     public constructor(public readonly overlayReference: OverlayRef) {}
 
     public close<R>(result?: R, delay: number = 300): void {
-        this.beforeClosed$.next(new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic }));
+        const beforeCloseEvent = new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
+        this.beforeClosed$.next(beforeCloseEvent);
+
+        if (beforeCloseEvent.isDefaultPrevented()) {
+            return;
+        }
+        this.closeStart$.next(beforeCloseEvent);
         const event =
             result instanceof PopupCloseEvent
                 ? result
@@ -31,6 +38,10 @@ export class PopupReference implements PopupRefParams {
             this.positionChanges$.complete();
             this.overlayRef.dispose();
         }, delay);
+    }
+
+    public get beforeClose$(): Observable<PopupCloseEvent> {
+        return this.beforeClosed$.asObservable();
     }
 
     public get closed(): Observable<PopupCloseEvent> {

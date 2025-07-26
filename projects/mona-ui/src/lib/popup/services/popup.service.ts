@@ -296,7 +296,7 @@ export class PopupService {
         }
 
         this.#animationBuilder.build(config.show).create(element).play();
-        popupReference.beforeClosed$
+        popupReference.closeStart$
             .pipe(
                 take(1),
                 tap(() => this.#animationBuilder.build(config.hide).create(element).play())

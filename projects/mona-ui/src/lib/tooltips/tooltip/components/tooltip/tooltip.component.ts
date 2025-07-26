@@ -84,7 +84,7 @@ export class TooltipComponent implements TooltipVariantInputs {
     private createTooltip(): void {
         this.currentArrowPosition.set(this.position());
         const connectionPoints = getPositionConnectionPoints(this.position());
-        const offset = getOffsetForPosition(this.position());
+        const offset = getOffsetForPosition(this.position(), true);
 
         this.popupRef = this.#popupService.create({
             anchor: this.target(),
