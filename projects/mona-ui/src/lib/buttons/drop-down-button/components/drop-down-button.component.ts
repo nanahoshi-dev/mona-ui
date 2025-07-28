@@ -1,10 +1,10 @@
-import { Component, computed, contentChildren, DestroyRef, effect, inject, input, viewChild } from "@angular/core";
+import { Component, computed, contentChildren, DestroyRef, inject, input, viewChild } from "@angular/core";
 import { selectMany } from "@mirei/ts-collections";
 import { prepareMenuItems } from "../../../menus/utils/menu.utils";
 import { ButtonVariantProps, DropdownButtonVariantInputs } from "../../button/styles/button.styles";
 import { MenuItemGroupComponent } from "../../../menus/menu-item-group/menu-item-group.component";
 import { MenuItemInjectionToken } from "../../../menus/models/MenuItemInjectionToken";
-import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
+import { ContextMenuComponent } from "../../../menus/contextmenu/components/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../menus/menu-item/menu-item.component";
 import { ButtonDirective } from "../../button/directives/button.directive";
 
@@ -19,7 +19,6 @@ import { ButtonDirective } from "../../button/directives/button.directive";
 export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     #resizeObserver: ResizeObserver | null = null;
-    protected readonly contextMenuComponent = viewChild<ContextMenuComponent>("contextMenuComponent");
     protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
         MenuItemInjectionToken
     );
@@ -51,12 +50,6 @@ export class DropDownButtonComponent implements DropdownButtonVariantInputs {
     public constructor() {
         this.#destroyRef.onDestroy(() => {
             this.#resizeObserver?.disconnect();
-        });
-        effect(() => {
-            const contextMenu = this.contextMenuComponent();
-            if (contextMenu) {
-                contextMenu.setPrecise(false);
-            }
         });
     }
 }

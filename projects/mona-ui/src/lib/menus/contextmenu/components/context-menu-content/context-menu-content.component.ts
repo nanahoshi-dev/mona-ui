@@ -1,37 +1,43 @@
 import { ActiveDescendantKeyManager } from "@angular/cdk/a11y";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     AfterViewInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
     computed,
+    DestroyRef,
     ElementRef,
     inject,
     signal,
     viewChildren
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { any, Dictionary, ImmutableSet, select, selectMany, toArray, toImmutableSet } from "@mirei/ts-collections";
 import { filter, fromEvent, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { PopupDataInjectionToken } from "../../popup/models/PopupInjectionToken";
-import { PopupRef } from "../../popup/models/PopupRef";
-import { ContextMenuItemComponent } from "../context-menu-item/context-menu-item.component";
-import { ContextMenuInjectorData } from "../models/ContextMenuInjectorData";
-import { MenuItem } from "../models/MenuItem";
-import { InternalMenuItemClickEvent } from "../models/MenuItemClickEvent";
-import { ContextMenuService } from "../services/context-menu.service";
+import { ToArrayPipe } from "../../../../pipes/to-array.pipe";
+import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
+import { PopupRef } from "../../../../popup/models/PopupRef";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import {
-    contextMenuContentVariants,
-    contextMenuDividerVariants,
-    menuItemGroupHeaderVariants
-} from "../styles/menu.style";
-import { hasSubMenuItems, isInteractive } from "../utils/menu.utils";
+    contextMenuContentThemeVariants,
+    contextMenuDividerThemeVariants,
+    menuItemGroupHeaderThemeVariants
+} from "../../../styles/menu.styles";
+import { ContextMenuItemComponent } from "../context-menu-item/context-menu-item.component";
+import { ContextMenuInjectorData } from "../../../models/ContextMenuInjectorData";
+import { MenuItem } from "../../../models/MenuItem";
+import { InternalMenuItemClickEvent } from "../../../models/MenuItemClickEvent";
+import { MenuItemGroupConfig } from "../../../models/MenuItemGroupConfig";
+import { ContextMenuService } from "../../../services/context-menu.service";
+import { hasSubMenuItems, isInteractive } from "../../../utils/menu.utils";
 
 @Component({
     selector: "mona-contextmenu-content",
     templateUrl: "./context-menu-content.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ContextMenuItemComponent],
+    imports: [ContextMenuItemComponent, NgTemplateOutlet, ToArrayPipe],
     host: {
         "[attr.data-contextmenu]": "true",
         "[class]": "classes()",
@@ -43,45 +49,68 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     readonly #contextMenuInjectorData: ContextMenuInjectorData<C> = {
         isRoot: false,
         menuItems: signal(ImmutableSet.create()),
+        rounded: "medium",
+        size: "medium",
         userClasses: signal(""),
         userStyles: signal("")
     };
     readonly #contextMenuService = inject(ContextMenuService);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #themeService = inject(ThemeService);
     #currentMenuItem: MenuItem | null = null;
     protected readonly classes = computed(() => {
-        const classes = contextMenuContentVariants();
+        const theme = this.#themeService.theme();
+        const rounded = this.parentMenuData.rounded;
+        const size = this.parentMenuData.size;
+        const classes = contextMenuContentThemeVariants(theme)({ rounded, size });
         const userClasses = this.parentMenuData.userClasses();
         return twMerge(classes, userClasses);
     });
     protected readonly contextMenuItemComponents = viewChildren(ContextMenuItemComponent);
     protected readonly dividerClasses = computed(() => {
-        const classes = contextMenuDividerVariants();
+        const theme = this.#themeService.theme();
+        const classes = contextMenuDividerThemeVariants(theme)();
         return twMerge(classes);
     });
     protected readonly groupHeaderClasses = computed(() => {
-        const classes = menuItemGroupHeaderVariants();
+        const theme = this.#themeService.theme();
+        const size = this.parentMenuData.size;
+        const classes = menuItemGroupHeaderThemeVariants(theme)({ size });
         const iconAreaVisible = this.iconAreaVisible();
-        const padding = iconAreaVisible ? "pl-8" : "pl-2";
+        const sizePadding = size === "small" ? "pl-1" : size === "large" ? "pl-3" : "pl-2";
+        const padding = iconAreaVisible ? "pl-8" : sizePadding;
         return twMerge(classes, [padding]);
     });
     protected readonly iconAreaVisible = computed(() => {
         const viewMenuItems = this.viewMenuItems();
-        return select(viewMenuItems, group =>
-            any(group.values(), groupItems => groupItems.any(i => i.iconTemplate != null || !!i.iconClass))
+        const menuItemIconVisible = select(viewMenuItems, group =>
+            any(group.values(), groupConfig => groupConfig.items.any(i => i.iconTemplate != null))
         ).any(f => f);
+        const iconTemplate = this.parentMenuData.iconTemplate;
+        return menuItemIconVisible || iconTemplate != null;
     });
     protected readonly menuPopupRef = signal<PopupRef | null>(null);
     protected readonly parentMenuData = inject<ContextMenuInjectorData<C>>(PopupDataInjectionToken);
     protected readonly viewMenuItems = computed(() => {
         return select(this.parentMenuData.menuItems(), mi => {
-            const groupDict = new Dictionary<string | symbol, ImmutableSet<MenuItem>>();
+            const groupDict = new Dictionary<string | symbol, MenuItemGroupConfig>();
             mi.forEach(item => {
+                const groupTemplate = item.groupTemplate ?? this.parentMenuData.groupTemplate ?? null;
                 if (item.group) {
-                    const groupItems = groupDict.get(item.group) ?? ImmutableSet.create();
-                    groupDict.put(item.group, groupItems.add(item));
+                    const groupConfig = groupDict.get(item.group) ?? {
+                        groupTemplate,
+                        items: ImmutableSet.create<MenuItem>()
+                    };
+                    groupDict.put(item.group, {
+                        groupTemplate,
+                        items: groupConfig.items.add(item)
+                    });
                 } else {
-                    groupDict.put(Symbol(), ImmutableSet.create([item]));
+                    groupDict.put(Symbol(), {
+                        groupTemplate: null,
+                        items: ImmutableSet.create([item])
+                    });
                 }
             });
             return groupDict;
@@ -96,7 +125,7 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
             .withWrap()
             .skipPredicate(mi => {
                 const menuItem = mi.menuItem();
-                return menuItem.disabled || !!menuItem.divider;
+                return menuItem.disabled || menuItem.divider;
             });
         this.setEventListeners();
         this.focus();
@@ -114,6 +143,7 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
         }
         const clickEvent: InternalMenuItemClickEvent<C> = {
             context: this.parentMenuData.context,
+            menuItem: menuItem.options,
             originalEvent: event
         };
         menuItem.menuClick?.(clickEvent);
@@ -130,9 +160,15 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
 
     private create(anchor: HTMLElement, menuItem: MenuItem, viaKeyboard?: boolean): void {
         this.#contextMenuInjectorData.context = this.parentMenuData.context;
+        this.#contextMenuInjectorData.groupTemplate = this.parentMenuData.groupTemplate;
+        this.#contextMenuInjectorData.iconTemplate = this.parentMenuData.iconTemplate;
         this.#contextMenuInjectorData.menuItems?.set(toImmutableSet(menuItem.subMenuItemsSet ?? []));
         this.#contextMenuInjectorData.menuClick = this.parentMenuData.menuClick;
         this.#contextMenuInjectorData.navigate = this.parentMenuData.navigate;
+        this.#contextMenuInjectorData.rounded = this.parentMenuData.rounded;
+        this.#contextMenuInjectorData.shortcutTemplate = this.parentMenuData.shortcutTemplate;
+        this.#contextMenuInjectorData.size = this.parentMenuData.size;
+        this.#contextMenuInjectorData.textTemplate = this.parentMenuData.textTemplate;
         this.#contextMenuInjectorData.userClasses = this.parentMenuData.userClasses;
         this.#contextMenuInjectorData.userStyles = this.parentMenuData.userStyles;
         const popupClasses = this.parentMenuData.popupClass
@@ -223,6 +259,7 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
             if (this.keyManager.activeItem) {
                 const clickEvent: InternalMenuItemClickEvent<C> = {
                     context: this.parentMenuData.context,
+                    menuItem: menuItem.options,
                     originalEvent: event
                 };
                 this.keyManager.activeItem.menuItem().menuClick?.(clickEvent);
@@ -254,7 +291,8 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
                         e.key === "ArrowLeft" ||
                         e.key === "Enter" ||
                         e.key === " "
-                )
+                ),
+                takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe(event => {
                 switch (event.key) {

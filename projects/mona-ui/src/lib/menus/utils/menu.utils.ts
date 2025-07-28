@@ -22,7 +22,6 @@ export const createMenuItems = (
     options: MenuItemOptions,
     subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>> = ImmutableSet.create()
 ): MenuItem => ({
-    data: options.data,
     disabled: options.disabled ?? false,
     divider: options.divider ?? false,
     group: options.group,
@@ -62,12 +61,14 @@ export const prepareMenuItems = (
 ): ImmutableSet<ImmutableSet<MenuItem>> => {
     return select(items, item => {
         if (item instanceof MenuItemGroupComponent) {
+            const groupTitleTemplate = item.titleTemplate();
             return select(item.menuItems(), subItem => {
                 const menuItem = subItem.getMenuItem();
-                // Create a new menu item with the group assigned
+                // Create a new menu item with the group and group template assigned
                 return {
                     ...menuItem,
-                    group: item.title()
+                    group: item.title(),
+                    groupTemplate: groupTitleTemplate
                 };
             }).toImmutableSet();
         } else {

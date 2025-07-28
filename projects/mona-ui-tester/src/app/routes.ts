@@ -55,6 +55,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "contextmenu",
+                loadComponent: () =>
+                    import("./docs/components/contextmenu-doc/contextmenu-doc.component").then(
+                        m => m.ContextMenuDocComponent
+                    )
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/drop-down-button-doc/drop-down-button-doc.component").then(

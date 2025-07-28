@@ -182,7 +182,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
             <mona-menu-item [divider]="true"></mona-menu-item>
             <mona-menu-item-group title="Group 2">
                 <mona-menu-item text="Option G"></mona-menu-item>
-                <mona-menu-item text="Option H" (menuClick)="onMenuItemClick($event)" [data]="{ key: 'OptionKey' }">
+                <mona-menu-item text="Option H" (menuClick)="onMenuItemClick($event)">
                     @if (featureData && featureData["menuItemTextTemplate"].active) {
                         <ng-template monaMenuItemTextTemplate let-item>
                             <span class="text-red-500">{{ item.data.key }}</span>
@@ -208,7 +208,7 @@ export class SplitButtonWrapperComponent implements ComponentInputsAsSignal<Spli
     public readonly size = input<ReturnType<SplitButtonComponent["size"]>>("medium");
     public readonly text = input("Split Button");
 
-    public onMenuItemClick(event: MenuItemClickEvent<any, any>): void {
+    public onMenuItemClick(event: MenuItemClickEvent): void {
         console.log("Menu item clicked:", event);
     }
 }

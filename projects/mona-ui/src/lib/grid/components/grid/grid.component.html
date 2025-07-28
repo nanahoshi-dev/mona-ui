@@ -17,7 +17,7 @@
                     <span style="margin-left: 0.5rem;" #groupReorder>
                         <i class="ri-more-2-fill"></i>
                     </span>
-                    <mona-contextmenu [anchor]="groupReorder" trigger="click">
+                    <mona-contextmenu [target]="groupReorder" trigger="click">
                         <mona-menu-item [text]="'Move as previous'"
                                         [disabled]="$first"
                                         (menuClick)="onGroupColumnReorder(groupColumn, 'prev')">

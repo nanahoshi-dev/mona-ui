@@ -2,21 +2,32 @@
     @for (group of viewMenuItems(); track group) {
         @for (entry of group; track entry) {
             @if (entry.key && typeof entry.key === 'string') {
-                <span [class]="groupHeaderClasses()">{{entry.key}}</span>
+                @if (entry.value.groupTemplate) {
+                    <ng-container [ngTemplateOutlet]="entry.value.groupTemplate"
+                                  [ngTemplateOutletContext]="{$implicit: entry.key, items: entry.value.items|toArray}"></ng-container>
+                } @else {
+                    <span [class]="groupHeaderClasses()">{{ entry.key }}</span>
+                }
             }
-            @for (menuItem of entry.value; track menuItem) {
+            @for (menuItem of entry.value.items; track menuItem) {
                 @if (menuItem.divider) {
                     <div role="separator" aria-orientation="horizontal" [class]="dividerClasses()"></div>
                 } @else {
                     <li
                         [attr.tabindex]="keyManager?.activeItem?.menuItem() === menuItem ? 0 : -1"
+                        class="outline-none"
                         (mouseenter)="onListItemMouseEnter($event, menuItem)"
                         (click)="onListItemClick($event, menuItem)">
                         <mona-contextmenu-item [menuItem]="menuItem"
+                                               [iconTemplate]="parentMenuData.iconTemplate || null"
                                                [iconVisible]="iconAreaVisible()"
                                                [itemFocused]="keyManager?.activeItem?.menuItem() === menuItem"
                                                [itemDisabled]="menuItem.disabled || menuItem.divider"
-                                               [submenuPopupRef]="menuPopupRef()" [attr.tabindex]="0">
+                                               [shortcutTemplate]="parentMenuData.shortcutTemplate || null"
+                                               [size]="parentMenuData.size"
+                                               [submenuPopupRef]="menuPopupRef()"
+                                               [textTemplate]="parentMenuData.textTemplate || null"
+                                               [attr.tabindex]="0">
                         </mona-contextmenu-item>
                     </li>
                 }

@@ -13,6 +13,7 @@
                 </ng-container>
             }
             <mona-contextmenu [anchor]="listItemElement" [menuItems]="item.menuItems()" trigger="click"
+                              [target]="listItemElement" [precise]="false" [toggleable]="true"
                               (navigate)="onContextMenuNavigate($event)"
                               (close)="onContextMenuClose($event)" (open)="onContextMenuOpen($event)"
                               #contextMenuComponent></mona-contextmenu>

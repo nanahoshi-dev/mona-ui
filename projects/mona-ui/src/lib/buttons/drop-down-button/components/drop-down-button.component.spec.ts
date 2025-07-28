@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
+import { ContextMenuComponent } from "../../../menus/contextmenu/components/context-menu/context-menu.component";
 
 import { DropDownButtonComponent } from "./drop-down-button.component";
 

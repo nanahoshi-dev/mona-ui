@@ -1,0 +1,7 @@
+<app-demo-container [config]="config()" [metadata]="metadata()"
+                    [subComponentMetadata]="subComponentsMetadata()"
+                    (valueChange)="onInputValueChange($event)">
+    <ng-container [ngComponentOutlet]="ContextMenuWrapperComponent"
+                  [ngComponentOutletInjector]="featureInjector"
+                  [ngComponentOutletInputs]="inputs()"></ng-container>
+</app-demo-container>

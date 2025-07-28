@@ -9,7 +9,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { Collections, List, zip } from "@mirei/ts-collections";
-import { ContextMenuComponent } from "../context-menu/context-menu.component";
+import { ContextMenuComponent } from "../contextmenu/components/context-menu/context-menu.component";
 import { MenuComponent } from "../menu/menu.component";
 import { ContextMenuCloseEvent } from "../models/ContextMenuCloseEvent";
 import { ContextMenuNavigationEvent } from "../models/ContextMenuNavigationEvent";
@@ -34,7 +34,6 @@ export class MenubarComponent {
         effect(() => {
             const contextMenuComponents = this.contextMenuComponents();
             untracked(() => {
-                contextMenuComponents.forEach(c => c.setPrecise(false));
                 zip(this.menuList(), contextMenuComponents).forEach(([menu, context]) => {
                     menu.contextMenu = context;
                 });

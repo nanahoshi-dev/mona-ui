@@ -701,144 +701,6 @@
       }
     ]
   },
-  "ContextMenuComponent": {
-    "name": "ContextMenuComponent",
-    "selector": "\"mona-contextmenu\"",
-    "inputs": [
-      {
-        "name": "anchor",
-        "type": "ElementRef | Element",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "anchorConnectionPoint",
-        "type": "ConnectionPoint | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "close",
-        "type": "ContextMenuCloseEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "context",
-        "type": "C",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "menuItems",
-        "type": "Iterable<MenuItemOptions | MenuItem>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "minWidth",
-        "type": "string | number | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "navigate",
-        "type": "ContextMenuNavigationEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "offset",
-        "type": "PopupOffset | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "open",
-        "type": "ContextMenuOpenEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "popupClass",
-        "type": "string | string[]",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "popupConnectionPoint",
-        "type": "ConnectionPoint | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "target",
-        "type": "ElementRef | Element | null",
-        "description": "The target element that will be used to trigger the context menu.",
-        "kind": "input"
-      },
-      {
-        "name": "trigger",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "userClasses",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "userStyles",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "width",
-        "type": "string | number | undefined",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "ContextMenuItemComponent": {
-    "name": "ContextMenuItemComponent",
-    "selector": "\"mona-contextmenu-item\"",
-    "inputs": [
-      {
-        "name": "iconVisible",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "itemDisabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "itemFocused",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "menuItem",
-        "type": "MenuItem",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "submenuPopupRef",
-        "type": "PopupRef | null",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "MenuComponent": {
     "name": "MenuComponent",
     "selector": "\"mona-menu\"",
@@ -868,12 +730,6 @@
     "selector": "\"mona-menu-item\"",
     "inputs": [
       {
-        "name": "data",
-        "type": "T",
-        "description": "The data associated with the menu item.\nThis can be any type of data that you want to associate with the menu item.",
-        "kind": "input"
-      },
-      {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the menu item as disabled.",
@@ -886,14 +742,8 @@
         "kind": "input"
       },
       {
-        "name": "iconClass",
-        "type": "string",
-        "description": "The icon class to use for the menu item.",
-        "kind": "input"
-      },
-      {
         "name": "menuClick",
-        "type": "MenuItemClickEvent<any, T>",
+        "type": "MenuItemClickEvent",
         "description": "Emits when the menu item is clicked.",
         "kind": "output"
       },
@@ -3762,6 +3612,198 @@
       {
         "name": "keepTabContent",
         "type": "boolean",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "ContextMenuComponent": {
+    "name": "ContextMenuComponent",
+    "selector": "\"mona-contextmenu\"",
+    "inputs": [
+      {
+        "name": "anchor",
+        "type": "ElementRef | Element",
+        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
+        "kind": "input"
+      },
+      {
+        "name": "anchorConnectionPoint",
+        "type": "ConnectionPoint | null",
+        "description": "The anchor connection point of the context menu.\nOnly applicable when `precise` is set to `false`.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "ContextMenuCloseEvent",
+        "description": "Emits when the context menu is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "context",
+        "type": "C",
+        "description": "The context object to be passed to the menu items.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "MenuItemClickEvent<C>",
+        "description": "Emits when any of the menu items are clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "menuItems",
+        "type": "Iterable<MenuItemOptions | MenuItem>",
+        "description": "The menu items to be displayed in the context menu.\nIf this is set, the menu items from the content children will be ignored.",
+        "kind": "input"
+      },
+      {
+        "name": "minWidth",
+        "type": "string | number | undefined",
+        "description": "Minimum width of the context menu. Only applies to the root context menu.",
+        "kind": "input"
+      },
+      {
+        "name": "navigate",
+        "type": "ContextMenuNavigationEvent",
+        "description": "Emits when context menu navigation occurs.",
+        "kind": "output"
+      },
+      {
+        "name": "offset",
+        "type": "PopupOffset",
+        "description": "The offset of the context menu.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "ContextMenuOpenEvent",
+        "description": "Emits when the context menu is opened.",
+        "kind": "output"
+      },
+      {
+        "name": "popupClass",
+        "type": "string | string[]",
+        "description": "The popup class of the context menu.",
+        "kind": "input"
+      },
+      {
+        "name": "popupConnectionPoint",
+        "type": "ConnectionPoint | null",
+        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
+        "kind": "input"
+      },
+      {
+        "name": "precise",
+        "type": "boolean",
+        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ContextMenuContentVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the context menu.\nThis will be applied to the root context menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ContextMenuContentVariantProps[\"size\"]",
+        "description": "The size of the context menu.\nThis will be applied to the root context menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "target",
+        "type": "ElementRef | Element",
+        "description": "The target element that will be used to trigger the context menu.",
+        "kind": "input"
+      },
+      {
+        "name": "toggleable",
+        "type": "boolean",
+        "description": "Whether the context menu is toggleable.",
+        "kind": "input"
+      },
+      {
+        "name": "trigger",
+        "type": "string",
+        "description": "The event that triggers the context menu.",
+        "kind": "input"
+      },
+      {
+        "name": "userClasses",
+        "type": "string",
+        "description": "The user classes to be applied to the context menu.\nThese will be applied to the root context menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "userStyles",
+        "type": "string",
+        "description": "The user styles to be applied to the context menu.\nThese will be applied to the root context menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number | undefined",
+        "description": "The width of the context menu. Only applies to the root context menu.",
+        "kind": "input"
+      }
+    ]
+  },
+  "ContextMenuItemComponent": {
+    "name": "ContextMenuItemComponent",
+    "selector": "\"mona-contextmenu-item\"",
+    "inputs": [
+      {
+        "name": "iconTemplate",
+        "type": "TemplateRef<MenuItemTemplateContext> | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "iconVisible",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "itemDisabled",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "itemFocused",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "menuItem",
+        "type": "MenuItem",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "shortcutTemplate",
+        "type": "TemplateRef<MenuItemTemplateContext> | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "MenuItemVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "submenuPopupRef",
+        "type": "PopupRef | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "textTemplate",
+        "type": "TemplateRef<MenuItemTemplateContext> | null",
         "description": "",
         "kind": "input"
       }

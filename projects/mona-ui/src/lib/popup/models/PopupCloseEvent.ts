@@ -30,5 +30,6 @@ export enum PopupCloseSource {
     Escape = "escape",
     MouseLeave = "mouseLeave",
     Programmatic = "programmatic",
-    OutsideClick = "outsideClick"
+    OutsideClick = "outsideClick",
+    Scroll = "scroll"
 }

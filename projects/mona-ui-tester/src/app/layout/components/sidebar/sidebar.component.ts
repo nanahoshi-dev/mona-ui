@@ -61,6 +61,10 @@ export class SidebarComponent {
                     path: "/color-picker"
                 },
                 {
+                    text: "Context Menu",
+                    path: "/contextmenu"
+                },
+                {
                     text: "Dropdown Button",
                     path: "/dropdown-button"
                 },

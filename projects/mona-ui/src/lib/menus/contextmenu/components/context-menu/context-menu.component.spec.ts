@@ -1,10 +1,10 @@
 import { ApplicationRef, Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NoopAnimationsModule } from "@angular/platform-browser/animations";
-import { MenuItemComponent } from "../menu-item/menu-item.component";
-import { MenuItem } from "../models/MenuItem";
-import { ContextMenuService } from "../services/context-menu.service";
-import { createMenuItems } from "../utils/menu.utils";
+import { MenuItemComponent } from "../../../menu-item/menu-item.component";
+import { MenuItem } from "../../../models/MenuItem";
+import { ContextMenuService } from "../../../services/context-menu.service";
+import { createMenuItems } from "../../../utils/menu.utils";
 
 import { ContextMenuComponent } from "./context-menu.component";
 

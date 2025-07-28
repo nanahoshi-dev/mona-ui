@@ -7,7 +7,7 @@ import { ContextMenuSettings } from "../models/ContextMenuSettings";
     providedIn: "root"
 })
 export class ContextMenuService {
-    readonly #popupService: PopupService = inject(PopupService);
+    readonly #popupService = inject(PopupService);
 
     public open(settings: ContextMenuSettings): PopupRef {
         return this.#popupService.create({

@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { any, select, selectMany } from "@mirei/ts-collections";
 import { v4 } from "uuid";
-import { ContextMenuComponent } from "../context-menu/context-menu.component";
+import { ContextMenuComponent } from "../contextmenu/components/context-menu/context-menu.component";
 import { MenuTextTemplateDirective } from "../directives/menu-text-template.directive";
 import { MenuItemGroupComponent } from "../menu-item-group/menu-item-group.component";
 import { MenuItemComponent } from "../menu-item/menu-item.component";

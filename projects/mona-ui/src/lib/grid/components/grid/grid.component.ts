@@ -35,7 +35,7 @@ import { Collections } from "@mirei/ts-collections";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
 import { PlaceholderComponent } from "../../../layout/placeholder/placeholder.component";
-import { ContextMenuComponent } from "../../../menus/context-menu/context-menu.component";
+import { ContextMenuComponent } from "../../../menus/contextmenu/components/context-menu/context-menu.component";
 import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";
 import { MenuItemComponent } from "../../../menus/menu-item/menu-item.component";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";

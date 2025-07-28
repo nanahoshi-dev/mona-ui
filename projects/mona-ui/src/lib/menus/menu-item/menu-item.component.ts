@@ -30,9 +30,8 @@ import { createMenuItems } from "../utils/menu.utils";
         }
     ]
 })
-export class MenuItemComponent<T = unknown> {
+export class MenuItemComponent {
     readonly #baseMenuItemOptions = computed(() => ({
-        data: this.data(),
         disabled: this.disabled(),
         divider: this.divider(),
         subMenuItems: [],
@@ -56,12 +55,6 @@ export class MenuItemComponent<T = unknown> {
     });
 
     /**
-     * @description The data associated with the menu item.
-     * This can be any type of data that you want to associate with the menu item.
-     */
-    public readonly data = input<T>();
-
-    /**
      * @description Sets the menu item as disabled.
      */
     public readonly disabled = input<boolean>(false);
@@ -73,14 +66,9 @@ export class MenuItemComponent<T = unknown> {
     public readonly divider = input<boolean>(false);
 
     /**
-     * @description The icon class to use for the menu item.
-     */
-    public readonly iconClass = input<string>("");
-
-    /**
      * @description Emits when the menu item is clicked.
      */
-    public readonly menuClick = output<MenuItemClickEvent<any, T>>();
+    public readonly menuClick = output<MenuItemClickEvent>();
 
     /**
      * @description The text to display for the menu item.
@@ -92,18 +80,22 @@ export class MenuItemComponent<T = unknown> {
     }
 
     private createSubMenuItemsSet(depth: number): ImmutableSet<ImmutableSet<MenuItem>> {
-        const items = select(this.submenuItems(), si => (si instanceof MenuItemGroupComponent ? si.menuItems() : [si]));
-        return items
-            .select(i => {
-                return select(i, mi => {
-                    const subMenuItem = mi.getMenuItemWithDepth(depth + 1);
-                    return {
-                        ...subMenuItem,
-                        parent: null // Will be set by parent if needed
+        return select(this.submenuItems(), item => {
+            if (item instanceof MenuItemGroupComponent) {
+                return select(item.menuItems(), subItem => {
+                    const menuItem = subItem.getMenuItemWithDepth(depth + 1);
+                    const groupedMenuItem: MenuItem = {
+                        ...menuItem,
+                        parent: menuItem.parent ?? null,
+                        group: item.title(),
+                        groupTemplate: item.titleTemplate()
                     };
+                    return groupedMenuItem;
                 }).toImmutableSet();
-            })
-            .toImmutableSet();
+            }
+            const menuItem = item.getMenuItemWithDepth(depth + 1);
+            return select([menuItem], i => i).toImmutableSet();
+        }).toImmutableSet();
     }
 
     private getMenuItemWithDepth(depth: number = 0): MenuItem {
@@ -113,12 +105,11 @@ export class MenuItemComponent<T = unknown> {
         return {
             ...menuItem,
             depth,
-            iconClass: this.iconClass(),
             iconTemplate: this.iconTemplate(),
             shortcutTemplate: this.shortcutTemplate(),
             textTemplate: this.textTemplate(),
             menuClick: (event: InternalMenuItemClickEvent<any>): void => {
-                const clickEvent: MenuItemClickEvent<any, T> = this.data() ? { ...event, data: this.data() } : event;
+                const clickEvent = new MenuItemClickEvent(event);
                 this.menuClick.emit(clickEvent);
             }
         };

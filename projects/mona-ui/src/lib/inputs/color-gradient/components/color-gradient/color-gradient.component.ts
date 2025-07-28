@@ -22,7 +22,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { Copy, LucideAngularModule } from "lucide-angular";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil, tap } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
+import { ContextMenuComponent } from "../../../../menus/contextmenu/components/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";

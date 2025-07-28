@@ -25,7 +25,7 @@ import { MenuItemGroupComponent } from "../../../../menus/menu-item-group/menu-i
 import { MenuItemInjectionToken } from "../../../../menus/models/MenuItemInjectionToken";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
-import { ContextMenuComponent } from "../../../../menus/context-menu/context-menu.component";
+import { ContextMenuComponent } from "../../../../menus/contextmenu/components/context-menu/context-menu.component";
 import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
 import { ButtonDirective } from "../../../button/directives/button.directive";
@@ -61,7 +61,6 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly contextMenuComponent = viewChild.required<ContextMenuComponent>("contextMenuComponent");
     protected readonly menuIcon = ChevronDown;
     protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
         MenuItemInjectionToken
@@ -108,15 +107,4 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
      */
     public readonly text = input("");
     public readonly userClass = input<string>("", { alias: "class" });
-
-    public constructor() {
-        effect(() => {
-            const contextMenuComponent = this.contextMenuComponent();
-            untracked(() => {
-                if (contextMenuComponent) {
-                    contextMenuComponent.setPrecise(false);
-                }
-            });
-        });
-    }
 }

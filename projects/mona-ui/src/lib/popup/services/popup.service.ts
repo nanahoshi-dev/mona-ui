@@ -12,7 +12,7 @@ import { ComponentPortal } from "@angular/cdk/portal";
 import { CdkScrollable, ScrollDispatcher } from "@angular/cdk/scrolling";
 import { DestroyRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { exhaustMap, filter, fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
+import { exhaustMap, filter, fromEvent, merge, mergeWith, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "../animations/popup.animation";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -165,7 +165,6 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
-
         const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
         const strategy = this.#overlay
             .position()
@@ -193,7 +192,11 @@ export class PopupService {
         this.setupAnimations(settings.animation, animationElement, popupReference);
         const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
         this.setupCleanupSubscription(popupReference, subscription, settings, originallyFocusedElement);
-        this.setupScrollTracking(settings, overlayRef, popupReference);
+        if (settings.closeOnScroll) {
+            this.setupScrollClosing(settings, popupReference, overlayRef);
+        } else {
+            this.setupScrollTracking(settings, overlayRef, popupReference);
+        }
         this.setupEscapeKeyListener(settings, popupReference);
         this.setupPositionChangeTracking(settings, overlayRef, popupReference);
 
@@ -224,11 +227,11 @@ export class PopupService {
     }
 
     private getPosition(
-        anchorConnectionPoint?: ConnectionPoint,
-        popupConnectionPoint?: ConnectionPoint
+        anchorConnectionPoint?: ConnectionPoint | null,
+        popupConnectionPoint?: ConnectionPoint | null
     ): ConnectionPositionPair[] {
         const anchorPoint = anchorConnectionPoint ?? "bottomleft";
-        const popupPoint = popupConnectionPoint ?? "topright";
+        const popupPoint = popupConnectionPoint ?? "topleft";
         return connectionPosition(anchorPoint, popupPoint);
     }
 
@@ -355,17 +358,23 @@ export class PopupService {
 
         if (settings.hasBackdrop) {
             const backdropSub = this.setupBackdropCloseSubscription(settings, popupReference, overlayRef);
-            if (backdropSub) subscriptions.push(backdropSub);
+            if (backdropSub) {
+                subscriptions.push(backdropSub);
+            }
         }
 
         if (settings.closeOnOutsideClick ?? true) {
             const outsideClickSub = this.setupOutsideClickSubscription(settings, popupReference, overlayRef);
-            if (outsideClickSub) subscriptions.push(outsideClickSub);
+            if (outsideClickSub) {
+                subscriptions.push(outsideClickSub);
+            }
         }
 
         if (settings.closeOnMouseLeave) {
             const mouseLeaveSubscription = this.setupMouseLeaveSubscription(settings, popupReference);
-            if (mouseLeaveSubscription) subscriptions.push(mouseLeaveSubscription);
+            if (mouseLeaveSubscription) {
+                subscriptions.push(mouseLeaveSubscription);
+            }
         }
 
         if (subscriptions.length === 0) {
@@ -512,6 +521,56 @@ export class PopupService {
                 .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
                 .subscribe(change => popupReference.positionChanges$.next(change.connectionPair));
         }
+    }
+
+    private setupScrollClosing(settings: PopupSettings, popupReference: PopupReference, overlayRef: OverlayRef): void {
+        if (!settings.closeOnScroll) {
+            return;
+        }
+
+        const scrollableContainers = this.getScrollableContainers(this.resolveAnchor(settings.anchor));
+        const subscriptions: Subscription[] = [];
+
+        const handleScrollClose = (originalEvent?: Event) => {
+            if (!overlayRef.hasAttached()) {
+                return;
+            }
+
+            const closeEvent = new PopupCloseEvent({
+                event: originalEvent ?? new Event("scroll"),
+                originalEvent: originalEvent ?? new Event("scroll"),
+                via: PopupCloseSource.Scroll
+            });
+
+            if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
+                return;
+            }
+            popupReference.close(closeEvent, 0);
+        };
+
+        if (scrollableContainers.length === 0) {
+            const globalScrollSubscription = merge(
+                fromEvent(window, "scroll", { passive: true }),
+                fromEvent(window, "resize", { passive: true }),
+                fromEvent(document, "scroll", { passive: true })
+            )
+                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                .subscribe(event => handleScrollClose(event));
+
+            subscriptions.push(globalScrollSubscription);
+        } else {
+            scrollableContainers.forEach(scrollable => {
+                const containerScrollSubscription = scrollable
+                    .elementScrolled()
+                    .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                    .subscribe(() => handleScrollClose());
+
+                subscriptions.push(containerScrollSubscription);
+            });
+        }
+        popupReference.closed.pipe(take(1)).subscribe(() => {
+            subscriptions.forEach(sub => sub.unsubscribe());
+        });
     }
 
     private setupScrollTracking(settings: PopupSettings, overlayRef: OverlayRef, popupReference: PopupReference): void {

@@ -1,5 +1,5 @@
 import { MenuItemOptions } from "./MenuItem";
 
-export interface ContextMenuItemIconTemplateContext {
+export interface MenuItemTemplateContext {
     $implicit: MenuItemOptions;
 }

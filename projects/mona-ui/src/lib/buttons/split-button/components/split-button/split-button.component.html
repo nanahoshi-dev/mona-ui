@@ -19,8 +19,9 @@
                   trigger="click" [minWidth]="popupWidth()"
                   [anchorConnectionPoint]="'bottomleft'"
                   [popupConnectionPoint]="'topleft'"
+                  [precise]="false"
                   [offset]="popupOffset()"
                   [menuItems]="menuItems()"
+                  [toggleable]="true"
                   (open)="menuOpen.set(true)"
-                  (close)="menuOpen.set(false)"
-                  #contextMenuComponent></mona-contextmenu>
+                  (close)="menuOpen.set(false)"></mona-contextmenu>

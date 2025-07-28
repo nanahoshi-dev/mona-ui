@@ -25,7 +25,7 @@ export interface PopupSettings<T = unknown, C = void> {
      * The connection point of the anchor element to which the popup will be connected.
      * @type {ConnectionPoint}
      */
-    anchorConnectionPoint?: ConnectionPoint;
+    anchorConnectionPoint?: ConnectionPoint | null;
 
     /**
      * Animation settings for the popup.
@@ -65,6 +65,13 @@ export interface PopupSettings<T = unknown, C = void> {
      * @type {boolean}
      */
     closeOnOutsideClick?: boolean;
+
+    /**
+     * Whether the popup will be closed when the user scrolls.
+     * Default: false.
+     * @type {boolean}
+     */
+    closeOnScroll?: boolean;
 
     /**
      * Optional data to pass to the popup context.
@@ -123,7 +130,7 @@ export interface PopupSettings<T = unknown, C = void> {
      * The connection point of the popup element to which the anchor will be connected.
      * @type {ConnectionPoint}
      */
-    popupConnectionPoint?: ConnectionPoint;
+    popupConnectionPoint?: ConnectionPoint | null;
 
     /**
      * Classes to be applied to the popup wrapper content div.

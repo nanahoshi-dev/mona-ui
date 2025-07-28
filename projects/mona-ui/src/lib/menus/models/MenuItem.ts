@@ -1,18 +1,13 @@
 import { TemplateRef } from "@angular/core";
 import { ImmutableSet } from "@mirei/ts-collections";
-import { ContextMenuItemIconTemplateContext } from "./ContextMenuItemIconTemplateContext";
-import { ContextMenuItemTextTemplateContext } from "./ContextMenuItemTextTemplateContext";
+import { MenuGroupTemplateContext } from "./MenuGroupTemplateContext";
 import { InternalMenuItemClickEvent } from "./MenuItemClickEvent";
+import { MenuItemTemplateContext } from "./MenuItemTemplateContext";
 
 /**
  * Configuration options for creating a menu item
  */
 export interface MenuItemOptions {
-    /**
-     * Additional data associated with the menu item
-     */
-    data?: unknown;
-
     /**
      * Whether the menu item is disabled
      */
@@ -44,11 +39,6 @@ export interface MenuItemOptions {
  */
 export interface MenuItem {
     /**
-     * Additional data associated with the menu item
-     */
-    readonly data?: unknown;
-
-    /**
      * Nesting depth in the menu hierarchy
      */
     depth?: number;
@@ -56,12 +46,12 @@ export interface MenuItem {
     /**
      * Whether the menu item is disabled
      */
-    readonly disabled: boolean;
+    disabled: boolean;
 
     /**
      * Whether this item should render as a divider
      */
-    readonly divider: boolean;
+    divider: boolean;
 
     /**
      * Group name for organizing menu items
@@ -69,14 +59,14 @@ export interface MenuItem {
     group?: string;
 
     /**
-     * CSS class for the menu item icon
+     * Template for custom group title
      */
-    iconClass?: string;
+    groupTemplate?: TemplateRef<MenuGroupTemplateContext>;
 
     /**
      * Template for custom icon rendering
      */
-    iconTemplate?: TemplateRef<ContextMenuItemIconTemplateContext>;
+    iconTemplate?: TemplateRef<MenuItemTemplateContext>;
 
     /**
      * Click handler for the menu item
@@ -97,20 +87,20 @@ export interface MenuItem {
     /**
      * Template for keyboard shortcut display
      */
-    shortcutTemplate?: TemplateRef<unknown>;
+    shortcutTemplate?: TemplateRef<MenuItemTemplateContext>;
 
     /**
      * Nested sub-menu items organized in groups
      */
-    readonly subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>>;
+    subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>>;
 
     /**
      * Display text for the menu item
      */
-    readonly text?: string;
+    text?: string;
 
     /**
      * Template for custom text rendering
      */
-    textTemplate?: TemplateRef<ContextMenuItemTextTemplateContext>;
+    textTemplate?: TemplateRef<MenuItemTemplateContext>;
 }

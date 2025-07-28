@@ -1,23 +1,25 @@
+@let iconTemplateRef = menuItem().iconTemplate ?? iconTemplate() ?? null;
+@let textTemplateRef = menuItem().textTemplate ?? textTemplate() ?? null;
+@let shortcutTemplateRef = menuItem().shortcutTemplate ?? shortcutTemplate() ?? null;
+
 @if (iconVisible()) {
     <span [class]="iconContainerClasses()">
-        @if (menuItem().iconTemplate) {
-            <ng-container [ngTemplateOutlet]="menuItem().iconTemplate??null"
+        @if (iconTemplateRef) {
+            <ng-container [ngTemplateOutlet]="iconTemplateRef"
                           [ngTemplateOutletContext]="{$implicit: menuItem().options}"></ng-container>
-        } @else if (menuItem().iconClass && !menuItem().iconTemplate) {
-            <span [ngClass]="menuItem().iconClass"></span>
         }
     </span>
 }
 <div [class]="textContainerClasses()">
-    @if (menuItem().textTemplate) {
-        <ng-container [ngTemplateOutlet]="menuItem().textTemplate??null"
+    @if (textTemplateRef) {
+        <ng-container [ngTemplateOutlet]="textTemplateRef"
                       [ngTemplateOutletContext]="{$implicit: menuItem().options}"></ng-container>
     } @else {
         <span>{{ menuItem().text }}</span>
     }
-    @if (menuItem().shortcutTemplate) {
+    @if (shortcutTemplateRef) {
         <span [class]="shortcutContainerClasses()">
-            <ng-container [ngTemplateOutlet]="menuItem().shortcutTemplate??null"
+            <ng-container [ngTemplateOutlet]="shortcutTemplateRef"
                           [ngTemplateOutletContext]="{$implicit: menuItem()}"></ng-container>
         </span>
     }
