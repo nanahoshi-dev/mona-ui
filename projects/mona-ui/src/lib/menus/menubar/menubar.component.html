@@ -1,8 +1,10 @@
-<ul class="mona-menubar-list">
+<ul [class]="listClasses()">
     @for (item of menuList(); track item) {
         <li [attr.data-uid]="item.uid" (click)="onMenuClick(contextMenuComponent)"
             (mouseenter)="onMenuMouseEnter(contextMenuComponent)"
-            [ngClass]="{'mona-active': currentContextMenu()?.uid===contextMenuComponent.uid, 'mona-disabled': item.disabled()}"
+            [class]="listItemClasses()"
+            [attr.data-active]="currentContextMenu()?.uid===contextMenuComponent.uid"
+            [attr.data-disabled]="item.disabled()"
             #listItemElement>
             @if (!item.textTemplate()) {
                 <span>{{ item.text() }}</span>
@@ -14,6 +16,9 @@
             }
             <mona-contextmenu [anchor]="listItemElement" [menuItems]="item.menuItems()" trigger="click"
                               [target]="listItemElement" [precise]="false" [toggleable]="true"
+                              [offset]="{vertical: 4}"
+                              [size]="size()"
+                              [rounded]="rounded()"
                               (navigate)="onContextMenuNavigate($event)"
                               (close)="onContextMenuClose($event)" (open)="onContextMenuOpen($event)"
                               #contextMenuComponent></mona-contextmenu>

@@ -73,6 +73,10 @@ export class SidebarComponent {
                     path: "/input"
                 },
                 {
+                    text: "Menubar",
+                    path: "/menubar"
+                },
+                {
                     text: "Numeric Text Box",
                     path: "/numeric-textbox"
                 },

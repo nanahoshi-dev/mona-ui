@@ -44,6 +44,11 @@ export interface PopupSettings<T = unknown, C = void> {
      */
     content: TemplateRef<C> | ComponentType<C>;
 
+    /**
+     * Whether the popup will be closed when the user clicks on the backdrop.
+     * Only applies if `hasBackdrop` is true.
+     * @type {boolean}
+     */
     closeOnBackdropClick?: boolean;
 
     /**

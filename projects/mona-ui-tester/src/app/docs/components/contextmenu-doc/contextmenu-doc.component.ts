@@ -10,5 +10,5 @@ import { SectionComponent } from "../../../layout/components/section/section.com
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContextMenuDocComponent {
-    protected readonly importCode = `import { ContextMenuModule } from "mona-ui";`;
+    protected readonly importCode = `import { ContextMenuComponent, MenuItemComponent, MenuItemGroupComponent } from "mona-ui";`;
 }

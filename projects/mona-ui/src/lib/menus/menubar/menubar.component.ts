@@ -1,34 +1,66 @@
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChildren,
     effect,
+    inject,
+    input,
     signal,
     untracked,
     viewChildren
 } from "@angular/core";
 import { Collections, List, zip } from "@mirei/ts-collections";
+import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../theme/services/theme.service";
 import { ContextMenuComponent } from "../contextmenu/components/context-menu/context-menu.component";
 import { MenuComponent } from "../menu/menu.component";
 import { ContextMenuCloseEvent } from "../models/ContextMenuCloseEvent";
 import { ContextMenuNavigationEvent } from "../models/ContextMenuNavigationEvent";
 import { ContextMenuOpenEvent } from "../models/ContextMenuOpenEvent";
+import {
+    menubarBaseThemeVariants,
+    menubarListItemThemeVariants,
+    menubarListThemeVariants,
+    MenubarVariantInput,
+    MenubarVariantProps
+} from "../styles/menu.styles";
 
 @Component({
     selector: "mona-menubar",
     templateUrl: "./menubar.component.html",
-    styleUrls: ["./menubar.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, NgTemplateOutlet, ContextMenuComponent],
+    imports: [NgTemplateOutlet, ContextMenuComponent],
     host: {
-        class: "mona-menubar"
+        "[class]": "baseClasses()"
     }
 })
-export class MenubarComponent {
+export class MenubarComponent implements MenubarVariantInput {
+    readonly #themeService = inject(ThemeService);
     protected readonly contextMenuComponents = viewChildren(ContextMenuComponent);
     protected readonly currentContextMenu = signal<ContextMenuComponent | null>(null);
     protected readonly menuList = contentChildren(MenuComponent);
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        const userClasses = this.userClasses();
+        const variants = menubarBaseThemeVariants(theme)({ rounded, size });
+        return twMerge(variants, userClasses);
+    });
+    protected readonly listClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return menubarListThemeVariants(theme)();
+    });
+    protected readonly listItemClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return menubarListItemThemeVariants(theme)();
+    });
+
+    public readonly size = input<MenubarVariantProps["size"]>("medium");
+    public readonly rounded = input<MenubarVariantProps["rounded"]>("medium");
+    public readonly userClasses = input("", { alias: "class" });
 
     public constructor() {
         effect(() => {
