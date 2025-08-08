@@ -59,7 +59,7 @@ export interface MenuItem {
     group?: string;
 
     /**
-     * Template for custom group title
+     * Template for the custom group title
      */
     groupTemplate?: TemplateRef<MenuGroupTemplateContext>;
 
@@ -90,7 +90,7 @@ export interface MenuItem {
     shortcutTemplate?: TemplateRef<MenuItemTemplateContext>;
 
     /**
-     * Nested sub-menu items organized in groups
+     * Nested submenu items organized in groups
      */
     subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>>;
 

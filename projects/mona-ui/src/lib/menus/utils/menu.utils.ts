@@ -20,18 +20,38 @@ export const convertToMenuItemSet = (optionsList: Iterable<MenuItemOptions>): Im
 
 export const createMenuItems = (
     options: MenuItemOptions,
-    subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>> = ImmutableSet.create()
-): MenuItem => ({
-    disabled: options.disabled ?? false,
-    divider: options.divider ?? false,
-    group: options.group,
-    options,
-    subMenuItemsSet,
-    text: options.text
-});
+    subMenuItemsSet: ImmutableSet<ImmutableSet<MenuItem>> = ImmutableSet.create(),
+    parent?: MenuItem
+): MenuItem => {
+    const menuItem: MenuItem = {
+        disabled: options.disabled ?? false,
+        divider: options.divider ?? false,
+        group: options.group,
+        options,
+        parent: parent ?? null,
+        subMenuItemsSet,
+        text: options.text
+    };
+
+    // Set parent references for all submenu items if any exist
+    if (subMenuItemsSet.length > 0) {
+        const updatedSubMenuItemsSet = select(subMenuItemsSet, itemGroup => {
+            return select(
+                itemGroup,
+                item =>
+                    ({
+                        ...item,
+                        parent: menuItem
+                    }) as MenuItem
+            ).toImmutableSet();
+        }).toImmutableSet();
+        Object.assign(menuItem, { subMenuItemsSet: updatedSubMenuItemsSet });
+    }
+    return menuItem;
+};
 
 /**
- * Creates nested sub-menu items from MenuItemOptions
+ * Creates nested submenu items from MenuItemOptions
  */
 export const createSubMenuItemsSet = (
     subMenuItems?: Iterable<MenuItemOptions[]>
@@ -50,6 +70,22 @@ export const createSubMenuItemsSet = (
     }).toImmutableSet();
 };
 
+/**
+ * Establishes parent-child relationships for submenu items
+ */
+export const createSubMenuWithParent = (parentMenuItem: MenuItem): ImmutableSet<ImmutableSet<MenuItem>> => {
+    return select(parentMenuItem.subMenuItemsSet, itemGroup => {
+        return select(
+            itemGroup,
+            item =>
+                ({
+                    ...item,
+                    parent: parentMenuItem
+                }) as MenuItem
+        ).toImmutableSet();
+    }).toImmutableSet();
+};
+
 export const hasSubMenuItems = (menuItem: MenuItem): boolean => menuItem.subMenuItemsSet.length > 0;
 export const isInteractive = (menuItem: MenuItem): boolean => !menuItem.disabled && !menuItem.divider;
 
@@ -64,7 +100,6 @@ export const prepareMenuItems = (
             const groupTitleTemplate = item.titleTemplate();
             return select(item.menuItems(), subItem => {
                 const menuItem = subItem.getMenuItem();
-                // Create a new menu item with the group and group template assigned
                 return {
                     ...menuItem,
                     group: item.title(),

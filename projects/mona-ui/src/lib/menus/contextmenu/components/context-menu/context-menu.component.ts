@@ -21,7 +21,6 @@ import { v4 } from "uuid";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { ConnectionPoint } from "../../../../popup/utils/connectionPosition";
-import { ThemeService } from "../../../../theme/services/theme.service";
 import { ContextMenuContentVariantInput, ContextMenuContentVariantProps } from "../../../styles/menu.styles";
 import { ContextMenuContentComponent } from "../context-menu-content/context-menu-content.component";
 import { MenuGroupTemplateDirective } from "../../../directives/menu-group-template.directive";
@@ -284,15 +283,15 @@ export class ContextMenuComponent<C = any> implements OnInit, ContextMenuContent
             anchor,
             anchorConnectionPoint,
             closeOnOutsideClick: true,
+            closeOnScroll: true,
             content: ContextMenuContentComponent,
             data: this.#contextMenuInjectorData,
             minWidth: this.minWidth(),
             offset: this.offset(),
             popupClass: this.popupClass(),
             popupConnectionPoint,
-            closeOnScroll: true,
-            withScrollTracking: false,
-            width: this.width()
+            width: this.width(),
+            withScrollTracking: false
         });
         this.setCloseSubscriptions();
         this.#contextMenuInjectorData.parentMenuRef = this.#contextMenuRef;

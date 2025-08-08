@@ -13,7 +13,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { any, Dictionary, ImmutableSet, select, selectMany, toArray, toImmutableSet } from "@mirei/ts-collections";
+import { any, Dictionary, ImmutableSet, select, selectMany, toArray } from "@mirei/ts-collections";
 import { filter, fromEvent, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ToArrayPipe } from "../../../../pipes/to-array.pipe";
@@ -31,7 +31,7 @@ import { MenuItem } from "../../../models/MenuItem";
 import { InternalMenuItemClickEvent } from "../../../models/MenuItemClickEvent";
 import { MenuItemGroupConfig } from "../../../models/MenuItemGroupConfig";
 import { ContextMenuService } from "../../../services/context-menu.service";
-import { hasSubMenuItems, isInteractive } from "../../../utils/menu.utils";
+import { createSubMenuWithParent, hasSubMenuItems, isInteractive } from "../../../utils/menu.utils";
 
 @Component({
     selector: "mona-contextmenu-content",
@@ -162,7 +162,8 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
         this.#contextMenuInjectorData.context = this.parentMenuData.context;
         this.#contextMenuInjectorData.groupTemplate = this.parentMenuData.groupTemplate;
         this.#contextMenuInjectorData.iconTemplate = this.parentMenuData.iconTemplate;
-        this.#contextMenuInjectorData.menuItems?.set(toImmutableSet(menuItem.subMenuItemsSet ?? []));
+        const subMenuItemsWithParent = createSubMenuWithParent(menuItem);
+        this.#contextMenuInjectorData.menuItems?.set(subMenuItemsWithParent);
         this.#contextMenuInjectorData.menuClick = this.parentMenuData.menuClick;
         this.#contextMenuInjectorData.navigate = this.parentMenuData.navigate;
         this.#contextMenuInjectorData.rounded = this.parentMenuData.rounded;

@@ -46,7 +46,10 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
                 <mona-menu-item text="Open"></mona-menu-item>
                 <mona-menu-item text="Open Recent">
                     <mona-menu-item text="Document 1"></mona-menu-item>
-                    <mona-menu-item text="Document 2"></mona-menu-item>
+                    <mona-menu-item text="Document 2">
+                        <mona-menu-item text="Version 1"></mona-menu-item>
+                        <mona-menu-item text="Version 2"></mona-menu-item>
+                    </mona-menu-item>
                     <mona-menu-item text="Document 3"></mona-menu-item>
                 </mona-menu-item>
                 <mona-menu-item text="Save"></mona-menu-item>
