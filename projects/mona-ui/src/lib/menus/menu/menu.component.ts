@@ -26,10 +26,18 @@ export class MenuComponent {
     protected readonly menuItemComponents = contentChildren<MenuItemComponent | MenuItemGroupComponent>(
         MenuItemInjectionToken
     );
+
+    /**
+     * @description Sets the menu as disabled.
+     */
     public readonly disabled = input(false);
+
+    /**
+     * @description Sets the items of the menu.
+     * If provided, it will override the menu items defined by the menu item components.
+     */
     public readonly items = input<Iterable<MenuItemOptions>>([]);
     public readonly textTemplate = contentChild(MenuTextTemplateDirective, { read: TemplateRef });
-    public readonly uid = v4();
     public readonly menuItems = computed(() => {
         const menuItemComponents = this.menuItemComponents();
         const items = this.items();
@@ -44,6 +52,11 @@ export class MenuComponent {
         }
         return selectMany(prepareMenuItems(menuItemComponents), i => i).toImmutableSet();
     });
+
+    /**
+     * @description The text of the menu.
+     */
     public readonly text = input("");
+    public readonly uid = v4();
     public contextMenu: ContextMenuComponent | null = null;
 }

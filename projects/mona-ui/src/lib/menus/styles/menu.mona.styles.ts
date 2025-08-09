@@ -79,6 +79,10 @@ export const menubarBaseVariants = cva(
         gap-1 overflow-hidden
         bg-background text-foreground
         shadow-sm border border-border
+
+        data-[disabled='true']:pointer-events-none
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:opacity-50
     `,
     {
         variants: {

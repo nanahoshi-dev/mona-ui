@@ -3,11 +3,14 @@ import {
     ChangeDetectionStrategy,
     Component,
     computed,
+    contentChild,
     contentChildren,
     effect,
     inject,
     input,
+    output,
     signal,
+    TemplateRef,
     untracked,
     viewChildren
 } from "@angular/core";
@@ -15,10 +18,15 @@ import { Collections, List, zip } from "@mirei/ts-collections";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../theme/services/theme.service";
 import { ContextMenuComponent } from "../contextmenu/components/context-menu/context-menu.component";
+import { MenuGroupTemplateDirective } from "../directives/menu-group-template.directive";
+import { MenuItemIconTemplateDirective } from "../directives/menu-item-icon-template.directive";
+import { MenuItemShortcutTemplateDirective } from "../directives/menu-item-shortcut-template.directive";
+import { MenuItemTextTemplateDirective } from "../directives/menu-item-text-template.directive";
 import { MenuComponent } from "../menu/menu.component";
 import { ContextMenuCloseEvent } from "../models/ContextMenuCloseEvent";
 import { ContextMenuNavigationEvent } from "../models/ContextMenuNavigationEvent";
 import { ContextMenuOpenEvent } from "../models/ContextMenuOpenEvent";
+import { MenuItemClickEvent } from "../models/MenuItemClickEvent";
 import {
     menubarBaseThemeVariants,
     menubarListItemThemeVariants,
@@ -31,15 +39,31 @@ import {
     selector: "mona-menubar",
     templateUrl: "./menubar.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgTemplateOutlet, ContextMenuComponent],
+    imports: [
+        NgTemplateOutlet,
+        ContextMenuComponent,
+        MenuItemIconTemplateDirective,
+        MenuGroupTemplateDirective,
+        MenuItemShortcutTemplateDirective,
+        MenuItemTextTemplateDirective
+    ],
     host: {
-        "[class]": "baseClasses()"
+        "[class]": "baseClasses()",
+        "[attr.data-disabled]": "disabled()"
     }
 })
 export class MenubarComponent implements MenubarVariantInput {
     readonly #themeService = inject(ThemeService);
     protected readonly contextMenuComponents = viewChildren(ContextMenuComponent);
     protected readonly currentContextMenu = signal<ContextMenuComponent | null>(null);
+    protected readonly groupTemplate = contentChild(MenuGroupTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
+    protected readonly iconTemplate = contentChild(MenuItemIconTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
     protected readonly menuList = contentChildren(MenuComponent);
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -57,9 +81,34 @@ export class MenubarComponent implements MenubarVariantInput {
         const theme = this.#themeService.theme();
         return menubarListItemThemeVariants(theme)();
     });
+    protected readonly shortcutTemplate = contentChild(MenuItemShortcutTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
 
+    /**
+     * @description Sets the disabled state of menubar.
+     */
+    public readonly disabled = input(false);
+
+    /**
+     * @description Emits when a menu item is clicked.
+     */
+    public readonly menuItemClick = output<MenuItemClickEvent>();
+
+    /**
+     * @description Sets the size of the menubar.
+     */
     public readonly size = input<MenubarVariantProps["size"]>("medium");
+
+    /**
+     * @description Sets the rounded style of the menubar.
+     */
     public readonly rounded = input<MenubarVariantProps["rounded"]>("medium");
+    protected readonly textTemplate = contentChild(MenuItemTextTemplateDirective, {
+        read: TemplateRef,
+        descendants: false
+    });
     public readonly userClasses = input("", { alias: "class" });
 
     public constructor() {
@@ -133,6 +182,10 @@ export class MenubarComponent implements MenubarVariantInput {
             }
         });
         this.currentContextMenu.set(ctx);
+    }
+
+    public onMenuItemClick(event: MenuItemClickEvent): void {
+        this.menuItemClick.emit(event);
     }
 
     public onMenuMouseEnter(ctx: ContextMenuComponent): void {

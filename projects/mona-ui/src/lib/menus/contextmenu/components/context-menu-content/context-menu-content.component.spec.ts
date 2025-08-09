@@ -1,16 +1,23 @@
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { ImmutableSet } from "@mirei/ts-collections";
 import { AnimationService } from "../../../../animations/services/animation.service";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
 import { ContextMenuInjectorData } from "../../../models/ContextMenuInjectorData";
+import { MenuItem, MenuItemOptions } from "../../../models/MenuItem";
 import { ContextMenuContentComponent } from "./context-menu-content.component";
 
 const POPUP_TOKEN = [
     {
         provide: PopupDataInjectionToken,
         useValue: {
-            menuItems: []
-        } as unknown as ContextMenuInjectorData
+            menuItems: signal<ImmutableSet<ImmutableSet<MenuItem>>>(ImmutableSet.create()),
+            rounded: "medium",
+            size: "medium",
+            userStyles: signal(""),
+            userClasses: signal("")
+        } as ContextMenuInjectorData
     }
 ];
 

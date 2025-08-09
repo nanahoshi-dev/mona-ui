@@ -17,6 +17,7 @@
                         [attr.tabindex]="keyManager?.activeItem?.menuItem() === menuItem ? 0 : -1"
                         class="outline-none"
                         (mouseenter)="onListItemMouseEnter($event, menuItem)"
+                        (mouseleave)="onListItemMouseLeave($event, menuItem)"
                         (click)="onListItemClick($event, menuItem)">
                         <mona-contextmenu-item [menuItem]="menuItem"
                                                [iconTemplate]="parentMenuData.iconTemplate || null"

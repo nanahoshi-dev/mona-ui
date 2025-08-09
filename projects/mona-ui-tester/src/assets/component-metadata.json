@@ -708,19 +708,19 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the menu as disabled.",
         "kind": "input"
       },
       {
         "name": "items",
         "type": "Iterable<MenuItemOptions>",
-        "description": "",
+        "description": "Sets the items of the menu.\nIf provided, it will override the menu items defined by the menu item components.",
         "kind": "input"
       },
       {
         "name": "text",
         "type": "string",
-        "description": "",
+        "description": "The text of the menu.",
         "kind": "input"
       }
     ]
@@ -763,6 +763,42 @@
         "name": "title",
         "type": "string",
         "description": "The title of the menu item group.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MenubarComponent": {
+    "name": "MenubarComponent",
+    "selector": "\"mona-menubar\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of menubar.",
+        "kind": "input"
+      },
+      {
+        "name": "menuItemClick",
+        "type": "MenuItemClickEvent",
+        "description": "Emits when a menu item is clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "size",
+        "type": "MenubarVariantProps[\"size\"]",
+        "description": "Sets the size of the menubar.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "MenubarVariantProps[\"rounded\"]",
+        "description": "Sets the rounded style of the menubar.",
+        "kind": "input"
+      },
+      {
+        "name": "userClasses",
+        "type": "string",
+        "description": "",
         "kind": "input"
       }
     ]

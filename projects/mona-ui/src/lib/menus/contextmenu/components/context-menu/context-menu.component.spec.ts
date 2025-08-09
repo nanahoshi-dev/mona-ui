@@ -11,7 +11,7 @@ import { ContextMenuComponent } from "./context-menu.component";
 @Component({
     template: `
         <button #target>Context Menu Anchor</button>
-        <mona-contextmenu [anchor]="target">
+        <mona-contextmenu [target]="target">
             <mona-menu-item text="First Item"></mona-menu-item>
             <mona-menu-item text="Second Item">
                 <mona-menu-item text="Second Item 1"></mona-menu-item>
@@ -28,7 +28,7 @@ class ContextMenuComponentTestComponent {}
 @Component({
     template: `
         <button #target>Context Menu Anchor</button>
-        <mona-contextmenu [anchor]="target" [menuItems]="menuItems">
+        <mona-contextmenu [target]="target" [menuItems]="menuItems">
             <mona-menu-item text="First Item"></mona-menu-item>
             <mona-menu-item text="Second Item"></mona-menu-item>
         </mona-contextmenu>

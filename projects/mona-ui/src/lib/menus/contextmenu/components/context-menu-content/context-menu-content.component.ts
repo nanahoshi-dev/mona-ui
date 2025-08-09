@@ -153,8 +153,22 @@ export class ContextMenuContentComponent<C> implements AfterViewInit {
     public onListItemMouseEnter(event: MouseEvent, menuItem: MenuItem): void {
         this.#currentMenuItem = menuItem;
         this.menuPopupRef()?.close();
+        const menuItemComponent = this.contextMenuItemComponents().find(component => component.menuItem() === menuItem);
+        if (menuItemComponent) {
+            this.keyManager.setActiveItem(menuItemComponent);
+        }
         if (hasSubMenuItems(this.#currentMenuItem)) {
             this.create(event.target as HTMLElement, this.#currentMenuItem);
+        }
+    }
+
+    public onListItemMouseLeave(event: MouseEvent, menuItem: MenuItem): void {
+        if (!hasSubMenuItems(menuItem) || !this.menuPopupRef()) {
+            const relatedTarget = event.relatedTarget as HTMLElement;
+            const isMovingToSubmenu = relatedTarget?.closest("[data-contextmenu]");
+            if (!isMovingToSubmenu) {
+                this.keyManager.setActiveItem(-1);
+            }
         }
     }
 
