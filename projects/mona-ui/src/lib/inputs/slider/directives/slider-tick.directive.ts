@@ -1,8 +1,5 @@
 import { Directive, ElementRef, inject } from "@angular/core";
 
-/**
- * @internal
- */
 @Directive({
     selector: "span[monaSliderTick]"
 })

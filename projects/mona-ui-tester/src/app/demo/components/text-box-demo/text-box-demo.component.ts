@@ -3,7 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angu
 import { ReactiveFormsModule } from "@angular/forms";
 import { List, LucideAngularModule, Search } from "lucide-angular";
 import {
-    DropDownButtonComponent,
+    DropdownButtonComponent,
+    DropdownButtonItemComponent,
     MenuItemComponent,
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
@@ -136,8 +137,8 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         TextBoxPrefixTemplateDirective,
         LucideAngularModule,
         TextBoxSuffixTemplateDirective,
-        DropDownButtonComponent,
-        MenuItemComponent,
+        DropdownButtonComponent,
+        DropdownButtonItemComponent,
         ReactiveFormsModule
     ],
     template: `
@@ -162,11 +163,11 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             }
             @if (featureData && featureData["suffixTemplate"].active) {
                 <ng-template monaTextBoxSuffixTemplate>
-                    <mona-drop-down-button look="ghost" class="h-full">
+                    <mona-dropdown-button look="ghost" class="h-full">
                         <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
-                        <mona-menu-item text="Menu Item 1"></mona-menu-item>
-                        <mona-menu-item text="Menu Item 1"></mona-menu-item>
-                    </mona-drop-down-button>
+                        <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
+                        <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
+                    </mona-dropdown-button>
                 </ng-template>
             }
         </mona-text-box>

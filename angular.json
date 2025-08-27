@@ -7,15 +7,8 @@
             "projectType": "library",
             "schematics": {
                 "@schematics/angular:component": {
-                    "style": "scss",
-                    "standalone": true,
+                    "style": "none",
                     "changeDetection": "OnPush"
-                },
-                "@schematics/angular:directive": {
-                    "standalone": true
-                },
-                "@schematics/angular:pipe": {
-                    "standalone": true
                 }
             },
             "root": "projects/mona-ui",
@@ -52,14 +45,7 @@
             "schematics": {
                 "@schematics/angular:component": {
                     "style": "none",
-                    "standalone": true,
                     "changeDetection": "OnPush"
-                },
-                "@schematics/angular:directive": {
-                    "standalone": true
-                },
-                "@schematics/angular:pipe": {
-                    "standalone": true
                 }
             },
             "root": "projects/mona-ui-tester",

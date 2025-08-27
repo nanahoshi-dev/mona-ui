@@ -24,9 +24,11 @@
                                 <div class="font-light text-gray-500">{{entry[1].description}}</div>
                             </div>
                             <div class="flex items-center justify-center px-2 gap-2">
-                                <button monaButton look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
-                                    <lucide-angular [name]="codeIcon" [size]="20"></lucide-angular>
-                                </button>
+                                @if (entry[1].hasCode !== false) {
+                                    <button monaButton look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
+                                        <lucide-angular [name]="codeIcon" [size]="20"></lucide-angular>
+                                    </button>
+                                }
                                 <mona-switch [ngModel]="entry[1].active"
                                              (ngModelChange)="handler.updateProperty(entry[0], $event)"></mona-switch>
                             </div>

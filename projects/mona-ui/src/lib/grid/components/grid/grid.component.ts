@@ -10,7 +10,6 @@ import {
 } from "@angular/cdk/drag-drop";
 import { NgStyle, NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -32,12 +31,13 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { Collections } from "@mirei/ts-collections";
+import { asyncScheduler, filter, observeOn, take, tap } from "rxjs";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
 import { PlaceholderComponent } from "../../../layout/placeholder/placeholder.component";
-import { ContextMenuComponent } from "../../../menus/contextmenu/components/context-menu/context-menu.component";
+import { ContextMenuItemComponent } from "../../../menus/ctx-menu/components/contextmenu-item/context-menu-item.component";
+import { ContextMenuComponent } from "../../../menus/ctx-menu/components/contextmenu/context-menu.component";
 import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";
-import { MenuItemComponent } from "../../../menus/menu-item/menu-item.component";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
 import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
@@ -56,7 +56,6 @@ import { GridColumnComponent } from "../grid-column/grid-column.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
-import { asyncScheduler, delay, filter, observeOn, take, tap } from "rxjs";
 
 @Component({
     selector: "mona-grid",
@@ -77,10 +76,10 @@ import { asyncScheduler, delay, filter, observeOn, take, tap } from "rxjs";
         PagerComponent,
         GridVirtualListComponent,
         CdkDragPlaceholder,
-        ContextMenuComponent,
-        MenuItemComponent,
         MenuItemIconTemplateDirective,
-        PlaceholderComponent
+        PlaceholderComponent,
+        ContextMenuComponent,
+        ContextMenuItemComponent
     ],
     host: {
         class: "mona-grid",

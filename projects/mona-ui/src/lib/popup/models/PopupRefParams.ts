@@ -3,9 +3,6 @@ import { PopupCloseEvent } from "./PopupCloseEvent";
 import { ComponentRef } from "@angular/core";
 import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 
-/**
- * @internal
- */
 export interface PopupRefParams {
     close: <R>(result?: R) => void;
 

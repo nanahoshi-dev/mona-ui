@@ -701,108 +701,6 @@
       }
     ]
   },
-  "MenuComponent": {
-    "name": "MenuComponent",
-    "selector": "\"mona-menu\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the menu as disabled.",
-        "kind": "input"
-      },
-      {
-        "name": "items",
-        "type": "Iterable<MenuItemOptions>",
-        "description": "Sets the items of the menu.\nIf provided, it will override the menu items defined by the menu item components.",
-        "kind": "input"
-      },
-      {
-        "name": "text",
-        "type": "string",
-        "description": "The text of the menu.",
-        "kind": "input"
-      }
-    ]
-  },
-  "MenuItemComponent": {
-    "name": "MenuItemComponent",
-    "selector": "\"mona-menu-item\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the menu item as disabled.",
-        "kind": "input"
-      },
-      {
-        "name": "divider",
-        "type": "boolean",
-        "description": "Sets the menu item as a divider.\nA divider is a horizontal line that separates menu items.",
-        "kind": "input"
-      },
-      {
-        "name": "menuClick",
-        "type": "MenuItemClickEvent",
-        "description": "Emits when the menu item is clicked.",
-        "kind": "output"
-      },
-      {
-        "name": "text",
-        "type": "string",
-        "description": "The text to display for the menu item.",
-        "kind": "input"
-      }
-    ]
-  },
-  "MenuItemGroupComponent": {
-    "name": "MenuItemGroupComponent",
-    "selector": "\"mona-menu-item-group\"",
-    "inputs": [
-      {
-        "name": "title",
-        "type": "string",
-        "description": "The title of the menu item group.",
-        "kind": "input"
-      }
-    ]
-  },
-  "MenubarComponent": {
-    "name": "MenubarComponent",
-    "selector": "\"mona-menubar\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of menubar.",
-        "kind": "input"
-      },
-      {
-        "name": "menuItemClick",
-        "type": "MenuItemClickEvent",
-        "description": "Emits when a menu item is clicked.",
-        "kind": "output"
-      },
-      {
-        "name": "size",
-        "type": "MenubarVariantProps[\"size\"]",
-        "description": "Sets the size of the menubar.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "MenubarVariantProps[\"rounded\"]",
-        "description": "Sets the rounded style of the menubar.",
-        "kind": "input"
-      },
-      {
-        "name": "userClasses",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "TreeViewCheckableDirective": {
     "name": "TreeViewCheckableDirective",
     "selector": "\"mona-tree-view[monaTreeViewCheckable]\"",
@@ -1183,42 +1081,6 @@
         "name": "tabindex",
         "type": "number | string",
         "description": "Sets the tabindex of the chip.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "DropDownButtonComponent": {
-    "name": "DropDownButtonComponent",
-    "selector": "\"mona-drop-down-button\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Sets the disabled state of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "look",
-        "type": "ButtonVariantProps[\"look\"]",
-        "description": "Sets the look of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the button.",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "ButtonVariantProps[\"size\"]",
-        "description": "Sets the size of the button.",
         "kind": "input"
       },
       {
@@ -2363,14 +2225,200 @@
       }
     ]
   },
+  "DropdownButtonComponent": {
+    "name": "DropdownButtonComponent",
+    "selector": "\"mona-dropdown-button\"",
+    "inputs": [
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "ARIA label for the dropdown button.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledby",
+        "type": "string",
+        "description": "ARIA labelledby for the dropdown button.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "look",
+        "type": "ButtonVariantProps[\"look\"]",
+        "description": "Sets the look of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "menuItemClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\nEmits when a menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      },
+      {
+        "name": "rounded",
+        "type": "ButtonVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ButtonVariantProps[\"size\"]",
+        "description": "Sets the size of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "description": "The text of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "DropdownButtonCheckboxItemComponent": {
+    "name": "DropdownButtonCheckboxItemComponent",
+    "selector": "\"mona-dropdown-button-checkbox-item\"",
+    "inputs": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Sets the checked state of the menu item.",
+        "kind": "model"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "DropdownButtonGroupComponent": {
+    "name": "DropdownButtonGroupComponent",
+    "selector": "\"mona-dropdown-button-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the menu group.",
+        "kind": "input"
+      }
+    ]
+  },
+  "DropdownButtonItemComponent": {
+    "name": "DropdownButtonItemComponent",
+    "selector": "\"mona-dropdown-button-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "DropdownButtonRadioGroupComponent": {
+    "name": "DropdownButtonRadioGroupComponent",
+    "selector": "\"mona-dropdown-button-radio-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title of the radio group.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the selected radio item.",
+        "kind": "model"
+      }
+    ]
+  },
+  "DropdownButtonRadioItemComponent": {
+    "name": "DropdownButtonRadioItemComponent",
+    "selector": "\"mona-dropdown-button-radio-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the radio item.",
+        "kind": "input"
+      }
+    ]
+  },
   "SplitButtonComponent": {
     "name": "SplitButtonComponent",
     "selector": "\"mona-split-button\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "ARIA label for the main button.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledby",
+        "type": "string",
+        "description": "ARIA labelledby for the main button.",
+        "kind": "input"
+      },
+      {
         "name": "buttonClick",
         "type": "MouseEvent",
-        "description": "",
+        "description": "Emits when the main button is clicked.",
         "kind": "output"
       },
       {
@@ -2384,6 +2432,12 @@
         "type": "SplitButtonVariantProps[\"look\"]",
         "description": "Sets the look of the button.",
         "kind": "input"
+      },
+      {
+        "name": "menuItemClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "Emits when a menu item is clicked.",
+        "kind": "output"
       },
       {
         "name": "popupWidth",
@@ -2404,12 +2458,6 @@
         "kind": "input"
       },
       {
-        "name": "tabindex",
-        "type": "number | string",
-        "description": "Sets the tabindex of the button.",
-        "kind": "input"
-      },
-      {
         "name": "text",
         "type": "string",
         "description": "Sets the text of the button.",
@@ -2419,6 +2467,120 @@
         "name": "userClass",
         "type": "string",
         "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "SplitButtonCheckboxItemComponent": {
+    "name": "SplitButtonCheckboxItemComponent",
+    "selector": "\"mona-split-button-checkbox-item\"",
+    "inputs": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Sets the checked state of the menu item.",
+        "kind": "model"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "SplitButtonGroupComponent": {
+    "name": "SplitButtonGroupComponent",
+    "selector": "\"mona-split-button-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the menu group.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SplitButtonItemComponent": {
+    "name": "SplitButtonItemComponent",
+    "selector": "\"mona-split-button-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "SplitButtonRadioGroupComponent": {
+    "name": "SplitButtonRadioGroupComponent",
+    "selector": "\"mona-split-button-radio-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title of the radio group.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the selected radio item.",
+        "kind": "model"
+      }
+    ]
+  },
+  "SplitButtonRadioItemComponent": {
+    "name": "SplitButtonRadioItemComponent",
+    "selector": "\"mona-split-button-radio-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the radio item.",
         "kind": "input"
       }
     ]
@@ -2509,6 +2671,222 @@
         "name": "template",
         "type": "TemplateRef<ListItemTemplateContext<TData>> | null",
         "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "PopupMenuComponent": {
+    "name": "PopupMenuComponent",
+    "selector": "\"mona-popup-menu\"",
+    "inputs": [
+      {
+        "name": "anchor",
+        "type": "ElementRef<HTMLElement> | Element",
+        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
+        "kind": "input"
+      },
+      {
+        "name": "anchorConnectionPoint",
+        "type": "ConnectionPoint | null",
+        "description": "The anchor connection point of the popup menu.\nOnly applicable when `precise` is set to `false`.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupMenuCloseEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "items",
+        "type": "Iterable<PopupMenuItem | MenuItem>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The event that is emitted when a menu item is clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "minWidth",
+        "type": "string | number",
+        "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "navigate",
+        "type": "PopupMenuNavigationEvent",
+        "description": "The event that is emitted when the popup menu is navigated.\nThis is used to handle keyboard navigation within the popup menu.",
+        "kind": "output"
+      },
+      {
+        "name": "offset",
+        "type": "PopupOffset",
+        "description": "The offset of the popup menu from the anchor element.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "popupConnectionPoint",
+        "type": "ConnectionPoint | null",
+        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
+        "kind": "input"
+      },
+      {
+        "name": "precise",
+        "type": "boolean",
+        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "PopupMenuVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "PopupMenuVariantProps[\"size\"]",
+        "description": "Sets the size of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "target",
+        "type": "ElementRef<HTMLElement> | Element",
+        "description": "The target element that will be used to trigger the popup menu.",
+        "kind": "input"
+      },
+      {
+        "name": "trigger",
+        "type": "string",
+        "description": "The event that triggers the popup menu.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number",
+        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input"
+      }
+    ]
+  },
+  "PopupMenuCheckboxItemComponent": {
+    "name": "PopupMenuCheckboxItemComponent",
+    "selector": "\"mona-popup-menu-checkbox-item\"",
+    "inputs": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Sets the checked state of the menu item.",
+        "kind": "model"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "PopupMenuGroupComponent": {
+    "name": "PopupMenuGroupComponent",
+    "selector": "\"mona-popup-menu-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the menu group.",
+        "kind": "input"
+      }
+    ]
+  },
+  "PopupMenuItemComponent": {
+    "name": "PopupMenuItemComponent",
+    "selector": "\"mona-popup-menu-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "PopupMenuRadioGroupComponent": {
+    "name": "PopupMenuRadioGroupComponent",
+    "selector": "\"mona-popup-menu-radio-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title of the radio group.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the selected radio item.",
+        "kind": "model"
+      }
+    ]
+  },
+  "PopupMenuRadioItemComponent": {
+    "name": "PopupMenuRadioItemComponent",
+    "selector": "\"mona-popup-menu-radio-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the radio item.",
         "kind": "input"
       }
     ]
@@ -2862,13 +3240,13 @@
       {
         "name": "apply",
         "type": "void",
-        "description": "Emits when the Apply button is clicked.\nThe `Apply` button is only displayed when `showButtons` is set to true.",
+        "description": "Emits when the Apply button is clicked.\r\nThe `Apply` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
         "name": "cancel",
         "type": "void",
-        "description": "Emits when the Cancel button is clicked.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
+        "description": "Emits when the Cancel button is clicked.\r\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
@@ -2898,7 +3276,7 @@
       {
         "name": "showButtons",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the buttons.\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
+        "description": "Specifies whether the color picker should display the buttons.\r\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\r\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
         "kind": "input"
       },
       {
@@ -3658,129 +4036,87 @@
     "selector": "\"mona-contextmenu\"",
     "inputs": [
       {
-        "name": "anchor",
-        "type": "ElementRef | Element",
-        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
-        "kind": "input"
-      },
-      {
-        "name": "anchorConnectionPoint",
-        "type": "ConnectionPoint | null",
-        "description": "The anchor connection point of the context menu.\nOnly applicable when `precise` is set to `false`.",
-        "kind": "input"
-      },
-      {
-        "name": "close",
-        "type": "ContextMenuCloseEvent",
-        "description": "Emits when the context menu is closed.",
-        "kind": "output"
-      },
-      {
-        "name": "context",
-        "type": "C",
-        "description": "The context object to be passed to the menu items.",
+        "name": "items",
+        "type": "Iterable<PopupMenuItem>",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "menuClick",
-        "type": "MenuItemClickEvent<C>",
-        "description": "Emits when any of the menu items are clicked.",
+        "type": "PopupMenuItemClickEvent",
+        "description": "",
         "kind": "output"
-      },
-      {
-        "name": "menuItems",
-        "type": "Iterable<MenuItemOptions | MenuItem>",
-        "description": "The menu items to be displayed in the context menu.\nIf this is set, the menu items from the content children will be ignored.",
-        "kind": "input"
       },
       {
         "name": "minWidth",
-        "type": "string | number | undefined",
-        "description": "Minimum width of the context menu. Only applies to the root context menu.",
-        "kind": "input"
-      },
-      {
-        "name": "navigate",
-        "type": "ContextMenuNavigationEvent",
-        "description": "Emits when context menu navigation occurs.",
-        "kind": "output"
-      },
-      {
-        "name": "offset",
-        "type": "PopupOffset",
-        "description": "The offset of the context menu.",
-        "kind": "input"
-      },
-      {
-        "name": "open",
-        "type": "ContextMenuOpenEvent",
-        "description": "Emits when the context menu is opened.",
-        "kind": "output"
-      },
-      {
-        "name": "popupClass",
-        "type": "string | string[]",
-        "description": "The popup class of the context menu.",
-        "kind": "input"
-      },
-      {
-        "name": "popupConnectionPoint",
-        "type": "ConnectionPoint | null",
-        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
-        "kind": "input"
-      },
-      {
-        "name": "precise",
-        "type": "boolean",
-        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "type": "string | number",
+        "description": "Sets the minimum width of the context menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "rounded",
-        "type": "ContextMenuContentVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the context menu.\nThis will be applied to the root context menu and all submenus.",
+        "type": "ContextMenuVariantProps[\"rounded\"]",
+        "description": "Sets the rounded state of the context menu.",
         "kind": "input"
       },
       {
         "name": "size",
-        "type": "ContextMenuContentVariantProps[\"size\"]",
-        "description": "The size of the context menu.\nThis will be applied to the root context menu and all submenus.",
+        "type": "ContextMenuVariantProps[\"size\"]",
+        "description": "Sets the size of the context menu.",
         "kind": "input"
       },
       {
         "name": "target",
-        "type": "ElementRef | Element",
+        "type": "ElementRef<HTMLElement> | HTMLElement",
         "description": "The target element that will be used to trigger the context menu.",
         "kind": "input"
       },
       {
-        "name": "toggleable",
-        "type": "boolean",
-        "description": "Whether the context menu is toggleable.",
-        "kind": "input"
-      },
-      {
-        "name": "trigger",
-        "type": "string",
-        "description": "The event that triggers the context menu.",
-        "kind": "input"
-      },
-      {
-        "name": "userClasses",
-        "type": "string",
-        "description": "The user classes to be applied to the context menu.\nThese will be applied to the root context menu and all submenus.",
-        "kind": "input"
-      },
-      {
-        "name": "userStyles",
-        "type": "string",
-        "description": "The user styles to be applied to the context menu.\nThese will be applied to the root context menu and all submenus.",
-        "kind": "input"
-      },
-      {
         "name": "width",
-        "type": "string | number | undefined",
-        "description": "The width of the context menu. Only applies to the root context menu.",
+        "type": "string | number",
+        "description": "Sets the width of the context menu.\r\nThis will be applied to the root menu and all submenus.",
+        "kind": "input"
+      }
+    ]
+  },
+  "ContextMenuCheckboxItemComponent": {
+    "name": "ContextMenuCheckboxItemComponent",
+    "selector": "\"mona-contextmenu-checkbox-item\"",
+    "inputs": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Sets the checked state of the menu item.",
+        "kind": "model"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "ContextMenuGroupComponent": {
+    "name": "ContextMenuGroupComponent",
+    "selector": "\"mona-contextmenu-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the menu group.",
         "kind": "input"
       }
     ]
@@ -3790,56 +4126,242 @@
     "selector": "\"mona-contextmenu-item\"",
     "inputs": [
       {
-        "name": "iconTemplate",
-        "type": "TemplateRef<MenuItemTemplateContext> | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "iconVisible",
+        "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the menu item.",
         "kind": "input"
       },
       {
-        "name": "itemDisabled",
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "ContextMenuRadioGroupComponent": {
+    "name": "ContextMenuRadioGroupComponent",
+    "selector": "\"mona-contextmenu-radio-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title of the radio group.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the selected radio item.",
+        "kind": "model"
+      }
+    ]
+  },
+  "ContextMenuRadioItemComponent": {
+    "name": "ContextMenuRadioItemComponent",
+    "selector": "\"mona-contextmenu-radio-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the menu item.",
         "kind": "input"
       },
       {
-        "name": "itemFocused",
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the radio item.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MenuComponent": {
+    "name": "MenuComponent",
+    "selector": "\"mona-menu\"",
+    "inputs": [
+      {
+        "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the menu as disabled.",
         "kind": "input"
       },
       {
-        "name": "menuItem",
-        "type": "MenuItem",
-        "description": "",
+        "name": "items",
+        "type": "Iterable<MenuItem>",
+        "description": "Sets the items of the menu.\r\nIf provided, it will override the menu items defined by the menu item components.",
         "kind": "input"
       },
       {
-        "name": "shortcutTemplate",
-        "type": "TemplateRef<MenuItemTemplateContext> | null",
-        "description": "",
+        "name": "text",
+        "type": "string",
+        "description": "The text of the menu.",
         "kind": "input"
+      }
+    ]
+  },
+  "MenuCheckboxItemComponent": {
+    "name": "MenuCheckboxItemComponent",
+    "selector": "\"mona-menu-checkbox-item\"",
+    "inputs": [
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Sets the checked state of the menu item.",
+        "kind": "model"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "MenuGroupComponent": {
+    "name": "MenuGroupComponent",
+    "selector": "\"mona-menu-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the menu group.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MenuItemComponent": {
+    "name": "MenuItemComponent",
+    "selector": "\"mona-menu-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      }
+    ]
+  },
+  "MenuRadioGroupComponent": {
+    "name": "MenuRadioGroupComponent",
+    "selector": "\"mona-menu-radio-group\"",
+    "inputs": [
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title of the radio group.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the selected radio item.",
+        "kind": "model"
+      }
+    ]
+  },
+  "MenuRadioItemComponent": {
+    "name": "MenuRadioItemComponent",
+    "selector": "\"mona-menu-radio-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "The text of the menu item.",
+        "kind": "input"
+      },
+      {
+        "name": "menuClick",
+        "type": "PopupMenuItemClickEvent",
+        "description": "The click event of the menu item.\r\nEmits when the menu item is selected by keyboard or mouse.",
+        "kind": "output"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "The value of the radio item.",
+        "kind": "input"
+      }
+    ]
+  },
+  "MenubarComponent": {
+    "name": "MenubarComponent",
+    "selector": "\"mona-menubar\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of menubar.",
+        "kind": "input"
+      },
+      {
+        "name": "menuItemClick",
+        "type": "MenuItemClickEvent",
+        "description": "Emits when a menu item is clicked.",
+        "kind": "output"
       },
       {
         "name": "size",
-        "type": "MenuItemVariantProps[\"size\"]",
-        "description": "",
+        "type": "MenubarVariantProps[\"size\"]",
+        "description": "Sets the size of the menubar.",
         "kind": "input"
       },
       {
-        "name": "submenuPopupRef",
-        "type": "PopupRef | null",
-        "description": "",
+        "name": "rounded",
+        "type": "MenubarVariantProps[\"rounded\"]",
+        "description": "Sets the rounded style of the menubar.",
         "kind": "input"
       },
       {
-        "name": "textTemplate",
-        "type": "TemplateRef<MenuItemTemplateContext> | null",
+        "name": "userClasses",
+        "type": "string",
         "description": "",
         "kind": "input"
       }
@@ -4002,7 +4524,7 @@
       {
         "name": "hide",
         "type": "PopoverHideEvent",
-        "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
+        "description": "Emits when the popover is about to be closed.\r\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -4026,7 +4548,7 @@
       {
         "name": "show",
         "type": "PopoverShowEvent",
-        "description": "Emits when the popover is about to be shown.\nThis event is preventable.",
+        "description": "Emits when the popover is about to be shown.\r\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -4038,7 +4560,7 @@
       {
         "name": "target",
         "type": "Element | ElementRef",
-        "description": "The target element(s) to which the popover is attached.",
+        "description": "The target element to which the popover is attached.",
         "kind": "input"
       },
       {
@@ -4050,7 +4572,7 @@
       {
         "name": "trigger",
         "type": "string",
-        "description": "The trigger event for showing the popover.\nCan be a suitable pointer event like \"click\" or \"pointerenter\";",
+        "description": "The trigger event for showing the popover.\r\nCan be a suitable pointer event like \"click\" or \"pointerenter\";",
         "kind": "input"
       }
     ]

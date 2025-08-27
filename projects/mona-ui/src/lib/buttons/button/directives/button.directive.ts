@@ -11,11 +11,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    ButtonVariantProps,
-    ButtonVariantsInput,
-    buttonThemeVariants
-} from "../styles/button.styles";
+import { ButtonVariantProps, ButtonVariantsInput, buttonThemeVariants } from "../styles/button.styles";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -24,12 +20,9 @@ import { ButtonService } from "../../services/button.service";
 @Directive({
     selector: "button[monaButton]",
     host: {
-        "[attr.aria-describedby]": "ariaDescribedby()",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "toggleable() ? selected() : undefined",
         "[attr.aria-haspopup]": "false",
-        "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-labelledby]": "ariaLabelledby()",
         "[attr.aria-pressed]": "toggleable() ? selected() : undefined",
         "[attr.aria-selected]": "selected() ? true : undefined",
         "[attr.data-look]": "look()",
@@ -59,21 +52,6 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         const variantClasses = variants({ look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
-
-    /**
-     * @description ARIA value for `aria-describedby` attribute.
-     */
-    public readonly ariaDescribedby = input<string>("");
-
-    /**
-     * @description ARIA value for `aria-label` attribute.
-     */
-    public readonly ariaLabel = input<string>("");
-
-    /**
-     * @description ARIA value for `aria-labelledby` attribute
-     */
-    public readonly ariaLabelledby = input<string>("");
 
     /**
      * @description Sets the disabled state of the button.

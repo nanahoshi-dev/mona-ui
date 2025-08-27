@@ -1,19 +1,16 @@
 import { VariantProps } from "class-variance-authority";
 import { ThemeStyle } from "../../../theme/models/Theme";
-import { VariantInputs, VariantPropsWithoutNull } from "../../../utils/VariantInputs";
-import { buttonGroupVariants, buttonGroupVariants as monaButtonGroupVariants } from "./button-group.mona.styles";
-import { buttonGroupVariants as shadcnButtonGroupVariants } from "./button-group.shadcn.styles";
+import { VariantInputs } from "../../../utils/VariantInputs";
+import { buttonGroupVariants as monaButtonGroupVariants } from "./button-group.mona.styles";
 
 export const buttonGroupThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaButtonGroupVariants;
-        case "shadcn":
-            return shadcnButtonGroupVariants;
         default:
             return monaButtonGroupVariants;
     }
 };
 
-export type ButtonGroupVariantProps = VariantPropsWithoutNull<VariantProps<typeof buttonGroupVariants>>;
+export type ButtonGroupVariantProps = VariantProps<ReturnType<typeof buttonGroupThemeVariants>>;
 export type ButtonGroupVariantsInput = VariantInputs<ButtonGroupVariantProps>;

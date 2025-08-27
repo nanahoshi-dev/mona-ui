@@ -119,6 +119,10 @@ export class SidebarComponent {
                 {
                     text: "Tooltip Directive",
                     path: "/tooltip-directive"
+                },
+                {
+                    text: "#PopupMenuInternal",
+                    path: "/popup-menu-internal"
                 }
             ]
         }

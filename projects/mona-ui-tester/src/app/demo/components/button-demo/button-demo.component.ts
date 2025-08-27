@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
-import { ButtonDirective, ThemeService } from "mona-ui";
+import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
+import { ButtonDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -12,15 +12,11 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> {
-    readonly #themeService = inject(ThemeService);
     protected readonly ButtonWrapperComponent = ButtonWrapperComponent;
     protected readonly config = signal<ComponentConfig<ButtonDirective>>({
         code: `
             <button
                 monaButton
-                [ariaDescribedby]="ariaDescribedby()"
-                [ariaLabel]="ariaLabel()"
-                [ariaLabelledby]="ariaLabelledby()"
                 [disabled]="disabled()"
                 [look]="look()"
                 [rounded]="rounded()"
@@ -30,18 +26,6 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
                 Mona Button
             </button>`,
         inputs: {
-            ariaDescribedby: {
-                type: "string",
-                value: "Aria described by"
-            },
-            ariaLabel: {
-                type: "string",
-                value: "Button"
-            },
-            ariaLabelledby: {
-                type: "string",
-                value: "Aria labelled by"
-            },
             disabled: {
                 type: "boolean",
                 value: false
@@ -85,13 +69,6 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
     });
     protected readonly metadata = this.getMetadata("ButtonDirective");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
-
-    // public constructor() {
-    //     super();
-    //     window.setInterval(() => {
-    //         this.#themeService.setTheme(this.#themeService.theme() === "mona" ? "shadcn" : "mona");
-    //     }, 4444);
-    // }
 }
 
 @Component({
@@ -100,9 +77,6 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
     template: `
         <button
             monaButton
-            [ariaDescribedby]="ariaDescribedby()"
-            [ariaLabel]="ariaLabel()"
-            [ariaLabelledby]="ariaLabelledby()"
             [disabled]="disabled()"
             [look]="look()"
             [rounded]="rounded()"

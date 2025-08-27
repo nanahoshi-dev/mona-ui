@@ -11,6 +11,6 @@ import { SectionComponent } from "../../../layout/components/section/section.com
 })
 export class SplitButtonDocComponent {
     protected readonly importCode = `
-        import { SplitButtonComponent } from "mona-ui";
+        import { SplitButtonComponent, SplitButtonItemComponent } from "mona-ui";
     `;
 }

@@ -64,8 +64,8 @@ export const routes: Routes = [
             {
                 path: "dropdown-button",
                 loadComponent: () =>
-                    import("./docs/components/drop-down-button-doc/drop-down-button-doc.component").then(
-                        m => m.DropDownButtonDocComponent
+                    import("./docs/components/drop-down-button-doc/dropdown-button-doc.component").then(
+                        m => m.DropdownButtonDocComponent
                     )
             },
             {
@@ -139,6 +139,13 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import("./docs/components/tooltip-directive-doc/tooltip-directive-doc.component").then(
                         m => m.TooltipDirectiveDocComponent
+                    )
+            },
+            {
+                path: "popup-menu-internal",
+                loadComponent: () =>
+                    import("./docs/components/popup-menu-doc/popup-menu-doc.component").then(
+                        m => m.PopupMenuDocComponent
                     )
             }
         ]

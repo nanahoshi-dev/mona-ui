@@ -20,10 +20,10 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { Copy, LucideAngularModule } from "lucide-angular";
-import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil, tap } from "rxjs";
+import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { ContextMenuComponent } from "../../../../menus/contextmenu/components/context-menu/context-menu.component";
-import { MenuItemComponent } from "../../../../menus/menu-item/menu-item.component";
+import { DropdownButtonItemComponent } from "../../../../buttons/drop-down-button/components/dropdown-button-item/dropdown-button-item.component";
+import { DropdownButtonComponent } from "../../../../buttons/drop-down-button/components/dropdown-button/dropdown-button.component";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { ColorMode, ColorOutputFormat } from "../../../models/ColorMode";
@@ -73,11 +73,11 @@ import {
         TextBoxComponent,
         TextBoxPrefixTemplateDirective,
         TextBoxSuffixTemplateDirective,
-        ContextMenuComponent,
-        MenuItemComponent,
         SliderComponent,
         NgTemplateOutlet,
-        LucideAngularModule
+        LucideAngularModule,
+        DropdownButtonComponent,
+        DropdownButtonItemComponent
     ],
     host: {
         "[class]": "baseClasses()",

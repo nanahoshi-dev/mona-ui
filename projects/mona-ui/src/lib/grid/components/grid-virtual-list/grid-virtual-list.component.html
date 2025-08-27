@@ -138,6 +138,7 @@
 
 <ng-template let-rowData let-element="element" let-rowIndex="index" #contextMenuTemplate>
     <mona-contextmenu [target]="element"
-                      [context]="{rowData, element, rowIndex}"
-                      [menuItems]="gridService.contextMenuItems()"></mona-contextmenu>
+                      [items]="gridService.contextMenuItems()"></mona-contextmenu>
+<!--    [context]="{rowData, element, rowIndex}"-->
+
 </ng-template>

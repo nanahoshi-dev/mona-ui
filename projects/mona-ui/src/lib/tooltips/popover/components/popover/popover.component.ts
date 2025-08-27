@@ -120,7 +120,7 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
     public readonly shown = output<PopoverShownEvent>();
 
     /**
-     * @description The target element(s) to which the popover is attached.
+     * @description The target element or ElementRef to which the popover is attached.
      */
     public readonly target = input.required<Element | ElementRef>();
 

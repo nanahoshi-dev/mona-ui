@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { CallExpression, Node, Project } from "ts-morph";
+import { CallExpression, JSDocTag, Node, Project } from "ts-morph";
 
 interface ComponentInputMetadata {
     name: string;
@@ -62,10 +62,91 @@ function simplifyType(fullType: string): string {
     return simplified.trim();
 }
 
+/**
+ * Recursively extracts input/output metadata from a class and its inheritance chain
+ * @param classDeclaration The class to extract metadata from
+ * @param visitedClasses Set to track visited classes and avoid infinite recursion
+ * @returns Array of component input metadata from the class and its base classes
+ */
+function extractInputsFromInheritanceChain(
+    classDeclaration: any,
+    visitedClasses = new Set<string>()
+): ComponentInputMetadata[] {
+    const className = classDeclaration.getName();
+    if (!className || visitedClasses.has(className)) {
+        return [];
+    }
+
+    visitedClasses.add(className);
+    const inputs: ComponentInputMetadata[] = [];
+
+    // Extract inputs from current class
+    for (const property of classDeclaration.getProperties()) {
+        const initializer = property.getInitializer();
+
+        if (initializer && Node.isCallExpression(initializer)) {
+            const callExpression = initializer as CallExpression;
+            const functionName = callExpression.getExpression().getText();
+
+            let kind: "input" | "model" | "output" | null = null;
+
+            if (functionName.startsWith("input")) {
+                kind = "input";
+            } else if (functionName.startsWith("model")) {
+                kind = "model";
+            } else if (functionName === "output") {
+                kind = "output";
+            }
+
+            if (kind) {
+                const inputName = property.getName();
+                let inputType = "any";
+
+                // Try to get type from the explicit generic argument first
+                const typeArguments = callExpression.getTypeArguments();
+                if (typeArguments.length > 0) {
+                    inputType = typeArguments[0].getText();
+                } else {
+                    const fullType = property.getType().getText();
+                    inputType = simplifyType(fullType);
+                }
+
+                let description = "";
+                const jsDocs = property.getJsDocs();
+                if (jsDocs.length > 0) {
+                    const mainDoc = jsDocs[0];
+                    const descriptionTag = mainDoc
+                        .getTags()
+                        .find((tag: JSDocTag) => tag.getTagName() === "description");
+                    if (descriptionTag) {
+                        description = descriptionTag.getCommentText()?.toString().trim() || "";
+                    }
+                }
+
+                inputs.push({
+                    name: inputName,
+                    type: inputType,
+                    description: description,
+                    kind: kind
+                });
+            }
+        }
+    }
+
+    // Extract inputs from base classes
+    const baseClass = classDeclaration.getBaseClass();
+    if (baseClass) {
+        const baseInputs = extractInputsFromInheritanceChain(baseClass, visitedClasses);
+        inputs.push(...baseInputs);
+    }
+
+    return inputs;
+}
+
 async function extractComponentMetadata() {
     const project = new Project({
         tsConfigFilePath: path.join(projectPath, "tsconfig.lib.json"), // Or tsconfig.json if applicable
-        skipFileDependencyResolution: true // Speeds up parsing if you don't need full type resolution for this
+        skipFileDependencyResolution: false // Enable full type resolution to follow inheritance
     });
 
     const allComponentMetadata: { [componentName: string]: ComponentMetadata } = {};
@@ -75,7 +156,7 @@ async function extractComponentMetadata() {
     const sourceFiles = project.getSourceFiles(pattern);
 
     for (const sourceFile of sourceFiles) {
-        // Find classes that have an @Component decorator
+        // Find classes that have a @Component decorator
         for (const classDeclaration of sourceFile.getClasses()) {
             const componentDecorator = classDeclaration.getDecorator("Component");
             const directiveDecorator = classDeclaration.getDecorator("Directive");
@@ -101,73 +182,25 @@ async function extractComponentMetadata() {
                     }
                 }
 
-                const componentInputs: ComponentInputMetadata[] = [];
+                // Extract inputs from the entire inheritance chain
+                const componentInputs = extractInputsFromInheritanceChain(classDeclaration);
 
-                // Find properties that use input(), model(), or output() functions
-                for (const property of classDeclaration.getProperties()) {
-                    const initializer = property.getInitializer();
+                // Remove duplicates (keep the most derived version)
+                const uniqueInputs: ComponentInputMetadata[] = [];
+                const seenInputs = new Set<string>();
 
-                    if (initializer && Node.isCallExpression(initializer)) {
-                        const callExpression = initializer as CallExpression;
-                        const functionName = callExpression.getExpression().getText();
-
-                        let kind: "input" | "model" | "output" | null = null;
-
-                        if (functionName.startsWith("input")) {
-                            // Changed from functionName === "input"
-                            kind = "input";
-                        } else if (functionName.startsWith("model")) {
-                            // Changed from functionName === "model"
-                            kind = "model";
-                        } else if (functionName === "output") {
-                            kind = "output";
-                        }
-
-                        if (kind) {
-                            const inputName = property.getName();
-                            let inputType = "any"; // Default to any if type cannot be determined
-
-                            // Try to get type from the explicit generic argument first
-                            const typeArguments = callExpression.getTypeArguments();
-                            if (typeArguments.length > 0) {
-                                // If there's an explicit generic like input<string>(), its text is the exact type.
-                                // No further simplification is needed.
-                                inputType = typeArguments[0].getText();
-                            } else {
-                                // Fallback for when type is inferred, e.g., `myInput = input("value")`.
-                                // In this case, `property.getType().getText()` will return the full type,
-                                // e.g., "InputSignal<string>", which DOES need simplification.
-                                const fullType = property.getType().getText();
-                                inputType = simplifyType(fullType);
-                            }
-
-                            let description = "";
-                            const jsDocs = property.getJsDocs();
-                            if (jsDocs.length > 0) {
-                                const mainDoc = jsDocs[0]; // Use the first JSDoc block
-                                const descriptionTag = mainDoc
-                                    .getTags()
-                                    .find(tag => tag.getTagName() === "description");
-                                if (descriptionTag) {
-                                    description = descriptionTag.getCommentText()?.toString().trim() || "";
-                                }
-                            }
-
-                            componentInputs.push({
-                                name: inputName,
-                                type: inputType,
-                                description: description,
-                                kind: kind
-                            });
-                        }
+                for (const input of componentInputs) {
+                    if (!seenInputs.has(input.name)) {
+                        seenInputs.add(input.name);
+                        uniqueInputs.push(input);
                     }
                 }
 
-                if (componentInputs.length > 0) {
+                if (uniqueInputs.length > 0) {
                     allComponentMetadata[componentName] = {
                         name: componentName,
                         selector: selector,
-                        inputs: componentInputs
+                        inputs: uniqueInputs
                     };
                 }
             }

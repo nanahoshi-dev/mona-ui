@@ -1,5 +1,6 @@
 import { contentChildren, Directive, effect, inject, untracked } from "@angular/core";
-import { MenuItemComponent } from "../../menus/menu-item/menu-item.component";
+import { ContextMenuItemComponent } from "../../menus/ctx-menu/components/contextmenu-item/context-menu-item.component";
+import { MenuItemComponent } from "../../menus/menubar/components/menu-item/menu-item.component";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -8,14 +9,14 @@ import { GridService } from "../services/grid.service";
 })
 export class GridContextMenuDirective {
     readonly #gridService = inject(GridService);
-    private readonly menuItemComponents = contentChildren(MenuItemComponent);
+    private readonly menuItemComponents = contentChildren(ContextMenuItemComponent);
 
     public constructor() {
         effect(() => {
             const menuItemComponents = this.menuItemComponents();
             untracked(() =>
                 this.#gridService.contextMenuItems.update(set =>
-                    set.clear().addAll(menuItemComponents.map(m => m.getMenuItem()))
+                    set.clear().addAll(menuItemComponents.map(m => m.getPopupMenuItem()).flatMap(i => i))
                 )
             );
         });

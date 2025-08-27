@@ -7,10 +7,8 @@ export const textAreaThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaTextAreaVariants;
-        case "shadcn":
-            return monaTextAreaVariants; // Placeholder for Shadcn styles, if available
         default:
-            return monaTextAreaVariants; // Default to Mona styles
+            return monaTextAreaVariants;
     }
 };
 

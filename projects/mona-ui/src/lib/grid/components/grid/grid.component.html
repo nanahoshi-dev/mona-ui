@@ -17,21 +17,21 @@
                     <span style="margin-left: 0.5rem;" #groupReorder>
                         <i class="ri-more-2-fill"></i>
                     </span>
-                    <mona-contextmenu [target]="groupReorder" trigger="click">
-                        <mona-menu-item [text]="'Move as previous'"
+                    <mona-contextmenu [target]="groupReorder">
+                        <mona-contextmenu-item [label]="'Move as previous'"
                                         [disabled]="$first"
                                         (menuClick)="onGroupColumnReorder(groupColumn, 'prev')">
                             <ng-template monaMenuItemIconTemplate>
                                 <i class="ri-arrow-left-fill"></i>
                             </ng-template>
-                        </mona-menu-item>
-                        <mona-menu-item [text]="'Move as next'"
+                        </mona-contextmenu-item>
+                        <mona-contextmenu-item [label]="'Move as next'"
                                         [disabled]="$last"
                                         (menuClick)="onGroupColumnReorder(groupColumn, 'next')">
                             <ng-template monaMenuItemIconTemplate>
                                 <i class="ri-arrow-right-fill"></i>
                             </ng-template>
-                        </mona-menu-item>
+                        </mona-contextmenu-item>
                     </mona-contextmenu>
                 </mona-chip>
             }

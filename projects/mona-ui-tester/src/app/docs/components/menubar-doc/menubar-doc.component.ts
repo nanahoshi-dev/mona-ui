@@ -10,5 +10,6 @@ import { SectionComponent } from "../../../layout/components/section/section.com
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenubarDocComponent {
-    protected readonly importCode = `import { MenubarComponent, MenuItemComponent, MenuItemGroupComponent } from "mona-ui";`;
+    protected readonly importCode = `
+        import { MenubarComponent, MenuComponent, MenuItemComponent } from "mona-ui";`;
 }

@@ -91,13 +91,11 @@
                               [ngTemplateOutletContext]="{$implicit: 'HEX', classes: 'w-auto px-2'}"></ng-container>
             </ng-template>
             <ng-template monaTextBoxSuffixTemplate>
-                <button monaButton look="ghost" title="Copy color" class="h-full" #copyButton>
+                <mona-dropdown-button look="ghost" title="Copy color" class="h-full">
                     <lucide-angular [name]="copyIcon" [size]="12"></lucide-angular>
-                </button>
-                <mona-contextmenu [target]="copyButton" trigger="click">
-                    <mona-menu-item text="Copy as HEX" (menuClick)="onCopyColorSelect('hex')"></mona-menu-item>
-                    <mona-menu-item text="Copy as RGB" (menuClick)="onCopyColorSelect('rgb')"></mona-menu-item>
-                </mona-contextmenu>
+                    <mona-dropdown-button-item label="Copy as HEX" (menuClick)="onCopyColorSelect('hex')"></mona-dropdown-button-item>
+                    <mona-dropdown-button-item label="Copy as RGB" (menuClick)="onCopyColorSelect('rgb')"></mona-dropdown-button-item>
+                </mona-dropdown-button>
             </ng-template>
         </mona-text-box>
     }

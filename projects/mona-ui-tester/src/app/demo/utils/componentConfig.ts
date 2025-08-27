@@ -80,6 +80,7 @@ export interface ComponentConfigFeatureItem {
         active: boolean;
         code: string;
         codeVisible?: boolean;
+        hasCode?: boolean;
         description: string;
         name: string;
     };

@@ -5,10 +5,6 @@ import { MoveEvent } from "./MoveEvent";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { ResizeEvent } from "./ResizeEvent";
 
-/**
- * @internal
- */
-
 export interface WindowRefParams<R = unknown> {
     close: (result?: R) => void;
     center: () => void;

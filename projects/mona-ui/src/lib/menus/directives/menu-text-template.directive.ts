@@ -1,5 +1,4 @@
-import { Directive, TemplateRef } from "@angular/core";
-import { MenuTextTemplateContext } from "../models/MenuTextTemplateContext";
+import { Directive } from "@angular/core";
 
 @Directive({
     selector: "ng-template[monaMenuTextTemplate]"
