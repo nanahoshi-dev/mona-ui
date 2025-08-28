@@ -69,6 +69,10 @@ export class SidebarComponent {
                     path: "/dropdown-button"
                 },
                 {
+                    text: "Dropdown List",
+                    path: "/dropdown-list"
+                },
+                {
                     text: "Input",
                     path: "/input"
                 },

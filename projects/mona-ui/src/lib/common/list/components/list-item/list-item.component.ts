@@ -12,7 +12,7 @@ import { ListService } from "../../services/list.service";
     templateUrl: "./list-item.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class]": "'flex items-center h-full'"
+        "[class]": "'flex items-center h-full w-full'"
     }
 })
 export class ListItemComponent<TData> {

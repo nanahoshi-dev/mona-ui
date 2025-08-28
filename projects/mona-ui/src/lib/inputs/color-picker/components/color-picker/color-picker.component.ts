@@ -85,13 +85,15 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorPickerBaseThemeVariants(theme)({ rounded });
+        const size = this.size();
+        return colorPickerBaseThemeVariants(theme)({ rounded, size });
     });
     protected readonly color = signal<string | null>(null);
     protected readonly colorClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorPickerColorThemeVariants(theme)({ rounded });
+        const size = this.size();
+        return colorPickerColorThemeVariants(theme)({ rounded, size });
     });
     protected readonly noColorIcon = faTimes;
     protected readonly dropdownIcon = faChevronDown;
@@ -140,6 +142,11 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
      * This is only applicable when the view is set to "palette".
      */
     public readonly showClearButton = input(false);
+
+    /**
+     * @description The size of the color picker.
+     */
+    public readonly size = input<ColorPickerVariantProps["size"]>("medium");
 
     /**
      * @description The view mode of the color picker.

@@ -1,5 +1,5 @@
-import { assertInInjectionContext, inject, Injectable, Injector, signal, WritableSignal } from "@angular/core";
-import { ComponentConfigFeatureItem } from "./componentConfig";
+import { assertInInjectionContext, inject, Injectable, Injector, Signal, signal } from "@angular/core";
+import { ComponentConfigFeatureItem, ComponentConfigFeatureItemOptions } from "./componentConfig";
 
 @Injectable()
 export class FeatureConfigHandler {
@@ -9,22 +9,101 @@ export class FeatureConfigHandler {
         this.#data.set(data);
     }
 
-    public updateProperty<K extends keyof ComponentConfigFeatureItem>(property: K, value: boolean): void {
+    public updateProperty<K extends keyof ComponentConfigFeatureItem>(
+        type: ComponentConfigFeatureItemOptions["type"],
+        property: K,
+        value: boolean
+    ): void {
         const currentData = this.#data();
         if (currentData) {
-            const updatedData: ComponentConfigFeatureItem = {
-                ...currentData,
-                [property]: {
-                    ...currentData[property],
-                    active: value
-                }
-            };
+            let updatedData: ComponentConfigFeatureItem;
+            if (type === "boolean") {
+                updatedData = {
+                    ...currentData,
+                    [property]: {
+                        ...currentData[property],
+                        active: value
+                    }
+                };
+            } else if (type === "number") {
+                updatedData = {
+                    ...currentData,
+                    [property]: {
+                        ...currentData[property],
+                        numericValue: value
+                    }
+                };
+            } else {
+                updatedData = {
+                    ...currentData,
+                    [property]: {
+                        ...currentData[property],
+                        dropdownValue: value
+                    }
+                };
+            }
             this.#data.set(updatedData);
         }
     }
 
-    public get data(): WritableSignal<ComponentConfigFeatureItem> {
-        return this.#data;
+    public updateSubFeature<K extends keyof ComponentConfigFeatureItem>(
+        type: ComponentConfigFeatureItemOptions["type"],
+        parentProperty: K,
+        subProperty: string,
+        value: boolean
+    ): void {
+        const currentData = this.#data();
+        if (currentData && currentData[parentProperty] && currentData[parentProperty].subFeatures) {
+            let updatedData: ComponentConfigFeatureItem;
+            if (type === "boolean") {
+                updatedData = {
+                    ...currentData,
+                    [parentProperty]: {
+                        ...currentData[parentProperty],
+                        subFeatures: {
+                            ...currentData[parentProperty].subFeatures,
+                            [subProperty]: {
+                                ...currentData[parentProperty].subFeatures![subProperty],
+                                active: value
+                            }
+                        }
+                    }
+                };
+            } else if (type === "number") {
+                updatedData = {
+                    ...currentData,
+                    [parentProperty]: {
+                        ...currentData[parentProperty],
+                        subFeatures: {
+                            ...currentData[parentProperty].subFeatures,
+                            [subProperty]: {
+                                ...currentData[parentProperty].subFeatures![subProperty],
+                                numericValue: value
+                            }
+                        }
+                    }
+                };
+            } else {
+                updatedData = {
+                    ...currentData,
+                    [parentProperty]: {
+                        ...currentData[parentProperty],
+                        subFeatures: {
+                            ...currentData[parentProperty].subFeatures,
+                            [subProperty]: {
+                                ...currentData[parentProperty].subFeatures![subProperty],
+                                dropdownValue: value
+                            }
+                        }
+                    }
+                };
+            }
+            this.#data.set(updatedData);
+        }
+    }
+
+    public get data(): Signal<ComponentConfigFeatureItem> {
+        return this.#data.asReadonly();
     }
 }
 

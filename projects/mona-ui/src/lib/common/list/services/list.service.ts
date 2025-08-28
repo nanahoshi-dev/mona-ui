@@ -49,7 +49,6 @@ export class ListService<TData> {
         toggleable: false
     });
     public readonly selectedKeys = signal(ImmutableSet.create<any>());
-    public readonly selectionChange$ = new Subject<ListItem<TData>>();
     public readonly selectedListItems = computed(() => {
         const selectedKeys = this.selectedKeys();
         return selectedKeys
@@ -58,6 +57,7 @@ export class ListService<TData> {
             .cast<ListItem<TData>>()
             .toImmutableSet();
     });
+    public readonly selectionChange$ = new Subject<ListItem<TData>>();
     public readonly textField = signal<string | Selector<TData, string>>("");
     public readonly valueField = signal<string | Selector<TData, any>>("");
     public readonly viewItems = computed(() => {
@@ -264,9 +264,7 @@ export class ListService<TData> {
             this.selectedKeys.update(set => set.clear().addAll(dataItems));
         } else {
             const selectedKeys = from(dataItems)
-                .select(item => {
-                    return this.getDataItemSelectionKey(item);
-                })
+                .select(item => this.getDataItemSelectionKey(item))
                 .toImmutableSet();
             this.selectedKeys.update(set => set.clear().addAll(selectedKeys));
         }
@@ -391,7 +389,7 @@ export class ListService<TData> {
             }
         } else {
             const navigationItem = lastHighlightedItem ?? firstSelectedItem ?? firstItem;
-            let prevItem = this.getPreviousItemForNavigation(viewItems, navigationItem);
+            const prevItem = this.getPreviousItemForNavigation(viewItems, navigationItem);
             if (prevItem) {
                 this.highlightedItem.set(prevItem);
                 return prevItem;
@@ -450,7 +448,7 @@ export class ListService<TData> {
                 return nextItem;
             }
         } else {
-            let prevItem = this.getPreviousItemForNavigation(viewItems, navigationItem);
+            const prevItem = this.getPreviousItemForNavigation(viewItems, navigationItem);
             if (prevItem) {
                 if (mode === "select") {
                     const previouslySelectedItem = this.selectedListItems().firstOrDefault();

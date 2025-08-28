@@ -53,6 +53,7 @@
                 }
                 @case ('boolean') {
                     <mona-switch [ngModel]="entry().value"
+                                 size="small"
                                  (ngModelChange)="onValueChange(entry().name, $event)"></mona-switch>
                 }
             }

@@ -21,14 +21,14 @@ export const listInnerListVariants = cva(
 
 export const listGroupHeaderVariants = cva(
     `
-        px-3 py-1.5 text-sm font-bold select-none
+        px-3 py-1.5 font-bold select-none
     `,
     {
         variants: {}
     }
 );
 
-export const listGroupHeaderTextVariants = cva(`font-semibold text-sm select-none`, {
+export const listGroupHeaderTextVariants = cva(`font-bold select-none`, {
     variants: {}
 });
 
@@ -38,7 +38,7 @@ export const listItemTextVariants = cva(``, {
 
 export const listItemVariants = cva(
     `
-        relative flex cursor-default select-none items-center rounded-sm text-sm
+        relative flex cursor-default select-none items-center
         outline-none focus:bg-accent focus:text-accent-foreground
         px-3 py-1
         hover:bg-accent hover:text-accent-foreground

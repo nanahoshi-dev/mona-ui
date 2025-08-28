@@ -1,12 +1,15 @@
 import { cva } from "class-variance-authority";
 
-export const colorPickerBaseVariants = cva(
+export const dropdownListInputVariants = cva(
     `
-        flex items-center
+        inline-flex items-center
+
         border border-input-border
         bg-background outline-none
         shadow-xs
-        cursor-pointer
+        cursor-pointer select-none
+
+        px-2
 
         hover:bg-accent hover:text-accent-foreground
 
@@ -38,10 +41,11 @@ export const colorPickerBaseVariants = cva(
     }
 );
 
-export const colorPickerColorVariants = cva(
+export const dropdownListPopupVariants = cva(
     `
-        flex items-center justify-center
-        mx-1
+        bg-background shadow-md
+        border border-input-border
+        h-full max-h-64 overflow-auto
     `,
     {
         variants: {
@@ -50,12 +54,12 @@ export const colorPickerColorVariants = cva(
                 small: "rounded-sm",
                 medium: "rounded-md",
                 large: "rounded-lg",
-                full: "rounded-full"
+                full: "rounded-lg"
             },
             size: {
-                large: "w-6 h-6 mx-2",
-                medium: "w-5 h-5 mx-2",
-                small: "w-4 h-4 mx-1"
+                large: "text-md",
+                medium: "text-sm",
+                small: "text-xs"
             }
         }
     }

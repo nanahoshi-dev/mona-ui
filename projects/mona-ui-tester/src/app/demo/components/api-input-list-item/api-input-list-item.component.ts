@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import {
     ColorPickerComponent,
     DropDownItemTemplateDirective,
-    DropDownListComponent,
+    DropdownListComponent,
     DropDownListValueTemplateDirective,
     NumericTextBoxComponent,
     SwitchComponent,
@@ -19,7 +19,7 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
     imports: [
         InputPropertyPipe,
         ColorPickerComponent,
-        DropDownListComponent,
+        DropdownListComponent,
         NumericTextBoxComponent,
         FormsModule,
         TextBoxComponent,

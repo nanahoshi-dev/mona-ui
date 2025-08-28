@@ -27,7 +27,7 @@ import {
 import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DropDownVirtualScrollDirective } from "../../../dropdowns/directives/drop-down-virtual-scroll.directive";
-import { DropDownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/drop-down-list.component";
+import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/dropdown-list.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { SlicePipe } from "../../../pipes/slice.pipe";
 import { Page } from "../../models/Page";
@@ -46,7 +46,7 @@ import { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
         NgClass,
         NumericTextBoxComponent,
         FormsModule,
-        DropDownListComponent,
+        DropdownListComponent,
         SlicePipe,
         DropDownVirtualScrollDirective
     ],
@@ -86,7 +86,7 @@ export class PagerComponent implements AfterViewInit, OnDestroy {
         return range(1, this.pageCount()).toArray();
     });
     protected readonly pageListVisible = signal(true);
-    protected readonly pageSizeDropdownList: Signal<DropDownListComponent<number> | undefined> =
+    protected readonly pageSizeDropdownList: Signal<DropdownListComponent<number> | undefined> =
         viewChild("pageSizeDropdownList");
     protected readonly pagerInfo = computed(() => {
         const start = (this.page() - 1) * this.pagerPageSize() + 1;

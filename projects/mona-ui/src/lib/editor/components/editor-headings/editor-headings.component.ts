@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropDownItemTemplateDirective } from "../../../dropdowns/directives/drop-down-item-template.directive";
-import { DropDownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/drop-down-list.component";
+import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/dropdown-list.component";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
     selector: "mona-editor-headings",
-    imports: [DropDownListComponent, FormsModule, DropDownItemTemplateDirective],
+    imports: [DropdownListComponent, FormsModule, DropDownItemTemplateDirective],
     templateUrl: "./editor-headings.component.html",
     styleUrl: "./editor-headings.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush

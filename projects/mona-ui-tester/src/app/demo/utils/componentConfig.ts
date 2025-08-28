@@ -75,15 +75,28 @@ export type ComponentConfigOutputType<TComponent> = {
     };
 };
 
+export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
+    active: boolean;
+    code: string;
+    codeVisible?: boolean;
+    description: string;
+    dropdownDataSource?: Iterable<TDropdown>;
+    dropdownDefaultValue?: TDropdown; // Only for dropdown type
+    dropdownTextField?: string; // Only for dropdown type
+    dropdownValue?: TDropdown; // Only for dropdown type
+    dropdownValueField?: string; // Only for dropdown type
+    hasCode?: boolean;
+    name: string;
+    numericMax?: number; // Only for number type
+    numericMin?: number; // Only for number type
+    numericNullable?: boolean; // Only for number type
+    numericValue?: number; // Only for number type
+    subFeatures?: ComponentConfigFeatureItem;
+    type?: "boolean" | "dropdown" | "number"; // Defaults to boolean
+}
+
 export interface ComponentConfigFeatureItem {
-    [key: string]: {
-        active: boolean;
-        code: string;
-        codeVisible?: boolean;
-        hasCode?: boolean;
-        description: string;
-        name: string;
-    };
+    [key: string]: ComponentConfigFeatureItemOptions;
 }
 
 export type ComponentConfig<TComponent> = {
@@ -99,8 +112,8 @@ export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     defaultValue?: TDefault;
     max?: number | null; // Optional, only for number inputs
     min?: number | null; // Optional, only for number inputs
-    nullable?: boolean; // Optional, only for number inputs
-    name: string; // From the input structure
+    name: string; // Optional, only for number inputs
+    nullable?: boolean; // From the input structure
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
 };
@@ -192,6 +205,10 @@ export function createComponentOutputConfigArray<TComponent>(
     return processedArray;
 }
 
+type ExtractedConfigValue<TComponent> = {
+    [K in keyof ComponentInputs<TComponent>]: ExtractFirstArrayItem<NonNullable<ComponentInputs<TComponent>[K]>>;
+};
+
 type ExtractFirstArrayItem<T> = T extends (infer U)[] ? U : T;
 
 /**
@@ -204,13 +221,10 @@ type ExtractFirstArrayItem<T> = T extends (infer U)[] ? U : T;
  * with array values flattened to their first element.
  * @template TComponent The type of the component being configured.
  */
-export function extractConfigValues<TComponent>(inputConfig: ComponentConfig<TComponent>): {
-    [K in keyof ComponentInputs<TComponent>]: ExtractFirstArrayItem<NonNullable<ComponentInputs<TComponent>[K]>>;
-} {
-    type ReturnType = {
-        [K in keyof ComponentInputs<TComponent>]: ExtractFirstArrayItem<NonNullable<ComponentInputs<TComponent>[K]>>;
-    };
-    const result: ReturnType = {} as ReturnType;
+export function extractConfigValues<TComponent>(
+    inputConfig: ComponentConfig<TComponent>
+): ExtractedConfigValue<TComponent> {
+    const result: ExtractedConfigValue<TComponent> = {} as ExtractedConfigValue<TComponent>;
 
     const inputs = inputConfig.inputs;
     for (const key in inputs) {
@@ -229,7 +243,8 @@ export function extractConfigValues<TComponent>(inputConfig: ComponentConfig<TCo
                 } else {
                     valueToAssign = configItem.value;
                 }
-                result[key as keyof ComponentInputs<TComponent>] = valueToAssign as ReturnType[typeof key];
+                result[key as keyof ComponentInputs<TComponent>] =
+                    valueToAssign as ExtractedConfigValue<TComponent>[typeof key];
             }
         }
     }

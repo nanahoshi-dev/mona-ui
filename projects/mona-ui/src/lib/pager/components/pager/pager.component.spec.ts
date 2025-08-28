@@ -1,7 +1,7 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { DropDownListComponent, NumericTextBoxComponent } from "mona-ui";
+import { DropdownListComponent, NumericTextBoxComponent } from "mona-ui";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PagerComponent } from "./pager.component";
 
@@ -178,7 +178,7 @@ describe("PagerComponent", () => {
         setupBigPager(fixture);
         fixture.componentRef.setInput("pageSizeValues", [1, 2, 3, 4, 5]);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         dropdownList.nativeElement.firstElementChild.click();
         fixture.detectChanges();
         tick();
@@ -196,7 +196,7 @@ describe("PagerComponent", () => {
         setupBigPager(fixture);
         fixture.componentRef.setInput("pageSizeValues", true);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         dropdownList.nativeElement.firstElementChild.click();
         fixture.detectChanges();
         tick();
@@ -214,7 +214,7 @@ describe("PagerComponent", () => {
         setupBigPager(fixture);
         fixture.componentRef.setInput("pageSizeValues", false);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         expect(dropdownList).toBeFalsy();
     }));
 
@@ -222,7 +222,7 @@ describe("PagerComponent", () => {
         setupBigPager(fixture);
         fixture.componentRef.setInput("pageSizeValues", [1, 2, 3, 4, 5]);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         dropdownList.nativeElement.firstElementChild.click();
         fixture.detectChanges();
         tick();
@@ -240,7 +240,7 @@ describe("PagerComponent", () => {
         setupBigPager(fixture);
         fixture.componentRef.setInput("pageSizeValues", [1, 2, 3, 4, 5]);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         dropdownList.nativeElement.firstElementChild.click();
         fixture.detectChanges();
         tick();
@@ -265,7 +265,7 @@ describe("PagerComponent", () => {
         fixture.componentRef.setInput("pageSizeValues", [1, 2, 3, 4, 5]);
         fixture.componentRef.setInput("pageSize", 5);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         dropdownList.nativeElement.firstElementChild.click();
         fixture.detectChanges();
         tick();
@@ -290,7 +290,7 @@ describe("PagerComponent", () => {
         fixture.componentRef.setInput("pageSizeValues", [1, 2, 3, 4, 5]);
         fixture.componentRef.setInput("pageSize", 5);
         fixture.detectChanges();
-        const dropdownList = fixture.debugElement.query(By.directive(DropDownListComponent));
+        const dropdownList = fixture.debugElement.query(By.directive(DropdownListComponent));
         dropdownList.nativeElement.firstElementChild.click();
         fixture.detectChanges();
         tick();

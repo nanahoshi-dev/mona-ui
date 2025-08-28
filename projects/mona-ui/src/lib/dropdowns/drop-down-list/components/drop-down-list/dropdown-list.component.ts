@@ -22,16 +22,6 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { Predicate } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import {
-    dropdownPopupHideAnimation,
-    dropdownPopupShowAnimation
-} from "../../../animations/dropdown.animation";
-import {
-    dropdownPopupVariants,
-    DropdownSelectorVariantInput,
-    DropdownSelectorVariantProps,
-    dropdownSelectorVariants
-} from "../../../styles/dropdown.style";
 import { distinctUntilChanged, fromEvent, take, withLatestFrom } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
@@ -46,25 +36,31 @@ import { SelectionChangeEvent } from "../../../../common/list/models/SelectionCh
 import { ListService } from "../../../../common/list/services/list.service";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-down-group-header-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
-import { DropDownService } from "../../../services/drop-down.service";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
+import {
+    dropdownListInputThemeVariants,
+    dropdownListPopupThemeVariants,
+    DropDownListVariantInput,
+    DropDownListVariantProps
+} from "../../styles/dropdown-list.styles";
 
 @Component({
     selector: "mona-drop-down-list",
-    templateUrl: "./drop-down-list.component.html",
+    templateUrl: "./dropdown-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         ListService,
-        DropDownService,
         {
             provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => DropDownListComponent),
+            useExisting: forwardRef(() => DropdownListComponent),
             multi: true
         }
     ],
@@ -86,21 +82,24 @@ import { DropDownListValueTemplateDirective } from "../../directives/drop-down-l
         "[attr.aria-haspopup]": "true",
         "[attr.data-disabled]": "disabled()",
         "[attr.tabindex]": "disabled() ? null : 0",
-        "[class]": "classes()"
+        "[class]": "baseClasses()"
     }
 })
-export class DropDownListComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
+export class DropdownListComponent<TData = unknown> implements OnInit, ControlValueAccessor, DropDownListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService<TData>);
     readonly #popupService = inject(PopupService);
+    readonly #themeService = inject(ThemeService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<TData | null> | null = null;
     #value: TData | null = null;
 
-    protected readonly classes = computed(() => {
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
         const size = this.size();
-        const classes = dropdownSelectorVariants({ size });
+        const classes = dropdownListInputThemeVariants(theme)({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
@@ -114,7 +113,10 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupClasses = computed(() => {
-        return twMerge(dropdownPopupVariants());
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        return dropdownListPopupThemeVariants(theme)({ rounded, size });
     });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
@@ -137,16 +139,52 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
         }
         return this.#listService.getItemText(listItem);
     });
-    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+
+    /**
+     * @description The data items of the dropdown list.
+     */
+    public readonly data = input<Iterable<TData>>([]);
+
+    /**
+     * @description Sets the disabled state of the dropdown list.
+     */
+    public readonly disabled = model(false);
+
+    /**
+     * @description A predicate function or the name of the field that determines whether an item is disabled.
+     */
+    public readonly itemDisabled = input<string | Predicate<TData> | null | undefined>("");
+
+    /**
+     * @description Placeholder text for the dropdown list when no item is selected.
+     */
+    public readonly placeholder = input("");
+
+    /**
+     * @description Sets the rounded appearance of the dropdown list.
+     */
+    public readonly rounded = input<DropDownListVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Whether to show the clear button when an item is selected.
+     */
+    public readonly showClearButton = input(false);
+
+    /**
+     * @description The size of the dropdown list.
+     */
+    public readonly size = input<DropDownListVariantProps["size"]>("medium");
+
+    /**
+     * @description The text field name of the data item.
+     */
+    public readonly textField = input<string | null | undefined>("");
     public readonly userClass = input<string>("", { alias: "class" });
 
-    public data = input<Iterable<TData>>([]);
-    public disabled = model(false);
-    public itemDisabled = input<string | Predicate<TData> | null | undefined>("");
-    public placeholder = input("");
-    public showClearButton = input(false);
-    public textField = input<string | null | undefined>("");
-    public valueField = input<string | null | undefined>("");
+    /**
+     * @description The value field name of the data item.
+     */
+    public readonly valueField = input<string | null | undefined>("");
 
     public constructor() {
         effect(() => {
@@ -209,6 +247,7 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
                 show: dropdownPopupShowAnimation
             },
             closeOnOutsideClick: true,
+            closeOnScroll: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
             offset: { horizontal: 0, vertical: 4 },
@@ -254,23 +293,17 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
         const previousItem = this.selectedListItem();
         const direction = event.key === "ArrowDown" ? "next" : "previous";
         const item = this.#listService.navigate(direction, "select");
-        if (item) {
-            if (previousItem === item) {
-                return;
-            }
-            this.updateValue(item.data);
-            if (!this.#popupRef) {
-                this.notifyValueChange();
-            }
+        if (!item || previousItem === item) {
+            return;
+        }
+        this.updateValue(item.data);
+        if (!this.#popupRef) {
+            this.notifyValueChange();
         }
     }
 
     private handleEnterKey(): void {
-        if (this.#popupRef) {
-            this.close();
-            return;
-        }
-        this.open();
+        this.togglePopup();
     }
 
     private handleKeyDown(event: KeyboardEvent): void {
@@ -299,48 +332,20 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
         if (!this.#popupRef) {
             return;
         }
-        this.#popupRef.closed
-            .pipe(
-                take(1),
-                withLatestFrom(
-                    this.#listService.selectionChange$.pipe(distinctUntilChanged((s1, s2) => s1.data === s2.data))
-                )
-            )
-            .subscribe(() => {
-                this.notifyValueChange();
-            });
+
+        const selectionChange$ = this.#listService.selectionChange$.pipe(
+            distinctUntilChanged((s1, s2) => s1.data === s2.data)
+        );
+        this.#popupRef.closed.pipe(take(1), withLatestFrom(selectionChange$)).subscribe(() => this.notifyValueChange());
     }
 
     private setEventListeners(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                this.handleKeyDown(event);
-            });
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                const target = event.relatedTarget as HTMLElement;
-                if (
-                    target &&
-                    (this.#hostElementRef.nativeElement.contains(target) ||
-                        this.#popupRef?.overlayRef.overlayElement.contains(target))
-                ) {
-                    return;
-                }
-            });
+            .subscribe(e => this.handleKeyDown(e));
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                if (this.disabled()) {
-                    return;
-                }
-                if (this.#popupRef) {
-                    this.close();
-                    return;
-                }
-                this.open();
-            });
+            .subscribe(() => this.togglePopup());
     }
 
     private setSubscriptions(): void {
@@ -348,6 +353,14 @@ export class DropDownListComponent<TData> implements OnInit, ControlValueAccesso
             const item = this.selectedDataItem();
             this.updateValue(item);
         });
+    }
+
+    private togglePopup(): void {
+        if (this.#popupRef) {
+            this.close();
+            return;
+        }
+        this.open();
     }
 
     private updateValue(value: TData | null): void {

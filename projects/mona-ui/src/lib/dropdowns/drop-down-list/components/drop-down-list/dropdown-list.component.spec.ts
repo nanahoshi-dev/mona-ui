@@ -2,18 +2,18 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
 
-import { DropDownListComponent } from "./drop-down-list.component";
+import { DropdownListComponent } from "./dropdown-list.component";
 
 describe("DropDownListComponent", () => {
-    let component: DropDownListComponent<any>;
-    let fixture: ComponentFixture<DropDownListComponent<any>>;
+    let component: DropdownListComponent<any>;
+    let fixture: ComponentFixture<DropdownListComponent<any>>;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [DropDownListComponent, BrowserAnimationsModule],
+            imports: [DropdownListComponent, BrowserAnimationsModule],
             providers: [PopupAnimationService]
         });
-        fixture = TestBed.createComponent(DropDownListComponent);
+        fixture = TestBed.createComponent(DropdownListComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

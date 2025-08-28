@@ -13,9 +13,6 @@ const compat = new FlatCompat({
 });
 
 export default [
-    {
-        ignores: ["projects/**/*"]
-    },
     ...compat
         .extends(
             "eslint:recommended",

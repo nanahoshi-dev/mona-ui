@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropDownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/drop-down-list.component";
+import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/dropdown-list.component";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
     selector: "mona-editor-font-size",
-    imports: [DropDownListComponent, FormsModule],
+    imports: [DropdownListComponent, FormsModule],
     templateUrl: "./editor-font-size.component.html",
     styleUrl: "./editor-font-size.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush

@@ -36,9 +36,9 @@ export const textBoxVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-11.5 text-md",
-                medium: "h-8.75 text-sm",
-                small: "h-8.25 text-xs"
+                large: "h-10.5 text-md",
+                medium: "h-8.5 text-sm",
+                small: "h-7.5 text-xs"
             }
         }
     }

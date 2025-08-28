@@ -245,7 +245,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         this.currentPopupMenu()?.closeMenu();
         this.currentPopupMenu.set(popupMenu);
         this.currentPopupElement.set(element);
-        this.currentPopupMenu()!.openMenu();
+        this.currentPopupMenu()!.openMenu(false);
     }
 
     private closeCurrentMenu(): void {

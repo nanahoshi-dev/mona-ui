@@ -86,6 +86,10 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     public readonly ariaLabel = input<string>("");
 
     public readonly items = input<Iterable<PopupMenuItem>>([]);
+
+    /**
+     * @description Emits when a menu item is clicked.
+     */
     public readonly menuClick = output<PopupMenuItemClickEvent>();
 
     /**
@@ -138,7 +142,7 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     private openMenuViaKeyboard(): void {
         const popupMenu = this.popupMenuRef();
         if (popupMenu && !this.#isMenuOpen()) {
-            popupMenu.openMenuViaKeyboard();
+            popupMenu.openMenuViaKeyboard(true);
         }
     }
 

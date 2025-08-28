@@ -14,7 +14,7 @@ import {
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { any, groupBy, partition, select, where } from "@mirei/ts-collections";
+import { any, groupBy, select } from "@mirei/ts-collections";
 import { fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { PopupOffset } from "../../../../popup/models/PopupOffset";
@@ -206,7 +206,7 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
         this.setSubscriptions();
     }
 
-    public openMenu(): void {
+    public openMenu(viaContextMenuKey: boolean): void {
         const target = this.target();
         const targetElement = target instanceof ElementRef ? target.nativeElement : target;
         if (!targetElement) {
@@ -216,20 +216,25 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
         // Create a fake event to pass the center of the target element as the mouse position.
         // This is useful when precise is true, but we want to open the menu via keyboard
         // or some other non-mouse event.
-        const event = new MouseEvent("contextmenu", {
-            bubbles: true,
-            cancelable: true,
-            clientX: center.left + center.width / 2,
-            clientY: center.top + center.height / 2,
-            button: -1
-        });
-        event.stopImmediatePropagation();
+        if (viaContextMenuKey) {
+            const contextMenuEvent = new MouseEvent("contextmenu", {
+                bubbles: true,
+                cancelable: true,
+                clientX: center.left + center.width / 2,
+                clientY: center.top + center.height / 2,
+                button: -1
+            });
+            contextMenuEvent.stopImmediatePropagation();
+            targetElement.dispatchEvent(contextMenuEvent);
+            return;
+        }
+        const event = new MouseEvent(this.trigger(), { bubbles: true, cancelable: true });
         targetElement.dispatchEvent(event);
     }
 
-    public openMenuViaKeyboard(): void {
+    public openMenuViaKeyboard(viaContextMenuKey: boolean = false): void {
         this.#shouldRestoreFocus = true;
-        this.openMenu();
+        this.openMenu(viaContextMenuKey);
     }
 
     public setRestoreFocusForKeyboard(): void {
@@ -336,7 +341,7 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
                         return;
                     }
                 });
-                this.popupRef.closed.pipe(take(1)).subscribe(e => {
+                this.popupRef.closed.pipe(take(1)).subscribe(() => {
                     if (this.#shouldRestoreFocus) {
                         const target = this.target();
                         const targetElement = target instanceof ElementRef ? target.nativeElement : target;

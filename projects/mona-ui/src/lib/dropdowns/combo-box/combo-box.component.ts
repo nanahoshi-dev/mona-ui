@@ -24,10 +24,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import {
-    dropdownPopupHideAnimation,
-    dropdownPopupShowAnimation
-} from "../animations/dropdown.animation";
+import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../animations/dropdown.animation";
 import {
     dropdownPopupVariants,
     DropdownSelectorVariantInput,
@@ -108,7 +105,7 @@ import { DropDownService } from "../services/drop-down.service";
     }
 })
 export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService: ListService<TData> = inject(ListService);
     readonly #popupService: PopupService = inject(PopupService);

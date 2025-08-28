@@ -22,7 +22,7 @@ import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 @Component({
-    selector: "app-drop-down-button-demo",
+    selector: "app-dropdown-button-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
     templateUrl: "./dropdown-button-demo.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush

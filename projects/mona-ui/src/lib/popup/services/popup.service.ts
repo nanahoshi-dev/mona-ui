@@ -12,7 +12,7 @@ import { ComponentPortal } from "@angular/cdk/portal";
 import { CdkScrollable, ScrollDispatcher } from "@angular/cdk/scrolling";
 import { DestroyRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { exhaustMap, filter, fromEvent, merge, mergeWith, Subject, Subscription, take, takeUntil, tap } from "rxjs";
+import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "../animations/popup.animation";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
@@ -47,7 +47,7 @@ export class PopupService {
         overlayRef: OverlayRef,
         injector: Injector
     ): HTMLElement {
-        const portal = new ComponentPortal(settings.content as ComponentType<any>, null, injector);
+        const portal = new ComponentPortal(settings.content as ComponentType<never>, null, injector);
         popupReference.componentRef = overlayRef.attach(portal);
         return popupReference.componentRef.location.nativeElement;
     }
@@ -73,7 +73,7 @@ export class PopupService {
         const portal = new ComponentPortal(PopupWrapperComponent, null, injector);
         popupReference.componentRef = overlayRef.attach(portal);
         const component = popupReference.componentRef.instance as PopupWrapperComponent;
-        component.templateRef.set(settings.content as TemplateRef<any>);
+        component.templateRef.set(settings.content as TemplateRef<never>);
         popupReference.componentRef.changeDetectorRef.detectChanges();
         return popupReference.componentRef.location.nativeElement;
     }

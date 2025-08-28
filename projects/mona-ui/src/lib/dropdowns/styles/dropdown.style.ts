@@ -4,7 +4,7 @@ import { VariantInputs } from "../../utils/VariantInputs";
 export const dropdownSelectorVariants = cva(
     `
         inline-flex items-center whitespace-nowrap cursor-pointer rounded-md text-sm
-        border border-input-border bg-background shadow-sm
+        border border-input-border bg-background shadow-xs
         data-[disabled='true']:pointer-events-none data-[disabled='true']:opacity-50
         hover:bg-accent hover:text-accent-foreground
         focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/10

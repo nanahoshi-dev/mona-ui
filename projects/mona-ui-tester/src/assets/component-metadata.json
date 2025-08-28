@@ -964,24 +964,6 @@
     "selector": "\"button[monaButton]\"",
     "inputs": [
       {
-        "name": "ariaDescribedby",
-        "type": "string",
-        "description": "ARIA value for `aria-describedby` attribute.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaLabel",
-        "type": "string",
-        "description": "ARIA value for `aria-label` attribute.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaLabelledby",
-        "type": "string",
-        "description": "ARIA value for `aria-labelledby` attribute",
-        "kind": "input"
-      },
-      {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the button.",
@@ -1020,7 +1002,7 @@
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\n\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Sets the toggleable state of the button.\r\n\r\nIf set to `true`, the button will toggle its selected state on click.",
         "kind": "input"
       },
       {
@@ -2256,7 +2238,7 @@
       {
         "name": "menuItemClick",
         "type": "PopupMenuItemClickEvent",
-        "description": "The click event of the menu item.\nEmits when a menu item is selected by keyboard or mouse.",
+        "description": "The click event of the menu item.\r\nEmits when a menu item is selected by keyboard or mouse.",
         "kind": "output"
       },
       {
@@ -2710,6 +2692,12 @@
         "kind": "output"
       },
       {
+        "name": "menuId",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "minWidth",
         "type": "string | number",
         "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
@@ -2987,8 +2975,8 @@
       }
     ]
   },
-  "DropDownListComponent": {
-    "name": "DropDownListComponent",
+  "DropdownListComponent": {
+    "name": "DropdownListComponent",
     "selector": "\"mona-drop-down-list\"",
     "inputs": [
       {
@@ -2998,9 +2986,51 @@
         "kind": "output"
       },
       {
+        "name": "data",
+        "type": "Iterable<TData>",
+        "description": "The data items of the dropdown list.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the dropdown list.",
+        "kind": "model"
+      },
+      {
+        "name": "itemDisabled",
+        "type": "string | Predicate<TData> | null | undefined",
+        "description": "A predicate function or the name of the field that determines whether an item is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Placeholder text for the dropdown list when no item is selected.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "DropDownListVariantProps[\"rounded\"]",
+        "description": "Sets the rounded appearance of the dropdown list.",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "Whether to show the clear button when an item is selected.",
+        "kind": "input"
+      },
+      {
         "name": "size",
-        "type": "DropdownSelectorVariantProps[\"size\"]",
-        "description": "",
+        "type": "DropDownListVariantProps[\"size\"]",
+        "description": "The size of the dropdown list.",
+        "kind": "input"
+      },
+      {
+        "name": "textField",
+        "type": "string | null | undefined",
+        "description": "The text field name of the data item.",
         "kind": "input"
       },
       {
@@ -3010,45 +3040,9 @@
         "kind": "input"
       },
       {
-        "name": "data",
-        "type": "Iterable<TData>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "itemDisabled",
-        "type": "string | Predicate<TData> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "placeholder",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showClearButton",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "textField",
-        "type": "string | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
         "name": "valueField",
         "type": "string | null | undefined",
-        "description": "",
+        "description": "The value field name of the data item.",
         "kind": "input"
       }
     ]
@@ -3373,6 +3367,12 @@
         "name": "showClearButton",
         "type": "boolean",
         "description": "Whether to show the clear button to reset the color.\nThis is only applicable when the view is set to \"palette\".",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ColorPickerVariantProps[\"size\"]",
+        "description": "The size of the color picker.",
         "kind": "input"
       },
       {
@@ -4036,6 +4036,12 @@
     "selector": "\"mona-contextmenu\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "ARIA label for the context menu.",
+        "kind": "input"
+      },
+      {
         "name": "items",
         "type": "Iterable<PopupMenuItem>",
         "description": "",
@@ -4044,13 +4050,13 @@
       {
         "name": "menuClick",
         "type": "PopupMenuItemClickEvent",
-        "description": "",
+        "description": "Emits when a menu item is clicked.",
         "kind": "output"
       },
       {
         "name": "minWidth",
         "type": "string | number",
-        "description": "Sets the minimum width of the context menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the minimum width of the context menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
@@ -4074,7 +4080,7 @@
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the context menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the width of the context menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       }
     ]
@@ -4336,6 +4342,18 @@
     "selector": "\"mona-menubar\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "ARIA label for the menubar.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledby",
+        "type": "string",
+        "description": "ARIA labelledby for the menubar.",
+        "kind": "input"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of menubar.",
@@ -4560,7 +4578,7 @@
       {
         "name": "target",
         "type": "Element | ElementRef",
-        "description": "The target element to which the popover is attached.",
+        "description": "The target element or ElementRef to which the popover is attached.",
         "kind": "input"
       },
       {

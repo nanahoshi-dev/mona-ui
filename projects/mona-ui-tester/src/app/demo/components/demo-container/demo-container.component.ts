@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
-    DropDownListComponent,
+    DropdownListComponent,
     DropDownListValueTemplateDirective,
     ThemeService,
     ThemeStyle
@@ -18,7 +18,7 @@ import { ConfigComponent } from "../config/config.component";
     selector: "app-demo-container",
     imports: [
         ConfigComponent,
-        DropDownListComponent,
+        DropdownListComponent,
         FormsModule,
         DropDownListValueTemplateDirective,
         CodeViewerComponent,

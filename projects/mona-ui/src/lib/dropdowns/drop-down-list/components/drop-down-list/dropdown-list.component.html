@@ -1,4 +1,4 @@
-<div class="flex-1 truncate flex items-center">
+<div class="flex-1 truncate inline-block items-center">
     @if (!valueTemplate()) {
         @if (selectedListItem()) {
             <span>{{valueText()}}</span>
@@ -25,29 +25,29 @@
                    (itemSelect)="onItemSelect($event)">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
-                    <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
                 </ng-template>
             }
             @if (groupHeaderTemplate()) {
                 <ng-template monaListGroupHeaderTemplate let-group>
-                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()??null"
+                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()"
                                   [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
                 </ng-template>
             }
             @if (headerTemplate()) {
                 <ng-template monaListHeaderTemplate>
-                    <ng-container [ngTemplateOutlet]="headerTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="headerTemplate()"></ng-container>
                 </ng-template>
             }
             @if (itemTemplate()) {
                 <ng-template monaListItemTemplate let-dataItem>
-                    <ng-container [ngTemplateOutlet]="itemTemplate()??null"
+                    <ng-container [ngTemplateOutlet]="itemTemplate()"
                                   [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
                 </ng-template>
             }
             @if (noDataTemplate()) {
                 <ng-template monaListNoDataTemplate>
-                    <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="noDataTemplate()"></ng-container>
                 </ng-template>
             }
         </mona-list>

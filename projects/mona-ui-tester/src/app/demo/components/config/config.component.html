@@ -16,31 +16,8 @@
                 </li>
             }
             @if (handler) {
-                @for (entry of templateProperties(); track $index) {
-                    <li class="flex flex-col gap-2 py-2">
-                        <div class="flex">
-                            <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
-                                <div class="font-semibold">{{ entry[1].name }}</div>
-                                <div class="font-light text-gray-500">{{entry[1].description}}</div>
-                            </div>
-                            <div class="flex items-center justify-center px-2 gap-2">
-                                @if (entry[1].hasCode !== false) {
-                                    <button monaButton look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
-                                        <lucide-angular [name]="codeIcon" [size]="20"></lucide-angular>
-                                    </button>
-                                }
-                                <mona-switch [ngModel]="entry[1].active"
-                                             (ngModelChange)="handler.updateProperty(entry[0], $event)"></mona-switch>
-                            </div>
-                        </div>
-                        @if (entry[1].codeVisible) {
-                            <div class="px-2">
-                                <app-code-viewer [code]="entry[1].code"
-                                                 language="html"></app-code-viewer>
-                            </div>
-                        }
-                    </li>
-                }
+                <ng-container [ngTemplateOutlet]="featureListTemplate"
+                              [ngTemplateOutletContext]="{$implicit: templateProperties(), level: 0}"></ng-container>
             }
         </ul>
         @if (subComponentPropertyConfig().length > 0) {
@@ -87,3 +64,88 @@
         }
     </div>
 </div>
+
+<ng-template #featureListTemplate let-features let-parentKey="parentKey" let-level="level">
+    @for (entry of features; track $index) {
+        <li class="flex flex-col gap-2 py-2" [style.padding-left.rem]="level * 1.5">
+            <div class="flex">
+                <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
+                    <div class="font-semibold">{{ entry[1].name }}</div>
+                    <div class="font-light text-gray-500">{{entry[1].description}}</div>
+                </div>
+                <div class="flex items-center justify-center px-2 gap-2">
+                    @if (entry[1].hasCode !== false) {
+                        <button monaButton size="small" look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
+                            <lucide-angular [name]="codeIcon" [size]="16"></lucide-angular>
+                        </button>
+                    }
+                    @if (entry[1].type === "boolean" || !entry[1].type) {
+                        <mona-switch [ngModel]="entry[1].active"
+                                     size="small"
+                                     (ngModelChange)="parentKey ? handler!.updateSubFeature('boolean', parentKey, entry[0], $event) : handler!.updateProperty('boolean',entry[0], $event)"></mona-switch>
+                    } @else if (entry[1].type === "number") {
+                        <mona-numeric-text-box
+                            [ngModel]="entry[1].numberValue"
+                            (ngModelChange)="parentKey ? handler!.updateSubFeature('number', parentKey, entry[0], $event) : handler!.updateProperty('number',entry[0], $event)"
+                            [min]="entry[1].min ?? null"
+                            [max]="entry[1].max ?? null"
+                            [nullable]="entry[1].nullable ?? false"
+                            [size]="'small'"
+                            class="w-37.5"
+                        ></mona-numeric-text-box>
+                    } @else if (entry[1].type === "dropdown") {
+                        <mona-drop-down-list
+                            [data]="entry[1].dropdownDataSource"
+                            [ngModel]="entry[1].dropdownValue"
+                            (ngModelChange)="parentKey ? handler!.updateSubFeature('dropdown', parentKey, entry[0], $event) : handler!.updateProperty('dropdown',entry[0], $event)"
+                            [textField]="entry[1].dropdownTextField"
+                            [valueField]="entry[1].dropdownValueField"
+                            [size]="'small'"
+                            class="w-37.5"
+                        >
+                            <ng-template monaDropDownListValueTemplate let-dataItem>
+                                @if (entry[1].dropdownTextField) {
+                                    <span>{{dataItem[entry[1].dropdownTextField]}}</span>
+                                } @else {
+                                    @if (dataItem === undefined) {
+                                        <span>undefined</span>
+                                    } @else if (dataItem === null) {
+                                        <span>null</span>
+                                    } @else {
+                                        <span>{{dataItem}}</span>
+                                    }
+                                }
+                            </ng-template>
+                            <ng-template monaDropDownListItemTemplate let-dataItem>
+                                @if (entry[1].dropdownTextField) {
+                                    <span>{{dataItem[entry[1].dropdownTextField]}}</span>
+                                } @else {
+                                    @if (dataItem === undefined) {
+                                        <span>undefined</span>
+                                    } @else if (dataItem === null) {
+                                        <span>null</span>
+                                    } @else {
+                                        <span>{{dataItem}}</span>
+                                    }
+                                }
+                            </ng-template>
+                        </mona-drop-down-list>
+                    }
+                </div>
+            </div>
+            @if (entry[1].codeVisible) {
+                <div class="px-2">
+                    <app-code-viewer [code]="entry[1].code"
+                                     language="html"></app-code-viewer>
+                </div>
+            }
+        </li>
+        @if (entry[1].subFeatures && entry[1].active) {
+            @let subFeatureEntries = Object.entries(entry[1].subFeatures);
+            @if (subFeatureEntries.length > 0) {
+                <ng-container [ngTemplateOutlet]="featureListTemplate"
+                              [ngTemplateOutletContext]="{$implicit: subFeatureEntries, parentKey: entry[0], level: level + 1}"></ng-container>
+            }
+        }
+    }
+</ng-template>

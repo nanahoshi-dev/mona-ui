@@ -64,8 +64,15 @@ export const routes: Routes = [
             {
                 path: "dropdown-button",
                 loadComponent: () =>
-                    import("./docs/components/drop-down-button-doc/dropdown-button-doc.component").then(
+                    import("./docs/components/dropdown-button-doc/dropdown-button-doc.component").then(
                         m => m.DropdownButtonDocComponent
+                    )
+            },
+            {
+                path: "dropdown-list",
+                loadComponent: () =>
+                    import("./docs/components/dropdown-list-doc/dropdown-list-doc.component").then(
+                        m => m.DropdownListDocComponent
                     )
             },
             {

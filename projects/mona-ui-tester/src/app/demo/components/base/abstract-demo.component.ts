@@ -14,7 +14,7 @@ export abstract class AbstractDemoComponent<TComponent> {
         computation: () => extractConfigValues(this.config())
     });
 
-    protected onInputValueChange(value: any) {
+    protected onInputValueChange(value: any): void {
         this.inputs.update(currentValues => {
             return { ...currentValues, ...value };
         });

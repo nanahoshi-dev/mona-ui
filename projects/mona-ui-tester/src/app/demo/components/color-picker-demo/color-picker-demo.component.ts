@@ -55,6 +55,11 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
                 type: "boolean",
                 value: false
             },
+            size: {
+                type: "dropdown",
+                value: ["small", "medium", "large"],
+                defaultValue: "medium"
+            },
             view: {
                 type: "dropdown",
                 value: ["palette", "gradient"],
@@ -82,6 +87,7 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
             [palette]="customPaletteActive ? customPalette : palette()"
             [rounded]="rounded()"
             [showClearButton]="showClearButton()"
+            [size]="size()"
             [view]="view()"></mona-color-picker>
     `
 })
@@ -95,5 +101,6 @@ export class ColorPickerWrapperComponent implements ComponentInputsAsSignal<Colo
     public readonly palette = input<ReturnType<ColorPickerComponent["palette"]>>("flat");
     public readonly rounded = input<ReturnType<ColorPickerComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<ColorPickerComponent["showClearButton"]>>(false);
+    public readonly size = input<ReturnType<ColorPickerComponent["size"]>>("medium");
     public readonly view = input<ReturnType<ColorPickerComponent["view"]>>("palette");
 }
