@@ -1,6 +1,7 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { range } from "@mirei/ts-collections";
 import {
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
@@ -9,10 +10,12 @@ import {
     DropDownHeaderTemplateDirective,
     DropDownItemTemplateDirective,
     DropdownListComponent,
-    DropDownListValueTemplateDirective
+    DropDownListValueTemplateDirective,
+    DropDownVirtualScrollDirective
 } from "../../../../../../mona-ui/src/lib";
 import { GroupableOptions } from "../../../../../../mona-ui/src/lib/common/list/models/GroupableOptions";
 import { FilterableOptions } from "../../../../../../mona-ui/src/lib/common/models/FilterableOptions";
+import { VirtualScrollOptions } from "../../../../../../mona-ui/src/lib/common/models/VirtualScrollOptions";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -131,6 +134,22 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             code: ``,
             description: `This template is used to customize the value template of the dropdown list.`,
             name: "Value Template"
+        },
+        virtualization: {
+            code: ``,
+            active: false,
+            description: `Enable virtualization for the dropdown list to improve performance with large datasets.`,
+            name: "Virtualization",
+            subFeatures: {
+                itemHeight: {
+                    code: ``,
+                    active: false,
+                    description: `Height of each item in pixels.`,
+                    name: "Item Height",
+                    type: "number",
+                    numericValue: 28
+                }
+            }
         }
     });
     protected readonly config = signal<ComponentConfig<DropdownListComponent<any>>>({
@@ -192,6 +211,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         DropDownListValueTemplateDirective,
         DropDownItemTemplateDirective,
         DropDownGroupHeaderTemplateDirective,
+        DropDownVirtualScrollDirective,
         CurrencyPipe,
         FormsModule
     ],
@@ -199,7 +219,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <mona-drop-down-list
-            [data]="dropdownData"
+            [data]="dropdownData()"
             [disabled]="disabled()"
             [itemDisabled]="itemDisabled()"
             [placeholder]="placeholder()"
@@ -212,12 +232,13 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             (ngModelChange)="onValueChange($event)"
             [monaDropDownGroupable]="grouping()"
             [monaDropDownFilterable]="filtering()"
+            [monaDropDownVirtualScroll]="virtualization()"
             [groupBy]="groupBy()"
             class="w-44">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
-                        Total items: {{ dropdownData.length }}
+                        Total items: {{ dropdownData().length }}
                     </div>
                 </ng-template>
             }
@@ -231,7 +252,8 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             @if (featureData["itemTemplate"].active) {
                 <ng-template monaDropDownItemTemplate let-item>
                     <div class="flex flex-row w-full">
-                        <span class="flex-1">{{ item.text }}</span>
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 {{ color }}">{{ item.text }}</span>
                         <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
                             item.price | currency
                         }}</span>
@@ -240,7 +262,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             }
             @if (featureData["valueTemplate"].active) {
                 <ng-template monaDropDownListValueTemplate let-item>
-                    <span class="text-violet-600 font-bold">{{ item?.text }}</span>
+                    <span class="text-pink-600 font-bold">{{ item?.text }}</span>
                 </ng-template>
             }
             @if (groupingFeatures["groupHeaderTemplate"]?.active) {
@@ -252,7 +274,18 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
     `
 })
 export class DropdownListWrapperComponent implements ComponentInputsAsSignal<DropdownListComponent> {
-    protected readonly dropdownData = dropdownFoodData;
+    protected readonly dropdownData = computed(() => {
+        const virtualization = this.virtualization();
+        if (!virtualization.enabled) {
+            return dropdownFoodData;
+        }
+        return range(1, 10000)
+            .select(i => {
+                const item = dropdownFoodData[i % dropdownFoodData.length];
+                return { ...item, value: i, text: `${item.text} ${i}` };
+            })
+            .toArray();
+    });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly filtering = computed(() => {
         const features = this.features();
@@ -282,6 +315,15 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         return groupingOptions;
     });
     protected readonly selectedItem = signal<any>(null);
+    protected readonly virtualization = computed(() => {
+        const features = this.features();
+        const subFeatures = features["virtualization"]?.subFeatures || {};
+        const options: Partial<VirtualScrollOptions> = {
+            enabled: features["virtualization"].active,
+            height: subFeatures["itemHeight"].numericValue
+        };
+        return options;
+    });
     public readonly data = input<ReturnType<DropdownListComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<DropdownListComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>(item => false);

@@ -18,7 +18,9 @@ export class DropDownVirtualScrollDirective<T> {
     };
     readonly #listService: ListService<T> = inject(ListService);
 
-    public options = input<Partial<VirtualScrollOptions> | "">("");
+    public options = input<Partial<VirtualScrollOptions> | "">("", {
+        alias: "monaDropDownVirtualScroll"
+    });
 
     public constructor() {
         effect(() => {

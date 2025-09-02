@@ -31,6 +31,7 @@ export class ListService<TData> {
         debounce: 0,
         operator: "contains"
     });
+    public readonly focus$ = new Subject<void>();
     public readonly groupBy = signal<ListKeySelector<TData>>(null);
     public readonly groupableOptions = signal<GroupableOptions<TData, any>>({
         enabled: false,
@@ -336,7 +337,7 @@ export class ListService<TData> {
     }
 
     private getPreviousItemForNavigation(
-        viewItems: ImmutableSet<ListItem<TData>>,
+        viewItems: IEnumerable<ListItem<TData>>,
         navigationItem: ListItem<TData>
     ): ListItem<TData> | null {
         let prevItem = viewItems.takeWhile(i => i !== navigationItem).lastOrDefault(i => !this.isDisabled(i));
@@ -356,7 +357,7 @@ export class ListService<TData> {
     }
 
     private navigateForMultipleSelection(
-        viewItems: ImmutableSet<ListItem<TData>>,
+        viewItems: IEnumerable<ListItem<TData>>,
         direction: NavigationDirection
     ): ListItem<TData> | null {
         const selectedKeys = this.selectedKeys();
@@ -398,6 +399,20 @@ export class ListService<TData> {
         return null;
     }
 
+    private navigateFirstForSingleSelection(
+        viewItems: ImmutableSet<ListItem<TData>>,
+        mode: NavigationMode
+    ): ListItem<TData> | null {
+        const firstItem = viewItems.first();
+        if (mode === "select") {
+            this.selectItem(firstItem);
+            this.highlightedItem.set(null);
+        } else {
+            this.highlightedItem.set(firstItem);
+        }
+        return firstItem;
+    }
+
     private navigateForSingleSelection(
         viewItems: ImmutableSet<ListItem<TData>>,
         direction: NavigationDirection,
@@ -423,46 +438,83 @@ export class ListService<TData> {
         const lastHighlightedItem = this.highlightedItem();
         const navigationItem = lastHighlightedItem ?? selectedItem ?? firstItem;
         if (direction === "next") {
-            let nextItem = viewItems
-                .skipWhile(i => i !== navigationItem)
-                .skip(1)
-                .firstOrDefault(i => !this.isDisabled(i));
-            if (nextItem == null) {
-                if (this.navigableOptions().wrap) {
-                    nextItem = firstItem;
-                } else if (!this.navigableOptions().wrap) {
-                    nextItem = navigationItem;
-                }
-            }
-            if (nextItem) {
-                if (mode === "select") {
-                    const previouslySelectedItem = this.selectedListItems().firstOrDefault();
-                    if (previouslySelectedItem === nextItem) {
-                        return null;
-                    }
-                    this.selectItem(nextItem);
-                    this.highlightedItem.set(null);
-                } else {
-                    this.highlightedItem.set(nextItem);
-                }
-                return nextItem;
-            }
-        } else {
-            const prevItem = this.getPreviousItemForNavigation(viewItems, navigationItem);
-            if (prevItem) {
-                if (mode === "select") {
-                    const previouslySelectedItem = this.selectedListItems().firstOrDefault();
-                    if (previouslySelectedItem === prevItem) {
-                        return null;
-                    }
-                    this.selectItem(prevItem);
-                    this.highlightedItem.set(null);
-                } else {
-                    this.highlightedItem.set(prevItem);
-                }
-                return prevItem;
-            }
+            return this.navigateNextForSingleSelection(viewItems, navigationItem, mode, firstItem);
+        } else if (direction === "previous") {
+            return this.navigatePreviousForSingleSelection(viewItems, navigationItem, mode);
+        } else if (direction === "first") {
+            return this.navigateFirstForSingleSelection(viewItems, mode);
+        } else if (direction === "last") {
+            return this.navigateLastForSingleSelection(viewItems, mode);
         }
         return null;
+    }
+
+    private navigateLastForSingleSelection(
+        viewItems: ImmutableSet<ListItem<TData>>,
+        mode: NavigationMode
+    ): ListItem<TData> | null {
+        const lastItem = viewItems.last();
+        if (mode === "select") {
+            this.selectItem(lastItem);
+            this.highlightedItem.set(null);
+        } else {
+            this.highlightedItem.set(lastItem);
+        }
+        return lastItem;
+    }
+
+    private navigateNextForSingleSelection(
+        viewItems: IEnumerable<ListItem<TData>>,
+        navigationItem: ListItem<TData>,
+        mode: NavigationMode,
+        firstItem: ListItem<TData>
+    ): ListItem<TData> | null {
+        let nextItem = viewItems
+            .skipWhile(i => i !== navigationItem)
+            .skip(1)
+            .firstOrDefault(i => !this.isDisabled(i));
+        if (nextItem == null) {
+            if (this.navigableOptions().wrap) {
+                nextItem = firstItem;
+            } else if (!this.navigableOptions().wrap) {
+                nextItem = navigationItem;
+            }
+        }
+        if (nextItem) {
+            if (mode === "select") {
+                const previouslySelectedItem = this.selectedListItems().firstOrDefault();
+                if (previouslySelectedItem === nextItem) {
+                    return null;
+                }
+                this.selectItem(nextItem);
+                this.highlightedItem.set(null);
+            } else {
+                this.highlightedItem.set(nextItem);
+            }
+            return nextItem;
+        }
+        return null;
+    }
+
+    private navigatePreviousForSingleSelection(
+        viewItems: IEnumerable<ListItem<TData>>,
+        navigationItem: ListItem<TData>,
+        mode: NavigationMode
+    ): ListItem<TData> | null {
+        const prevItem = this.getPreviousItemForNavigation(viewItems, navigationItem);
+        if (!prevItem) {
+            return null;
+        }
+        if (mode === "select") {
+            const previouslySelectedItem = this.selectedListItems().firstOrDefault();
+            if (previouslySelectedItem === prevItem) {
+                return null;
+            }
+            this.selectItem(prevItem);
+            this.highlightedItem.set(null);
+        } else {
+            this.highlightedItem.set(prevItem);
+        }
+        return prevItem;
     }
 }

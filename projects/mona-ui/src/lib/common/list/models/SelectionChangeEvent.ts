@@ -5,4 +5,4 @@ export interface SelectionChangeEvent<T> {
     source: SelectionSource;
 }
 
-export type SelectionSource = { source: "mouse" } | { source: "keyboard"; key: string };
+export type SelectionSource = { via: "mouse" } | { via: "keyboard"; key: string };

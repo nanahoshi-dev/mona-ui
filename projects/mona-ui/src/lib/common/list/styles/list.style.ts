@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const listVariants = cva(
     `
-        h-full flex flex-col overflow-hidden
+        h-full flex flex-col overflow-hidden outline-none
     `,
     {
         variants: {}
@@ -21,7 +21,7 @@ export const listInnerListVariants = cva(
 
 export const listGroupHeaderVariants = cva(
     `
-        px-3 py-1.5 font-bold select-none
+        px-3 py-1 font-bold select-none
     `,
     {
         variants: {}
@@ -45,7 +45,6 @@ export const listItemVariants = cva(
         data-[disabled='false']:cursor-pointer
         data-[disabled='true']:pointer-events-none data-[disabled='true']:opacity-50
         data-[selected='true']:bg-primary data-[selected='true']:text-primary-foreground
-        data-[highlighted='true']:ring-1 data-[highlighted='true']:ring-ring/20
         data-[highlighted='true']:bg-accent data-[highlighted='true']:text-accent-foreground
         data-[highlighted='true']:rounded-none
         data-[focused]:bg-accent data-[focused]:text-accent-foreground

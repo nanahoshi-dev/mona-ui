@@ -49,6 +49,7 @@
     } @else {
         <li class="px-0.5"
             [attr.data-uid]="item.uid"
+            [attr.tabindex]="0"
             (click)="onListItemClick(item)"
             monaListItem [item]="item">
             <mona-list-item [item]="item" [template]="itemTemplate()??null"></mona-list-item>

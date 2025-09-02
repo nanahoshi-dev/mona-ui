@@ -20,6 +20,8 @@ export const dropdownListInputVariants = cva(
         data-[disabled='true']:opacity-50
 
         focus-within:ring-1 focus-within:ring-primary/40
+        data-[expanded='true']:ring-1
+        data-[expanded='true']:ring-primary/40
 
         [&.ng-touched.ng-invalid]:border-error
     `,
@@ -30,7 +32,7 @@ export const dropdownListInputVariants = cva(
                 small: "rounded-sm",
                 medium: "rounded-md",
                 large: "rounded-lg",
-                full: "rounded-full"
+                full: "rounded-full px-3"
             },
             size: {
                 large: "h-10.5 text-md",

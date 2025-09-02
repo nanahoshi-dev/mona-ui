@@ -2,7 +2,7 @@
 
 <div class="flex overflow-auto">
     <div class="flex-1 w-full">
-        <ul class=" bg-demo-background/10 divide-y divide-border">
+        <ul class=" bg-demo-background/10 divide-y divide-border select-none">
             @for (entry of inputProperties(); track $index) {
                 <li class="flex flex-col gap-2 py-2">
                     <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
@@ -67,7 +67,7 @@
 
 <ng-template #featureListTemplate let-features let-parentKey="parentKey" let-level="level">
     @for (entry of features; track $index) {
-        <li class="flex flex-col gap-2 py-2" [style.padding-left.rem]="level * 1.5">
+        <li class="flex flex-col gap-2 py-2 select-none" [style.padding-left.rem]="level * 1.5">
             <div class="flex">
                 <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
                     <div class="font-semibold">{{ entry[1].name }}</div>
@@ -85,7 +85,7 @@
                                      (ngModelChange)="parentKey ? handler!.updateSubFeature('boolean', parentKey, entry[0], $event) : handler!.updateProperty('boolean',entry[0], $event)"></mona-switch>
                     } @else if (entry[1].type === "number") {
                         <mona-numeric-text-box
-                            [ngModel]="entry[1].numberValue"
+                            [ngModel]="entry[1].numericValue"
                             (ngModelChange)="parentKey ? handler!.updateSubFeature('number', parentKey, entry[0], $event) : handler!.updateProperty('number',entry[0], $event)"
                             [min]="entry[1].min ?? null"
                             [max]="entry[1].max ?? null"

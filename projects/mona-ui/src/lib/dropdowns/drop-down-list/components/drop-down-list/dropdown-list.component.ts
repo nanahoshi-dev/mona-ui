@@ -13,6 +13,7 @@ import {
     model,
     OnInit,
     output,
+    signal,
     TemplateRef,
     untracked,
     viewChild
@@ -79,10 +80,13 @@ import {
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-expanded]": "popupOpen() ? 'true' : 'false'",
         "[attr.aria-haspopup]": "true",
         "[attr.data-disabled]": "disabled()",
+        "[attr.data-expanded]": "popupOpen()",
         "[attr.tabindex]": "disabled() ? null : 0",
-        "[class]": "baseClasses()"
+        "[class]": "baseClasses()",
+        "[role]": "'combobox'"
     }
 })
 export class DropdownListComponent<TData = unknown> implements OnInit, ControlValueAccessor, DropDownListVariantInput {
@@ -118,6 +122,7 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
         const size = this.size();
         return dropdownListPopupThemeVariants(theme)({ rounded, size });
     });
+    protected readonly popupOpen = signal(false);
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
@@ -229,7 +234,7 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
     }
 
     public onItemSelect(event: SelectionChangeEvent<TData>): void {
-        if (event.source.source === "mouse" || event.source.key === "Enter" || event.source.key === "NumpadEnter") {
+        if (event.source.via === "mouse" || event.source.key === "Enter" || event.source.key === "NumpadEnter") {
             this.close();
         }
     }
@@ -255,9 +260,12 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
             withPush: false
         });
+        this.popupOpen.set(true);
         this.notifyValueChangeOnPopupClose();
+        this.#listService.focus$.next();
         this.#popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef = null;
+            this.popupOpen.set(false);
             this.#listService.clearFilter();
         });
     }
@@ -310,7 +318,12 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
         if (event.key === "Enter") {
             event.preventDefault();
             this.handleEnterKey();
-        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        } else if (
+            event.key === "ArrowDown" ||
+            event.key === "ArrowUp" ||
+            event.key === "Home" ||
+            event.key === "End"
+        ) {
             event.preventDefault();
             this.handleArrowKeys(event);
         } else if (event.key === "Escape" || event.key === "Tab") {

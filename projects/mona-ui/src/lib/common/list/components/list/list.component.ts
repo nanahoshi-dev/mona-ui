@@ -19,8 +19,9 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { isTypeaheadKey, setupTypeahead } from "../../../utils/typeahead.util";
 import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.style";
-import { filter, fromEvent, tap } from "rxjs";
+import { asapScheduler, asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder.component";
 import { FilterInputComponent } from "../../../filter-input/components/filter-input/filter-input.component";
@@ -34,8 +35,9 @@ import { ListNoDataTemplateDirective } from "../../directives/list-no-data-templ
 import { ListItem } from "../../models/ListItem";
 import { ListKeySelector } from "../../models/ListSelectors";
 import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
-import { SelectionChangeEvent } from "../../models/SelectionChangeEvent";
+import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
+import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
 
 @Component({
@@ -54,7 +56,6 @@ import { ListItemComponent } from "../list-item/list-item.component";
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[attr.tabindex]": "-1",
-        "[class.mona-list]": "true",
         "[class]": "classes()",
         "[style.height]": "listHeight()",
         "[style.max-height]": "listMaxHeight()",
@@ -64,6 +65,7 @@ import { ListItemComponent } from "../list-item/list-item.component";
 export class ListComponent<TData> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #typeaheadKey$ = new Subject<string>();
     protected readonly classes = computed(() => {
         const classes = listVariants();
         return twMerge(classes);
@@ -128,13 +130,12 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly virtualScrollViewport = viewChild(CdkVirtualScrollViewport);
 
+    public readonly data = input<Iterable<TData> | null | undefined>(null);
+    public readonly height = input<ListSizeInputType>(undefined);
     public readonly itemSelect = output<SelectionChangeEvent<TData>>();
-
-    public data = input<Iterable<TData> | null | undefined>(null);
-    public height = input<ListSizeInputType>(undefined);
-    public maxHeight = input<ListSizeInputType>(undefined);
-    public textField = input<ListKeySelector<TData, string> | undefined>(null);
-    public width = input<ListSizeInputType>(undefined);
+    public readonly maxHeight = input<ListSizeInputType>(undefined);
+    public readonly textField = input<ListKeySelector<TData, string> | undefined>(null);
+    public readonly width = input<ListSizeInputType>(undefined);
 
     public constructor() {
         effect(() => {
@@ -153,13 +154,8 @@ export class ListComponent<TData> implements OnInit {
                 }
             });
         });
-        afterNextRender(() => {
-            window.setTimeout(() => {
-                const selectedItem = this.listService.selectedListItems().lastOrDefault();
-                if (selectedItem) {
-                    this.scrollToItem(selectedItem);
-                }
-            });
+        afterNextRender({
+            read: () => this.setInitialSelectionOrFocus()
         });
     }
 
@@ -176,16 +172,124 @@ export class ListComponent<TData> implements OnInit {
 
     public onListItemClick(item: ListItem<TData>): void {
         this.selectItem(item);
-        this.itemSelect.emit({ item, source: { source: "mouse" } });
+        this.itemSelect.emit({ item, source: { via: "mouse" } });
     }
 
-    private scrollToItem(item: ListItem<TData>): void {
-        const element = this.#hostElementRef.nativeElement.querySelector(`[data-uid="${item.uid}"]`);
+    private cycleThroughMatchedItems(buffer: string): void {
+        const matchedItems = this.listService
+            .viewItems()
+            .where(item => {
+                const text = this.listService.getItemText(item);
+                return text.toLowerCase().startsWith(buffer.toLowerCase());
+            })
+            .toImmutableList();
+        if (!matchedItems.any()) {
+            return;
+        }
+        const highlightedItem = this.listService.highlightedItem();
+        let nextItem: ListItem<TData> | null;
+        if (highlightedItem) {
+            const currentIndex = matchedItems.indexOf(highlightedItem);
+            if (currentIndex === -1 || currentIndex === matchedItems.count() - 1) {
+                nextItem = matchedItems.firstOrDefault();
+            } else {
+                nextItem = matchedItems.elementAt(currentIndex + 1);
+            }
+        } else {
+            nextItem = matchedItems.firstOrDefault();
+        }
+        if (nextItem) {
+            const navigationMode = this.listService.navigableOptions().mode;
+            this.listService.highlightedItem.set(nextItem);
+            if (navigationMode === "select") {
+                this.selectItem(nextItem);
+            }
+            this.scrollToItem(nextItem, "instant");
+        }
+    }
+
+    private focusToItem(item: ListItem<TData>): void {
+        if (this.listService.navigableOptions().enabled) {
+            this.listService.highlightedItem.set(item);
+        }
+        this.scrollToItem(item);
+    }
+
+    private handleNavigation(key: string): void {
+        const direction = getListNavigationDirection(key);
+        if (!direction) {
+            return;
+        }
+        if (direction === "pageup" || direction === "pagedown") {
+            this.handlePageScroll(direction);
+            return;
+        }
+        const navigableOptions = this.listService.navigableOptions();
+        const previousSelectedItems = this.listService.selectedListItems();
+        const item = this.listService.navigate(direction, navigableOptions.mode);
+        if (item) {
+            this.itemSelect.emit({ item, source: { via: "keyboard", key } });
+            if (previousSelectedItems.contains(item)) {
+                return;
+            }
+            this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
+        }
+    }
+
+    private handlePageScroll(direction: "pageup" | "pagedown"): void {
+        const listElement = this.#hostElementRef.nativeElement.firstElementChild as HTMLElement;
+        switch (direction) {
+            case "pagedown": {
+                const virtualScrollViewport = this.virtualScrollViewport();
+                if (virtualScrollViewport) {
+                    const scrollOffset = virtualScrollViewport.measureScrollOffset();
+                    virtualScrollViewport.scrollToOffset(
+                        scrollOffset + virtualScrollViewport.getViewportSize(),
+                        "smooth"
+                    );
+                } else {
+                    const top = listElement.scrollTop + listElement.clientHeight * 0.8;
+                    listElement.scrollTo({ top, behavior: "smooth" });
+                }
+                break;
+            }
+            case "pageup": {
+                const virtualScrollViewport = this.virtualScrollViewport();
+                if (virtualScrollViewport) {
+                    const scrollOffset = virtualScrollViewport.measureScrollOffset();
+                    virtualScrollViewport.scrollToOffset(
+                        scrollOffset - virtualScrollViewport.getViewportSize(),
+                        "smooth"
+                    );
+                } else {
+                    const top = listElement.scrollTop - listElement.clientHeight * 0.8;
+                    listElement.scrollTo({ top, behavior: "smooth" });
+                }
+                break;
+            }
+        }
+    }
+
+    private scrollToItem(item: ListItem<TData>, behavior: ScrollBehavior = "auto"): void {
+        const element = this.#hostElementRef.nativeElement.querySelector(`[data-uid="${item.uid}"]`) as HTMLElement;
         if (element) {
-            element.scrollIntoView({ block: "center", behavior: "auto" });
+            element.scrollIntoView({ block: "center", behavior });
+            element.focus();
         } else if (this.listService.virtualScrollOptions().enabled) {
             const index = this.listService.viewItems().toList().indexOf(item);
-            this.virtualScrollViewport()?.scrollToIndex(index, "auto");
+            const itemHeight = this.listService.virtualScrollOptions().height;
+            const rect = this.#hostElementRef.nativeElement.getBoundingClientRect();
+            const offset = itemHeight * index - rect.height / 2;
+            asyncScheduler.schedule(() => {
+                this.virtualScrollViewport()?.scrollToOffset(offset, behavior);
+                // this.virtualScrollViewport()?.scrollToIndex(index, behavior);
+                const scrolledElement = this.#hostElementRef.nativeElement.querySelector(
+                    `[data-uid="${item.uid}"]`
+                ) as HTMLElement;
+                if (scrolledElement) {
+                    scrolledElement.focus();
+                }
+            });
         }
     }
 
@@ -204,6 +308,21 @@ export class ListComponent<TData> implements OnInit {
         }
     }
 
+    private setInitialSelectionOrFocus(): void {
+        const selectedItem = this.listService.selectedListItems().lastOrDefault();
+        if (selectedItem) {
+            this.focusToItem(selectedItem);
+            return;
+        }
+        const firstItem = this.listService
+            .viewItems()
+            .where(i => !i.header && !this.listService.isDisabled(i))
+            .firstOrDefault();
+        if (firstItem) {
+            this.focusToItem(firstItem);
+        }
+    }
+
     private setKeyboardEvents(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
@@ -213,12 +332,13 @@ export class ListComponent<TData> implements OnInit {
             .subscribe((event: KeyboardEvent) => {
                 const highlightedItem = this.listService.highlightedItem();
                 const selectedItem = this.listService.selectedListItems().firstOrDefault();
+                const source: SelectionSource = { via: "keyboard", key: event.key };
                 if (highlightedItem) {
                     this.selectItem(highlightedItem);
-                    this.itemSelect.emit({ item: highlightedItem, source: { source: "keyboard", key: event.key } });
+                    this.itemSelect.emit({ item: highlightedItem, source });
                 } else if (selectedItem) {
                     this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
-                    this.itemSelect.emit({ item: selectedItem, source: { source: "keyboard", key: event.key } });
+                    this.itemSelect.emit({ item: selectedItem, source });
                 }
             });
     }
@@ -227,7 +347,6 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(event => event.key === "ArrowDown" || event.key === "ArrowUp"),
                 tap(event => {
                     const navigableOptions = this.listService.navigableOptions();
                     if (navigableOptions.enabled) {
@@ -236,31 +355,31 @@ export class ListComponent<TData> implements OnInit {
                 })
             )
             .subscribe(event => {
-                const navigableOptions = this.listService.navigableOptions();
-                const previousSelectedItems = this.listService.selectedListItems();
-                let item: ListItem<TData> | null = null;
-                if (event.key === "ArrowDown") {
-                    item = this.listService.navigate("next", navigableOptions.mode);
-                } else if (event.key === "ArrowUp") {
-                    item = this.listService.navigate("previous", navigableOptions.mode);
+                if (isTypeaheadKey(event.key)) {
+                    event.preventDefault();
+                    this.#typeaheadKey$.next(event.key);
+                    return;
                 }
-                if (item) {
-                    this.itemSelect.emit({ item, source: { source: "keyboard", key: event.key } });
-                }
-                if (item /* && navigableOptions.mode === "select"*/) {
-                    if (previousSelectedItems.contains(item)) {
-                        return;
-                    }
-                    this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
-                }
+                this.#typeaheadKey$.next("");
+                this.handleNavigation(event.key);
             });
     }
 
     private setSubscriptions(): void {
         this.setNavigationEvents();
         this.setKeyboardEvents();
+        this.setTypeaheadSubscription();
         this.listService.scrollToItem$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(item => this.scrollToItem(item));
+        this.listService.focus$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => this.#hostElementRef.nativeElement.focus());
+    }
+
+    private setTypeaheadSubscription(): void {
+        setupTypeahead(this.#typeaheadKey$)
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(buffer => this.cycleThroughMatchedItems(buffer));
     }
 }

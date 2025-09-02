@@ -13,14 +13,6 @@ import {
 import { MenuItem, PopupMenuItem } from "../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../models/PopupMenuItemClickEvent";
 
-export const isNavigationKey = (key: string): boolean => {
-    return ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Escape", "Home", "End", " "].includes(key);
-};
-
-export const isTypeaheadKey = (key: string): boolean => {
-    return /^[a-zA-Z0-9\-_\s]$/.test(key);
-};
-
 const itemTypeMap: Record<PopupMenuItemType, string> = {
     [PopupMenuItemType.CheckboxMenuItem]: "checkbox",
     [PopupMenuItemType.MenuGroup]: "group",

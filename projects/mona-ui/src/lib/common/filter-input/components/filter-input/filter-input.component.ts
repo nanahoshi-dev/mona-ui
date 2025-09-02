@@ -41,9 +41,7 @@ export class FilterInputComponent implements OnInit {
     public constructor() {
         effect(() => {
             const filter = this.filter();
-            untracked(() => {
-                this.filterText.set(filter);
-            });
+            untracked(() => this.filterText.set(filter));
         });
     }
 

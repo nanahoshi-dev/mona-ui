@@ -13,26 +13,15 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { groupBy, selectMany } from "@mirei/ts-collections";
 import { Check, ChevronRight, LucideAngularModule } from "lucide-angular";
-import {
-    debounceTime,
-    filter,
-    fromEvent,
-    map,
-    merge,
-    Observable,
-    scan,
-    Subject,
-    switchMap,
-    take,
-    takeUntil,
-    tap
-} from "rxjs";
+import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { isNavigationKey } from "../../../utils/navigation.utils";
+import { isTypeaheadKey, setupTypeahead } from "../../../utils/typeahead.util";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
@@ -44,7 +33,7 @@ import {
     popupMenuItemThemeVariants,
     popupMenuLinkThemeVariants
 } from "../../styles/popup-menu.styles";
-import { createPopupMenuControlId, isNavigationKey, isTypeaheadKey } from "../../utils/popup-menu.utils";
+import { createPopupMenuControlId } from "../../utils/popup-menu.utils";
 
 @Component({
     selector: "mona-popup-menu-list",
@@ -453,12 +442,8 @@ export class PopupMenuListComponent implements OnInit {
             .subscribe();
 
         this.pointerLeave$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                takeUntil(this.pointerEnter$),
-                tap(() => this.popupRef?.close())
-            )
-            .subscribe();
+            .pipe(takeUntilDestroyed(this.#destroyRef), takeUntil(this.pointerEnter$))
+            .subscribe(() => this.popupRef?.close());
     }
 
     private setSubscriptions(): void {
@@ -469,19 +454,8 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     private setTypeaheadSubscription(): void {
-        const resetTrigger$ = this.#typeaheadKey$.pipe(
-            debounceTime(200),
-            map(() => ({ type: "reset", value: "" }))
-        );
-        const keypress$ = this.#typeaheadKey$.pipe(map(key => ({ type: "key", value: key })));
-
-        merge(keypress$, resetTrigger$)
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                scan((buffer, action) => (action.type === "reset" ? "" : buffer + action.value.toLowerCase()), ""),
-                filter(buffer => buffer.length > 0),
-                tap(buffer => this.cycleThroughMatchedItems(buffer))
-            )
-            .subscribe();
+        setupTypeahead(this.#typeaheadKey$)
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(buffer => this.cycleThroughMatchedItems(buffer));
     }
 }
