@@ -3,8 +3,10 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, model, sig
 import { FormsModule } from "@angular/forms";
 import {
     DropDownFilterableDirective,
+    DropDownFooterTemplateDirective,
     DropDownGroupableDirective,
     DropDownGroupHeaderTemplateDirective,
+    DropDownHeaderTemplateDirective,
     DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective
@@ -56,6 +58,12 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 }
             }
         },
+        footerTemplate: {
+            active: false,
+            code: ``,
+            description: `This template is used to customize the footer template of the dropdown list.`,
+            name: "Footer Template"
+        },
         grouping: {
             code: ``,
             active: false,
@@ -105,6 +113,12 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                     name: "Group Header Template"
                 }
             }
+        },
+        headerTemplate: {
+            active: false,
+            code: ``,
+            description: `This template is used to customize the header template of the dropdown list.`,
+            name: "Header Template"
         },
         itemTemplate: {
             active: false,
@@ -173,6 +187,8 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         DropdownListComponent,
         DropDownFilterableDirective,
         DropDownGroupableDirective,
+        DropDownHeaderTemplateDirective,
+        DropDownFooterTemplateDirective,
         DropDownListValueTemplateDirective,
         DropDownItemTemplateDirective,
         DropDownGroupHeaderTemplateDirective,
@@ -197,7 +213,21 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             [monaDropDownGroupable]="grouping()"
             [monaDropDownFilterable]="filtering()"
             [groupBy]="groupBy()"
-            class="w-40">
+            class="w-44">
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaDropDownFooterTemplate>
+                    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                        Total items: {{ dropdownData.length }}
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaDropDownHeaderTemplate>
+                    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                        Select your favorite food
+                    </div>
+                </ng-template>
+            }
             @if (featureData["itemTemplate"].active) {
                 <ng-template monaDropDownItemTemplate let-item>
                     <div class="flex flex-row w-full">
