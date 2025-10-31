@@ -1,8 +1,7 @@
 @if (image()) {
-    <img [src]="image()" [ngStyle]="{'border-radius': borderRadius()}"
-         class="mona-avatar-image" alt=""/>
+    <img [src]="image()" [style.border-radius]="borderRadius()" alt=""/>
 } @else if (!image() && label()) {
-    <div class="mona-avatar-label" [ngStyle]="avatarLabelStyles()">{{ label() }}</div>
+    <div [style]="avatarLabelStyles()">{{ label() }}</div>
 } @else if (!image() && !label()) {
     <ng-content></ng-content>
 }
