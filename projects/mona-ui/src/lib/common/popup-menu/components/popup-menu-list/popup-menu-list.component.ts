@@ -125,6 +125,7 @@ export class PopupMenuListComponent implements OnInit {
         return popupMenuLinkThemeVariants(theme)();
     });
     protected readonly linkIcon = ChevronRight;
+    protected readonly menuId = computed(() => this.#parentConfig.menuId);
     protected readonly menuItemClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
@@ -134,7 +135,6 @@ export class PopupMenuListComponent implements OnInit {
         const iconClasses = hasIcon ? "pl-8" : "pl-2";
         return twMerge(variantClasses, iconClasses);
     });
-    protected readonly menuId = computed(() => this.#parentConfig.menuId);
     protected readonly menuItems = computed(() => this.#parentConfig.items);
     protected readonly pointerEnter$ = new Subject<{ event: PointerEvent; item: PopupMenuItem }>();
     protected readonly pointerLeave$ = new Subject<{ event: PointerEvent; item: PopupMenuItem }>();

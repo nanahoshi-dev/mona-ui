@@ -33,9 +33,9 @@ export class FilterInputComponent implements OnInit {
     protected readonly filter$ = new Subject<string>();
     protected readonly filterText = signal("");
 
+    public readonly debounce = input(0);
     public readonly filter = input("");
     public readonly filterChange = output<FilterChangeEvent>();
-    public readonly debounce = input(0);
     public readonly placeholder = input("");
 
     public constructor() {

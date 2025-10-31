@@ -11,14 +11,13 @@ import { ListService } from "../../common/list/services/list.service";
     `,
     standalone: true
 })
-export class DropDownVirtualScrollDirective<T> {
+export class DropDownVirtualScrollDirective<TData> {
     readonly #defaultOptions: VirtualScrollOptions = {
         enabled: true,
         height: 28
     };
-    readonly #listService: ListService<T> = inject(ListService);
-
-    public options = input<Partial<VirtualScrollOptions> | "">("", {
+    readonly #listService = inject(ListService<TData>);
+    public readonly options = input<Partial<VirtualScrollOptions> | "">("", {
         alias: "monaDropDownVirtualScroll"
     });
 

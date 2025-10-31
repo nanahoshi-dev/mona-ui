@@ -285,15 +285,6 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
         return anchor;
     }
 
-    private setNavigationSubscription(): void {
-        this.#navigate$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                tap(e => this.navigate.emit(e))
-            )
-            .subscribe();
-    }
-
     private setMenuItemClickSubscription(): void {
         this.#menuItemClick$
             .pipe(
@@ -305,6 +296,15 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
                     }
                     this.popupRef?.close();
                 })
+            )
+            .subscribe();
+    }
+
+    private setNavigationSubscription(): void {
+        this.#navigate$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                tap(e => this.navigate.emit(e))
             )
             .subscribe();
     }

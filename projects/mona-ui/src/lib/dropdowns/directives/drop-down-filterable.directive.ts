@@ -19,13 +19,11 @@ export class DropDownFilterableDirective<TData> implements OnInit {
         debounce: 0,
         caseSensitive: false
     };
-    readonly #listService: ListService<TData> = inject(ListService);
-
+    readonly #listService = inject(ListService<TData>);
+    public readonly filter = input<string>("");
     public readonly filterChange = output<FilterChangeEvent>();
-
-    public filter = input<string>("");
-    public filterPlaceholder = input<string>("");
-    public options = input<Partial<FilterableOptions> | "">("", {
+    public readonly filterPlaceholder = input<string>("");
+    public readonly options = input<Partial<FilterableOptions> | "">("", {
         alias: "monaDropDownFilterable"
     });
 
