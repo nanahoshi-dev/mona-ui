@@ -3,8 +3,7 @@ import { FilterOperators } from "../../query/filter/FilterDescriptor";
 import { FilterMenuDataItem } from "../models/FilterMenuDataItem";
 
 @Pipe({
-    name: "operatorFilter",
-    standalone: true
+    name: "operatorFilter"
 })
 export class OperatorFilterPipe implements PipeTransform {
     public transform(value: FilterMenuDataItem[], visibleOperators?: Iterable<FilterOperators>): FilterMenuDataItem[] {

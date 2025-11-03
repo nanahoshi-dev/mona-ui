@@ -1,104 +1,163 @@
-import { DecimalPipe, NgClass, NgStyle } from "@angular/common";
+import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
 import {
-    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     computed,
-    effect,
+    contentChild,
+    inject,
     input,
     signal,
-    untracked
 } from "@angular/core";
+import {
+    ProgressBarLabelTemplateDirective
+} from "mona-ui/progress-bars/progress-bar/directives/progress-bar-label-template.directive";
+import {
+    progressBarBaseThemeVariants, progressBarIndeterminateThemeVariants, progressBarLabelThemeVariants,
+    progressBarTrackThemeVariants,
+    ProgressBarVariantInput,
+    ProgressBarVariantProps
+} from "mona-ui/progress-bars/progress-bar/styles/progress-bar.styles";
+import { getPercentage } from "mona-ui/progress-bars/utils/progress-bar.utils";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
+import { twMerge } from "tailwind-merge";
 import { Action } from "../../../../utils/Action";
 import { LabelPosition } from "../../models/LabelPosition";
 
 @Component({
     selector: "mona-progress-bar",
     templateUrl: "./progress-bar.component.html",
-    styleUrls: ["./progress-bar.component.scss"],
+    styles: `
+        .indeterminate {
+            animation: indeterminate 16s linear infinite;
+        }
+        @keyframes indeterminate {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 100% 0;
+            }
+        }
+    `,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, NgStyle, DecimalPipe],
+    imports: [DecimalPipe, NgTemplateOutlet],
     host: {
-        class: "mona-progress-bar",
-        "[class.mon-disabled]": "disabled()"
+        "[class]": "baseClasses()",
+        "[attr.aria-valuemin]": "min()",
+        "[attr.aria-valuemax]": "max()",
+        "[attr.aria-valuenow]": "progress()",
+        "[attr.aria-disabled]": "disabled()",
+        "[attr.data-disabled]": "disabled()",
+        role: "progressbar"
     }
 })
-export class ProgressBarComponent implements AfterViewInit {
-    readonly #color = signal("var(--mona-primary)");
-    protected readonly formatted = signal(false);
-    protected readonly label = computed(() => {
+export class ProgressBarComponent implements ProgressBarVariantInput {
+    readonly #color = computed(() => {
+        const color = this.color();
         const progress = this.progress();
-        const labelFormat = this.labelFormat();
-        return labelFormat(progress);
+        return typeof color === "string" ? color : color?.(progress);
     });
-    protected readonly progress = signal(0);
-    protected readonly progressStyles = computed(() => {
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const classes = progressBarBaseThemeVariants(theme)({ rounded });
+        const userClass = this.userClass();
+        return twMerge(classes, userClass);
+    });
+    protected readonly indeterminateClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return progressBarIndeterminateThemeVariants(theme)();
+    });
+    protected readonly labelClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        return progressBarLabelThemeVariants(theme)();
+    });
+    protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
+    protected readonly nextTrackClipPath = computed(() => {
+        const rightClip = this.rightClip();
         const progress = this.progress();
-        const color = this.#color();
-        const progressColor = progress === 0 ? "transparent" : color;
-        return {
-            borderTopRightRadius:
-                progress === 100 ? "var(--mona-border-radius)" : "calc(var(--mona-border-radius) * 2)",
-            borderBottomRightRadius:
-                progress === 100 ? "var(--mona-border-radius)" : "calc(var(--mona-border-radius) * 2)",
-            backgroundColor: progressColor
-        } as Partial<CSSStyleDeclaration>;
+        return `inset(-1px ${rightClip}px -1px ${progress}%)`;
     });
+    protected readonly prevTrackClipPath = computed(() => {
+        const progress = this.progress();
+        const indeterminate = this.indeterminate();
+        if (indeterminate) {
+            return `inset(-1px -1px -1px -1px)`;
+        }
+        const left = progress < 0 ? 8 : 0;
+        const right = progress < 100 ? 8 : 0;
+        return `inset(-1px ${right}px -1px ${left}px)`;
+    });
+    protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
     protected readonly rightClip = signal(-1);
-
-    public color = input<string | Action<number, string>>("var(--mona-primary)");
-    public disabled = input(false);
-    public indeterminate = input(false);
-    public labelFormat = input((progress: number) => `${progress}%`, {
-        transform: (labelFormat: string | Action<number, string>) => {
-            if (typeof labelFormat === "string") {
-                return () => labelFormat;
-            }
-            return labelFormat;
-        }
+    protected readonly trackClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        return progressBarTrackThemeVariants(theme)({ rounded });
     });
-    public labelPosition = input<LabelPosition>("center");
-    public labelStyles = input<Partial<CSSStyleDeclaration>>({});
-    public labelVisible = input(true);
-    public max = input(100);
-    public min = input(0);
-    public value = input(0);
+    protected readonly trackColor = this.#color;
 
-    public constructor() {
-        effect(() => {
-            const color = this.color();
-            const progress = this.progress();
-            untracked(() => {
-                this.#color.set(typeof color === "string" ? color : color(progress));
-            });
-        });
-        effect(() => {
-            const value = this.value();
-            untracked(() => this.updateProgress(value));
-        });
-        effect(() => {
-            this.labelFormat();
-            untracked(() => this.formatted.set(true));
-        });
-    }
+    /**
+     * @description The color of the progress bar.
+     * Can be a string or a function that takes the current value and returns a string.
+     */
+    public readonly color = input<string | Action<number, string>>("");
 
-    public ngAfterViewInit(): void {
-        window.setTimeout(() => {
-            this.updateProgress(this.progress());
-        });
-    }
+    /**
+     * @description Whether the progress bar is disabled.
+     */
+    public readonly disabled = input(false);
 
-    private updateProgress(value: number): void {
-        const oldProgress = this.progress();
-        this.progress.set(((value - this.min()) / (this.max() - this.min())) * 100);
-        this.updateProgressStyle(oldProgress, this.progress());
-    }
+    /**
+     * @description Whether the progress bar is in indeterminate state.
+     */
+    public readonly indeterminate = input(false);
 
-    private updateProgressStyle(oldProgress: number, newProgress: number): void {
-        if (oldProgress !== 100 && newProgress === 100) {
-            this.rightClip.set(1);
-        } else {
-            this.rightClip.set(-1);
-        }
-    }
+    /**
+     * @description The position of the label.
+     * @default center
+     */
+    public readonly labelPosition = input<LabelPosition>("center");
+
+    /**
+     * @description The styles of the label.
+     */
+    public readonly labelStyles = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * @description Whether the label is visible.
+     * @default true
+     */
+    public readonly labelVisible = input(true);
+
+    /**
+     * @description The maximum value of the progress bar.
+     * @default 100
+     */
+    public readonly max = input(100);
+
+    /**
+     * @description The minimum value of the progress bar.
+     * @default 0
+     */
+    public readonly min = input(0);
+
+    /**
+     * @description The border radius of the progress bar.
+     * @default medium
+     */
+    public readonly rounded = input<ProgressBarVariantProps["rounded"]>("medium");
+
+    /**
+     * @description The user class of the progress bar.
+     * @default ""
+     */
+    public readonly userClass = input("", { alias: "class" });
+
+    /**
+     * @description The value of the progress bar.
+     * @default 0
+     */
+    public readonly value = input(0);
 }

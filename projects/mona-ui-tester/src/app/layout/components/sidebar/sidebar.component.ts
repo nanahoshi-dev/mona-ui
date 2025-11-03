@@ -49,6 +49,10 @@ export class SidebarComponent {
                     path: "/chip"
                 },
                 {
+                    text: "Circular Progress Bar",
+                    path: "/circular-progress-bar"
+                },
+                {
                     text: "Color Gradient",
                     path: "/color-gradient"
                 },
@@ -91,6 +95,10 @@ export class SidebarComponent {
                 {
                     text: "Popup",
                     path: "/popup"
+                },
+                {
+                    text: "Progress Bar",
+                    path: "progress-bar"
                 },
                 {
                     text: "Radio Button",

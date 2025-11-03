@@ -15,17 +15,18 @@
     }
 </button>
 
-<mona-popup-menu [anchorConnectionPoint]="'bottomcenter'"
-                 [items]="menuItems()"
+<mona-popup-menu #popupMenu
+                 (close)="onMenuClose()"
                  (menuClick)="onMenuItemClick($event)"
                  (open)="onMenuOpen()"
-                 (close)="onMenuClose()"
+                 [anchorConnectionPoint]="'bottomcenter'"
+                 [id]="menuId"
+                 [items]="menuItems()"
                  [offset]="{horizontal: 0, vertical: 2}"
                  [popupConnectionPoint]="'topcenter'"
+                 [size]="size()"
                  [target]="dropdownButton"
-                 [trigger]="'click'"
-                 [id]="menuId"
-                 #popupMenu>
+                 [trigger]="'click'">
     @if (groupTemplate()) {
         <ng-template monaPopupMenuGroupTemplate let-group>
             <ng-container [ngTemplateOutlet]="groupTemplate()"

@@ -21,7 +21,7 @@
                                  [ngModel]="entry().defaultValue"
                                  [style.width.px]="150"
                                  size="small"
-                                 [showClearButton]="false"
+                                 [showClearButton]="entry().clearable||false"
                                  (ngModelChange)="onValueChange(entry().name, $event)">
                 <ng-template monaDropDownListItemTemplate let-dataItem>
                     <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
@@ -32,6 +32,7 @@
             </mona-drop-down-list>
         } @else if (entry().configType === "color") {
             <mona-color-picker
+                size="small"
                 [ngModel]="entry().value"
                 (ngModelChange)="onValueChange(entry().name, $event)"></mona-color-picker>
         } @else {

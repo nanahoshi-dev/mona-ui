@@ -29,14 +29,15 @@
                 </div>
             }
             <mona-color-palette [palette]="palette()" [columns]="columns()" [ngModel]="color()"
-                                (ngModelChange)="onColorPaletteValueChange($event)"
-            ></mona-color-palette>
+                                (ngModelChange)="onColorPaletteValueChange($event)"></mona-color-palette>
         </div>
     } @else if (view() === 'gradient') {
         <mona-color-gradient [opacity]="opacity()"
-                             [ngModel]="color()" (ngModelChange)="onColorGradientValueChange($event)"
+                             [rounded]="rounded()"
+                             [ngModel]="color()"
+                             (ngModelChange)="onColorGradientValueChange($event)"
                              class="border border-input-border bg-background shadow-lg"
-                             (apply)="onColorGradientApply()" (cancel)="onColorGradientCancel()"
-        ></mona-color-gradient>
+                             (apply)="onColorGradientApply()"
+                             (cancel)="onColorGradientCancel()"></mona-color-gradient>
     }
 </ng-template>

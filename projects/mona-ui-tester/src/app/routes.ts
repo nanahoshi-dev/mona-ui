@@ -34,6 +34,13 @@ export const routes: Routes = [
                     import("./docs/components/chip-doc/chip-doc.component").then(m => m.ChipDocComponent)
             },
             {
+                path: "circular-progress-bar",
+                loadComponent: () =>
+                    import("./docs/components/circular-progress-bar-doc/circular-progress-bar-doc.component").then(
+                        m => m.CircularProgressBarDocComponent
+                    )
+            },
+            {
                 path: "color-gradient",
                 loadComponent: () =>
                     import("./docs/components/color-gradient-doc/color-gradient-doc.component").then(
@@ -101,6 +108,13 @@ export const routes: Routes = [
                 path: "popup",
                 loadComponent: () =>
                     import("./docs/components/popup-doc/popup-doc.component").then(m => m.PopupDocComponent)
+            },
+            {
+                path: "progress-bar",
+                loadComponent: () =>
+                    import("./docs/components/progress-bar-doc/progress-bar-doc.component").then(
+                        m => m.ProgressBarDocComponent
+                    )
             },
             {
                 path: "radio-button",

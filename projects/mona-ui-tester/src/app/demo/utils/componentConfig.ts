@@ -57,6 +57,7 @@ export type ComponentConfigInputType<TComponent> = {
               type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
               defaultValue: ComponentInputs<TComponent>[key];
+              clearable?: boolean;
           }
         | {
               type: Extract<ComponentConfigType, "function">;
@@ -109,6 +110,7 @@ export type ComponentConfig<TComponent> = {
 export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     alias?: string; // Optional alias for the input
     configType: ComponentConfigType;
+    clearable?: boolean; // Only for dropdown inputs
     defaultValue?: TDefault;
     max?: number | null; // Optional, only for number inputs
     min?: number | null; // Optional, only for number inputs
@@ -162,6 +164,7 @@ export function createComponentInputConfigArray<TComponent>(
             processedArray.push({
                 alias: configItem.alias,
                 configType: configItem.type,
+                clearable: configItem.type === "dropdown" ? configItem.clearable : undefined,
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
