@@ -19,8 +19,6 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { fromEvent, take, takeUntil } from "rxjs";
-import { AnimationState } from "../../../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import {
     dropdownPopupHideAnimation,
@@ -34,7 +32,6 @@ import { ColorGradientComponent } from "../../../color-gradient/components/color
 import { ColorPaletteComponent } from "../../../color-palette/components/color-palette/color-palette.component";
 import { PaletteType } from "../../../models/PaletteType";
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
-import { ColorPickerValueTemplateContext } from "../../models/ColorPickerValueTemplateContext";
 import { ColorPickerView } from "../../models/ColorPickerView";
 import {
     colorPickerBaseThemeVariants,
