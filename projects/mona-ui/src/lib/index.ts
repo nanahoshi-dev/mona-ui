@@ -273,6 +273,10 @@ export * from "./notification/components/notification/notification.component";
 /** Pager */
 export * from "./pager/models/PageChangeEvent";
 export * from "./pager/models/PageSizeChangeEvent";
+export * from "./pager/directives/pager-info-template.directive";
+export * from "./pager/directives/pager-numeric-buttons-template.directive";
+export * from "./pager/directives/pager-navigation-buttons-template.directive";
+export * from "./pager/directives/pager-page-size-template.directive";
 export * from "./pager/components/pager/pager.component";
 
 /** Popup */

@@ -100,6 +100,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "pager",
+                loadComponent: () =>
+                    import("./docs/components/pager-doc/pager-doc.component").then(m => m.PagerDocComponent)
+            },
+            {
                 path: "popover",
                 loadComponent: () =>
                     import("./docs/components/popover-doc/popover-doc.component").then(m => m.PopoverDocComponent)

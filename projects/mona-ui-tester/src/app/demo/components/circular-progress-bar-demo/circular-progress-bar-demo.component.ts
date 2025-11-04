@@ -28,7 +28,21 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
         }
     });
     protected readonly config = signal<ComponentConfig<CircularProgressBarComponent>>({
-        code: ``,
+        code: `
+            <mona-circular-progress-bar
+                [color]="color()"
+                [disabled]="disabled()"
+                [indeterminate]="indeterminate()"
+                [max]="max()"
+                [min]="min()"
+                [size]="size()"
+                [thickness]="thickness()"
+                [value]="value()">
+                <ng-template monaCircularProgressBarLabelTemplate let-value let-min="min" let-max="max">
+                    <span class="text-xs px-2"> {{ value }} | {{ max }} </span>
+                </ng-template>
+            </mona-circular-progress-bar>
+        `,
         inputs: {
             color: {
                 type: "color",

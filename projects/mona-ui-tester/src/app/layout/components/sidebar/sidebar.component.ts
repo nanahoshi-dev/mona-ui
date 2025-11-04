@@ -89,6 +89,10 @@ export class SidebarComponent {
                     path: "/numeric-textbox"
                 },
                 {
+                    text: "Pager",
+                    path: "/pager"
+                },
+                {
                     text: "Popover",
                     path: "/popover"
                 },

@@ -1672,75 +1672,93 @@
     "selector": "\"mona-pager\"",
     "inputs": [
       {
-        "name": "pageChange",
-        "type": "PageChangeEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "pageSizeChange",
-        "type": "PageSizeChangeEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "firstLast",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the first and last page buttons.",
         "kind": "input"
+      },
+      {
+        "name": "pageChange",
+        "type": "PageChangeEvent",
+        "description": "The event emitted when the page changes.",
+        "kind": "output"
       },
       {
         "name": "pageInput",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the page input.",
         "kind": "input"
       },
       {
         "name": "pageSize",
         "type": "number",
-        "description": "",
+        "description": "The page size.",
         "kind": "input"
       },
       {
+        "name": "pageSizeChange",
+        "type": "PageSizeChangeEvent",
+        "description": "The event emitted when the page size changes.",
+        "kind": "output"
+      },
+      {
         "name": "pageSizeValues",
-        "type": "boolean | number[]",
-        "description": "",
+        "type": "number[] | boolean",
+        "description": "The page size values.",
         "kind": "input"
       },
       {
         "name": "previousNext",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the previous and next page buttons.",
         "kind": "input"
       },
       {
         "name": "responsive",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to make the pager responsive.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "PagerVariantProps[\"rounded\"]",
+        "description": "The rounded of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "PagerVariantProps[\"size\"]",
+        "description": "The size of the pager.",
         "kind": "input"
       },
       {
         "name": "skip",
         "type": "number",
-        "description": "",
+        "description": "The skip of the pager.",
         "kind": "input"
       },
       {
         "name": "total",
         "type": "number",
-        "description": "",
+        "description": "The total of the pager.",
         "kind": "input"
       },
       {
         "name": "type",
         "type": "PagerType",
+        "description": "The type of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "userClasses",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
       {
         "name": "visiblePages",
         "type": "number",
-        "description": "",
+        "description": "The visible pages of the pager.",
         "kind": "input"
       }
     ]
