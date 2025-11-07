@@ -81,6 +81,10 @@ export class SidebarComponent {
                     path: "/input"
                 },
                 {
+                    text: "List View",
+                    path: "/list-view"
+                },
+                {
                     text: "Menubar",
                     path: "/menubar"
                 },

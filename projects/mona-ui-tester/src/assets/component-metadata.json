@@ -701,6 +701,18 @@
       }
     ]
   },
+  "PagerNavigationButtonsTemplateDirective": {
+    "name": "PagerNavigationButtonsTemplateDirective",
+    "selector": "\"ng-template[monaPagerNavigationButtonsTemplate]\"",
+    "inputs": [
+      {
+        "name": "type",
+        "type": "\"first\" | \"last\" | \"next\" | \"previous\"",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "TreeViewCheckableDirective": {
     "name": "TreeViewCheckableDirective",
     "selector": "\"mona-tree-view[monaTreeViewCheckable]\"",
@@ -1624,20 +1636,32 @@
     "selector": "\"mona-list-view\"",
     "inputs": [
       {
+        "name": "height",
+        "type": "ListSizeInputType",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "items",
+        "type": "Iterable<T>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ListViewVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "scrollBottom",
         "type": "Event",
         "description": "",
         "kind": "output"
       },
       {
-        "name": "height",
-        "type": "ListSizeType",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "items",
-        "type": "ImmutableSet<T>",
+        "name": "size",
+        "type": "ListViewVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
       },
@@ -1648,8 +1672,14 @@
         "kind": "input"
       },
       {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "width",
-        "type": "ListSizeType",
+        "type": "ListSizeInputType",
         "description": "",
         "kind": "input"
       }

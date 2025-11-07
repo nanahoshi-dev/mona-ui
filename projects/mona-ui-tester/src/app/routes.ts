@@ -88,6 +88,11 @@ export const routes: Routes = [
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
             },
             {
+                path: "list-view",
+                loadComponent: () =>
+                    import("./docs/components/list-view-doc/list-view-doc.component").then(m => m.ListViewDocComponent)
+            },
+            {
                 path: "menubar",
                 loadComponent: () =>
                     import("./docs/components/menubar-doc/menubar-doc.component").then(m => m.MenubarDocComponent)

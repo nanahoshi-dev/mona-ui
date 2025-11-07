@@ -1,4 +1,6 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { computed, Directive, effect, ElementRef, inject, input } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { fromEvent } from "rxjs";
 import { listItemVariants } from "../styles/list.style";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
@@ -24,8 +26,17 @@ export class ListItemDirective<TData> {
     protected readonly highlighted = computed(() => this.#listService.isHighlighted(this.item()));
     protected readonly selected = computed(() => this.#listService.isSelected(this.item()));
     protected readonly textClasses = computed(() => {
-        const classes = listItemVariants();
+        const disabled = this.disabled();
+        const highlighted = this.highlighted();
+        const selected = this.selected();
+        const classes = listItemVariants({ disabled, highlighted, selected });
         return twMerge(classes);
     });
     public readonly item = input.required<ListItem<TData>>();
+
+    public constructor() {
+        fromEvent(inject(ElementRef<HTMLElement>).nativeElement, "focusout")
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.#listService.itemFocusOut$.next(this.item()));
+    }
 }

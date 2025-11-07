@@ -4,7 +4,8 @@ import {
     ChangeDetectionStrategy,
     Component,
     computed,
-    contentChild, contentChildren,
+    contentChild,
+    contentChildren,
     DestroyRef,
     effect,
     ElementRef,
@@ -30,12 +31,8 @@ import {
 import { range } from "@mirei/ts-collections";
 import { DropDownListValueTemplateDirective } from "mona-ui/dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
 import { PagerInfoTemplateDirective } from "mona-ui/pager/directives/pager-info-template.directive";
-import {
-    PagerNavigationButtonsTemplateDirective
-} from "mona-ui/pager/directives/pager-navigation-buttons-template.directive";
-import {
-    PagerNumericButtonsTemplateDirective
-} from "mona-ui/pager/directives/pager-numeric-buttons-template.directive";
+import { PagerNavigationButtonsTemplateDirective } from "mona-ui/pager/directives/pager-navigation-buttons-template.directive";
+import { PagerNumericButtonsTemplateDirective } from "mona-ui/pager/directives/pager-numeric-buttons-template.directive";
 import { PagerPageSizeTemplateDirective } from "mona-ui/pager/directives/pager-page-size-template.directive";
 import type { InfoTemplateContext } from "mona-ui/pager/models/InfoTemplateContext";
 import {
@@ -80,6 +77,7 @@ import { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
 })
 export class PagerComponent implements PagerVariantInputs {
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #infoVisible = signal(true);
     readonly #skip = linkedSignal({
         source: () => this.skip(),
         computation: skip => skip
@@ -104,7 +102,11 @@ export class PagerComponent implements PagerVariantInputs {
         const theme = this.#themeService.theme();
         return pagerInfoThemeVariants(theme)();
     });
-    protected readonly infoVisible = signal(true);
+    protected readonly infoVisible = computed(() => {
+        const showInfo = this.showInfo();
+        const visible = this.#infoVisible();
+        return showInfo && visible;
+    });
     protected readonly inputClasses = computed(() => {
         const theme = this.#themeService.theme();
         return pagerInputThemeVariants(theme)();
@@ -240,6 +242,12 @@ export class PagerComponent implements PagerVariantInputs {
     public readonly rounded = input<PagerVariantProps["rounded"]>("medium");
 
     /**
+     * @description Whether to show the info section.
+     * @default true
+     */
+    public readonly showInfo = input(true);
+
+    /**
      * @description The size of the pager.
      * @default "medium"
      */
@@ -283,7 +291,7 @@ export class PagerComponent implements PagerVariantInputs {
             if (this.responsive()) {
                 this.#widthObserver = new ResizeObserver(() => {
                     untracked(() => {
-                        this.infoVisible.set(this.#hostElementRef.nativeElement.clientWidth >= 790);
+                        this.#infoVisible.set(this.#hostElementRef.nativeElement.clientWidth >= 790);
                         this.pageInputVisible.set(this.#hostElementRef.nativeElement.clientWidth >= 640);
                         this.pageListVisible.set(this.#hostElementRef.nativeElement.clientWidth >= 480);
                     });
@@ -291,7 +299,7 @@ export class PagerComponent implements PagerVariantInputs {
                 this.#widthObserver.observe(this.#hostElementRef.nativeElement);
             } else if (this.#widthObserver) {
                 untracked(() => {
-                    this.infoVisible.set(true);
+                    this.#infoVisible.set(true);
                     this.pageInputVisible.set(true);
                     this.pageListVisible.set(true);
                 });

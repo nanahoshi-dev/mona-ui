@@ -19,14 +19,14 @@ export class ListViewSelectableDirective<T, K = T> implements OnInit {
     public options = input<Partial<SelectableOptions> | "">("", {
         alias: "monaListViewSelectable"
     });
+    public selectBy = input<ListKeySelector<T, K> | undefined>("");
     public selectedKeys = input<Iterable<K>>([]);
-    public selectionKey = input<ListKeySelector<T, K> | undefined>("");
 
     public constructor() {
         effect(() => {
-            const selectionKey = this.selectionKey();
+            const selectBy = this.selectBy();
             untracked(() => {
-                this.#listService.setValueField(selectionKey ?? "");
+                this.#listService.setValueField(selectBy ?? "");
             });
         });
         effect(() => {

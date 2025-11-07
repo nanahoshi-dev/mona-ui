@@ -3,34 +3,23 @@ import { cva } from "class-variance-authority";
 export const listVariants = cva(
     `
         h-full flex flex-col overflow-hidden outline-none
-    `,
-    {
-        variants: {}
-    }
+    `
 );
 
 export const listInnerListVariants = cva(
     `
         list-none p-0 m-0 overflow-x-hidden overflow-y-auto
         h-full outline-none
-    `,
-    {
-        variants: {}
-    }
+    `
 );
 
 export const listGroupHeaderVariants = cva(
     `
         px-3 py-1 font-bold select-none
-    `,
-    {
-        variants: {}
-    }
+    `
 );
 
-export const listGroupHeaderTextVariants = cva(`font-bold select-none`, {
-    variants: {}
-});
+export const listGroupHeaderTextVariants = cva(`font-bold select-none`);
 
 export const listItemTextVariants = cva(``, {
     variants: {}
@@ -39,17 +28,43 @@ export const listItemTextVariants = cva(``, {
 export const listItemVariants = cva(
     `
         relative flex cursor-default select-none items-center
-        outline-none focus:bg-accent focus:text-accent-foreground
-        px-3 py-1
+        outline-none px-3 py-1
         hover:bg-accent hover:text-accent-foreground
-        data-[disabled='false']:cursor-pointer
-        data-[disabled='true']:pointer-events-none data-[disabled='true']:opacity-50
-        data-[selected='true']:bg-primary data-[selected='true']:text-primary-foreground
-        data-[highlighted='true']:bg-accent data-[highlighted='true']:text-accent-foreground
-        data-[highlighted='true']:rounded-none
-        data-[focused]:bg-accent data-[focused]:text-accent-foreground
+        focus:bg-accent focus:text-accent-foreground
     `,
     {
-        variants: {}
+        variants: {
+            highlighted: {
+                true: "bg-accent text-accent-foreground rounded-none",
+                false: ""
+            },
+            selected: {
+                true: "bg-primary text-primary-foreground",
+                false: ""
+            },
+            disabled: {
+                true: "pointer-events-none opacity-50 cursor-default",
+                false: "cursor-pointer"
+            }
+        },
+        compoundVariants: [
+            {
+                selected: true,
+                class: `
+                    bg-primary text-primary-foreground rounded-none
+                    hover:bg-primary hover:text-primary-foreground
+                    focus:bg-primary focus:text-primary-foreground
+                `
+            },
+            {
+                highlighted: true,
+                selected: true,
+                class: `
+                    bg-primary text-primary-foreground rounded-none
+                    hover:bg-primary hover:text-primary-foreground
+                    focus:bg-primary focus:text-primary-foreground
+                `
+            }
+        ]
     }
 );

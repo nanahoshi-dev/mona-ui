@@ -12,7 +12,7 @@ export class ListViewNavigableDirective<T> {
         mode: "select",
         wrap: false
     };
-    readonly #listService = inject(ListService<T>);
+    readonly #listService = inject<ListService<T>>(ListService);
 
     public options = input<Partial<NavigableOptions> | "">("", {
         alias: "monaListViewNavigable"
