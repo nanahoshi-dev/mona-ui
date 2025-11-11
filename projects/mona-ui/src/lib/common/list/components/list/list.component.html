@@ -43,7 +43,7 @@
 
 <ng-template #listItemTemplate let-item>
     @if (item.header) {
-        <li [class]="groupHeaderClasses()">
+        <li>
             <mona-list-item [item]="item" [template]="groupHeaderTemplate()??null"></mona-list-item>
         </li>
     } @else {

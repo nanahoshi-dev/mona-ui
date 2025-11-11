@@ -32,7 +32,8 @@ export class ListItemComponent<TData> {
     protected readonly textClasses = computed(() => {
         const isHeader = this.isHeader();
         if (isHeader) {
-            const classes = listGroupHeaderTextVariants();
+            const hasTemplate = this.template() != null;
+            const classes = listGroupHeaderTextVariants({ hasTemplate });
             return twMerge(classes);
         }
         const classes = listItemTextVariants();

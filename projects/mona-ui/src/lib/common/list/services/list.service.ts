@@ -594,6 +594,13 @@ export class ListService<TData> {
                 }
             }
         }
+
+        // Remove trailing group headers if they are at the end
+        let lastIndex = result.length - 1;
+        while (lastIndex >= 0 && result[lastIndex].header) {
+            result.pop();
+            lastIndex--;
+        }
         return result;
     }
 }

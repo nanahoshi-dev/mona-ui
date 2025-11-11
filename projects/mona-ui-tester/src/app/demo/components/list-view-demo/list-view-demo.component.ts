@@ -362,7 +362,9 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             }
             @if (groupingFeatures["groupHeaderTemplate"].active) {
                 <ng-template monaListViewGroupHeaderTemplate let-group>
-                    <div class="font-semibold underline text-blue-600">{{ group }}</div>
+                    <div class="font-semibold w-full h-full px-3 py-1 underline bg-secondary text-blue-600">
+                        {{ group }}
+                    </div>
                 </ng-template>
             }
             @if (featureData["headerTemplate"].active) {

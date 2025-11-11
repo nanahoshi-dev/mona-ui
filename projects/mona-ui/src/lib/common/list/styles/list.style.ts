@@ -19,7 +19,14 @@ export const listGroupHeaderVariants = cva(
     `
 );
 
-export const listGroupHeaderTextVariants = cva(`font-bold select-none`);
+export const listGroupHeaderTextVariants = cva(`select-none`, {
+    variants: {
+        hasTemplate: {
+            true: "",
+            false: "font-bold w-full px-3 py-1"
+        }
+    }
+});
 
 export const listItemTextVariants = cva(``, {
     variants: {}
