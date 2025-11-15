@@ -583,7 +583,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         };
         return options;
     });
-    public readonly height = input<ReturnType<ListViewComponent["height"]>>();
+    public readonly height = input<ReturnType<ListViewComponent["height"]>>("100%");
     public readonly listClass = input<ReturnType<ListViewComponent["listClass"]>>("");
     public readonly listItemClass = input<ReturnType<ListViewComponent["listItemClass"]>>("");
     public readonly listItemStyle = input<ReturnType<ListViewComponent["listItemStyle"]>>({});
@@ -592,7 +592,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
     public readonly rounded = input<ReturnType<ListViewComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<ListViewComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListViewComponent["textField"]>>("");
-    public readonly width = input<ReturnType<ListViewComponent["width"]>>("");
+    public readonly width = input<ReturnType<ListViewComponent["width"]>>("100%");
 
     public constructor() {
         effect(() => {

@@ -39,6 +39,12 @@ import { ListBoxActionClickEvent } from "../../models/ListBoxActionClickEvent";
 import { ListBoxItemTemplateContext } from "../../models/ListBoxItemTemplateContext";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
+import {
+    listBoxBaseThemeVariants,
+    ListBoxVariantInputs,
+    ListBoxVariantProps
+} from "mona-ui/list-box/styles/list-box.styles";
+import { ThemeService } from "mona-ui/theme/services/theme.service";
 
 type ListBoxDirection = "horizontal" | "horizontal-reverse" | "vertical" | "vertical-reverse";
 
@@ -59,15 +65,12 @@ type ListBoxDirection = "horizontal" | "horizontal-reverse" | "vertical" | "vert
         ListViewNoDataTemplateDirective
     ],
     host: {
-        class: "mona-list-box",
-        "[class.mona-list-box-horizontal]": "direction()==='horizontal'",
-        "[class.mona-list-box-vertical]": "direction()==='vertical'",
-        "[class.mona-list-box-horizontal-reverse]": "direction()==='horizontal-reverse'",
-        "[class.mona-list-box-vertical-reverse]": "direction()==='vertical-reverse'"
+        "[class]": "baseClasses()"
     }
 })
-export class ListBoxComponent<T = any> implements OnInit {
+export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #themeService = inject(ThemeService);
     protected readonly activeListBox: Signal<ListBoxComponent<T> | null> = computed(() => {
         const selectedItem = this.selectedItem();
         if (selectedItem) {
@@ -78,6 +81,12 @@ export class ListBoxComponent<T = any> implements OnInit {
             return connectedList;
         }
         return this;
+    });
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        return listBoxBaseThemeVariants(theme)({ rounded, size });
     });
     protected readonly direction: Signal<ListBoxDirection> = computed(() => {
         const position = this.toolbarOptions()?.position;
@@ -98,20 +107,23 @@ export class ListBoxComponent<T = any> implements OnInit {
         ListBoxItemTemplateDirective,
         { read: TemplateRef }
     );
+    protected readonly listHeight = computed(() => {
+        const height = this.height();
+        return typeof height === "number" ? `${height}px` : height;
+    });
+    protected readonly listWidth = computed(() => {
+        const width = this.width();
+        return typeof width === "number" ? `${width}px` : width;
+    });
     protected readonly moveDownIcon = faAngleDown;
     protected readonly moveUpIcon = faAngleUp;
-    protected readonly noDataTemplate: Signal<TemplateRef<any> | undefined> = contentChild(
-        ListBoxNoDataTemplateDirective,
-        { read: TemplateRef }
-    );
+    protected readonly noDataTemplate = contentChild(ListBoxNoDataTemplateDirective, { read: TemplateRef });
     protected readonly removeIcon = faTrash;
     protected readonly transferAllFromIcon = faAnglesLeft;
     protected readonly transferAllToIcon = faAnglesRight;
     protected readonly transferFromIcon = faAngleLeft;
     protected readonly transferToIcon = faAngleRight;
-    protected selectedItem = signal<T | null>(null);
-    protected selectedItems = signal(ImmutableList.create<T>());
-    protected toolbarOptions = computed(() => {
+    protected readonly toolbarOptions = computed(() => {
         const toolbar = this.toolbar();
         if (typeof toolbar === "boolean") {
             return toolbar ? this.getDefaultToolbarOptions() : null;
@@ -120,14 +132,23 @@ export class ListBoxComponent<T = any> implements OnInit {
     });
 
     public readonly actionClick = output<ListBoxActionClickEvent>();
+    public readonly connectedList = input<ListBoxComponent<T> | null>(null);
+
+    /**
+     * @description Sets the height of the list box.
+     * @default 100%
+     */
+    public readonly height = input<string | number>("100%");
+    public readonly items = input<Iterable<T>>([]);
     public readonly listBoxItems = signal(ImmutableList.create<T>());
+    public readonly rounded = input<ListBoxVariantProps["rounded"]>("medium");
     public readonly selectionChange = output<ListBoxSelectionEvent>();
-    public connectedList = input<ListBoxComponent<T> | null>(null);
-    public items = input(new List<T>(), {
-        transform: (items: Iterable<T>) => new List<T>(items)
-    });
-    public textField = input("");
-    public toolbar = input<boolean | Partial<ToolbarOptions>>(true);
+    public readonly selectedItem = signal<T | null>(null);
+    public readonly selectedItems = signal(ImmutableList.create<T>());
+    public readonly size = input<ListBoxVariantProps["size"]>("medium");
+    public readonly textField = input("");
+    public readonly toolbar = input<boolean | Partial<ToolbarOptions>>(true);
+    public readonly width = input<string | number>("100%");
 
     public constructor() {
         effect(() => {
@@ -283,6 +304,9 @@ export class ListBoxComponent<T = any> implements OnInit {
     }
 
     private updateToolbarOptions(options: boolean | Partial<ToolbarOptions>): ToolbarOptions | null {
+        if (!options) {
+            return null;
+        }
         if (typeof options === "boolean") {
             return options ? this.getDefaultToolbarOptions() : null;
         } else if (options.actions && options.actions.length > 0 && options.position) {

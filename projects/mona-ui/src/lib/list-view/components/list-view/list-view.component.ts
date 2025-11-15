@@ -86,13 +86,7 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
     protected readonly itemTemplate = contentChild(ListViewItemTemplateDirective, { read: TemplateRef });
     protected readonly listHeight = computed(() => {
         const height = this.height();
-        if (height == null) {
-            return undefined;
-        } else if (typeof height === "number") {
-            return `${height}px`;
-        } else {
-            return height;
-        }
+        return typeof height === "number" ? `${height}px` : height;
     });
     protected readonly listItems = computed(() => {
         const items = this.items();
@@ -101,13 +95,7 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
     protected readonly listService = inject<ListService<T>>(ListService);
     protected readonly listWidth = computed(() => {
         const width = this.width();
-        if (width == null) {
-            return undefined;
-        } else if (typeof width === "number") {
-            return `${width}px`;
-        } else {
-            return width;
-        }
+        return typeof width === "number" ? `${width}px` : width;
     });
     protected readonly noDataTemplate = contentChild(ListViewNoDataTemplateDirective, { read: TemplateRef });
     protected readonly viewItems = computed(() => this.listItems());
@@ -116,7 +104,7 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
      * @description Sets the height of the list view.
      * @default 100%
      */
-    public readonly height = input<ListSizeInputType>("100%");
+    public readonly height = input<string | number>("100%");
 
     /**
      * @description Sets the classes of the inner UL element.
@@ -169,7 +157,7 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
      * @description Sets the width of the list view.
      * @default 100%
      */
-    public readonly width = input<ListSizeInputType>("100%");
+    public readonly width = input<string | number>("100%");
 
     public constructor() {
         effect(() => {
