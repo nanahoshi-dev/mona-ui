@@ -36,7 +36,7 @@ import { ListKeySelector } from "../../models/ListSelectors";
 import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
 import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
-import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.style";
+import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.styles";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
 
@@ -72,15 +72,18 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderClasses = computed(() => {
-        const classes = listGroupHeaderVariants();
-        return twMerge(classes);
+        const listItemClass = this.listItemClass();
+        const hasTemplate = this.groupHeaderTemplate() != null;
+        const classes = listGroupHeaderVariants({ hasTemplate });
+        return twMerge(classes, listItemClass);
     });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly innerListClasses = computed(() => {
         const classes = listInnerListVariants();
-        return twMerge(classes);
+        const listClass = this.listClass();
+        return twMerge(classes, listClass);
     });
     protected readonly listHeight = computed(() => {
         const height = this.height();
@@ -133,6 +136,10 @@ export class ListComponent<TData> implements OnInit {
     public readonly data = input<Iterable<TData> | null | undefined>(null);
     public readonly height = input<ListSizeInputType>(undefined);
     public readonly itemSelect = output<SelectionChangeEvent<TData>>();
+    public readonly listClass = input<string>("");
+    public readonly listItemClass = input("");
+    public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
+    public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly maxHeight = input<ListSizeInputType>(undefined);
     public readonly textField = input<ListKeySelector<TData, string> | undefined>(null);
     public readonly width = input<ListSizeInputType>(undefined);

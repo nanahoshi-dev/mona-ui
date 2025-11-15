@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, Signal, TemplateRef } from "@angular/core";
-import { listGroupHeaderTextVariants, listItemTextVariants } from "../../styles/list.style";
+import { listGroupHeaderTextVariants, listItemTextVariants } from "../../styles/list.styles";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
@@ -10,10 +10,7 @@ import { ListService } from "../../services/list.service";
     selector: "mona-list-item",
     imports: [NgTemplateOutlet],
     templateUrl: "./list-item.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {
-        "[class]": "'flex items-center h-full w-full'"
-    }
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListItemComponent<TData> {
     protected readonly dataItem: Signal<TData | null> = computed(() => this.item()?.data ?? null);

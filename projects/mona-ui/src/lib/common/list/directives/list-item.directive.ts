@@ -1,7 +1,7 @@
 import { computed, Directive, effect, ElementRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
-import { listItemVariants } from "../styles/list.style";
+import { listItemVariants } from "../styles/list.styles";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";

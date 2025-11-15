@@ -1,34 +1,35 @@
-<div class="flex-1 overflow-hidden" [class]="listClasses()">
-    <mona-list [data]="viewItems()" [height]="listHeight()" [width]="listWidth()">
-        @if (footerTemplate()) {
-            <ng-template monaListFooterTemplate>
-                <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>
-            </ng-template>
-        }
-        @if (groupHeaderTemplate()) {
-            <ng-template monaListGroupHeaderTemplate let-groupHeader>
-                <ng-container [ngTemplateOutlet]="groupHeaderTemplate()??null"
-                              [ngTemplateOutletContext]="{$implicit: groupHeader}"></ng-container>
-            </ng-template>
-        }
-        @if (headerTemplate()) {
-            <ng-template monaListHeaderTemplate>
-                <ng-container [ngTemplateOutlet]="headerTemplate()??null"></ng-container>
-            </ng-template>
-        }
-        @if (itemTemplate()) {
-            <ng-template monaListItemTemplate let-dataItem>
-                <ng-container [ngTemplateOutlet]="itemTemplate()??null"
-                              [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
-            </ng-template>
-        }
-        @if (noDataTemplate()) {
-            <ng-template monaListNoDataTemplate>
-                <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
-            </ng-template>
-        }
-    </mona-list>
-</div>
+<mona-list [data]="viewItems()" [height]="listHeight()" [width]="listWidth()"
+           [listItemClass]="listItemClass()"
+           [listItemStyle]="listItemStyle()"
+           [listClass]="listClass()" [listStyle]="listStyle()">
+    @if (footerTemplate()) {
+        <ng-template monaListFooterTemplate>
+            <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>
+        </ng-template>
+    }
+    @if (groupHeaderTemplate()) {
+        <ng-template monaListGroupHeaderTemplate let-groupHeader>
+            <ng-container [ngTemplateOutlet]="groupHeaderTemplate()??null"
+                          [ngTemplateOutletContext]="{$implicit: groupHeader}"></ng-container>
+        </ng-template>
+    }
+    @if (headerTemplate()) {
+        <ng-template monaListHeaderTemplate>
+            <ng-container [ngTemplateOutlet]="headerTemplate()??null"></ng-container>
+        </ng-template>
+    }
+    @if (itemTemplate()) {
+        <ng-template monaListItemTemplate let-dataItem>
+            <ng-container [ngTemplateOutlet]="itemTemplate()??null"
+                          [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
+        </ng-template>
+    }
+    @if (noDataTemplate()) {
+        <ng-template monaListNoDataTemplate>
+            <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
+        </ng-template>
+    }
+</mona-list>
 
 @let pageableOptions = listService.pageableOptions();
 @if (pageableOptions.enabled && !listService.virtualScrollOptions().enabled && viewItems().length > 0) {

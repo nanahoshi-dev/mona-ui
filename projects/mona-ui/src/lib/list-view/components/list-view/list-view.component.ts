@@ -12,7 +12,6 @@ import {
     inject,
     input,
     output,
-    signal,
     TemplateRef,
     untracked
 } from "@angular/core";
@@ -20,7 +19,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableSet } from "@mirei/ts-collections";
 import {
     listViewBaseThemeVariants,
-    listViewListThemeVariants,
     type ListViewVariantInputs,
     type ListViewVariantProps
 } from "mona-ui/list-view/styles/list-view.styles";
@@ -48,7 +46,6 @@ import { ListViewNoDataTemplateDirective } from "../../directives/list-view-no-d
 @Component({
     selector: "mona-list-view",
     templateUrl: "./list-view.component.html",
-    styleUrls: ["./list-view.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [ListService],
     imports: [
@@ -87,10 +84,6 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
     protected readonly headerTemplate = contentChild(ListViewHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemCount = computed(() => this.listItems().size());
     protected readonly itemTemplate = contentChild(ListViewItemTemplateDirective, { read: TemplateRef });
-    protected readonly listClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return listViewListThemeVariants(theme)();
-    });
     protected readonly listHeight = computed(() => {
         const height = this.height();
         if (height == null) {
@@ -117,15 +110,65 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
         }
     });
     protected readonly noDataTemplate = contentChild(ListViewNoDataTemplateDirective, { read: TemplateRef });
-
     protected readonly viewItems = computed(() => this.listItems());
+
+    /**
+     * @description Sets the height of the list view.
+     * @default 100%
+     */
     public readonly height = input<ListSizeInputType>("100%");
+
+    /**
+     * @description Sets the classes of the inner UL element.
+     */
+    public readonly listClass = input<string>("");
+
+    /**
+     * @description Sets the classes of the list items.
+     */
+    public readonly listItemClass = input("");
+
+    /**
+     * @description Sets the style of the list items.
+     */
+    public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * @description Sets the style of the list.
+     */
+    public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * @description The items to display in the list.
+     */
     public readonly items = input<Iterable<T>>([]);
+
+    /**
+     * @description Sets the rounding of the list.
+     */
     public readonly rounded = input<ListViewVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Emits when the list has scrolled to the bottom.
+     */
     public readonly scrollBottom = output<Event>();
+
+    /**
+     * @description Sets the size of the list.
+     */
     public readonly size = input<ListViewVariantProps["size"]>("medium");
+
+    /**
+     * @description Sets the field to display in the list.
+     */
     public readonly textField = input<ListKeySelector<T, string> | undefined>("");
+
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Sets the width of the list view.
+     * @default 100%
+     */
     public readonly width = input<ListSizeInputType>("100%");
 
     public constructor() {
@@ -158,7 +201,7 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
         if (virtualScrollEnabled) {
             element = this.#hostElementRef.nativeElement.querySelector(".cdk-virtual-scroll-viewport");
         } else {
-            element = this.#hostElementRef.nativeElement.querySelector(".mona-list > ul");
+            element = this.#hostElementRef.nativeElement.querySelector("mona-list > ul");
         }
         if (!element) {
             return;

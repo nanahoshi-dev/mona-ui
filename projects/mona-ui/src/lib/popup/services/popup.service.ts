@@ -130,7 +130,7 @@ export class PopupService {
         const virtualOverlayRef = this.#overlay.create({ hasBackdrop: false });
         const virtualPopupReference = new PopupReference(virtualOverlayRef);
 
-        // Set up event delegation internally
+        // Set up the event delegation internally
         this.setupInternalEventDelegation(selector, settings);
 
         // Clean up when the virtual popup is closed

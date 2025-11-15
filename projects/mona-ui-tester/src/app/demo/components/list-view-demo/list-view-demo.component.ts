@@ -1,5 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal } from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    linkedSignal,
+    signal
+} from "@angular/core";
 import { range } from "@mirei/ts-collections";
 import {
     type GroupableOptions,
@@ -15,7 +24,8 @@ import {
     ListViewSelectableDirective,
     ListViewVirtualScrollDirective,
     type PagerSettings,
-    type SelectableOptions
+    type SelectableOptions,
+    SlicePipe
 } from "mona-ui";
 import type { NavigableOptions } from "mona-ui/common/list/models/NavigableOptions";
 import type { VirtualScrollOptions } from "mona-ui/common/models/VirtualScrollOptions";
@@ -24,6 +34,7 @@ import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/compo
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+import { twMerge } from "tailwind-merge";
 
 @Component({
     selector: "app-list-view-demo",
@@ -110,11 +121,29 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             description: "Enables custom header template for the list view",
             name: "Header Template"
         },
+        infiniteScroll: {
+            code: ``,
+            active: false,
+            hasCode: false,
+            description: "Enables infinite scroll mode for the list view by utilizing the scrollBottom event.",
+            name: "Infinite Scroll",
+            type: "boolean"
+        },
         itemTemplate: {
             code: ``,
             active: false,
             description: "Enables custom item template for the list view",
             name: "Item Template"
+        },
+        layout: {
+            code: ``,
+            active: false,
+            hasCode: false,
+            description: "",
+            name: "Layout",
+            type: "dropdown",
+            dropdownDataSource: ["Default", "Gallery"],
+            dropdownValue: "Default"
         },
         navigation: {
             code: ``,
@@ -280,6 +309,24 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             items: {
                 type: "object"
             },
+            listClass: {
+                type: "string",
+                value: ""
+            },
+            listItemClass: {
+                type: "string",
+                value: ""
+            },
+            listItemStyle: {
+                type: "dropdown",
+                value: [{}, { color: "red" }],
+                defaultValue: {}
+            },
+            listStyle: {
+                type: "dropdown",
+                value: [{}, { backgroundColor: "aliceblue" }],
+                defaultValue: {}
+            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
@@ -324,14 +371,19 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         ListViewHeaderTemplateDirective,
         ListViewFooterTemplateDirective,
         ListViewNoDataTemplateDirective,
-        ListViewPageableDirective
+        ListViewPageableDirective,
+        SlicePipe
     ],
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <mona-list-view
             [height]="height()"
-            [items]="listViewItems()"
+            [items]="listViewItems() | monaSlice: 0 : scrollBottomItemCount()"
+            [listClass]="listClassInput()"
+            [listItemClass]="listItemClass()"
+            [listItemStyle]="listItemStyle()"
+            [listStyle]="listStyle()"
             [rounded]="rounded()"
             [size]="size()"
             [textField]="textField()"
@@ -344,7 +396,8 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             [selectedKeys]="selectedKeys()"
             (selectedKeysChange)="onSelectedKeysChange($event)"
             [selectBy]="selectBy()"
-            [monaListViewVirtualScroll]="virtualization()">
+            [monaListViewVirtualScroll]="virtualization()"
+            (scrollBottom)="onScrollBottom()">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaListViewFooterTemplate>
                     <div class="px-3 py-1 bg-secondary border-0 border-t border-solid border-border font-bold">
@@ -353,12 +406,29 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 </ng-template>
             }
             @if (featureData["itemTemplate"].active) {
-                <ng-template monaListViewItemTemplate let-item>
-                    <div class="flex items-center gap-2 w-full">
-                        <span class="flex-1">{{ item.text }}</span>
-                        <span class="text-green-600">\${{ item.price }}</span>
-                    </div>
-                </ng-template>
+                @if (featureData["layout"].dropdownValue === "Default") {
+                    <ng-template monaListViewItemTemplate let-item>
+                        <div class="flex items-center gap-2 w-full">
+                            <span class="flex-1">{{ item.text }}</span>
+                            <span class="text-green-600">\${{ item.price }}</span>
+                        </div>
+                    </ng-template>
+                } @else if (featureData["layout"].dropdownValue === "Gallery") {
+                    <ng-template monaListViewItemTemplate let-item>
+                        <div class="flex flex-col gap-2 w-full">
+                            @if (item.image) {
+                                <img
+                                    [src]="item.image"
+                                    [style.width.px]="100"
+                                    [style.height.px]="100"
+                                    [alt]="item.text" />
+                            } @else {
+                                <div class="flex items-center justify center">No image.</div>
+                            }
+                            <span class="inline-flex justify-center">{{ item.text }}</span>
+                        </div>
+                    </ng-template>
+                }
             }
             @if (groupingFeatures["groupHeaderTemplate"].active) {
                 <ng-template monaListViewGroupHeaderTemplate let-group>
@@ -401,29 +471,53 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
             orderByDirection: subFeatures["orderByDirection"].dropdownValue
         } as GroupableOptions;
     });
+    protected readonly listClassInput = computed(() => {
+        const features = this.features();
+        const layout = features["layout"].dropdownValue;
+        if (layout === "Default") {
+            return this.listClass();
+        }
+        return twMerge(
+            `flex flex-wrap p-4 [&_li]:w-40 [&_li]:h-40 [&_li]:items-center [&_li]:justify-center`,
+            this.listClass()
+        );
+    });
     protected readonly listViewItems = computed(() => {
-        const virtualization = this.virtualization();
         const dataSet = this.features()["dataSet"]?.dropdownValue;
         if (dataSet === "empty") {
             return [];
         }
-        if (!virtualization.enabled) {
-            return dropdownFoodData;
+        const virtualization = this.virtualization();
+        if (virtualization.enabled) {
+            return range(1, 50000)
+                .select(i => {
+                    const item = dropdownFoodData[i % dropdownFoodData.length];
+                    return { ...item, value: i, text: `${item.text} ${i}` };
+                })
+                .toArray();
         }
-        return range(1, 50000)
-            .select(i => {
-                const item = dropdownFoodData[i % dropdownFoodData.length];
-                return { ...item, value: i, text: `${item.text} ${i}` };
-            })
-            .toArray();
+        const infiniteScroll = this.features()["infiniteScroll"]?.active;
+        if (infiniteScroll) {
+            return range(1, 200)
+                .select(i => {
+                    const item = dropdownFoodData[i % dropdownFoodData.length];
+                    return { ...item, value: i, text: `${item.text} ${i}` };
+                })
+                .toArray();
+        }
+        return dropdownFoodData;
     });
     protected readonly listWidth = linkedSignal({
         source: () => this.width(),
         computation: width => {
             const features = this.features();
+            const layout = features["layout"];
             const pagination = features["pagination"];
             const virtualization = features["virtualization"];
             const items = this.listViewItems();
+            if (layout.dropdownValue === "Gallery") {
+                return `550px`;
+            }
             if (virtualization.active) {
                 return width;
             }
@@ -457,6 +551,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         };
         return options;
     });
+    protected readonly scrollBottomItemCount = signal(20);
     protected readonly selectedKeys = signal<number[]>([]);
     protected readonly selection = computed<Partial<SelectableOptions>>(() => {
         const features = this.features();
@@ -489,11 +584,34 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         return options;
     });
     public readonly height = input<ReturnType<ListViewComponent["height"]>>();
+    public readonly listClass = input<ReturnType<ListViewComponent["listClass"]>>("");
+    public readonly listItemClass = input<ReturnType<ListViewComponent["listItemClass"]>>("");
+    public readonly listItemStyle = input<ReturnType<ListViewComponent["listItemStyle"]>>({});
+    public readonly listStyle = input<ReturnType<ListViewComponent["listStyle"]>>({});
     public readonly items = input<ReturnType<ListViewComponent["items"]>>([]);
     public readonly rounded = input<ReturnType<ListViewComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<ListViewComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListViewComponent["textField"]>>("");
     public readonly width = input<ReturnType<ListViewComponent["width"]>>("");
+
+    public constructor() {
+        effect(() => {
+            const infiniteScroll = this.features()["infiniteScroll"].active;
+            if (!infiniteScroll) {
+                this.scrollBottomItemCount.set(this.listViewItems().length);
+            } else {
+                this.scrollBottomItemCount.set(20);
+            }
+        });
+    }
+
+    protected onScrollBottom(): void {
+        const infiniteScroll = this.features()["infiniteScroll"].active;
+        if (!infiniteScroll) {
+            return;
+        }
+        this.scrollBottomItemCount.update(i => i + 10);
+    }
 
     protected onSelectedKeysChange(keys: number[]): void {
         this.selectedKeys.set(keys);

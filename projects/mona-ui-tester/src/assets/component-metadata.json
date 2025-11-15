@@ -676,14 +676,14 @@
         "kind": "input"
       },
       {
-        "name": "selectedKeys",
-        "type": "Iterable<K>",
+        "name": "selectBy",
+        "type": "ListKeySelector<T, K> | undefined",
         "description": "",
         "kind": "input"
       },
       {
-        "name": "selectionKey",
-        "type": "ListKeySelector<T, K> | undefined",
+        "name": "selectedKeys",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       }
@@ -1638,37 +1638,61 @@
       {
         "name": "height",
         "type": "ListSizeInputType",
-        "description": "",
+        "description": "Sets the height of the list view.",
+        "kind": "input"
+      },
+      {
+        "name": "listClass",
+        "type": "string",
+        "description": "Sets the classes of the inner UL element.",
+        "kind": "input"
+      },
+      {
+        "name": "listItemClass",
+        "type": "string",
+        "description": "Sets the classes of the list items.",
+        "kind": "input"
+      },
+      {
+        "name": "listItemStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "Sets the style of the list items.",
+        "kind": "input"
+      },
+      {
+        "name": "listStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "Sets the style of the list.",
         "kind": "input"
       },
       {
         "name": "items",
         "type": "Iterable<T>",
-        "description": "",
+        "description": "The items to display in the list.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ListViewVariantProps[\"rounded\"]",
-        "description": "",
+        "description": "Sets the rounding of the list.",
         "kind": "input"
       },
       {
         "name": "scrollBottom",
         "type": "Event",
-        "description": "",
+        "description": "Emits when the list has scrolled to the bottom.",
         "kind": "output"
       },
       {
         "name": "size",
         "type": "ListViewVariantProps[\"size\"]",
-        "description": "",
+        "description": "Sets the size of the list.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "ListKeySelector<T, string> | undefined",
-        "description": "",
+        "description": "Sets the field to display in the list.",
         "kind": "input"
       },
       {
@@ -1680,7 +1704,7 @@
       {
         "name": "width",
         "type": "ListSizeInputType",
-        "description": "",
+        "description": "Sets the width of the list view.",
         "kind": "input"
       }
     ]
@@ -1753,6 +1777,12 @@
         "name": "rounded",
         "type": "PagerVariantProps[\"rounded\"]",
         "description": "The rounded of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "showInfo",
+        "type": "boolean",
+        "description": "Whether to show the info section.",
         "kind": "input"
       },
       {
@@ -2666,6 +2696,30 @@
         "type": "SelectionChangeEvent<TData>",
         "description": "",
         "kind": "output"
+      },
+      {
+        "name": "listClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listItemClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listItemStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "",
+        "kind": "input"
       },
       {
         "name": "maxHeight",

@@ -23,8 +23,3 @@ export const listViewBaseVariants = cva(
         }
     }
 );
-
-export const listViewListVariants = cva(
-    `
-    `
-);

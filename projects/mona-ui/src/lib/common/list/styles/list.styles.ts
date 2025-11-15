@@ -13,11 +13,14 @@ export const listInnerListVariants = cva(
     `
 );
 
-export const listGroupHeaderVariants = cva(
-    `
-        px-3 py-1 font-bold select-none
-    `
-);
+export const listGroupHeaderVariants = cva(``, {
+    variants: {
+        hasTemplate: {
+            true: "",
+            false: "py-1 font-bold"
+        }
+    }
+});
 
 export const listGroupHeaderTextVariants = cva(`select-none`, {
     variants: {
