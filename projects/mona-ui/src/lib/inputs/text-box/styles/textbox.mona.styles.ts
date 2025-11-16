@@ -36,9 +36,9 @@ export const textBoxVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10.5 text-md",
-                medium: "h-8.5 text-sm",
-                small: "h-7.5 text-xs"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
         }
     }
@@ -59,6 +59,8 @@ export const inputVariants = cva(
         file:bg-transparent file:text-xs
         file:font-medium
 
+        placeholder:text-muted-foreground
+
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
@@ -78,9 +80,9 @@ export const inputVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-11.5 text-md",
-                medium: "h-8.75 text-sm",
-                small: "h-8.25 text-xs"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
         },
         compoundVariants: [
