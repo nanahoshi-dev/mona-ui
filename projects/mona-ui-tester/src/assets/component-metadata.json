@@ -982,6 +982,12 @@
         "kind": "model"
       },
       {
+        "name": "iconOnly",
+        "type": "boolean",
+        "description": "Sets the icon only state of the button.\r\nWhen set to true, the button will appear as square.",
+        "kind": "input"
+      },
+      {
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
         "description": "Sets the look of the button.",
@@ -1600,20 +1606,38 @@
         "kind": "output"
       },
       {
-        "name": "selectionChange",
-        "type": "ListBoxSelectionEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "connectedList",
         "type": "ListBoxComponent<T> | null",
         "description": "",
         "kind": "input"
       },
       {
+        "name": "height",
+        "type": "string | number",
+        "description": "Sets the height of the list box.",
+        "kind": "input"
+      },
+      {
         "name": "items",
-        "type": "T>, Iterable<T>",
+        "type": "Iterable<T>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ListBoxVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "selectionChange",
+        "type": "ListBoxSelectionEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "size",
+        "type": "ListBoxVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
       },
@@ -1628,6 +1652,12 @@
         "type": "boolean | Partial<ToolbarOptions>",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number",
+        "description": "",
+        "kind": "input"
       }
     ]
   },
@@ -1637,7 +1667,7 @@
     "inputs": [
       {
         "name": "height",
-        "type": "ListSizeInputType",
+        "type": "string | number",
         "description": "Sets the height of the list view.",
         "kind": "input"
       },
@@ -1703,7 +1733,7 @@
       },
       {
         "name": "width",
-        "type": "ListSizeInputType",
+        "type": "string | number",
         "description": "Sets the width of the list view.",
         "kind": "input"
       }
@@ -2299,6 +2329,12 @@
         "name": "ariaLabelledby",
         "type": "string",
         "description": "ARIA labelledby for the dropdown button.",
+        "kind": "input"
+      },
+      {
+        "name": "iconOnly",
+        "type": "boolean",
+        "description": "Sets the icon only state of the button.\r\nWhen set to true, the button will appear as square.",
         "kind": "input"
       },
       {

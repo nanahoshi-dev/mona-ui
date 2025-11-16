@@ -7,7 +7,7 @@ export const buttonGroupVariants = cva(
         [&>button]:border-0
         [&>button]:focus-visible:ring-2
         [&>button]:focus-visible:z-10
-        [&>button]:w-full [&>button]:h-full [&>button]:rounded-none
+        [&>button]:rounded-none
     `,
     {
         variants: {

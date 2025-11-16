@@ -2,10 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, signal } f
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { NgComponentOutlet } from "@angular/common";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { ListBoxComponent } from "mona-ui";
+import { ListBoxComponent, ToolbarAction, ToolbarOptions } from "mona-ui";
 import { ComponentConfig, type ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
-import { List } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 
 @Component({
@@ -15,7 +14,85 @@ import { dropdownFoodData } from "../../../../assets/dropdown.data";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent> {
-    readonly #injector = createFeatureInjector({});
+    readonly #injector = createFeatureInjector({
+        customizedToolbar: {
+            active: false,
+            code: ``,
+            codeVisible: false,
+            hasCode: false,
+            name: "Customized Toolbar",
+            description: "Customize the toolbar",
+            subFeatures: {
+                moveDown: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Move Down",
+                    description: "Display move down button"
+                },
+                moveUp: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Move Up",
+                    description: "Display move up button"
+                },
+                position: {
+                    active: false,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Position",
+                    description: "Set the position of the toolbar",
+                    type: "dropdown",
+                    dropdownDataSource: ["left", "right", "top", "bottom"],
+                    dropdownValue: "right"
+                },
+                remove: {
+                    active: false,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Remove",
+                    description: "Display remove button"
+                },
+                transferAllFrom: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Transfer All From",
+                    description: "Display transfer all from button"
+                },
+                transferAllTo: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Transfer All To",
+                    description: "Display transfer all to button"
+                },
+                transferFrom: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Transfer From",
+                    description: "Display transfer from button"
+                },
+                transferTo: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Transfer To",
+                    description: "Display transfer to button"
+                }
+            }
+        }
+    });
     protected readonly config = signal<ComponentConfig<ListBoxComponent>>({
         code: ``,
         inputs: {
@@ -24,7 +101,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             },
             height: {
                 type: "string",
-                value: "300px"
+                value: "320px"
             },
             rounded: {
                 type: "dropdown",
@@ -47,7 +124,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             },
             width: {
                 type: "string",
-                value: "200px"
+                value: "280px"
             }
         },
         outputs: {},
@@ -63,17 +140,63 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
     imports: [ListBoxComponent],
     template: `
         <mona-list-box
+            [connectedList]="connectedList"
             [height]="height()"
             [items]="viewItems()"
             [rounded]="rounded()"
             [size]="size()"
             [textField]="textField()"
-            [toolbar]="toolbar()"
+            [toolbar]="toolbarCustomizations()"
             [width]="width()"></mona-list-box>
-    `
+
+        <mona-list-box
+            [height]="height()"
+            [rounded]="rounded()"
+            [size]="size()"
+            [textField]="textField()"
+            [toolbar]="false"
+            [width]="width()"
+            #connectedList></mona-list-box>
+    `,
+    host: {
+        class: "flex gap-1"
+    }
 })
 class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly toolbarCustomizations = computed(() => {
+        const toolbar = this.toolbar();
+        const features = this.features();
+        const customizedToolbarActive = features["customizedToolbar"].active;
+        const customizedToolbar = features["customizedToolbar"].subFeatures || {};
+        if (!customizedToolbarActive) {
+            return toolbar;
+        }
+        const actions: ToolbarAction[] = [];
+        if (customizedToolbar["moveDown"].active) {
+            actions.push("moveDown");
+        }
+        if (customizedToolbar["moveUp"].active) {
+            actions.push("moveUp");
+        }
+        if (customizedToolbar["remove"].active) {
+            actions.push("remove");
+        }
+        if (customizedToolbar["transferAllFrom"].active) {
+            actions.push("transferAllFrom");
+        }
+        if (customizedToolbar["transferAllTo"].active) {
+            actions.push("transferAllTo");
+        }
+        if (customizedToolbar["transferFrom"].active) {
+            actions.push("transferFrom");
+        }
+        if (customizedToolbar["transferTo"].active) {
+            actions.push("transferTo");
+        }
+        const position = customizedToolbar["position"].dropdownValue;
+        return { actions, position } as ToolbarOptions;
+    });
     protected readonly viewItems = computed(() => dropdownFoodData);
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");

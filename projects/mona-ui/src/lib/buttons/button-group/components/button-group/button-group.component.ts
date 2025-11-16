@@ -33,8 +33,7 @@ import { ButtonGroupItemComponent } from "../button-group-item/button-group-item
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ButtonDirective, NgTemplateOutlet],
     host: {
-        "[class]": "classes()",
-        "[class.mona-button-group]": "true"
+        "[class]": "classes()"
     }
 })
 export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
