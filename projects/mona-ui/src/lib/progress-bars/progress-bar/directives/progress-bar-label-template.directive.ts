@@ -1,5 +1,5 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
-import type { LabelTemplateContext } from "mona-ui/progress-bars/models/LabelTemplateContext";
+import { LabelTemplateContext } from "../../models/LabelTemplateContext";
 
 @Directive({
     selector: "ng-template[monaProgressBarLabelTemplate]"

@@ -1,5 +1,5 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
-import type { NumericButtonsTemplateContext } from "mona-ui/pager/models/NumericButtonsTemplateContext";
+import { NumericButtonsTemplateContext } from "../models/NumericButtonsTemplateContext";
 
 @Directive({
     selector: "ng-template[monaPagerNumericButtonsTemplate]"

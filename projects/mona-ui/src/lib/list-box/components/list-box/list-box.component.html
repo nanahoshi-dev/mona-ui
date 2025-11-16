@@ -4,7 +4,7 @@
                 [size]="size()"
                 [textField]="textField()"
                 [width]="'100%'"
-                [monaListViewSelectable]="{enabled: true, mode: 'single', toggleable: true}"
+                [monaListViewSelectable]="{enabled: true, mode: 'multiple'}"
                 [monaListViewNavigable]="{enabled: true, mode: 'select'}"
                 [selectedKeys]="selectedItems()" (selectedKeysChange)="onSelectedItemChange($event)">
     @if (itemTemplate()) {
@@ -21,63 +21,64 @@
 </mona-list-view>
 
 @let options = toolbarOptions() ?? null;
-@let selectedListItem = selectedItem() ?? null;
-@let connectedListSelectedItem = connectedList()?.selectedItem() ?? null;
-@let connectedListItems = connectedList()?.listBoxItems() ?? [];
-@if (options !== null) {
+@let connectedListBox = connectedList();
+@let hasSelectedItems = selectedItems().length > 0;
+@let connectedListHasSelectedItems = connectedListBox && connectedListBox.selectedItems().length > 0;
+@let connectedListItems = connectedListBox?.listBoxItems() ?? [];
+@if (options !== null && connectedListBox !== null) {
     <div [class]="toolbarClasses()">
         @if (options.actions|monaContains:'moveUp') {
-            <button monaButton (click)="onMoveUpClick($event)"
+            <button monaButton (click)="onMoveClick('moveUp', $event)"
                     [iconOnly]="true"
                     [rounded]="rounded()"
                     [size]="size()"
                     title="Move Up"
-                    [disabled]="selectedListItem === null && connectedListSelectedItem === null">
+                    [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <fa-icon [icon]="moveUpIcon"></fa-icon>
             </button>
         }
         @if (options.actions|monaContains:'moveDown') {
-            <button monaButton (click)="onMoveDownClick($event)"
+            <button monaButton (click)="onMoveClick('moveDown', $event)"
                     [iconOnly]="true"
                     [rounded]="rounded()"
                     [size]="size()"
                     title="Move Down"
-                    [disabled]="selectedListItem === null && connectedListSelectedItem === null">
+                    [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <fa-icon [icon]="moveDownIcon"></fa-icon>
             </button>
         }
         @if (options.actions|monaContains:'transferFrom') {
-            <button monaButton (click)="onTransferFromClick($event)"
+            <button monaButton (click)="onTransferClick('transferFrom', $event)"
                     [iconOnly]="true"
                     [rounded]="rounded()"
                     [size]="size()"
                     title="Transfer From"
-                    [disabled]="connectedListSelectedItem === null">
+                    [disabled]="!connectedListHasSelectedItems">
                 <fa-icon [icon]="transferFromIcon"></fa-icon>
             </button>
         }
         @if (options.actions|monaContains:'transferTo') {
-            <button monaButton (click)="onTransferToClick($event)"
+            <button monaButton (click)="onTransferClick('transferTo', $event)"
                     [iconOnly]="true"
                     [rounded]="rounded()"
                     [size]="size()"
                     title="Transfer To"
-                    [disabled]="selectedListItem === null">
+                    [disabled]="!hasSelectedItems">
                 <fa-icon [icon]="transferToIcon"></fa-icon>
             </button>
         }
         @if (options.actions|monaContains:'transferAllFrom') {
-            <button monaButton (click)="onTransferAllFromClick($event)"
+            <button monaButton (click)="onTransferClick('transferAllFrom', $event)"
                     [iconOnly]="true"
                     [rounded]="rounded()"
                     [size]="size()"
                     title="Transfer All From"
-                    [disabled]="!connectedList() || connectedListItems.length === 0">
+                    [disabled]="!connectedListBox || connectedListItems.length === 0">
                 <fa-icon [icon]="transferAllFromIcon"></fa-icon>
             </button>
         }
         @if (options.actions|monaContains:'transferAllTo') {
-            <button monaButton (click)="onTransferAllToClick($event)"
+            <button monaButton (click)="onTransferClick('transferAllTo', $event)"
                     [iconOnly]="true"
                     [rounded]="rounded()"
                     [size]="size()"
@@ -92,7 +93,7 @@
                     [rounded]="rounded()"
                     [size]="size()"
                     title="Remove"
-                    [disabled]="selectedListItem === null">
+                    [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
                 <fa-icon [icon]="removeIcon"></fa-icon>
             </button>
         }

@@ -1,11 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild } from "@angular/core";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
-import { NgComponentOutlet } from "@angular/common";
+import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { ListBoxComponent, ToolbarAction, ToolbarOptions } from "mona-ui";
+import {
+    ListBoxActionEvent,
+    ListBoxComponent,
+    ListBoxItemTemplateDirective,
+    ListBoxNoDataTemplateDirective,
+    ListBoxSelectionEvent,
+    moveIndices,
+    ToolbarAction,
+    ToolbarOptions
+} from "mona-ui";
 import { ComponentConfig, type ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
+import { ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
+import { Box, LucideAngularModule } from "lucide-angular";
 
 @Component({
     selector: "app-list-box-demo",
@@ -15,6 +26,14 @@ import { dropdownFoodData } from "../../../../assets/dropdown.data";
 })
 export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent> {
     readonly #injector = createFeatureInjector({
+        connectedLists: {
+            active: true,
+            code: ``,
+            codeVisible: false,
+            hasCode: false,
+            name: "Connected Lists",
+            description: "Display connected lists"
+        },
         customizedToolbar: {
             active: false,
             code: ``,
@@ -91,6 +110,22 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                     description: "Display transfer to button"
                 }
             }
+        },
+        itemTemplate: {
+            active: false,
+            code: ``,
+            codeVisible: false,
+            hasCode: false,
+            name: "Item Template",
+            description: "Display item template"
+        },
+        noDataTemplate: {
+            active: false,
+            code: ``,
+            codeVisible: false,
+            hasCode: false,
+            name: "No Data Template",
+            description: "This template sets the view when the list box is empty."
         }
     });
     protected readonly config = signal<ComponentConfig<ListBoxComponent>>({
@@ -127,7 +162,11 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 value: "280px"
             }
         },
-        outputs: {},
+        outputs: {
+            actionClick: {
+                type: "event"
+            }
+        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
@@ -137,33 +176,87 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
 }
 
 @Component({
-    imports: [ListBoxComponent],
+    imports: [
+        ListBoxComponent,
+        ListBoxItemTemplateDirective,
+        CurrencyPipe,
+        ListBoxNoDataTemplateDirective,
+        LucideAngularModule
+    ],
     template: `
+        @let featureData = features();
         <mona-list-box
-            [connectedList]="connectedList"
+            (actionClick)="onActionClick($event, 'first')"
+            (selectionChange)="onSelectionChange($event)"
+            [connectedList]="secondListBox() ?? null"
             [height]="height()"
             [items]="viewItems()"
             [rounded]="rounded()"
             [size]="size()"
             [textField]="textField()"
             [toolbar]="toolbarCustomizations()"
-            [width]="width()"></mona-list-box>
+            [width]="width()">
+            @if (featureData["itemTemplate"].active) {
+                <ng-template monaListBoxItemTemplate let-item>
+                    <div class="flex flex-row w-full">
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 flex items-center {{ color }}">{{ item.text }}</span>
+                        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                            item.price | currency
+                        }}</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaListBoxNoDataTemplate>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <lucide-angular [name]="boxIcon"></lucide-angular>
+                        <span>List box has no items.</span>
+                    </div>
+                </ng-template>
+            }
+        </mona-list-box>
 
-        <mona-list-box
-            [height]="height()"
-            [rounded]="rounded()"
-            [size]="size()"
-            [textField]="textField()"
-            [toolbar]="false"
-            [width]="width()"
-            #connectedList></mona-list-box>
+        @if (connectedListsVisible()) {
+            <mona-list-box
+                (actionClick)="onActionClick($event, 'second')"
+                [connectedList]="thirdList"
+                [height]="height()"
+                [items]="secondListBoxItems()"
+                [rounded]="rounded()"
+                [size]="size()"
+                [textField]="textField()"
+                [toolbar]="true"
+                [width]="width()"
+                #secondList></mona-list-box>
+
+            <mona-list-box
+                (actionClick)="onActionClick($event, 'third')"
+                [height]="height()"
+                [items]="thirdListBoxItems()"
+                [rounded]="rounded()"
+                [size]="size()"
+                [textField]="textField()"
+                [toolbar]="false"
+                [width]="width()"
+                #thirdList></mona-list-box>
+        }
     `,
     host: {
         class: "flex gap-1"
     }
 })
 class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponent> {
+    #listData = signal(ImmutableSet.create(dropdownFoodData));
+    protected readonly boxIcon = Box;
+    protected readonly connectedListsVisible = computed(() => {
+        const features = this.features();
+        return features["connectedLists"].active;
+    });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly secondListBox = viewChild<ListBoxComponent<(typeof dropdownFoodData)[0]>>("secondList");
+    protected readonly secondListBoxItems = signal(ImmutableSet.create<(typeof dropdownFoodData)[0]>());
+    protected readonly thirdListBoxItems = signal(ImmutableSet.create<(typeof dropdownFoodData)[0]>());
     protected readonly toolbarCustomizations = computed(() => {
         const toolbar = this.toolbar();
         const features = this.features();
@@ -197,7 +290,7 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         const position = customizedToolbar["position"].dropdownValue;
         return { actions, position } as ToolbarOptions;
     });
-    protected readonly viewItems = computed(() => dropdownFoodData);
+    protected readonly viewItems = computed(() => this.#listData());
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
     // public readonly items = input<ReturnType<ListBoxComponent["items"]>>(new List());
@@ -206,4 +299,69 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
     public readonly textField = input<ReturnType<ListBoxComponent["textField"]>>("");
     public readonly toolbar = input<ReturnType<ListBoxComponent["toolbar"]>>(true);
     public readonly width = input<ReturnType<ListBoxComponent["width"]>>("100%");
+
+    protected onActionClick(
+        event: ListBoxActionEvent<(typeof dropdownFoodData)[0]>,
+        listBox: "first" | "second" | "third"
+    ): void {
+        console.log(event);
+        if (event.action === "moveDown" || event.action === "moveUp") {
+            const dataToProcess =
+                listBox === "first"
+                    ? this.#listData
+                    : listBox === "second"
+                      ? this.secondListBoxItems
+                      : this.thirdListBoxItems;
+            dataToProcess.update(data => {
+                const newData = [...data];
+                return toImmutableSet(
+                    moveIndices(newData, event.selectedIndices, event.action === "moveDown" ? 1 : -1)
+                );
+            });
+        } else if (event.action === "transferTo") {
+            if (listBox === "first") {
+                this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
+                this.#listData.update(set => set.removeAll(event.selectedItems));
+            } else if (listBox === "second") {
+                this.thirdListBoxItems.update(set => set.addAll(event.selectedItems));
+                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
+            }
+        } else if (event.action === "transferFrom") {
+            if (listBox === "second") {
+                this.#listData.update(set => set.addAll(event.selectedItems));
+                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
+            } else if (listBox === "third") {
+                this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
+                this.thirdListBoxItems.update(set => set.removeAll(event.selectedItems));
+            }
+        } else if (event.action === "transferAllTo") {
+            if (listBox === "first") {
+                this.secondListBoxItems.update(set => set.addAll(this.#listData()));
+                this.#listData.update(set => set.clear());
+            } else if (listBox === "second") {
+                this.thirdListBoxItems.update(set => set.addAll(this.secondListBoxItems()));
+                this.secondListBoxItems.update(set => set.clear());
+            }
+        } else if (event.action === "transferAllFrom") {
+            if (listBox === "second") {
+                this.#listData.update(set => set.addAll(this.secondListBoxItems()));
+                this.secondListBoxItems.update(set => set.clear());
+            } else if (listBox === "third") {
+                this.secondListBoxItems.update(set => set.addAll(this.thirdListBoxItems()));
+                this.thirdListBoxItems.update(set => set.clear());
+            }
+        } else if (event.action === "remove") {
+            if (listBox === "first") {
+                this.#listData.update(set => set.removeAll(event.selectedItems));
+            } else if (listBox === "second") {
+                this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
+            } else if (listBox === "third") {
+                this.thirdListBoxItems.update(set => set.removeAll(event.selectedItems));
+            }
+        }
+    }
+
+    protected onSelectionChange(event: ListBoxSelectionEvent): void {
+        console.log(event);
+    }
 }

@@ -29,12 +29,12 @@ import {
     faEllipsis
 } from "@fortawesome/free-solid-svg-icons";
 import { range } from "@mirei/ts-collections";
-import { DropDownListValueTemplateDirective } from "mona-ui/dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
-import { PagerInfoTemplateDirective } from "mona-ui/pager/directives/pager-info-template.directive";
-import { PagerNavigationButtonsTemplateDirective } from "mona-ui/pager/directives/pager-navigation-buttons-template.directive";
-import { PagerNumericButtonsTemplateDirective } from "mona-ui/pager/directives/pager-numeric-buttons-template.directive";
-import { PagerPageSizeTemplateDirective } from "mona-ui/pager/directives/pager-page-size-template.directive";
-import type { InfoTemplateContext } from "mona-ui/pager/models/InfoTemplateContext";
+import { DropDownListValueTemplateDirective } from "../../../dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
+import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
+import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-navigation-buttons-template.directive";
+import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-numeric-buttons-template.directive";
+import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
+import type { InfoTemplateContext } from "../../models/InfoTemplateContext";
 import {
     pagerBaseThemeVariants,
     pagerInfoThemeVariants,
@@ -42,8 +42,7 @@ import {
     pagerListThemeVariants,
     type PagerVariantInputs,
     type PagerVariantProps
-} from "mona-ui/pager/styles/pager.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../../styles/pager.styles";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DropDownVirtualScrollDirective } from "../../../dropdowns/directives/drop-down-virtual-scroll.directive";
@@ -54,6 +53,7 @@ import { Page } from "../../models/Page";
 import { PageChangeEvent } from "../../models/PageChangeEvent";
 import { PagerType } from "../../models/PagerType";
 import { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
+import { ThemeService } from "../../../theme/services/theme.service";
 
 @Component({
     selector: "mona-pager",

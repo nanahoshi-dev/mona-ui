@@ -30,7 +30,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { Collections } from "@mirei/ts-collections";
+import { swap } from "@mirei/ts-collections";
 import { asyncScheduler, filter, observeOn, take, tap } from "rxjs";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
@@ -336,7 +336,7 @@ export class GridComponent<T> implements OnInit {
             if (newIndex < 0 || newIndex >= colList.size()) {
                 return colList.toImmutableSet();
             }
-            Collections.swap(colList, index, newIndex);
+            swap(colList, index, newIndex);
             return colList.toImmutableSet();
         });
     }

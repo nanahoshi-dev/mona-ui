@@ -1,13 +1,13 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input, TemplateRef } from "@angular/core";
-import { getPercentage } from "mona-ui/progress-bars/utils/progress-bar.utils";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input } from "@angular/core";
 import { Action } from "../../../../utils/Action";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
     circularProgressBarBaseThemeVariants,
     type CircularProgressBarBaseVariantInput
 } from "../../styles/circular-progress-bar.styles";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { getPercentage } from "../../../utils/progress-bar.utils";
 
 @Component({
     selector: "mona-circular-progress-bar",

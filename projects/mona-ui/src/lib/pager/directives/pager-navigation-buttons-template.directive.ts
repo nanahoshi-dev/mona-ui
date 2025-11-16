@@ -1,5 +1,5 @@
 import { Directive, inject, input, TemplateRef } from "@angular/core";
-import type { NavigationButtonsTemplateContext } from "mona-ui/pager/models/NavigationButtonsTemplateContext";
+import { NavigationButtonsTemplateContext } from "../models/NavigationButtonsTemplateContext";
 
 @Directive({
     selector: "ng-template[monaPagerNavigationButtonsTemplate]"

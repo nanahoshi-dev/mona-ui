@@ -1,5 +1,5 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
-import type { InfoTemplateContext } from "mona-ui/pager/models/InfoTemplateContext";
+import { InfoTemplateContext } from "../models/InfoTemplateContext";
 
 @Directive({
     selector: "ng-template[monaPagerInfoTemplate]"

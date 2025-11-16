@@ -1601,7 +1601,7 @@
     "inputs": [
       {
         "name": "actionClick",
-        "type": "ListBoxActionClickEvent",
+        "type": "ListBoxActionEvent",
         "description": "",
         "kind": "output"
       },

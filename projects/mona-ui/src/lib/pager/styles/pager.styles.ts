@@ -4,9 +4,9 @@ import {
     pagerInfoVariants as monaPagerInfoVariants,
     pagerInputVariants as monaPagerInputVariants,
     pagerListVariants as monaPagerListVariants
-} from "mona-ui/pager/styles/pager.mona.styles";
-import type { ThemeStyle } from "mona-ui/theme/models/Theme";
-import type { VariantInputs } from "mona-ui/utils/VariantInputs";
+} from "../styles/pager.mona.styles";
+import { ThemeStyle } from "../../theme/models/Theme";
+import { VariantInputs } from "../../utils/VariantInputs";
 
 export const pagerBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

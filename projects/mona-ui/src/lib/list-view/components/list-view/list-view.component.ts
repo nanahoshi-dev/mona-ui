@@ -17,12 +17,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableSet } from "@mirei/ts-collections";
-import {
-    listViewBaseThemeVariants,
-    type ListViewVariantInputs,
-    type ListViewVariantProps
-} from "mona-ui/list-view/styles/list-view.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
 import { filter, fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListComponent } from "../../../common/list/components/list/list.component";
@@ -32,7 +26,6 @@ import { ListHeaderTemplateDirective } from "../../../common/list/directives/lis
 import { ListItemTemplateDirective } from "../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../common/list/directives/list-no-data-template.directive";
 import { ListKeySelector } from "../../../common/list/models/ListSelectors";
-import { ListSizeInputType } from "../../../common/list/models/ListSizeType";
 import { ListService } from "../../../common/list/services/list.service";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
@@ -42,6 +35,8 @@ import { ListViewGroupHeaderTemplateDirective } from "../../directives/list-view
 import { ListViewHeaderTemplateDirective } from "../../directives/list-view-header-template.directive";
 import { ListViewItemTemplateDirective } from "../../directives/list-view-item-template.directive";
 import { ListViewNoDataTemplateDirective } from "../../directives/list-view-no-data-template.directive";
+import { listViewBaseThemeVariants, ListViewVariantInputs, ListViewVariantProps } from "../../styles/list-view.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
 
 @Component({
     selector: "mona-list-view",

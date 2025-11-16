@@ -23,12 +23,12 @@ import {
     ListViewPageableDirective,
     ListViewSelectableDirective,
     ListViewVirtualScrollDirective,
+    NavigableOptions,
     type PagerSettings,
     type SelectableOptions,
-    SlicePipe
+    SlicePipe,
+    VirtualScrollOptions
 } from "mona-ui";
-import type { NavigableOptions } from "mona-ui/common/list/models/NavigableOptions";
-import type { VirtualScrollOptions } from "mona-ui/common/models/VirtualScrollOptions";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

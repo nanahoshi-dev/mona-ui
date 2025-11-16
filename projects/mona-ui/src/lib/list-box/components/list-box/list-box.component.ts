@@ -8,7 +8,6 @@ import {
     ElementRef,
     inject,
     input,
-    OnInit,
     output,
     Signal,
     signal,
@@ -25,7 +24,7 @@ import {
     faAngleUp,
     faTrash
 } from "@fortawesome/free-solid-svg-icons";
-import { Collections, Enumerable, ImmutableList } from "@mirei/ts-collections";
+import { ImmutableList } from "@mirei/ts-collections";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ListViewComponent } from "../../../list-view/components/list-view/list-view.component";
 import { ListViewItemTemplateDirective } from "../../../list-view/directives/list-view-item-template.directive";
@@ -35,7 +34,7 @@ import { ListViewSelectableDirective } from "../../../list-view/directives/list-
 import { ContainsPipe } from "../../../pipes/contains.pipe";
 import { ListBoxItemTemplateDirective } from "../../directives/list-box-item-template.directive";
 import { ListBoxNoDataTemplateDirective } from "../../directives/list-box-no-data-template.directive";
-import { ListBoxActionClickEvent } from "../../models/ListBoxActionClickEvent";
+import { ListBoxActionEvent } from "../../models/ListBoxActionClickEvent";
 import { ListBoxItemTemplateContext } from "../../models/ListBoxItemTemplateContext";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
@@ -44,8 +43,11 @@ import {
     listBoxToolbarThemeVariants,
     ListBoxVariantInputs,
     ListBoxVariantProps
-} from "mona-ui/list-box/styles/list-box.styles";
-import { ThemeService } from "mona-ui/theme/services/theme.service";
+} from "../../styles/list-box.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { ListBoxMoveEvent } from "../../models/ListBoxMoveEvent";
+import { ListBoxRemoveEvent } from "../../models/ListBoxRemoveEvent";
+import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
 
 @Component({
     selector: "mona-list-box",
@@ -68,16 +70,16 @@ import { ThemeService } from "mona-ui/theme/services/theme.service";
         "[style.width]": "listWidth()"
     }
 })
-export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
+export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     protected readonly activeListBox: Signal<ListBoxComponent<T> | null> = computed(() => {
-        const selectedItem = this.selectedItem();
-        if (selectedItem) {
+        const selectedItems = this.selectedItems();
+        if (selectedItems.any()) {
             return this;
         }
         const connectedList = this.connectedList();
-        if (connectedList?.selectedItem() != null) {
+        if (connectedList?.selectedItems().any()) {
             return connectedList;
         }
         return this;
@@ -127,7 +129,7 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
         return this.updateToolbarOptions(toolbar);
     });
 
-    public readonly actionClick = output<ListBoxActionClickEvent>();
+    public readonly actionClick = output<ListBoxActionEvent>();
     public readonly connectedList = input<ListBoxComponent<T> | null>(null);
 
     /**
@@ -139,7 +141,6 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
     public readonly listBoxItems = signal(ImmutableList.create<T>());
     public readonly rounded = input<ListBoxVariantProps["rounded"]>("medium");
     public readonly selectionChange = output<ListBoxSelectionEvent>();
-    public readonly selectedItem = signal<T | null>(null);
     public readonly selectedItems = signal(ImmutableList.create<T>());
     public readonly size = input<ListBoxVariantProps["size"]>("medium");
     public readonly textField = input("");
@@ -151,132 +152,122 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
             const items = this.items();
             untracked(() => this.listBoxItems.set(ImmutableList.create(items)));
         });
-    }
-
-    public createAndEmitActionEvent(action: ToolbarAction, originalEvent: MouseEvent): boolean {
-        const event = new ListBoxActionClickEvent(action, this.selectedItem(), originalEvent);
-        this.actionClick.emit(event);
-        return event.isDefaultPrevented();
-    }
-
-    public moveInto(items: Iterable<T>) {
-        const itemsToAdd = Enumerable.from(items).where(item => !this.listBoxItems().contains(item));
-        this.listBoxItems.update(list => list.concat(itemsToAdd).toImmutableList());
-    }
-
-    public ngOnInit(): void {
-        if (this.connectedList()) {
-            this.connectedList()!.selectionChange.subscribe(() => {
-                this.selectedItems.update(list => list.clear());
-                this.selectedItem.set(null);
+        effect(() => {
+            const connectedList = this.connectedList();
+            if (!connectedList) {
+                return;
+            }
+            connectedList.selectionChange.subscribe(() => {
+                untracked(() => this.selectedItems.update(list => list.clear()));
             });
-        }
+        });
     }
 
-    public onMoveDownClick(event: MouseEvent): void {
+    public onMoveClick(direction: Extract<ToolbarAction, "moveDown" | "moveUp">, event: MouseEvent): void {
         const activeListBox = this.getActiveListBox();
         if (!activeListBox) {
             return;
         }
-        const selectedItem = activeListBox.selectedItem();
-        if (selectedItem && !activeListBox.createAndEmitActionEvent("moveDown", event)) {
-            const index = activeListBox.listBoxItems().indexOf(selectedItem);
-            if (index < activeListBox.listBoxItems().length - 1) {
-                const itemList = activeListBox.listBoxItems().toList();
-                Collections.swap(itemList, index, index + 1);
-                activeListBox.listBoxItems.update(list => list.clear().addAll(itemList));
-                activeListBox.scrollToSelectedItem();
-            }
-        }
-    }
 
-    public onMoveUpClick(event: MouseEvent): void {
-        const activeListBox = this.getActiveListBox();
-        if (!activeListBox) {
+        const selectedItems = activeListBox.selectedItems();
+        if (selectedItems.none()) {
+            const moveEvent = new ListBoxMoveEvent(direction, [], [], -1, -1, event);
+            activeListBox.actionClick.emit(moveEvent);
             return;
         }
-        const selectedItem = activeListBox.selectedItem();
-        if (selectedItem && !activeListBox.createAndEmitActionEvent("moveUp", event)) {
-            const index = activeListBox.listBoxItems().indexOf(selectedItem);
-            if (index > 0) {
-                const itemList = activeListBox.listBoxItems().toList();
-                Collections.swap(itemList, index, index - 1);
-                activeListBox.listBoxItems.update(list => list.clear().addAll(itemList));
-                activeListBox.scrollToSelectedItem();
+
+        const listBoxItems = activeListBox.listBoxItems();
+        const startIndex = listBoxItems.indexOf(selectedItems.elementAt(0));
+        const endIndex = listBoxItems.indexOf(selectedItems.elementAt(selectedItems.length - 1));
+
+        let newMoveIndex: number;
+        if (direction === "moveDown") {
+            if (endIndex >= listBoxItems.length - 1) {
+                return;
             }
+            newMoveIndex = endIndex + 1;
+        } else {
+            if (startIndex <= 0) {
+                return;
+            }
+            newMoveIndex = startIndex - 1;
+        }
+
+        const selectedIndices = selectedItems.select(item => listBoxItems.indexOf(item)).toArray();
+        const moveEvent = new ListBoxMoveEvent(
+            direction,
+            selectedItems,
+            selectedIndices,
+            startIndex,
+            newMoveIndex,
+            event
+        );
+
+        activeListBox.actionClick.emit(moveEvent);
+
+        if (!moveEvent.isDefaultPrevented()) {
+            activeListBox.scrollToSelectedItem();
         }
     }
 
     public onRemoveClick(event: MouseEvent): void {
-        const selectedItem = this.selectedItem();
-        if (selectedItem && !this.createAndEmitActionEvent("remove", event)) {
-            const index = this.listBoxItems().indexOf(selectedItem);
-            this.listBoxItems.update(list => list.removeAt(index));
-            this.selectedItems.update(list => list.remove(selectedItem));
-            this.selectedItem.set(null);
+        const listBox = this.activeListBox();
+        if (!listBox) {
+            return;
+        }
+        const selectedItems = listBox.selectedItems();
+        if (selectedItems.none()) {
+            return;
+        }
+        const removeEvent = new ListBoxRemoveEvent("remove", selectedItems, event);
+        listBox.actionClick.emit(removeEvent);
+        if (!removeEvent.isDefaultPrevented()) {
+            listBox.scrollToSelectedItem();
         }
     }
 
     public onSelectedItemChange(items: T[]): void {
-        const item = this.selectedItem();
+        const oldSelectedItems = this.selectedItems()
+            .toArray()
+            .filter(i => !items.includes(i));
+        const newSelectedItems = items.filter(i => !oldSelectedItems.includes(i));
         this.selectedItems.update(list => list.clear().addAll(items));
-        this.selectedItem.set(items[0]);
-        this.connectedList()?.selectedItem.set(null);
         this.connectedList()?.selectedItems.update(list => list.clear());
         this.activeListBox()?.selectionChange.emit({
-            previous: item ? { item, index: this.listBoxItems().indexOf(item) } : null,
-            current: { item: items[0], index: item ? this.listBoxItems().indexOf(items[0]) : -1 }
+            deselectedItems: oldSelectedItems,
+            selectedItems: newSelectedItems
         });
     }
 
-    public onTransferAllFromClick(event: MouseEvent): void {
+    public onTransferClick(
+        action: Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">,
+        event: MouseEvent
+    ): void {
         const connectedList = this.connectedList();
-        if (connectedList && !this.createAndEmitActionEvent("transferAllFrom", event)) {
-            this.moveInto(connectedList.listBoxItems());
-            connectedList.listBoxItems.update(list => list.clear());
-            connectedList.selectedItem.set(null);
-            connectedList.selectedItems.update(list => list.clear());
+        if (!connectedList) {
+            return;
         }
-    }
-
-    public onTransferAllToClick(event: MouseEvent): void {
-        const connectedList = this.connectedList();
-        if (connectedList && !this.createAndEmitActionEvent("transferAllTo", event)) {
-            connectedList.moveInto(this.listBoxItems());
-            this.listBoxItems.update(list => list.clear());
-            this.selectedItem.set(null);
-            this.selectedItems.update(list => list.clear());
+        const sourceList = this.activeListBox();
+        const targetList = this.activeListBox() === connectedList ? this : connectedList;
+        if (!sourceList || !targetList) {
+            return;
         }
-    }
-
-    public onTransferFromClick(event: MouseEvent): void {
-        const connectedList = this.connectedList();
-        const connectedSelectedItem = connectedList?.selectedItem();
-        if (connectedList && connectedSelectedItem && !this.createAndEmitActionEvent("transferFrom", event)) {
-            this.moveInto([connectedSelectedItem]);
-            connectedList.listBoxItems.update(list => list.remove(connectedSelectedItem));
-            this.selectedItem.set(connectedSelectedItem);
-            this.selectedItems.update(list => list.clear().add(connectedSelectedItem));
-            connectedList.selectedItem.set(null);
-            connectedList.selectedItems.update(list => list.clear());
+        const selectedItems = sourceList.selectedItems();
+        const transferEvent = new ListBoxTransferEvent(action, selectedItems, event);
+        if (action === "transferFrom" || action === "transferAllFrom") {
+            connectedList.actionClick.emit(transferEvent);
+        } else {
+            sourceList.actionClick.emit(transferEvent);
         }
-    }
-
-    public onTransferToClick(event: MouseEvent): void {
-        const connectedList = this.connectedList();
-        const selectedItem = this.selectedItem();
-        if (connectedList && selectedItem && !this.createAndEmitActionEvent("transferTo", event)) {
-            connectedList.moveInto([selectedItem]);
-            this.listBoxItems.update(list => list.remove(selectedItem));
-            connectedList.selectedItem.set(selectedItem);
-            connectedList.selectedItems.update(list => list.clear().add(selectedItem));
-            this.selectedItem.set(null);
-            this.selectedItems.update(list => list.clear());
+        if (!transferEvent.isDefaultPrevented()) {
+            sourceList.selectedItems.update(set => set.clear());
+            targetList.selectedItems.update(set => set.clear());
+            targetList.scrollToSelectedItem();
         }
     }
 
     private getActiveListBox(): ListBoxComponent<T> | null {
-        if (this.selectedItem() != null) {
+        if (this.selectedItems().any()) {
             return this;
         }
         if (this.connectedList() != null) {
@@ -293,7 +284,7 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
     }
 
     private scrollToSelectedItem(): void {
-        const selectedItemElement = this.#hostElementRef.nativeElement.querySelector(".mona-selected");
+        const selectedItemElement = this.#hostElementRef.nativeElement.querySelector("[data-selected='true']");
         if (selectedItemElement) {
             selectedItemElement.scrollIntoView({ behavior: "auto", block: "center" });
         }

@@ -1,10 +1,10 @@
-import { ThemeStyle } from "mona-ui/theme/models/Theme";
 import {
     listBoxBaseVariants as monaListBoxBaseVariants,
     listBoxToolbarVariants as monaListBoxToolbarVariants
-} from "mona-ui/list-box/styles/list-box.mona.styles";
+} from "../styles/list-box.mona.styles";
 import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "mona-ui/utils/VariantInputs";
+import { ThemeStyle } from "../../theme/models/Theme";
+import { VariantInputs } from "../../utils/VariantInputs";
 
 export const listBoxBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

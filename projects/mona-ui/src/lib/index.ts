@@ -36,6 +36,8 @@ export * from "./buttons/split-button/directives/split-button-menu-item-text-tem
 export * from "./buttons/split-button/directives/split-button-text-template.directive";
 
 /** Common */
+export * from "./common/models/VirtualScrollOptions";
+
 export * from "./common/filter-input/models/FilterChangeEvent";
 
 export * from "./common/popup-menu/components/popup-menu/popup-menu.component";
@@ -218,7 +220,6 @@ export * from "./list-box/directives/list-box-no-data-template.directive";
 export * from "./list-box/components/list-box/list-box.component";
 
 /** List View */
-export * from "./list-view/models/PagerSettings";
 export * from "./list-view/components/list-view/list-view.component";
 export * from "./list-view/directives/list-view-footer-template.directive";
 export * from "./list-view/directives/list-view-group-header-template.directive";
@@ -230,6 +231,8 @@ export * from "./list-view/directives/list-view-no-data-template.directive";
 export * from "./list-view/directives/list-view-pageable.directive";
 export * from "./list-view/directives/list-view-selectable.directive";
 export * from "./list-view/directives/list-view-virtual-scroll.directive";
+export * from "./common/list/models/NavigableOptions";
+export * from "./common/list/models/PagerSettings";
 
 /** Menus */
 export { MenuItemClickEvent } from "./menus/models/MenuItemClickEvent";
@@ -338,3 +341,6 @@ export * from "./pipes/type-cast.pipe";
 /** Theme */
 export * from "./theme/models/Theme";
 export * from "./theme/services/theme.service";
+
+/** Utils */
+export * from "./utils/moveIndices";

@@ -8,8 +8,7 @@ import {
     Selector,
     toImmutableSet
 } from "@mirei/ts-collections";
-import type { PagerSettings } from "mona-ui/list-view/models/PagerSettings";
-import type { PageState } from "mona-ui/list-view/models/PageState";
+import { PageState } from "../models/PageState";
 import { ReplaySubject, Subject } from "rxjs";
 import { FilterChangeEvent } from "../../filter-input/models/FilterChangeEvent";
 import { FilterableOptions } from "../../models/FilterableOptions";
@@ -21,6 +20,7 @@ import { NavigableOptions } from "../models/NavigableOptions";
 import { NavigationDirection } from "../models/NavigationDirection";
 import { NavigationMode } from "../models/NavigationMode";
 import { SelectableOptions } from "../models/SelectableOptions";
+import { PagerSettings } from "../models/PagerSettings";
 
 @Injectable()
 export class ListService<TData> {

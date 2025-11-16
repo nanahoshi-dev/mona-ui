@@ -10,7 +10,10 @@ import { ListService } from "../../services/list.service";
     selector: "mona-list-item",
     imports: [NgTemplateOutlet],
     templateUrl: "./list-item.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        class: "w-full h-full"
+    }
 })
 export class ListItemComponent<TData> {
     protected readonly dataItem: Signal<TData | null> = computed(() => this.item()?.data ?? null);
