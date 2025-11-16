@@ -212,6 +212,7 @@ export * from "./layout/tab-strip/components/tab/tab.component";
 /** List Box */
 export * from "./list-box/models/ListBoxActionClickEvent";
 export * from "./list-box/models/ListBoxSelectionEvent";
+export * from "./list-box/models/ToolbarOptions";
 export * from "./list-box/directives/list-box-item-template.directive";
 export * from "./list-box/directives/list-box-no-data-template.directive";
 export * from "./list-box/components/list-box/list-box.component";

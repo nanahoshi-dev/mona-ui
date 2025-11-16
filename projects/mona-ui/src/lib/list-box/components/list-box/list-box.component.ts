@@ -25,7 +25,7 @@ import {
     faAngleUp,
     faTrash
 } from "@fortawesome/free-solid-svg-icons";
-import { Collections, Enumerable, ImmutableList, List } from "@mirei/ts-collections";
+import { Collections, Enumerable, ImmutableList } from "@mirei/ts-collections";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ListViewComponent } from "../../../list-view/components/list-view/list-view.component";
 import { ListViewItemTemplateDirective } from "../../../list-view/directives/list-view-item-template.directive";
@@ -41,17 +41,15 @@ import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
 import {
     listBoxBaseThemeVariants,
+    listBoxToolbarThemeVariants,
     ListBoxVariantInputs,
     ListBoxVariantProps
 } from "mona-ui/list-box/styles/list-box.styles";
 import { ThemeService } from "mona-ui/theme/services/theme.service";
 
-type ListBoxDirection = "horizontal" | "horizontal-reverse" | "vertical" | "vertical-reverse";
-
 @Component({
     selector: "mona-list-box",
     templateUrl: "./list-box.component.html",
-    styleUrls: ["./list-box.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ListViewComponent,
@@ -65,7 +63,9 @@ type ListBoxDirection = "horizontal" | "horizontal-reverse" | "vertical" | "vert
         ListViewNoDataTemplateDirective
     ],
     host: {
-        "[class]": "baseClasses()"
+        "[class]": "baseClasses()",
+        "[style.height]": "listHeight()",
+        "[style.width]": "listWidth()"
     }
 })
 export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
@@ -86,22 +86,11 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        return listBoxBaseThemeVariants(theme)({ rounded, size });
-    });
-    protected readonly direction: Signal<ListBoxDirection> = computed(() => {
-        const position = this.toolbarOptions()?.position;
-        switch (position) {
-            case "right":
-                return "horizontal";
-            case "left":
-                return "horizontal-reverse";
-            case "top":
-                return "vertical-reverse";
-            case "bottom":
-                return "vertical";
-            default:
-                return "horizontal";
-        }
+        const toolbarOptions = this.toolbarOptions();
+        const position = toolbarOptions?.position ?? "right";
+        const direction = position === "left" || position === "right" ? "horizontal" : "vertical";
+        const reversed = position === "left" || position === "top";
+        return listBoxBaseThemeVariants(theme)({ direction, reversed, rounded, size });
     });
     protected readonly itemTemplate: Signal<TemplateRef<ListBoxItemTemplateContext> | undefined> = contentChild(
         ListBoxItemTemplateDirective,
@@ -123,6 +112,13 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
     protected readonly transferAllToIcon = faAnglesRight;
     protected readonly transferFromIcon = faAngleLeft;
     protected readonly transferToIcon = faAngleRight;
+    protected readonly toolbarClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const toolbarOptions = this.toolbarOptions();
+        const position = toolbarOptions?.position ?? "right";
+        const direction = position === "left" || position === "right" ? "vertical" : "horizontal";
+        return listBoxToolbarThemeVariants(theme)({ direction });
+    });
     protected readonly toolbarOptions = computed(() => {
         const toolbar = this.toolbar();
         if (typeof toolbar === "boolean") {
@@ -304,29 +300,26 @@ export class ListBoxComponent<T = any> implements OnInit, ListBoxVariantInputs {
     }
 
     private updateToolbarOptions(options: boolean | Partial<ToolbarOptions>): ToolbarOptions | null {
-        if (!options) {
-            return null;
-        }
         if (typeof options === "boolean") {
             return options ? this.getDefaultToolbarOptions() : null;
-        } else if (options.actions && options.actions.length > 0 && options.position) {
-            return options as Required<ToolbarOptions>;
-        } else if (options.actions && options.actions.length > 0 && !options.position) {
-            return { ...options, position: "right" } as Required<ToolbarOptions>;
-        } else if ((!options.actions || options.actions.length === 0) && options.position) {
-            return {
-                ...options,
-                actions: [
-                    "moveDown",
-                    "moveUp",
-                    "remove",
-                    "transferAllFrom",
-                    "transferAllTo",
-                    "transferFrom",
-                    "transferTo"
-                ]
-            } as Required<ToolbarOptions>;
         }
-        return null;
+        const position = options.position ?? "right";
+        let actions: ToolbarAction[];
+        if (options.actions && options.actions.length > 0) {
+            actions = options.actions;
+        } else if (options.actions && options.actions.length === 0) {
+            actions = [];
+        } else {
+            actions = [
+                "moveDown",
+                "moveUp",
+                "remove",
+                "transferAllFrom",
+                "transferAllTo",
+                "transferFrom",
+                "transferTo"
+            ];
+        }
+        return { actions, position };
     }
 }
