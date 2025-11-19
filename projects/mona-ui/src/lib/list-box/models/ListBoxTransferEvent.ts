@@ -3,7 +3,7 @@ import { ToolbarAction } from "./ToolbarOptions";
 
 type ActionType = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;
 
-export class ListBoxTransferEvent<T = unknown> extends PreventableEvent {
+export class ListBoxTransferEvent<T = any> extends PreventableEvent {
     readonly #action: ActionType;
     readonly #selectedItems: T[];
     public constructor(action: ActionType, selectedItems: Iterable<T>, originalEvent?: Event) {

@@ -6,6 +6,7 @@ export interface ToolbarOptions {
 }
 
 export type ToolbarAction =
+    | "clear"
     | "moveDown"
     | "moveUp"
     | "remove"

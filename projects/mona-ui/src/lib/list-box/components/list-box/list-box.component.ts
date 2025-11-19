@@ -1,9 +1,11 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
+    DestroyRef,
     effect,
     ElementRef,
     inject,
@@ -22,6 +24,7 @@ import {
     faAnglesLeft,
     faAnglesRight,
     faAngleUp,
+    faTimes,
     faTrash
 } from "@fortawesome/free-solid-svg-icons";
 import { ImmutableList } from "@mirei/ts-collections";
@@ -48,11 +51,19 @@ import { ThemeService } from "../../../theme/services/theme.service";
 import { ListBoxMoveEvent } from "../../models/ListBoxMoveEvent";
 import { ListBoxRemoveEvent } from "../../models/ListBoxRemoveEvent";
 import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
+import { ListBoxClearEvent } from "../../models/ListBoxClearEvent";
+import { SelectionMode } from "../../../models/SelectionMode";
+import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
+import { ListKeySelector } from "../../../common/list/models/ListSelectors";
+import { ListService } from "../../../common/list/services/list.service";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { delay, filter, ReplaySubject, sample, scan, tap } from "rxjs";
 
 @Component({
     selector: "mona-list-box",
     templateUrl: "./list-box.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [ListService],
     imports: [
         ListViewComponent,
         ListViewSelectableDirective,
@@ -70,10 +81,13 @@ import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
         "[style.width]": "listWidth()"
     }
 })
-export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
+export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInputs {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #listService = inject<ListService<T>>(ListService);
+    readonly #notifySelectionChange$ = new ReplaySubject<boolean>(1);
     readonly #themeService = inject(ThemeService);
-    protected readonly activeListBox: Signal<ListBoxComponent<T> | null> = computed(() => {
+    protected readonly activeListBox: Signal<ListBoxComponent<T, K> | null> = computed(() => {
         const selectedItems = this.selectedItems();
         if (selectedItems.any()) {
             return this;
@@ -94,6 +108,7 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
         const reversed = position === "left" || position === "top";
         return listBoxBaseThemeVariants(theme)({ direction, reversed, rounded, size });
     });
+    protected readonly clearIcon = faTimes;
     protected readonly itemTemplate: Signal<TemplateRef<ListBoxItemTemplateContext> | undefined> = contentChild(
         ListBoxItemTemplateDirective,
         { read: TemplateRef }
@@ -110,6 +125,14 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
     protected readonly moveUpIcon = faAngleUp;
     protected readonly noDataTemplate = contentChild(ListBoxNoDataTemplateDirective, { read: TemplateRef });
     protected readonly removeIcon = faTrash;
+    protected readonly selectableOptions = computed<SelectableOptions>(() => {
+        const enabled = true;
+        const mode = this.selectionMode();
+        if (mode === "multiple") {
+            return { enabled, mode };
+        }
+        return { enabled, mode, toggleable: true };
+    });
     protected readonly transferAllFromIcon = faAnglesLeft;
     protected readonly transferAllToIcon = faAnglesRight;
     protected readonly transferFromIcon = faAngleLeft;
@@ -130,7 +153,7 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
     });
 
     public readonly actionClick = output<ListBoxActionEvent>();
-    public readonly connectedList = input<ListBoxComponent<T> | null>(null);
+    public readonly connectedList = input<ListBoxComponent<T, K> | null>(null);
 
     /**
      * @description Sets the height of the list box.
@@ -140,8 +163,16 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
     public readonly items = input<Iterable<T>>([]);
     public readonly listBoxItems = signal(ImmutableList.create<T>());
     public readonly rounded = input<ListBoxVariantProps["rounded"]>("medium");
+    public readonly selectBy = input<ListKeySelector<T, K>>("");
+    public readonly selectedKeys = input<Iterable<K>>([]);
+    public readonly selectedKeysChange = output<K[]>();
     public readonly selectionChange = output<ListBoxSelectionEvent>();
-    public readonly selectedItems = signal(ImmutableList.create<T>());
+    public readonly selectedItems = computed(() => {
+        const listItems = this.#listService.selectedListItems();
+        return listItems.select(item => item.data).toImmutableSet();
+    });
+    public readonly selectedItems$ = toObservable(this.selectedItems);
+    public readonly selectionMode = input<SelectionMode>("single");
     public readonly size = input<ListBoxVariantProps["size"]>("medium");
     public readonly textField = input("");
     public readonly toolbar = input<boolean | Partial<ToolbarOptions>>(true);
@@ -158,9 +189,39 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
                 return;
             }
             connectedList.selectionChange.subscribe(() => {
-                untracked(() => this.selectedItems.update(list => list.clear()));
+                untracked(() => this.clearSelections());
             });
         });
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
+    }
+
+    public clearSelections(): void {
+        this.#listService.clearSelections();
+    }
+
+    public notifySelectionChange(): void {
+        this.#notifySelectionChange$.next(true);
+    }
+
+    public onClearClick(event: MouseEvent): void {
+        const listBox = this.activeListBox();
+        if (!listBox) {
+            return;
+        }
+        const selectedItems = listBox.selectedItems();
+        if (selectedItems.none()) {
+            return;
+        }
+        const clearEvent = new ListBoxClearEvent(selectedItems, event);
+        listBox.actionClick.emit(clearEvent);
+        if (!clearEvent.isDefaultPrevented()) {
+            listBox.clearSelections();
+            listBox.notifySelectionChange();
+            this.connectedList()?.clearSelections();
+            this.connectedList()?.notifySelectionChange();
+        }
     }
 
     public onMoveClick(direction: Extract<ToolbarAction, "moveDown" | "moveUp">, event: MouseEvent): void {
@@ -219,24 +280,17 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
         if (selectedItems.none()) {
             return;
         }
-        const removeEvent = new ListBoxRemoveEvent("remove", selectedItems, event);
+        const removeEvent = new ListBoxRemoveEvent(selectedItems, event);
         listBox.actionClick.emit(removeEvent);
         if (!removeEvent.isDefaultPrevented()) {
             listBox.scrollToSelectedItem();
         }
     }
 
-    public onSelectedItemChange(items: T[]): void {
-        const oldSelectedItems = this.selectedItems()
-            .toArray()
-            .filter(i => !items.includes(i));
-        const newSelectedItems = items.filter(i => !oldSelectedItems.includes(i));
-        this.selectedItems.update(list => list.clear().addAll(items));
-        this.connectedList()?.selectedItems.update(list => list.clear());
-        this.activeListBox()?.selectionChange.emit({
-            deselectedItems: oldSelectedItems,
-            selectedItems: newSelectedItems
-        });
+    public onSelectedKeysChange(keys: K[]): void {
+        this.selectedKeysChange.emit(keys);
+        this.connectedList()?.clearSelections();
+        this.#notifySelectionChange$.next(true);
     }
 
     public onTransferClick(
@@ -260,13 +314,13 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
             sourceList.actionClick.emit(transferEvent);
         }
         if (!transferEvent.isDefaultPrevented()) {
-            sourceList.selectedItems.update(set => set.clear());
-            targetList.selectedItems.update(set => set.clear());
+            sourceList.clearSelections();
+            targetList.clearSelections();
             targetList.scrollToSelectedItem();
         }
     }
 
-    private getActiveListBox(): ListBoxComponent<T> | null {
+    private getActiveListBox(): ListBoxComponent<T, K> | null {
         if (this.selectedItems().any()) {
             return this;
         }
@@ -278,7 +332,16 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
 
     private getDefaultToolbarOptions(): ToolbarOptions {
         return {
-            actions: ["moveDown", "moveUp", "remove", "transferAllFrom", "transferAllTo", "transferFrom", "transferTo"],
+            actions: [
+                "clear",
+                "moveDown",
+                "moveUp",
+                "remove",
+                "transferAllFrom",
+                "transferAllTo",
+                "transferFrom",
+                "transferTo"
+            ],
             position: "right"
         };
     }
@@ -288,6 +351,29 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
         if (selectedItemElement) {
             selectedItemElement.scrollIntoView({ behavior: "auto", block: "center" });
         }
+    }
+
+    private setSubscriptions(): void {
+        this.selectedItems$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                sample(
+                    this.#notifySelectionChange$.pipe(
+                        delay(0),
+                        filter(e => e),
+                        tap(() => this.#notifySelectionChange$.next(false))
+                    )
+                ),
+                scan((previous, current) => {
+                    const selectedItems = current.where(i => !previous.contains(i)).toArray();
+                    const deselectedItems = previous.where(i => !current.contains(i)).toArray();
+                    if (selectedItems.length > 0 || deselectedItems.length > 0) {
+                        this.activeListBox()?.selectionChange.emit({ selectedItems, deselectedItems });
+                    }
+                    return current;
+                }, this.selectedItems())
+            )
+            .subscribe();
     }
 
     private updateToolbarOptions(options: boolean | Partial<ToolbarOptions>): ToolbarOptions | null {
@@ -302,6 +388,7 @@ export class ListBoxComponent<T = any> implements ListBoxVariantInputs {
             actions = [];
         } else {
             actions = [
+                "clear",
                 "moveDown",
                 "moveUp",
                 "remove",

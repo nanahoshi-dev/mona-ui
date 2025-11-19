@@ -187,7 +187,10 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         @let featureData = features();
         <mona-list-box
             (actionClick)="onActionClick($event, 'first')"
-            (selectionChange)="onSelectionChange($event)"
+            [selectBy]="'value'"
+            [selectedKeys]="firstListSelectedKeys()"
+            (selectedKeysChange)="onSelectedKeysChange($event, 'first')"
+            (selectionChange)="onSelectionChange($event, 'first')"
             [connectedList]="secondListBox() ?? null"
             [height]="height()"
             [items]="viewItems()"
@@ -220,6 +223,9 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         @if (connectedListsVisible()) {
             <mona-list-box
                 (actionClick)="onActionClick($event, 'second')"
+                [selectedKeys]="secondListSelectedKeys()"
+                (selectedKeysChange)="onSelectedKeysChange($event, 'second')"
+                (selectionChange)="onSelectionChange($event, 'second')"
                 [connectedList]="thirdList"
                 [height]="height()"
                 [items]="secondListBoxItems()"
@@ -232,6 +238,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
 
             <mona-list-box
                 (actionClick)="onActionClick($event, 'third')"
+                (selectionChange)="onSelectionChange($event, 'third')"
                 [height]="height()"
                 [items]="thirdListBoxItems()"
                 [rounded]="rounded()"
@@ -254,8 +261,10 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         return features["connectedLists"].active;
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly firstListSelectedKeys = signal(ImmutableSet.create<unknown>([2, 4]));
     protected readonly secondListBox = viewChild<ListBoxComponent<(typeof dropdownFoodData)[0]>>("secondList");
     protected readonly secondListBoxItems = signal(ImmutableSet.create<(typeof dropdownFoodData)[0]>());
+    protected readonly secondListSelectedKeys = signal(ImmutableSet.create<unknown>([]));
     protected readonly thirdListBoxItems = signal(ImmutableSet.create<(typeof dropdownFoodData)[0]>());
     protected readonly toolbarCustomizations = computed(() => {
         const toolbar = this.toolbar();
@@ -293,7 +302,6 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
     protected readonly viewItems = computed(() => this.#listData());
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
-    // public readonly items = input<ReturnType<ListBoxComponent["items"]>>(new List());
     public readonly rounded = input<ReturnType<ListBoxComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<ListBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListBoxComponent["textField"]>>("");
@@ -361,7 +369,16 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         }
     }
 
-    protected onSelectionChange(event: ListBoxSelectionEvent): void {
-        console.log(event);
+    protected onSelectedKeysChange(keys: unknown[], listBox: "first" | "second" | "third"): void {
+        console.log(listBox, keys);
+        if (listBox === "first") {
+            this.firstListSelectedKeys.set(ImmutableSet.create(keys));
+        } else if (listBox === "second") {
+            this.secondListSelectedKeys.set(ImmutableSet.create(keys));
+        }
+    }
+
+    protected onSelectionChange(event: ListBoxSelectionEvent, listBox: "first" | "second" | "third"): void {
+        console.log(listBox, event);
     }
 }

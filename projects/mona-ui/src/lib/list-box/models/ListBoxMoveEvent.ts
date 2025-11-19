@@ -1,7 +1,7 @@
 import { PreventableEvent } from "../../utils/PreventableEvent";
 import { ToolbarAction } from "./ToolbarOptions";
 
-export class ListBoxMoveEvent<T = unknown> extends PreventableEvent {
+export class ListBoxMoveEvent<T = any> extends PreventableEvent {
     readonly #action: Extract<ToolbarAction, "moveDown" | "moveUp">;
     readonly #newIndex: number;
     readonly #oldIndex: number;

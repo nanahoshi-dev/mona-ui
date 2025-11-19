@@ -4,9 +4,10 @@
                 [size]="size()"
                 [textField]="textField()"
                 [width]="'100%'"
-                [monaListViewSelectable]="{enabled: true, mode: 'multiple'}"
                 [monaListViewNavigable]="{enabled: true, mode: 'select'}"
-                [selectedKeys]="selectedItems()" (selectedKeysChange)="onSelectedItemChange($event)">
+                [monaListViewSelectable]="selectableOptions()"
+                [selectBy]="selectBy()"
+                [selectedKeys]="selectedKeys()" (selectedKeysChange)="onSelectedKeysChange($event)">
     @if (itemTemplate()) {
         <ng-template monaListViewItemTemplate let-dataItem>
             <ng-container [ngTemplateOutlet]="itemTemplate()"
@@ -85,6 +86,16 @@
                     title="Transfer All To"
                     [disabled]="listBoxItems().length === 0">
                 <fa-icon [icon]="transferAllToIcon"></fa-icon>
+            </button>
+        }
+        @if (options.actions|monaContains:'clear') {
+            <button monaButton (click)="onClearClick($event)"
+                    [iconOnly]="true"
+                    [rounded]="rounded()"
+                    [size]="size()"
+                    title="Clear Selection"
+                    [disabled]="!hasSelectedItems && !connectedListHasSelectedItems">
+                <fa-icon [icon]="clearIcon"></fa-icon>
             </button>
         }
         @if (options.actions|monaContains:'remove') {

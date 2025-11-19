@@ -1,15 +1,15 @@
-import { ToolbarAction } from "./ToolbarOptions";
 import { PreventableEvent } from "../../utils/PreventableEvent";
+import { ToolbarAction } from "./ToolbarOptions";
 
-export class ListBoxRemoveEvent<T = any> extends PreventableEvent {
-    readonly #action: Extract<ToolbarAction, "remove"> = "remove";
+export class ListBoxClearEvent<T = any> extends PreventableEvent {
+    readonly #action: Extract<ToolbarAction, "clear"> = "clear";
     readonly #selectedItems: T[];
     public constructor(selectedItems: Iterable<T>, originalEvent?: Event) {
-        super("listBoxRemove", originalEvent);
+        super("listBoxClear", originalEvent);
         this.#selectedItems = [...selectedItems];
     }
 
-    public get action(): Extract<ToolbarAction, "remove"> {
+    public get action(): Extract<ToolbarAction, "clear"> {
         return this.#action;
     }
 

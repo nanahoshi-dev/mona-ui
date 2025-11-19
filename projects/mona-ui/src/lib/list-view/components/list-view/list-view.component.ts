@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterRenderEffect,
-    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -11,7 +10,9 @@ import {
     ElementRef,
     inject,
     input,
+    Optional,
     output,
+    SkipSelf,
     TemplateRef,
     untracked
 } from "@angular/core";
@@ -42,7 +43,15 @@ import { ThemeService } from "../../../theme/services/theme.service";
     selector: "mona-list-view",
     templateUrl: "./list-view.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ListService],
+    providers: [
+        {
+            provide: ListService,
+            useFactory: (parentListService: ListService<unknown>): ListService<unknown> => {
+                return parentListService ?? new ListService<unknown>();
+            },
+            deps: [[new Optional(), new SkipSelf(), ListService]]
+        }
+    ],
     imports: [
         NgTemplateOutlet,
         PagerComponent,
@@ -58,7 +67,7 @@ import { ThemeService } from "../../../theme/services/theme.service";
         "[attr.tabindex]": "-1"
     }
 })
-export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterViewInit {
+export class ListViewComponent<T = any> implements ListViewVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #scrollBottomEnabled = computed(() => {
@@ -162,12 +171,6 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs, AfterV
         afterRenderEffect({
             read: () => this.setScrollBottomEvent()
         });
-    }
-
-    public ngAfterViewInit(): void {
-        // window.setTimeout(() => {
-        //     this.setScrollBottomEvent();
-        // });
     }
 
     public onPageChange(event: PageChangeEvent): void {
