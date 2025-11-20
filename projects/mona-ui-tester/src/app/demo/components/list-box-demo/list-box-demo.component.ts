@@ -42,6 +42,14 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             name: "Customized Toolbar",
             description: "Customize the toolbar",
             subFeatures: {
+                clear: {
+                    active: true,
+                    code: ``,
+                    codeVisible: false,
+                    hasCode: false,
+                    name: "Clear",
+                    description: "Display clear button"
+                },
                 moveDown: {
                     active: true,
                     code: ``,
@@ -70,7 +78,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                     dropdownValue: "right"
                 },
                 remove: {
-                    active: false,
+                    active: true,
                     code: ``,
                     codeVisible: false,
                     hasCode: false,
@@ -143,6 +151,17 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 value: ["none", "small", "medium", "large"],
                 defaultValue: "medium"
             },
+            selectBy: {
+                type: "dropdown",
+                value: ["value"],
+                defaultValue: "value"
+            },
+
+            selectionMode: {
+                type: "dropdown",
+                value: ["single", "multiple"],
+                defaultValue: "single"
+            },
             size: {
                 type: "dropdown",
                 value: ["small", "medium", "large"],
@@ -187,7 +206,8 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         @let featureData = features();
         <mona-list-box
             (actionClick)="onActionClick($event, 'first')"
-            [selectBy]="'value'"
+            [selectBy]="selectBy()"
+            [selectionMode]="selectionMode()"
             [selectedKeys]="firstListSelectedKeys()"
             (selectedKeysChange)="onSelectedKeysChange($event, 'first')"
             (selectionChange)="onSelectionChange($event, 'first')"
@@ -223,6 +243,8 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         @if (connectedListsVisible()) {
             <mona-list-box
                 (actionClick)="onActionClick($event, 'second')"
+                [selectBy]="selectBy()"
+                [selectionMode]="selectionMode()"
                 [selectedKeys]="secondListSelectedKeys()"
                 (selectedKeysChange)="onSelectedKeysChange($event, 'second')"
                 (selectionChange)="onSelectionChange($event, 'second')"
@@ -275,6 +297,9 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
             return toolbar;
         }
         const actions: ToolbarAction[] = [];
+        if (customizedToolbar["clear"].active) {
+            actions.push("clear");
+        }
         if (customizedToolbar["moveDown"].active) {
             actions.push("moveDown");
         }
@@ -303,6 +328,8 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
     public readonly connectedList = input<ReturnType<ListBoxComponent["connectedList"]>>(null);
     public readonly height = input<ReturnType<ListBoxComponent["height"]>>("100%");
     public readonly rounded = input<ReturnType<ListBoxComponent["rounded"]>>("medium");
+    public readonly selectBy = input<ReturnType<ListBoxComponent["selectBy"]>>("value");
+    public readonly selectionMode = input<ReturnType<ListBoxComponent["selectionMode"]>>("single");
     public readonly size = input<ReturnType<ListBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListBoxComponent["textField"]>>("");
     public readonly toolbar = input<ReturnType<ListBoxComponent["toolbar"]>>(true);

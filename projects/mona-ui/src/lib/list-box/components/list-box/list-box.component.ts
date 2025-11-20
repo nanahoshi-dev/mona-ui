@@ -27,7 +27,7 @@ import {
     faTimes,
     faTrash
 } from "@fortawesome/free-solid-svg-icons";
-import { ImmutableList } from "@mirei/ts-collections";
+import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ListViewComponent } from "../../../list-view/components/list-view/list-view.component";
 import { ListViewItemTemplateDirective } from "../../../list-view/directives/list-view-item-template.directive";
@@ -57,7 +57,7 @@ import { SelectableOptions } from "../../../common/list/models/SelectableOptions
 import { ListKeySelector } from "../../../common/list/models/ListSelectors";
 import { ListService } from "../../../common/list/services/list.service";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { delay, filter, ReplaySubject, sample, scan, tap } from "rxjs";
+import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
 
 @Component({
     selector: "mona-list-box",
@@ -82,6 +82,7 @@ import { delay, filter, ReplaySubject, sample, scan, tap } from "rxjs";
     }
 })
 export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInputs {
+    readonly #dataStateChange$ = new Subject<void>();
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService = inject<ListService<T>>(ListService);
@@ -284,6 +285,7 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         listBox.actionClick.emit(removeEvent);
         if (!removeEvent.isDefaultPrevented()) {
             listBox.scrollToSelectedItem();
+            this.#dataStateChange$.next();
         }
     }
 
@@ -317,7 +319,28 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
             sourceList.clearSelections();
             targetList.clearSelections();
             targetList.scrollToSelectedItem();
+            this.#dataStateChange$.next();
         }
+    }
+
+    private createSelectedChangeNotifier(): Observable<ImmutableSet<T>> {
+        return this.selectedItems$.pipe(
+            sample(
+                this.#notifySelectionChange$.pipe(
+                    delay(0),
+                    filter(e => e),
+                    tap(() => this.#notifySelectionChange$.next(false))
+                )
+            ),
+            scan((previous, current) => {
+                const selectedItems = current.where(i => !previous.contains(i)).toArray();
+                const deselectedItems = previous.where(i => !current.contains(i)).toArray();
+                if (selectedItems.length > 0 || deselectedItems.length > 0) {
+                    this.activeListBox()?.selectionChange.emit({ selectedItems, deselectedItems });
+                }
+                return current;
+            }, this.selectedItems())
+        );
     }
 
     private getActiveListBox(): ListBoxComponent<T, K> | null {
@@ -354,24 +377,11 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
     }
 
     private setSubscriptions(): void {
-        this.selectedItems$
+        this.#dataStateChange$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                sample(
-                    this.#notifySelectionChange$.pipe(
-                        delay(0),
-                        filter(e => e),
-                        tap(() => this.#notifySelectionChange$.next(false))
-                    )
-                ),
-                scan((previous, current) => {
-                    const selectedItems = current.where(i => !previous.contains(i)).toArray();
-                    const deselectedItems = previous.where(i => !current.contains(i)).toArray();
-                    if (selectedItems.length > 0 || deselectedItems.length > 0) {
-                        this.activeListBox()?.selectionChange.emit({ selectedItems, deselectedItems });
-                    }
-                    return current;
-                }, this.selectedItems())
+                startWith(null),
+                switchMap(() => this.createSelectedChangeNotifier())
             )
             .subscribe();
     }
