@@ -8,12 +8,8 @@
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "importHelpers": true,
-        "lib": [
-            "ES2022",
-            "dom"
-        ],
         "module": "es2020",
-        "moduleResolution": "Bundler",
+        "moduleResolution": "bundler",
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
         "noImplicitOverride": true,
