@@ -1607,7 +1607,7 @@
       },
       {
         "name": "connectedList",
-        "type": "ListBoxComponent<T> | null",
+        "type": "ListBoxComponent<T, K> | null",
         "description": "",
         "kind": "input"
       },
@@ -1630,10 +1630,34 @@
         "kind": "input"
       },
       {
+        "name": "selectBy",
+        "type": "ListKeySelector<T, K>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "selectedKeys",
+        "type": "Iterable<K>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "selectedKeysChange",
+        "type": "K[]",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "selectionChange",
         "type": "ListBoxSelectionEvent",
         "description": "",
         "kind": "output"
+      },
+      {
+        "name": "selectionMode",
+        "type": "SelectionMode",
+        "description": "",
+        "kind": "input"
       },
       {
         "name": "size",

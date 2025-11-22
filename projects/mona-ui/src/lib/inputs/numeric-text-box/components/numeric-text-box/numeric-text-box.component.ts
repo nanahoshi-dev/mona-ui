@@ -63,8 +63,8 @@ type Sign = "-" | "+";
     ],
     imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideAngularModule],
     host: {
-        "[role]": "'spinbutton'",
         "[class]": "classes()",
+        "[attr.role]": "'spinbutton'",
         "[attr.data-disabled]": "disabled()",
         "[attr.data-readonly]": "readonly()",
         "[attr.aria-disabled]": "disabled()",
