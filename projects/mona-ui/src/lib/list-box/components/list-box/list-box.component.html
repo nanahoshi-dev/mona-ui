@@ -8,6 +8,16 @@
                 [monaListViewSelectable]="selectableOptions()"
                 [selectBy]="selectBy()"
                 [selectedKeys]="selectedKeys()" (selectedKeysChange)="onSelectedKeysChange($event)">
+    @if (footerTemplate()) {
+        <ng-template monaListViewFooterTemplate>
+            <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
+        </ng-template>
+    }
+    @if (headerTemplate()) {
+        <ng-template monaListViewHeaderTemplate>
+            <ng-container [ngTemplateOutlet]="headerTemplate()"></ng-container>
+        </ng-template>
+    }
     @if (itemTemplate()) {
         <ng-template monaListViewItemTemplate let-dataItem>
             <ng-container [ngTemplateOutlet]="itemTemplate()"

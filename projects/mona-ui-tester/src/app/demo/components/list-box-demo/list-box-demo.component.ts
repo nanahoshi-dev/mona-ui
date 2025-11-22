@@ -5,6 +5,8 @@ import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import {
     ListBoxActionEvent,
     ListBoxComponent,
+    ListBoxFooterTemplateDirective,
+    ListBoxHeaderTemplateDirective,
     ListBoxItemTemplateDirective,
     ListBoxNoDataTemplateDirective,
     ListBoxSelectionEvent,
@@ -28,9 +30,11 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
     readonly #injector = createFeatureInjector({
         connectedLists: {
             active: true,
-            code: ``,
-            codeVisible: false,
-            hasCode: false,
+            code: `
+                <mona-list-box [connectedList]="list2"></mona-list-box>
+                <mona-list-box [connectedList]="list3" #list2></mona-list-box>
+                <mona-list-box #list3></mona-list-box>
+            `,
             name: "Connected Lists",
             description: "Display connected lists"
         },
@@ -119,19 +123,62 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 }
             }
         },
+        footerTemplate: {
+            active: false,
+            code: `
+                <mona-list-box>
+                    <ng-template monaListBoxFooterTemplate>
+                        <div class="px-3 py-2 border-t border-input-border text-sm text-muted-foreground">
+                            Total items: {{ viewItems().length }}
+                        </div>
+                    </ng-template>
+                </mona-list-box>
+            `,
+            name: "Footer Template",
+            description: "Display footer template"
+        },
+        headerTemplate: {
+            active: false,
+            code: `
+                <mona-list-box>
+                    <ng-template monaListBoxHeaderTemplate>
+                        <div class="px-3 py-2 border-b border-input-border font-medium">Food Items</div>
+                    </ng-template>
+                </mona-list-box>
+            `,
+            name: "Header Template",
+            description: "Display header template"
+        },
         itemTemplate: {
             active: false,
-            code: ``,
-            codeVisible: false,
-            hasCode: false,
+            code: `
+                 <mona-list-box>
+                    <ng-template monaListBoxItemTemplate>
+                        <div class="flex flex-row w-full">
+                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                            <span class="flex-1 flex items-center {{ color }}">{{ item.text }}</span>
+                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                                item.price | currency
+                            }}</span>
+                        </div>
+                    </ng-template>
+                </mona-list-box>
+            `,
             name: "Item Template",
             description: "Display item template"
         },
         noDataTemplate: {
             active: false,
-            code: ``,
-            codeVisible: false,
-            hasCode: false,
+            code: `
+                 <mona-list-box>
+                    <ng-template monaListBoxNoDataTemplate>
+                        <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                            <lucide-angular [name]="boxIcon"></lucide-angular>
+                            <span>List box has no items.</span>
+                        </div>
+                    </ng-template>
+                </mona-list-box>
+            `,
             name: "No Data Template",
             description: "This template sets the view when the list box is empty."
         }
@@ -200,7 +247,9 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         ListBoxItemTemplateDirective,
         CurrencyPipe,
         ListBoxNoDataTemplateDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        ListBoxHeaderTemplateDirective,
+        ListBoxFooterTemplateDirective
     ],
     template: `
         @let featureData = features();
@@ -219,6 +268,19 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             [textField]="textField()"
             [toolbar]="toolbarCustomizations()"
             [width]="width()">
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaListBoxHeaderTemplate>
+                    <div class="px-3 py-2 border-b border-input-border font-medium">Food Items</div>
+                </ng-template>
+            }
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaListBoxFooterTemplate>
+                    <div class="px-3 py-2 border-t border-input-border text-sm text-muted-foreground">
+                        Total items: {{ viewItems().length }}
+                    </div>
+                </ng-template>
+            }
+
             @if (featureData["itemTemplate"].active) {
                 <ng-template monaListBoxItemTemplate let-item>
                     <div class="flex flex-row w-full">

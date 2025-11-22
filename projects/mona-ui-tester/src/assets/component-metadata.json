@@ -1602,13 +1602,13 @@
       {
         "name": "actionClick",
         "type": "ListBoxActionEvent",
-        "description": "",
+        "description": "The event emitted when an action button is clicked.",
         "kind": "output"
       },
       {
         "name": "connectedList",
         "type": "ListBoxComponent<T, K> | null",
-        "description": "",
+        "description": "The connected list box for transferring items.",
         "kind": "input"
       },
       {
@@ -1620,67 +1620,67 @@
       {
         "name": "items",
         "type": "Iterable<T>",
-        "description": "",
+        "description": "The items of the list box.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ListBoxVariantProps[\"rounded\"]",
-        "description": "",
+        "description": "The border radius of the list box.",
         "kind": "input"
       },
       {
         "name": "selectBy",
         "type": "ListKeySelector<T, K>",
-        "description": "",
+        "description": "The selector to extract the key from an item.\nIt can be a string representing the property name or a function that takes an item and returns its key.",
         "kind": "input"
       },
       {
         "name": "selectedKeys",
         "type": "Iterable<K>",
-        "description": "",
+        "description": "The keys of the selected items.",
         "kind": "input"
       },
       {
         "name": "selectedKeysChange",
         "type": "K[]",
-        "description": "",
+        "description": "The event emitted when the selected keys change.",
         "kind": "output"
       },
       {
         "name": "selectionChange",
         "type": "ListBoxSelectionEvent",
-        "description": "",
+        "description": "The event emitted when the selection changes.\nIt contains the selected and deselected items.",
         "kind": "output"
       },
       {
         "name": "selectionMode",
         "type": "SelectionMode",
-        "description": "",
+        "description": "The selection mode of the list box.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "ListBoxVariantProps[\"size\"]",
-        "description": "",
+        "description": "Sets the size of the list box.",
         "kind": "input"
       },
       {
         "name": "textField",
-        "type": "string",
-        "description": "",
+        "type": "ListKeySelector<T, string>",
+        "description": "The selector to extract the text from an item.\nIt can be a string representing the property name or a function that takes an item and returns its text.",
         "kind": "input"
       },
       {
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
-        "description": "",
+        "description": "Sets the toolbar options of the list box.\nIt can be a boolean to enable/disable the toolbar or an object to customize the toolbar.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "",
+        "description": "Sets the width of the list box.",
         "kind": "input"
       }
     ]

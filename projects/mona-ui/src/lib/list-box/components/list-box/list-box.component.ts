@@ -38,7 +38,6 @@ import { ContainsPipe } from "../../../pipes/contains.pipe";
 import { ListBoxItemTemplateDirective } from "../../directives/list-box-item-template.directive";
 import { ListBoxNoDataTemplateDirective } from "../../directives/list-box-no-data-template.directive";
 import { ListBoxActionEvent } from "../../models/ListBoxActionClickEvent";
-import { ListBoxItemTemplateContext } from "../../models/ListBoxItemTemplateContext";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
 import {
@@ -58,6 +57,10 @@ import { ListKeySelector } from "../../../common/list/models/ListSelectors";
 import { ListService } from "../../../common/list/services/list.service";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
+import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";
+import { ListBoxHeaderTemplateDirective } from "../../directives/list-box-header-template.directive";
+import { ListViewFooterTemplateDirective } from "../../../list-view/directives/list-view-footer-template.directive";
+import { ListViewHeaderTemplateDirective } from "../../../list-view/directives/list-view-header-template.directive";
 
 @Component({
     selector: "mona-list-box",
@@ -73,7 +76,9 @@ import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subj
         FontAwesomeModule,
         ContainsPipe,
         ListViewNavigableDirective,
-        ListViewNoDataTemplateDirective
+        ListViewNoDataTemplateDirective,
+        ListViewFooterTemplateDirective,
+        ListViewHeaderTemplateDirective
     ],
     host: {
         "[class]": "baseClasses()",
@@ -110,10 +115,9 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         return listBoxBaseThemeVariants(theme)({ direction, reversed, rounded, size });
     });
     protected readonly clearIcon = faTimes;
-    protected readonly itemTemplate: Signal<TemplateRef<ListBoxItemTemplateContext> | undefined> = contentChild(
-        ListBoxItemTemplateDirective,
-        { read: TemplateRef }
-    );
+    protected readonly footerTemplate = contentChild(ListBoxFooterTemplateDirective, { read: TemplateRef });
+    protected readonly headerTemplate = contentChild(ListBoxHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly itemTemplate = contentChild(ListBoxItemTemplateDirective, { read: TemplateRef });
     protected readonly listHeight = computed(() => {
         const height = this.height();
         return typeof height === "number" ? `${height}px` : height;
@@ -153,7 +157,14 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         return this.updateToolbarOptions(toolbar);
     });
 
+    /**
+     * @description The event emitted when an action button is clicked.
+     */
     public readonly actionClick = output<ListBoxActionEvent>();
+
+    /**
+     * @description The connected list box for transferring items.
+     */
     public readonly connectedList = input<ListBoxComponent<T, K> | null>(null);
 
     /**
@@ -161,22 +172,74 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
      * @default 100%
      */
     public readonly height = input<string | number>("100%");
+
+    /**
+     * @description The items of the list box.
+     */
     public readonly items = input<Iterable<T>>([]);
     public readonly listBoxItems = signal(ImmutableList.create<T>());
+
+    /**
+     * @description The border radius of the list box.
+     * @default medium
+     */
     public readonly rounded = input<ListBoxVariantProps["rounded"]>("medium");
+
+    /**
+     * @description The selector to extract the key from an item.
+     * It can be a string representing the property name or a function that takes an item and returns its key.
+     */
     public readonly selectBy = input<ListKeySelector<T, K>>("");
+
+    /**
+     * @description The keys of the selected items.
+     */
     public readonly selectedKeys = input<Iterable<K>>([]);
+
+    /**
+     * @description The event emitted when the selected keys change.
+     */
     public readonly selectedKeysChange = output<K[]>();
+
+    /**
+     * @description The event emitted when the selection changes.
+     * It contains the selected and deselected items.
+     */
     public readonly selectionChange = output<ListBoxSelectionEvent>();
     public readonly selectedItems = computed(() => {
         const listItems = this.#listService.selectedListItems();
         return listItems.select(item => item.data).toImmutableSet();
     });
     public readonly selectedItems$ = toObservable(this.selectedItems);
+
+    /**
+     * @description The selection mode of the list box.
+     */
     public readonly selectionMode = input<SelectionMode>("single");
+
+    /**
+     * @description Sets the size of the list box.
+     * @default medium
+     */
     public readonly size = input<ListBoxVariantProps["size"]>("medium");
-    public readonly textField = input("");
+
+    /**
+     * @description The selector to extract the text from an item.
+     * It can be a string representing the property name or a function that takes an item and returns its text.
+     */
+    public readonly textField = input<ListKeySelector<T, string>>("");
+
+    /**
+     * @description Sets the toolbar options of the list box.
+     * It can be a boolean to enable/disable the toolbar or an object to customize the toolbar.
+     * @default true
+     */
     public readonly toolbar = input<boolean | Partial<ToolbarOptions>>(true);
+
+    /**
+     * @description Sets the width of the list box.
+     * @default 100%
+     */
     public readonly width = input<string | number>("100%");
 
     public constructor() {
@@ -206,7 +269,7 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         this.#notifySelectionChange$.next(true);
     }
 
-    public onClearClick(event: MouseEvent): void {
+    protected onClearClick(event: MouseEvent): void {
         const listBox = this.activeListBox();
         if (!listBox) {
             return;
@@ -225,7 +288,7 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         }
     }
 
-    public onMoveClick(direction: Extract<ToolbarAction, "moveDown" | "moveUp">, event: MouseEvent): void {
+    protected onMoveClick(direction: Extract<ToolbarAction, "moveDown" | "moveUp">, event: MouseEvent): void {
         const activeListBox = this.getActiveListBox();
         if (!activeListBox) {
             return;
@@ -272,7 +335,7 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         }
     }
 
-    public onRemoveClick(event: MouseEvent): void {
+    protected onRemoveClick(event: MouseEvent): void {
         const listBox = this.activeListBox();
         if (!listBox) {
             return;
@@ -289,13 +352,13 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         }
     }
 
-    public onSelectedKeysChange(keys: K[]): void {
+    protected onSelectedKeysChange(keys: K[]): void {
         this.selectedKeysChange.emit(keys);
         this.connectedList()?.clearSelections();
         this.#notifySelectionChange$.next(true);
     }
 
-    public onTransferClick(
+    protected onTransferClick(
         action: Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">,
         event: MouseEvent
     ): void {
