@@ -211,7 +211,7 @@ export class EditorService {
             starterKit = starterKit.configure({ strike: false });
         }
         if (!settings.history) {
-            starterKit = starterKit.configure({ history: false });
+            starterKit = starterKit.configure({ undoRedo: false });
         }
         if (!settings.blockquote) {
             starterKit = starterKit.configure({ blockquote: false });
