@@ -1632,7 +1632,7 @@
       {
         "name": "selectBy",
         "type": "ListKeySelector<T, K>",
-        "description": "The selector to extract the key from an item.\nIt can be a string representing the property name or a function that takes an item and returns its key.",
+        "description": "The selector to extract the key from an item.\r\nIt can be a string representing the property name or a function that takes an item and returns its key.",
         "kind": "input"
       },
       {
@@ -1650,7 +1650,7 @@
       {
         "name": "selectionChange",
         "type": "ListBoxSelectionEvent",
-        "description": "The event emitted when the selection changes.\nIt contains the selected and deselected items.",
+        "description": "The event emitted when the selection changes.\r\nIt contains the selected and deselected items.",
         "kind": "output"
       },
       {
@@ -1668,13 +1668,13 @@
       {
         "name": "textField",
         "type": "ListKeySelector<T, string>",
-        "description": "The selector to extract the text from an item.\nIt can be a string representing the property name or a function that takes an item and returns its text.",
+        "description": "The selector to extract the text from an item.\r\nIt can be a string representing the property name or a function that takes an item and returns its text.",
         "kind": "input"
       },
       {
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
-        "description": "Sets the toolbar options of the list box.\nIt can be a boolean to enable/disable the toolbar or an object to customize the toolbar.",
+        "description": "Sets the toolbar options of the list box.\r\nIt can be a boolean to enable/disable the toolbar or an object to customize the toolbar.",
         "kind": "input"
       },
       {

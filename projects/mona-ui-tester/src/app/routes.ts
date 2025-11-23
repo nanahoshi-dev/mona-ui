@@ -83,6 +83,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "expansion-panel",
+                loadComponent: () =>
+                    import("./docs/components/expansion-panel-doc/expansion-panel-doc.component").then(
+                        m => m.ExpansionPanelDocComponent
+                    )
+            },
+            {
                 path: "input",
                 loadComponent: () =>
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)

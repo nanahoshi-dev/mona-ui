@@ -8,6 +8,7 @@
 
 @theme {
     --color-background: oklch(1 0 0);
+    --color-background-dark: oklch(0.99 0 0);
     --color-foreground: #09090b;
     --color-hover: oklch(0.97 0 0);
     --color-active: oklch(0.95 0 0);

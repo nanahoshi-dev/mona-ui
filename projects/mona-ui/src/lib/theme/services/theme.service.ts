@@ -21,7 +21,8 @@ export class ThemeService {
 
     private getMonaDarkThemeVariables(): Record<string, string> {
         return {
-            "--color-background": "oklch(0.20 0 0)",
+            "--color-background": "oklch(0.21 0 0)",
+            "--color-background-dark": "oklch(0.19 0 0)",
             "--color-foreground": "oklch(100% 0.001 106.424)",
             "--color-hover": "oklch(22.5% 0 0)",
             "--color-active": "oklch(19.5% 0 0)",
@@ -181,6 +182,7 @@ export class ThemeService {
     private getShadcnLightThemeVariables(): Record<string, string> {
         return {
             "--color-background": "oklch(1 0 0)",
+            "--color-background-dark": "oklch(0.99 0 0)",
             "--color-foreground": "oklch(0.1407 0.0044 285.82)",
             "--color-hover": "oklch(0.97 0 0)",
             "--color-active": "oklch(0.95 0 0)",

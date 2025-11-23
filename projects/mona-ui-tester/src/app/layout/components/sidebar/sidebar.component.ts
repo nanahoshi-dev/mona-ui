@@ -77,6 +77,10 @@ export class SidebarComponent {
                     path: "/dropdown-list"
                 },
                 {
+                    text: "Expansion Panel",
+                    path: "/expansion-panel"
+                },
+                {
                     text: "Input",
                     path: "/input"
                 },

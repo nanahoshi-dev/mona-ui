@@ -1,25 +1,31 @@
-<div class="mona-expansion-panel-header" (click)="expanded.set(!expanded());">
-    <div class="mona-expansion-panel-header-title">
+<div [class]="headerClass()" (click)="expanded.set(!expanded());">
+    <div [class]="headerTitleClass()">
         @if (titleTemplate()) {
-            <ng-container [ngTemplateOutlet]="titleTemplate()??null"></ng-container>
+            <ng-container [ngTemplateOutlet]="titleTemplate()"></ng-container>
         } @else {
             {{ title() }}
         }
     </div>
-    <div class="mona-expansion-panel-header-actions">
-        @if (actionsTemplate()) {
-            <ng-container [ngTemplateOutlet]="actionsTemplate()??null"></ng-container>
+    <div>
+        @for (action of actionsTemplateList(); track $index) {
+            <ng-container [ngTemplateOutlet]="action"></ng-container>
+        }
+    </div>
+    <div [class]="iconContainerClass()">
+        @if (iconTemplate()) {
+            <ng-container [ngTemplateOutlet]="iconTemplate()"
+                          [ngTemplateOutletContext]="{$implicit: expanded()}"></ng-container>
         } @else {
             @if (expanded()) {
-                <fa-icon [icon]="collapseIcon"></fa-icon>
+                <lucide-angular [name]="collapseIcon" [size]="14"></lucide-angular>
             } @else {
-                <fa-icon [icon]="expandIcon"></fa-icon>
+                <lucide-angular [name]="expandIcon" [size]="14"></lucide-angular>
             }
         }
     </div>
 </div>
-@if (expanded()) {
-    <div class="mona-expansion-panel-content" @slideVertical>
+<div [class]="contentClass()">
+    <div>
         <ng-content></ng-content>
     </div>
-}
+</div>
