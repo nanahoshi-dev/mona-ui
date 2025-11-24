@@ -109,6 +109,10 @@ export class SidebarComponent {
                     path: "/pager"
                 },
                 {
+                    text: "Placeholder",
+                    path: "/placeholder"
+                },
+                {
                     text: "Popover",
                     path: "/popover"
                 },

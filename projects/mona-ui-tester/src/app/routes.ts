@@ -127,6 +127,13 @@ export const routes: Routes = [
                     import("./docs/components/pager-doc/pager-doc.component").then(m => m.PagerDocComponent)
             },
             {
+                path: "placeholder",
+                loadComponent: () =>
+                    import("./docs/components/placeholder-doc/placeholder-doc.component").then(
+                        m => m.PlaceholderDocComponent
+                    )
+            },
+            {
                 path: "popover",
                 loadComponent: () =>
                     import("./docs/components/popover-doc/popover-doc.component").then(m => m.PopoverDocComponent)

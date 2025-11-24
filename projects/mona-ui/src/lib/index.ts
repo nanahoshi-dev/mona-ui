@@ -185,7 +185,7 @@ export * from "./layout/fieldset/directives/fieldset-legend-template.directive";
 export * from "./layout/fieldset/components/fieldset/fieldset.component";
 
 /* Placeholder */
-export * from "./layout/placeholder/placeholder.component";
+export * from "./layout/placeholder/components/placeholder/placeholder.component";
 
 /** Scroll View */
 export * from "./layout/scroll-view/components/scroll-view/scroll-view.component";

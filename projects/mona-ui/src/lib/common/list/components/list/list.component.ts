@@ -21,7 +21,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder.component";
+import { PlaceholderComponent } from "../../../../layout/placeholder/components/placeholder/placeholder.component";
 import { FilterInputComponent } from "../../../filter-input/components/filter-input/filter-input.component";
 import { FilterChangeEvent } from "../../../filter-input/models/FilterChangeEvent";
 import { isTypeaheadKey, setupTypeahead } from "../../../utils/typeahead.util";

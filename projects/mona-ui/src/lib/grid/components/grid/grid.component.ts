@@ -34,7 +34,7 @@ import { swap } from "@mirei/ts-collections";
 import { asyncScheduler, filter, observeOn, take, tap } from "rxjs";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
-import { PlaceholderComponent } from "../../../layout/placeholder/placeholder.component";
+import { PlaceholderComponent } from "../../../layout/placeholder/components/placeholder/placeholder.component";
 import { ContextMenuItemComponent } from "../../../menus/ctx-menu/components/contextmenu-item/context-menu-item.component";
 import { ContextMenuComponent } from "../../../menus/ctx-menu/components/contextmenu/context-menu.component";
 import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";

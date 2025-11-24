@@ -605,18 +605,6 @@
       }
     ]
   },
-  "PlaceholderComponent": {
-    "name": "PlaceholderComponent",
-    "selector": "\"mona-placeholder\"",
-    "inputs": [
-      {
-        "name": "text",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "ListViewGroupableDirective": {
     "name": "ListViewGroupableDirective",
     "selector": "\"mona-list-view[monaListViewGroupable]\"",
@@ -3997,6 +3985,24 @@
         "name": "rounded",
         "type": "FieldsetVariantProps[\"rounded\"]",
         "description": "The rounded variant of the fieldset.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "PlaceholderComponent": {
+    "name": "PlaceholderComponent",
+    "selector": "\"mona-placeholder\"",
+    "inputs": [
+      {
+        "name": "text",
+        "type": "string",
+        "description": "The text to display inside the placeholder.\nTakes precedence over custom content if both are provided.",
         "kind": "input"
       },
       {
