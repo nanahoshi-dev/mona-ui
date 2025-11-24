@@ -90,6 +90,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "fieldset",
+                loadComponent: () =>
+                    import("./docs/components/fieldset-doc/fieldset-doc.component").then(m => m.FieldsetDocComponent)
+            },
+            {
                 path: "input",
                 loadComponent: () =>
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)

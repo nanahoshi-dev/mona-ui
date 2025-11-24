@@ -81,6 +81,10 @@ export class SidebarComponent {
                     path: "/expansion-panel"
                 },
                 {
+                    text: "Fieldset",
+                    path: "/fieldset"
+                },
+                {
                     text: "Input",
                     path: "/input"
                 },

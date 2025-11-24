@@ -3966,13 +3966,19 @@
       {
         "name": "expanded",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the expansion panel is expanded or collapsed.",
         "kind": "model"
+      },
+      {
+        "name": "rounded",
+        "type": "ExpansionPanelVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the expansion panel.",
+        "kind": "input"
       },
       {
         "name": "title",
         "type": "string",
-        "description": "",
+        "description": "Sets the title of the expansion panel.",
         "kind": "input"
       }
     ]
@@ -3983,6 +3989,18 @@
     "inputs": [
       {
         "name": "legend",
+        "type": "string",
+        "description": "The legend text of the fieldset.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "FieldsetVariantProps[\"rounded\"]",
+        "description": "The rounded variant of the fieldset.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
         "type": "string",
         "description": "",
         "kind": "input"
