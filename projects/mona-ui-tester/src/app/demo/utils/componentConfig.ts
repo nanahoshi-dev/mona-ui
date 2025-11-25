@@ -37,6 +37,7 @@ export type ComponentConfigType =
     | "dropdown"
     | "color"
     | "event"
+    | "iterable"
     | "function"
     | "object";
 
@@ -58,6 +59,10 @@ export type ComponentConfigInputType<TComponent> = {
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
               defaultValue: ComponentInputs<TComponent>[key];
               clearable?: boolean;
+          }
+        | {
+              type: Extract<ComponentConfigType, "iterable">;
+              value: Iterable<NonNullable<ComponentInputs<TComponent>[key]>>;
           }
         | {
               type: Extract<ComponentConfigType, "function">;
@@ -82,10 +87,10 @@ export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     codeVisible?: boolean;
     description: string;
     dropdownDataSource?: Iterable<TDropdown>;
-    dropdownDefaultValue?: TDropdown; // Only for dropdown type
-    dropdownTextField?: string; // Only for dropdown type
-    dropdownValue?: TDropdown; // Only for dropdown type
-    dropdownValueField?: string; // Only for dropdown type
+    dropdownDefaultValue?: TDropdown; // Only for the dropdown type
+    dropdownTextField?: string; // Only for the dropdown type
+    dropdownValue?: TDropdown; // Only for the dropdown type
+    dropdownValueField?: string; // Only for the dropdown type
     hasCode?: boolean;
     name: string;
     numericMax?: number; // Only for number type
@@ -235,7 +240,9 @@ export function extractConfigValues<TComponent>(
             const configItem = inputs[key];
             if (configItem) {
                 let valueToAssign: any;
-                if (Array.isArray(configItem.value) && configItem.value.length > 0) {
+                if (configItem.type === "iterable") {
+                    valueToAssign = [...configItem.value];
+                } else if (Array.isArray(configItem.value) && configItem.value.length > 0) {
                     if (configItem.type === "dropdown") {
                         valueToAssign = configItem.defaultValue;
                     } else {

@@ -1583,6 +1583,24 @@
       }
     ]
   },
+  "ScrollViewActivePageDirective": {
+    "name": "ScrollViewActivePageDirective",
+    "selector": "\"li[monaScrollViewActivePage]\"",
+    "inputs": [
+      {
+        "name": "active",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ScrollViewVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "ListBoxComponent": {
     "name": "ListBoxComponent",
     "selector": "\"mona-list-box\"",
@@ -4020,55 +4038,67 @@
       {
         "name": "arrows",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the visibility of the arrows.",
         "kind": "input"
       },
       {
         "name": "data",
-        "type": "any>",
-        "description": "",
+        "type": "Iterable<any>",
+        "description": "Sets the data of the scroll view.",
         "kind": "input"
       },
       {
         "name": "height",
         "type": "string | number",
-        "description": "",
+        "description": "Sets the height of the scroll view.\nThis property is required.",
         "kind": "input"
       },
       {
         "name": "index",
         "type": "number",
-        "description": "",
+        "description": "Sets the active page of the scroll view.",
         "kind": "model"
       },
       {
         "name": "infinite",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the scroll view is infinite.",
         "kind": "input"
       },
       {
         "name": "pageable",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the pager is visible.",
         "kind": "input"
       },
       {
         "name": "pagerBlur",
         "type": "number",
-        "description": "",
+        "description": "Sets the background blur of the pager in pixels.",
         "kind": "input"
       },
       {
         "name": "pagerOverlay",
         "type": "PagerOverlay",
+        "description": "Sets the color of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ScrollViewVariantProps[\"rounded\"]",
+        "description": "Represents the rounded property for a ScrollView component.\n\nThe variable `rounded` determines the border radius style to be applied\nto the ScrollView. The value \"medium\" is used as the default rounding level.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "",
+        "description": "Represents the width of an element or component. The value can be specified\neither as a string (e.g., to include units like \"px\", \"%\", \"em\") or as a number\n(e.g., for unitless numerical values).\n\nThis variable is required and must be provided when initializing\nor configuring the input.",
         "kind": "input"
       }
     ]

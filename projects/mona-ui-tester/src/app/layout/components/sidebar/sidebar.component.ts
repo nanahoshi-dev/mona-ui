@@ -129,6 +129,10 @@ export class SidebarComponent {
                     path: "/radio-button"
                 },
                 {
+                    text: "Scroll View",
+                    path: "/scroll-view"
+                },
+                {
                     text: "Slider",
                     path: "/slider"
                 },

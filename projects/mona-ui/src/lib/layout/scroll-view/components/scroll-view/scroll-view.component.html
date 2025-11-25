@@ -1,52 +1,71 @@
-<div class="mona-scroll-view-content">
-    <ul class="mona-scroll-view-list">
-        @for (item of data(); track $index) {
-            @if ($index === index()) {
-                <li [@.disabled]="lastDirection==='none'"
-                    [@slideInOut]="{value: '', params:{start: lastDirection==='right'?'+':'-',end: lastDirection==='right'?'-':'+'}}">
-                    <ng-container [ngTemplateOutlet]="contentTemplate()??null"
+<div [class]="contentClass()">
+    <ul [class]="listClass()">
+        @for (item of viewData(); track $index) {
+<!--            @let itemIndex = infinite() ? index() % viewData().length : index();-->
+            @if ($index === viewIndex()) {
+                <li [animate.enter]="enterAnimation()" [animate.leave]="leaveAnimation()">
+                    <ng-container [ngTemplateOutlet]="contentTemplate()"
                                   [ngTemplateOutletContext]="{$implicit: item.data}"></ng-container>
                 </li>
             }
         }
     </ul>
 </div>
-<div class="mona-scroll-view-arrow mona-scroll-view-arrow-left" (click)="onArrowClick('left')"
-     [ngClass]="{'mona-hidden': !arrows() || !(infinite() || index() !== 0)}">
-    <fa-icon [icon]="leftArrow"></fa-icon>
+<div [class]="leftArrowClass()" (click)="onArrowClick('left')" [attr.data-navigate-prev]="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         class="lucide lucide-chevron-left-icon lucide-chevron-left">
+        <path d="m15 18-6-6 6-6"/>
+    </svg>
 </div>
-<div class="mona-scroll-view-arrow mona-scroll-view-arrow-right" (click)="onArrowClick('right')"
-     [ngClass]="{'mona-hidden': !arrows() || !(infinite() || index() !== itemCount() - 1)}">
-    <fa-icon [icon]="rightArrow"></fa-icon>
+<div [class]="rightArrowClass()" (click)="onArrowClick('right')" [attr.data-navigate-next]="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         class="lucide lucide-chevron-right-icon lucide-chevron-right">
+        <path d="m9 18 6-6-6-6"/>
+    </svg>
 </div>
 
 @if (pageable()) {
-    <div class="mona-scroll-view-pager"
-         [ngClass]="{'mona-scroll-view-pager-dark': pagerOverlay()==='dark', 'mona-scroll-view-pager-light': pagerOverlay()==='light'}"
-         [ngStyle]="{'backdrop-filter': 'blur('+pagerBlur()+'px)'}">
+    <div [class]="pagerClass()"
+         [style.backdrop-filter]="'blur('+pagerBlur()+'px)'">
         @if (pagerArrowVisible()) {
-            <div class="mona-scroll-view-pager-arrow mona-scroll-view-pager-arrow-left"
+            <div [class]="pagerArrowClass()"
                  (click)="onPagerScroll(pagerListElement, 'left', 'single')"
                  (mousedown)="onPagerScroll(pagerListElement, 'left', 'continuous')"
                  (mouseup)="onPagerScrollEnd()">
-                <fa-icon [icon]="leftArrow"></fa-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="lucide lucide-chevron-left-icon lucide-chevron-left">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
             </div>
         }
-        <div class="mona-scroll-view-pager-list-wrapper">
-            <ul class="mona-scroll-view-pager-list" [ngStyle]="{'transform': 'translateX('+pagerPosition()+')'}"
+        <div [class]="pagerListContainerClass()">
+            <ul [class]="pagerListClass()"
+                [style.transform]="'translateX('+pagerPosition()+')'"
                 #pagerListElement>
-                @for (item of data(); track $index) {
-                    <li [ngClass]="{'mona-scroll-view-active-page': $index===index()}"
+                @for (_ of data(); track $index) {
+                    <li monaScrollViewActivePage
+                        [active]="$index===viewIndex()"
+                        [rounded]="rounded()"
+                        [attr.data-page-index]="$index"
+                        [attr.data-page-item]="true"
+                        [attr.data-active-page]="$index===viewIndex()"
                         (click)="onPageClick($index, pagerItemElement)" #pagerItemElement></li>
                 }
             </ul>
         </div>
         @if (pagerArrowVisible()) {
-            <div class="mona-scroll-view-pager-arrow mona-scroll-view-pager-arrow-right"
+            <div [class]="pagerArrowClass()"
                  (click)="onPagerScroll(pagerListElement, 'right', 'single')"
                  (mousedown)="onPagerScroll(pagerListElement, 'right', 'continuous')"
                  (mouseup)="onPagerScrollEnd()">
-                <fa-icon [icon]="rightArrow"></fa-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                    <path d="m9 18 6-6-6-6"/>
+                </svg>
             </div>
         }
     </div>

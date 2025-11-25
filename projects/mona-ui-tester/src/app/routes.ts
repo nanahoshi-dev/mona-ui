@@ -158,6 +158,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "scroll-view",
+                loadComponent: () =>
+                    import("./docs/components/scroll-view-doc/scroll-view-doc.component").then(
+                        m => m.ScrollViewDocComponent
+                    )
+            },
+            {
                 path: "slider",
                 loadComponent: () =>
                     import("./docs/components/slider-doc/slider-doc.component").then(m => m.SliderDocComponent)

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { FieldsetComponent, PlaceholderComponent } from "mona-ui";
+import { PlaceholderComponent } from "mona-ui";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
