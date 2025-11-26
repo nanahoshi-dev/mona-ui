@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterRenderEffect,
     AfterViewInit,
     ChangeDetectionStrategy,
     Component,
@@ -10,7 +9,6 @@ import {
     ElementRef,
     inject,
     input,
-    linkedSignal,
     model,
     signal,
     TemplateRef,
@@ -90,16 +88,16 @@ import {
             }
         }
         .slide-in-from-right {
-            animation: slideInFromRight 0.3s ease-out both;
+            animation: slideInFromRight 0.5s ease-out both;
         }
         .slide-out-to-left {
-            animation: slideOutToLeft 0.3s ease-out both;
+            animation: slideOutToLeft 0.5s ease-out both;
         }
         .slide-in-from-left {
-            animation: slideInFromLeft 0.3s ease-out both;
+            animation: slideInFromLeft 0.5s ease-out both;
         }
         .slide-out-to-right {
-            animation: slideOutToRight 0.3s ease-out both;
+            animation: slideOutToRight 0.5s ease-out both;
         }
     `,
     host: {
@@ -110,10 +108,15 @@ import {
     }
 })
 export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInput {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #index = computed(() => this.viewIndex());
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #viewIndex = computed(() => {
+        const infinite = this.infinite();
+        const index = this.index();
+        const viewData = this.viewData();
+        return infinite ? index % viewData.length : index;
+    });
     readonly #directionFromIndex = toSignal(
-        toObservable(this.#index).pipe(
+        toObservable(this.#viewIndex).pipe(
             startWith(0),
             pairwise(),
             map(([prevIndex, index]) => {
@@ -140,6 +143,10 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
 
+    protected readonly animationDuration = computed(() => {
+        const animate = this.animate();
+        return typeof animate === "boolean" ? (animate ? 500 : 0) : animate;
+    });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -205,12 +212,9 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
         const data = this.data();
         return select(data, d => ({ data: d }) as ScrollViewListItem).toImmutableSet();
     });
-    protected readonly viewIndex = computed(() => {
-        const infinite = this.infinite();
-        const index = this.index();
-        const viewData = this.viewData();
-        return infinite ? index % viewData.length : index;
-    });
+    protected readonly viewIndex = this.#viewIndex;
+
+    public readonly animate = input<boolean | number>(true);
 
     /**
      * @description Represents the state of arrows' visibility or activity.
@@ -219,12 +223,9 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     public readonly arrows = input(false);
 
     /**
-     * @description Represents an iterable data input.
-     *
-     * This variable is initialized as an iterable with no elements.
-     * It accepts any iterable containing elements of any type.
+     * @description Sets the data of the scroll view.
      */
-    public readonly data = input<Iterable<any>>([]);
+    public readonly data = input<Iterable<unknown>>([]);
 
     /**
      * @description Sets the height of the scroll view.
@@ -262,6 +263,12 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     public readonly pagerOverlay = input<PagerOverlay>("dark");
 
     /**
+     * @description Sets the border radius of the pager items.
+     * @default "medium"
+     */
+    public readonly pagerRounded = input<ScrollViewVariantProps["pagerRounded"]>("medium");
+
+    /**
      * @description Represents the rounded property for a ScrollView component.
      *
      * The variable `rounded` determines the border radius style to be applied
@@ -283,9 +290,6 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
 
     public constructor() {
         this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
-        afterRenderEffect({
-            earlyRead: () => console.log(this.index())
-        });
     }
 
     public ngAfterViewInit(): void {

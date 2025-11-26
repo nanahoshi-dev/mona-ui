@@ -17,6 +17,11 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
     protected readonly config = signal<ComponentConfig<ScrollViewComponent>>({
         code: ``,
         inputs: {
+            animate: {
+                type: "dropdown",
+                value: [true, false, 500, 1000, 2000],
+                defaultValue: true
+            },
             data: {
                 type: "iterable",
                 value: [
@@ -60,6 +65,11 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
                 value: ["dark", "light", "none"],
                 defaultValue: "dark"
             },
+            pagerRounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "none"
+            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
@@ -83,6 +93,7 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
     imports: [ScrollViewComponent],
     template: `
         <mona-scroll-view
+            [animate]="animate()"
             [arrows]="arrows()"
             [data]="data()"
             [height]="height()"
@@ -91,16 +102,18 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
             [pageable]="pageable()"
             [pagerBlur]="pagerBlur()"
             [pagerOverlay]="pagerOverlay()"
+            [pagerRounded]="pagerRounded()"
             [rounded]="rounded()"
             [width]="width()">
             <ng-template let-item>
-                <img [src]="item" style="width: 100%; height: 100%;" alt="" />
+                <img [src]="item" alt="" />
             </ng-template>
         </mona-scroll-view>
     `
 })
 class ScrollViewWrapperComponent implements ComponentInputsAsSignal<ScrollViewComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly animate = input<ReturnType<ScrollViewComponent["animate"]>>(true);
     public readonly arrows = input<ReturnType<ScrollViewComponent["arrows"]>>(true);
     public readonly data = input<ReturnType<ScrollViewComponent["data"]>>([]);
     public readonly height = input.required<ReturnType<ScrollViewComponent["height"]>>();
@@ -109,6 +122,7 @@ class ScrollViewWrapperComponent implements ComponentInputsAsSignal<ScrollViewCo
     public readonly pageable = input<ReturnType<ScrollViewComponent["pageable"]>>(true);
     public readonly pagerBlur = input<ReturnType<ScrollViewComponent["pagerBlur"]>>(1);
     public readonly pagerOverlay = input<ReturnType<ScrollViewComponent["pagerOverlay"]>>("dark");
+    public readonly pagerRounded = input<ReturnType<ScrollViewComponent["pagerRounded"]>>("none");
     public readonly rounded = input<ReturnType<ScrollViewComponent["rounded"]>>("none");
     public readonly width = input.required<ReturnType<ScrollViewComponent["width"]>>();
 }

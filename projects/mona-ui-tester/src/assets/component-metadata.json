@@ -1595,7 +1595,7 @@
       },
       {
         "name": "rounded",
-        "type": "ScrollViewVariantProps[\"rounded\"]",
+        "type": "ScrollViewVariantProps[\"pagerRounded\"]",
         "description": "",
         "kind": "input"
       }
@@ -4036,14 +4036,20 @@
     "selector": "\"mona-scroll-view\"",
     "inputs": [
       {
+        "name": "animate",
+        "type": "boolean | number",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "arrows",
         "type": "boolean",
-        "description": "Sets the visibility of the arrows.",
+        "description": "Represents the state of arrows' visibility or activity.",
         "kind": "input"
       },
       {
         "name": "data",
-        "type": "Iterable<any>",
+        "type": "Iterable<unknown>",
         "description": "Sets the data of the scroll view.",
         "kind": "input"
       },
@@ -4081,6 +4087,12 @@
         "name": "pagerOverlay",
         "type": "PagerOverlay",
         "description": "Sets the color of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "pagerRounded",
+        "type": "ScrollViewVariantProps[\"pagerRounded\"]",
+        "description": "Sets the border radius of the pager items.",
         "kind": "input"
       },
       {

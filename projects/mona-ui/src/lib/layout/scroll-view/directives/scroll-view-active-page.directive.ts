@@ -13,9 +13,9 @@ export class ScrollViewActivePageDirective {
     protected readonly pageItemClass = computed(() => {
         const theme = this.#themeService.theme();
         const active = this.active();
-        const rounded = this.rounded();
-        return scrollViewPagerListItemThemeVariants(theme)({ active, rounded });
+        const pagerRounded = this.rounded();
+        return scrollViewPagerListItemThemeVariants(theme)({ active, pagerRounded });
     });
     public readonly active = input.required<boolean>();
-    public readonly rounded = input.required<ScrollViewVariantProps["rounded"]>();
+    public readonly rounded = input.required<ScrollViewVariantProps["pagerRounded"]>();
 }

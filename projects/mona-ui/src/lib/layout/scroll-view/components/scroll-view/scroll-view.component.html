@@ -1,11 +1,13 @@
-<div [class]="contentClass()">
+<div [class]="contentClass()" #contentElement>
     <ul [class]="listClass()">
         @for (item of viewData(); track $index) {
-<!--            @let itemIndex = infinite() ? index() % viewData().length : index();-->
             @if ($index === viewIndex()) {
-                <li [animate.enter]="enterAnimation()" [animate.leave]="leaveAnimation()">
+                <li [animate.enter]="enterAnimation()" [animate.leave]="leaveAnimation()"
+                    [style.animation-duration.ms]="animationDuration()">
+                    @let width = contentElement.clientWidth;
+                    @let height = contentElement.clientHeight;
                     <ng-container [ngTemplateOutlet]="contentTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: item.data}"></ng-container>
+                                  [ngTemplateOutletContext]="{$implicit: item.data, width, height}"></ng-container>
                 </li>
             }
         }
@@ -48,7 +50,7 @@
                 @for (_ of data(); track $index) {
                     <li monaScrollViewActivePage
                         [active]="$index===viewIndex()"
-                        [rounded]="rounded()"
+                        [rounded]="pagerRounded()"
                         [attr.data-page-index]="$index"
                         [attr.data-page-item]="true"
                         [attr.data-active-page]="$index===viewIndex()"
