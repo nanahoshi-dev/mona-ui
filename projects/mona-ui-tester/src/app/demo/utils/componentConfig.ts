@@ -62,7 +62,7 @@ export type ComponentConfigInputType<TComponent> = {
           }
         | {
               type: Extract<ComponentConfigType, "iterable">;
-              value: Iterable<NonNullable<ComponentInputs<TComponent>[key]>>;
+              value: ComponentInputs<TComponent>[key];
           }
         | {
               type: Extract<ComponentConfigType, "function">;
@@ -241,7 +241,7 @@ export function extractConfigValues<TComponent>(
             if (configItem) {
                 let valueToAssign: any;
                 if (configItem.type === "iterable") {
-                    valueToAssign = [...configItem.value];
+                    valueToAssign = configItem.value;
                 } else if (Array.isArray(configItem.value) && configItem.value.length > 0) {
                     if (configItem.type === "dropdown") {
                         valueToAssign = configItem.defaultValue;

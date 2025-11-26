@@ -177,6 +177,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "stepper",
+                loadComponent: () =>
+                    import("./docs/components/stepper-doc/stepper-doc.component").then(m => m.StepperDocComponent)
+            },
+            {
                 path: "switch",
                 loadComponent: () =>
                     import("./docs/components/switch-doc/switch-doc.component").then(m => m.SwitchDocComponent)

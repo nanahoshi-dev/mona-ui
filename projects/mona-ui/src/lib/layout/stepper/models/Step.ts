@@ -11,3 +11,9 @@ export class Step<T = any> {
 
     public constructor(public readonly options: StepOptions<T>) {}
 }
+
+export interface StepItem<T = any> {
+    options: StepOptions<T>;
+    index: number;
+    uid: string;
+}

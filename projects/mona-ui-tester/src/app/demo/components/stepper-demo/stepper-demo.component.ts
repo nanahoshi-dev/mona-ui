@@ -1,0 +1,267 @@
+import { NgComponentOutlet } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import {
+    Check,
+    CheckLine,
+    CreditCard,
+    FileSearchCorner,
+    LucideAngularModule,
+    MapPinHouse,
+    ShoppingCart,
+    Truck
+} from "lucide-angular";
+import {
+    StepperComponent,
+    StepperIndicatorTemplateDirective,
+    StepperLabelTemplateDirective,
+    StepperStepTemplateDirective
+} from "mona-ui";
+import { RandomColorPipe } from "../../pipes/random-color.pipe";
+import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
+import { AbstractDemoComponent } from "../base/abstract-demo.component";
+import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+@Component({
+    selector: "app-stepper-demo",
+    imports: [DemoContainerComponent, NgComponentOutlet],
+    templateUrl: "./stepper-demo.component.html",
+    changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent> {
+    readonly #injector = createFeatureInjector({
+        indicatorTemplate: {
+            code: `
+                <mona-stepper>
+                    <ng-template
+                        monaStepperIndicatorTemplate
+                        let-dataItem
+                        let-active="active"
+                        let-index="index"
+                        let-currentIndex="currentIndex">
+                        @if (index < currentIndex || currentIndex === 5) {
+                            <lucide-angular [name]="checkIcon" class="text-lime-300 font-bold" [size]="16"></lucide-angular>
+                        } @else {
+                            @switch (dataItem.label) {
+                                @case ("Cart") {
+                                    <lucide-angular [name]="cartIcon" class="font-bold" [size]="16"></lucide-angular>
+                                }
+                                @case ("Address") {
+                                    <lucide-angular [name]="addressIcon" class="font-bold" [size]="16"></lucide-angular>
+                                }
+                                @case ("Shipping") {
+                                    <lucide-angular [name]="shippingIcon" class="font-bold" [size]="16"></lucide-angular>
+                                }
+                                @case ("Payment") {
+                                    <lucide-angular [name]="paymentIcon" class="font-bold" [size]="16"></lucide-angular>
+                                }
+                                @case ("Review") {
+                                    <lucide-angular [name]="reviewIcon" class="font-bold" [size]="16"></lucide-angular>
+                                }
+                                @case ("Complete") {
+                                    <lucide-angular [name]="completeIcon" class="font-bold" [size]="16"></lucide-angular>
+                                }
+                            }
+                        }
+                    </ng-template>
+                </mona-stepper>
+            `,
+            active: false,
+            name: "Indicator Template",
+            description: "Use a custom template for the step indicator."
+        },
+        labelTemplate: {
+            code: `
+                <mona-stepper>
+                    <ng-template
+                        monaStepperLabelTemplate
+                        let-dataItem
+                        let-active="active"
+                        let-index="index"
+                        let-currentIndex="currentIndex">
+                        <div class="flex items-center">
+                            @if (index < currentIndex || currentIndex === 5) {
+                                <span class="text-lime-600 font-bold">{{ dataItem.label }}</span>
+                            } @else {
+                                {{ dataItem.label }}
+                            }
+                        </div>
+                    </ng-template>
+                </mona-stepper>
+            `,
+            active: false,
+            name: "Label Template",
+            description: "Use a custom template for the step label."
+        },
+        stepTemplate: {
+            code: `
+                <mona-stepper>
+                    <ng-template monaStepperStepTemplate let-step let-index="index" let-active="active">
+                        @let icon = active ? "✦" : "✧";
+                        @let color = active ? ("" | randomColor) : "";
+                        <span class="text-[3em] -mt-3 h-16 flex items-center justify-center" [style.color]="color">{{
+                            icon
+                        }}</span>
+                    </ng-template>
+                </mona-stepper>
+            `,
+            active: false,
+            name: "Step Template",
+            description: "Use a custom template for the step content."
+        }
+    });
+    protected readonly config = signal<ComponentConfig<StepperComponent>>({
+        code: `
+            <mona-stepper
+                [linear]="linear()"
+                [orientation]="orientation()"
+                [rounded]="rounded()"
+                [step]="step()"
+                (stepChange)="onStepChange($event)"
+                [steps]="steps()">
+            </mona-stepper>
+        `,
+        inputs: {
+            linear: {
+                type: "boolean",
+                value: true
+            },
+            orientation: {
+                type: "dropdown",
+                value: ["horizontal", "vertical"],
+                defaultValue: "horizontal"
+            },
+            rounded: {
+                type: "dropdown",
+                value: ["small", "medium", "large", "full", "none"],
+                defaultValue: "full"
+            },
+            step: {
+                type: "number",
+                value: 0,
+                min: 0,
+                max: 5
+            },
+            steps: {
+                type: "iterable",
+                value: [
+                    { label: "Cart" },
+                    { label: "Address" },
+                    { label: "Shipping" },
+                    { label: "Payment" },
+                    { label: "Review" },
+                    { label: "Complete" }
+                ]
+            }
+        },
+        outputs: {},
+        featureHandler: this.#injector.get(FeatureConfigHandler)
+    });
+    protected readonly featureInjector = this.#injector;
+    protected readonly metadata = this.getMetadata("StepperComponent");
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
+    protected readonly StepperWrapperComponent = StepperWrapperComponent;
+}
+
+@Component({
+    imports: [
+        StepperComponent,
+        StepperIndicatorTemplateDirective,
+        LucideAngularModule,
+        StepperLabelTemplateDirective,
+        StepperStepTemplateDirective,
+        RandomColorPipe
+    ],
+    template: `
+        @let featureData = features();
+        <mona-stepper
+            [linear]="linear()"
+            [orientation]="orientation()"
+            [rounded]="rounded()"
+            [step]="step()"
+            (stepChange)="onStepChange($event)"
+            [steps]="steps()">
+            @if (featureData["indicatorTemplate"].active) {
+                <ng-template
+                    monaStepperIndicatorTemplate
+                    let-dataItem
+                    let-active="active"
+                    let-index="index"
+                    let-currentIndex="currentIndex">
+                    @if (index < currentIndex || currentIndex === 5) {
+                        <lucide-angular [name]="checkIcon" class="text-lime-300 font-bold" [size]="16"></lucide-angular>
+                    } @else {
+                        @switch (dataItem.label) {
+                            @case ("Cart") {
+                                <lucide-angular [name]="cartIcon" class="font-bold" [size]="16"></lucide-angular>
+                            }
+                            @case ("Address") {
+                                <lucide-angular [name]="addressIcon" class="font-bold" [size]="16"></lucide-angular>
+                            }
+                            @case ("Shipping") {
+                                <lucide-angular [name]="shippingIcon" class="font-bold" [size]="16"></lucide-angular>
+                            }
+                            @case ("Payment") {
+                                <lucide-angular [name]="paymentIcon" class="font-bold" [size]="16"></lucide-angular>
+                            }
+                            @case ("Review") {
+                                <lucide-angular [name]="reviewIcon" class="font-bold" [size]="16"></lucide-angular>
+                            }
+                            @case ("Complete") {
+                                <lucide-angular [name]="completeIcon" class="font-bold" [size]="16"></lucide-angular>
+                            }
+                        }
+                    }
+                </ng-template>
+            }
+            @if (featureData["labelTemplate"].active) {
+                <ng-template
+                    monaStepperLabelTemplate
+                    let-dataItem
+                    let-active="active"
+                    let-index="index"
+                    let-currentIndex="currentIndex">
+                    <div class="flex items-center">
+                        @if (index < currentIndex || currentIndex === 5) {
+                            <span class="text-lime-600 font-bold">{{ dataItem.label }}</span>
+                        } @else {
+                            {{ dataItem.label }}
+                        }
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["stepTemplate"].active) {
+                <ng-template monaStepperStepTemplate let-step let-index="index" let-active="active">
+                    @let icon = active ? "✦" : "✧";
+                    @let color = active ? ("" | randomColor) : "";
+                    <span class="text-[3em] -mt-3 h-16 flex items-center justify-center" [style.color]="color">{{
+                        icon
+                    }}</span>
+                </ng-template>
+            }
+        </mona-stepper>
+    `,
+    host: {
+        class: "w-full flex items-center justify-center",
+        "[style.height.px]": "orientation() === 'vertical' ? 500 : undefined"
+    }
+})
+export class StepperWrapperComponent implements ComponentInputsAsSignal<StepperComponent> {
+    protected readonly addressIcon = MapPinHouse;
+    protected readonly cartIcon = ShoppingCart;
+    protected readonly checkIcon = Check;
+    protected readonly completeIcon = CheckLine;
+    protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly paymentIcon = CreditCard;
+    protected readonly reviewIcon = FileSearchCorner;
+    protected readonly shippingIcon = Truck;
+    public readonly linear = input<ReturnType<StepperComponent["linear"]>>(true);
+    public readonly orientation = input<ReturnType<StepperComponent["orientation"]>>("horizontal");
+    public readonly rounded = input<ReturnType<StepperComponent["rounded"]>>("full");
+    public readonly step = model<ReturnType<StepperComponent["step"]>>(1);
+    public readonly steps = input<ReturnType<StepperComponent["steps"]>>([]);
+
+    protected onStepChange(step: number) {
+        console.log(`Step changed to ${step}`);
+    }
+}

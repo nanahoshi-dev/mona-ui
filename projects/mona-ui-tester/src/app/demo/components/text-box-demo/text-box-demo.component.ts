@@ -5,6 +5,7 @@ import { List, LucideAngularModule, Search } from "lucide-angular";
 import {
     DropdownButtonComponent,
     DropdownButtonItemComponent,
+    DropdownButtonTextTemplateDirective,
     MenuItemComponent,
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
@@ -37,10 +38,10 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             active: false,
             code: `
                 <ng-template monaTextBoxSuffixTemplate>
-                    <mona-drop-down-button look="ghost" class="h-full">
+                    <mona-drop-down-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
                         <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
                         <mona-menu-item text="Menu Item 1"></mona-menu-item>
-                        <mona-menu-item text="Menu Item 1"></mona-menu-item>
+                        <mona-menu-item text="Menu Item 2"></mona-menu-item>
                     </mona-drop-down-button>
                 </ng-template>
             `,
@@ -67,10 +68,10 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                     <lucide-angular [name]="searchIcon" [size]="20" class="pl-1"></lucide-angular>
                 </ng-template>
                 <ng-template monaTextBoxSuffixTemplate>
-                    <mona-drop-down-button look="ghost" class="h-full">
+                    <mona-drop-down-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
                         <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
                         <mona-menu-item text="Menu Item 1"></mona-menu-item>
-                        <mona-menu-item text="Menu Item 1"></mona-menu-item>
+                        <mona-menu-item text="Menu Item 2"></mona-menu-item>
                     </mona-drop-down-button>
                 </ng-template>
             </mona-text-box>
@@ -139,7 +140,8 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         TextBoxSuffixTemplateDirective,
         DropdownButtonComponent,
         DropdownButtonItemComponent,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        DropdownButtonTextTemplateDirective
     ],
     template: `
         @let featureData = features();
@@ -163,10 +165,12 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             }
             @if (featureData && featureData["suffixTemplate"].active) {
                 <ng-template monaTextBoxSuffixTemplate>
-                    <mona-dropdown-button look="ghost" class="h-full">
-                        <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
+                    <mona-dropdown-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
+                        <ng-template monaDropdownButtonTextTemplate>
+                            <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
+                        </ng-template>
                         <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
-                        <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
+                        <mona-dropdown-button-item label="Menu Item 2"></mona-dropdown-button-item>
                     </mona-dropdown-button>
                 </ng-template>
             }

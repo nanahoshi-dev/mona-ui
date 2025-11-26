@@ -100,7 +100,7 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
 
     /**
      * @description Whether to close the color picker when a color is selected.
-     * Only applies when view is set to "palette".
+     * Only applies when the view is set to "palette".
      * @default true
      */
     public readonly closeOnSelect = input(true);
@@ -208,7 +208,7 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
             case " ":
             case "Home":
             case "End":
-                // Focus the first color tile when user starts navigating
+                // Focus on the first color tile when the user starts navigating
                 event.preventDefault();
                 event.stopPropagation();
                 this.focusFirstColorTile();

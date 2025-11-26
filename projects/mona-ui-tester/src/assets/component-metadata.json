@@ -1601,6 +1601,30 @@
       }
     ]
   },
+  "StepperIndicatorDirective": {
+    "name": "StepperIndicatorDirective",
+    "selector": "\"span[monaStepperIndicator]\"",
+    "inputs": [
+      {
+        "name": "active",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "focused",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "StepperVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "ListBoxComponent": {
     "name": "ListBoxComponent",
     "selector": "\"mona-list-box\"",
@@ -3498,7 +3522,7 @@
       {
         "name": "closeOnSelect",
         "type": "boolean",
-        "description": "Whether to close the color picker when a color is selected.\r\nOnly applies when view is set to \"palette\".",
+        "description": "Whether to close the color picker when a color is selected.\r\nOnly applies when the view is set to \"palette\".",
         "kind": "input"
       },
       {
@@ -4174,33 +4198,33 @@
     "selector": "\"mona-stepper\"",
     "inputs": [
       {
-        "name": "stepChange",
-        "type": "number",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "linear",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the flow of the stepper.\nIf set to true, the user will only be able to navigate to the previous or the next step.",
         "kind": "input"
       },
       {
         "name": "orientation",
-        "type": "\"horizontal\" | \"vertical\"",
-        "description": "",
+        "type": "StepperVariantProps[\"orientation\"]",
+        "description": "Sets the orientation of the stepper.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "StepperVariantProps[\"rounded\"]",
+        "description": "Sets the roundness of the stepper steps.",
         "kind": "input"
       },
       {
         "name": "step",
         "type": "number",
-        "description": "",
+        "description": "Sets the active step of the stepper.",
         "kind": "model"
       },
       {
         "name": "steps",
-        "type": "any>>",
-        "description": "",
+        "type": "Iterable<StepOptions>",
+        "description": "Sets the steps of the stepper.",
         "kind": "input"
       }
     ]
