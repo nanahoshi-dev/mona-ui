@@ -116,7 +116,20 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
         toObservable(this.#index).pipe(
             startWith(0),
             pairwise(),
-            map(([prevIndex, index]) => (index < prevIndex ? "left" : "right"))
+            map(([prevIndex, index]) => {
+                const infinite = this.infinite();
+                const totalItems = this.itemCount();
+                if (infinite && totalItems > 1) {
+                    const lastIndex = totalItems - 1;
+                    if (prevIndex === lastIndex && index === 0) {
+                        return "right";
+                    }
+                    if (prevIndex === 0 && index === lastIndex) {
+                        return "left";
+                    }
+                }
+                return index < prevIndex ? "left" : "right";
+            })
         ),
         {
             initialValue: "right"
