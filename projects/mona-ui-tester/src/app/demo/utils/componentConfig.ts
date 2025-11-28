@@ -42,7 +42,7 @@ export type ComponentConfigType =
     | "object";
 
 export type ComponentConfigInputType<TComponent> = {
-    [key in keyof ComponentInputs<TComponent>]: { alias?: string } & (
+    [key in keyof ComponentInputs<TComponent>]: { alias?: string; note?: string } & (
         | {
               type: Extract<ComponentConfigType, "string" | "boolean" | "color">;
               value: NonNullable<ComponentInputs<TComponent>[key]>;
@@ -119,7 +119,8 @@ export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     defaultValue?: TDefault;
     max?: number | null; // Optional, only for number inputs
     min?: number | null; // Optional, only for number inputs
-    name: string; // Optional, only for number inputs
+    name: string;
+    note?: string;
     nullable?: boolean; // From the input structure
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
@@ -173,6 +174,7 @@ export function createComponentInputConfigArray<TComponent>(
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
+                note: configItem.note,
                 nullable: configItem.type === "number" ? (configItem.nullable ?? false) : undefined,
                 name: String(key),
                 value: configItem.value,

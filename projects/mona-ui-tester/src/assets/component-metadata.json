@@ -1601,6 +1601,24 @@
       }
     ]
   },
+  "SplitterPaneStyleDirective": {
+    "name": "SplitterPaneStyleDirective",
+    "selector": "\"div[monaSplitterPaneStyle]\"",
+    "inputs": [
+      {
+        "name": "pane",
+        "type": "SplitterPaneComponent",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "paneList",
+        "type": "Iterable<SplitterPaneComponent>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "StepperIndicatorDirective": {
     "name": "StepperIndicatorDirective",
     "selector": "\"span[monaStepperIndicator]\"",
@@ -4145,7 +4163,7 @@
     "inputs": [
       {
         "name": "orientation",
-        "type": "Orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
         "description": "",
         "kind": "input"
       }
@@ -4156,15 +4174,39 @@
     "selector": "\"mona-splitter-pane\"",
     "inputs": [
       {
+        "name": "collapsible",
+        "type": "boolean",
+        "description": "Whether the pane is collapsible.",
+        "kind": "input"
+      },
+      {
+        "name": "collapsed",
+        "type": "boolean",
+        "description": "Whether the pane is collapsed.",
+        "kind": "model"
+      },
+      {
+        "name": "max",
+        "type": "string | number | null",
+        "description": "The maximum size of the pane.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "string | number | null",
+        "description": "The minimum size of the pane.",
+        "kind": "input"
+      },
+      {
         "name": "resizable",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the pane is resizable.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "string | number",
-        "description": "",
+        "description": "The size of the pane.",
         "kind": "model"
       }
     ]
@@ -4181,13 +4223,55 @@
       },
       {
         "name": "orientation",
-        "type": "Orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
         "description": "",
         "kind": "input"
       },
       {
         "name": "previousPane",
         "type": "SplitterPaneComponent",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "SplitterResizerHandleComponent": {
+    "name": "SplitterResizerHandleComponent",
+    "selector": "\"mona-splitter-resizer-handle\"",
+    "inputs": [
+      {
+        "name": "collapseNext",
+        "type": "MouseEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "collapsePrevious",
+        "type": "MouseEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "nextControlsVisible",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "previousControlsVisible",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "resizable",
+        "type": "boolean",
         "description": "",
         "kind": "input"
       }

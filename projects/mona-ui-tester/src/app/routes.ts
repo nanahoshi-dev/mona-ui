@@ -177,6 +177,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "splitter",
+                loadComponent: () =>
+                    import("./docs/components/splitter-doc/splitter-doc.component").then(m => m.SplitterDocComponent)
+            },
+            {
                 path: "stepper",
                 loadComponent: () =>
                     import("./docs/components/stepper-doc/stepper-doc.component").then(m => m.StepperDocComponent)

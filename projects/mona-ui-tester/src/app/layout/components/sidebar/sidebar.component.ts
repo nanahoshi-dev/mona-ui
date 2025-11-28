@@ -141,6 +141,10 @@ export class SidebarComponent {
                     path: "/split-button"
                 },
                 {
+                    text: "Splitter",
+                    path: "/splitter"
+                },
+                {
                     text: "Stepper",
                     path: "/stepper"
                 },
