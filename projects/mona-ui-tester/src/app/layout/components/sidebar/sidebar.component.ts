@@ -153,6 +153,10 @@ export class SidebarComponent {
                     path: "/switch"
                 },
                 {
+                    text: "Tabs",
+                    path: "/tabs"
+                },
+                {
                     text: "Text Area",
                     path: "/textarea"
                 },

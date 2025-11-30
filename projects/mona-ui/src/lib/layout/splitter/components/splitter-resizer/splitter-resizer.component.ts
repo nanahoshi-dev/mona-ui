@@ -337,10 +337,7 @@ export class SplitterResizerComponent {
     private getNeighborPanes(
         targetElement: HTMLElement,
         direction: "previous" | "next"
-    ): {
-        leading: { pane: SplitterPaneComponent; element: HTMLElement; size: number } | null;
-        trailing: { pane: SplitterPaneComponent; element: HTMLElement; size: number } | null;
-    } {
+    ): { leading: PaneElementData | null; trailing: PaneElementData | null } {
         const [previousElement, nextElement] = this.getPaneElements();
         const leadingPane =
             direction === "previous"

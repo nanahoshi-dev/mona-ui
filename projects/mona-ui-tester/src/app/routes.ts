@@ -192,6 +192,11 @@ export const routes: Routes = [
                     import("./docs/components/switch-doc/switch-doc.component").then(m => m.SwitchDocComponent)
             },
             {
+                path: "tabs",
+                loadComponent: () =>
+                    import("./docs/components/tabs-doc/tabs-doc.component").then(m => m.TabsDocComponent)
+            },
+            {
                 path: "textarea",
                 loadComponent: () =>
                     import("./docs/components/text-area-doc/text-area-doc.component").then(m => m.TextAreaDocComponent)

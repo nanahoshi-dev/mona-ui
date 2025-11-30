@@ -25,16 +25,16 @@ import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabComponent } from "../tab/tab.component";
 
 @Component({
-    selector: "mona-tab-strip",
-    templateUrl: "./tab-strip.component.html",
-    styleUrls: ["./tab-strip.component.scss"],
+    selector: "mona-tabs",
+    templateUrl: "./tabs.component.html",
+    styleUrls: ["./tabs.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ButtonDirective, FontAwesomeModule, NgClass, NgTemplateOutlet],
     host: {
-        class: "mona-tab-strip"
+        class: "mona-tabs"
     }
 })
-export class TabStripComponent implements OnDestroy, AfterViewInit {
+export class TabsComponent implements OnDestroy, AfterViewInit {
     readonly #cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
