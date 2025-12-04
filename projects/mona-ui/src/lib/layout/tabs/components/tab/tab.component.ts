@@ -1,51 +1,61 @@
 import {
-    AfterViewInit,
+    afterRenderEffect,
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChild,
-    EmbeddedViewRef,
+    DestroyRef,
     inject,
     input,
     model,
-    TemplateRef,
-    ViewContainerRef
+    TemplateRef
 } from "@angular/core";
 import { v4 } from "uuid";
 import { TabContentTemplateDirective } from "../../directives/tab-content-template.directive";
 import { TabTitleTemplateDirective } from "../../directives/tab-title-template.directive";
+import { TabItem } from "../../models/TabItem";
+import { TabsService } from "../../services/tabs.service";
 
 @Component({
     selector: "mona-tab",
     template: "",
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TabComponent implements AfterViewInit {
-    readonly #vcr: ViewContainerRef = inject(ViewContainerRef);
-    #viewRef?: EmbeddedViewRef<any>;
-
-    protected readonly contentTemplate = contentChild(TabContentTemplateDirective, { read: TemplateRef });
-
-    public readonly titleTemplate = contentChild(TabTitleTemplateDirective, { read: TemplateRef });
-    public readonly uid = v4();
-    public closable = input<boolean | undefined>(undefined);
-    public disabled = input(false);
-    public index = 0;
-    public selected = model(false);
-    public title = input("");
-
-    public createView(): void {
+export class TabComponent {
+    readonly #tabItem = computed(() => {
+        const closable = this.closable();
         const contentTemplate = this.contentTemplate();
-        if (contentTemplate) {
-            this.#viewRef = this.#vcr.createEmbeddedView(contentTemplate);
-        }
-    }
+        const disabled = this.disabled();
+        const selected = this.selected();
+        const titleTemplate = this.titleTemplate();
+        const title = this.title();
+        const uid = this.uid;
+        const tabItem: TabItem = {
+            closable,
+            contentTemplate,
+            disabled,
+            index: 0,
+            selected,
+            title,
+            titleTemplate,
+            uid
+        };
+        return tabItem;
+    });
+    readonly #tabService = inject(TabsService);
+    protected readonly contentTemplate = contentChild(TabContentTemplateDirective, { read: TemplateRef });
+    public readonly titleTemplate = contentChild(TabTitleTemplateDirective, { read: TemplateRef });
+    public readonly closable = input<boolean>(false);
+    public readonly disabled = input(false);
+    public readonly selected = model(false);
+    public readonly title = input("");
+    public readonly uid = v4();
+    public index = 0;
 
-    public ngAfterViewInit(): void {
-        this.createView();
-    }
-
-    public get viewRef(): EmbeddedViewRef<any> | undefined {
-        return this.#viewRef;
+    public constructor() {
+        afterRenderEffect({
+            read: () => this.#tabService.addTab(this.uid, this.#tabItem())
+        });
+        inject(DestroyRef).onDestroy(() => this.#tabService.removeTab(this.uid));
     }
 }

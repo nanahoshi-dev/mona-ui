@@ -24,6 +24,11 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             keepTabContent: {
                 type: "boolean",
                 value: false
+            },
+            rounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "large"
             }
         },
         outputs: {},
@@ -38,12 +43,15 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
 @Component({
     imports: [TabsComponent, TabComponent, TabContentTemplateDirective],
     template: `
-        <mona-tabs [closable]="closable()" [keepTabContent]="keepTabContent()">
+        <mona-tabs [closable]="closable()" [keepTabContent]="keepTabContent()" [rounded]="rounded()">
             <mona-tab [title]="'Tab 1'">
                 <ng-template monaTabContentTemplate> Content for Tab 1 </ng-template>
             </mona-tab>
-            <mona-tab [title]="'Tab 2'">
+            <mona-tab [title]="'Tab 2'" [selected]="true">
                 <ng-template monaTabContentTemplate> Content for Tab 2 </ng-template>
+            </mona-tab>
+            <mona-tab [title]="'Tab 3'">
+                <ng-template monaTabContentTemplate> Content for Tab 3 </ng-template>
             </mona-tab>
         </mona-tabs>
     `
@@ -51,4 +59,5 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
 export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsComponent> {
     public readonly closable = input<ReturnType<TabsComponent["closable"]>>(false);
     public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(false);
+    public readonly rounded = input<ReturnType<TabsComponent["rounded"]>>("large");
 }

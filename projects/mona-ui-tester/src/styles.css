@@ -90,7 +90,8 @@
 
     --page-background: #fff;
     /*--page-background: oklch(96.79% 0.0011 17.18);*/
-    --color-demo-background: #f9fafb;
+    --color-demo-background: #FFF;
+    /*--color-demo-background: #f9fafb;*/
 }
 
 :root {

@@ -1,50 +1,12 @@
-<div class="mona-tab-strip-tabs">
-    @if (scrollsVisible()) {
-        <div class="mona-tab-strip-scroll">
-            <button monaButton (click)="startScrolling(tabListElement, 'left', 'single')"
-                    (mousedown)="startScrolling(tabListElement, 'left', 'continuous')"
-                    (mouseup)="stopScrolling()">
-                <fa-icon [icon]="scrollLeftIcon"></fa-icon>
-            </button>
-        </div>
-    }
-    <div class="mona-tab-list-wrapper">
-        <ul class="mona-tab-list" #tabListElement>
-            @for (tab of tabComponents(); track tab.uid) {
-                <li [ngClass]="{'mona-tab-active': tab.selected(), 'mona-disabled': tab.disabled()}"
-                    (click)="onTabClick(tab, tabListElement)">
-                    <div class="mona-tab-title">
-                        @if (tab.titleTemplate()) {
-                            <ng-container [ngTemplateOutlet]="tab.titleTemplate()??null"></ng-container>
-                        } @else {
-                            <span>{{ tab.title() }}</span>
-                        }
-                    </div>
-                    @if ((tab.closable()===true) || (closable() && tab.closable() !== false)) {
-                        <button monaButton look="ghost" [disabled]="tab.disabled()"
-                                class="mona-tab-close"
-                                (click)="onTabClose(tab, $event)">
-                            <fa-icon [icon]="tabCloseIcon"></fa-icon>
-                        </button>
-                    }
-                </li>
-            }
-        </ul>
-    </div>
-    @if (scrollsVisible()) {
-        <div class="mona-tab-strip-scroll">
-            <button monaButton (click)="startScrolling(tabListElement, 'right', 'single')"
-                    (mousedown)="startScrolling(tabListElement, 'right', 'continuous')"
-                    (mouseup)="stopScrolling()">
-                <fa-icon [icon]="scrollRightIcon"></fa-icon>
-            </button>
-        </div>
-    }
-</div>
+<mona-tab-list [closable]="closable()" [rounded]="rounded()" (tabClose)="tabClose.emit($event)"></mona-tab-list>
 <div class="mona-tab-content">
-    <ng-container #tabContentContainer></ng-container>
-</div>
-
-<div style="display: block; width: 0; height: 0; overflow: hidden;" #initialLoadContainer>
-    <ng-container #initialLoadAnchor></ng-container>
+    @for (tab of tabList(); track tab) {
+        @let tabLoaded = keepTabContent() || tab.selected;
+        @let tabHidden = keepTabContent() && !tab.selected;
+        @if (tabLoaded) {
+            <div class="w-full h-full" [class.hidden]="tabHidden">
+                <ng-container [ngTemplateOutlet]="tab.contentTemplate"></ng-container>
+            </div>
+        }
+    }
 </div>
