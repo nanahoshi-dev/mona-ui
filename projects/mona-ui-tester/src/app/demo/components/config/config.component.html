@@ -97,6 +97,7 @@
                         <mona-drop-down-list
                             [data]="entry[1].dropdownDataSource"
                             [ngModel]="entry[1].dropdownValue"
+                            [placeholder]="entry[1].placeholder ?? ''"
                             (ngModelChange)="parentKey ? handler!.updateSubFeature('dropdown', parentKey, entry[0], $event) : handler!.updateProperty('dropdown',entry[0], $event)"
                             [textField]="entry[1].dropdownTextField"
                             [valueField]="entry[1].dropdownValueField"

@@ -4,6 +4,7 @@ import {
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     forwardRef,
@@ -77,6 +78,7 @@ import { DropDownTreeNodeTemplateDirective } from "../../directives/drop-down-tr
 })
 export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, DropdownSelectorVariantInput {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #injector: Injector = inject(Injector);
     readonly #popupService: PopupService = inject(PopupService);
@@ -216,7 +218,7 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
 
     private focusSelectedNode(): void {
         window.setTimeout(() => {
-            const popupElement = document.querySelector(`.${this.#popupUidClass}`);
+            const popupElement = this.#document.querySelector(`.${this.#popupUidClass}`);
             if (!popupElement) {
                 return;
             }
@@ -273,7 +275,7 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
                     if (!highlightedNode) {
                         return;
                     }
-                    const popupElement = document.querySelector(`.${this.#popupUidClass}`);
+                    const popupElement = this.#document.querySelector(`.${this.#popupUidClass}`);
                     if (!popupElement) {
                         return;
                     }

@@ -10,7 +10,7 @@ import {
 } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { CdkScrollable, ScrollDispatcher } from "@angular/cdk/scrolling";
-import { DestroyRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
+import { DestroyRef, DOCUMENT, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "../animations/popup.animation";
@@ -28,6 +28,7 @@ import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition
 export class PopupService {
     readonly #animationBuilder = inject(AnimationBuilder);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #injector = inject(Injector);
     readonly #outsideEventsToClose = ["click", "mousedown", "dblclick", "contextmenu", "auxclick"];
     readonly #overlay = inject(Overlay);
@@ -90,7 +91,7 @@ export class PopupService {
             return null;
         }
 
-        const activeElement = document.activeElement;
+        const activeElement = this.#document.activeElement;
         if (!(activeElement instanceof HTMLElement)) {
             return null;
         }
@@ -418,7 +419,7 @@ export class PopupService {
 
         let currentPopupRef: PopupRef | null = null;
         const subscriptions: Subscription[] = [];
-        const elements = document.querySelectorAll(selector);
+        const elements = this.#document.querySelectorAll(selector);
 
         elements.forEach(element => {
             if (!(element instanceof HTMLElement)) {

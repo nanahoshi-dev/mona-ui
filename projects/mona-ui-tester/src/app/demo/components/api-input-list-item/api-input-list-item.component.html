@@ -19,15 +19,20 @@
         @if (entry().configType === 'dropdown') {
             <mona-drop-down-list [data]="entry().value"
                                  [ngModel]="entry().defaultValue"
+                                 [placeholder]="entry().placeholder ?? 'xSelect...'"
                                  [style.width.px]="150"
                                  size="small"
-                                 [showClearButton]="false"
+                                 [showClearButton]="entry().clear ?? false"
                                  (ngModelChange)="onValueChange(entry().name, $event)">
                 <ng-template monaDropDownListItemTemplate let-dataItem>
                     <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
                 </ng-template>
                 <ng-template monaDropDownListValueTemplate let-dataItem>
-                    <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                    @if (dataItem) {
+                        <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                    } @else {
+                        <span>{{entry().placeholder ?? 'Select...'}}</span>
+                    }
                 </ng-template>
             </mona-drop-down-list>
         } @else if (entry().configType === "color") {

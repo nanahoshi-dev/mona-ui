@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ColorPickerComponent } from "../../../inputs/color-picker/components/color-picker/color-picker.component";
 import { ColorPickerValueTemplateDirective } from "../../../inputs/color-picker/directives/color-picker-value-template.directive";
@@ -13,13 +13,14 @@ import { htmlColorCode } from "../../utils/htmlColorCode";
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditorFontColorComponent {
+    readonly #document = inject(DOCUMENT);
     readonly #editorService: EditorService = inject(EditorService);
     #lastColor: string = "";
     protected readonly selectedColor = computed(() => {
         this.#editorService.state();
         const attributes = this.#editorService.editor.getAttributes("textStyle");
         const color = attributes["color"] || this.#lastColor;
-        return htmlColorCode(color);
+        return htmlColorCode(color, this.#document);
     });
 
     public onColorChange(color: string): void {

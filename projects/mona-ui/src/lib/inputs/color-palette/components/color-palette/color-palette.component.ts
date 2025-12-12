@@ -1,4 +1,4 @@
-import { Component, computed, forwardRef, inject, input, signal, Signal } from "@angular/core";
+import { Component, computed, DOCUMENT, forwardRef, inject, input, signal, Signal } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { count } from "@mirei/ts-collections";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -33,6 +33,7 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
     }
 })
 export class ColorPaletteComponent implements ControlValueAccessor, ColorPaletteVariantInput {
+    readonly #document = inject(DOCUMENT);
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<string | null> | null = null;
     #propagateTouched: Action = () => {};
@@ -110,7 +111,7 @@ export class ColorPaletteComponent implements ControlValueAccessor, ColorPalette
 
     protected focusColorTile(index: number): void {
         setTimeout(() => {
-            const colorTiles = document.querySelectorAll("[data-color-index]");
+            const colorTiles = this.#document.querySelectorAll("[data-color-index]");
             colorTiles.forEach((tile, i) => {
                 tile.setAttribute("tabindex", i === index ? "0" : "-1");
             });

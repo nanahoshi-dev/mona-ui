@@ -6,6 +6,7 @@ import {
     contentChild,
     contentChildren,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
@@ -64,6 +65,7 @@ import { MenuComponent } from "../menu/menu.component";
 })
 export class MenubarComponent implements MenubarVariantInput, OnInit {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
@@ -257,7 +259,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
     private findCurrentMenuIndex(): number | null {
         let currentIndex = this.menuList().findIndex(n => n.popupMenu === this.currentPopupMenu());
         if (currentIndex < 0) {
-            const focusedElement = document.activeElement as HTMLElement;
+            const focusedElement = this.#document.activeElement as HTMLElement;
             if (focusedElement && focusedElement.hasAttribute("data-mid")) {
                 const uid = focusedElement.getAttribute("data-mid");
                 currentIndex = this.menuList().findIndex(m => m.uid === uid);

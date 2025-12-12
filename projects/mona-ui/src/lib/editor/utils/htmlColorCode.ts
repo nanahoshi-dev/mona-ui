@@ -1,4 +1,4 @@
-export const htmlColorCode = (name: string): string => {
+export const htmlColorCode = (name: string, document: Document): string => {
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     if (!context) {

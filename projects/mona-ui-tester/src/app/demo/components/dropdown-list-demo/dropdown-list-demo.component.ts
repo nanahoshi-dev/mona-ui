@@ -1,4 +1,4 @@
-import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
+import { CurrencyPipe, JsonPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { range } from "@mirei/ts-collections";
@@ -162,6 +162,12 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 type: "boolean",
                 value: false
             },
+            itemDisabled: {
+                type: "dropdown",
+                value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
+                clear: true,
+                placeholder: "Select a condition..."
+            },
             placeholder: {
                 type: "string",
                 value: "Select an option"
@@ -215,6 +221,9 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         CurrencyPipe,
         FormsModule
     ],
+    host: {
+        class: "flex flex-col items-center justify-center w-full"
+    },
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
@@ -271,6 +280,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 </ng-template>
             }
         </mona-drop-down-list>
+        <!--        <app-code-viewer [code]="selectedItem() | json" language="json"></app-code-viewer>-->
     `
 })
 export class DropdownListWrapperComponent implements ComponentInputsAsSignal<DropdownListComponent> {
@@ -326,7 +336,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     });
     public readonly data = input<ReturnType<DropdownListComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<DropdownListComponent["disabled"]>>(false);
-    public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>(item => false);
+    public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>("active");
     public readonly placeholder = input<ReturnType<DropdownListComponent["placeholder"]>>("Select an option");
     public readonly rounded = input<ReturnType<DropdownListComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<DropdownListComponent["showClearButton"]>>(false);

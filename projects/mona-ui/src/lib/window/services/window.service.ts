@@ -1,4 +1,4 @@
-import { forwardRef, inject, Injectable } from "@angular/core";
+import { DOCUMENT, forwardRef, inject, Injectable } from "@angular/core";
 import { asapScheduler } from "rxjs";
 import { AnimationService } from "../../animations/services/animation.service";
 import { PopupCloseEvent } from "../../popup/models/PopupCloseEvent";
@@ -16,6 +16,7 @@ import { WindowSettings } from "../models/WindowSettings";
 })
 export class WindowService {
     readonly #animationService: AnimationService = inject(AnimationService);
+    readonly #document = inject(DOCUMENT);
     readonly #popupService: PopupService = inject(PopupService);
 
     public open(settings: WindowSettings): WindowRef {
@@ -48,7 +49,7 @@ export class WindowService {
         windowReferenceHolder.windowReference = new WindowReference(windowReferenceOptions);
         injectorData.windowReference = windowReferenceHolder.windowReference;
         windowReferenceOptions.popupRef = this.#popupService.create({
-            anchor: document.body,
+            anchor: this.#document.body,
             content: WindowContentComponent,
             closeOnBackdropClick: false,
             closeOnEscape: false, // handled by window component

@@ -56,7 +56,9 @@ export type ComponentConfigInputType<TComponent> = {
         | {
               type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
-              defaultValue: ComponentInputs<TComponent>[key];
+              defaultValue?: ComponentInputs<TComponent>[key];
+              placeholder?: string; // Optional, only for dropdown inputs
+              clear?: boolean; // Optional, only for dropdown inputs
           }
         | {
               type: Extract<ComponentConfigType, "function">;
@@ -108,11 +110,13 @@ export type ComponentConfig<TComponent> = {
 
 export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     alias?: string; // Optional alias for the input
+    clear?: boolean; // Optional, only for dropdown inputs
     configType: ComponentConfigType;
     defaultValue?: TDefault;
     max?: number | null; // Optional, only for number inputs
     min?: number | null; // Optional, only for number inputs
     name: string; // Optional, only for number inputs
+    placeholder?: string; // Optional, only for dropdown inputs
     nullable?: boolean; // From the input structure
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
@@ -161,12 +165,14 @@ export function createComponentInputConfigArray<TComponent>(
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
                 alias: configItem.alias,
+                clear: configItem.type === "dropdown" ? (configItem.clear ?? false) : undefined,
                 configType: configItem.type,
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
                 nullable: configItem.type === "number" ? (configItem.nullable ?? false) : undefined,
                 name: String(key),
+                placeholder: configItem.type === "dropdown" ? configItem.placeholder : undefined,
                 value: configItem.value,
                 valueType: runtimeValueType
             });

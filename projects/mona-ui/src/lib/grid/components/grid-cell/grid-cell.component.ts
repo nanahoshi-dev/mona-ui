@@ -4,6 +4,7 @@ import {
     ChangeDetectionStrategy,
     Component,
     DestroyRef,
+    DOCUMENT,
     ElementRef,
     inject,
     input,
@@ -43,6 +44,7 @@ import { GridService } from "../../services/grid.service";
 })
 export class GridCellComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     #focused = false;
@@ -85,7 +87,7 @@ export class GridCellComponent implements OnInit {
         if (this.editing()) {
             return;
         }
-        const nextRowElement = document.querySelector(`tr[data-ruid='${this.row().uid}']`)?.nextElementSibling;
+        const nextRowElement = this.#document.querySelector(`tr[data-ruid='${this.row().uid}']`)?.nextElementSibling;
         if (nextRowElement) {
             const cell = nextRowElement.querySelector(
                 `td .mona-grid-cell[data-field='${this.column().field()}']`
@@ -100,7 +102,7 @@ export class GridCellComponent implements OnInit {
         if (this.editing()) {
             return;
         }
-        const row = document.querySelector(`tr[data-ruid='${this.row().uid}']`);
+        const row = this.#document.querySelector(`tr[data-ruid='${this.row().uid}']`);
         if (!row) {
             return;
         }
@@ -126,7 +128,7 @@ export class GridCellComponent implements OnInit {
         if (this.editing()) {
             return;
         }
-        const row = document.querySelector(`tr[data-ruid='${this.row().uid}']`);
+        const row = this.#document.querySelector(`tr[data-ruid='${this.row().uid}']`);
         if (!row) {
             return;
         }
@@ -152,7 +154,9 @@ export class GridCellComponent implements OnInit {
         if (this.editing()) {
             return;
         }
-        const previousRowElement = document.querySelector(`tr[data-ruid='${this.row().uid}']`)?.previousElementSibling;
+        const previousRowElement = this.#document.querySelector(
+            `tr[data-ruid='${this.row().uid}']`
+        )?.previousElementSibling;
         if (previousRowElement) {
             const cell = previousRowElement.querySelector(
                 `td .mona-grid-cell[data-field='${this.column().field()}']`
@@ -164,7 +168,7 @@ export class GridCellComponent implements OnInit {
     }
 
     private handleDateInputFocusLoss(): void {
-        const popupElement = document.querySelector(".mona-date-input-popup");
+        const popupElement = this.#document.querySelector(".mona-date-input-popup");
         if (!popupElement) {
             this.editing.set(false);
             return;
