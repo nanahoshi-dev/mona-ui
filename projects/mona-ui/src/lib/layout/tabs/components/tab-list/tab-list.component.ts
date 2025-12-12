@@ -27,6 +27,7 @@ import { TabsService } from "../../services/tabs.service";
 import {
     tabListBaseThemeVariants,
     tabListListThemeVariants,
+    tabListScrollButtonThemeVariants,
     TabListVariantInput,
     TabListVariantProps
 } from "../../styles/tabs.styles";
@@ -54,7 +55,10 @@ export class TabListComponent implements TabListVariantInput {
         const theme = this.#themeService.theme();
         return tabListListThemeVariants(theme)();
     });
-
+    protected readonly scrollButtonClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return tabListScrollButtonThemeVariants(theme)();
+    });
     protected readonly scrollLeftIcon = faChevronLeft;
     protected readonly scrollRightIcon = faChevronRight;
     protected readonly scrollsVisible = signal(false);

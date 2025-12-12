@@ -1,11 +1,11 @@
 @if (scrollsVisible()) {
-    <div class="mona-tab-strip-scroll">
-        <button monaButton (click)="startScrolling(tabListElement, 'left', 'single')"
+        <button monaButton
+                look="link" size="small" [class]="scrollButtonClass()"
+                (click)="startScrolling(tabListElement, 'left', 'single')"
                 (mousedown)="startScrolling(tabListElement, 'left', 'continuous')"
                 (mouseup)="stopScrolling()">
             <fa-icon [icon]="scrollLeftIcon"></fa-icon>
         </button>
-    </div>
 }
 <div class="w-full h-full overflow-hidden">
     <ul [class]="listClass()" #tabListElement>
@@ -32,7 +32,9 @@
 </div>
 @if (scrollsVisible()) {
     <div class="mona-tab-strip-scroll">
-        <button monaButton (click)="startScrolling(tabListElement, 'right', 'single')"
+        <button monaButton
+                look="link" size="small" [class]="scrollButtonClass()"
+                (click)="startScrolling(tabListElement, 'right', 'single')"
                 (mousedown)="startScrolling(tabListElement, 'right', 'continuous')"
                 (mouseup)="stopScrolling()">
             <fa-icon [icon]="scrollRightIcon"></fa-icon>

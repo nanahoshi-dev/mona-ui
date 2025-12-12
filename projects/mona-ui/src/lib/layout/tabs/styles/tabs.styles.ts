@@ -6,7 +6,9 @@ import {
     tabListListWrapperVariants as monaTabListListWrapperVariants,
     tabListListVariants as monaTabListListVariants,
     tabListListItemVariants as monaTabListListItemVariants,
-    tabContentVariants as monaTabContentVariants
+    tabListScrollButtonVariants as monaTabListScrollButtonVariants,
+    tabContentVariants as monaTabContentVariants,
+    tabsBaseVariants as monaTabsBaseVariants
 } from "./tabs.mona.styles";
 
 export const tabListBaseThemeVariants = (theme: ThemeStyle) => {
@@ -45,12 +47,30 @@ export const tabListListItemThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const tabListScrollButtonThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaTabListScrollButtonVariants;
+        default:
+            return monaTabListScrollButtonVariants;
+    }
+};
+
 export const tabContentThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaTabContentVariants;
         default:
             return monaTabContentVariants;
+    }
+};
+
+export const tabsBaseThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaTabsBaseVariants;
+        default:
+            return monaTabsBaseVariants;
     }
 };
 
@@ -62,17 +82,24 @@ type TabListListVariantProps = VariantProps<ReturnType<typeof tabListListThemeVa
 type TabListListVariantInput = VariantInputs<TabListListVariantProps>;
 export type TabListListItemVariantProps = VariantProps<ReturnType<typeof tabListListItemThemeVariants>>;
 export type TabListListItemVariantInput = VariantInputs<TabListListItemVariantProps>;
+export type TabListScrollButtonVariantProps = VariantProps<ReturnType<typeof tabListScrollButtonThemeVariants>>;
+export type TabListScrollButtonVariantInput = VariantInputs<TabListScrollButtonVariantProps>;
+
 type TabContentVariantProps = VariantProps<ReturnType<typeof tabContentThemeVariants>>;
 type TabContentVariantInput = VariantInputs<TabContentVariantProps>;
+type TabsBaseVariantProps = VariantProps<ReturnType<typeof tabsBaseThemeVariants>>;
+type TabsBaseVariantInput = VariantInputs<TabsBaseVariantProps>;
 
 export type TabListVariantProps = TabListBaseVariantProps &
     TabListListWrapperVariantProps &
     TabListListVariantProps &
-    TabListListItemVariantProps;
+    TabListListItemVariantProps &
+    TabListScrollButtonVariantProps;
 export type TabListVariantInput = TabListBaseVariantInput &
     TabListListWrapperVariantInput &
     TabListListVariantInput &
-    Omit<TabListListItemVariantInput, "active" | "disabled">;
+    Omit<TabListListItemVariantInput, "active" | "disabled"> &
+    TabListScrollButtonVariantInput;
 
-export type TabsVariantProps = TabListVariantProps & TabContentVariantProps;
-export type TabsVariantInput = TabListVariantInput & TabContentVariantInput;
+export type TabsVariantProps = TabsBaseVariantProps & TabListVariantProps & TabContentVariantProps;
+export type TabsVariantInput = TabsBaseVariantInput & TabListVariantInput & TabContentVariantInput;

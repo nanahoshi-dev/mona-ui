@@ -2,8 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const tabListBaseVariants = cva(
     `
-        w-full flex overflow-hidden
-        bg-accent
+        w-fit max-w-full
+        flex overflow-hidden
+        bg-accent h-10
+        font-medium text-sm
     `,
     {
         variants: {
@@ -59,4 +61,37 @@ export const tabListListItemVariants = cva(
     }
 );
 
-export const tabContentVariants = cva(`w-full overflow-auto flex-1`);
+export const tabListScrollButtonVariants = cva(
+    `
+        flex items-center justify-center
+        h-full px-2
+    `
+);
+
+export const tabContentVariants = cva(
+    `
+        w-full overflow-auto flex-1
+        border border-border shadow-sm
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full",
+                none: "rounded-none"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium"
+        }
+    }
+);
+
+export const tabsBaseVariants = cva(
+    `
+        flex flex-col w-full
+        gap-2
+    `
+);

@@ -1,5 +1,5 @@
 <mona-tab-list [closable]="closable()" [rounded]="rounded()" (tabClose)="tabClose.emit($event)"></mona-tab-list>
-<div class="mona-tab-content">
+<div [class]="contentClass()">
     @for (tab of tabList(); track tab) {
         @let tabLoaded = keepTabContent() || tab.selected;
         @let tabHidden = keepTabContent() && !tab.selected;
