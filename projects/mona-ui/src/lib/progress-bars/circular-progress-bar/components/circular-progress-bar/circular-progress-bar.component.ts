@@ -1,32 +1,54 @@
-import { NgClass, NgTemplateOutlet } from "@angular/common";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    contentChild,
-    effect,
-    input,
-    signal,
-    TemplateRef,
-    untracked
-} from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
+import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input } from "@angular/core";
 import { Action } from "../../../../utils/Action";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
+import {
+    circularProgressBarBaseThemeVariants,
+    type CircularProgressBarBaseVariantInput
+} from "../../styles/circular-progress-bar.styles";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { getPercentage } from "../../../utils/progress-bar.utils";
 
 @Component({
     selector: "mona-circular-progress-bar",
     templateUrl: "./circular-progress-bar.component.html",
-    styleUrls: ["./circular-progress-bar.component.scss"],
+    styles: `
+        .indeterminate {
+            animation: rotate 2s linear infinite;
+        }
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(180deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    `,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, NgTemplateOutlet],
+    imports: [NgTemplateOutlet],
     host: {
-        class: "mona-circular-progress-bar",
-        "[class.mon-disabled]": "disabled()",
+        "[class]": "baseClasses()",
+        "[attr.aria-valuemin]": "min()",
+        "[attr.aria-valuemax]": "max()",
+        "[attr.aria-valuenow]": "progress()",
+        "[attr.aria-disabled]": "disabled()",
+        "[attr.data-disabled]": "disabled()",
+        role: "progressbar",
         "[style.width]": "pixelSize()",
         "[style.height]": "pixelSize()"
     }
 })
-export class CircularProgressBarComponent {
+export class CircularProgressBarComponent implements CircularProgressBarBaseVariantInput {
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const disabled = this.disabled();
+        return circularProgressBarBaseThemeVariants(theme)({ disabled });
+    });
     protected readonly center = computed(() => {
         return {
             x: computed(() => this.size() / 2),
@@ -34,59 +56,68 @@ export class CircularProgressBarComponent {
         };
     });
     protected readonly circumference = computed(() => 2 * Math.PI * (this.size() / 2 - this.thickness()));
-    protected readonly labelTemplate = contentChild(CircularProgressBarLabelTemplateDirective, {
-        read: TemplateRef
-    });
+    protected readonly labelTemplate = contentChild(CircularProgressBarLabelTemplateDirective);
     protected readonly pixelSize = computed(() => `${this.size()}px`);
-    protected readonly progressValue = signal(0);
+    protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
     protected readonly radius = computed(() => this.size() / 2 - this.thickness());
     protected readonly strokeColor = computed(() => {
         if (typeof this.color() === "string") {
-            return this.color() as string;
+            return this.color() || "var(--color-primary)";
         }
         const colorize = this.color() as Action<number, string>;
-        return colorize(this.progressValue());
+        return colorize(this.progress());
     });
     protected readonly strokeDashOffset = computed(() => {
-        const dashOffset = this.circumference() * (1 - this.progressValue() / 100);
+        const progress = Math.min(Math.max(this.progress(), 0), 100);
+        const dashOffset = this.circumference() * (1 - progress / 100);
         return this.indeterminate() ? this.circumference() / 1.42 : dashOffset;
     });
 
     /**
-     * Color of progress bar. Can be string or function that takes progress value and returns color.
+     * @description The color of the circular progress bar.
+     * Can be a string or a function that takes the current value and returns a string.
      */
-    public color = input<string | Action<number, string>>("var(--mona-primary)");
-    public disabled = input(false);
-    public indeterminate = input(false);
-    public max = input(100);
-    public min = input(0);
+    public readonly color = input<string | Action<number, string>>("");
 
     /**
-     * Progress value in percentage. Value must be between 0 and 100.
-     * Do not use together with the {@link value} input.
+     * @description Whether the circular progress bar is disabled.
+     * @default false
      */
-    public progress = input(0);
-    public size = input(100);
-    public thickness = input(5);
+    public readonly disabled = input(false);
 
     /**
-     * Progress value in absolute value. Value must be between min and max.
-     * Do not use together with the {@link progress} input.
+     * @description Whether the circular progress bar is in indeterminate state.
+     * @default false
      */
-    public value = input(0);
+    public readonly indeterminate = input(false);
 
-    public constructor() {
-        effect(() => {
-            const progress = this.progress();
-            untracked(() => this.progressValue.set(progress));
-        });
-        effect(() => {
-            const value = this.value();
-            untracked(() => this.updateProgress(value));
-        });
-    }
+    /**
+     * @description The maximum value of the circular progress bar.
+     * @default 100
+     */
+    public readonly max = input(100);
 
-    private updateProgress(value: number): void {
-        this.progressValue.set(Math.round(((value - this.min()) / (this.max() - this.min())) * 100));
-    }
+    /**
+     * @description The minimum value of the circular progress bar.
+     * @default 0
+     */
+    public readonly min = input(0);
+
+    /**
+     * @description The size of the circular progress bar.
+     * @default 100
+     */
+    public readonly size = input(100);
+
+    /**
+     * @description The thickness of the circular progress bar.
+     * @default 6
+     */
+    public readonly thickness = input(6);
+
+    /**
+     * @description The value of the circular progress bar.
+     * @default 0
+     */
+    public readonly value = input(0);
 }

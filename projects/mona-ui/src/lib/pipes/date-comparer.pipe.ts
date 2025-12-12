@@ -3,8 +3,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 type DateComparisonOperator = "==" | "!=" | "<" | "<=" | ">" | ">=";
 
 @Pipe({
-    name: "monaDateComparer",
-    standalone: true
+    name: "monaDateComparer"
 })
 export class DateComparerPipe implements PipeTransform {
     public transform(value: Date | null, other: Date | null, operator: DateComparisonOperator): boolean {

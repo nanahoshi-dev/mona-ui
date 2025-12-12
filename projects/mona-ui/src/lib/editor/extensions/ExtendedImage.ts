@@ -1,4 +1,4 @@
-import { Image } from "@tiptap/extension-image";
+import { Image, SetImageOptions } from "@tiptap/extension-image";
 
 type ImageAttributes = {
     alt?: string;
@@ -9,7 +9,7 @@ type ImageAttributes = {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         image: {
-            setImage: (options: ImageAttributes) => ReturnType;
+            setImage: (options: SetImageOptions) => ReturnType;
         };
     }
 }
@@ -18,7 +18,6 @@ export const ExtendedImage = Image.extend({
     name: "extendedImage",
     addAttributes() {
         return {
-            ...this.parent?.(),
             width: {
                 default: null,
                 parseHTML: (element: Element) => element.getAttribute("width"),

@@ -30,13 +30,13 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { Collections } from "@mirei/ts-collections";
+import { swap } from "@mirei/ts-collections";
 import { asyncScheduler, filter, observeOn, take, tap } from "rxjs";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
-import { PlaceholderComponent } from "../../../layout/placeholder/placeholder.component";
-import { ContextMenuItemComponent } from "../../../menus/ctx-menu/components/contextmenu-item/context-menu-item.component";
-import { ContextMenuComponent } from "../../../menus/ctx-menu/components/contextmenu/context-menu.component";
+import { PlaceholderComponent } from "../../../layout/placeholder/components/placeholder/placeholder.component";
+import { ContextMenuItemComponent } from "../../../menus/contextmenu/components/contextmenu-item/context-menu-item.component";
+import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
@@ -336,7 +336,7 @@ export class GridComponent<T> implements OnInit {
             if (newIndex < 0 || newIndex >= colList.size()) {
                 return colList.toImmutableSet();
             }
-            Collections.swap(colList, index, newIndex);
+            swap(colList, index, newIndex);
             return colList.toImmutableSet();
         });
     }

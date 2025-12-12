@@ -49,6 +49,10 @@ export class SidebarComponent {
                     path: "/chip"
                 },
                 {
+                    text: "Circular Progress Bar",
+                    path: "/circular-progress-bar"
+                },
+                {
                     text: "Color Gradient",
                     path: "/color-gradient"
                 },
@@ -73,8 +77,24 @@ export class SidebarComponent {
                     path: "/dropdown-list"
                 },
                 {
+                    text: "Expansion Panel",
+                    path: "/expansion-panel"
+                },
+                {
+                    text: "Fieldset",
+                    path: "/fieldset"
+                },
+                {
                     text: "Input",
                     path: "/input"
+                },
+                {
+                    text: "List Box",
+                    path: "/list-box"
+                },
+                {
+                    text: "List View",
+                    path: "/list-view"
                 },
                 {
                     text: "Menubar",
@@ -85,6 +105,14 @@ export class SidebarComponent {
                     path: "/numeric-textbox"
                 },
                 {
+                    text: "Pager",
+                    path: "/pager"
+                },
+                {
+                    text: "Placeholder",
+                    path: "/placeholder"
+                },
+                {
                     text: "Popover",
                     path: "/popover"
                 },
@@ -93,8 +121,16 @@ export class SidebarComponent {
                     path: "/popup"
                 },
                 {
+                    text: "Progress Bar",
+                    path: "progress-bar"
+                },
+                {
                     text: "Radio Button",
                     path: "/radio-button"
+                },
+                {
+                    text: "Scroll View",
+                    path: "/scroll-view"
                 },
                 {
                     text: "Slider",
@@ -105,8 +141,20 @@ export class SidebarComponent {
                     path: "/split-button"
                 },
                 {
+                    text: "Splitter",
+                    path: "/splitter"
+                },
+                {
+                    text: "Stepper",
+                    path: "/stepper"
+                },
+                {
                     text: "Switch",
                     path: "/switch"
+                },
+                {
+                    text: "Tabs",
+                    path: "/tabs"
                 },
                 {
                     text: "Text Area",

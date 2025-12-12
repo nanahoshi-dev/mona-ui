@@ -33,7 +33,7 @@ import { TreeNodeTemplateDirective } from "../../../../common/tree/directives/tr
 import { SelectableOptions } from "../../../../common/tree/models/SelectableOptions";
 import { TreeNode } from "../../../../common/tree/models/TreeNode";
 import { TreeService } from "../../../../common/tree/services/tree.service";
-import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder.component";
+import { PlaceholderComponent } from "../../../../layout/placeholder/components/placeholder/placeholder.component";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { Action } from "../../../../utils/Action";

@@ -7,26 +7,26 @@ import { ListService } from "../../common/list/services/list.service";
     selector: "mona-list-view[monaListViewSelectable]",
     standalone: true
 })
-export class ListViewSelectableDirective<T, K = T> implements OnInit {
+export class ListViewSelectableDirective<T, K = unknown> implements OnInit {
     readonly #defaultOptions: SelectableOptions = {
         mode: "single",
         enabled: true,
         toggleable: false
     };
-    readonly #listService = inject(ListService<T>);
+    readonly #listService = inject<ListService<T>>(ListService);
 
     public readonly selectedKeysChange = output<Array<K>>();
     public options = input<Partial<SelectableOptions> | "">("", {
         alias: "monaListViewSelectable"
     });
+    public selectBy = input<ListKeySelector<T, K> | undefined>("");
     public selectedKeys = input<Iterable<K>>([]);
-    public selectionKey = input<ListKeySelector<T, K> | undefined>("");
 
     public constructor() {
         effect(() => {
-            const selectionKey = this.selectionKey();
+            const selectBy = this.selectBy();
             untracked(() => {
-                this.#listService.setValueField(selectionKey ?? "");
+                this.#listService.setValueField(selectBy ?? "");
             });
         });
         effect(() => {

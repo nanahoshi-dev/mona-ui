@@ -2,8 +2,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 import { all, contains } from "@mirei/ts-collections";
 
 @Pipe({
-    name: "monaContains",
-    standalone: true
+    name: "monaContains"
 })
 export class ContainsPipe implements PipeTransform {
     public transform<T>(sequence: Iterable<T> | null | undefined, value: T | Iterable<T>): boolean {

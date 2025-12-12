@@ -1,5 +1,14 @@
 import { computed, Injectable, OutputEmitterRef, signal } from "@angular/core";
-import { from, IEnumerable, ImmutableList, ImmutableSet, Predicate, Selector } from "@mirei/ts-collections";
+import {
+    from,
+    IEnumerable,
+    ImmutableList,
+    ImmutableSet,
+    Predicate,
+    Selector,
+    toImmutableSet
+} from "@mirei/ts-collections";
+import { PageState } from "../models/PageState";
 import { ReplaySubject, Subject } from "rxjs";
 import { FilterChangeEvent } from "../../filter-input/models/FilterChangeEvent";
 import { FilterableOptions } from "../../models/FilterableOptions";
@@ -11,6 +20,7 @@ import { NavigableOptions } from "../models/NavigableOptions";
 import { NavigationDirection } from "../models/NavigationDirection";
 import { NavigationMode } from "../models/NavigationMode";
 import { SelectableOptions } from "../models/SelectableOptions";
+import { PagerSettings } from "../models/PagerSettings";
 
 @Injectable()
 export class ListService<TData> {
@@ -38,10 +48,21 @@ export class ListService<TData> {
         headerOrder: "asc"
     });
     public readonly highlightedItem = signal<ListItem<TData> | null>(null);
+    public readonly itemFocusOut$ = new Subject<ListItem<TData>>();
     public readonly navigableOptions = signal<NavigableOptions>({
         enabled: false,
         mode: "select",
         wrap: false
+    });
+    public readonly pageState = signal<PageState>({ page: 1, skip: 0, take: 10 });
+    public readonly pageableOptions = signal<PagerSettings>({
+        enabled: false,
+        firstLast: false,
+        showInfo: true,
+        pageSizeValues: true,
+        previousNext: false,
+        type: "numeric",
+        visiblePages: 5
     });
     public readonly scrollToItem$ = new ReplaySubject<ListItem<TData>>(1);
     public readonly selectableOptions = signal<SelectableOptions>({
@@ -55,7 +76,6 @@ export class ListService<TData> {
         return selectedKeys
             .select(key => this.#listItems().firstOrDefault(i => this.getSelectionKey(i) === key))
             .where(i => i != null)
-            .cast<ListItem<TData>>()
             .toImmutableSet();
     });
     public readonly selectionChange$ = new Subject<ListItem<TData>>();
@@ -65,10 +85,12 @@ export class ListService<TData> {
         const listItems = this.#listItems();
         const filterText = this.filterText();
         const groupableOptions = this.groupableOptions();
+        const virtualScrollOptions = this.virtualScrollOptions();
         let enumerable: IEnumerable<ListItem<TData>> = listItems;
         if (filterText) {
             enumerable = enumerable.where(item => this.filterItem(item, filterText));
         }
+        let resultEnumerable: IEnumerable<ListItem<TData>>;
         if (groupableOptions.enabled) {
             if (groupableOptions.orderBy) {
                 if (groupableOptions.orderByDirection === "desc") {
@@ -85,15 +107,24 @@ export class ListService<TData> {
                     groupedEnumerable = groupedEnumerable.orderBy(g => g.key);
                 }
             }
-            return groupedEnumerable
-                .selectMany(g => {
-                    const groupHeaderItem = new ListItem({ data: g.key, header: String(g.key) });
-                    return g.source.prepend(groupHeaderItem);
-                })
-                .toImmutableSet();
+            resultEnumerable = groupedEnumerable.selectMany(g => {
+                const groupHeaderItem = new ListItem({ data: g.key, header: String(g.key) });
+                return g.source.prepend(groupHeaderItem);
+            });
         } else {
-            return enumerable.toImmutableSet();
+            resultEnumerable = enumerable;
         }
+        const pageableOptions = this.pageableOptions();
+        if (virtualScrollOptions.enabled) {
+            return resultEnumerable.toImmutableSet();
+        }
+        if (pageableOptions.enabled) {
+            const pageState = this.pageState();
+            const skip = pageState.skip;
+            const take = pageState.take;
+            return toImmutableSet(this.skipTakeWithGroups(resultEnumerable.toArray(), skip, take));
+        }
+        return resultEnumerable.toImmutableSet();
     });
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({
         enabled: false,
@@ -168,8 +199,8 @@ export class ListService<TData> {
     }
 
     public navigate(direction: NavigationDirection, mode: NavigationMode): ListItem<TData> | null {
-        const options = this.navigableOptions();
-        if (!options.enabled) {
+        const navigableOptions = this.navigableOptions();
+        if (!navigableOptions.enabled) {
             return null;
         }
         const viewItems = this.viewItems()
@@ -179,6 +210,9 @@ export class ListService<TData> {
             return null;
         }
         const selectableOptions = this.selectableOptions();
+        if (mode === "select" && (!selectableOptions.enabled || selectableOptions.mode === "multiple")) {
+            mode = "highlight";
+        }
         let item: ListItem<TData> | null;
         if (selectableOptions.mode === "single") {
             item = this.navigateForSingleSelection(viewItems, direction, mode);
@@ -253,6 +287,10 @@ export class ListService<TData> {
 
     public setNavigableOptions(options: Partial<NavigableOptions>): void {
         this.navigableOptions.update(o => ({ ...o, ...options }));
+    }
+
+    public setPageableOptions(settings: PagerSettings): void {
+        this.pageableOptions.set(settings);
     }
 
     public setSelectableOptions(options: Partial<SelectableOptions>): void {
@@ -516,5 +554,53 @@ export class ListService<TData> {
             this.highlightedItem.set(prevItem);
         }
         return prevItem;
+    }
+
+    private skipTakeWithGroups(items: ListItem<TData>[], skip: number, take: number): ListItem<TData>[] {
+        let skipped = 0;
+        let taken = 0;
+        let capturing = false;
+        const result: ListItem<TData>[] = [];
+
+        for (const item of items) {
+            if (item.header) {
+                // Include group headers when we're capturing
+                if (capturing) {
+                    result.push(item);
+                }
+            } else {
+                // Handle regular items
+                if (!capturing && skipped < skip) {
+                    skipped++;
+                    continue;
+                }
+                if (taken < take) {
+                    // Check if we need to include the group header for this item
+                    if (!capturing && result.length === 0) {
+                        // Find the group header for this item
+                        const itemIndex = items.indexOf(item);
+                        for (let i = itemIndex - 1; i >= 0; i--) {
+                            if (items[i].header) {
+                                result.push(items[i]);
+                                break;
+                            }
+                        }
+                    }
+                    capturing = true;
+                    result.push(item);
+                    taken++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // Remove trailing group headers if they are at the end
+        let lastIndex = result.length - 1;
+        while (lastIndex >= 0 && result[lastIndex].header) {
+            result.pop();
+            lastIndex--;
+        }
+        return result;
     }
 }

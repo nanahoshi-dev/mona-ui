@@ -50,7 +50,7 @@
                                                     {{ subComponentEntry[1].inputs|inputProperty:property.name:"kind" }}
                                                 </div>
                                             </div>
-                                            <div class="font-light text-gray-500 whitespace-pre-line">
+                                            <div class="font-light text-gray-500 whitespace-pre-line text-sm/3.5">
                                                 {{ subComponentEntry[1].inputs|inputProperty:property.name:"description" }}
                                             </div>
                                         </div>
@@ -87,9 +87,9 @@
                         <mona-numeric-text-box
                             [ngModel]="entry[1].numericValue"
                             (ngModelChange)="parentKey ? handler!.updateSubFeature('number', parentKey, entry[0], $event) : handler!.updateProperty('number',entry[0], $event)"
-                            [min]="entry[1].min ?? null"
-                            [max]="entry[1].max ?? null"
-                            [nullable]="entry[1].nullable ?? false"
+                            [min]="entry[1].numericMin ?? null"
+                            [max]="entry[1].numericMax ?? null"
+                            [nullable]="entry[1].numericNullable ?? false"
                             [size]="'small'"
                             class="w-37.5"
                         ></mona-numeric-text-box>

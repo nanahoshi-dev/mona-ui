@@ -1,28 +1,36 @@
-<div class="mona-progress-bar-track mona-progress-bar-track-prev"
-     [ngStyle]="progressStyles()"
-     [ngClass]="{'mona-progress-left': labelPosition()==='start',
-                     'mona-progress-right': labelPosition()==='end',
-                     'mona-progress-bar-label-hidden': !labelVisible(),
-                     'mona-progress-bar-indeterminate': indeterminate()}">
-    @if (labelVisible() && !indeterminate()) {
-        @if (formatted()) {
-            <span class="mona-progress-bar-label" [ngStyle]="labelStyles()">{{ label() }}</span>
+<div [class]="trackClasses()"
+     [style.background-color]="trackColor()"
+     [attr.data-prev]="true"
+     [attr.data-left]="labelPosition()==='start'"
+     [attr.data-right]="labelPosition()==='end'"
+     [attr.data-indeterminate]="indeterminate()"
+     [attr.data-value]="progress()"
+     [style.clip-path]="prevTrackClipPath()">
+    @if (indeterminate()) {
+        <div [class]="indeterminateClasses()" class="indeterminate"></div>
+    } @else if (labelVisible()) {
+        @if (labelTemplate()) {
+            <ng-container [ngTemplateOutlet]="labelTemplate()?.templateRef"
+                          [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
+            </ng-container>
         } @else {
-            <span class="mona-progress-bar-label" [ngStyle]="labelStyles()">{{ progress() | number:'1.0-2' }}%</span>
+            <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number:'1.0-2' }}</span>
         }
     }
 </div>
-<div class="mona-progress-bar-track mona-progress-bar-track-next indeterminate"
-     [ngClass]="{'mona-progress-left': labelPosition()==='start',
-                     'mona-progress-right': labelPosition()==='end',
-                     'mona-progress-bar-label-hidden': !labelVisible(),
-                     'mona-progress-bar-indeterminate': indeterminate()}"
-     [ngStyle]="{'clip-path': 'inset(-1px '+rightClip()+'px -1px '+progress()+'%)'}">
-    @if (labelVisible() && !indeterminate()) {
-        @if (formatted()) {
-            <span class="mona-progress-bar-label" [ngStyle]="labelStyles()">{{ label() }}</span>
+
+@if (!indeterminate()) {
+    <div [class]="trackClasses()"
+         [attr.data-next]="true"
+         [attr.data-left]="labelPosition()==='start'"
+         [attr.data-right]="labelPosition()==='end'"
+         [style.clip-path]="nextTrackClipPath()">
+        @if (labelTemplate()) {
+            <ng-container [ngTemplateOutlet]="labelTemplate()?.templateRef"
+                          [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
+            </ng-container>
         } @else {
-            <span class="mona-progress-bar-label" [ngStyle]="labelStyles()">{{ progress() | number:'1.0-2' }}%</span>
+            <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number:'1.0-2' }}</span>
         }
-    }
-</div>
+    </div>
+}

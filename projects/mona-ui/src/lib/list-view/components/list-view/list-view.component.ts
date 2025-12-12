@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    AfterViewInit,
+    afterRenderEffect,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -10,14 +10,16 @@ import {
     ElementRef,
     inject,
     input,
+    Optional,
     output,
-    signal,
+    SkipSelf,
     TemplateRef,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { filter, fromEvent } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { ListComponent } from "../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../common/list/directives/list-group-header-template.directive";
@@ -25,7 +27,6 @@ import { ListHeaderTemplateDirective } from "../../../common/list/directives/lis
 import { ListItemTemplateDirective } from "../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../common/list/directives/list-no-data-template.directive";
 import { ListKeySelector } from "../../../common/list/models/ListSelectors";
-import { ListSizeInputType, ListSizeType } from "../../../common/list/models/ListSizeType";
 import { ListService } from "../../../common/list/services/list.service";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
@@ -35,15 +36,22 @@ import { ListViewGroupHeaderTemplateDirective } from "../../directives/list-view
 import { ListViewHeaderTemplateDirective } from "../../directives/list-view-header-template.directive";
 import { ListViewItemTemplateDirective } from "../../directives/list-view-item-template.directive";
 import { ListViewNoDataTemplateDirective } from "../../directives/list-view-no-data-template.directive";
-import { PagerSettings } from "../../models/PagerSettings";
-import { PageState } from "../../models/PageState";
+import { listViewBaseThemeVariants, ListViewVariantInputs, ListViewVariantProps } from "../../styles/list-view.styles";
+import { ThemeService } from "../../../theme/services/theme.service";
 
 @Component({
     selector: "mona-list-view",
     templateUrl: "./list-view.component.html",
-    styleUrls: ["./list-view.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [ListService],
+    providers: [
+        {
+            provide: ListService,
+            useFactory: (parentListService: ListService<unknown>): ListService<unknown> => {
+                return parentListService ?? new ListService<unknown>();
+            },
+            deps: [[new Optional(), new SkipSelf(), ListService]]
+        }
+    ],
     imports: [
         NgTemplateOutlet,
         PagerComponent,
@@ -55,101 +63,122 @@ import { PageState } from "../../models/PageState";
         ListNoDataTemplateDirective
     ],
     host: {
-        class: "mona-list-view",
+        "[class]": "baseClasses()",
         "[attr.tabindex]": "-1"
     }
 })
-export class ListViewComponent<T = any> implements AfterViewInit {
+export class ListViewComponent<T = any> implements ListViewVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #scrollBottomEnabled = computed(() => {
-        const pageableOptions = this.pagerSettings();
+        const pageableOptions = this.listService.pageableOptions();
         return !pageableOptions.enabled;
     });
-
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClasses = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        const variantClasses = listViewBaseThemeVariants(theme)({ rounded, size });
+        const userClass = this.userClass();
+        return twMerge(variantClasses, userClass);
+    });
     protected readonly footerTemplate = contentChild(ListViewFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(ListViewGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListViewHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly itemCount = computed(() => this.items().size());
+    protected readonly itemCount = computed(() => this.listItems().size());
     protected readonly itemTemplate = contentChild(ListViewItemTemplateDirective, { read: TemplateRef });
-    protected readonly listService = inject(ListService<T>);
-    protected readonly noDataTemplate = contentChild(ListViewNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly pageState: PageState = { page: signal(1), skip: signal(0), take: signal(10) };
-    protected readonly pagerSettings = signal<PagerSettings>({
-        enabled: false,
-        firstLast: false,
-        info: true,
-        pageSizeValues: true,
-        previousNext: false,
-        type: "numeric",
-        visiblePages: 5
+    protected readonly listHeight = computed(() => {
+        const height = this.height();
+        return typeof height === "number" ? `${height}px` : height;
     });
-    protected readonly viewItems = computed(() => {
+    protected readonly listItems = computed(() => {
         const items = this.items();
-        const pageableOptions = this.pagerSettings();
-        const skip = this.pageState.skip();
-        const take = this.pageState.take();
-        if (!pageableOptions.enabled) {
-            return items;
-        }
-        return items.skip(skip).take(take).toImmutableSet();
+        return ImmutableSet.create(items);
     });
+    protected readonly listService = inject<ListService<T>>(ListService);
+    protected readonly listWidth = computed(() => {
+        const width = this.width();
+        return typeof width === "number" ? `${width}px` : width;
+    });
+    protected readonly noDataTemplate = contentChild(ListViewNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly viewItems = computed(() => this.listItems());
 
+    /**
+     * @description Sets the height of the list view.
+     * @default 100%
+     */
+    public readonly height = input<string | number>("100%");
+
+    /**
+     * @description Sets the classes of the inner UL element.
+     */
+    public readonly listClass = input<string>("");
+
+    /**
+     * @description Sets the classes of the list items.
+     */
+    public readonly listItemClass = input("");
+
+    /**
+     * @description Sets the style of the list items.
+     */
+    public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * @description Sets the style of the list.
+     */
+    public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
+
+    /**
+     * @description The items to display in the list.
+     */
+    public readonly items = input<Iterable<T>>([]);
+
+    /**
+     * @description Sets the rounding of the list.
+     */
+    public readonly rounded = input<ListViewVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Emits when the list has scrolled to the bottom.
+     */
     public readonly scrollBottom = output<Event>();
 
-    public height = input<ListSizeType, ListSizeInputType>("100%", {
-        transform: value => {
-            if (value == null) {
-                return undefined;
-            } else if (typeof value === "number") {
-                return `${value}px`;
-            } else {
-                return value;
-            }
-        }
-    });
-    public items = input<ImmutableSet<T>, Iterable<T>>(ImmutableSet.create(), {
-        transform: value => ImmutableSet.create(value)
-    });
-    public textField = input<ListKeySelector<T, string> | undefined>("");
-    public width = input<ListSizeType, ListSizeInputType>("100%", {
-        transform: value => {
-            if (value == null) {
-                return undefined;
-            } else if (typeof value === "number") {
-                return `${value}px`;
-            } else {
-                return value;
-            }
-        }
-    });
+    /**
+     * @description Sets the size of the list.
+     */
+    public readonly size = input<ListViewVariantProps["size"]>("medium");
+
+    /**
+     * @description Sets the field to display in the list.
+     */
+    public readonly textField = input<ListKeySelector<T, string> | undefined>("");
+
+    public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Sets the width of the list view.
+     * @default 100%
+     */
+    public readonly width = input<string | number>("100%");
 
     public constructor() {
         effect(() => {
             const textField = this.textField();
             untracked(() => this.listService.setTextField(textField ?? ""));
         });
-    }
-
-    public ngAfterViewInit(): void {
-        window.setTimeout(() => {
-            this.setScrollBottomEvent();
+        afterRenderEffect({
+            read: () => this.setScrollBottomEvent()
         });
     }
 
     public onPageChange(event: PageChangeEvent): void {
-        this.pageState.page.set(event.page);
-        this.pageState.skip.set(event.skip);
+        this.listService.pageState.update(s => ({ ...s, page: event.page, skip: event.skip }));
     }
 
     public onPageSizeChange(event: PageSizeChangeEvent): void {
-        this.pageState.page.set(1);
-        this.pageState.skip.set(0);
-        this.pageState.take.set(event.newPageSize);
-    }
-
-    public setPagerSettings(settings: PagerSettings): void {
-        this.pagerSettings.set(settings);
+        this.listService.pageState.update(s => ({ ...s, page: 1, skip: 0, take: event.newPageSize }));
     }
 
     private setScrollBottomEvent(): void {
@@ -158,7 +187,7 @@ export class ListViewComponent<T = any> implements AfterViewInit {
         if (virtualScrollEnabled) {
             element = this.#hostElementRef.nativeElement.querySelector(".cdk-virtual-scroll-viewport");
         } else {
-            element = this.#hostElementRef.nativeElement.querySelector(".mona-list > ul");
+            element = this.#hostElementRef.nativeElement.querySelector("mona-list > ul");
         }
         if (!element) {
             return;

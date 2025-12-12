@@ -43,10 +43,7 @@ import { DropdownButtonTextTemplateDirective } from "../../directives/dropdown-b
         PopupMenuShortcutTemplateDirective,
         PopupMenuTextTemplateDirective,
         NgTemplateOutlet
-    ],
-    host: {
-        "[class.mona-drop-down-button]": "true"
-    }
+    ]
 })
 export class DropdownButtonComponent implements DropdownButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
@@ -94,6 +91,12 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
      * @description ARIA labelledby for the dropdown button.
      */
     public readonly ariaLabelledby = input<string>("");
+
+    /**
+     * @description Sets the icon only state of the button.
+     * When set to true, the button will appear as square.
+     */
+    public readonly iconOnly = input(false);
 
     /**
      * @description Sets the disabled state of the button.

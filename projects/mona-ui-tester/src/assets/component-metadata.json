@@ -364,16 +364,16 @@
     "selector": "",
     "inputs": [
       {
-        "name": "filterChange",
-        "type": "FilterChangeEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "filter",
         "type": "string",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "filterChange",
+        "type": "FilterChangeEvent",
+        "description": "",
+        "kind": "output"
       },
       {
         "name": "filterPlaceholder",
@@ -534,7 +534,7 @@
       {
         "name": "backgroundColor",
         "type": "string",
-        "description": "Sets the background color of the avatar.\n\nIf an image is provided, this will be ignored.",
+        "description": "Sets the background color of the avatar.\r\n\r\nIf an image is provided, this will be ignored.",
         "kind": "input"
       },
       {
@@ -546,73 +546,61 @@
       {
         "name": "borderRadius",
         "type": "string | number",
-        "description": "Sets the border radius of the avatar.\nCan be a percentage or pixel value.",
+        "description": "Sets the border radius of the avatar.\r\nCan be a percentage or pixel value.",
         "kind": "input"
       },
       {
         "name": "borderWidth",
         "type": "string | number",
-        "description": "Sets the border width of the avatar.\nCan be a pixel value.",
+        "description": "Sets the border width of the avatar.\r\nCan be a pixel value.",
         "kind": "input"
       },
       {
         "name": "customStyles",
         "type": "Partial<CSSStyleDeclaration>",
-        "description": "Custom styles to apply to the avatar.\nThis can be used to override default styles or add additional styles.",
+        "description": "Custom styles to apply to the avatar.\r\nThis can be used to override default styles or add additional styles.",
         "kind": "input"
       },
       {
         "name": "height",
         "type": "string | number",
-        "description": "Sets the height of the avatar.\nCan be a pixel value or a string with units (e.g., \"64px\").",
+        "description": "Sets the height of the avatar.\r\nCan be a pixel value or a string with units (e.g., \"64px\").",
         "kind": "input"
       },
       {
         "name": "image",
         "type": "string",
-        "description": "Sets the image URL for the avatar.\nIf an image is provided, the avatar will display the image instead of a label.",
+        "description": "Sets the image URL for the avatar.\r\nIf an image is provided, the avatar will display the image instead of a label.",
         "kind": "input"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label for the avatar.\nIf an image is provided, this will be ignored.",
+        "description": "Sets the label for the avatar.\r\nIf an image is provided, this will be ignored.",
         "kind": "input"
       },
       {
         "name": "labelColor",
         "type": "string",
-        "description": "Sets the color of the label text.\nIf an image is provided, this will be ignored.",
+        "description": "Sets the color of the label text.\r\nIf an image is provided, this will be ignored.",
         "kind": "input"
       },
       {
         "name": "labelFontSize",
         "type": "string",
-        "description": "Sets the font size of the label text.\nIf an image is provided, this will be ignored.",
+        "description": "Sets the font size of the label text.\r\nIf an image is provided, this will be ignored.",
         "kind": "input"
       },
       {
         "name": "labelFontWeight",
         "type": "string",
-        "description": "Sets the font weight of the label text.\nIf an image is provided, this will be ignored.",
+        "description": "Sets the font weight of the label text.\r\nIf an image is provided, this will be ignored.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the avatar.\nCan be a pixel value or a string with units (e.g., \"64px\").",
-        "kind": "input"
-      }
-    ]
-  },
-  "PlaceholderComponent": {
-    "name": "PlaceholderComponent",
-    "selector": "\"mona-placeholder\"",
-    "inputs": [
-      {
-        "name": "text",
-        "type": "string",
-        "description": "",
+        "description": "Sets the width of the avatar.\r\nCan be a pixel value or a string with units (e.g., \"64px\").",
         "kind": "input"
       }
     ]
@@ -676,14 +664,14 @@
         "kind": "input"
       },
       {
-        "name": "selectedKeys",
-        "type": "Iterable<K>",
+        "name": "selectBy",
+        "type": "ListKeySelector<T, K> | undefined",
         "description": "",
         "kind": "input"
       },
       {
-        "name": "selectionKey",
-        "type": "ListKeySelector<T, K> | undefined",
+        "name": "selectedKeys",
+        "type": "Iterable<K>",
         "description": "",
         "kind": "input"
       }
@@ -696,6 +684,18 @@
       {
         "name": "options",
         "type": "VirtualScrollOptions",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "PagerNavigationButtonsTemplateDirective": {
+    "name": "PagerNavigationButtonsTemplateDirective",
+    "selector": "\"ng-template[monaPagerNavigationButtonsTemplate]\"",
+    "inputs": [
+      {
+        "name": "type",
+        "type": "\"first\" | \"last\" | \"next\" | \"previous\"",
         "description": "",
         "kind": "input"
       }
@@ -970,6 +970,12 @@
         "kind": "model"
       },
       {
+        "name": "iconOnly",
+        "type": "boolean",
+        "description": "Sets the icon only state of the button.\r\nWhen set to true, the button will appear as square.",
+        "kind": "input"
+      },
+      {
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
         "description": "Sets the look of the button.",
@@ -1026,7 +1032,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the chip.\n\nIf the label is set, the chip will display the label instead of the content.",
+        "description": "Sets the label of the chip.\r\n\r\nIf the label is set, the chip will display the label instead of the content.",
         "kind": "input"
       },
       {
@@ -1038,7 +1044,7 @@
       {
         "name": "removable",
         "type": "boolean",
-        "description": "Sets the removable state of the chip.\nIf true, the chip will display a remove icon.",
+        "description": "Sets the removable state of the chip.\r\nIf true, the chip will display a remove icon.",
         "kind": "input"
       },
       {
@@ -1577,44 +1583,152 @@
       }
     ]
   },
+  "ScrollViewActivePageDirective": {
+    "name": "ScrollViewActivePageDirective",
+    "selector": "\"li[monaScrollViewActivePage]\"",
+    "inputs": [
+      {
+        "name": "active",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ScrollViewVariantProps[\"pagerRounded\"]",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "SplitterPaneStyleDirective": {
+    "name": "SplitterPaneStyleDirective",
+    "selector": "\"div[monaSplitterPaneStyle]\"",
+    "inputs": [
+      {
+        "name": "pane",
+        "type": "SplitterPaneComponent",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "paneList",
+        "type": "Iterable<SplitterPaneComponent>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "StepperIndicatorDirective": {
+    "name": "StepperIndicatorDirective",
+    "selector": "\"span[monaStepperIndicator]\"",
+    "inputs": [
+      {
+        "name": "active",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "focused",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "StepperVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "ListBoxComponent": {
     "name": "ListBoxComponent",
     "selector": "\"mona-list-box\"",
     "inputs": [
       {
         "name": "actionClick",
-        "type": "ListBoxActionClickEvent",
-        "description": "",
+        "type": "ListBoxActionEvent",
+        "description": "The event emitted when an action button is clicked.",
+        "kind": "output"
+      },
+      {
+        "name": "connectedList",
+        "type": "ListBoxComponent<T, K> | null",
+        "description": "The connected list box for transferring items.",
+        "kind": "input"
+      },
+      {
+        "name": "height",
+        "type": "string | number",
+        "description": "Sets the height of the list box.",
+        "kind": "input"
+      },
+      {
+        "name": "items",
+        "type": "Iterable<T>",
+        "description": "The items of the list box.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ListBoxVariantProps[\"rounded\"]",
+        "description": "The border radius of the list box.",
+        "kind": "input"
+      },
+      {
+        "name": "selectBy",
+        "type": "ListKeySelector<T, K>",
+        "description": "The selector to extract the key from an item.\r\nIt can be a string representing the property name or a function that takes an item and returns its key.",
+        "kind": "input"
+      },
+      {
+        "name": "selectedKeys",
+        "type": "Iterable<K>",
+        "description": "The keys of the selected items.",
+        "kind": "input"
+      },
+      {
+        "name": "selectedKeysChange",
+        "type": "K[]",
+        "description": "The event emitted when the selected keys change.",
         "kind": "output"
       },
       {
         "name": "selectionChange",
         "type": "ListBoxSelectionEvent",
-        "description": "",
+        "description": "The event emitted when the selection changes.\r\nIt contains the selected and deselected items.",
         "kind": "output"
       },
       {
-        "name": "connectedList",
-        "type": "ListBoxComponent<T> | null",
-        "description": "",
+        "name": "selectionMode",
+        "type": "SelectionMode",
+        "description": "The selection mode of the list box.",
         "kind": "input"
       },
       {
-        "name": "items",
-        "type": "T>, Iterable<T>",
-        "description": "",
+        "name": "size",
+        "type": "ListBoxVariantProps[\"size\"]",
+        "description": "Sets the size of the list box.",
         "kind": "input"
       },
       {
         "name": "textField",
-        "type": "string",
-        "description": "",
+        "type": "ListKeySelector<T, string>",
+        "description": "The selector to extract the text from an item.\r\nIt can be a string representing the property name or a function that takes an item and returns its text.",
         "kind": "input"
       },
       {
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
-        "description": "",
+        "description": "Sets the toolbar options of the list box.\r\nIt can be a boolean to enable/disable the toolbar or an object to customize the toolbar.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number",
+        "description": "Sets the width of the list box.",
         "kind": "input"
       }
     ]
@@ -1624,33 +1738,75 @@
     "selector": "\"mona-list-view\"",
     "inputs": [
       {
-        "name": "scrollBottom",
-        "type": "Event",
-        "description": "",
-        "kind": "output"
+        "name": "height",
+        "type": "string | number",
+        "description": "Sets the height of the list view.",
+        "kind": "input"
       },
       {
-        "name": "height",
-        "type": "ListSizeType",
-        "description": "",
+        "name": "listClass",
+        "type": "string",
+        "description": "Sets the classes of the inner UL element.",
+        "kind": "input"
+      },
+      {
+        "name": "listItemClass",
+        "type": "string",
+        "description": "Sets the classes of the list items.",
+        "kind": "input"
+      },
+      {
+        "name": "listItemStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "Sets the style of the list items.",
+        "kind": "input"
+      },
+      {
+        "name": "listStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "Sets the style of the list.",
         "kind": "input"
       },
       {
         "name": "items",
-        "type": "ImmutableSet<T>",
-        "description": "",
+        "type": "Iterable<T>",
+        "description": "The items to display in the list.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ListViewVariantProps[\"rounded\"]",
+        "description": "Sets the rounding of the list.",
+        "kind": "input"
+      },
+      {
+        "name": "scrollBottom",
+        "type": "Event",
+        "description": "Emits when the list has scrolled to the bottom.",
+        "kind": "output"
+      },
+      {
+        "name": "size",
+        "type": "ListViewVariantProps[\"size\"]",
+        "description": "Sets the size of the list.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "ListKeySelector<T, string> | undefined",
+        "description": "Sets the field to display in the list.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
       {
         "name": "width",
-        "type": "ListSizeType",
-        "description": "",
+        "type": "string | number",
+        "description": "Sets the width of the list view.",
         "kind": "input"
       }
     ]
@@ -1672,75 +1828,99 @@
     "selector": "\"mona-pager\"",
     "inputs": [
       {
-        "name": "pageChange",
-        "type": "PageChangeEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "pageSizeChange",
-        "type": "PageSizeChangeEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "firstLast",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the first and last page buttons.",
         "kind": "input"
+      },
+      {
+        "name": "pageChange",
+        "type": "PageChangeEvent",
+        "description": "The event emitted when the page changes.",
+        "kind": "output"
       },
       {
         "name": "pageInput",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the page input.",
         "kind": "input"
       },
       {
         "name": "pageSize",
         "type": "number",
-        "description": "",
+        "description": "The page size.",
         "kind": "input"
       },
       {
+        "name": "pageSizeChange",
+        "type": "PageSizeChangeEvent",
+        "description": "The event emitted when the page size changes.",
+        "kind": "output"
+      },
+      {
         "name": "pageSizeValues",
-        "type": "boolean | number[]",
-        "description": "",
+        "type": "number[] | boolean",
+        "description": "The page size values.",
         "kind": "input"
       },
       {
         "name": "previousNext",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the previous and next page buttons.",
         "kind": "input"
       },
       {
         "name": "responsive",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to make the pager responsive.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "PagerVariantProps[\"rounded\"]",
+        "description": "The rounded of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "showInfo",
+        "type": "boolean",
+        "description": "Whether to show the info section.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "PagerVariantProps[\"size\"]",
+        "description": "The size of the pager.",
         "kind": "input"
       },
       {
         "name": "skip",
         "type": "number",
-        "description": "",
+        "description": "The skip of the pager.",
         "kind": "input"
       },
       {
         "name": "total",
         "type": "number",
-        "description": "",
+        "description": "The total of the pager.",
         "kind": "input"
       },
       {
         "name": "type",
         "type": "PagerType",
+        "description": "The type of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "userClasses",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
       {
         "name": "visiblePages",
         "type": "number",
-        "description": "",
+        "description": "The visible pages of the pager.",
         "kind": "input"
       }
     ]
@@ -1932,13 +2112,13 @@
       {
         "name": "filter",
         "type": "string",
-        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element.\nOnly applies when `mode` is set to `content`.",
+        "description": "The filter to select elements that will have tooltips.\r\nIt can be a CSS selector that matches elements within the host element.\r\nOnly applies when `mode` is set to `content`.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "\"host\" | \"content\"",
-        "description": "The mode of the tooltip.\n\"host\" mode receives the tooltip from the host element's title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "description": "The mode of the tooltip.\r\n\"host\" mode receives the tooltip from the host element's title attribute.\r\n\"content\" mode uses the title attribute of elements matching the filter.",
         "kind": "input"
       },
       {
@@ -1992,13 +2172,13 @@
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Whether to animate the tree.\n\nIf true, the tree will animate when expanding or collapsing nodes.",
+        "description": "Whether to animate the tree.\r\n\r\nIf true, the tree will animate when expanding or collapsing nodes.",
         "kind": "input"
       },
       {
         "name": "children",
         "type": "ChildrenSelector<T>",
-        "description": "The children selector for the tree.\n\nIt can be either of the following:\n- A string representing the property name of the children.\n- A function that returns the children of a node.\n- A function that returns an observable that emits the children of a node.",
+        "description": "The children selector for the tree.\r\n\r\nIt can be either of the following:\r\n- A string representing the property name of the children.\r\n- A function that returns the children of a node.\r\n- A function that returns an observable that emits the children of a node.",
         "kind": "input"
       },
       {
@@ -2010,19 +2190,19 @@
       {
         "name": "hasChildren",
         "type": "Predicate<T> | null",
-        "description": "The predicate to determine if a node has children.\n\nRequired if the children selector is set to a function that returns an observable.",
+        "description": "The predicate to determine if a node has children.\r\n\r\nRequired if the children selector is set to a function that returns an observable.",
         "kind": "input"
       },
       {
         "name": "idField",
         "type": "string",
-        "description": "The field that represents the unique identifier of a node.\n\nThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the unique identifier of a node.\r\n\r\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "DataStructure",
-        "description": "The data structure of the tree.\n\nIt can be either of the following:\n- `flat`: The tree is a flat list of nodes.\n- `hierarchical`: The tree is a hierarchical structure.\n\nIf the data structure is set to `flat`, the following fields are required:\n- idField\n- parentIdField\n\nIf the data structure is set to `hierarchical`, the following fields are required:\n- children\n- hasChildren",
+        "description": "The data structure of the tree.\r\n\r\nIt can be either of the following:\r\n- `flat`: The tree is a flat list of nodes.\r\n- `hierarchical`: The tree is a hierarchical structure.\r\n\r\nIf the data structure is set to `flat`, the following fields are required:\r\n- idField\r\n- parentIdField\r\n\r\nIf the data structure is set to `hierarchical`, the following fields are required:\r\n- children\r\n- hasChildren",
         "kind": "input"
       },
       {
@@ -2034,7 +2214,7 @@
       {
         "name": "textField",
         "type": "string | Selector<T, string>",
-        "description": "The text field for the tree.\n\nIt can be either of the following:\n- A string representing the property name of the text.\n- A function that returns the text of a node.",
+        "description": "The text field for the tree.\r\n\r\nIt can be either of the following:\r\n- A string representing the property name of the text.\r\n- A function that returns the text of a node.",
         "kind": "input"
       }
     ]
@@ -2148,7 +2328,7 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
+        "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
         "kind": "model"
       },
       {
@@ -2221,6 +2401,12 @@
         "name": "ariaLabelledby",
         "type": "string",
         "description": "ARIA labelledby for the dropdown button.",
+        "kind": "input"
+      },
+      {
+        "name": "iconOnly",
+        "type": "boolean",
+        "description": "Sets the icon only state of the button.\r\nWhen set to true, the button will appear as square.",
         "kind": "input"
       },
       {
@@ -2572,6 +2758,12 @@
     "selector": "\"mona-filter-input\"",
     "inputs": [
       {
+        "name": "debounce",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "filter",
         "type": "string",
         "description": "",
@@ -2582,12 +2774,6 @@
         "type": "FilterChangeEvent",
         "description": "",
         "kind": "output"
-      },
-      {
-        "name": "debounce",
-        "type": "number",
-        "description": "",
-        "kind": "input"
       },
       {
         "name": "placeholder",
@@ -2602,12 +2788,6 @@
     "selector": "\"mona-list\"",
     "inputs": [
       {
-        "name": "itemSelect",
-        "type": "SelectionChangeEvent<TData>",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "data",
         "type": "Iterable<TData> | null | undefined",
         "description": "",
@@ -2616,6 +2796,36 @@
       {
         "name": "height",
         "type": "ListSizeInputType",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "itemSelect",
+        "type": "SelectionChangeEvent<TData>",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "listClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listItemClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listItemStyle",
+        "type": "Partial<CSSStyleDeclaration>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listStyle",
+        "type": "Partial<CSSStyleDeclaration>",
         "description": "",
         "kind": "input"
       },
@@ -2664,13 +2874,13 @@
       {
         "name": "anchor",
         "type": "ElementRef<HTMLElement> | Element",
-        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor element that the context menu will be anchored to.\r\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The anchor connection point of the popup menu.\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor connection point of the popup menu.\r\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
@@ -2700,13 +2910,13 @@
       {
         "name": "minWidth",
         "type": "string | number",
-        "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the minimum width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "navigate",
         "type": "PopupMenuNavigationEvent",
-        "description": "The event that is emitted when the popup menu is navigated.\nThis is used to handle keyboard navigation within the popup menu.",
+        "description": "The event that is emitted when the popup menu is navigated.\r\nThis is used to handle keyboard navigation within the popup menu.",
         "kind": "output"
       },
       {
@@ -2724,25 +2934,25 @@
       {
         "name": "popupConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
+        "description": "The connection point of the popup element to which the anchor will be connected.\r\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "precise",
         "type": "boolean",
-        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "description": "Whether the context menu should be opened with precise positioning.\r\nIf true, the context menu will be positioned at the mouse cursor position.\r\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "PopupMenuVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the border radius of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "PopupMenuVariantProps[\"size\"]",
-        "description": "Sets the size of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the size of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
@@ -2760,7 +2970,7 @@
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       }
     ]
@@ -3192,7 +3402,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label text of the checkbox.\nIf provided, it will take precedence over the content inside the checkbox.",
+        "description": "Sets the label text of the checkbox.\r\nIf provided, it will take precedence over the content inside the checkbox.",
         "kind": "input"
       },
       {
@@ -3294,7 +3504,7 @@
       {
         "name": "columns",
         "type": "number",
-        "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
+        "description": "The number of columns in the color palette grid.\r\nOnly applicable when using a custom palette.",
         "kind": "input"
       },
       {
@@ -3306,7 +3516,7 @@
       {
         "name": "palette",
         "type": "PaletteType | Iterable<string>",
-        "description": "The type of color palette to use.\nThis can be either \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.\nIf the provided palette is empty, it defaults to the flat color scheme.",
+        "description": "The type of color palette to use.\r\nThis can be either \"flat\", \"material\", or \"websafe\",\r\nor a custom iterable of colors.\r\nIf the provided palette is empty, it defaults to the flat color scheme.",
         "kind": "input"
       },
       {
@@ -3330,13 +3540,13 @@
       {
         "name": "closeOnSelect",
         "type": "boolean",
-        "description": "Whether to close the color picker when a color is selected.\nOnly applies when view is set to \"palette\".",
+        "description": "Whether to close the color picker when a color is selected.\r\nOnly applies when the view is set to \"palette\".",
         "kind": "input"
       },
       {
         "name": "columns",
         "type": "number",
-        "description": "The number of columns to display in the color palette.\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.",
+        "description": "The number of columns to display in the color palette.\r\nOnly applies when the view is set to \"palette\" and the palette is a custom array of colors.",
         "kind": "input"
       },
       {
@@ -3348,13 +3558,13 @@
       {
         "name": "opacity",
         "type": "boolean",
-        "description": "Whether to display the opacity slider.\nOnly applies when the view is set to \"gradient\".",
+        "description": "Whether to display the opacity slider.\r\nOnly applies when the view is set to \"gradient\".",
         "kind": "input"
       },
       {
         "name": "palette",
         "type": "Iterable<string> | PaletteType",
-        "description": "The type of color palette to use.\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\nor a custom iterable of colors.",
+        "description": "The type of color palette to use.\r\nThis can be a predefined palette type like \"flat\", \"material\", or \"websafe\",\r\nor a custom iterable of colors.",
         "kind": "input"
       },
       {
@@ -3366,7 +3576,7 @@
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "Whether to show the clear button to reset the color.\nThis is only applicable when the view is set to \"palette\".",
+        "description": "Whether to show the clear button to reset the color.\r\nThis is only applicable when the view is set to \"palette\".",
         "kind": "input"
       },
       {
@@ -3378,7 +3588,7 @@
       {
         "name": "view",
         "type": "ColorPickerView",
-        "description": "The view mode of the color picker.\nThis can be either \"palette\" or \"gradient\".",
+        "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
         "kind": "input"
       }
     ]
@@ -3528,7 +3738,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the radio button.\nIf provided, it will take precedence over the content inside the radio button.",
+        "description": "Sets the label of the radio button.\r\nIf provided, it will take precedence over the content inside the radio button.",
         "kind": "input"
       },
       {
@@ -3648,7 +3858,7 @@
       {
         "name": "showLabels",
         "type": "boolean",
-        "description": "Sets whether to show labels on the slider.\nOnly applicable if `showTicks` is `true`.",
+        "description": "Sets whether to show labels on the slider.\r\nOnly applicable if `showTicks` is `true`.",
         "kind": "input"
       },
       {
@@ -3678,7 +3888,7 @@
       {
         "name": "trackSize",
         "type": "string | number | null",
-        "description": "Sets the size of the slider track.\nFor horizontal sliders, this sets the height.\nFor vertical sliders, this sets the width.",
+        "description": "Sets the size of the slider track.\r\nFor horizontal sliders, this sets the height.\r\nFor vertical sliders, this sets the width.",
         "kind": "input"
       }
     ]
@@ -3756,7 +3966,7 @@
       {
         "name": "inputStyle",
         "type": "string | Partial<CSSStyleDeclaration> | null",
-        "description": "Sets the style for the input element.\nCan be a string or a partial CSSStyleDeclaration.",
+        "description": "Sets the style for the input element.\r\nCan be a string or a partial CSSStyleDeclaration.",
         "kind": "input"
       },
       {
@@ -3786,7 +3996,7 @@
       {
         "name": "type",
         "type": "InputType",
-        "description": "Sets the type of the input element.\nDefaults to \"text\".",
+        "description": "Sets the type of the input element.\r\nDefaults to \"text\".",
         "kind": "input"
       },
       {
@@ -3804,13 +4014,19 @@
       {
         "name": "expanded",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the expansion panel is expanded or collapsed.",
         "kind": "model"
+      },
+      {
+        "name": "rounded",
+        "type": "ExpansionPanelVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the expansion panel.",
+        "kind": "input"
       },
       {
         "name": "title",
         "type": "string",
-        "description": "",
+        "description": "Sets the title of the expansion panel.",
         "kind": "input"
       }
     ]
@@ -3822,6 +4038,36 @@
       {
         "name": "legend",
         "type": "string",
+        "description": "The legend text of the fieldset.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "FieldsetVariantProps[\"rounded\"]",
+        "description": "The rounded variant of the fieldset.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "PlaceholderComponent": {
+    "name": "PlaceholderComponent",
+    "selector": "\"mona-placeholder\"",
+    "inputs": [
+      {
+        "name": "text",
+        "type": "string",
+        "description": "The text to display inside the placeholder.\nTakes precedence over custom content if both are provided.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }
@@ -3832,57 +4078,81 @@
     "selector": "\"mona-scroll-view\"",
     "inputs": [
       {
-        "name": "arrows",
-        "type": "boolean",
+        "name": "animate",
+        "type": "boolean | number",
         "description": "",
         "kind": "input"
       },
       {
+        "name": "arrows",
+        "type": "boolean",
+        "description": "Represents the state of arrows' visibility or activity.",
+        "kind": "input"
+      },
+      {
         "name": "data",
-        "type": "any>",
-        "description": "",
+        "type": "Iterable<unknown>",
+        "description": "Sets the data of the scroll view.",
         "kind": "input"
       },
       {
         "name": "height",
         "type": "string | number",
-        "description": "",
+        "description": "Sets the height of the scroll view.\nThis property is required.",
         "kind": "input"
       },
       {
         "name": "index",
         "type": "number",
-        "description": "",
+        "description": "Sets the active page of the scroll view.",
         "kind": "model"
       },
       {
         "name": "infinite",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the scroll view is infinite.",
         "kind": "input"
       },
       {
         "name": "pageable",
         "type": "boolean",
-        "description": "",
+        "description": "Sets whether the pager is visible.",
         "kind": "input"
       },
       {
         "name": "pagerBlur",
         "type": "number",
-        "description": "",
+        "description": "Sets the background blur of the pager in pixels.",
         "kind": "input"
       },
       {
         "name": "pagerOverlay",
         "type": "PagerOverlay",
+        "description": "Sets the color of the pager.",
+        "kind": "input"
+      },
+      {
+        "name": "pagerRounded",
+        "type": "ScrollViewVariantProps[\"pagerRounded\"]",
+        "description": "Sets the border radius of the pager items.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ScrollViewVariantProps[\"rounded\"]",
+        "description": "Represents the rounded property for a ScrollView component.\n\nThe variable `rounded` determines the border radius style to be applied\nto the ScrollView. The value \"medium\" is used as the default rounding level.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "",
+        "description": "Represents the width of an element or component. The value can be specified\neither as a string (e.g., to include units like \"px\", \"%\", \"em\") or as a number\n(e.g., for unitless numerical values).\n\nThis variable is required and must be provided when initializing\nor configuring the input.",
         "kind": "input"
       }
     ]
@@ -3893,7 +4163,7 @@
     "inputs": [
       {
         "name": "orientation",
-        "type": "Orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
         "description": "",
         "kind": "input"
       }
@@ -3904,15 +4174,39 @@
     "selector": "\"mona-splitter-pane\"",
     "inputs": [
       {
+        "name": "collapsible",
+        "type": "boolean",
+        "description": "Whether the pane is collapsible.",
+        "kind": "input"
+      },
+      {
+        "name": "collapsed",
+        "type": "boolean",
+        "description": "Whether the pane is collapsed.",
+        "kind": "model"
+      },
+      {
+        "name": "max",
+        "type": "string | number | null",
+        "description": "The maximum size of the pane.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "string | number | null",
+        "description": "The minimum size of the pane.",
+        "kind": "input"
+      },
+      {
         "name": "resizable",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the pane is resizable.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "string | number",
-        "description": "",
+        "description": "The size of the pane.",
         "kind": "model"
       }
     ]
@@ -3929,7 +4223,7 @@
       },
       {
         "name": "orientation",
-        "type": "Orientation",
+        "type": "SplitterVariantProps[\"orientation\"]",
         "description": "",
         "kind": "input"
       },
@@ -3941,38 +4235,80 @@
       }
     ]
   },
-  "StepperComponent": {
-    "name": "StepperComponent",
-    "selector": "\"mona-stepper\"",
+  "SplitterResizerHandleComponent": {
+    "name": "SplitterResizerHandleComponent",
+    "selector": "\"mona-splitter-resizer-handle\"",
     "inputs": [
       {
-        "name": "stepChange",
-        "type": "number",
+        "name": "collapseNext",
+        "type": "MouseEvent",
         "description": "",
         "kind": "output"
       },
       {
-        "name": "linear",
+        "name": "collapsePrevious",
+        "type": "MouseEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "nextControlsVisible",
         "type": "boolean",
         "description": "",
         "kind": "input"
       },
       {
         "name": "orientation",
-        "type": "\"horizontal\" | \"vertical\"",
+        "type": "SplitterVariantProps[\"orientation\"]",
         "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "previousControlsVisible",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "resizable",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "StepperComponent": {
+    "name": "StepperComponent",
+    "selector": "\"mona-stepper\"",
+    "inputs": [
+      {
+        "name": "linear",
+        "type": "boolean",
+        "description": "Sets the flow of the stepper.\nIf set to true, the user will only be able to navigate to the previous or the next step.",
+        "kind": "input"
+      },
+      {
+        "name": "orientation",
+        "type": "StepperVariantProps[\"orientation\"]",
+        "description": "Sets the orientation of the stepper.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "StepperVariantProps[\"rounded\"]",
+        "description": "Sets the roundness of the stepper steps.",
         "kind": "input"
       },
       {
         "name": "step",
         "type": "number",
-        "description": "",
+        "description": "Sets the active step of the stepper.",
         "kind": "model"
       },
       {
         "name": "steps",
-        "type": "any>>",
-        "description": "",
+        "type": "Iterable<StepOptions>",
+        "description": "Sets the steps of the stepper.",
         "kind": "input"
       }
     ]
@@ -4056,7 +4392,7 @@
       {
         "name": "minWidth",
         "type": "string | number",
-        "description": "Sets the minimum width of the context menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the minimum width of the context menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
@@ -4080,7 +4416,7 @@
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the context menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the width of the context menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       }
     ]
@@ -4410,55 +4746,49 @@
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "",
+        "description": "The color of the circular progress bar.\nCan be a string or a function that takes the current value and returns a string.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the circular progress bar is disabled.",
         "kind": "input"
       },
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the circular progress bar is in indeterminate state.",
         "kind": "input"
       },
       {
         "name": "max",
         "type": "number",
-        "description": "",
+        "description": "The maximum value of the circular progress bar.",
         "kind": "input"
       },
       {
         "name": "min",
         "type": "number",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "progress",
-        "type": "number",
-        "description": "",
+        "description": "The minimum value of the circular progress bar.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "number",
-        "description": "",
+        "description": "The size of the circular progress bar.",
         "kind": "input"
       },
       {
         "name": "thickness",
         "type": "number",
-        "description": "",
+        "description": "The thickness of the circular progress bar.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "number",
-        "description": "",
+        "description": "The value of the circular progress bar.",
         "kind": "input"
       }
     ]
@@ -4470,61 +4800,67 @@
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "",
+        "description": "The color of the progress bar.\nCan be a string or a function that takes the current value and returns a string.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the progress bar is disabled.",
         "kind": "input"
       },
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "labelFormat",
-        "type": "number, string>",
-        "description": "",
+        "description": "Whether the progress bar is in indeterminate state.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "LabelPosition",
-        "description": "",
+        "description": "The position of the label.",
         "kind": "input"
       },
       {
         "name": "labelStyles",
         "type": "Partial<CSSStyleDeclaration>",
-        "description": "",
+        "description": "The styles of the label.",
         "kind": "input"
       },
       {
         "name": "labelVisible",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the label is visible.",
         "kind": "input"
       },
       {
         "name": "max",
         "type": "number",
-        "description": "",
+        "description": "The maximum value of the progress bar.",
         "kind": "input"
       },
       {
         "name": "min",
         "type": "number",
-        "description": "",
+        "description": "The minimum value of the progress bar.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ProgressBarVariantProps[\"rounded\"]",
+        "description": "The border radius of the progress bar.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "The user class of the progress bar.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "number",
-        "description": "",
+        "description": "The value of the progress bar.",
         "kind": "input"
       }
     ]
@@ -4614,7 +4950,7 @@
       {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

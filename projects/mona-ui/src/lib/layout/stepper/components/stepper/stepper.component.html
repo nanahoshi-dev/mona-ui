@@ -1,34 +1,35 @@
-<ol class="mona-stepper-step-list"
-    [ngClass]="{'mona-stepper-step-list-horizontal': orientation()==='horizontal',
-                'mona-stepper-step-list-vertical': orientation()==='vertical'}">
-    @for (step of steps(); track $index) {
-        <li [ngStyle]="trackItemStyles()" (click)="onStepClick(step)">
-            <div>
-                @if (stepTemplate()) {
-                    <ng-container [ngTemplateOutlet]="stepTemplate()??null"
-                                  [ngTemplateOutletContext]="{$implicit: step.options, index: step.index, active: step.active()}"></ng-container>
-                } @else {
-                    <span [ngClass]="{'mona-stepper-step-active': step.active()}">
-                        @if (indicatorTemplate()) {
-                            <ng-container [ngTemplateOutlet]="indicatorTemplate()??null"
-                                          [ngTemplateOutletContext]="{$implicit: step.options, index: step.index, active: step.active()}"></ng-container>
-                        } @else {
-                            {{ step.index }}
-                        }
-                    </span>
-                }
-                @if (labelTemplate()) {
-                    <ng-container [ngTemplateOutlet]="labelTemplate() ?? null"
-                                  [ngTemplateOutletContext]="{$implicit: step.options, index: step.index, active: step.active()}"></ng-container>
-                } @else {
-                    <span>{{ step.options.label }}</span>
-                }
-            </div>
+<ol [class]="listClass()">
+    @for (step of viewSteps(); track $index) {
+        @let active = step|activeStep:activeStep();
+        @let focused = step.index === highlightedStep();
+        @let options = step.options;
+        @let index = step.index;
+        @let currentIndex = activeStep().index;
+        <li [class]="listItemClass()" [style]="trackItemStyles()" (click)="onStepClick(step)">
+            @if (stepTemplate()) {
+                <ng-container [ngTemplateOutlet]="stepTemplate()"
+                              [ngTemplateOutletContext]="{$implicit: options, index, active, currentIndex}"></ng-container>
+            } @else {
+                <span monaStepperIndicator [rounded]="rounded()" [active]="active" [focused]="focused"
+                      (focus)="onIndicatorFocus(step)"
+                      [attr.tabindex]="focused ? 0 : -1">
+                    @if (indicatorTemplate()) {
+                        <ng-container [ngTemplateOutlet]="indicatorTemplate()"
+                                      [ngTemplateOutletContext]="{$implicit: options, index, active, currentIndex}"></ng-container>
+                    } @else {
+                        {{ step.index }}
+                    }
+                </span>
+            }
+            @if (labelTemplate()) {
+                <ng-container [ngTemplateOutlet]="labelTemplate()"
+                              [ngTemplateOutletContext]="{$implicit: options, index, active, currentIndex}"></ng-container>
+            } @else {
+                <span>{{ options.label }}</span>
+            }
         </li>
     }
 </ol>
-<div class="mona-stepper-track" [ngStyle]="trackStyles()"
-     [ngClass]="{'mona-stepper-track-horizontal': orientation()==='horizontal',
-                 'mona-stepper-track-vertical': orientation()==='vertical'}">
-    <div [ngStyle]="trackInnerStyles()"></div>
+<div [class]="trackClass()" [style]="trackStyles()">
+    <div [class]="trackLineClass()" [style]="trackInnerStyles()"></div>
 </div>

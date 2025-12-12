@@ -17,12 +17,13 @@ export class ThemeService {
     }
 
     private getActiveThemeVariables(): Record<string, string> {
-        return this.#theme() === "mona" ? this.getMonaDarkThemeVariables() : this.getShadcnLightThemeVariables();
+        return this.#theme() === "mona" ? this.getMonaDarkThemeVariables() : this.getMonaLightThemeVariables();
     }
 
     private getMonaDarkThemeVariables(): Record<string, string> {
         return {
-            "--color-background": "oklch(0.20 0 0)",
+            "--color-background": "oklch(0.21 0 0)",
+            "--color-background-dark": "oklch(0.19 0 0)",
             "--color-foreground": "oklch(100% 0.001 106.424)",
             "--color-hover": "oklch(22.5% 0 0)",
             "--color-active": "oklch(19.5% 0 0)",
@@ -30,6 +31,8 @@ export class ThemeService {
             "--color-accent": "oklch(24.5% 0 0)",
             "--color-accent-dark": "oklch(21.5% 0 0)",
             "--color-accent-foreground": "oklch(97% 0 0)",
+            "--color-accent-hover": "oklch(26.5% 0 0)",
+            "--color-accent-active": "oklch(31.5% 0 0)",
 
             "--color-input-background": "oklch(0.20 0 0)",
             "--color-input-border": "oklch(0.12 0 0)",
@@ -108,80 +111,8 @@ export class ThemeService {
 
     private getMonaLightThemeVariables(): Record<string, string> {
         return {
-            "--color-background": "oklch(100% 0.001 106.424)",
-            "--color-foreground": "oklch(20% 0 0)",
-            "--color-hover": "oklch(98% 0.001 106.424)",
-            "--color-active": "oklch(96% 0.001 106.424)",
-            "--color-selected": "#f4f5f7",
-            "--color-accent": "oklch(98% 0.001 106.424)",
-            "--color-accent-dark": "oklch(96% 0.001 106.424)",
-            "--color-accent-foreground": "oklch(14.1% 0.005 285.823)",
-
-            "--color-popover": "#fff",
-            "--color-popover-foreground": "#09090b",
-
-            ...generatePrimaryColorPalette(themeColorMap.mona),
-
-            "--color-secondary": "oklch(92% 0.004 286.32)",
-            "--color-secondary-foreground": "#18181b",
-            "--color-secondary-hover": "oklch(93% 0.004 286.32)",
-            "--color-secondary-active": "oklch(91% 0.004 286.32)",
-
-            "--color-success": "oklch(62.7% 0.194 149.214)",
-            "--color-success-foreground": "oklch(97.7% 0.001 106.424)",
-            "--color-success-hover": "oklch(66.7% 0.194 149.214)",
-            "--color-success-active": "oklch(54.7% 0.194 149.214)",
-            "--color-success-selected": "oklch(76.7% 0.194 149.214)",
-
-            "--color-error": "oklch(57.7% 0.245 27.325)",
-            "--color-error-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-error-hover": "oklch(61.7% 0.245 27.325)",
-            "--color-error-active": "oklch(53.7% 0.245 27.325)",
-            "--color-error-selected": "oklch(71.7% 0.245 27.325)",
-
-            "--color-warning": "oklch(66.6% 0.179 58.318)",
-            "--color-warning-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-warning-hover": "oklch(70.6% 0.179 58.318)",
-            "--color-warning-active": "oklch(58.6% 0.179 58.318)",
-            "--color-warning-selected": "oklch(80.6% 0.179 58.318)",
-
-            "--color-info": "oklch(54.6% 0.245 262.881)",
-            "--color-info-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-info-hover": "oklch(58.6% 0.245 262.881)",
-            "--color-info-active": "oklch(46.6% 0.245 262.881)",
-            "--color-info-selected": "oklch(68.6% 0.245 262.881)",
-
-            "--color-muted": "#f4f4f5",
-            "--color-muted-foreground": "#71717a",
-
-            "--color-border": "oklch(0.9197 0.004 286.32)",
-            "--color-input": "#e4e4e7",
-
-            "--color-chart-1": "#e76e50",
-            "--color-chart-2": "#2a9d90",
-            "--color-chart-3": "#274754",
-            "--color-chart-4": "#e8c468",
-            "--color-chart-5": "#f4a462",
-
-            "--color-scrollbar-thumb": "#d1d5db",
-            "--color-scrollbar-thumb-hover": "#9ca3af",
-            "--color-scrollbar-thumb-active": "#6b7280",
-            "--color-scrollbar-thumb-focus": "#9ca3af",
-            "--color-scrollbar-track": "#f9fafb",
-            "--color-scrollbar-track-hover": "#f4f5f7",
-            "--color-scrollbar-track-active": "#e5e7eb",
-            "--color-scrollbar-track-focus": "#f4f5f7",
-            "--color-scrollbar-corner": "#f9fafb",
-
-            // Temporary variables for testing purposes
-            "--page-background": "#fff",
-            "--color-demo-background": "#f9fafb"
-        };
-    }
-
-    private getShadcnLightThemeVariables(): Record<string, string> {
-        return {
             "--color-background": "oklch(1 0 0)",
+            "--color-background-dark": "oklch(0.99 0 0)",
             "--color-foreground": "oklch(0.1407 0.0044 285.82)",
             "--color-hover": "oklch(0.97 0 0)",
             "--color-active": "oklch(0.95 0 0)",
@@ -189,6 +120,9 @@ export class ThemeService {
             "--color-accent": "oklch(0.97 0 0)",
             "--color-accent-dark": "oklch(0.95 0 0)",
             "--color-accent-foreground": "oklch(0.21 0 0)",
+            "--color-accent-hover": "oklch(0.95 0 0)",
+            "--color-accent-active": "oklch(0.90 0 0)",
+
             "--color-input-background": "oklch(1 0 0)",
             "--color-input-border": "oklch(0.92 0 0)",
             "--color-input-hover": "oklch(0.95 0 0)",
@@ -198,6 +132,7 @@ export class ThemeService {
             "--color-popover-foreground": "#09090b",
 
             ...generatePrimaryColorPalette("oklch(0.21 0.01 0)"),
+            // ...generatePrimaryColorPalette("oklch(0.59 0.25 17.59)"),
 
             "--color-secondary": "oklch(.97 0 0)",
             "--color-secondary-foreground": "oklch(0.21 0 0)",

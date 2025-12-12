@@ -1,5 +1,5 @@
 import { contentChildren, Directive, effect, inject, untracked } from "@angular/core";
-import { ContextMenuItemComponent } from "../../menus/ctx-menu/components/contextmenu-item/context-menu-item.component";
+import { ContextMenuItemComponent } from "../../menus/contextmenu/components/contextmenu-item/context-menu-item.component";
 import { MenuItemComponent } from "../../menus/menubar/components/menu-item/menu-item.component";
 import { GridService } from "../services/grid.service";
 

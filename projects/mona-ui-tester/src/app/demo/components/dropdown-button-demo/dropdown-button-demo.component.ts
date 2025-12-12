@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { Heart, LucideAngularModule, Settings } from "lucide-angular";
+import { Heart, LucideAngularModule, Menu, Settings } from "lucide-angular";
 import {
     DropdownButtonComponent,
     DropdownButtonGroupComponent,
@@ -162,6 +162,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         code: `
             <mona-dropdown-button
                 [disabled]="disabled()"
+                [iconOnly]="iconOnly()"
                 [look]="look()"
                 [rounded]="rounded()"
                 [size]="size()"
@@ -234,6 +235,10 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
                 type: "boolean",
                 value: false
             },
+            iconOnly: {
+                type: "boolean",
+                value: false
+            },
             look: {
                 type: "dropdown",
                 value: [
@@ -302,10 +307,11 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         @let featureData = features();
         <mona-dropdown-button
             [disabled]="disabled()"
+            [iconOnly]="iconOnly()"
             [look]="look()"
             [rounded]="rounded()"
             [size]="size()"
-            [text]="text()">
+            [text]="!iconOnly() ? text() : ''">
             <mona-dropdown-button-group title="Project">
                 <mona-dropdown-button-item label="Issues"></mona-dropdown-button-item>
                 <mona-dropdown-button-item label="Roadmap" [disabled]="true"></mona-dropdown-button-item>
@@ -354,7 +360,11 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
 
             @if (featureData["textTemplate"].active) {
                 <ng-template monaDropdownButtonTextTemplate let-text>
-                    <span class="text-pink-800 font-bold">{{ text }}</span>
+                    @if (iconOnly()) {
+                        <lucide-angular [name]="menuIcon" size="14"></lucide-angular>
+                    } @else {
+                        <span class="text-pink-800 font-bold">{{ text }}</span>
+                    }
                 </ng-template>
             }
 
@@ -395,8 +405,10 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
 export class DropdownButtonWrapperComponent implements ComponentInputsAsSignal<DropdownButtonComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly heartIcon = Heart;
+    protected readonly menuIcon = Menu;
     protected readonly settingsIcon = Settings;
     public readonly disabled = input(false);
+    public readonly iconOnly = input(false);
     public readonly look = input<ReturnType<DropdownButtonComponent["look"]>>("default");
     public readonly rounded = input<ReturnType<DropdownButtonComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<DropdownButtonComponent["size"]>>("medium");

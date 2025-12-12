@@ -1,4 +1,5 @@
 <button monaButton [look]="look()" [size]="size()"
+        [iconOnly]="iconOnly()"
         [rounded]="rounded()"
         [disabled]="disabled()"
         [attr.aria-label]="dropdownButtonAriaLabel() || null"
@@ -6,7 +7,7 @@
         [attr.aria-haspopup]="'menu'"
         [attr.aria-expanded]="isMenuOpen()"
         [attr.aria-controls]="menuId"
-        class="w-full h-full" #dropdownButton>
+        #dropdownButton>
     @if (textTemplate()) {
         <ng-container [ngTemplateOutlet]="textTemplate()"
                       [ngTemplateOutletContext]="{$implicit: text()}"></ng-container>
@@ -15,17 +16,18 @@
     }
 </button>
 
-<mona-popup-menu [anchorConnectionPoint]="'bottomcenter'"
-                 [items]="menuItems()"
+<mona-popup-menu #popupMenu
+                 (close)="onMenuClose()"
                  (menuClick)="onMenuItemClick($event)"
                  (open)="onMenuOpen()"
-                 (close)="onMenuClose()"
+                 [anchorConnectionPoint]="'bottomcenter'"
+                 [id]="menuId"
+                 [items]="menuItems()"
                  [offset]="{horizontal: 0, vertical: 2}"
                  [popupConnectionPoint]="'topcenter'"
+                 [size]="size()"
                  [target]="dropdownButton"
-                 [trigger]="'click'"
-                 [id]="menuId"
-                 #popupMenu>
+                 [trigger]="'click'">
     @if (groupTemplate()) {
         <ng-template monaPopupMenuGroupTemplate let-group>
             <ng-container [ngTemplateOutlet]="groupTemplate()"

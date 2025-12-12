@@ -12,6 +12,10 @@ export const buttonVariants = cva(
     `,
     {
         variants: {
+            iconOnly: {
+                true: "aspect-square",
+                false: "aspect-auto"
+            },
             look: {
                 default: `
                     bg-background text-foreground
@@ -80,9 +84,9 @@ export const buttonVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "px-6 py-3",
-                medium: "px-4 py-2",
-                small: "px-3 py-2 text-xs"
+                large: "px-6 h-10",
+                medium: "px-4 h-9",
+                small: "px-3 text-xs h-8"
             },
             selected: {
                 true: "bg-accent text-accent-foreground hover:bg-accent/90 hover:text-accent-foreground"
@@ -178,6 +182,21 @@ export const buttonVariants = cva(
                     hover:bg-secondary-selected/95 hover:text-secondary-foreground
                     active:bg-secondary-selected/100 active:text-secondary-foreground
                 `
+            },
+            {
+                iconOnly: true,
+                size: "small",
+                class: "w-8 h-8 p-0"
+            },
+            {
+                iconOnly: true,
+                size: "medium",
+                class: "w-9 h-9 p-0"
+            },
+            {
+                iconOnly: true,
+                size: "large",
+                class: "w-10 h-10 p-0"
             }
         ],
         defaultVariants: {

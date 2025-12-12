@@ -42,6 +42,7 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
+        const iconOnly = this.iconOnly();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
@@ -49,7 +50,7 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         const userClass = this.userClass();
         const theme = this.#themeService.theme();
         const variants = buttonThemeVariants(theme);
-        const variantClasses = variants({ look, rounded, selected, size });
+        const variantClasses = variants({ iconOnly, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
 
@@ -57,6 +58,12 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
      * @description Sets the disabled state of the button.
      */
     public readonly disabled = model<boolean>(false);
+
+    /**
+     * @description Sets the icon only state of the button.
+     * When set to true, the button will appear as square.
+     */
+    public readonly iconOnly = input(false);
 
     /**
      * @description Sets the look of the button.

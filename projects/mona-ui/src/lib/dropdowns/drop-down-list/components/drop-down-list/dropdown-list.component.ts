@@ -86,7 +86,7 @@ import {
         "[attr.data-expanded]": "popupOpen()",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClasses()",
-        "[role]": "'combobox'"
+        "[attr.role]": "'combobox'"
     }
 })
 export class DropdownListComponent<TData = unknown> implements OnInit, ControlValueAccessor, DropDownListVariantInput {

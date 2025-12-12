@@ -1,4 +1,3 @@
-import { NgStyle } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, input, Signal } from "@angular/core";
 
 @Component({
@@ -6,18 +5,22 @@ import { ChangeDetectionStrategy, Component, computed, input, Signal } from "@an
     templateUrl: "./avatar.component.html",
     styleUrls: ["./avatar.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgStyle],
     host: {
-        class: "mona-avatar block",
+        class: "mona-avatar",
         "[style]": "avatarStyles()"
     }
 })
 export class AvatarComponent {
     protected readonly avatarLabelStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
         return {
+            alignItems: "center",
             color: this.labelColor(),
+            display: "flex",
             fontSize: this.labelFontSize(),
-            fontWeight: this.labelFontWeight()
+            fontWeight: this.labelFontWeight(),
+            height: "100%",
+            justifyContent: "center",
+            width: "100%"
         };
     });
     protected readonly avatarStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
@@ -29,6 +32,7 @@ export class AvatarComponent {
             borderStyle: "solid",
             borderRadius: this.borderRadius(),
             backgroundColor,
+            display: "inline-block",
             height: this.height(),
             width: this.width(),
             ...this.customStyles()
@@ -40,18 +44,18 @@ export class AvatarComponent {
      *
      * If an image is provided, this will be ignored.
      */
-    public backgroundColor = input("var(--mona-primary)");
+    public readonly backgroundColor = input("var(--mona-primary)");
 
     /**
      * @description Sets the border color of the avatar.
      */
-    public borderColor = input("var(--mona-border-color)");
+    public readonly borderColor = input("var(--mona-border-color)");
 
     /**
      * @description Sets the border radius of the avatar.
      * Can be a percentage or pixel value.
      */
-    public borderRadius = input("0", {
+    public readonly borderRadius = input("0", {
         transform: (value: string | number) => {
             if (typeof value === "number") {
                 return `${value}px`;
@@ -64,7 +68,7 @@ export class AvatarComponent {
      * @description Sets the border width of the avatar.
      * Can be a pixel value.
      */
-    public borderWidth = input("1px", {
+    public readonly borderWidth = input("1px", {
         transform: (value: string | number) => {
             if (typeof value === "number") {
                 return `${value}px`;
@@ -77,13 +81,13 @@ export class AvatarComponent {
      * @description Custom styles to apply to the avatar.
      * This can be used to override default styles or add additional styles.
      */
-    public customStyles = input<Partial<CSSStyleDeclaration>>({});
+    public readonly customStyles = input<Partial<CSSStyleDeclaration>>({});
 
     /**
      * @description Sets the height of the avatar.
      * Can be a pixel value or a string with units (e.g., "64px").
      */
-    public height = input("64px", {
+    public readonly height = input("64px", {
         transform: (value: string | number) => {
             if (typeof value === "string") {
                 return value;
@@ -96,37 +100,37 @@ export class AvatarComponent {
      * @description Sets the image URL for the avatar.
      * If an image is provided, the avatar will display the image instead of a label.
      */
-    public image = input("");
+    public readonly image = input("");
 
     /**
      * @description Sets the label for the avatar.
      * If an image is provided, this will be ignored.
      */
-    public label = input("");
+    public readonly label = input("");
 
     /**
      * @description Sets the color of the label text.
      * If an image is provided, this will be ignored.
      */
-    public labelColor = input("var(--mona-text)");
+    public readonly labelColor = input("var(--mona-text)");
 
     /**
      * @description Sets the font size of the label text.
      * If an image is provided, this will be ignored.
      */
-    public labelFontSize = input("1rem");
+    public readonly labelFontSize = input("1rem");
 
     /**
      * @description Sets the font weight of the label text.
      * If an image is provided, this will be ignored.
      */
-    public labelFontWeight = input("700");
+    public readonly labelFontWeight = input("700");
 
     /**
      * @description Sets the width of the avatar.
      * Can be a pixel value or a string with units (e.g., "64px").
      */
-    public width = input("64px", {
+    public readonly width = input("64px", {
         transform: (value: string | number) => {
             if (typeof value === "string") {
                 return value;

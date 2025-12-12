@@ -11,8 +11,13 @@
                 {{ metadata().inputs|inputProperty:entry().name:"kind" }}
             </div>
         </div>
-        <div class="font-light text-gray-500 whitespace-pre-line">
+        <div class="font-light text-gray-500 whitespace-pre-line text-sm/3.5">
             <span [innerHTML]="metadata().inputs|inputProperty:entry().name:'description'"></span>
+            @if (entry().note) {
+                <div class="mt-1">
+                    <span class="text-sm font-medium">Note: </span><span class="text-sm text-gray-400">{{ entry().note }}</span>
+                </div>
+            }
         </div>
     </div>
     <div class="flex px-2 items-center justify-end flex-1">
@@ -22,7 +27,7 @@
                                  [placeholder]="entry().placeholder ?? 'xSelect...'"
                                  [style.width.px]="150"
                                  size="small"
-                                 [showClearButton]="entry().clear ?? false"
+                                 [showClearButton]="entry().clearable||false"
                                  (ngModelChange)="onValueChange(entry().name, $event)">
                 <ng-template monaDropDownListItemTemplate let-dataItem>
                     <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
@@ -37,6 +42,7 @@
             </mona-drop-down-list>
         } @else if (entry().configType === "color") {
             <mona-color-picker
+                size="small"
                 [ngModel]="entry().value"
                 (ngModelChange)="onValueChange(entry().name, $event)"></mona-color-picker>
         } @else {

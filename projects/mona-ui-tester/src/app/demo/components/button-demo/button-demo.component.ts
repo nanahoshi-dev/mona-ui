@@ -4,6 +4,7 @@ import { ButtonDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+import { Layers, LucideAngularModule } from "lucide-angular";
 
 @Component({
     selector: "app-button-demo",
@@ -18,6 +19,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             <button
                 monaButton
                 [disabled]="disabled()"
+                [iconOnly]="iconOnly()"
                 [look]="look()"
                 [rounded]="rounded()"
                 [selected]="selected()"
@@ -27,6 +29,10 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             </button>`,
         inputs: {
             disabled: {
+                type: "boolean",
+                value: false
+            },
+            iconOnly: {
                 type: "boolean",
                 value: false
             },
@@ -73,25 +79,35 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
 
 @Component({
     selector: "app-button-wrapper",
-    imports: [ButtonDirective],
+    imports: [ButtonDirective, LucideAngularModule],
     template: `
         <button
             monaButton
             [disabled]="disabled()"
+            [iconOnly]="iconOnly()"
             [look]="look()"
             [rounded]="rounded()"
             [selected]="selected()"
             [size]="size()"
             [toggleable]="toggleable()">
-            Mona Button
+            @if (iconOnly()) {
+                <lucide-angular [name]="layersIcon" size="14"></lucide-angular>
+            } @else {
+                Mona Button
+            }
         </button>
-    `
+    `,
+    host: {
+        class: "flex items-center"
+    }
 })
 export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDirective> {
+    protected readonly layersIcon = Layers;
     public readonly ariaDescribedby = input("aria-describedby");
     public readonly ariaLabel = input("Button");
     public readonly ariaLabelledby = input("aria-labelledby");
     public readonly disabled = model(false);
+    public readonly iconOnly = input(false);
     public readonly look = model<ReturnType<ButtonDirective["look"]>>("default");
     public readonly rounded = input<ReturnType<ButtonDirective["rounded"]>>("medium");
     public readonly selected = model<ReturnType<ButtonDirective["selected"]>>(false);

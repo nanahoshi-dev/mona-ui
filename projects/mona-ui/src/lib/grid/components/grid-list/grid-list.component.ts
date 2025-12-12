@@ -16,7 +16,7 @@ import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons
 import { Dictionary, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { fromEvent, mergeWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
-import { ContextMenuComponent } from "../../../menus/ctx-menu/components/contextmenu/context-menu.component";
+import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { ElementAtPipe } from "../../../pipes/element-at.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
 import { Column } from "../../models/Column";

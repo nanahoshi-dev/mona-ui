@@ -19,7 +19,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Collections, List, zip } from "@mirei/ts-collections";
+import { rotate, zip } from "@mirei/ts-collections";
 import { pairwise, startWith, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupMenuComponent } from "../../../../common/popup-menu/components/popup-menu/popup-menu.component";
@@ -282,9 +282,9 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         if (currentIndex == null || currentIndex < 0) {
             return this.menuList().findIndex(m => !m.disabled());
         }
-        const list = new List(this.menuList());
-        Collections.rotate(list, -currentIndex);
-        const next = list.skip(1).firstOrDefault(m => !m.disabled());
+        const next = rotate(this.menuList(), currentIndex)
+            .skip(1)
+            .firstOrDefault(m => !m.disabled());
         if (next) {
             return this.menuList().findIndex(m => m === next);
         }
@@ -301,9 +301,9 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
                 .findIndex(m => !m.disabled());
             return lastEnabledIndex >= 0 ? menuList.length - 1 - lastEnabledIndex : -1;
         }
-        const list = new List(this.menuList());
-        Collections.rotate(list, -currentIndex);
-        const next = list.reverse().firstOrDefault(m => !m.disabled());
+        const next = rotate(this.menuList(), currentIndex)
+            .reverse()
+            .firstOrDefault(m => !m.disabled());
         if (next) {
             return this.menuList().findIndex(m => m === next);
         }

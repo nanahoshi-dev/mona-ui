@@ -12,9 +12,9 @@ import {
     ContextMenuSeparatorComponent,
     ContextMenuTextTemplateDirective
 } from "mona-ui";
-import { ContextMenuGroupTemplateDirective } from "../../../../../../mona-ui/src/lib/menus/ctx-menu/directives/context-menu-group-template.directive";
-import { ContextMenuIconTemplateDirective } from "../../../../../../mona-ui/src/lib/menus/ctx-menu/directives/context-menu-icon-template.directive";
-import { ContextMenuShortcutTemplateDirective } from "../../../../../../mona-ui/src/lib/menus/ctx-menu/directives/context-menu-shortcut-template.directive";
+import { ContextMenuGroupTemplateDirective } from "mona-ui/menus/contextmenu/directives/context-menu-group-template.directive";
+import { ContextMenuIconTemplateDirective } from "mona-ui/menus/contextmenu/directives/context-menu-icon-template.directive";
+import { ContextMenuShortcutTemplateDirective } from "mona-ui/menus/contextmenu/directives/context-menu-shortcut-template.directive";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

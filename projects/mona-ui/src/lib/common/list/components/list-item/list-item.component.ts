@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, Signal, TemplateRef } from "@angular/core";
-import { listGroupHeaderTextVariants, listItemTextVariants } from "../../styles/list.style";
+import { listGroupHeaderTextVariants, listItemTextVariants } from "../../styles/list.styles";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
@@ -12,7 +12,7 @@ import { ListService } from "../../services/list.service";
     templateUrl: "./list-item.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class]": "'flex items-center h-full w-full'"
+        class: "w-full h-full"
     }
 })
 export class ListItemComponent<TData> {
@@ -32,7 +32,8 @@ export class ListItemComponent<TData> {
     protected readonly textClasses = computed(() => {
         const isHeader = this.isHeader();
         if (isHeader) {
-            const classes = listGroupHeaderTextVariants();
+            const hasTemplate = this.template() != null;
+            const classes = listGroupHeaderTextVariants({ hasTemplate });
             return twMerge(classes);
         }
         const classes = listItemTextVariants();

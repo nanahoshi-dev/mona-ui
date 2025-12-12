@@ -11,10 +11,10 @@
     }
 </button>
 <button monaButton [disabled]="disabled()"
+        [iconOnly]="true"
         [look]="look()" [size]="size()" [rounded]="rounded()"
         class="rounded-tl-none rounded-bl-none border-l-0"
         [attr.aria-haspopup]="'menu'"
-        [attr.aria-hidden]="true"
         [attr.aria-expanded]="menuOpen()"
         [attr.aria-controls]="menuId"
         [attr.aria-label]="'Show menu options'"

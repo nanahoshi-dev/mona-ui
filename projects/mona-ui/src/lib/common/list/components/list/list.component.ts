@@ -19,13 +19,12 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { isTypeaheadKey, setupTypeahead } from "../../../utils/typeahead.util";
-import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.style";
 import { asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { PlaceholderComponent } from "../../../../layout/placeholder/placeholder.component";
+import { PlaceholderComponent } from "../../../../layout/placeholder/components/placeholder/placeholder.component";
 import { FilterInputComponent } from "../../../filter-input/components/filter-input/filter-input.component";
 import { FilterChangeEvent } from "../../../filter-input/models/FilterChangeEvent";
+import { isTypeaheadKey, setupTypeahead } from "../../../utils/typeahead.util";
 import { ListFooterTemplateDirective } from "../../directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../directives/list-group-header-template.directive";
 import { ListHeaderTemplateDirective } from "../../directives/list-header-template.directive";
@@ -37,6 +36,7 @@ import { ListKeySelector } from "../../models/ListSelectors";
 import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
 import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
+import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.styles";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
 
@@ -55,7 +55,7 @@ import { ListItemComponent } from "../list-item/list-item.component";
     templateUrl: "./list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[attr.tabindex]": "-1",
+        "[attr.tabindex]": "0",
         "[class]": "classes()",
         "[style.height]": "listHeight()",
         "[style.max-height]": "listMaxHeight()",
@@ -72,15 +72,18 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderClasses = computed(() => {
-        const classes = listGroupHeaderVariants();
-        return twMerge(classes);
+        const listItemClass = this.listItemClass();
+        const hasTemplate = this.groupHeaderTemplate() != null;
+        const classes = listGroupHeaderVariants({ hasTemplate });
+        return twMerge(classes, listItemClass);
     });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly innerListClasses = computed(() => {
         const classes = listInnerListVariants();
-        return twMerge(classes);
+        const listClass = this.listClass();
+        return twMerge(classes, listClass);
     });
     protected readonly listHeight = computed(() => {
         const height = this.height();
@@ -102,7 +105,7 @@ export class ListComponent<TData> implements OnInit {
         }
         return maxHeight;
     });
-    protected readonly listService = inject(ListService<TData>);
+    protected readonly listService = inject<ListService<TData>>(ListService);
     protected readonly listWidth: Signal<ListSizeType> = computed(() => {
         const width = this.width();
         if (width == null) {
@@ -133,6 +136,10 @@ export class ListComponent<TData> implements OnInit {
     public readonly data = input<Iterable<TData> | null | undefined>(null);
     public readonly height = input<ListSizeInputType>(undefined);
     public readonly itemSelect = output<SelectionChangeEvent<TData>>();
+    public readonly listClass = input<string>("");
+    public readonly listItemClass = input("");
+    public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
+    public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly maxHeight = input<ListSizeInputType>(undefined);
     public readonly textField = input<ListKeySelector<TData, string> | undefined>(null);
     public readonly width = input<ListSizeInputType>(undefined);
@@ -171,6 +178,10 @@ export class ListComponent<TData> implements OnInit {
     }
 
     public onListItemClick(item: ListItem<TData>): void {
+        this.listService.highlightedItem.set(item);
+        if (!this.listService.selectableOptions().enabled) {
+            return;
+        }
         this.selectItem(item);
         this.itemSelect.emit({ item, source: { via: "mouse" } });
     }
@@ -225,14 +236,17 @@ export class ListComponent<TData> implements OnInit {
             return;
         }
         const navigableOptions = this.listService.navigableOptions();
+        const selectableOptions = this.listService.selectableOptions();
         const previousSelectedItems = this.listService.selectedListItems();
         const item = this.listService.navigate(direction, navigableOptions.mode);
-        if (item) {
+        if (item && navigableOptions.mode === "select" && selectableOptions.enabled) {
             this.itemSelect.emit({ item, source: { via: "keyboard", key } });
             if (previousSelectedItems.contains(item)) {
                 return;
             }
-            this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
+            if (this.listService.selectedKeysChange) {
+                this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
+            }
         }
     }
 
@@ -297,6 +311,10 @@ export class ListComponent<TData> implements OnInit {
         const selectedItem = this.listService.selectedListItems();
         const options = this.listService.selectableOptions();
 
+        if (!options.enabled) {
+            return;
+        }
+
         if (
             (options.mode === "single" && !selectedItem.contains(item)) ||
             (options.mode === "single" && options.toggleable) ||
@@ -304,7 +322,10 @@ export class ListComponent<TData> implements OnInit {
             (options.mode === "single" && selectedItem.size() > 1)
         ) {
             this.listService.selectItem(item);
-            this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
+            this.listService.highlightedItem.set(item);
+            if (this.listService.selectedKeysChange) {
+                this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
+            }
         }
     }
 
@@ -337,7 +358,7 @@ export class ListComponent<TData> implements OnInit {
                     this.selectItem(highlightedItem);
                     this.itemSelect.emit({ item: highlightedItem, source });
                 } else if (selectedItem) {
-                    this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
+                    this.selectItem(selectedItem);
                     this.itemSelect.emit({ item: selectedItem, source });
                 }
             });
@@ -347,6 +368,7 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
+                filter(() => this.listService.navigableOptions().enabled),
                 tap(event => {
                     const navigableOptions = this.listService.navigableOptions();
                     if (navigableOptions.enabled) {
@@ -372,9 +394,22 @@ export class ListComponent<TData> implements OnInit {
         this.listService.scrollToItem$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(item => this.scrollToItem(item));
-        this.listService.focus$
+        this.listService.focus$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.#hostElementRef.nativeElement.focus();
+            this.setInitialSelectionOrFocus();
+        });
+        fromEvent(this.#hostElementRef.nativeElement, "focus")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => this.#hostElementRef.nativeElement.focus());
+            .subscribe(() => this.setInitialSelectionOrFocus());
+        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => {
+                const next = event.relatedTarget as HTMLElement | null;
+                if (next && this.#hostElementRef.nativeElement.contains(next)) {
+                    return;
+                }
+                this.listService.highlightedItem.set(null);
+            });
     }
 
     private setTypeaheadSubscription(): void {

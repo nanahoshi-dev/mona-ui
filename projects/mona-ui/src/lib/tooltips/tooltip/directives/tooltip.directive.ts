@@ -41,8 +41,8 @@ import {
     selector: "[monaTooltip]",
     host: {
         "[aria-describedby]": "originalTitle()",
-        "[data.mona-title]": "originalTitle()",
-        "[role]": "'tooltip'"
+        "[attr.data-mona-title]": "originalTitle()",
+        "[attr.role]": "'tooltip'"
     }
 })
 export class TooltipDirective implements TooltipVariantInputs {

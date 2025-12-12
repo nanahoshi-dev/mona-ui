@@ -34,6 +34,13 @@ export const routes: Routes = [
                     import("./docs/components/chip-doc/chip-doc.component").then(m => m.ChipDocComponent)
             },
             {
+                path: "circular-progress-bar",
+                loadComponent: () =>
+                    import("./docs/components/circular-progress-bar-doc/circular-progress-bar-doc.component").then(
+                        m => m.CircularProgressBarDocComponent
+                    )
+            },
+            {
                 path: "color-gradient",
                 loadComponent: () =>
                     import("./docs/components/color-gradient-doc/color-gradient-doc.component").then(
@@ -76,9 +83,31 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "expansion-panel",
+                loadComponent: () =>
+                    import("./docs/components/expansion-panel-doc/expansion-panel-doc.component").then(
+                        m => m.ExpansionPanelDocComponent
+                    )
+            },
+            {
+                path: "fieldset",
+                loadComponent: () =>
+                    import("./docs/components/fieldset-doc/fieldset-doc.component").then(m => m.FieldsetDocComponent)
+            },
+            {
                 path: "input",
                 loadComponent: () =>
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
+            },
+            {
+                path: "list-box",
+                loadComponent: () =>
+                    import("./docs/components/list-box-doc/list-box-doc.component").then(m => m.ListBoxDocComponent)
+            },
+            {
+                path: "list-view",
+                loadComponent: () =>
+                    import("./docs/components/list-view-doc/list-view-doc.component").then(m => m.ListViewDocComponent)
             },
             {
                 path: "menubar",
@@ -93,6 +122,18 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "pager",
+                loadComponent: () =>
+                    import("./docs/components/pager-doc/pager-doc.component").then(m => m.PagerDocComponent)
+            },
+            {
+                path: "placeholder",
+                loadComponent: () =>
+                    import("./docs/components/placeholder-doc/placeholder-doc.component").then(
+                        m => m.PlaceholderDocComponent
+                    )
+            },
+            {
                 path: "popover",
                 loadComponent: () =>
                     import("./docs/components/popover-doc/popover-doc.component").then(m => m.PopoverDocComponent)
@@ -103,10 +144,24 @@ export const routes: Routes = [
                     import("./docs/components/popup-doc/popup-doc.component").then(m => m.PopupDocComponent)
             },
             {
+                path: "progress-bar",
+                loadComponent: () =>
+                    import("./docs/components/progress-bar-doc/progress-bar-doc.component").then(
+                        m => m.ProgressBarDocComponent
+                    )
+            },
+            {
                 path: "radio-button",
                 loadComponent: () =>
                     import("./docs/components/radio-button-doc/radio-button-doc.component").then(
                         m => m.RadioButtonDocComponent
+                    )
+            },
+            {
+                path: "scroll-view",
+                loadComponent: () =>
+                    import("./docs/components/scroll-view-doc/scroll-view-doc.component").then(
+                        m => m.ScrollViewDocComponent
                     )
             },
             {
@@ -122,9 +177,24 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "splitter",
+                loadComponent: () =>
+                    import("./docs/components/splitter-doc/splitter-doc.component").then(m => m.SplitterDocComponent)
+            },
+            {
+                path: "stepper",
+                loadComponent: () =>
+                    import("./docs/components/stepper-doc/stepper-doc.component").then(m => m.StepperDocComponent)
+            },
+            {
                 path: "switch",
                 loadComponent: () =>
                     import("./docs/components/switch-doc/switch-doc.component").then(m => m.SwitchDocComponent)
+            },
+            {
+                path: "tabs",
+                loadComponent: () =>
+                    import("./docs/components/tabs-doc/tabs-doc.component").then(m => m.TabsDocComponent)
             },
             {
                 path: "textarea",

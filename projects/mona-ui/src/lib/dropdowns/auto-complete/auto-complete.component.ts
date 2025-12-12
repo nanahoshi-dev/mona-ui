@@ -24,10 +24,7 @@ import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { LucideAngularModule, X } from "lucide-angular";
 import { ButtonDirective } from "../../buttons/button/directives/button.directive";
-import {
-    dropdownPopupHideAnimation,
-    dropdownPopupShowAnimation
-} from "../animations/dropdown.animation";
+import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../animations/dropdown.animation";
 import {
     dropdownPopupVariants,
     DropdownSelectorVariantInput,
@@ -97,7 +94,7 @@ import { DropDownService } from "../services/drop-down.service";
 export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #listService = inject(ListService<TData>);
+    readonly #listService = inject(ListService);
     readonly #popupService = inject(PopupService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<string | null> | null = null;

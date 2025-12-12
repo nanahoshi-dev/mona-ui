@@ -1,6 +1,6 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { ListViewComponent } from "../components/list-view/list-view.component";
-import { PagerSettings } from "../models/PagerSettings";
+import { PagerSettings } from "../../common/list/models/PagerSettings";
+import { ListService } from "../../common/list/services/list.service";
 
 @Directive({
     selector: "mona-list-view[monaListViewPageable]",
@@ -9,14 +9,14 @@ import { PagerSettings } from "../models/PagerSettings";
 export class ListViewPageableDirective {
     readonly #defaultOptions: PagerSettings = {
         enabled: true,
-        info: false,
+        showInfo: false,
         firstLast: false,
         type: "numeric",
         previousNext: true,
         pageSizeValues: [5, 10, 20, 25, 50, 100],
         visiblePages: 5
     };
-    readonly #host = inject(ListViewComponent);
+    readonly #listService = inject(ListService);
 
     public options = input<Partial<PagerSettings> | "">("", {
         alias: "monaListViewPageable"
@@ -27,9 +27,9 @@ export class ListViewPageableDirective {
             const options = this.options();
             untracked(() => {
                 if (options === "") {
-                    this.#host.setPagerSettings(this.#defaultOptions);
+                    this.#listService.setPageableOptions(this.#defaultOptions);
                 } else {
-                    this.#host.setPagerSettings({
+                    this.#listService.setPageableOptions({
                         ...this.#defaultOptions,
                         ...options
                     });

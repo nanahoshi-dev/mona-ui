@@ -3,8 +3,7 @@ import { Enumerable } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 
 @Pipe({
-    name: "monaDateInclude",
-    standalone: true
+    name: "monaDateInclude"
 })
 export class DateIncludePipe implements PipeTransform {
     public transform(value: Date, dates: Iterable<Date>): boolean {

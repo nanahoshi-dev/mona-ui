@@ -36,6 +36,8 @@ export * from "./buttons/split-button/directives/split-button-menu-item-text-tem
 export * from "./buttons/split-button/directives/split-button-text-template.directive";
 
 /** Common */
+export * from "./common/models/VirtualScrollOptions";
+
 export * from "./common/filter-input/models/FilterChangeEvent";
 
 export * from "./common/popup-menu/components/popup-menu/popup-menu.component";
@@ -175,6 +177,7 @@ export * from "./layout/avatar/avatar.component";
 /* Expansion Panel */
 export * from "./layout/expansion-panel/components/expansion-panel/expansion-panel.component";
 export * from "./layout/expansion-panel/directives/expansion-panel-actions-template.directive";
+export * from "./layout/expansion-panel/directives/expansion-panel-icon-template.directive";
 export * from "./layout/expansion-panel/directives/expansion-panel-title-template.directive";
 
 /* Fieldset */
@@ -182,7 +185,7 @@ export * from "./layout/fieldset/directives/fieldset-legend-template.directive";
 export * from "./layout/fieldset/components/fieldset/fieldset.component";
 
 /* Placeholder */
-export * from "./layout/placeholder/placeholder.component";
+export * from "./layout/placeholder/components/placeholder/placeholder.component";
 
 /** Scroll View */
 export * from "./layout/scroll-view/components/scroll-view/scroll-view.component";
@@ -201,23 +204,25 @@ export * from "./layout/splitter/components/splitter/splitter.component";
 export * from "./layout/splitter/components/splitter-pane/splitter-pane.component";
 
 /* Tab Strip */
-export * from "./layout/tab-strip/models/TabCloseEvent";
-export * from "./layout/tab-strip/directives/tab-content-template.directive";
-export * from "./layout/tab-strip/directives/tab-title-template.directive";
-export * from "./layout/tab-strip/components/tab-strip/tab-strip.component";
-export * from "./layout/tab-strip/components/tab/tab.component";
+export * from "./layout/tabs/models/TabCloseEvent";
+export * from "./layout/tabs/directives/tab-content-template.directive";
+export * from "./layout/tabs/directives/tab-title-template.directive";
+export * from "./layout/tabs/components/tabs/tabs.component";
+export * from "./layout/tabs/components/tab/tab.component";
 
 /** Layout End */
 
 /** List Box */
 export * from "./list-box/models/ListBoxActionClickEvent";
 export * from "./list-box/models/ListBoxSelectionEvent";
+export * from "./list-box/models/ToolbarOptions";
+export * from "./list-box/directives/list-box-footer-template.directive";
+export * from "./list-box/directives/list-box-header-template.directive";
 export * from "./list-box/directives/list-box-item-template.directive";
 export * from "./list-box/directives/list-box-no-data-template.directive";
 export * from "./list-box/components/list-box/list-box.component";
 
 /** List View */
-export * from "./list-view/models/PagerSettings";
 export * from "./list-view/components/list-view/list-view.component";
 export * from "./list-view/directives/list-view-footer-template.directive";
 export * from "./list-view/directives/list-view-group-header-template.directive";
@@ -229,6 +234,8 @@ export * from "./list-view/directives/list-view-no-data-template.directive";
 export * from "./list-view/directives/list-view-pageable.directive";
 export * from "./list-view/directives/list-view-selectable.directive";
 export * from "./list-view/directives/list-view-virtual-scroll.directive";
+export * from "./common/list/models/NavigableOptions";
+export * from "./common/list/models/PagerSettings";
 
 /** Menus */
 export { MenuItemClickEvent } from "./menus/models/MenuItemClickEvent";
@@ -249,14 +256,14 @@ export * from "./menus/directives/menu-item-shortcut-template.directive";
 export * from "./menus/directives/menu-item-text-template.directive";
 export * from "./menus/directives/menu-text-template.directive";
 
-export * from "./menus/ctx-menu/components/contextmenu/context-menu.component";
-export * from "./menus/ctx-menu/components/contextmenu-group/context-menu-group.component";
-export * from "./menus/ctx-menu/components/contextmenu-checkbox-item/contextmenu-checkbox-item.component";
-export * from "./menus/ctx-menu/components/contextmenu-item/context-menu-item.component";
-export * from "./menus/ctx-menu/components/contextmenu-radio-group/contextmenu-radio-group.component";
-export * from "./menus/ctx-menu/components/contextmenu-radio-item/contextmenu-radio-item.component";
-export * from "./menus/ctx-menu/components/contextmenu-separator/context-menu-separator.component";
-export * from "./menus/ctx-menu/directives/context-menu-text-template.directive";
+export * from "./menus/contextmenu/components/contextmenu/context-menu.component";
+export * from "./menus/contextmenu/components/contextmenu-group/context-menu-group.component";
+export * from "./menus/contextmenu/components/contextmenu-checkbox-item/contextmenu-checkbox-item.component";
+export * from "./menus/contextmenu/components/contextmenu-item/context-menu-item.component";
+export * from "./menus/contextmenu/components/contextmenu-radio-group/contextmenu-radio-group.component";
+export * from "./menus/contextmenu/components/contextmenu-radio-item/contextmenu-radio-item.component";
+export * from "./menus/contextmenu/components/contextmenu-separator/context-menu-separator.component";
+export * from "./menus/contextmenu/directives/context-menu-text-template.directive";
 
 /** Navigation */
 
@@ -273,6 +280,10 @@ export * from "./notification/components/notification/notification.component";
 /** Pager */
 export * from "./pager/models/PageChangeEvent";
 export * from "./pager/models/PageSizeChangeEvent";
+export * from "./pager/directives/pager-info-template.directive";
+export * from "./pager/directives/pager-numeric-buttons-template.directive";
+export * from "./pager/directives/pager-navigation-buttons-template.directive";
+export * from "./pager/directives/pager-page-size-template.directive";
 export * from "./pager/components/pager/pager.component";
 
 /** Popup */
@@ -284,7 +295,9 @@ export * from "./popup/components/popup/popup.component";
 /** Progress */
 export * from "./progress-bars/circular-progress-bar/directives/circular-progress-bar-label-template.directive";
 export * from "./progress-bars/circular-progress-bar/components/circular-progress-bar/circular-progress-bar.component";
+
 export * from "./progress-bars/progress-bar/components/progress-bar/progress-bar.component";
+export * from "./progress-bars/progress-bar/directives/progress-bar-label-template.directive";
 
 /** Tooltips */
 
@@ -331,3 +344,6 @@ export * from "./pipes/type-cast.pipe";
 /** Theme */
 export * from "./theme/models/Theme";
 export * from "./theme/services/theme.service";
+
+/** Utils */
+export * from "./utils/moveIndices";

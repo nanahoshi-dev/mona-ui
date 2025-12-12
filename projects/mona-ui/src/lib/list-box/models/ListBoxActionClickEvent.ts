@@ -1,20 +1,10 @@
-import { PreventableEvent } from "../../utils/PreventableEvent";
-import { ToolbarAction } from "./ToolbarOptions";
+import { ListBoxMoveEvent } from "./ListBoxMoveEvent";
+import { ListBoxRemoveEvent } from "./ListBoxRemoveEvent";
+import { ListBoxTransferEvent } from "./ListBoxTransferEvent";
+import { ListBoxClearEvent } from "./ListBoxClearEvent";
 
-export class ListBoxActionClickEvent<T = any> extends PreventableEvent {
-    readonly #action: ToolbarAction;
-    readonly #selectedItem: T | null;
-    public constructor(action: ToolbarAction, selectedItem: T | null, originalEvent?: Event) {
-        super("listBoxActionClick", originalEvent);
-        this.#action = action;
-        this.#selectedItem = selectedItem;
-    }
-
-    public get action(): ToolbarAction {
-        return this.#action;
-    }
-
-    public get selectedItem(): T | null {
-        return this.#selectedItem;
-    }
-}
+export type ListBoxActionEvent<T = any> =
+    | ListBoxClearEvent<T>
+    | ListBoxMoveEvent<T>
+    | ListBoxRemoveEvent<T>
+    | ListBoxTransferEvent<T>;

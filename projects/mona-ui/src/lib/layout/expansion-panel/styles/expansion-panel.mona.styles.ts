@@ -1,0 +1,76 @@
+import { cva } from "class-variance-authority";
+
+export const expansionPanelBaseVariants = cva(
+    `
+        block bg-background overflow-hidden
+        border border-border
+        not-last:border-b-transparent not-last:rounded-b-none
+        not-first:rounded-t-none
+        focus-visible:outline-none
+        focus-visible:ring-1 focus-visible:ring-primary/40
+        focus-visible:z-1 focus-visible:relative
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                none: "rounded-none"
+            }
+        }
+    }
+);
+
+export const expansionPanelHeaderVariants = cva(
+    `
+        w-full flex items-center justify-between
+        px-2 py-1
+        bg-background-dark
+        cursor-pointer
+        font-medium
+        text-foreground
+        select-none
+        transition-border-b duration-200
+    `,
+    {
+        variants: {
+            collapsed: {
+                true: "border-b-transparent",
+                false: "border-0 border-b border-border border-solid"
+            }
+        }
+    }
+);
+
+export const expansionPanelHeaderTitleVariants = cva(
+    `
+        p-1 flex-1
+    `
+);
+
+export const expansionPanelIconContainerVariants = cva(``, {
+    variants: {
+        hasTemplate: {
+            true: "",
+            false: "px-2"
+        }
+    }
+});
+
+export const expansionPanelContentVariants = cva(
+    `
+        grid
+        transition-[grid-template-rows] duration-300 ease-out
+        text-foreground
+        [&>div]:overflow-hidden
+    `,
+    {
+        variants: {
+            expanded: {
+                true: "grid-rows-[1fr]",
+                false: "grid-rows-[0fr]"
+            }
+        }
+    }
+);

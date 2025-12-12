@@ -1,10 +1,9 @@
-import { Directive, TemplateRef } from "@angular/core";
-import { CircularProgressBarLabelTemplateContext } from "../models/CircularProgressBarLabelTemplateContext";
+import { Directive, inject, TemplateRef } from "@angular/core";
+import { LabelTemplateContext } from "../../models/LabelTemplateContext";
 
 @Directive({
-    selector: "ng-template[monaCircularProgressBarLabelTemplate]",
-    standalone: true
+    selector: "ng-template[monaCircularProgressBarLabelTemplate]"
 })
 export class CircularProgressBarLabelTemplateDirective {
-    public constructor(public readonly templateRef: TemplateRef<CircularProgressBarLabelTemplateContext>) {}
+    public readonly templateRef = inject<TemplateRef<LabelTemplateContext>>(TemplateRef);
 }

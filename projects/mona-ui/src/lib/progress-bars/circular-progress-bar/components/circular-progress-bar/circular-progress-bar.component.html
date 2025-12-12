@@ -1,16 +1,29 @@
 <svg>
-    <circle [attr.cx]="center().x()" [attr.cy]="center().y()" [attr.r]="radius()" [attr.stroke]="strokeColor()"
-            [attr.stroke-dasharray]="circumference()" [attr.stroke-dashoffset]="strokeDashOffset()"
-            [attr.stroke-width]="thickness()" fill="transparent"
-            [ngClass]="{'mona-circular-progress-bar-indeterminate': indeterminate()}"/>
+    <circle [attr.cx]="center().x()"
+            [attr.cy]="center().y()"
+            [attr.r]="radius()"
+            [attr.data-stroke-trail]="true"
+            [attr.stroke-dasharray]="circumference()"
+            [attr.stroke-width]="thickness()"
+            fill="transparent"/>
+    <circle [attr.cx]="center().x()"
+            [attr.cy]="center().y()"
+            [attr.r]="radius()"
+            [attr.stroke]="strokeColor()"
+            [attr.stroke-dasharray]="circumference()"
+            [attr.stroke-dashoffset]="strokeDashOffset()"
+            [attr.stroke-width]="thickness()"
+            fill="transparent"
+            [class.indeterminate]="indeterminate()"/>
 </svg>
 @if (!indeterminate()) {
     <div class="mona-circular-progress-bar-label">
         @if (labelTemplate()) {
-            <ng-container [ngTemplateOutlet]="labelTemplate()??null"
-                          [ngTemplateOutletContext]="{$implicit: progressValue()}"></ng-container>
+            <ng-container [ngTemplateOutlet]="labelTemplate()?.templateRef"
+                          [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
+            </ng-container>
         } @else {
-            {{ progressValue() }}%
+            {{ progress() }}
         }
     </div>
 }

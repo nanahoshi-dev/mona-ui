@@ -11,7 +11,7 @@
     @if (listService.viewItems().length !== 0) {
         <cdk-virtual-scroll-viewport [itemSize]="listService.virtualScrollOptions().height"
                                      [style.height]="viewportHeight()">
-            <ul [tabIndex]="-1">
+            <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1">
                 <ng-container *cdkVirtualFor="let item of listService.viewItems()">
                     <ng-container [ngTemplateOutlet]="listItemTemplate"
                                   [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
@@ -21,11 +21,11 @@
     } @else if (noDataTemplate()) {
         <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
     } @else {
-        <mona-placeholder text="No data"></mona-placeholder>
+        <mona-placeholder text="No data" class="w-full h-full flex items-center justify-center"></mona-placeholder>
     }
 } @else {
     @if (listService.viewItems().length !== 0) {
-        <ul [class]="innerListClasses()" [tabIndex]="-1">
+        <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1">
             @for (item of listService.viewItems(); track item.uid) {
                 <ng-container [ngTemplateOutlet]="listItemTemplate"
                               [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
@@ -34,7 +34,7 @@
     } @else if (noDataTemplate()) {
         <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
     } @else {
-        <mona-placeholder text="No data"></mona-placeholder>
+        <mona-placeholder text="No data" class="w-full h-full flex items-center justify-center"></mona-placeholder>
     }
 }
 @if (footerTemplate()) {
@@ -43,11 +43,13 @@
 
 <ng-template #listItemTemplate let-item>
     @if (item.header) {
-        <li [class]="groupHeaderClasses()">
+        <li [class]="groupHeaderClasses()" [style]="listItemStyle()">
             <mona-list-item [item]="item" [template]="groupHeaderTemplate()??null"></mona-list-item>
         </li>
     } @else {
-        <li class="px-0.5"
+        <li [class]="listItemClass()"
+            [class.px-0.5]="true"
+            [style]="listItemStyle()"
             [attr.data-uid]="item.uid"
             [attr.tabindex]="0"
             (click)="onListItemClick(item)"

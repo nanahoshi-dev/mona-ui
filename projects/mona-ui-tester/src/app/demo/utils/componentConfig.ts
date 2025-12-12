@@ -37,11 +37,12 @@ export type ComponentConfigType =
     | "dropdown"
     | "color"
     | "event"
+    | "iterable"
     | "function"
     | "object";
 
 export type ComponentConfigInputType<TComponent> = {
-    [key in keyof ComponentInputs<TComponent>]: { alias?: string } & (
+    [key in keyof ComponentInputs<TComponent>]: { alias?: string; note?: string } & (
         | {
               type: Extract<ComponentConfigType, "string" | "boolean" | "color">;
               value: NonNullable<ComponentInputs<TComponent>[key]>;
@@ -56,9 +57,13 @@ export type ComponentConfigInputType<TComponent> = {
         | {
               type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
-              defaultValue?: ComponentInputs<TComponent>[key];
+              defaultValue: ComponentInputs<TComponent>[key];
               placeholder?: string; // Optional, only for dropdown inputs
-              clear?: boolean; // Optional, only for dropdown inputs
+              clearable?: boolean;
+          }
+        | {
+              type: Extract<ComponentConfigType, "iterable">;
+              value: ComponentInputs<TComponent>[key];
           }
         | {
               type: Extract<ComponentConfigType, "function">;
@@ -83,10 +88,10 @@ export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     codeVisible?: boolean;
     description: string;
     dropdownDataSource?: Iterable<TDropdown>;
-    dropdownDefaultValue?: TDropdown; // Only for dropdown type
-    dropdownTextField?: string; // Only for dropdown type
-    dropdownValue?: TDropdown; // Only for dropdown type
-    dropdownValueField?: string; // Only for dropdown type
+    dropdownDefaultValue?: TDropdown; // Only for the dropdown type
+    dropdownTextField?: string; // Only for the dropdown type
+    dropdownValue?: TDropdown; // Only for the dropdown type
+    dropdownValueField?: string; // Only for the dropdown type
     hasCode?: boolean;
     name: string;
     numericMax?: number; // Only for number type
@@ -110,14 +115,15 @@ export type ComponentConfig<TComponent> = {
 
 export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     alias?: string; // Optional alias for the input
-    clear?: boolean; // Optional, only for dropdown inputs
     configType: ComponentConfigType;
+    clearable?: boolean; // Only for dropdown inputs
     defaultValue?: TDefault;
     max?: number | null; // Optional, only for number inputs
     min?: number | null; // Optional, only for number inputs
-    name: string; // Optional, only for number inputs
-    placeholder?: string; // Optional, only for dropdown inputs
+    name: string;
+    note?: string;
     nullable?: boolean; // From the input structure
+    placeholder?: string; // Optional, only for dropdown inputs
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
 };
@@ -167,9 +173,11 @@ export function createComponentInputConfigArray<TComponent>(
                 alias: configItem.alias,
                 clear: configItem.type === "dropdown" ? (configItem.clear ?? false) : undefined,
                 configType: configItem.type,
+                clearable: configItem.type === "dropdown" ? configItem.clearable : undefined,
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
+                note: configItem.note,
                 nullable: configItem.type === "number" ? (configItem.nullable ?? false) : undefined,
                 name: String(key),
                 placeholder: configItem.type === "dropdown" ? configItem.placeholder : undefined,
@@ -238,7 +246,9 @@ export function extractConfigValues<TComponent>(
             const configItem = inputs[key];
             if (configItem) {
                 let valueToAssign: any;
-                if (Array.isArray(configItem.value) && configItem.value.length > 0) {
+                if (configItem.type === "iterable") {
+                    valueToAssign = configItem.value;
+                } else if (Array.isArray(configItem.value) && configItem.value.length > 0) {
                     if (configItem.type === "dropdown") {
                         valueToAssign = configItem.defaultValue;
                     } else {

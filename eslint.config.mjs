@@ -50,7 +50,6 @@ export default [
                     type: "element"
                 }
             ],
-
             "@angular-eslint/directive-selector": [
                 "error",
                 {
@@ -59,7 +58,7 @@ export default [
                     type: "attribute"
                 }
             ],
-
+            "@angular-eslint/no-input-rename": "off",
             "@typescript-eslint/explicit-function-return-type": "off",
             "@typescript-eslint/explicit-member-accessibility": "off",
             "@typescript-eslint/member-ordering": [
@@ -71,8 +70,11 @@ export default [
                             "private-static-field",
                             "protected-static-field",
                             "public-static-field",
+                            "private-readonly-instance-field",
                             "private-instance-field",
+                            "protected-readonly-instance-field",
                             "protected-instance-field",
+                            "public-readonly-instance-field",
                             "public-instance-field",
                             "private-decorated-field",
                             "protected-decorated-field",
