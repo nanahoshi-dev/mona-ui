@@ -1,4 +1,4 @@
-import { Injectable, signal } from "@angular/core";
+import { DOCUMENT, inject, Injectable, signal } from "@angular/core";
 import { ThemeStyle } from "../models/Theme";
 import { generatePrimaryColorPalette } from "../utils/generateThemeColors";
 import { themeColorMap } from "../utils/themeColorMap";
@@ -7,6 +7,7 @@ import { themeColorMap } from "../utils/themeColorMap";
     providedIn: "root"
 })
 export class ThemeService {
+    readonly #document = inject(DOCUMENT);
     readonly #theme = signal<ThemeStyle>("shadcn");
     public readonly theme = this.#theme.asReadonly();
 
@@ -194,7 +195,7 @@ export class ThemeService {
 
     private updateThemeVariables(): void {
         const themeVariables = this.getActiveThemeVariables();
-        const root = document.querySelector(":root") as HTMLElement;
+        const root = this.#document.querySelector(":root") as HTMLElement;
         Object.entries(themeVariables).forEach(([key, value]) => {
             root.style.setProperty(key, value);
         });

@@ -1,4 +1,4 @@
-import { ApplicationRef, ComponentRef, createComponent, inject, Injectable, signal } from "@angular/core";
+import { ApplicationRef, ComponentRef, createComponent, DOCUMENT, inject, Injectable, signal } from "@angular/core";
 import { Subject, Subscription, take } from "rxjs";
 import { v4 } from "uuid";
 import { NotificationContainerComponent } from "../components/notification-container/notification-container.component";
@@ -13,6 +13,7 @@ import { NotificationType } from "../models/NotificationType";
 })
 export class NotificationService {
     readonly #appRef: ApplicationRef = inject(ApplicationRef);
+    readonly #document = inject(DOCUMENT);
     private notificationContainerMap: Map<NotificationPosition, NotificationContainerData> = new Map<
         NotificationPosition,
         NotificationContainerData
@@ -82,7 +83,7 @@ export class NotificationService {
         const notificationContainerComponent = createComponent(NotificationContainerComponent, {
             environmentInjector: this.#appRef.injector
         });
-        document.body.appendChild(notificationContainerComponent.location.nativeElement);
+        this.#document.body.appendChild(notificationContainerComponent.location.nativeElement);
         this.#appRef.attachView(notificationContainerComponent.hostView);
         notificationContainerComponent.changeDetectorRef.detectChanges();
         window.setTimeout(() => {

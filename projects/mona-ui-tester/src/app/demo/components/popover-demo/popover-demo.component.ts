@@ -1,5 +1,5 @@
 import { NgComponentOutlet, NgOptimizedImage } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
 import { LucideAngularModule, X } from "lucide-angular";
 import {
     ButtonDirective,
@@ -202,12 +202,13 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
     `
 })
 class PopoverWrapperComponent implements ComponentInputsAsSignal<PopoverComponent> {
+    readonly #document = inject(DOCUMENT);
     protected readonly closeIcon = X;
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly displayArrow = input<ReturnType<PopoverComponent["displayArrow"]>>(false);
     public readonly position = input<ReturnType<PopoverComponent["position"]>>("top");
     public readonly rounded = input<ReturnType<PopoverComponent["rounded"]>>("medium");
-    public readonly target = input<ReturnType<PopoverComponent["target"]>>(document.body);
+    public readonly target = input<ReturnType<PopoverComponent["target"]>>(this.#document.body);
     public readonly trigger = input<ReturnType<PopoverComponent["trigger"]>>("click");
     public readonly title = input<ReturnType<PopoverComponent["title"]>>("");
 }

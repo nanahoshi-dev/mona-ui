@@ -1,4 +1,4 @@
-import { AfterViewInit, DestroyRef, Directive, ElementRef, inject, input, NgZone } from "@angular/core";
+import { AfterViewInit, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, NgZone } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
@@ -8,12 +8,13 @@ import { WindowReference } from "../models/WindowReference";
     standalone: true
 })
 export class WindowDragHandlerDirective implements AfterViewInit {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #zone: NgZone = inject(NgZone);
+    readonly #zone = inject(NgZone);
 
-    public draggable = input(true);
-    public windowRef = input.required<WindowReference>();
+    public readonly draggable = input(true);
+    public readonly windowRef = input.required<WindowReference>();
 
     public ngAfterViewInit(): void {
         this.setEvents();
@@ -54,16 +55,16 @@ export class WindowDragHandlerDirective implements AfterViewInit {
         };
 
         const onMouseUp = () => {
-            document.removeEventListener("mousemove", onMouseMove);
-            document.removeEventListener("mouseup", onMouseUp);
+            this.#document.removeEventListener("mousemove", onMouseMove);
+            this.#document.removeEventListener("mouseup", onMouseUp);
             if (dragInitiated) {
                 this.windowRef().moveEnd$$.next();
                 dragInitiated = false;
             }
         };
 
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
+        this.#document.addEventListener("mousemove", onMouseMove);
+        this.#document.addEventListener("mouseup", onMouseUp);
     }
 
     private setEvents() {

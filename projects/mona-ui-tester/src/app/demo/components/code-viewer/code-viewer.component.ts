@@ -3,10 +3,12 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from "@an
 import HighlightJS from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
+import json from "highlight.js/lib/languages/json";
 import { Copy, LucideAngularModule } from "lucide-angular";
 
 HighlightJS.registerLanguage("typescript", typescript);
 HighlightJS.registerLanguage("html", html);
+HighlightJS.registerLanguage("json", json);
 
 @Component({
     selector: "app-code-viewer",
@@ -23,7 +25,6 @@ export class CodeViewerComponent {
     protected readonly highlightedCode = computed(() => {
         const codeValue = this.processedCode();
         const lang = this.language();
-
         const highlighted = HighlightJS.highlight(codeValue, {
             language: lang,
             ignoreIllegals: true

@@ -1,4 +1,4 @@
-import { computed, Injectable, OutputEmitterRef, signal, TemplateRef } from "@angular/core";
+import { computed, DOCUMENT, inject, Injectable, OutputEmitterRef, signal, TemplateRef } from "@angular/core";
 import { any, Dictionary, from, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
 import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
@@ -20,6 +20,7 @@ import { SortableOptions } from "../models/SortableOptions";
 
 @Injectable()
 export class GridService {
+    readonly #document = inject(DOCUMENT);
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
@@ -132,12 +133,12 @@ export class GridService {
         if (column.title().length > longestValue.length) {
             longestValue = column.title();
         }
-        const div = document.createElement("canvas");
+        const div = this.#document.createElement("canvas");
         const context = div.getContext("2d");
         if (context == null) {
             return 0;
         }
-        const documentBodyStyle = window.getComputedStyle(document.body);
+        const documentBodyStyle = window.getComputedStyle(this.#document.body);
         const fontFamily = documentBodyStyle.getPropertyValue("font-family");
         const fontSize = documentBodyStyle.getPropertyValue("font-size");
         const titleElement = element.querySelector(".mona-grid-column-title");

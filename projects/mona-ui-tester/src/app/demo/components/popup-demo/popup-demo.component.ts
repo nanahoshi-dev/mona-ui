@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
 import { ButtonDirective, PopupComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -12,6 +12,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
+    readonly #document = inject(DOCUMENT);
     readonly #offsetList = [
         { horizontal: 0, vertical: 0 },
         { horizontal: 0, vertical: 4 },
@@ -24,7 +25,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
         inputs: {
             anchor: {
                 type: "object",
-                value: document.body
+                value: this.#document.body
             },
             anchorConnectionPoint: {
                 type: "dropdown",
@@ -206,7 +207,8 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
     `
 })
 export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupComponent> {
-    public readonly anchor = input<ReturnType<PopupComponent["anchor"]>>(document.body);
+    readonly #document = inject(DOCUMENT);
+    public readonly anchor = input<ReturnType<PopupComponent["anchor"]>>(this.#document.body);
     public readonly anchorConnectionPoint = input<ReturnType<PopupComponent["anchorConnectionPoint"]>>("bottomcenter");
     public readonly animation = input<ReturnType<PopupComponent["animation"]>>(true);
     public readonly backdropClass = input<ReturnType<PopupComponent["backdropClass"]>>("");

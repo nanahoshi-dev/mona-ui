@@ -1199,7 +1199,6 @@ export class AppComponent implements OnInit {
 
     public print(value: unknown): void {
         console.log(value);
-        document.documentElement.style.setProperty("--color-primary", "hsl(246, 48%, 35%)");
     }
 
     public progressBarColorSelector(value: number): string {

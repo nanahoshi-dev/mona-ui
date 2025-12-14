@@ -9,6 +9,7 @@ import {
     Component,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
@@ -37,6 +38,7 @@ import { ConnectionPoint } from "../../utils/connectionPosition";
 })
 export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #popupService: PopupService = inject(PopupService);
     #popupOpened: boolean = false;
     #eventListenerCleanup$ = new Subject<void>();
@@ -243,7 +245,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
         } else if (anchor instanceof HTMLElement) {
             target = anchor;
         } else {
-            target = document.body;
+            target = this.#document.body;
             pointAnchor = true;
         }
 

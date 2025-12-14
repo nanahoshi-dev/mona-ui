@@ -9,7 +9,7 @@ import {
     CdkDropList
 } from "@angular/cdk/drag-drop";
 import { AsyncPipe } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { take } from "rxjs";
@@ -39,6 +39,7 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
     ]
 })
 export class SubTreeComponent<T> {
+    readonly #document = inject(DOCUMENT);
     protected readonly treeService: TreeService<T> = inject(TreeService);
 
     public depth = input.required<number>();
@@ -133,7 +134,9 @@ export class SubTreeComponent<T> {
 
     private focusNode(node: TreeNode<T>): void {
         this.treeService.navigatedNode.set(node);
-        const element = document.querySelector(`li[data-uid="${node.uid}"]`)?.closest(".mona-tree") as HTMLElement;
+        const element = this.#document
+            .querySelector(`li[data-uid="${node.uid}"]`)
+            ?.closest(".mona-tree") as HTMLElement;
         if (element == null) {
             return;
         }

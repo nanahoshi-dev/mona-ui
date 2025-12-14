@@ -58,6 +58,7 @@ export type ComponentConfigInputType<TComponent> = {
               type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
               defaultValue: ComponentInputs<TComponent>[key];
+              placeholder?: string; // Optional, only for dropdown inputs
               clearable?: boolean;
           }
         | {
@@ -122,6 +123,7 @@ export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     name: string;
     note?: string;
     nullable?: boolean; // From the input structure
+    placeholder?: string; // Optional, only for dropdown inputs
     value?: TValue; // Runtime JS type of the value
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
 };
@@ -169,14 +171,15 @@ export function createComponentInputConfigArray<TComponent>(
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
                 alias: configItem.alias,
-                configType: configItem.type,
                 clearable: configItem.type === "dropdown" ? configItem.clearable : undefined,
+                configType: configItem.type,
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
                 note: configItem.note,
                 nullable: configItem.type === "number" ? (configItem.nullable ?? false) : undefined,
                 name: String(key),
+                placeholder: configItem.type === "dropdown" ? configItem.placeholder : undefined,
                 value: configItem.value,
                 valueType: runtimeValueType
             });

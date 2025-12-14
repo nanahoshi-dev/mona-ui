@@ -1,4 +1,4 @@
-import { AfterViewInit, DestroyRef, Directive, ElementRef, inject, input, NgZone } from "@angular/core";
+import { AfterViewInit, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, NgZone } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
@@ -10,6 +10,7 @@ import { WindowResizeHandlerDirection } from "../models/WindowResizeHandlerDirec
 })
 export class WindowResizeHandlerDirective implements AfterViewInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     readonly #zone: NgZone = inject(NgZone);
 
@@ -32,11 +33,11 @@ export class WindowResizeHandlerDirective implements AfterViewInit {
         const initialY = event.clientY;
         const initialTop = element.getBoundingClientRect().top;
         const initialLeft = element.getBoundingClientRect().left;
-        const oldSelectStart = document.onselectstart;
-        const oldDragStart = document.ondragstart;
+        const oldSelectStart = this.#document.onselectstart;
+        const oldDragStart = this.#document.ondragstart;
 
-        document.onselectstart = () => false;
-        document.ondragstart = () => false;
+        this.#document.onselectstart = () => false;
+        this.#document.ondragstart = () => false;
 
         const onMouseMove = (event: MouseEvent) => {
             const deltaX = event.clientX - initialX;
@@ -197,14 +198,14 @@ export class WindowResizeHandlerDirective implements AfterViewInit {
             });
         };
         const onMouseUp = () => {
-            document.removeEventListener("mousemove", onMouseMove);
-            document.removeEventListener("mouseup", onMouseUp);
+            this.#document.removeEventListener("mousemove", onMouseMove);
+            this.#document.removeEventListener("mouseup", onMouseUp);
 
-            document.onselectstart = oldSelectStart;
-            document.ondragstart = oldDragStart;
+            this.#document.onselectstart = oldSelectStart;
+            this.#document.ondragstart = oldDragStart;
         };
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp);
+        this.#document.addEventListener("mousemove", onMouseMove);
+        this.#document.addEventListener("mouseup", onMouseUp);
     }
 
     private setEvents(): void {

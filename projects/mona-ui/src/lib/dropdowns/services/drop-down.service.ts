@@ -25,11 +25,4 @@ export class DropDownService {
             )
         ];
     }
-
-    public static shouldFocusAfterClose(element: HTMLElement, popupElement: Element | null): boolean {
-        const popupHasFocus = popupElement?.contains(document.activeElement);
-        const elementHasFocus = element.contains(document.activeElement);
-        const bodyHasFocus = document.activeElement === document.body;
-        return popupHasFocus || elementHasFocus || bodyHasFocus;
-    }
 }
