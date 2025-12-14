@@ -165,7 +165,8 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
-                clear: true,
+                defaultValue: null,
+                clearable: true,
                 placeholder: "Select a condition..."
             },
             placeholder: {

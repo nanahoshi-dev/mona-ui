@@ -171,9 +171,8 @@ export function createComponentInputConfigArray<TComponent>(
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
                 alias: configItem.alias,
-                clear: configItem.type === "dropdown" ? (configItem.clear ?? false) : undefined,
-                configType: configItem.type,
                 clearable: configItem.type === "dropdown" ? configItem.clearable : undefined,
+                configType: configItem.type,
                 defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
