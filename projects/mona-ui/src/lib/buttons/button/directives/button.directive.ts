@@ -22,9 +22,8 @@ import { ButtonService } from "../../services/button.service";
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "toggleable() ? selected() : undefined",
-        "[attr.aria-haspopup]": "false",
+        "[attr.aria-haspopup]": "ariaHasPopup()",
         "[attr.aria-pressed]": "toggleable() ? selected() : undefined",
-        "[attr.aria-selected]": "selected() ? true : undefined",
         "[attr.data-look]": "look()",
         "[attr.data-size]": "size()",
         "[attr.disabled]": "disabled() ? '' : undefined",
@@ -53,6 +52,11 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         const variantClasses = variants({ iconOnly, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
+
+    /**
+     * @description Sets the aria-haspopup attribute of the button.
+     */
+    public readonly ariaHasPopup = input<string>("false", { alias: "aria-haspopup" });
 
     /**
      * @description Sets the disabled state of the button.
