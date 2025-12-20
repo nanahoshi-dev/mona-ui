@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, contentChildren, inject, input, output } from "@angular/core";
+import { select } from "@mirei/ts-collections";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabsService } from "../../services/tabs.service";
 import {
@@ -11,6 +12,7 @@ import {
 import { TabListComponent } from "../tab-list/tab-list.component";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
+import { TabComponent } from "../tab/tab.component";
 
 @Component({
     selector: "mona-tabs",
@@ -23,8 +25,8 @@ import { twMerge } from "tailwind-merge";
     }
 })
 export class TabsComponent implements TabsVariantInput {
-    readonly #tabsService = inject(TabsService);
     readonly #themeService = inject(ThemeService);
+    private readonly tabs = contentChildren(TabComponent);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const variantClass = tabsBaseThemeVariants(theme)();
@@ -33,10 +35,15 @@ export class TabsComponent implements TabsVariantInput {
     });
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
-        const rounded = this.rounded();
+        const rounded = this.rounded() === "full" ? "large" : this.rounded();
         return tabContentThemeVariants(theme)({ rounded });
     });
-    protected readonly tabList = this.#tabsService.tabList;
+    protected readonly tabList = computed(() => {
+        const tabs = this.tabs();
+        return select(tabs, t => t.tabItem)
+            .tap((t, tx) => ({ ...t, index: tx }))
+            .toImmutableSet();
+    });
     public readonly closable = input(false);
     public readonly keepTabContent = input(false);
     public readonly rounded = input<TabsVariantProps["rounded"]>("medium");

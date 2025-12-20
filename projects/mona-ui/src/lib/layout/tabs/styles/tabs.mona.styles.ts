@@ -4,7 +4,7 @@ export const tabListBaseVariants = cva(
     `
         w-fit max-w-full
         flex overflow-hidden
-        bg-accent h-10
+        bg-accent h-9
         font-medium text-sm
     `,
     {
@@ -35,7 +35,7 @@ export const tabListListItemVariants = cva(
     `
         flex items-center justify-center
         cursor-pointer
-        px-2 py-1
+        px-2
     `,
     {
         variants: {
@@ -72,6 +72,7 @@ export const tabContentVariants = cva(
     `
         w-full overflow-auto flex-1
         border border-border shadow-sm
+        bg-background
     `,
     {
         variants: {
@@ -91,7 +92,7 @@ export const tabContentVariants = cva(
 
 export const tabsBaseVariants = cva(
     `
-        flex flex-col w-full
-        gap-2
+        max-w-full
+        flex flex-col gap-2
     `
 );

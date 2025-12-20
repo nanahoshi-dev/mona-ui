@@ -29,7 +29,7 @@ export class TabComponent {
         const selected = this.selected();
         const titleTemplate = this.titleTemplate();
         const title = this.title();
-        const uid = this.uid;
+        const uid = this.#uid;
         const tabItem: TabItem = {
             closable,
             contentTemplate,
@@ -42,20 +42,15 @@ export class TabComponent {
         };
         return tabItem;
     });
-    readonly #tabService = inject(TabsService);
+    readonly #uid = v4();
     protected readonly contentTemplate = contentChild(TabContentTemplateDirective, { read: TemplateRef });
-    public readonly titleTemplate = contentChild(TabTitleTemplateDirective, { read: TemplateRef });
+    protected readonly titleTemplate = contentChild(TabTitleTemplateDirective, { read: TemplateRef });
     public readonly closable = input<boolean>(false);
     public readonly disabled = input(false);
     public readonly selected = model(false);
     public readonly title = input("");
-    public readonly uid = v4();
-    public index = 0;
 
-    public constructor() {
-        afterRenderEffect({
-            read: () => this.#tabService.addTab(this.uid, this.#tabItem())
-        });
-        inject(DestroyRef).onDestroy(() => this.#tabService.removeTab(this.uid));
+    public get tabItem(): TabItem {
+        return this.#tabItem();
     }
 }

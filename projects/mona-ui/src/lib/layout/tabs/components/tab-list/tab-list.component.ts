@@ -16,6 +16,7 @@ import {
 } from "@angular/core";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronLeft, faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { forEach } from "@mirei/ts-collections";
 import { asapScheduler, interval, Subject, takeUntil, timer } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ScrollDirection } from "../../../../models/ScrollDirection";
@@ -23,7 +24,6 @@ import { ThemeService } from "../../../../theme/services/theme.service";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
-import { TabsService } from "../../services/tabs.service";
 import {
     tabListBaseThemeVariants,
     tabListListThemeVariants,
@@ -42,7 +42,6 @@ import {
     }
 })
 export class TabListComponent implements TabListVariantInput {
-    readonly #tabsService = inject(TabsService);
     readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
@@ -63,17 +62,17 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly scrollRightIcon = faChevronRight;
     protected readonly scrollsVisible = signal(false);
     protected readonly tabCloseIcon = faXmark;
-    protected readonly tabList = this.#tabsService.tabList;
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
 
     public readonly closable = input(false);
     public readonly rounded = input.required<TabListVariantProps["rounded"]>();
     public readonly tabClose = output<TabCloseEvent>();
+    public readonly tabList = input.required<Iterable<TabItem>>();
 
     public constructor() {
         afterRenderEffect({
             read: () => {
-                this.#tabsService.tabDict();
+                this.tabList();
                 untracked(() => {
                     this.updateScrollVisibility();
                 });
@@ -89,7 +88,7 @@ export class TabListComponent implements TabListVariantInput {
         if (tab.selected) {
             return;
         }
-        this.#tabsService.updateSelectedTab(tab.uid);
+        forEach(this.tabList(), t => (t.selected = t.uid === tab.uid));
         window.setTimeout(() => {
             const listElement = tabListElement.querySelector("li.mona-tab-active");
             if (listElement) {

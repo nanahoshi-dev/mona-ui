@@ -19,11 +19,11 @@
                         <span>{{ tab.title }}</span>
                     }
                 </div>
-                @if (tab.closable || (closable() && tab.closable)) {
-                    <button monaButton look="ghost" [disabled]="tab.disabled"
-                            class="mona-tab-close"
-                            (click)="onTabClose(tab, $event)">
-                        <fa-icon [icon]="tabCloseIcon"></fa-icon>
+                @let c = tab.closable || (closable() && !tab.closable);
+                @if (c) {
+                    <button monaButton look="link" [disabled]="tab.disabled"
+                            (click)="onTabClose(tab, $event)" class="px-0 h-fit ml-1 w-min">
+                        <fa-icon [icon]="tabCloseIcon" class="text-xs flex"></fa-icon>
                     </button>
                 }
             </li>
