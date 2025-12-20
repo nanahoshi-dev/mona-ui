@@ -47,12 +47,41 @@ describe("TabsComponent", () => {
         const panel = debugElement.query(By.css("div[role='tabpanel']"));
         expect(panel).toBeTruthy();
 
+        // target === currentTarget
         panel.triggerEventHandler("keydown", {
             key: "Tab",
             shiftKey: true,
+            target: panel.nativeElement,
+            currentTarget: panel.nativeElement,
             preventDefault: vi.fn()
         });
 
         expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should NOT handle Shift+Tab from inner content", () => {
+        const debugElement = fixture.debugElement.query(By.directive(TabsComponent));
+        fixture.detectChanges();
+
+        const tabListDe = debugElement.query(By.directive(TabListComponent));
+        const tabListComponent = tabListDe.componentInstance as TabListComponent;
+        const focusSpy = vi.spyOn(tabListComponent, "focusSelectedTab");
+
+        const panel = debugElement.query(By.css("div[role='tabpanel']"));
+
+        // Mock event where target != currentTarget
+        const fakeTarget = document.createElement("input");
+        const preventDefaultSpy = vi.fn();
+
+        panel.triggerEventHandler("keydown", {
+            key: "Tab",
+            shiftKey: true,
+            target: fakeTarget,
+            currentTarget: panel.nativeElement,
+            preventDefault: preventDefaultSpy
+        });
+
+        expect(focusSpy).not.toHaveBeenCalled();
+        expect(preventDefaultSpy).not.toHaveBeenCalled();
     });
 });

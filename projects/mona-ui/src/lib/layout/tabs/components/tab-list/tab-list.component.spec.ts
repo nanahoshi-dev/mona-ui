@@ -77,4 +77,44 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
     });
+
+    it("should focus panel on Tab", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const debugElement = fixture.debugElement;
+        const preventDefaultSpy = vi.fn();
+
+        // Mock document.getElementById
+        const focusSpy = vi.fn();
+        const getElementByIdSpy = vi.spyOn(document, "getElementById").mockReturnValue({ focus: focusSpy } as any);
+
+        debugElement.triggerEventHandler("keydown", {
+            key: "Tab",
+            preventDefault: preventDefaultSpy,
+            shiftKey: false
+        });
+
+        expect(preventDefaultSpy).toHaveBeenCalled();
+        expect(getElementByIdSpy).toHaveBeenCalledWith("tab1");
+        expect(focusSpy).toHaveBeenCalled();
+
+        getElementByIdSpy.mockRestore();
+    });
+
+    it("should allow default behavior on Shift+Tab", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const debugElement = fixture.debugElement;
+        const preventDefaultSpy = vi.fn();
+
+        debugElement.triggerEventHandler("keydown", {
+            key: "Tab",
+            preventDefault: preventDefaultSpy,
+            shiftKey: true
+        });
+
+        expect(preventDefaultSpy).not.toHaveBeenCalled();
+    });
 });

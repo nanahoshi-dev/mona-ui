@@ -106,7 +106,19 @@ export class TabListComponent implements TabListVariantInput {
         inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
-    public onTabClick(tab: TabItem, tabListElement: HTMLUListElement, event: MouseEvent): void {
+    public focusSelectedTab(): void {
+        const tabList = this.tabList();
+        const selectedTab = firstOrDefault(tabList, t => t.id === this.selectedTabId());
+        if (selectedTab) {
+            this.focusTab(selectedTab);
+        }
+    }
+
+    protected onKeydown(event: KeyboardEvent): void {
+        this.#keydown$.next(event);
+    }
+
+    protected onTabClick(tab: TabItem, tabListElement: HTMLUListElement, event: MouseEvent): void {
         if (tab.id === this.selectedTabId()) {
             return;
         }
@@ -124,13 +136,13 @@ export class TabListComponent implements TabListVariantInput {
         });
     }
 
-    public onTabClose(tab: TabItem, event: MouseEvent): void {
+    protected onTabClose(tab: TabItem, event: MouseEvent): void {
         event.stopPropagation();
         const tabCloseEvent = new TabCloseEvent(tab.index, tab.selected);
         this.tabClose.emit(tabCloseEvent);
     }
 
-    public startScrolling(element: HTMLElement, direction: ScrollDirection, type: "single" | "continuous"): void {
+    protected startScrolling(element: HTMLElement, direction: ScrollDirection, type: "single" | "continuous"): void {
         const timeFunction = type === "single" ? timer : interval;
         timeFunction(60)
             .pipe(takeUntil(this.#scroll$))
@@ -149,14 +161,10 @@ export class TabListComponent implements TabListVariantInput {
             });
     }
 
-    public stopScrolling(): void {
+    protected stopScrolling(): void {
         this.#scroll$.next();
         this.#scroll$.complete();
         this.#scroll$ = new Subject<void>();
-    }
-
-    public onKeydown(event: KeyboardEvent): void {
-        this.#keydown$.next(event);
     }
 
     private handleKeyboardEvents(event: KeyboardEvent): void {
@@ -185,7 +193,9 @@ export class TabListComponent implements TabListVariantInput {
                 this.activateTab(tabs[tabs.length - 1], event);
                 break;
             case "Tab":
-                this.handleTabKey(selectedTab, event);
+                if (!event.shiftKey) {
+                    this.handleTabKey(selectedTab, event);
+                }
                 break;
             case "Delete":
             case "Backspace":
@@ -208,14 +218,6 @@ export class TabListComponent implements TabListVariantInput {
         const selectEvent = new TabSelectEvent(tab.index, event);
         this.tabSelect.emit(selectEvent);
         return selectEvent.isDefaultPrevented();
-    }
-
-    public focusSelectedTab(): void {
-        const tabList = this.tabList();
-        const selectedTab = firstOrDefault(tabList, t => t.id === this.selectedTabId());
-        if (selectedTab) {
-            this.focusTab(selectedTab);
-        }
     }
 
     private focusTab(tab: TabItem): void {

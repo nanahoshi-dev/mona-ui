@@ -109,6 +109,9 @@ export class TabsComponent implements TabsVariantInput {
 
     protected handlePanelKeyDown(event: KeyboardEvent): void {
         if (event.key === "Tab" && event.shiftKey) {
+            if (event.target !== event.currentTarget) {
+                return;
+            }
             event.preventDefault();
             this.tabListComponent().focusSelectedTab();
         }
