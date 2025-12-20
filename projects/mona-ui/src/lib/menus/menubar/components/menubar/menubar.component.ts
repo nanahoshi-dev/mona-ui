@@ -28,8 +28,8 @@ import { PopupMenuIconTemplateDirective } from "../../../../common/popup-menu/di
 import { PopupMenuShortcutTemplateDirective } from "../../../../common/popup-menu/directives/popup-menu-shortcut-template.directive";
 import { PopupMenuTextTemplateDirective } from "../../../../common/popup-menu/directives/popup-menu-text-template.directive";
 import { PopupMenuNavigationEvent } from "../../../../common/popup-menu/models/PopupMenuNavigationEvent";
-import { createPopupMenuControlId } from "../../../../common/popup-menu/utils/popup-menu.utils";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { MenuGroupTemplateDirective } from "../../../directives/menu-group-template.directive";
 import { MenuIconTemplateDirective } from "../../../directives/menu-icon-template.directive";
 import { MenuItemIconTemplateDirective } from "../../../directives/menu-item-icon-template.directive";
@@ -95,7 +95,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         return menubarListItemThemeVariants(theme)();
     });
     protected readonly menuIdList = computed(() => {
-        return this.menuList().map(() => createPopupMenuControlId());
+        return this.menuList().map(() => createElementControlId());
     });
     protected readonly menuItemIconTemplate = contentChild(MenuItemIconTemplateDirective, {
         read: TemplateRef,

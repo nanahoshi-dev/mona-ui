@@ -1,9 +1,19 @@
 import { animate, style, transition, trigger } from "@angular/animations";
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    output,
+    signal
+} from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
+    ColorPickerComponent,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
     ThemeService,
@@ -23,7 +33,8 @@ import { ConfigComponent } from "../config/config.component";
         DropDownListValueTemplateDirective,
         CodeViewerComponent,
         ButtonDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        ColorPickerComponent
     ],
     templateUrl: "./demo-container.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,9 +46,18 @@ import { ConfigComponent } from "../config/config.component";
     ]
 })
 export class DemoContainerComponent<TComponent> {
+    // readonly #defaultColors = signal<{ mona: string; shadcn: string }>({ mona: "var(--color-demo-background)", shadcn: "var(--color-demo-background)" });
     readonly #themeService = inject(ThemeService);
     protected readonly Code = Code;
+    protected readonly background = computed(() => {
+        const customColor = this.customColor();
+        if (customColor) {
+            return customColor;
+        }
+        return `var(--color-demo-background)`;
+    });
     protected readonly codeVisible = signal(false);
+    protected readonly customColor = signal<string | null>(null);
     protected readonly selectedTheme = computed(() => this.#themeService.theme());
     protected readonly themeDropdownData = signal<ThemeStyle[]>(["mona", "shadcn"]);
     public readonly config = input.required<ComponentConfig<TComponent>>();

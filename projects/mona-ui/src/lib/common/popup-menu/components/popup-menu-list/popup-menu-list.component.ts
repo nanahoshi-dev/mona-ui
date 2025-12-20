@@ -20,6 +20,7 @@ import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjection
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { isNavigationKey } from "../../../utils/navigation.utils";
 import { isTypeaheadKey, setupTypeahead } from "../../../utils/typeahead.util";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
@@ -33,7 +34,6 @@ import {
     popupMenuItemThemeVariants,
     popupMenuLinkThemeVariants
 } from "../../styles/popup-menu.styles";
-import { createPopupMenuControlId } from "../../utils/popup-menu.utils";
 
 @Component({
     selector: "mona-popup-menu-list",
@@ -60,7 +60,7 @@ export class PopupMenuListComponent implements OnInit {
             isRoot: false,
             items: this.#childMenuItems(),
             level: this.#parentConfig.level + 1,
-            menuId: createPopupMenuControlId(this.#parentConfig.level + 1),
+            menuId: createElementControlId(this.#parentConfig.level + 1),
             menuItemClick$: this.#parentConfig.menuItemClick$,
             minWidth: this.#parentConfig.minWidth,
             navigate$: this.#parentConfig.navigate$,

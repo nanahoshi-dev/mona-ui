@@ -27,7 +27,7 @@ import { PopupMenuTextTemplateDirective } from "../../../../common/popup-menu/di
 import { PopupMenuToken } from "../../../../common/popup-menu/models/PopupMenuConfig";
 import { PopupMenuItem } from "../../../../common/popup-menu/models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../../../common/popup-menu/models/PopupMenuItemClickEvent";
-import { createPopupMenuControlId } from "../../../../common/popup-menu/utils/popup-menu.utils";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { ContextMenuGroupTemplateDirective } from "../../directives/context-menu-group-template.directive";
 import { ContextMenuIconTemplateDirective } from "../../directives/context-menu-icon-template.directive";
 import { ContextMenuShortcutTemplateDirective } from "../../directives/context-menu-shortcut-template.directive";
@@ -61,7 +61,7 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
         read: TemplateRef,
         descendants: false
     });
-    protected readonly menuId = createPopupMenuControlId();
+    protected readonly menuId = createElementControlId();
     protected readonly menuItems = computed(() => {
         if (any(this.items())) {
             return this.items();

@@ -9,21 +9,25 @@ import {
     ElementRef,
     inject,
     input,
+    model,
     output,
     signal,
     untracked,
-    viewChild
+    viewChild,
+    viewChildren
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronLeft, faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { forEach } from "@mirei/ts-collections";
-import { asapScheduler, interval, Subject, takeUntil, timer } from "rxjs";
+import { firstOrDefault, forEach } from "@mirei/ts-collections";
+import { asapScheduler, fromEvent, interval, Subject, takeUntil, timer } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ScrollDirection } from "../../../../models/ScrollDirection";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
+import { TabSelectEvent } from "../../models/TabSelectEvent";
 import {
     tabListBaseThemeVariants,
     tabListListThemeVariants,
@@ -42,13 +46,16 @@ import {
     }
 })
 export class TabListComponent implements TabListVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return tabListBaseThemeVariants(theme)({ rounded });
+        const size = this.size();
+        return tabListBaseThemeVariants(theme)({ rounded, size });
     });
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -63,10 +70,14 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly scrollsVisible = signal(false);
     protected readonly tabCloseIcon = faXmark;
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
+    protected readonly tabListItems = viewChildren(TabListItemDirective, { read: ElementRef });
 
     public readonly closable = input(false);
     public readonly rounded = input.required<TabListVariantProps["rounded"]>();
+    public readonly selectedTabId = model<string | null>(null);
+    public readonly size = input.required<TabListVariantProps["size"]>();
     public readonly tabClose = output<TabCloseEvent>();
+    public readonly tabSelect = output<TabSelectEvent>();
     public readonly tabList = input.required<Iterable<TabItem>>();
 
     public constructor() {
@@ -79,27 +90,41 @@ export class TabListComponent implements TabListVariantInput {
             }
         });
         afterNextRender({
-            read: () => this.setupResizeObserver()
+            write: () => {
+                const selectedTab = firstOrDefault(this.tabList(), t => t.id === this.selectedTabId());
+                if (selectedTab) {
+                    this.selectedTabId.set(selectedTab.id);
+                }
+            },
+            read: () => {
+                this.setupKeyboardNavigation();
+                this.setupResizeObserver();
+            }
         });
         inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
-    public onTabClick(tab: TabItem, tabListElement: HTMLUListElement): void {
-        if (tab.selected) {
+    public onTabClick(tab: TabItem, tabListElement: HTMLUListElement, event: MouseEvent): void {
+        if (tab.id === this.selectedTabId()) {
             return;
         }
-        forEach(this.tabList(), t => (t.selected = t.uid === tab.uid));
+        const selectEvent = new TabSelectEvent(tab.index, event);
+        this.tabSelect.emit(selectEvent);
+        if (selectEvent.isDefaultPrevented()) {
+            return;
+        }
+        this.selectTab(tab);
         window.setTimeout(() => {
-            const listElement = tabListElement.querySelector("li.mona-tab-active");
+            const listElement = tabListElement.querySelector("li[data-selected='true']");
             if (listElement) {
-                listElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                listElement.scrollIntoView({ behavior: "auto", block: "center" });
             }
         });
     }
 
     public onTabClose(tab: TabItem, event: MouseEvent): void {
         event.stopPropagation();
-        const tabCloseEvent = new TabCloseEvent(tab.index, tab);
+        const tabCloseEvent = new TabCloseEvent(tab.index, tab.selected);
         this.tabClose.emit(tabCloseEvent);
     }
 
@@ -126,6 +151,90 @@ export class TabListComponent implements TabListVariantInput {
         this.#scroll$.next();
         this.#scroll$.complete();
         this.#scroll$ = new Subject<void>();
+    }
+
+    private handleKeyboardEvents(event: KeyboardEvent): void {
+        const tabList = this.tabList();
+        const tabs = Array.from(tabList);
+        const selectedTab = tabs.find(t => t.id === this.selectedTabId());
+        if (!selectedTab) {
+            return;
+        }
+        const selectedIndex = tabs.indexOf(selectedTab);
+        let nextIndex = selectedIndex;
+
+        switch (event.key) {
+            case "ArrowLeft":
+                nextIndex = selectedIndex === 0 ? tabs.length - 1 : selectedIndex - 1;
+                this.activateTab(tabs[nextIndex], event);
+                break;
+            case "ArrowRight":
+                nextIndex = selectedIndex === tabs.length - 1 ? 0 : selectedIndex + 1;
+                this.activateTab(tabs[nextIndex], event);
+                break;
+            case "Home":
+                this.activateTab(tabs[0], event);
+                break;
+            case "End":
+                this.activateTab(tabs[tabs.length - 1], event);
+                break;
+            case "Tab":
+                this.handleTabKey(selectedTab, event);
+                break;
+            case "Delete":
+            case "Backspace":
+                if (selectedTab.closable || (this.closable() && !selectedTab.closable)) {
+                    this.tabClose.emit(new TabCloseEvent(selectedTab.index, selectedTab.selected));
+                }
+                break;
+        }
+    }
+
+    private activateTab(tab: TabItem, event: Event): void {
+        const prevented = this.emitTabSelect(tab, event);
+        if (!prevented) {
+            this.selectTab(tab);
+            this.focusSelectedTab();
+        }
+    }
+
+    private emitTabSelect(tab: TabItem, event: Event): boolean {
+        const selectEvent = new TabSelectEvent(tab.index, event);
+        this.tabSelect.emit(selectEvent);
+        return selectEvent.isDefaultPrevented();
+    }
+
+    public focusSelectedTab(): void {
+        const tabList = this.tabList();
+        const selectedTab = firstOrDefault(tabList, t => t.id === this.selectedTabId());
+        if (selectedTab) {
+            this.focusTab(selectedTab);
+        }
+    }
+
+    private focusTab(tab: TabItem): void {
+        const tabListItems = this.tabListItems();
+        const tabListItem = tabListItems.find(t => t.nativeElement.getAttribute("data-tab-id") === tab.id);
+        tabListItem?.nativeElement.focus();
+    }
+
+    private handleTabKey(tab: TabItem, event: KeyboardEvent): void {
+        event.preventDefault();
+        const panelId = tab.id;
+        const panel = document.getElementById(panelId);
+        if (panel) {
+            panel.focus();
+        }
+    }
+
+    private selectTab(tab: TabItem): void {
+        this.selectedTabId.set(tab.id);
+    }
+
+    private setupKeyboardNavigation(): void {
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.handleKeyboardEvents(event));
     }
 
     private setupResizeObserver(): void {

@@ -1,4 +1,4 @@
-import { JsonPipe, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ChevronsUpDown, Code, LucideAngularModule } from "lucide-angular";
@@ -10,7 +10,6 @@ import {
     NumericTextBoxComponent,
     SwitchComponent
 } from "mona-ui";
-import { ListItemTemplateDirective } from "../../../../../../mona-ui/src/lib/common/list/directives/list-item-template.directive";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ComponentConfig, ComponentInputs, createComponentPropertyConfig } from "../../utils/componentConfig";

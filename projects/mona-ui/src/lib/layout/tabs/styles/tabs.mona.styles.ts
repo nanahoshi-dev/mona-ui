@@ -4,7 +4,7 @@ export const tabListBaseVariants = cva(
     `
         w-fit max-w-full
         flex overflow-hidden
-        bg-accent h-9
+        bg-accent
         font-medium text-sm
     `,
     {
@@ -15,6 +15,11 @@ export const tabListBaseVariants = cva(
                 large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
+            },
+            size: {
+                small: "h-8",
+                medium: "h-9",
+                large: "h-10"
             }
         }
     }
@@ -28,6 +33,7 @@ export const tabListListVariants = cva(
         list-none cursor-default
         select-none whitespace-nowrap
         p-[3px]
+        transition-colors duration-300 ease-out
     `
 );
 
@@ -35,7 +41,8 @@ export const tabListListItemVariants = cva(
     `
         flex items-center justify-center
         cursor-pointer
-        px-2
+        px-2 outline-none
+        focus-visible:ring-2 focus-visible:ring-primary/40
     `,
     {
         variants: {

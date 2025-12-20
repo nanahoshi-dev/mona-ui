@@ -1,6 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
-import { ButtonDirective, TabComponent, TabContentTemplateDirective, TabsComponent, TextBoxComponent } from "mona-ui";
+import {
+    ButtonDirective,
+    TabCloseEvent,
+    TabComponent,
+    TabContentTemplateDirective,
+    TabSelectEvent,
+    TabsComponent,
+    TextBoxComponent
+} from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -36,12 +44,17 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             },
             keepTabContent: {
                 type: "boolean",
-                value: false
+                value: true
             },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "large"
+            },
+            size: {
+                type: "dropdown",
+                value: ["small", "medium", "large"],
+                defaultValue: "medium"
             }
         },
         outputs: {},
@@ -60,6 +73,9 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             [closable]="closable()"
             [keepTabContent]="keepTabContent()"
             [rounded]="rounded()"
+            [size]="size()"
+            (tabClose)="onTabClose($event)"
+            (tabSelect)="onTabSelect($event)"
             class="w-full max-w-90">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
@@ -73,7 +89,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                             <button monaButton look="primary">Register</button>
                         </div>
                         <div class="flex items-center justify-center py-1 relative">
-                            <div class="flex shrink-0 h-[1px] border-b border-border/90 w-full"></div>
+                            <div class="flex shrink-0 h-px border-b border-border/90 w-full"></div>
                             <span class="absolute bg-background px-1 text-sm text-gray-400">OR CONTINUE WITH</span>
                         </div>
                         <div class="flex flex-col gap-1">
@@ -121,6 +137,15 @@ export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsCompone
         return range(1, tabCount).toImmutableSet();
     });
     public readonly closable = input<ReturnType<TabsComponent["closable"]>>(false);
-    public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(false);
+    public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(true);
     public readonly rounded = input<ReturnType<TabsComponent["rounded"]>>("large");
+    public readonly size = input<ReturnType<TabsComponent["size"]>>("medium");
+
+    protected onTabClose(event: TabCloseEvent): void {
+        console.log("Tab closed", event);
+    }
+
+    protected onTabSelect(event: TabSelectEvent): void {
+        console.log("Tab selected", event);
+    }
 }

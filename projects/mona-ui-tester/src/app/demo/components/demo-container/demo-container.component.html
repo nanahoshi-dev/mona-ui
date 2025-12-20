@@ -1,9 +1,10 @@
 <div class="flex flex-col border border-border">
-    <div class="flex flex-col border-b border-border bg-demo-background">
-        <div class="flex items-center justify-end p-2">
+    <div class="flex flex-col border-b border-border bg-demo-background" [style.background]="background()">
+        <div class="flex items-center justify-end p-2 gap-1">
             <button monaButton look="ghost" (click)="onCodeToggle()">
                 <lucide-angular [name]="Code" [size]="20"></lucide-angular>
             </button>
+            <mona-color-picker [ngModel]="customColor()" (ngModelChange)="customColor.set($event)" size="small"></mona-color-picker>
             <mona-drop-down-list [data]="themeDropdownData()" [ngModel]="selectedTheme()"
                                  size="small"
                                  (ngModelChange)="onThemeChange($event)">

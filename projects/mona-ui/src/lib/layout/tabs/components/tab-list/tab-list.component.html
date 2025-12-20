@@ -1,28 +1,30 @@
 @if (scrollsVisible()) {
-        <button monaButton
-                look="link" size="small" [class]="scrollButtonClass()"
-                (click)="startScrolling(tabListElement, 'left', 'single')"
-                (mousedown)="startScrolling(tabListElement, 'left', 'continuous')"
-                (mouseup)="stopScrolling()">
-            <fa-icon [icon]="scrollLeftIcon"></fa-icon>
-        </button>
+    <button monaButton look="link" size="small" [class]="scrollButtonClass()"
+            (click)="startScrolling(tabListElement, 'left', 'single')"
+            (mousedown)="startScrolling(tabListElement, 'left', 'continuous')" (mouseup)="stopScrolling()"
+            [attr.aria-hidden]="true" tabindex="-1">
+        <fa-icon [icon]="scrollLeftIcon"></fa-icon>
+    </button>
 }
-<div class="w-full h-full overflow-hidden">
+<div class="w-full h-full overflow-hidden" role="tablist">
     <ul [class]="listClass()" #tabListElement>
         @for (tab of tabList(); track tab) {
-            <li monaTabListItem [active]="tab.selected" [disabled]="tab.disabled" [rounded]="rounded()"
-                (click)="onTabClick(tab, tabListElement)">
-                <div class="mona-tab-title">
+            @let selected = tab.id === selectedTabId();
+            <li monaTabListItem [active]="selected" [disabled]="tab.disabled" [rounded]="rounded()" role="tab"
+                [tabindex]="selected ? 0 : -1" [attr.aria-selected]="selected"
+                [attr.aria-disabled]="tab.disabled"
+                [attr.aria-controls]="tab.id" [attr.data-selected]="selected" [attr.data-tab-id]="tab.id"
+                (click)="onTabClick(tab, tabListElement, $event)">
+                <div>
                     @if (tab.titleTemplate) {
                         <ng-container [ngTemplateOutlet]="tab.titleTemplate"></ng-container>
                     } @else {
                         <span>{{ tab.title }}</span>
                     }
                 </div>
-                @let c = tab.closable || (closable() && !tab.closable);
-                @if (c) {
-                    <button monaButton look="link" [disabled]="tab.disabled"
-                            (click)="onTabClose(tab, $event)" class="px-0 h-fit ml-1 w-min">
+                @if (tab.closable || (closable() && !tab.closable)) {
+                    <button monaButton look="link" [disabled]="tab.disabled" (click)="onTabClose(tab, $event)"
+                            class="px-0 h-fit ml-1 w-min" tabindex="-1">
                         <fa-icon [icon]="tabCloseIcon" class="text-xs flex"></fa-icon>
                     </button>
                 }
@@ -31,13 +33,10 @@
     </ul>
 </div>
 @if (scrollsVisible()) {
-    <div class="mona-tab-strip-scroll">
-        <button monaButton
-                look="link" size="small" [class]="scrollButtonClass()"
-                (click)="startScrolling(tabListElement, 'right', 'single')"
-                (mousedown)="startScrolling(tabListElement, 'right', 'continuous')"
-                (mouseup)="stopScrolling()">
-            <fa-icon [icon]="scrollRightIcon"></fa-icon>
-        </button>
-    </div>
+    <button monaButton look="link" size="small" [class]="scrollButtonClass()"
+            (click)="startScrolling(tabListElement, 'right', 'single')"
+            (mousedown)="startScrolling(tabListElement, 'right', 'continuous')" (mouseup)="stopScrolling()"
+            [attr.aria-hidden]="true" tabindex="-1">
+        <fa-icon [icon]="scrollRightIcon"></fa-icon>
+    </button>
 }

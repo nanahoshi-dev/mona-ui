@@ -25,8 +25,8 @@ import { PopupMenuShortcutTemplateDirective } from "../../../../common/popup-men
 import { PopupMenuTextTemplateDirective } from "../../../../common/popup-menu/directives/popup-menu-text-template.directive";
 import { PopupMenuToken } from "../../../../common/popup-menu/models/PopupMenuConfig";
 import { PopupMenuItemClickEvent } from "../../../../common/popup-menu/models/PopupMenuItemClickEvent";
-import { createPopupMenuControlId } from "../../../../common/popup-menu/utils/popup-menu.utils";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { SplitButtonMenuButtonTemplateDirective } from "../../directives/split-button-menu-button-template.directive";
 import { SplitButtonMenuGroupTemplateDirective } from "../../directives/split-button-menu-group-template.directive";
@@ -88,7 +88,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     protected readonly mainButtonTextTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
     protected readonly menuButtonTemplate = contentChild(SplitButtonMenuButtonTemplateDirective, { read: TemplateRef });
     protected readonly menuIcon = ChevronDown;
-    protected readonly menuId = createPopupMenuControlId();
+    protected readonly menuId = createElementControlId();
     protected readonly menuItems = computed(() => {
         return this.menuItemComponents()
             .map(item => item.getPopupMenuItem())

@@ -23,7 +23,7 @@ import { PopupMenuShortcutTemplateDirective } from "../../../../common/popup-men
 import { PopupMenuTextTemplateDirective } from "../../../../common/popup-menu/directives/popup-menu-text-template.directive";
 import { PopupMenuToken } from "../../../../common/popup-menu/models/PopupMenuConfig";
 import { PopupMenuItemClickEvent } from "../../../../common/popup-menu/models/PopupMenuItemClickEvent";
-import { createPopupMenuControlId } from "../../../../common/popup-menu/utils/popup-menu.utils";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { ButtonVariantProps, DropdownButtonVariantInputs } from "../../../button/styles/button.styles";
 import { DropdownButtonMenuGroupTemplateDirective } from "../../directives/dropdown-button-menu-group-template.directive";
@@ -55,7 +55,7 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
         return ariaLabel || `${text} dropdown button`;
     });
     protected readonly isMenuOpen = signal(false);
-    protected readonly menuId = createPopupMenuControlId();
+    protected readonly menuId = createElementControlId();
     protected readonly groupTemplate = contentChild(DropdownButtonMenuGroupTemplateDirective, {
         read: TemplateRef,
         descendants: false
