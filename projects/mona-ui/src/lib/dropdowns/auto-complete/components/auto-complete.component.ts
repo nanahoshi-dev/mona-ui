@@ -20,43 +20,40 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { LucideAngularModule, X } from "lucide-angular";
-import { ButtonDirective } from "../../buttons/button/directives/button.directive";
-import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../animations/dropdown.animation";
-import {
-    dropdownPopupVariants,
-    DropdownSelectorVariantInput,
-    DropdownSelectorVariantProps,
-    dropdownSelectorVariants
-} from "../styles/dropdown.style";
 import { debounceTime, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { v4 } from "uuid";
-import { AnimationState } from "../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../animations/services/popup-animation.service";
-import { FilterChangeEvent } from "../../common/filter-input/models/FilterChangeEvent";
-import { ListComponent } from "../../common/list/components/list/list.component";
-import { ListFooterTemplateDirective } from "../../common/list/directives/list-footer-template.directive";
-import { ListGroupHeaderTemplateDirective } from "../../common/list/directives/list-group-header-template.directive";
-import { ListHeaderTemplateDirective } from "../../common/list/directives/list-header-template.directive";
-import { ListItemTemplateDirective } from "../../common/list/directives/list-item-template.directive";
-import { ListNoDataTemplateDirective } from "../../common/list/directives/list-no-data-template.directive";
-import { ListItem } from "../../common/list/models/ListItem";
-import { SelectableOptions } from "../../common/list/models/SelectableOptions";
-import { SelectionChangeEvent } from "../../common/list/models/SelectionChangeEvent";
-import { ListService } from "../../common/list/services/list.service";
-import { TextBoxDirective } from "../../inputs/text-box/directives/text-box.directive";
-import { PopupRef } from "../../popup/models/PopupRef";
-import { PopupService } from "../../popup/services/popup.service";
-import { Action } from "../../utils/Action";
-import { DropDownFooterTemplateDirective } from "../directives/drop-down-footer-template.directive";
-import { DropDownGroupHeaderTemplateDirective } from "../directives/drop-down-group-header-template.directive";
-import { DropDownHeaderTemplateDirective } from "../directives/drop-down-header-template.directive";
-import { DropDownItemTemplateDirective } from "../directives/drop-down-item-template.directive";
-import { DropDownNoDataTemplateDirective } from "../directives/drop-down-no-data-template.directive";
-import { DropDownService } from "../services/drop-down.service";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
+import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
+import { ListComponent } from "../../../common/list/components/list/list.component";
+import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
+import { ListGroupHeaderTemplateDirective } from "../../../common/list/directives/list-group-header-template.directive";
+import { ListHeaderTemplateDirective } from "../../../common/list/directives/list-header-template.directive";
+import { ListItemTemplateDirective } from "../../../common/list/directives/list-item-template.directive";
+import { ListNoDataTemplateDirective } from "../../../common/list/directives/list-no-data-template.directive";
+import { ListItem } from "../../../common/list/models/ListItem";
+import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
+import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
+import { ListService } from "../../../common/list/services/list.service";
+import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
+import { PopupRef } from "../../../popup/models/PopupRef";
+import { PopupService } from "../../../popup/services/popup.service";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { Action } from "../../../utils/Action";
+import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../animations/dropdown.animation";
+import { DropDownFooterTemplateDirective } from "../../directives/drop-down-footer-template.directive";
+import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down-group-header-template.directive";
+import { DropDownHeaderTemplateDirective } from "../../directives/drop-down-header-template.directive";
+import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-template.directive";
+import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
+import {
+    autoCompleteBaseThemeVariants,
+    autoCompletePopupThemeVariants,
+    autoCompleteTextInputThemeVariants,
+    AutoCompleteVariantInput,
+    AutoCompleteVariantProps
+} from "../styles/auto-complete.styles";
 
 @Component({
     selector: "mona-auto-complete",
@@ -88,25 +85,28 @@ import { DropDownService } from "../services/drop-down.service";
         "[attr.aria-haspopup]": "true",
         "[attr.data-disabled]": "disabled()",
         "[attr.tabindex]": "disabled() ? null : 0",
-        "[class]": "classes()"
+        "[class]": "baseClass()"
     }
 })
-export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccessor, DropdownSelectorVariantInput {
+export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlValueAccessor, AutoCompleteVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
     readonly #popupService = inject(PopupService);
+    readonly #themeService = inject(ThemeService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<string | null> | null = null;
     #value = "";
 
     protected readonly autoCompleteValue = signal("");
     protected readonly autoCompleteValue$ = new Subject<string>();
-    protected readonly classes = computed(() => {
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
         const size = this.size();
-        const classes = dropdownSelectorVariants({ size });
+        const variantClass = autoCompleteBaseThemeVariants(theme)({ rounded, size });
         const userClass = this.userClass();
-        return twMerge(classes, userClass, ["pr-0"]);
+        return twMerge(variantClass, userClass);
     });
     protected readonly clearIcon = X;
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
@@ -114,10 +114,18 @@ export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccesso
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly inputClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        return autoCompleteTextInputThemeVariants(theme)({ rounded });
+    });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupClasses = computed(() => {
-        return twMerge(dropdownPopupVariants());
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        return autoCompletePopupThemeVariants(theme)({ rounded, size });
     });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly selectableOptions: SelectableOptions = {
@@ -127,16 +135,17 @@ export class AutoCompleteComponent<TData> implements OnInit, ControlValueAccesso
     };
     protected readonly selectedKeysChange = output<any[]>();
 
-    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+    public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
 
     public data = input<Iterable<TData>>([]);
     public disabled = model(false);
-    public itemDisabled = input<string | Predicate<TData> | null | undefined>("");
+    public itemDisabled = input<string | Predicate<TData> | null>();
     public placeholder = input("");
+    public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
     public showClearButton = input(false);
-    public textField = input<string | Selector<TData, string> | null | undefined>("");
-    public valueField = input<string | Selector<TData, any> | null | undefined>("");
+    public textField = input<string | Selector<TData, string> | null>();
+    public valueField = input<string | Selector<TData, any> | null>();
 
     public constructor() {
         effect(() => {

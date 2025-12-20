@@ -7,6 +7,13 @@ export const routes: Routes = [
             import("./layout/components/components/components.component").then(m => m.ComponentsComponent),
         children: [
             {
+                path: "auto-complete",
+                loadComponent: () =>
+                    import("./docs/components/auto-complete-doc/auto-complete-doc.component").then(
+                        m => m.AutoCompleteDocComponent
+                    )
+            },
+            {
                 path: "avatar",
                 loadComponent: () =>
                     import("./docs/components/avatar-doc/avatar-doc.component").then(m => m.AvatarDocComponent)

@@ -29,6 +29,10 @@ export class SidebarComponent {
             path: "/components",
             items: [
                 {
+                    text: "Auto Complete",
+                    path: "/auto-complete"
+                },
+                {
                     text: "Avatar",
                     path: "/avatar"
                 },

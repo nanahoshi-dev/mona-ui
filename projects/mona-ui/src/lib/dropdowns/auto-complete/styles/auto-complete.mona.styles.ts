@@ -1,29 +1,12 @@
 import { cva } from "class-variance-authority";
 
-export const dropdownListInputVariants = cva(
+export const autoCompleteBaseVariants = cva(
     `
-        inline-flex items-center
-
-        border border-input-border
-        bg-background outline-none
-        shadow-xs
-        cursor-pointer select-none
-
-        px-2
-
-        hover:bg-accent hover:text-accent-foreground
-
-        transition-[color,box-shadow,border] ease-in-out duration-300
-
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
-
+        flex
+        border border-input-border outline-none
+        bg-background shadow-xs
         focus-within:ring-1 focus-within:ring-primary/40
-        data-[expanded='true']:ring-1
-        data-[expanded='true']:ring-primary/40
-
-        [&.ng-touched.ng-invalid]:border-error
+        transition-[color,box-shadow,border] ease-in-out duration-300
     `,
     {
         variants: {
@@ -32,7 +15,7 @@ export const dropdownListInputVariants = cva(
                 small: "rounded-sm",
                 medium: "rounded-md",
                 large: "rounded-lg",
-                full: "rounded-full px-3"
+                full: "rounded-full"
             },
             size: {
                 large: "h-10 text-md",
@@ -43,7 +26,27 @@ export const dropdownListInputVariants = cva(
     }
 );
 
-export const dropdownListPopupVariants = cva(
+export const autoCompleteTextInputVariants = cva(
+    `
+        border-none outline-none
+        bg-transparent shadow-none
+        px-2 h-full w-full
+        focus-within:ring-0
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full px-3"
+            }
+        }
+    }
+);
+
+export const autoCompletePopupVariants = cva(
     `
         bg-background shadow-md
         border border-input-border

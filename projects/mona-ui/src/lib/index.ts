@@ -81,7 +81,7 @@ export * from "./dropdowns/directives/drop-down-no-data-template.directive";
 export * from "./dropdowns/directives/drop-down-virtual-scroll.directive";
 
 /* Auto Complete */
-export * from "./dropdowns/auto-complete/auto-complete.component";
+export * from "./dropdowns/auto-complete/components/auto-complete.component";
 
 /* Combo Box */
 export * from "./dropdowns/combo-box/combo-box.component";
