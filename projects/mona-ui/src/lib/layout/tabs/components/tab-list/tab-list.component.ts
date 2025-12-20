@@ -19,12 +19,13 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronLeft, faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { firstOrDefault, forEach } from "@mirei/ts-collections";
-import { asapScheduler, fromEvent, interval, Subject, takeUntil, timer } from "rxjs";
+import { firstOrDefault } from "@mirei/ts-collections";
+import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ScrollDirection } from "../../../../models/ScrollDirection";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
+import { ScrollIntent } from "../../models/ScrollIntent";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
@@ -48,11 +49,10 @@ import {
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #hostElementRef = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #keydown$ = new Subject<KeyboardEvent>();
     #resizeObserver: ResizeObserver | null = null;
-    #scroll$ = new Subject<void>();
+    readonly #scrollIntent$ = new Subject<ScrollIntent | null>();
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -101,6 +101,7 @@ export class TabListComponent implements TabListVariantInput {
             read: () => {
                 this.setupKeyboardNavigation();
                 this.setupResizeObserver();
+                this.setupScrolling();
             }
         });
         inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
@@ -138,33 +139,15 @@ export class TabListComponent implements TabListVariantInput {
 
     protected onTabClose(tab: TabItem, event: MouseEvent): void {
         event.stopPropagation();
-        const tabCloseEvent = new TabCloseEvent(tab.index, tab.selected);
-        this.tabClose.emit(tabCloseEvent);
+        this.emitTabClose(tab, event);
     }
 
     protected startScrolling(element: HTMLElement, direction: ScrollDirection, type: "single" | "continuous"): void {
-        const timeFunction = type === "single" ? timer : interval;
-        timeFunction(60)
-            .pipe(takeUntil(this.#scroll$))
-            .subscribe(() => {
-                let left: number = 0;
-                switch (direction) {
-                    case "left":
-                        left = Math.max(element.scrollLeft - 100, 0);
-                        element.scrollTo({ left, behavior: "smooth" });
-                        break;
-                    case "right":
-                        left = Math.min(element.scrollLeft + 100, element.scrollWidth);
-                        element.scrollTo({ left, behavior: "smooth" });
-                        break;
-                }
-            });
+        this.#scrollIntent$.next({ element, direction, type });
     }
 
     protected stopScrolling(): void {
-        this.#scroll$.next();
-        this.#scroll$.complete();
-        this.#scroll$ = new Subject<void>();
+        this.#scrollIntent$.next(null);
     }
 
     private handleKeyboardEvents(event: KeyboardEvent): void {
@@ -200,7 +183,7 @@ export class TabListComponent implements TabListVariantInput {
             case "Delete":
             case "Backspace":
                 if (selectedTab.closable || (this.closable() && !selectedTab.closable)) {
-                    this.tabClose.emit(new TabCloseEvent(selectedTab.index, selectedTab.selected));
+                    this.emitTabClose(selectedTab, event);
                 }
                 break;
         }
@@ -212,6 +195,13 @@ export class TabListComponent implements TabListVariantInput {
             this.selectTab(tab);
             this.focusSelectedTab();
         }
+    }
+
+    private emitTabClose(tabItem: TabItem, event: Event): boolean {
+        const selected = tabItem.id === this.selectedTabId();
+        const tabCloseEvent = new TabCloseEvent(tabItem.index, selected, event);
+        this.tabClose.emit(tabCloseEvent);
+        return tabCloseEvent.isDefaultPrevented();
     }
 
     private emitTabSelect(tab: TabItem, event: Event): boolean {
@@ -235,6 +225,20 @@ export class TabListComponent implements TabListVariantInput {
         }
     }
 
+    private performScroll(element: HTMLElement, direction: ScrollDirection): void {
+        let left: number = 0;
+        switch (direction) {
+            case "left":
+                left = Math.max(element.scrollLeft - 100, 0);
+                element.scrollTo({ left, behavior: "smooth" });
+                break;
+            case "right":
+                left = Math.min(element.scrollLeft + 100, element.scrollWidth);
+                element.scrollTo({ left, behavior: "smooth" });
+                break;
+        }
+    }
+
     private selectTab(tab: TabItem): void {
         this.selectedTabId.set(tab.id);
     }
@@ -253,6 +257,22 @@ export class TabListComponent implements TabListVariantInput {
             });
         });
         this.#resizeObserver.observe(this.tabListElement().nativeElement);
+    }
+
+    private setupScrolling(): void {
+        this.#scrollIntent$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                switchMap(intent => {
+                    if (!intent) {
+                        return EMPTY;
+                    }
+                    const { element, direction, type } = intent;
+                    const timeFunction = type === "single" ? timer : interval;
+                    return timeFunction(60).pipe(tap(() => this.performScroll(element, direction)));
+                })
+            )
+            .subscribe();
     }
 
     private updateScrollVisibility(): void {

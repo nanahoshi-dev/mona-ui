@@ -36,6 +36,7 @@ import { TabComponent } from "../tab/tab.component";
 })
 export class TabsComponent implements TabsVariantInput {
     readonly #themeService = inject(ThemeService);
+    private readonly tabListComponent = viewChild.required(TabListComponent);
     private readonly tabs = contentChildren(TabComponent);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -104,8 +105,6 @@ export class TabsComponent implements TabsVariantInput {
     public readonly tabSelect = output<TabSelectEvent>();
 
     public readonly userClass = input("", { alias: "class" });
-
-    protected readonly tabListComponent = viewChild.required(TabListComponent);
 
     protected handlePanelKeyDown(event: KeyboardEvent): void {
         if (event.key === "Tab" && event.shiftKey) {
