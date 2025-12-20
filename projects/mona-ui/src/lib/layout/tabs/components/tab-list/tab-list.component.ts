@@ -42,13 +42,15 @@ import {
     templateUrl: "./tab-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(keydown)": "onKeydown($event)"
     }
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
+    readonly #keydown$ = new Subject<KeyboardEvent>();
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
     protected readonly baseClass = computed(() => {
@@ -153,6 +155,10 @@ export class TabListComponent implements TabListVariantInput {
         this.#scroll$ = new Subject<void>();
     }
 
+    public onKeydown(event: KeyboardEvent): void {
+        this.#keydown$.next(event);
+    }
+
     private handleKeyboardEvents(event: KeyboardEvent): void {
         const tabList = this.tabList();
         const tabs = Array.from(tabList);
@@ -232,9 +238,7 @@ export class TabListComponent implements TabListVariantInput {
     }
 
     private setupKeyboardNavigation(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.handleKeyboardEvents(event));
+        this.#keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.handleKeyboardEvents(event));
     }
 
     private setupResizeObserver(): void {

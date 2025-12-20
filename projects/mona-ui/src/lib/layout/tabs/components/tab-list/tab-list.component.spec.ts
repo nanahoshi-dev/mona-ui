@@ -28,49 +28,52 @@ describe("TabListComponent", () => {
     });
 
     it("should navigate with ArrowRight", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        const host = fixture.debugElement.nativeElement;
-        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+        const debugElement = fixture.debugElement;
+        debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
     });
 
     it("should navigate with ArrowLeft", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        const host = fixture.debugElement.nativeElement;
-        host.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft" }));
+        const debugElement = fixture.debugElement;
+        debugElement.triggerEventHandler("keydown", { key: "ArrowLeft" });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
     });
 
     it("should navigate with Home", () => {
-        // First select middle to test Home properly
-        fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: false, title: "Tab 1", closable: true, disabled: false },
-            { id: "tab2", index: 1, selected: true, title: "Tab 2", closable: true, disabled: false },
-            { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: false }
-        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab2");
         fixture.detectChanges();
 
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        const host = fixture.debugElement.nativeElement;
-        host.dispatchEvent(new KeyboardEvent("keydown", { key: "Home" }));
+        const debugElement = fixture.debugElement;
+        debugElement.triggerEventHandler("keydown", { key: "Home" });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
     });
 
     it("should navigate with End", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        const host = fixture.debugElement.nativeElement;
-        host.dispatchEvent(new KeyboardEvent("keydown", { key: "End" }));
+        const debugElement = fixture.debugElement;
+        debugElement.triggerEventHandler("keydown", { key: "End" });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
     });
 
     it("should emit close event with Delete", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabClose, "emit");
-        const host = fixture.debugElement.nativeElement;
-        host.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete" }));
+        const debugElement = fixture.debugElement;
+        debugElement.triggerEventHandler("keydown", { key: "Delete" });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
     });
