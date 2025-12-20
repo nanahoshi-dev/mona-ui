@@ -14,33 +14,24 @@ describe("EditorTableComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj(
-                                "Editor",
-                                {
-                                    isActive: jasmine.createSpy()
-                                },
-                                {
-                                    can: jasmine.createSpy().and.returnValue({
-                                        addColumnAfter: jasmine.createSpy(),
-                                        addColumnBefore: jasmine.createSpy(),
-                                        addRowAfter: jasmine.createSpy(),
-                                        addRowBefore: jasmine.createSpy(),
-                                        deleteColumn: jasmine.createSpy(),
-                                        deleteRow: jasmine.createSpy(),
-                                        deleteTable: jasmine.createSpy(),
-                                        mergeCells: jasmine.createSpy(),
-                                        splitCell: jasmine.createSpy(),
-                                        toggleHeaderRow: jasmine.createSpy()
-                                    })
-                                }
-                            ),
-                            state: jasmine.createSpy()
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive").mockReturnValue(vi.fn()),
+                            can: vi.fn().mockReturnValue({
+                                addColumnAfter: vi.fn(),
+                                addColumnBefore: vi.fn(),
+                                addRowAfter: vi.fn(),
+                                addRowBefore: vi.fn(),
+                                deleteColumn: vi.fn(),
+                                deleteRow: vi.fn(),
+                                deleteTable: vi.fn(),
+                                mergeCells: vi.fn(),
+                                splitCell: vi.fn(),
+                                toggleHeaderRow: vi.fn()
+                            })
+                        },
+                        state: vi.fn()
+                    }
                 },
                 provideAnimations()
             ]

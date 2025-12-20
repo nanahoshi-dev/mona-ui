@@ -1,20 +1,8 @@
-import {
-    afterRenderEffect,
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    contentChild,
-    DestroyRef,
-    inject,
-    input,
-    model,
-    TemplateRef
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, contentChild, input, model, TemplateRef } from "@angular/core";
 import { v4 } from "uuid";
 import { TabContentTemplateDirective } from "../../directives/tab-content-template.directive";
 import { TabTitleTemplateDirective } from "../../directives/tab-title-template.directive";
 import { TabItem } from "../../models/TabItem";
-import { TabsService } from "../../services/tabs.service";
 
 @Component({
     selector: "mona-tab",

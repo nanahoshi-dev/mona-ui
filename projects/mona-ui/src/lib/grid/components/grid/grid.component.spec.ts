@@ -8,11 +8,11 @@ describe("GridComponent", () => {
     let component: GridComponent<any>;
     let fixture: ComponentFixture<GridComponent<any>>;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
             imports: [GridComponent, PagerComponent],
             providers: [provideAnimations()]
-        });
+        }).compileComponents();
         fixture = TestBed.createComponent(GridComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

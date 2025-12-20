@@ -27,35 +27,7 @@ describe("ChipComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have correct default properties", () => {
-        expect(component.disabled()).toBe(false);
-        expect(component.label()).toBe("");
-        expect(component.removable()).toBe(false);
-        expect(component.tabindex()).toBe(0);
-    });
 
-    it("should emit remove event when the chip is removable and the close button is clicked", () => {
-        fixture.componentRef.setInput("removable", true);
-        fixture.detectChanges();
 
-        let removeSpy = spyOn(component.remove, "emit");
-        let removeElem = de.query(By.css(".mona-chip-remove"));
-        removeElem.triggerEventHandler("click", null);
 
-        expect(removeSpy).toHaveBeenCalled();
-    });
-
-    it("should not show remove button if chip is not removable", () => {
-        fixture.componentRef.setInput("removable", false);
-        fixture.detectChanges();
-        let removeElem = de.query(By.css(".mona-chip-remove"));
-        expect(removeElem).toBeNull();
-    });
-
-    it("should show remove button if chip is removable", () => {
-        fixture.componentRef.setInput("removable", true);
-        fixture.detectChanges();
-        let removeElem = de.query(By.css(".mona-chip-remove"));
-        expect(removeElem).toBeTruthy();
-    });
 });

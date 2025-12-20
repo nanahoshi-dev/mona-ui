@@ -11,7 +11,8 @@ import { WindowContentComponent } from "./window-content.component";
     template: ` <div>Test</div> `,
     standalone: false
 })
-class WindowContentComponentTestComponent {}
+class WindowContentComponentTestComponent {
+}
 
 const POPUP_TOKEN = [
     {

@@ -3,21 +3,21 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SplitButtonRadioGroupComponent } from './split-button-radio-group.component';
 
 describe('SplitButtonRadioGroupComponent', () => {
-  let component: SplitButtonRadioGroupComponent;
-  let fixture: ComponentFixture<SplitButtonRadioGroupComponent>;
+    let component: SplitButtonRadioGroupComponent;
+    let fixture: ComponentFixture<SplitButtonRadioGroupComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [SplitButtonRadioGroupComponent]
-    })
-    .compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [SplitButtonRadioGroupComponent]
+        })
+            .compileComponents();
 
-    fixture = TestBed.createComponent(SplitButtonRadioGroupComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(SplitButtonRadioGroupComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

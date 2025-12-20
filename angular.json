@@ -31,11 +31,11 @@
                     "defaultConfiguration": "production"
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@angular/build:unit-test",
                     "options": {
-                        "main": "projects/mona-ui/src/test.ts",
-                        "tsConfig": "projects/mona-ui/tsconfig.spec.json",
-                        "karmaConfig": "projects/mona-ui/karma.conf.js"
+                        "setupFiles": [
+                            "./test-setup.ts"
+                        ]
                     }
                 }
             }
@@ -133,21 +133,11 @@
                     }
                 },
                 "test": {
-                    "builder": "@angular/build:karma",
+                    "builder": "@angular/build:unit-test",
                     "options": {
-                        "main": "projects/mona-ui-tester/src/test.ts",
-                        "polyfills": "projects/mona-ui-tester/src/polyfills.ts",
-                        "tsConfig": "projects/mona-ui-tester/tsconfig.spec.json",
-                        "karmaConfig": "projects/mona-ui-tester/karma.conf.js",
-                        "inlineStyleLanguage": "scss",
-                        "assets": [
-                            "projects/mona-ui-tester/src/favicon.ico",
-                            "projects/mona-ui-tester/src/assets"
-                        ],
-                        "styles": [
-                            "projects/mona-ui-tester/src/styles.css"
-                        ],
-                        "scripts": []
+                        "setupFiles": [
+                            "./test-setup.ts"
+                        ]
                     }
                 }
             }

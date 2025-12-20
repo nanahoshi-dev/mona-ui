@@ -3,8 +3,6 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { SplitterPaneComponent } from "../splitter-pane/splitter-pane.component";
 import { SplitterComponent } from "../splitter/splitter.component";
 
-import { SplitterResizerComponent } from "./splitter-resizer.component";
-
 @Component({
     template: `
         <mona-splitter>
@@ -15,7 +13,8 @@ import { SplitterResizerComponent } from "./splitter-resizer.component";
     styles: "",
     imports: [SplitterComponent, SplitterPaneComponent]
 })
-class TestHostComponent {}
+class TestHostComponent {
+}
 
 describe("SplitterResizerComponent", () => {
     let hostComponent: TestHostComponent;

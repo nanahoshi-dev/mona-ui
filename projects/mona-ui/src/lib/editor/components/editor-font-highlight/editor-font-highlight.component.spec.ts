@@ -15,36 +15,20 @@ describe("EditorFontHighlightComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", ["isActive"]),
-                            state: signal(
-                                jasmine.createSpyObj(
-                                    "State",
-                                    {},
-                                    {
-                                        selection: jasmine.createSpyObj(
-                                            "Selection",
-                                            {},
-                                            {
-                                                empty: jasmine.createSpy(),
-                                                from: jasmine.createSpy(),
-                                                $from: jasmine.createSpyObj(
-                                                    "ResolvedPos",
-                                                    {},
-                                                    {
-                                                        marks: jasmine.createSpy().and.returnValue([])
-                                                    }
-                                                )
-                                            }
-                                        )
-                                    }
-                                )
-                            )
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive")
+                        },
+                        state: signal({
+                            selection: {
+                                empty: vi.fn(),
+                                from: vi.fn(),
+                                $from: {
+                                    marks: vi.fn().mockReturnValue([])
+                                }
+                            }
+                        })
+                    }
                 },
                 provideAnimations()
             ]

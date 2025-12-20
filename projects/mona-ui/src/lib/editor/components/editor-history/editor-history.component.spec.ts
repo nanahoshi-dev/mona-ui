@@ -13,19 +13,16 @@ describe("EditorHistoryComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", ["isActive"], {
-                                can: jasmine.createSpy().and.returnValue({
-                                    undo: jasmine.createSpy(),
-                                    redo: jasmine.createSpy()
-                                })
-                            }),
-                            state: jasmine.createSpy()
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive"),
+                            can: vi.fn().mockReturnValue({
+                                undo: vi.fn(),
+                                redo: vi.fn()
+                            })
+                        },
+                        state: vi.fn()
+                    }
                 }
             ]
         }).compileComponents();

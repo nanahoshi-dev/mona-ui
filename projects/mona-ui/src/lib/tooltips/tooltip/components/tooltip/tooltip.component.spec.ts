@@ -12,7 +12,8 @@ import { TooltipComponent } from "./tooltip.component";
     `,
     imports: [TooltipComponent]
 })
-class TooltipComponentTestComponent {}
+class TooltipComponentTestComponent {
+}
 
 describe("TooltipComponent", () => {
     let component: TooltipComponentTestComponent;

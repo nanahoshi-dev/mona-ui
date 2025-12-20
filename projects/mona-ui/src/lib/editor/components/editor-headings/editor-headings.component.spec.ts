@@ -15,39 +15,25 @@ describe("EditorHeadingsComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", {
-                                isActive: jasmine.createSpy(),
-                                chain: jasmine.createSpy().and.returnValue({
-                                    focus: jasmine.createSpy().and.returnValue({})
-                                })
-                            }),
-                            state: signal(
-                                jasmine.createSpyObj(
-                                    "State",
-                                    {},
-                                    {
-                                        selection: jasmine.createSpyObj(
-                                            "Selection",
-                                            {},
-                                            {
-                                                $from: jasmine.createSpyObj("ResolvedPos", {
-                                                    node: jasmine.createSpyObj("Node", {
-                                                        type: jasmine.createSpyObj("NodeType", {
-                                                            name: "heading"
-                                                        })
-                                                    })
-                                                })
-                                            }
-                                        )
-                                    }
-                                )
-                            )
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive").mockReturnValue(vi.fn()),
+                            chain: vi.fn().mockName("Editor.chain").mockReturnValue(vi.fn().mockReturnValue({
+                                focus: vi.fn().mockReturnValue({})
+                            }))
+                        },
+                        state: signal({
+                            selection: {
+                                $from: {
+                                    node: vi.fn().mockName("ResolvedPos.node").mockReturnValue({
+                                        type: vi.fn().mockName("Node.type").mockReturnValue({
+                                            name: vi.fn().mockName("NodeType.name").mockReturnValue("heading")
+                                        })
+                                    })
+                                }
+                            }
+                        })
+                    }
                 },
                 provideAnimations()
             ]

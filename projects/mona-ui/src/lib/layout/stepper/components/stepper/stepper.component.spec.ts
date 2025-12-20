@@ -13,6 +13,11 @@ describe("StepperComponent", () => {
 
         fixture = TestBed.createComponent(StepperComponent);
         component = fixture.componentInstance;
+        fixture.componentRef.setInput("steps", [
+            { label: "Step 1" },
+            { label: "Step 2" },
+            { label: "Step 3" }
+        ]);
         fixture.detectChanges();
     });
 

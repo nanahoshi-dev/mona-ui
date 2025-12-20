@@ -3,21 +3,21 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PopupMenuSeparatorComponent } from './popup-menu-separator.component';
 
 describe('PopupMenuSeparatorComponent', () => {
-  let component: PopupMenuSeparatorComponent;
-  let fixture: ComponentFixture<PopupMenuSeparatorComponent>;
+    let component: PopupMenuSeparatorComponent;
+    let fixture: ComponentFixture<PopupMenuSeparatorComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [PopupMenuSeparatorComponent]
-    })
-    .compileComponents();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [PopupMenuSeparatorComponent]
+        })
+            .compileComponents();
 
-    fixture = TestBed.createComponent(PopupMenuSeparatorComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        fixture = TestBed.createComponent(PopupMenuSeparatorComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 });

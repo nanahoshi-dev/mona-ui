@@ -13,19 +13,16 @@ describe("EditorIndentComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", ["isActive"], {
-                                can: jasmine.createSpy().and.returnValue({
-                                    indent: jasmine.createSpy(),
-                                    outdent: jasmine.createSpy()
-                                })
-                            }),
-                            state: jasmine.createSpy()
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive"),
+                            can: vi.fn().mockReturnValue({
+                                indent: vi.fn(),
+                                outdent: vi.fn()
+                            })
+                        },
+                        state: vi.fn()
+                    }
                 }
             ]
         }).compileComponents();

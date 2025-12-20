@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { ThemeService } from "mona-ui";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { TextBoxDirective } from "./text-box.directive";
 
 describe("TextBoxDirective", () => {

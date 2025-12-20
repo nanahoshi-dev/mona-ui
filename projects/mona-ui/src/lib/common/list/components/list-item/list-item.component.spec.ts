@@ -16,13 +16,10 @@ describe("ListItemComponent", () => {
 
         fixture = TestBed.createComponent(ListItemComponent);
         component = fixture.componentInstance;
-        fixture.componentRef.setInput(
-            "item",
-            new ListItem<any>({
-                data: "test",
-                header: "test"
-            })
-        );
+        fixture.componentRef.setInput("item", new ListItem<any>({
+            data: "test",
+            header: "test"
+        }));
         fixture.detectChanges();
     });
 

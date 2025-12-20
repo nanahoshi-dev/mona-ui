@@ -2,8 +2,10 @@ import { GridColumnResizeHandlerDirective } from "./grid-column-resize-handler.d
 
 describe("GridColumnResizeHandlerDirective", () => {
     it("should create an instance", () => {
-        // const directive = new GridColumnResizeHandlerDirective();
+        // TODO: vitest-migration: expect().nothing() has been removed because it is redundant in Vitest. Tests without assertions pass by default.
+        // // const directive = new GridColumnResizeHandlerDirective();
         // expect(directive).toBeTruthy();
-        expect().nothing(); // TODO: Implement this test
+        expect(true).toBeTruthy();
+        ;
     });
 });

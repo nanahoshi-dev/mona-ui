@@ -37,14 +37,4 @@ describe("PopupComponent", () => {
         expect(hostComponent).toBeTruthy();
     });
 
-    it("should show popup on click", fakeAsync(() => {
-        // const button = hostFixture.debugElement.nativeElement.querySelector("button");
-        // button.click();
-        // tick();
-        // hostFixture.detectChanges();
-        // tick();
-        // const popupDiv = document.querySelector("div.cdk-overlay-container");
-        // expect(popupDiv).not.toBeNull();
-        expect().nothing(); // TODO: Use fromEvent for popup component event listening
-    }));
 });

@@ -14,17 +14,13 @@ describe("EditorFontColorComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", {
-                                isActive: jasmine.createSpy(),
-                                getAttributes: jasmine.createSpy().and.returnValue({})
-                            }),
-                            state: jasmine.createSpy()
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive").mockReturnValue(vi.fn()),
+                            getAttributes: vi.fn().mockName("Editor.getAttributes").mockReturnValue(vi.fn().mockReturnValue({}))
+                        },
+                        state: vi.fn()
+                    }
                 },
                 provideAnimations()
             ]

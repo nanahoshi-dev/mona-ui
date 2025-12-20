@@ -16,29 +16,20 @@ describe("EditorFontFamilyComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj(
-                                "Editor",
-                                {
-                                    isActive: jasmine.createSpy()
-                                },
-                                {
-                                    chain: jasmine.createSpy().and.returnValue({
-                                        focus: jasmine.createSpy().and.returnValue({
-                                            setFontFamily: jasmine.createSpy().and.returnValue({
-                                                run: jasmine.createSpy()
-                                            })
-                                        })
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive").mockReturnValue(vi.fn()),
+                            chain: vi.fn().mockReturnValue({
+                                focus: vi.fn().mockReturnValue({
+                                    setFontFamily: vi.fn().mockReturnValue({
+                                        run: vi.fn()
                                     })
-                                }
-                            ),
-                            state: jasmine.createSpy(),
-                            fonts: signal(ImmutableSet.create(["Arial", "Verdana"]))
-                        }
-                    )
+                                })
+                            })
+                        },
+                        state: vi.fn(),
+                        fonts: signal(ImmutableSet.create(["Arial", "Verdana"]))
+                    }
                 },
                 provideAnimations()
             ]

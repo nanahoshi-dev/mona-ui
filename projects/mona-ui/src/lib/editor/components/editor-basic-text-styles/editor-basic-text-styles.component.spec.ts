@@ -14,15 +14,13 @@ describe("EditorBasicTextStylesComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", ["isActive"]),
-                            state: jasmine.createSpy(),
-                            settings: signal({})
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive")
+                        },
+                        state: vi.fn(),
+                        settings: signal({})
+                    }
                 }
             ]
         }).compileComponents();

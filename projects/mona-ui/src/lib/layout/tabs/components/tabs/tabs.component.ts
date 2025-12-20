@@ -2,7 +2,6 @@ import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, contentChildren, inject, input, output } from "@angular/core";
 import { select } from "@mirei/ts-collections";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
-import { TabsService } from "../../services/tabs.service";
 import {
     tabContentThemeVariants,
     tabsBaseThemeVariants,
@@ -19,7 +18,6 @@ import { TabComponent } from "../tab/tab.component";
     templateUrl: "./tabs.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet, TabListComponent],
-    providers: [TabsService],
     host: {
         "[class]": "baseClass()"
     }

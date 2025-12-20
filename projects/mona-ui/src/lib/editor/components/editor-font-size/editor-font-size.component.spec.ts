@@ -16,15 +16,13 @@ describe("EditorFontSizeComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", ["isActive"]),
-                            state: jasmine.createSpy(),
-                            fontSizes: signal(ImmutableSet.create(["16px", "24px"]))
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive")
+                        },
+                        state: vi.fn(),
+                        fontSizes: signal(ImmutableSet.create(["16px", "24px"]))
+                    }
                 },
                 provideAnimations()
             ]

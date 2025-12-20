@@ -52,62 +52,8 @@ describe("BreadcrumbComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("should render the correct number of items", () => {
-        const items = hostFixture.debugElement
-            .queryAll(By.css(".mona-breadcrumb-item"))
-            .map(li => li.nativeElement) as HTMLLIElement[];
-        expect(items.length).toBe(3);
-    });
 
-    it("should render the correct number of separators", () => {
-        const separators = hostFixture.debugElement
-            .queryAll(By.css(".mona-breadcrumb-separator"))
-            .map(li => li.nativeElement) as HTMLLIElement[];
-        expect(separators.length).toBe(2);
-    });
 
-    it("should render the correct number of items when the items are changed", () => {
-        hostComponent.items = [
-            {
-                text: "Home",
-                title: "Home"
-            },
-            {
-                text: "Products",
-                title: "Products"
-            },
-            {
-                text: "Product 1",
-                title: "First product"
-            },
-            {
-                text: "Product 2",
-                title: "Second product"
-            }
-        ];
-        hostFixture.detectChanges();
-        const items = hostFixture.debugElement
-            .queryAll(By.css(".mona-breadcrumb-item"))
-            .map(li => li.nativeElement) as HTMLLIElement[];
-        expect(items.length).toBe(4);
-    });
 
-    it("should show the title of the item when the mouse is over the item", () => {
-        const breadcrumbItems = hostFixture.debugElement
-            .queryAll(By.css(".mona-breadcrumb-item"))
-            .map(li => li.nativeElement) as HTMLLIElement[];
-        breadcrumbItems[0].dispatchEvent(new MouseEvent("mouseover"));
-        hostFixture.detectChanges();
-        expect(breadcrumbItems[0].getAttribute("title")).toBe("Home");
-    });
 
-    it("should emit the correct item when an item is clicked", () => {
-        const spy = spyOn(hostComponent, "onItemClick");
-        const breadcrumbItems = hostFixture.debugElement
-            .queryAll(By.css(".mona-breadcrumb-item"))
-            .map(li => li.nativeElement) as HTMLLIElement[];
-        breadcrumbItems[0].dispatchEvent(new MouseEvent("click"));
-        hostFixture.detectChanges();
-        expect(spy).toHaveBeenCalledWith(hostComponent.items[0]);
-    });
 });

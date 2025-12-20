@@ -1,17 +1,32 @@
-import { TestBed } from "@angular/core/testing";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
-import { PopupService } from "../../../popup/services/popup.service";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TooltipDirective } from "./tooltip.directive";
+import { Component } from "@angular/core";
+import { provideNoopAnimations } from "@angular/platform-browser/animations";
+@Component({
+    template: `
+        <button monaTooltip title="Tooltip">Button</button>
+    `,
+    imports: [TooltipDirective]
+})
+class TestHostComponent {
+}
 
 describe("TooltipDirective", () => {
-    let directive: TooltipDirective;
+    let hostComponent: TestHostComponent;
+    let hostFixture: ComponentFixture<TestHostComponent>;
+
     beforeEach(async () => {
-        TestBed.configureTestingModule({
-            providers: [PopupService, provideNoopAnimations()]
-        });
-        directive = TestBed.runInInjectionContext(() => new TooltipDirective());
+        await TestBed.configureTestingModule({
+            imports: [TestHostComponent, TooltipDirective],
+            providers: [provideNoopAnimations()]
+        }).compileComponents();
+
+        hostFixture = TestBed.createComponent(TestHostComponent);
+        hostComponent = hostFixture.componentInstance;
+        hostFixture.detectChanges();
     });
-    it("should create an instance", () => {
-        expect(directive).toBeTruthy();
+
+    it("should create", () => {
+        expect(hostComponent).toBeTruthy();
     });
 });

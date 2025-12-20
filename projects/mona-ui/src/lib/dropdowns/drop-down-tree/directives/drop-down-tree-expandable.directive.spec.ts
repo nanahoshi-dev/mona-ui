@@ -17,10 +17,4 @@ describe("DropDownTreeExpandableDirective", () => {
         expect(directive).toBeTruthy();
     });
 
-    it("should emit expanded keys change event", () => {
-        const expandedKeys = ["key1", "key2"];
-        spyOn(directive.expandedKeysChange, "emit");
-        directive.expandedKeysChange.emit(expandedKeys);
-        expect(directive.expandedKeysChange.emit).toHaveBeenCalledWith(expandedKeys);
-    });
 });

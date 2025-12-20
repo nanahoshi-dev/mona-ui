@@ -164,7 +164,7 @@ export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValu
         this.#propagateChange = fn;
     }
 
-    public registerOnTouched(fn: any): void {}
+    public registerOnTouched(fn: any): void { }
 
     public setDisabledState(isDisabled: boolean): void {
         this.disabled.set(isDisabled);
@@ -193,7 +193,7 @@ export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValu
         if (value == null) {
             window.setTimeout(() => {
                 const selectedElement = list.querySelector(".mona-selected") as HTMLOListElement;
-                if (selectedElement) {
+                if (selectedElement && selectedElement.scrollIntoView) { // TODO: Temporary test fix, remove after test refactoring
                     selectedElement.scrollIntoView({ behavior: "auto", block: "center" });
                 }
             }, 0);

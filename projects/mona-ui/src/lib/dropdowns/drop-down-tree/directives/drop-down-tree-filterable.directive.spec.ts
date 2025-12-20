@@ -18,10 +18,4 @@ describe("DropDownTreeFilterableDirective", () => {
         expect(directive).toBeTruthy();
     });
 
-    it("should emit filter change event", () => {
-        const filterChangeEvent: FilterChangeEvent = new FilterChangeEvent("test");
-        spyOn(directive.filterChange, "emit");
-        directive.filterChange.emit(filterChangeEvent);
-        expect(directive.filterChange.emit).toHaveBeenCalledWith(filterChangeEvent);
-    });
 });

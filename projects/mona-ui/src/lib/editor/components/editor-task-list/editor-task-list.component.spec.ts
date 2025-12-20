@@ -13,14 +13,12 @@ describe("EditorTaskListComponent", () => {
             providers: [
                 {
                     provide: EditorService,
-                    useValue: jasmine.createSpyObj(
-                        "EditorService",
-                        {},
-                        {
-                            editor: jasmine.createSpyObj("Editor", ["isActive"]),
-                            state: jasmine.createSpy()
-                        }
-                    )
+                    useValue: {
+                        editor: {
+                            isActive: vi.fn().mockName("Editor.isActive")
+                        },
+                        state: vi.fn()
+                    }
                 }
             ]
         }).compileComponents();
