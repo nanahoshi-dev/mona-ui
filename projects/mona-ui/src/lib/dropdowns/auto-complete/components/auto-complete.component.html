@@ -6,6 +6,7 @@
        [size]="size()"
        [ngModel]="autoCompleteValue()"
        (ngModelChange)="autoCompleteValue$.next($event)"
+       (blur)="onInputBlur($event)"
        (keydown)="onKeydown($event)">
 @if (showClearButton() && autoCompleteValue()) {
     <button monaButton look="link" size="small" class="px-2 py-0 h-full" [tabindex]="-1" (click)="clearValue($event)">

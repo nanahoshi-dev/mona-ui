@@ -20,7 +20,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { Predicate, Selector } from "@mirei/ts-collections";
 import { LucideAngularModule, X } from "lucide-angular";
 import { debounceTime, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -98,6 +97,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     readonly #themeService = inject(ThemeService);
     readonly #value = signal("");
     #propagateChange: Action<string | null> | null = null;
+    #propagateTouch: Action | null = null;
 
     protected readonly autoCompleteValue = signal("");
     protected readonly autoCompleteValue$ = new Subject<string>();
@@ -180,7 +180,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     }
 
     public registerOnTouched(fn: any): void {
-        // TODO: Implement touch handling logic
+        this.#propagateTouch = fn;
     }
 
     public setDisabledState(isDisabled: boolean): void {
@@ -201,6 +201,16 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     protected close(): void {
         this.#popupRef()?.close();
         this.#popupRef.set(null);
+    }
+
+    protected onInputBlur(event: FocusEvent): void {
+        if (this.#propagateTouch) {
+            this.#propagateTouch();
+        }
+        const popupRef = this.#popupRef();
+        if (popupRef && !popupRef.overlayRef.overlayElement.contains(event.relatedTarget as HTMLElement)) {
+            this.close();
+        }
     }
 
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
