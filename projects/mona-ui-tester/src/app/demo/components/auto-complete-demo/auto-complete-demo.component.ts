@@ -1,9 +1,24 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { AutoCompleteComponent } from "mona-ui";
+import { range } from "@mirei/ts-collections";
+import {
+    AutoCompleteComponent,
+    DropDownFilterableDirective,
+    DropDownGroupableDirective,
+    DropDownGroupHeaderTemplateDirective,
+    DropDownVirtualScrollDirective,
+    VirtualScrollOptions
+} from "mona-ui";
+import { GroupableOptions } from "mona-ui/src/lib/common/list/models/GroupableOptions";
+import { FilterableOptions } from "mona-ui/src/lib/common/models/FilterableOptions";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import {
+    dropdownFilteringFeatureConfig,
+    dropdownGroupingFeatureConfig,
+    dropdownVirtualizationFeatureConfig
+} from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -15,7 +30,11 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoCompleteComponent<any>> {
-    readonly #injector = createFeatureInjector({});
+    readonly #injector = createFeatureInjector({
+        filtering: dropdownFilteringFeatureConfig("autocomplete"),
+        grouping: dropdownGroupingFeatureConfig("autocomplete"),
+        virtualization: dropdownVirtualizationFeatureConfig("dropdown")
+    });
     protected readonly config = signal<ComponentConfig<AutoCompleteComponent<any>>>({
         code: ``,
         inputs: {
@@ -68,8 +87,17 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 }
 
 @Component({
-    imports: [AutoCompleteComponent, FormsModule],
+    imports: [
+        AutoCompleteComponent,
+        FormsModule,
+        DropDownGroupableDirective,
+        DropDownGroupHeaderTemplateDirective,
+        DropDownVirtualScrollDirective,
+        DropDownFilterableDirective
+    ],
     template: `
+        @let featureData = features();
+        @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <mona-auto-complete
             [data]="autoCompleteData()"
             [disabled]="disabled()"
@@ -82,7 +110,17 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             [valueField]="valueField()"
             [ngModel]="selectedItem()"
             (ngModelChange)="onItemSelect($event)"
-            class="w-50"></mona-auto-complete>
+            [monaDropDownGroupable]="grouping()"
+            [monaDropDownFilterable]="filtering()"
+            [monaDropDownVirtualScroll]="virtualization()"
+            [groupBy]="groupBy()"
+            class="w-50">
+            @if (groupingFeatures["groupHeaderTemplate"]?.active) {
+                <ng-template monaDropDownGroupHeaderTemplate let-group>
+                    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+                </ng-template>
+            }
+        </mona-auto-complete>
     `,
     host: {
         class: "h-full"
@@ -90,10 +128,55 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 })
 class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {
     protected readonly autoCompleteData = computed(() => {
-        return dropdownFoodData;
+        const virtualization = this.virtualization();
+        if (!virtualization.enabled) {
+            return dropdownFoodData;
+        }
+        return range(1, 10000)
+            .select(i => {
+                const item = dropdownFoodData[i % dropdownFoodData.length];
+                return { ...item, value: i, text: `${i} - ${item.text}` };
+            })
+            .toArray();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filtering = computed(() => {
+        const features = this.features();
+        const subFeatures = features["filtering"]?.subFeatures || {};
+        const filteringOptions: FilterableOptions = {
+            caseSensitive: subFeatures["caseSensitive"].active,
+            debounce: subFeatures["debounce"].numericValue ?? 0,
+            enabled: features["filtering"].active,
+            operator: subFeatures["operator"].dropdownValue
+        };
+        return filteringOptions;
+    });
+    protected readonly groupBy = computed(() => {
+        const features = this.features();
+        const subFeatures = features["grouping"]?.subFeatures || {};
+        return subFeatures["groupBy"].dropdownValue;
+    });
+    protected readonly grouping = computed(() => {
+        const features = this.features();
+        const subFeatures = features["grouping"]?.subFeatures || {};
+        const groupingOptions: GroupableOptions<unknown, unknown> = {
+            enabled: features["grouping"].active,
+            headerOrder: subFeatures["headerOrder"].dropdownValue,
+            orderBy: subFeatures["orderBy"].dropdownValue,
+            orderByDirection: subFeatures["orderByDirection"].dropdownValue
+        };
+        return groupingOptions;
+    });
     protected readonly selectedItem = signal<unknown | null>(null);
+    protected readonly virtualization = computed(() => {
+        const features = this.features();
+        const subFeatures = features["virtualization"]?.subFeatures || {};
+        const options: Partial<VirtualScrollOptions> = {
+            enabled: features["virtualization"].active,
+            height: subFeatures["itemHeight"].numericValue
+        };
+        return options;
+    });
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>((item: any) => false);

@@ -9,8 +9,7 @@ import { ListService } from "../../common/list/services/list.service";
         mona-combo-box[monaDropDownGroupable],
         mona-drop-down-list[monaDropDownGroupable],
         mona-multi-select[monaDropDownGroupable],
-    `,
-    standalone: true
+    `
 })
 export class DropDownGroupableDirective<TData> {
     readonly #defaultOptions: GroupableOptions<TData, any> = {
@@ -19,8 +18,8 @@ export class DropDownGroupableDirective<TData> {
     };
     readonly #listService: ListService<TData> = inject(ListService);
 
-    public groupBy = input<string | Selector<TData, any> | null | undefined>("");
-    public options = input<GroupableOptions<TData, any> | "">("", {
+    public readonly groupBy = input<string | Selector<TData, any> | null | undefined>("");
+    public readonly options = input<GroupableOptions<TData, any> | "">("", {
         alias: "monaDropDownGroupable"
     });
 

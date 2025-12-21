@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -11,7 +12,6 @@ import {
     inject,
     input,
     model,
-    OnInit,
     output,
     signal,
     TemplateRef,
@@ -45,6 +45,7 @@ import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-d
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
+import { DropdownFieldPredicateType, DropdownFieldSelectionType } from "../../../models/DropdownFieldTypes";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
 import {
     dropdownListInputThemeVariants,
@@ -89,7 +90,7 @@ import {
         "[attr.role]": "'combobox'"
     }
 })
-export class DropdownListComponent<TData = unknown> implements OnInit, ControlValueAccessor, DropDownListVariantInput {
+export class DropdownListComponent<TData = unknown> implements ControlValueAccessor, DropDownListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService<TData>);
@@ -158,7 +159,7 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
     /**
      * @description A predicate function or the name of the field that determines whether an item is disabled.
      */
-    public readonly itemDisabled = input<string | Predicate<TData> | null | undefined>("");
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
      * @description Placeholder text for the dropdown list when no item is selected.
@@ -183,13 +184,13 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
     /**
      * @description The text field name of the data item.
      */
-    public readonly textField = input<string | null | undefined>("");
+    public readonly textField = input<DropdownFieldSelectionType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
      * @description The value field name of the data item.
      */
-    public readonly valueField = input<string | null | undefined>("");
+    public readonly valueField = input<DropdownFieldSelectionType<TData>>();
 
     public constructor() {
         effect(() => {
@@ -213,6 +214,13 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
             const data = this.data();
             untracked(() => this.#listService.setData(data));
         });
+        afterNextRender({
+            read: () => {
+                this.initialize();
+                this.setEventListeners();
+                this.setSubscriptions();
+            }
+        });
     }
 
     public clearValue(event: MouseEvent): void {
@@ -225,12 +233,6 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
     public close(): void {
         this.#popupRef?.close();
         this.#popupRef = null;
-    }
-
-    public ngOnInit(): void {
-        this.initialize();
-        this.setEventListeners();
-        this.setSubscriptions();
     }
 
     public onItemSelect(event: SelectionChangeEvent<TData>): void {

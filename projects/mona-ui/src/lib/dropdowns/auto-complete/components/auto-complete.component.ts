@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     Component,
     computed,
     contentChild,
@@ -10,7 +11,6 @@ import {
     inject,
     input,
     model,
-    OnInit,
     output,
     signal,
     TemplateRef,
@@ -47,6 +47,7 @@ import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down
 import { DropDownHeaderTemplateDirective } from "../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
+import { DropdownFieldPredicateType, DropdownFieldSelectionType } from "../../models/DropdownFieldTypes";
 import {
     autoCompleteBaseThemeVariants,
     autoCompletePopupThemeVariants,
@@ -88,15 +89,15 @@ import {
         "[class]": "baseClass()"
     }
 })
-export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlValueAccessor, AutoCompleteVariantInput {
+export class AutoCompleteComponent<TData = unknown> implements ControlValueAccessor, AutoCompleteVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
+    readonly #popupRef = signal<PopupRef | null>(null);
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
-    readonly #popupRef = signal<PopupRef | null>(null);
+    readonly #value = signal("");
     #propagateChange: Action<string | null> | null = null;
-    #value = "";
 
     protected readonly autoCompleteValue = signal("");
     protected readonly autoCompleteValue$ = new Subject<string>();
@@ -135,17 +136,18 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         mode: "single",
         toggleable: false
     };
+    protected readonly selectedKeysChange = output<any[]>();
+
     public readonly data = input<Iterable<TData>>([]);
     public readonly disabled = model(false);
-    public readonly itemDisabled = input<string | Predicate<TData> | null>();
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
     public readonly placeholder = input("");
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
-    public readonly selectedKeysChange = output<any[]>();
     public readonly showClearButton = input(false);
     public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
-    public readonly textField = input<string | Selector<TData, string> | null>();
+    public readonly textField = input<DropdownFieldSelectionType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
-    public readonly valueField = input<string | Selector<TData, any> | null>();
+    public readonly valueField = input<DropdownFieldSelectionType<TData>>();
 
     public constructor() {
         effect(() => {
@@ -164,36 +166,51 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
             const data = this.data();
             untracked(() => this.#listService.setData(data));
         });
+        afterNextRender({
+            read: () => {
+                this.initialize();
+                this.setSubscriptions();
+                this.autoCompleteValue.set(this.#value() ?? "");
+            }
+        });
     }
 
-    public clearValue(event: MouseEvent): void {
+    public registerOnChange(fn: any): void {
+        this.#propagateChange = fn;
+    }
+
+    public registerOnTouched(fn: any): void {
+        // TODO: Implement touch handling logic
+    }
+
+    public setDisabledState(isDisabled: boolean): void {
+        this.disabled.set(isDisabled);
+    }
+
+    public writeValue(data: any): void {
+        this.updateValue(data, false);
+    }
+
+    protected clearValue(event: MouseEvent): void {
         event.stopImmediatePropagation();
         this.updateValue("");
         this.autoCompleteValue.set("");
         this.#listService.clearSelections();
-        this.#propagateChange?.(null);
     }
 
-    public close(): void {
+    protected close(): void {
         this.#popupRef()?.close();
         this.#popupRef.set(null);
     }
 
-    public ngOnInit(): void {
-        this.initialize();
-        this.setSubscriptions();
-        this.autoCompleteValue.set(this.#value ?? "");
-    }
-
-    public onItemSelect(event: SelectionChangeEvent<TData>): void {
+    protected onItemSelect(event: SelectionChangeEvent<TData>): void {
         const itemText = this.#listService.getItemText(event.item);
         this.updateValue(itemText);
         this.autoCompleteValue.set(itemText);
-        this.notifyValueChange();
         this.close();
     }
 
-    public onKeydown(event: KeyboardEvent): void {
+    protected onKeydown(event: KeyboardEvent): void {
         if (event.key === "Escape" || event.key === "Tab") {
             this.close();
         } else if (event.key === "Enter") {
@@ -205,8 +222,7 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         }
     }
 
-    public open(): void {
-        this.focus();
+    protected open(): void {
         if (this.#popupRef()) {
             return;
         }
@@ -230,26 +246,11 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
             this.#popupRef.set(null);
             this.#listService.clearSelections();
             this.#listService.clearFilter();
-            if (this.#value !== this.autoCompleteValue()) {
+            if (this.#value() !== this.autoCompleteValue()) {
                 this.updateValue(this.autoCompleteValue());
-                this.notifyValueChange();
             }
             window.setTimeout(() => this.focus());
         });
-    }
-
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {}
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(data: any): void {
-        this.updateValue(data);
     }
 
     private focus(): void {
@@ -278,13 +279,11 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         const autoCompleteValue = this.autoCompleteValue();
         if (highlightedItemText && autoCompleteValue) {
             this.autoCompleteValue.set(highlightedItemText);
-            if (this.#value !== this.autoCompleteValue()) {
+            if (this.#value() !== this.autoCompleteValue()) {
                 this.updateValue(highlightedItemText);
-                this.notifyValueChange();
             }
-        } else if (this.#value !== autoCompleteValue) {
+        } else if (this.#value() !== autoCompleteValue) {
             this.updateValue(autoCompleteValue);
-            this.notifyValueChange();
         }
         this.close();
     }
@@ -302,10 +301,6 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         return event;
     }
 
-    private notifyValueChange(): void {
-        this.#propagateChange?.(this.#value);
-    }
-
     private setSubscriptions(): void {
         const debounce = this.#listService.filterableOptions().enabled
             ? this.#listService.filterableOptions().debounce
@@ -318,8 +313,8 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
             )
             .subscribe((value: string) => {
                 if (!value) {
-                    this.autoCompleteValue.set(value);
                     this.close();
+                    this.autoCompleteValue.set(value);
                     return;
                 }
                 if (this.#listService.filterableOptions().enabled) {
@@ -329,19 +324,20 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
                     }
                 }
                 const item = this.getItemStartsWith(value);
+                this.#listService.clearSelections();
+                this.#listService.highlightedItem.set(item);
                 if (item) {
-                    this.#listService.clearSelections();
-                    this.#listService.highlightedItem.set(item);
                     this.#listService.scrollToItem$.next({ item, focus: false });
-                } else {
-                    this.#listService.clearSelections();
-                    this.#listService.highlightedItem.set(null);
                 }
                 this.autoCompleteValue.set(value);
             });
     }
 
-    private updateValue(value: string) {
-        this.#value = value;
+    private updateValue(value: string, notify: boolean = true): void {
+        this.#value.set(value);
+        if (notify) {
+            const notifyValue = value === "" || value == null ? null : value;
+            this.#propagateChange?.(notifyValue);
+        }
     }
 }
