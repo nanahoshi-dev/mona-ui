@@ -16,7 +16,7 @@ import { ListService } from "../services/list.service";
         "[attr.data-disabled]": "disabled()",
         "[attr.data-highlighted]": "highlighted()",
         "[attr.data-selected]": "selected()",
-        "[attr.role]": "'listitem'",
+        "[attr.role]": "'option'",
         "[class]": "textClasses()"
     }
 })

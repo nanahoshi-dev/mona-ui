@@ -40,6 +40,7 @@ import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupService } from "../../../popup/services/popup.service";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { Action } from "../../../utils/Action";
+import { createElementControlId } from "../../../utils/createElementControlId";
 import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down-group-header-template.directive";
@@ -99,6 +100,10 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     #propagateChange: Action<string | null> | null = null;
     #propagateTouch: Action | null = null;
 
+    protected readonly activeDescendant = computed(() => {
+        const highlightedItem = this.#listService.highlightedItem();
+        return highlightedItem ? highlightedItem.uid : null;
+    });
     protected readonly autoCompleteValue = signal("");
     protected readonly autoCompleteValue$ = new Subject<string>();
     protected readonly baseClass = computed(() => {
@@ -112,6 +117,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         return twMerge(variantClass, userClass);
     });
     protected readonly clearIcon = X;
+    protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
         read: TemplateRef
@@ -123,6 +129,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         return autoCompleteTextInputThemeVariants(theme)({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly listId = createElementControlId();
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -142,6 +149,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     public readonly disabled = model(false);
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
     public readonly placeholder = input("");
+    public readonly readonly = input(false);
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
     public readonly showClearButton = input(false);
     public readonly size = input<AutoCompleteVariantProps["size"]>("medium");

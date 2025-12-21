@@ -138,6 +138,7 @@ export class ListComponent<TData> implements OnInit {
     public readonly height = input<ListSizeInputType>(undefined);
     public readonly itemSelect = output<SelectionChangeEvent<TData>>();
     public readonly listClass = input<string>("");
+    public readonly listId = input<string>("");
     public readonly listItemClass = input("");
     public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});

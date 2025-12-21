@@ -1,10 +1,17 @@
 <input monaTextBox
+       role="combobox"
        [class]="inputClass()"
        [disabled]="disabled()"
        [placeholder]="placeholder()"
+       [readonly]="readonly()"
        [rounded]="rounded()"
        [size]="size()"
        [ngModel]="autoCompleteValue()"
+       [attr.aria-activedescendant]="activeDescendant()"
+       [attr.aria-autocomplete]="'list'"
+       [attr.aria-controls]="listId"
+       [attr.aria-expanded]="expanded()"
+       [attr.aria-haspopup]="'listbox'"
        (ngModelChange)="autoCompleteValue$.next($event)"
        (blur)="onInputBlur($event)"
        (keydown)="onKeydown($event)">
@@ -15,8 +22,8 @@
 }
 
 <ng-template #popupTemplate>
-    <div [class]="popupClasses()">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false">
+    <div [class]="popupClasses()" [attr.role]="'region'">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>
