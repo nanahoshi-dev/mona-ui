@@ -46,6 +46,6 @@ type AutoCompleteTextInputVariantInput = VariantInputs<AutoCompleteTextInputVari
 export type AutoCompleteVariantProps = AutoCompleteBaseVariantProps &
     AutoCompletePopupVariantProps &
     AutoCompleteTextInputVariantProps;
-export type AutoCompleteVariantInput = AutoCompleteBaseVariantInput &
+export type AutoCompleteVariantInput = Omit<AutoCompleteBaseVariantInput, "focused"> &
     AutoCompletePopupVariantInput &
     AutoCompleteTextInputVariantInput;

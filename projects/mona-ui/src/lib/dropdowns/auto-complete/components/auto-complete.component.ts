@@ -22,7 +22,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { LucideAngularModule, X } from "lucide-angular";
-import { debounceTime, fromEvent, Subject, take, tap } from "rxjs";
+import { debounceTime, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
@@ -84,7 +84,7 @@ import {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-haspopup]": "true",
         "[attr.data-disabled]": "disabled()",
-        "[attr.tabindex]": "disabled() ? null : 0",
+        "[attr.tabindex]": "-1",
         "[class]": "baseClass()"
     }
 })
@@ -94,7 +94,7 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
     readonly #listService = inject(ListService);
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
-    #popupRef: PopupRef | null = null;
+    readonly #popupRef = signal<PopupRef | null>(null);
     #propagateChange: Action<string | null> | null = null;
     #value = "";
 
@@ -102,9 +102,11 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
     protected readonly autoCompleteValue$ = new Subject<string>();
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
+        const disabled = this.disabled();
+        const focused = this.#popupRef() !== null;
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = autoCompleteBaseThemeVariants(theme)({ rounded, size });
+        const variantClass = autoCompleteBaseThemeVariants(theme)({ disabled, focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -133,19 +135,17 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         mode: "single",
         toggleable: false
     };
-    protected readonly selectedKeysChange = output<any[]>();
-
-    public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
-    public readonly userClass = input<string>("", { alias: "class" });
-
-    public data = input<Iterable<TData>>([]);
-    public disabled = model(false);
-    public itemDisabled = input<string | Predicate<TData> | null>();
-    public placeholder = input("");
+    public readonly data = input<Iterable<TData>>([]);
+    public readonly disabled = model(false);
+    public readonly itemDisabled = input<string | Predicate<TData> | null>();
+    public readonly placeholder = input("");
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
-    public showClearButton = input(false);
-    public textField = input<string | Selector<TData, string> | null>();
-    public valueField = input<string | Selector<TData, any> | null>();
+    public readonly selectedKeysChange = output<any[]>();
+    public readonly showClearButton = input(false);
+    public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
+    public readonly textField = input<string | Selector<TData, string> | null>();
+    public readonly userClass = input<string>("", { alias: "class" });
+    public readonly valueField = input<string | Selector<TData, any> | null>();
 
     public constructor() {
         effect(() => {
@@ -175,13 +175,12 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
     }
 
     public close(): void {
-        this.#popupRef?.close();
-        this.#popupRef = null;
+        this.#popupRef()?.close();
+        this.#popupRef.set(null);
     }
 
     public ngOnInit(): void {
         this.initialize();
-        this.setEventListeners();
         this.setSubscriptions();
         this.autoCompleteValue.set(this.#value ?? "");
     }
@@ -200,13 +199,18 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         } else if (event.key === "Enter") {
             this.handleEnterKey();
         } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.stopPropagation();
             event.preventDefault();
             this.handleArrowKeys(event);
         }
     }
 
     public open(): void {
-        this.#popupRef = this.#popupService.create({
+        this.focus();
+        if (this.#popupRef()) {
+            return;
+        }
+        const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             anchorConnectionPoint: "bottomleft",
             animation: {
@@ -221,21 +225,16 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
             width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
             withPush: false
         });
-        window.setTimeout(() => {
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input) {
-                input.focus();
-                input.setSelectionRange(-1, -1);
-            }
-        });
-        this.#popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef = null;
+        this.#popupRef.set(popupRef);
+        popupRef.closed.pipe(take(1)).subscribe(() => {
+            this.#popupRef.set(null);
             this.#listService.clearSelections();
             this.#listService.clearFilter();
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input) {
-                input.focus();
+            if (this.#value !== this.autoCompleteValue()) {
+                this.updateValue(this.autoCompleteValue());
+                this.notifyValueChange();
             }
+            window.setTimeout(() => this.focus());
         });
     }
 
@@ -254,21 +253,23 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
     }
 
     private focus(): void {
-        this.#hostElementRef.nativeElement?.focus();
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input) {
+            input.focus();
+            input.setSelectionRange(-1, -1);
+        }
     }
 
     private getItemStartsWith(value: string): ListItem<TData> | null {
         return this.#listService
             .viewItems()
             .where(i => !i.header && !this.#listService.isDisabled(i))
-            .firstOrDefault(i => {
-                return this.#listService.getItemText(i).toLowerCase().startsWith(value.toLowerCase());
-            });
+            .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().startsWith(value.toLowerCase()));
     }
 
     private handleArrowKeys(event: KeyboardEvent): void {
         const direction = event.key === "ArrowDown" ? "next" : "previous";
-        this.#listService.navigate(direction, "highlight");
+        this.#listService.navigate(direction, "highlight", false);
     }
 
     private handleEnterKey(): void {
@@ -305,43 +306,13 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
         this.#propagateChange?.(this.#value);
     }
 
-    private setEventListeners(): void {
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                const input = this.#hostElementRef.nativeElement.querySelector("input");
-                if (input) {
-                    input.focus();
-                    input.setSelectionRange(-1, -1);
-                }
-            });
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                const target = event.relatedTarget as HTMLElement;
-                if (
-                    !(
-                        target &&
-                        (this.#hostElementRef.nativeElement.contains(target) ||
-                            this.#popupRef?.overlayRef.overlayElement.contains(target))
-                    )
-                ) {
-                    return;
-                }
-            });
-    }
-
     private setSubscriptions(): void {
         const debounce = this.#listService.filterableOptions().enabled
             ? this.#listService.filterableOptions().debounce
             : 0;
         this.autoCompleteValue$
             .pipe(
-                tap(() => {
-                    if (!this.#popupRef) {
-                        this.open();
-                    }
-                }),
+                tap(() => this.open()),
                 debounceTime(debounce),
                 takeUntilDestroyed(this.#destroyRef)
             )
@@ -361,7 +332,7 @@ export class AutoCompleteComponent<TData = unknown> implements OnInit, ControlVa
                 if (item) {
                     this.#listService.clearSelections();
                     this.#listService.highlightedItem.set(item);
-                    this.#listService.scrollToItem$.next(item);
+                    this.#listService.scrollToItem$.next({ item, focus: false });
                 } else {
                     this.#listService.clearSelections();
                     this.#listService.highlightedItem.set(null);

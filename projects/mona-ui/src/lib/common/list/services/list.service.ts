@@ -64,7 +64,10 @@ export class ListService<TData> {
         type: "numeric",
         visiblePages: 5
     });
-    public readonly scrollToItem$ = new ReplaySubject<ListItem<TData>>(1);
+    public readonly scrollToItem$ = new ReplaySubject<{
+        item: ListItem<TData>;
+        focus: boolean;
+    }>(1);
     public readonly selectableOptions = signal<SelectableOptions>({
         mode: "single",
         enabled: false,
@@ -198,7 +201,7 @@ export class ListService<TData> {
         return selectedKeys.contains(key);
     }
 
-    public navigate(direction: NavigationDirection, mode: NavigationMode): ListItem<TData> | null {
+    public navigate(direction: NavigationDirection, mode: NavigationMode, focus: boolean): ListItem<TData> | null {
         const navigableOptions = this.navigableOptions();
         if (!navigableOptions.enabled) {
             return null;
@@ -220,7 +223,7 @@ export class ListService<TData> {
             item = this.navigateForMultipleSelection(viewItems, direction);
         }
         if (item) {
-            this.scrollToItem$.next(item);
+            this.scrollToItem$.next({ item, focus });
         }
         return item;
     }

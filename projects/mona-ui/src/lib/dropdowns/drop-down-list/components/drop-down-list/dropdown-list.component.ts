@@ -300,7 +300,7 @@ export class DropdownListComponent<TData = unknown> implements OnInit, ControlVa
     private handleArrowKeys(event: KeyboardEvent): void {
         const previousItem = this.selectedListItem();
         const direction = event.key === "ArrowDown" ? "next" : "previous";
-        const item = this.#listService.navigate(direction, "select");
+        const item = this.#listService.navigate(direction, "select", false);
         if (!item || previousItem === item) {
             return;
         }

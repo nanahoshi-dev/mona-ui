@@ -307,7 +307,7 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor, D
     private handleArrowKeys(event: KeyboardEvent): void {
         const previousItem = this.selectedListItem();
         const direction = event.key === "ArrowDown" ? "next" : "previous";
-        const listItem = this.#listService.navigate(direction, "select");
+        const listItem = this.#listService.navigate(direction, "select", false);
         if (!listItem || previousItem === listItem) {
             return;
         }
@@ -440,7 +440,7 @@ export class ComboBoxComponent<TData> implements OnInit, ControlValueAccessor, D
                 if (item) {
                     this.#listService.clearSelections();
                     this.#listService.highlightedItem.set(item);
-                    this.#listService.scrollToItem$.next(item);
+                    this.#listService.scrollToItem$.next({ item, focus: false });
                 }
                 this.comboBoxValue.set(value);
             });

@@ -10,6 +10,12 @@ export const autoCompleteBaseVariants = cva(
     `,
     {
         variants: {
+            disabled: {
+                true: "pointer-events-none opacity-50"
+            },
+            focused: {
+                true: "ring-1 ring-primary/40"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-sm",

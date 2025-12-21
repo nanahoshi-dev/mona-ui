@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { AutoCompleteComponent } from "mona-ui";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -67,7 +68,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 }
 
 @Component({
-    imports: [AutoCompleteComponent],
+    imports: [AutoCompleteComponent, FormsModule],
     template: `
         <mona-auto-complete
             [data]="autoCompleteData()"
@@ -79,6 +80,8 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             [size]="size()"
             [textField]="textField()"
             [valueField]="valueField()"
+            [ngModel]="selectedItem()"
+            (ngModelChange)="onItemSelect($event)"
             class="w-50"></mona-auto-complete>
     `,
     host: {
@@ -90,6 +93,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         return dropdownFoodData;
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly selectedItem = signal<unknown | null>(null);
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>((item: any) => false);
@@ -99,4 +103,9 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     public readonly size = input<ReturnType<AutoCompleteComponent["size"]>>("small");
     public readonly textField = input<ReturnType<AutoCompleteComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<AutoCompleteComponent["valueField"]>>("value");
+
+    public onItemSelect(item: any) {
+        this.selectedItem.set(item);
+        console.log(item);
+    }
 }

@@ -285,9 +285,9 @@ export class MultiSelectComponent<TData>
 
     private handleArrowKeys(event: KeyboardEvent): void {
         if (event.key === "ArrowDown") {
-            this.#listService.navigate("next", "highlight");
+            this.#listService.navigate("next", "highlight", false);
         } else if (event.key === "ArrowUp") {
-            this.#listService.navigate("previous", "highlight");
+            this.#listService.navigate("previous", "highlight", false);
         }
     }
 

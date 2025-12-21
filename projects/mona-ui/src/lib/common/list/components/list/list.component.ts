@@ -134,6 +134,7 @@ export class ListComponent<TData> implements OnInit {
     protected readonly virtualScrollViewport = viewChild(CdkVirtualScrollViewport);
 
     public readonly data = input<Iterable<TData> | null | undefined>(null);
+    public readonly focusOnMount = input(true);
     public readonly height = input<ListSizeInputType>(undefined);
     public readonly itemSelect = output<SelectionChangeEvent<TData>>();
     public readonly listClass = input<string>("");
@@ -215,7 +216,7 @@ export class ListComponent<TData> implements OnInit {
             if (navigationMode === "select") {
                 this.selectItem(nextItem);
             }
-            this.scrollToItem(nextItem, "instant");
+            this.scrollToItem(nextItem, true, "instant");
         }
     }
 
@@ -223,7 +224,7 @@ export class ListComponent<TData> implements OnInit {
         if (this.listService.navigableOptions().enabled) {
             this.listService.highlightedItem.set(item);
         }
-        this.scrollToItem(item);
+        this.scrollToItem(item, true);
     }
 
     private handleNavigation(key: string): void {
@@ -238,7 +239,7 @@ export class ListComponent<TData> implements OnInit {
         const navigableOptions = this.listService.navigableOptions();
         const selectableOptions = this.listService.selectableOptions();
         const previousSelectedItems = this.listService.selectedListItems();
-        const item = this.listService.navigate(direction, navigableOptions.mode);
+        const item = this.listService.navigate(direction, navigableOptions.mode, true);
         if (item && navigableOptions.mode === "select" && selectableOptions.enabled) {
             this.itemSelect.emit({ item, source: { via: "keyboard", key } });
             if (previousSelectedItems.contains(item)) {
@@ -284,11 +285,13 @@ export class ListComponent<TData> implements OnInit {
         }
     }
 
-    private scrollToItem(item: ListItem<TData>, behavior: ScrollBehavior = "auto"): void {
+    private scrollToItem(item: ListItem<TData>, focus: boolean, behavior: ScrollBehavior = "auto"): void {
         const element = this.#hostElementRef.nativeElement.querySelector(`[data-uid="${item.uid}"]`) as HTMLElement;
         if (element) {
             element.scrollIntoView({ block: "center", behavior });
-            element.focus();
+            if (focus) {
+                element.focus();
+            }
         } else if (this.listService.virtualScrollOptions().enabled) {
             const index = this.listService.viewItems().toList().indexOf(item);
             const itemHeight = this.listService.virtualScrollOptions().height;
@@ -330,6 +333,9 @@ export class ListComponent<TData> implements OnInit {
     }
 
     private setInitialSelectionOrFocus(): void {
+        if (!this.focusOnMount()) {
+            return;
+        }
         const selectedItem = this.listService.selectedListItems().lastOrDefault();
         if (selectedItem) {
             this.focusToItem(selectedItem);
@@ -393,7 +399,7 @@ export class ListComponent<TData> implements OnInit {
         this.setTypeaheadSubscription();
         this.listService.scrollToItem$
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(item => this.scrollToItem(item));
+            .subscribe(event => this.scrollToItem(event.item, event.focus));
         this.listService.focus$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.#hostElementRef.nativeElement.focus();
             this.setInitialSelectionOrFocus();
