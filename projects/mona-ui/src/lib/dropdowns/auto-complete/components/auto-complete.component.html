@@ -1,10 +1,9 @@
 @if (prefixTemplate()) {
     <span [class]="affixClass()">
-        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
-    </span>
+    <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+</span>
 }
-<input monaTextBox
-       role="combobox"
+<input monaTextBox role="combobox"
        [class]="inputClass()"
        [disabled]="disabled()"
        [placeholder]="placeholder()"
@@ -14,12 +13,18 @@
        [ngModel]="autoCompleteValue()"
        [attr.aria-activedescendant]="activeDescendant()"
        [attr.aria-autocomplete]="'list'"
+       [attr.aria-busy]="loading()"
        [attr.aria-controls]="listId"
        [attr.aria-expanded]="expanded()"
        [attr.aria-haspopup]="'listbox'"
+       [attr.aria-label]="ariaLabel() || undefined"
+       [attr.aria-labelledby]="ariaLabelledBy() || undefined"
        (ngModelChange)="autoCompleteValue$.next($event)"
        (blur)="onInputBlur($event)"
        (keydown)="onKeydown($event)">
+
+<span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
+
 @if (showClearButton() && autoCompleteValue() && !loading()) {
     <button monaButton look="link" size="small" class="px-2 py-0 h-full" [tabindex]="-1" (click)="clearValue($event)">
         <lucide-angular class="opacity-50 size-4 hover:opacity-90" [name]="clearIcon"></lucide-angular>
@@ -30,8 +35,8 @@
 }
 @if (suffixTemplate()) {
     <span [class]="affixClass()">
-        <ng-container [ngTemplateOutlet]="suffixTemplate()"></ng-container>
-    </span>
+    <ng-container [ngTemplateOutlet]="suffixTemplate()"></ng-container>
+</span>
 }
 
 <ng-template #popupTemplate>

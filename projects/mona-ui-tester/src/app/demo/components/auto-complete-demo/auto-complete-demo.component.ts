@@ -17,6 +17,7 @@ import {
     DropDownVirtualScrollDirective,
     FilterableOptions,
     GroupableOptions,
+    PreventableEvent,
     VirtualScrollOptions
 } from "mona-ui";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
@@ -53,6 +54,18 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         itemTemplate: dropdownItemTemplateFeatureConfig("autocomplete"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
         prefixTemplate: dropdownPrefixTemplateFeatureConfig("autocomplete"),
+        preventClose: {
+            active: false,
+            code: ``,
+            description: `The "close" event is fired when the popup is about to close.`,
+            name: "Prevent Close"
+        },
+        preventOpen: {
+            active: false,
+            code: ``,
+            description: `The "open" event is fired when the popup is about to open.`,
+            name: "Prevent Open"
+        },
         suffixTemplate: dropdownSuffixTemplateFeatureConfig("autocomplete"),
         virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
     });
@@ -122,7 +135,10 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 value: "value"
             }
         },
-        outputs: {},
+        outputs: {
+            close: { type: "event" },
+            open: { type: "event" }
+        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
@@ -171,6 +187,8 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             [monaDropDownFilterable]="filtering()"
             [monaDropDownVirtualScroll]="virtualization()"
             [groupBy]="groupBy()"
+            (close)="onPopupClose($event)"
+            (open)="onPopupOpen($event)"
             class="w-50">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
@@ -311,8 +329,23 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     public readonly textField = input<ReturnType<AutoCompleteComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<AutoCompleteComponent["valueField"]>>("value");
 
-    public onItemSelect(item: any) {
+    protected onItemSelect(item: any) {
         this.selectedItem.set(item);
         console.log(item);
+    }
+
+    protected onPopupClose(event: PreventableEvent) {
+        const preventClose = this.features()["preventClose"].active;
+        if (preventClose) {
+            event.preventDefault();
+            console.log("Popup prevented from closing");
+        }
+    }
+    protected onPopupOpen(event: PreventableEvent) {
+        const preventOpen = this.features()["preventOpen"].active;
+        if (preventOpen) {
+            event.preventDefault();
+            console.log("Popup prevented from opening");
+        }
     }
 }

@@ -350,4 +350,5 @@ export * from "./theme/models/Theme";
 export * from "./theme/services/theme.service";
 
 /** Utils */
+export * from "./utils/PreventableEvent";
 export * from "./utils/moveIndices";

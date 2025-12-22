@@ -1,5 +1,5 @@
 import { AnimationBuilder } from "@angular/animations";
-import { Direction, Directionality } from "@angular/cdk/bidi";
+import { Directionality } from "@angular/cdk/bidi";
 import {
     ComponentType,
     ConnectionPositionPair,
@@ -172,11 +172,7 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        const position = this.getPosition(
-            settings.anchorConnectionPoint,
-            settings.popupConnectionPoint,
-            this.#directionality?.value
-        );
+        const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
         const strategy = this.#overlay
             .position()
             .flexibleConnectedTo(resolvedAnchor)
@@ -239,8 +235,7 @@ export class PopupService {
 
     private getPosition(
         anchorConnectionPoint?: ConnectionPoint | null,
-        popupConnectionPoint?: ConnectionPoint | null,
-        direction?: Direction
+        popupConnectionPoint?: ConnectionPoint | null
     ): ConnectionPositionPair[] {
         const anchorPoint = anchorConnectionPoint ?? "bottomleft";
         const popupPoint = popupConnectionPoint ?? "topleft";

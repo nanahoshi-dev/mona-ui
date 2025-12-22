@@ -1042,6 +1042,24 @@
         "kind": "output"
       },
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label attribute of the autocomplete component.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "description": "Sets the aria-labelledby attribute of the autocomplete component.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
         "name": "data",
         "type": "Iterable<TData>",
         "description": "Sets the data of the autocomplete component.",
@@ -1064,6 +1082,12 @@
         "type": "boolean",
         "description": "Sets the loading state of the autocomplete component.",
         "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
       },
       {
         "name": "placeholder",

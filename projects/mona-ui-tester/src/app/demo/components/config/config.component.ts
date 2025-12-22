@@ -1,12 +1,14 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ChevronsUpDown, Code, LucideAngularModule } from "lucide-angular";
+import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
     DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
+    ExpansionPanelComponent,
+    ExpansionPanelTitleTemplateDirective,
     NumericTextBoxComponent,
     SwitchComponent
 } from "mona-ui";
@@ -30,7 +32,9 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         InputPropertyPipe,
         NgTemplateOutlet,
         DropDownListValueTemplateDirective,
-        DropDownItemTemplateDirective
+        DropDownItemTemplateDirective,
+        ExpansionPanelComponent,
+        ExpansionPanelTitleTemplateDirective
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,7 +45,6 @@ export class ConfigComponent<C> {
         return createComponentPropertyConfig(config);
     });
     protected readonly codeIcon = Code;
-    protected readonly expandIcon = ChevronsUpDown;
     public readonly config = input.required<ComponentConfig<C>>();
     public readonly inputProperties = computed(() => {
         return this.#componentPropertyConfig().inputs;

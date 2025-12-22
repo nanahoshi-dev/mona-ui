@@ -2,40 +2,60 @@
 
 <div class="flex overflow-auto">
     <div class="flex-1 w-full">
-        <ul class=" bg-demo-background/10 divide-y divide-border select-none">
-            @for (entry of inputProperties(); track $index) {
-                <li class="flex flex-col gap-2 py-2">
-                    <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
-                                             (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
-                </li>
-            }
-            @for (entry of outputProperties(); track $index) {
-                <li class="flex flex-col gap-2 py-2">
-                    <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
-                                             (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
-                </li>
-            }
-            @if (handler) {
-                <ng-container [ngTemplateOutlet]="featureListTemplate"
-                              [ngTemplateOutletContext]="{$implicit: templateProperties(), level: 0}"></ng-container>
-            }
-        </ul>
+        <mona-expansion-panel rounded="none" class="border-t-0 border-l-0 border-r-0"
+                              [class.border-b-0]="outputProperties().length === 0 && !handler">
+            <ng-template monaExpansionPanelTitleTemplate>
+                <span class="text-sm">Inputs</span>
+            </ng-template>
+            <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                @for (entry of inputProperties(); track $index) {
+                    <li class="flex flex-col gap-2 py-2">
+                        <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
+                                                 (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
+                    </li>
+                }
+            </ul>
+        </mona-expansion-panel>
+        @if (outputProperties().length > 0) {
+            <mona-expansion-panel rounded="none" class="border-l-0 border-r-0">
+                <ng-template monaExpansionPanelTitleTemplate>
+                    <span class="text-sm">Outputs</span>
+                </ng-template>
+                <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                    @for (entry of outputProperties(); track $index) {
+                        <li class="flex flex-col gap-2 py-2">
+                            <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
+                                                     (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
+                        </li>
+                    }
+                </ul>
+            </mona-expansion-panel>
+        }
+        @if (handler) {
+            <mona-expansion-panel rounded="none" class="border-l-0 border-r-0 border-b-0">
+                <ng-template monaExpansionPanelTitleTemplate>
+                    <span class="text-sm">Features</span>
+                </ng-template>
+                <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                    <ng-container [ngTemplateOutlet]="featureListTemplate"
+                                  [ngTemplateOutletContext]="{$implicit: templateProperties(), level: 0}"></ng-container>
+                </ul>
+            </mona-expansion-panel>
+        }
         @if (subComponentPropertyConfig().length > 0) {
-            <div class="border-t border-t-border">
-                @for (subComponentEntry of subComponentPropertyConfig(); track $index) {
-                    <div class="flex flex-col group">
-                        <div class="p-2 text-sm font-semibold flex w-full border-b border-border bg-accent"
-                            [class.border-b-0]="$last && !subComponentEntry[1].expanded">
-                            <div class="flex-1 flex items-center">{{subComponentEntry[0]}}</div>
-                            <div>
-                                <button monaButton look="ghost"
-                                        (click)="subComponentEntry[1].expanded = !subComponentEntry[1].expanded">
-                                    <lucide-angular [name]="expandIcon" [size]="16"></lucide-angular>
-                                </button>
-                            </div>
-                        </div>
-                        @if (subComponentEntry[1].expanded) {
-                            <ul>
+            <mona-expansion-panel rounded="none" class="border-l-0 border-r-0 border-b-0">
+                <ng-template monaExpansionPanelTitleTemplate>
+                    <span class="text-sm">Related Components</span>
+                </ng-template>
+                <div class="p-4">
+                    @for (subComponentEntry of subComponentPropertyConfig(); track $index) {
+                        <mona-expansion-panel rounded="none" [class.border-b-0]="!$last">
+                            <ng-template monaExpansionPanelTitleTemplate>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm flex-1">{{ subComponentEntry[0] }}</span>
+                                </div>
+                            </ng-template>
+                            <ul class="group">
                                 @for (property of subComponentEntry[1].inputs; track $index) {
                                     <li class="flex flex-col gap-2 py-2 border-b border-border group-last:last:border-b-0">
                                         <div class="flex flex-col px-2 text-sm gap-2">
@@ -57,10 +77,10 @@
                                     </li>
                                 }
                             </ul>
-                        }
-                    </div>
-                }
-            </div>
+                        </mona-expansion-panel>
+                    }
+                </div>
+            </mona-expansion-panel>
         }
     </div>
 </div>
@@ -71,11 +91,12 @@
             <div class="flex">
                 <div class="flex flex-col flex-1 px-2 gap-2 text-sm">
                     <div class="font-semibold">{{ entry[1].name }}</div>
-                    <div class="font-light text-gray-500">{{entry[1].description}}</div>
+                    <div class="font-light text-gray-500">{{ entry[1].description }}</div>
                 </div>
                 <div class="flex items-center justify-center px-2 gap-2">
                     @if (entry[1].hasCode !== false) {
-                        <button monaButton size="small" look="ghost" (click)="entry[1].codeVisible = !entry[1].codeVisible">
+                        <button monaButton size="small" look="ghost"
+                                (click)="entry[1].codeVisible = !entry[1].codeVisible">
                             <lucide-angular [name]="codeIcon" [size]="16"></lucide-angular>
                         </button>
                     }
@@ -106,27 +127,27 @@
                         >
                             <ng-template monaDropDownListValueTemplate let-dataItem>
                                 @if (entry[1].dropdownTextField) {
-                                    <span>{{dataItem[entry[1].dropdownTextField]}}</span>
+                                    <span>{{ dataItem[entry[1].dropdownTextField] }}</span>
                                 } @else {
                                     @if (dataItem === undefined) {
                                         <span>undefined</span>
                                     } @else if (dataItem === null) {
                                         <span>null</span>
                                     } @else {
-                                        <span>{{dataItem}}</span>
+                                        <span>{{ dataItem }}</span>
                                     }
                                 }
                             </ng-template>
                             <ng-template monaDropDownListItemTemplate let-dataItem>
                                 @if (entry[1].dropdownTextField) {
-                                    <span>{{dataItem[entry[1].dropdownTextField]}}</span>
+                                    <span>{{ dataItem[entry[1].dropdownTextField] }}</span>
                                 } @else {
                                     @if (dataItem === undefined) {
                                         <span>undefined</span>
                                     } @else if (dataItem === null) {
                                         <span>null</span>
                                     } @else {
-                                        <span>{{dataItem}}</span>
+                                        <span>{{ dataItem }}</span>
                                     }
                                 }
                             </ng-template>

@@ -3,7 +3,7 @@ export class PreventableEvent<E extends Event = Event> {
     readonly #type?: string;
     #defaultPrevented: boolean = false;
 
-    protected constructor(type?: string, event?: E) {
+    public constructor(type?: string, event?: E) {
         this.#type = type;
         this.#event = event;
     }

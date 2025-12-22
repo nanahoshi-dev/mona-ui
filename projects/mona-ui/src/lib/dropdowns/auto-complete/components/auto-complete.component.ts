@@ -21,7 +21,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { LucideAngularModule, X } from "lucide-angular";
-import { debounceTime, Subject, take, tap } from "rxjs";
+import { debounceTime, Subject, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
@@ -38,11 +38,13 @@ import { SelectionChangeEvent } from "../../../common/list/models/SelectionChang
 import { ListService } from "../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
+import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupService } from "../../../popup/services/popup.service";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { Action } from "../../../utils/Action";
 import { createElementControlId } from "../../../utils/createElementControlId";
+import { PreventableEvent } from "../../../utils/PreventableEvent";
 import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down-group-header-template.directive";
@@ -165,8 +167,29 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         mode: "single",
         toggleable: false
     };
+    protected readonly resultCountMessage = computed(() => {
+        const count = this.#listService.viewItems().size();
+        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
+    });
     protected readonly selectedKeysChange = output<any[]>();
     protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Sets the aria-label attribute of the autocomplete component.
+     * @default ""
+     */
+    public readonly ariaLabel = input("");
+
+    /**
+     * @description Sets the aria-labelledby attribute of the autocomplete component.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("");
+
+    /**
+     * @description Emits when the popup is about to close. This event is preventable.
+     */
+    public readonly close = output<PopupCloseEvent>();
 
     /**
      * @description Sets the data of the autocomplete component.
@@ -190,6 +213,11 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
      * @default false
      */
     public readonly loading = input(false);
+
+    /**
+     * @description Emits when the popup is about to open. This event is preventable.
+     */
+    public readonly open = output<PreventableEvent>();
 
     /**
      * @description Sets the placeholder text of the autocomplete component.
@@ -301,13 +329,8 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     protected clearValue(event: MouseEvent): void {
         event.stopImmediatePropagation();
         this.clear();
-        this.close();
+        this.closePopup();
         this.focus();
-    }
-
-    protected close(): void {
-        this.#popupRef()?.close();
-        this.#popupRef.set(null);
     }
 
     protected onInputBlur(event: FocusEvent): void {
@@ -315,8 +338,18 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             this.#propagateTouch();
         }
         const popupRef = this.#popupRef();
-        if (popupRef && !popupRef.overlayRef.overlayElement.contains(event.relatedTarget as HTMLElement)) {
-            // this.close();
+        if (
+            popupRef &&
+            event.relatedTarget &&
+            !this.#hostElementRef.nativeElement.contains(event.relatedTarget as HTMLElement) &&
+            !popupRef.overlayRef.overlayElement.contains(event.relatedTarget as HTMLElement)
+        ) {
+            this.closePopup();
+        }
+        this.#listService.clearSelections();
+        this.#listService.clearFilter();
+        if (this.#value() !== this.autoCompleteValue()) {
+            this.updateValue(this.autoCompleteValue());
         }
     }
 
@@ -324,19 +357,19 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         const itemText = this.#listService.getItemText(event.item);
         this.updateValue(itemText);
         this.autoCompleteValue.set(itemText);
-        this.close();
+        this.closePopup();
     }
 
     protected onKeydown(event: KeyboardEvent): void {
         if (event.key === "Escape") {
             if (this.#popupRef()) {
-                this.close();
+                this.closePopup();
             } else {
                 this.clear();
                 window.setTimeout(() => this.focus());
             }
         } else if (event.key === "Tab") {
-            this.close();
+            this.closePopup();
         } else if (event.key === "Enter") {
             this.handleEnterKey();
         } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -346,8 +379,12 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         }
     }
 
-    protected open(): void {
+    protected openPopup(): void {
         if (this.#popupRef()) {
+            return;
+        }
+        const event = this.notifyPopupOpen();
+        if (event.isDefaultPrevented()) {
             return;
         }
         const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
@@ -367,13 +404,11 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             withPush: false
         });
         this.#popupRef.set(popupRef);
+        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
+            this.close.emit(event);
+        });
         popupRef.closed.pipe(take(1)).subscribe(() => {
             this.#popupRef.set(null);
-            this.#listService.clearSelections();
-            this.#listService.clearFilter();
-            if (this.#value() !== this.autoCompleteValue()) {
-                this.updateValue(this.autoCompleteValue());
-            }
             window.setTimeout(() => this.focus());
         });
     }
@@ -383,6 +418,10 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         this.autoCompleteValue.set("");
         this.#listService.clearSelections();
         this.#listService.clearFilter();
+    }
+
+    private closePopup(): void {
+        this.#popupRef()?.close();
     }
 
     private focus(): void {
@@ -417,7 +456,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         } else if (this.#value() !== autoCompleteValue) {
             this.updateValue(autoCompleteValue);
         }
-        this.close();
+        this.closePopup();
     }
 
     private initialize(): void {
@@ -433,19 +472,25 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         return event;
     }
 
+    private notifyPopupOpen(): PreventableEvent {
+        const event = new PreventableEvent("autoCompletePopupOpen");
+        this.open.emit(event);
+        return event;
+    }
+
     private setSubscriptions(): void {
         const debounce = this.#listService.filterableOptions().enabled
             ? this.#listService.filterableOptions().debounce
             : 0;
         this.autoCompleteValue$
             .pipe(
-                tap(() => this.open()),
+                tap(() => this.openPopup()),
                 debounceTime(debounce),
                 takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe((value: string) => {
                 if (!value) {
-                    this.close();
+                    this.closePopup();
                     this.autoCompleteValue.set(value);
                     return;
                 }
