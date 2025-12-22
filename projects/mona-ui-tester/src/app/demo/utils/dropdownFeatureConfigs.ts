@@ -44,8 +44,8 @@ export const dropdownDataSetFeatureConfig = (type: string): ComponentConfigFeatu
         description: `Sets a predefined data set for the ${type} list.`,
         name: "Data Set",
         type: "dropdown",
-        dropdownDataSource: ["foods", "empty"],
-        dropdownValue: "foods"
+        dropdownDataSource: ["Foods", "Empty"],
+        dropdownValue: "Foods"
     };
 };
 

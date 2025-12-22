@@ -2,7 +2,7 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { range } from "@mirei/ts-collections";
-import { Check, LucideAngularModule, Search, TriangleAlert } from "lucide-angular";
+import { Box, Check, LucideAngularModule, Search, TriangleAlert } from "lucide-angular";
 import {
     AutoCompleteComponent,
     DropDownFilterableDirective,
@@ -15,10 +15,10 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownSuffixTemplateDirective,
     DropDownVirtualScrollDirective,
+    FilterableOptions,
+    GroupableOptions,
     VirtualScrollOptions
 } from "mona-ui";
-import { GroupableOptions } from "mona-ui/src/lib/common/list/models/GroupableOptions";
-import { FilterableOptions } from "mona-ui/src/lib/common/models/FilterableOptions";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -174,7 +174,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             class="w-50">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
-                    <span class="font-medium">{{ autoCompleteData().length }} item(s)</span>
+                    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                        Total items: {{ autoCompleteData().length }}
+                    </div>
                 </ng-template>
             }
             @if (groupingFeatures["groupHeaderTemplate"]?.active) {
@@ -184,20 +186,28 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             }
             @if (featureData["headerTemplate"].active) {
                 <ng-template monaDropDownHeaderTemplate>
-                    <span class="text-gray-600 font-semibold px-3 py-0.5 underline">AutoComplete Header</span>
+                    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                        Select your favorite food
+                    </div>
                 </ng-template>
             }
             @if (featureData["itemTemplate"].active) {
                 <ng-template monaDropDownItemTemplate let-item>
-                    <div class="flex items-center w-full h-full">
-                        <span class="flex-1">{{ item.text }}</span>
-                        <span>{{ item.price | currency }}</span>
+                    <div class="flex flex-row w-full">
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 {{ color }}">{{ item.text }}</span>
+                        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                            item.price | currency
+                        }}</span>
                     </div>
                 </ng-template>
             }
             @if (featureData["noDataTemplate"].active) {
                 <ng-template monaDropDownNoDataTemplate>
-                    <span class="text-gray-500">No items found</span>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <lucide-angular [name]="boxIcon"></lucide-angular>
+                        <span>No items found</span>
+                    </div>
                 </ng-template>
             }
             @if (featureData["prefixTemplate"].active) {
@@ -232,7 +242,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     protected readonly alertIcon = TriangleAlert;
     protected readonly autoCompleteData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
-        if (dataSet === "empty") {
+        if (dataSet === "Empty") {
             return [];
         }
         const virtualization = this.virtualization();
@@ -246,6 +256,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
             })
             .toArray();
     });
+    protected readonly boxIcon = Box;
     protected readonly checkIcon = Check;
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly filtering = computed(() => {

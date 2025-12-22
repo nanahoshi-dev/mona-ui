@@ -1,4 +1,4 @@
-import { CurrencyPipe, JsonPipe, NgComponentOutlet } from "@angular/common";
+import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { range } from "@mirei/ts-collections";
@@ -11,11 +11,11 @@ import {
     DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
-    DropDownVirtualScrollDirective
-} from "../../../../../../mona-ui/src/lib";
-import { GroupableOptions } from "../../../../../../mona-ui/src/lib/common/list/models/GroupableOptions";
-import { FilterableOptions } from "../../../../../../mona-ui/src/lib/common/models/FilterableOptions";
-import { VirtualScrollOptions } from "../../../../../../mona-ui/src/lib/common/models/VirtualScrollOptions";
+    DropDownVirtualScrollDirective,
+    FilterableOptions,
+    GroupableOptions,
+    VirtualScrollOptions
+} from "mona-ui";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -228,7 +228,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     protected readonly grouping = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions<unknown, unknown> = {
+        const groupingOptions: GroupableOptions = {
             enabled: features["grouping"].active,
             headerOrder: subFeatures["headerOrder"].dropdownValue,
             orderBy: subFeatures["orderBy"].dropdownValue,

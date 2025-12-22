@@ -102,7 +102,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     readonly #popupRef = signal<PopupRef | null>(null);
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
-    readonly #value = signal("");
+    readonly #value = signal<string | null>(null);
     #propagateChange: Action<string | null> | null = null;
     #propagateTouch: Action | null = null;
 
@@ -168,20 +168,92 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     protected readonly selectedKeysChange = output<any[]>();
     protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
 
+    /**
+     * @description Sets the data of the autocomplete component.
+     * @default []
+     */
     public readonly data = input<Iterable<TData>>([]);
+
+    /**
+     * @description Sets the disabled state of the autocomplete component.
+     * @default false
+     */
     public readonly disabled = model(false);
+
+    /**
+     * @description Sets the predicate function that determines whether an item is disabled.
+     */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
+
+    /**
+     * @description Sets the loading state of the autocomplete component.
+     * @default false
+     */
     public readonly loading = input(false);
+
+    /**
+     * @description Sets the placeholder text of the autocomplete component.
+     * @default ""
+     */
     public readonly placeholder = input("");
+
+    /**
+     * @description Sets the class of the popup element.
+     * @default ""
+     */
     public readonly popupClass = input("");
+
+    /**
+     * @description Sets the height of the popup element.
+     * @default null
+     */
     public readonly popupHeight = input<ListSizeInputType>(null);
+
+    /**
+     * @description Sets the width of the popup element.
+     * @default null
+     */
     public readonly popupWidth = input<ListSizeInputType>(null);
+
+    /**
+     * @description Sets the readonly state of the autocomplete component.
+     * @default false
+     */
     public readonly readonly = input(false);
+
+    /**
+     * @description Sets the border radius of the autocomplete component.
+     * @default "medium"
+     */
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
-    public readonly showClearButton = input(false);
+
+    /**
+     * @description Shows or hides the clear button.
+     * @default true
+     */
+    public readonly showClearButton = input(true);
+
+    /**
+     * @description Sets the size of the autocomplete component.
+     * @default "medium"
+     */
     public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
+
+    /**
+     * @description Sets the text field of the autocomplete component.
+     * It can be null, string, or a function that takes an item and returns a string.
+     * If null, the item itself will be used as the text representation.
+     * @default null
+     */
     public readonly textField = input<DropdownFieldSelectionType<TData>>(null);
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Sets the value field of the autocomplete component.
+     * It can be null, string, or a function that takes an item and returns a string.
+     * If null, the item itself will be used as the value representation.
+     * @default null
+     */
     public readonly valueField = input<DropdownFieldSelectionType<TData>>(null);
 
     public constructor() {
@@ -228,12 +300,9 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
 
     protected clearValue(event: MouseEvent): void {
         event.stopImmediatePropagation();
-        this.updateValue("");
-        this.autoCompleteValue.set("");
+        this.clear();
         this.close();
         this.focus();
-        this.#listService.clearFilter();
-        this.#listService.clearSelections();
     }
 
     protected close(): void {
@@ -259,7 +328,14 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     }
 
     protected onKeydown(event: KeyboardEvent): void {
-        if (event.key === "Escape" || event.key === "Tab") {
+        if (event.key === "Escape") {
+            if (this.#popupRef()) {
+                this.close();
+            } else {
+                this.clear();
+                window.setTimeout(() => this.focus());
+            }
+        } else if (event.key === "Tab") {
             this.close();
         } else if (event.key === "Enter") {
             this.handleEnterKey();
@@ -300,6 +376,13 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             }
             window.setTimeout(() => this.focus());
         });
+    }
+
+    private clear(): void {
+        this.updateValue("");
+        this.autoCompleteValue.set("");
+        this.#listService.clearSelections();
+        this.#listService.clearFilter();
     }
 
     private focus(): void {
@@ -383,8 +466,9 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     }
 
     private updateValue(value: string, notify: boolean = true): void {
+        const oldValue = this.#value();
         this.#value.set(value);
-        if (notify) {
+        if (notify && oldValue !== value) {
             const notifyValue = value === "" || value == null ? null : value;
             this.#propagateChange?.(notifyValue);
         }

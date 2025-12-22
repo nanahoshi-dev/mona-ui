@@ -14,7 +14,7 @@ type OrderByOptions<T, R> =
           orderByDirection?: "asc" | "desc";
       };
 
-export type GroupableOptions<T, R> = {
+export type GroupableOptions<T = unknown, R = unknown> = {
     /**
      * Whether to group the items. If not specified, the items will not be grouped.
      */

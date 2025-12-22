@@ -1044,79 +1044,79 @@
       {
         "name": "data",
         "type": "Iterable<TData>",
-        "description": "",
+        "description": "Sets the data of the autocomplete component.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the disabled state of the autocomplete component.",
         "kind": "model"
       },
       {
         "name": "itemDisabled",
         "type": "DropdownFieldPredicateType<TData>",
-        "description": "",
+        "description": "Sets the predicate function that determines whether an item is disabled.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the loading state of the autocomplete component.",
         "kind": "input"
       },
       {
         "name": "placeholder",
         "type": "string",
-        "description": "",
+        "description": "Sets the placeholder text of the autocomplete component.",
         "kind": "input"
       },
       {
         "name": "popupClass",
         "type": "string",
-        "description": "",
+        "description": "Sets the class of the popup element.",
         "kind": "input"
       },
       {
         "name": "popupHeight",
         "type": "ListSizeInputType",
-        "description": "",
+        "description": "Sets the height of the popup element.",
         "kind": "input"
       },
       {
         "name": "popupWidth",
         "type": "ListSizeInputType",
-        "description": "",
+        "description": "Sets the width of the popup element.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "",
+        "description": "Sets the readonly state of the autocomplete component.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "AutoCompleteVariantProps[\"rounded\"]",
-        "description": "",
+        "description": "Sets the border radius of the autocomplete component.",
         "kind": "input"
       },
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "",
+        "description": "Shows or hides the clear button.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "AutoCompleteVariantProps[\"size\"]",
-        "description": "",
+        "description": "Sets the size of the autocomplete component.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "DropdownFieldSelectionType<TData>",
-        "description": "",
+        "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -1128,7 +1128,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectionType<TData>",
-        "description": "",
+        "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]

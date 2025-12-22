@@ -36,6 +36,7 @@ export * from "./buttons/split-button/directives/split-button-menu-item-text-tem
 export * from "./buttons/split-button/directives/split-button-text-template.directive";
 
 /** Common */
+export * from "./common/models/FilterableOptions";
 export * from "./common/models/VirtualScrollOptions";
 
 export * from "./common/filter-input/models/FilterChangeEvent";
@@ -122,7 +123,6 @@ export * from "./query/sort/SortDescriptor";
 export * from "./grid/models/CellEditEvent";
 export { SelectableOptions } from "./grid/models/SelectableOptions";
 export * from "./grid/models/GroupDescriptor";
-export * from "./grid/models/GroupableOptions";
 export * from "./grid/models/SortableOptions";
 export * from "./grid/directives/grid-cell-template.directive";
 export * from "./grid/directives/grid-cell-tooltip-template.directive";
@@ -237,6 +237,7 @@ export * from "./list-view/directives/list-view-no-data-template.directive";
 export * from "./list-view/directives/list-view-pageable.directive";
 export * from "./list-view/directives/list-view-selectable.directive";
 export * from "./list-view/directives/list-view-virtual-scroll.directive";
+export * from "./common/list/models/GroupableOptions";
 export * from "./common/list/models/NavigableOptions";
 export * from "./common/list/models/PagerSettings";
 
