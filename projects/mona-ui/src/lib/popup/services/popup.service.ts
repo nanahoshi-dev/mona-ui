@@ -1,10 +1,12 @@
 import { AnimationBuilder } from "@angular/animations";
+import { Direction, Directionality } from "@angular/cdk/bidi";
 import {
     ComponentType,
     ConnectionPositionPair,
     FlexibleConnectedPositionStrategy,
     FlexibleConnectedPositionStrategyOrigin,
     Overlay,
+    OverlayConfig,
     OverlayRef,
     PositionStrategy
 } from "@angular/cdk/overlay";
@@ -28,6 +30,7 @@ import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition
 export class PopupService {
     readonly #animationBuilder = inject(AnimationBuilder);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #directionality = inject(Directionality, { optional: true });
     readonly #document = inject(DOCUMENT);
     readonly #injector = inject(Injector);
     readonly #outsideEventsToClose = ["click", "mousedown", "dblclick", "contextmenu", "auxclick"];
@@ -145,19 +148,22 @@ export class PopupService {
     private createOverlay(settings: PopupSettings): OverlayRef {
         const positionStrategy = this.createPositionStrategy(settings);
         const panelClass = this.buildPanelClass(settings.popupClass);
-
-        return this.#overlay.create({
-            positionStrategy,
-            hasBackdrop: settings.hasBackdrop ?? false,
-            height: settings.height,
-            maxHeight: settings.maxHeight,
-            maxWidth: settings.maxWidth,
-            minHeight: settings.minHeight,
-            minWidth: settings.minWidth,
-            width: settings.width,
-            panelClass,
-            backdropClass: settings.backdropClass ?? "transparent"
-        });
+        const direction = this.#directionality?.value;
+        return this.#overlay.create(
+            new OverlayConfig({
+                positionStrategy,
+                hasBackdrop: settings.hasBackdrop ?? false,
+                height: settings.height,
+                maxHeight: settings.maxHeight,
+                maxWidth: settings.maxWidth,
+                minHeight: settings.minHeight,
+                minWidth: settings.minWidth,
+                width: settings.width,
+                panelClass,
+                backdropClass: settings.backdropClass ?? "transparent",
+                direction
+            })
+        );
     }
 
     private createPositionStrategy(settings: PopupSettings): PositionStrategy {
@@ -166,7 +172,11 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+        const position = this.getPosition(
+            settings.anchorConnectionPoint,
+            settings.popupConnectionPoint,
+            this.#directionality?.value
+        );
         const strategy = this.#overlay
             .position()
             .flexibleConnectedTo(resolvedAnchor)
@@ -229,7 +239,8 @@ export class PopupService {
 
     private getPosition(
         anchorConnectionPoint?: ConnectionPoint | null,
-        popupConnectionPoint?: ConnectionPoint | null
+        popupConnectionPoint?: ConnectionPoint | null,
+        direction?: Direction
     ): ConnectionPositionPair[] {
         const anchorPoint = anchorConnectionPoint ?? "bottomleft";
         const popupPoint = popupConnectionPoint ?? "topleft";

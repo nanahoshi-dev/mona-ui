@@ -1,19 +1,12 @@
 import { animate, style, transition, trigger } from "@angular/animations";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    inject,
-    input,
-    linkedSignal,
-    output,
-    signal
-} from "@angular/core";
+import { Directionality } from "@angular/cdk/bidi";
+import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
     ColorPickerComponent,
+    DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
     ThemeService,
@@ -34,7 +27,8 @@ import { ConfigComponent } from "../config/config.component";
         CodeViewerComponent,
         ButtonDirective,
         LucideAngularModule,
-        ColorPickerComponent
+        ColorPickerComponent,
+        DropDownItemTemplateDirective
     ],
     templateUrl: "./demo-container.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +40,8 @@ import { ConfigComponent } from "../config/config.component";
     ]
 })
 export class DemoContainerComponent<TComponent> {
-    // readonly #defaultColors = signal<{ mona: string; shadcn: string }>({ mona: "var(--color-demo-background)", shadcn: "var(--color-demo-background)" });
+    readonly #directionality = inject(Directionality);
+    readonly #document = inject(DOCUMENT);
     readonly #themeService = inject(ThemeService);
     protected readonly Code = Code;
     protected readonly background = computed(() => {
@@ -58,6 +53,7 @@ export class DemoContainerComponent<TComponent> {
     });
     protected readonly codeVisible = signal(false);
     protected readonly customColor = signal<string | null>(null);
+    protected readonly direction = signal<"ltr" | "rtl">("ltr");
     protected readonly selectedTheme = computed(() => this.#themeService.theme());
     protected readonly themeDropdownData = signal<ThemeStyle[]>(["mona", "shadcn"]);
     public readonly config = input.required<ComponentConfig<TComponent>>();
@@ -65,11 +61,17 @@ export class DemoContainerComponent<TComponent> {
     public readonly subComponentMetadata = input<Record<string, ComponentMetadata>>();
     public readonly valueChange = output<Record<string, unknown>>();
 
-    public onCodeToggle(): void {
+    protected onCodeToggle(): void {
         this.codeVisible.update(visible => !visible);
     }
 
-    public onThemeChange(theme: ThemeStyle): void {
+    protected onDirectionChange(direction: "ltr" | "rtl"): void {
+        this.direction.set(direction);
+        this.#document.documentElement.setAttribute("dir", direction);
+        this.#directionality.change.emit(direction);
+    }
+
+    protected onThemeChange(theme: ThemeStyle): void {
         this.#themeService.setTheme(theme);
     }
 }

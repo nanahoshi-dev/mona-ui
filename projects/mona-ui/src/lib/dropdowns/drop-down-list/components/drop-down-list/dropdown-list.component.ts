@@ -21,7 +21,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { Predicate } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import { distinctUntilChanged, fromEvent, take, withLatestFrom } from "rxjs";
 import { twMerge } from "tailwind-merge";

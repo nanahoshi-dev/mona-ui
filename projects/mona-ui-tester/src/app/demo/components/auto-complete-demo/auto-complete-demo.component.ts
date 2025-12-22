@@ -299,7 +299,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     });
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
-    public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>((item: any) => false);
+    public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>(null);
     public readonly loading = input<ReturnType<AutoCompleteComponent["loading"]>>(false);
     public readonly placeholder = input<ReturnType<AutoCompleteComponent["placeholder"]>>("");
     public readonly popupClass = input<ReturnType<AutoCompleteComponent["popupClass"]>>("");
