@@ -2,6 +2,7 @@ import { VariantProps } from "class-variance-authority";
 import { ThemeStyle } from "../../../theme/models/Theme";
 import { VariantInputs } from "../../../utils/VariantInputs";
 import {
+    autoCompleteAffixContainerVariants as monaAutoCompleteAffixContainerVariants,
     autoCompleteBaseVariants as monaAutoCompleteBaseVariants,
     autoCompletePopupVariants as monaAutoCompletePopupVariants,
     autoCompleteTextInputVariants as monaAutoCompleteTextInputVariants
@@ -34,6 +35,15 @@ export const autoCompleteTextInputThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const autoCompleteAffixContainerThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaAutoCompleteAffixContainerVariants;
+        default:
+            return monaAutoCompleteAffixContainerVariants;
+    }
+};
+
 type AutoCompleteBaseVariantProps = VariantProps<ReturnType<typeof autoCompleteBaseThemeVariants>>;
 type AutoCompleteBaseVariantInput = VariantInputs<AutoCompleteBaseVariantProps>;
 
@@ -43,9 +53,14 @@ type AutoCompletePopupVariantInput = VariantInputs<AutoCompletePopupVariantProps
 type AutoCompleteTextInputVariantProps = VariantProps<ReturnType<typeof autoCompleteTextInputThemeVariants>>;
 type AutoCompleteTextInputVariantInput = VariantInputs<AutoCompleteTextInputVariantProps>;
 
+type AutoCompleteAffixContainerVariantProps = VariantProps<ReturnType<typeof autoCompleteAffixContainerThemeVariants>>;
+type AutoCompleteAffixContainerVariantInput = VariantInputs<AutoCompleteAffixContainerVariantProps>;
+
 export type AutoCompleteVariantProps = AutoCompleteBaseVariantProps &
     AutoCompletePopupVariantProps &
-    AutoCompleteTextInputVariantProps;
+    AutoCompleteTextInputVariantProps &
+    AutoCompleteAffixContainerVariantProps;
 export type AutoCompleteVariantInput = Omit<AutoCompleteBaseVariantInput, "focused"> &
     AutoCompletePopupVariantInput &
-    AutoCompleteTextInputVariantInput;
+    AutoCompleteTextInputVariantInput &
+    AutoCompleteAffixContainerVariantInput;

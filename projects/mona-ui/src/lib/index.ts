@@ -78,6 +78,8 @@ export * from "./dropdowns/directives/drop-down-group-header-template.directive"
 export * from "./dropdowns/directives/drop-down-header-template.directive";
 export * from "./dropdowns/directives/drop-down-item-template.directive";
 export * from "./dropdowns/directives/drop-down-no-data-template.directive";
+export * from "./dropdowns/directives/dropdown-prefix-template.directive";
+export * from "./dropdowns/directives/dropdown-suffix-template.directive";
 export * from "./dropdowns/directives/drop-down-virtual-scroll.directive";
 
 /* Auto Complete */

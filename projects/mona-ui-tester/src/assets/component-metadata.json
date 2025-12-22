@@ -215,72 +215,6 @@
       }
     ]
   },
-  "AutoCompleteComponent": {
-    "name": "AutoCompleteComponent",
-    "selector": "\"mona-auto-complete\"",
-    "inputs": [
-      {
-        "name": "selectedKeysChange",
-        "type": "any[]",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "size",
-        "type": "DropdownSelectorVariantProps[\"size\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "data",
-        "type": "Iterable<TData>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "itemDisabled",
-        "type": "string | Predicate<TData> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "placeholder",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showClearButton",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "textField",
-        "type": "string | Selector<TData, string> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "valueField",
-        "type": "string | Selector<TData, any> | null | undefined",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "ComboBoxComponent": {
     "name": "ComboBoxComponent",
     "selector": "\"mona-combo-box\"",
@@ -1092,6 +1026,108 @@
       {
         "name": "item",
         "type": "ListItem<TData>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "AutoCompleteComponent": {
+    "name": "AutoCompleteComponent",
+    "selector": "\"mona-auto-complete\"",
+    "inputs": [
+      {
+        "name": "selectedKeysChange",
+        "type": "any[]",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "data",
+        "type": "Iterable<TData>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "",
+        "kind": "model"
+      },
+      {
+        "name": "itemDisabled",
+        "type": "DropdownFieldPredicateType<TData>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "AutoCompleteVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "AutoCompleteVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "textField",
+        "type": "DropdownFieldSelectionType<TData>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "valueField",
+        "type": "DropdownFieldSelectionType<TData>",
         "description": "",
         "kind": "input"
       }
@@ -2824,6 +2860,12 @@
         "kind": "input"
       },
       {
+        "name": "focusOnMount",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "height",
         "type": "ListSizeInputType",
         "description": "",
@@ -2837,6 +2879,12 @@
       },
       {
         "name": "listClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listId",
         "type": "string",
         "description": "",
         "kind": "input"
@@ -2892,6 +2940,18 @@
       {
         "name": "template",
         "type": "TemplateRef<ListItemTemplateContext<TData>> | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "LoadingIndicatorComponent": {
+    "name": "LoadingIndicatorComponent",
+    "selector": "\"mona-loading-indicator\"",
+    "inputs": [
+      {
+        "name": "size",
+        "type": "number",
         "description": "",
         "kind": "input"
       }
@@ -3239,7 +3299,7 @@
       },
       {
         "name": "itemDisabled",
-        "type": "string | Predicate<TData> | null | undefined",
+        "type": "DropdownFieldPredicateType<TData>",
         "description": "A predicate function or the name of the field that determines whether an item is disabled.",
         "kind": "input"
       },
@@ -3269,7 +3329,7 @@
       },
       {
         "name": "textField",
-        "type": "string | null | undefined",
+        "type": "DropdownFieldSelectionType<TData>",
         "description": "The text field name of the data item.",
         "kind": "input"
       },
@@ -3281,7 +3341,7 @@
       },
       {
         "name": "valueField",
-        "type": "string | null | undefined",
+        "type": "DropdownFieldSelectionType<TData>",
         "description": "The value field name of the data item.",
         "kind": "input"
       }
@@ -4350,13 +4410,13 @@
       {
         "name": "closable",
         "type": "boolean",
-        "description": "Whether the tab is closable.\nIf true, a close button will be displayed for the tab.\nThis will take precedence over the `closable` prop on the `mona-tabs` component.",
+        "description": "Whether the tab is closable.\r\nIf true, a close button will be displayed for the tab.\r\nThis will take precedence over the `closable` prop on the `mona-tabs` component.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the tab is disabled.\nIf true, the tab will be disabled and cannot be selected.\nThis will take precedence over the `disabled` prop on the `mona-tabs` component.",
+        "description": "Whether the tab is disabled.\r\nIf true, the tab will be disabled and cannot be selected.\r\nThis will take precedence over the `disabled` prop on the `mona-tabs` component.",
         "kind": "input"
       },
       {
@@ -4388,6 +4448,12 @@
         "type": "TabListVariantProps[\"rounded\"]",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "selectedTabId",
+        "type": "string | null",
+        "description": "",
+        "kind": "model"
       },
       {
         "name": "size",

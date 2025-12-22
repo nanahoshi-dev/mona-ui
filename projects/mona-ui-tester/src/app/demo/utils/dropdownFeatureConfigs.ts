@@ -36,6 +36,19 @@ export const dropdownFilteringFeatureConfig = <TDropdown = any>(
     };
 };
 
+export const dropdownDataSetFeatureConfig = (type: string): ComponentConfigFeatureItemOptions<string> => {
+    return {
+        code: ``,
+        hasCode: false,
+        active: false,
+        description: `Sets a predefined data set for the ${type} list.`,
+        name: "Data Set",
+        type: "dropdown",
+        dropdownDataSource: ["foods", "empty"],
+        dropdownValue: "foods"
+    };
+};
+
 export const dropdownGroupingFeatureConfig = <TDropdown = any>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {
@@ -88,6 +101,72 @@ export const dropdownGroupingFeatureConfig = <TDropdown = any>(
                 name: "Group Header Template"
             }
         }
+    };
+};
+
+export const dropdownPrefixTemplateFeatureConfig = <TDropdown = any>(
+    type: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `Enable prefix template for the ${type} list.`,
+        name: "Prefix Template"
+    };
+};
+
+export const dropdownSuffixTemplateFeatureConfig = <TDropdown = any>(
+    type: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `Enable suffix template for the ${type} list.`,
+        name: "Suffix Template"
+    };
+};
+
+export const dropdownFooterTemplateFeatureConfig = <TDropdown = any>(
+    type: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `Enable footer template for the ${type} list.`,
+        name: "Footer Template"
+    };
+};
+
+export const dropdownNoDataTemplateFeatureConfig = <TDropdown = any>(
+    type: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `Enable no data template for the ${type} list.`,
+        name: "No Data Template"
+    };
+};
+
+export const dropdownHeaderTemplateFeatureConfig = <TDropdown = any>(
+    type: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `Enable header template for the ${type} list.`,
+        name: "Header Template"
+    };
+};
+
+export const dropdownItemTemplateFeatureConfig = <TDropdown = any>(
+    type: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `Enable item template for the ${type} list.`,
+        name: "Item Template"
     };
 };
 

@@ -1,3 +1,8 @@
+@if (prefixTemplate()) {
+    <span [class]="affixClass()">
+        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+    </span>
+}
 <input monaTextBox
        role="combobox"
        [class]="inputClass()"
@@ -15,40 +20,49 @@
        (ngModelChange)="autoCompleteValue$.next($event)"
        (blur)="onInputBlur($event)"
        (keydown)="onKeydown($event)">
-@if (showClearButton() && autoCompleteValue()) {
+@if (showClearButton() && autoCompleteValue() && !loading()) {
     <button monaButton look="link" size="small" class="px-2 py-0 h-full" [tabindex]="-1" (click)="clearValue($event)">
-        <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
+        <lucide-angular class="opacity-50 size-4 hover:opacity-90" [name]="clearIcon"></lucide-angular>
     </button>
+}
+@if (loading()) {
+    <mona-loading-indicator></mona-loading-indicator>
+}
+@if (suffixTemplate()) {
+    <span [class]="affixClass()">
+        <ng-container [ngTemplateOutlet]="suffixTemplate()"></ng-container>
+    </span>
 }
 
 <ng-template #popupTemplate>
-    <div [class]="popupClasses()" [attr.role]="'region'">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId">
+    <div [class]="listPopupClass()" [attr.role]="'region'">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId"
+                   [height]="listPopupHeight()">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
-                    <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
                 </ng-template>
             }
             @if (groupHeaderTemplate()) {
                 <ng-template monaListGroupHeaderTemplate let-group>
-                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()??null"
+                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()"
                                   [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
                 </ng-template>
             }
             @if (headerTemplate()) {
                 <ng-template monaListHeaderTemplate>
-                    <ng-container [ngTemplateOutlet]="headerTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="headerTemplate()"></ng-container>
                 </ng-template>
             }
             @if (itemTemplate()) {
                 <ng-template monaListItemTemplate let-dataItem>
-                    <ng-container [ngTemplateOutlet]="itemTemplate()??null"
+                    <ng-container [ngTemplateOutlet]="itemTemplate()"
                                   [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
                 </ng-template>
             }
             @if (noDataTemplate()) {
                 <ng-template monaListNoDataTemplate>
-                    <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="noDataTemplate()"></ng-container>
                 </ng-template>
             }
         </mona-list>

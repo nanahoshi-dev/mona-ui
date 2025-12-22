@@ -1,12 +1,19 @@
-import { NgComponentOutlet } from "@angular/common";
+import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { range } from "@mirei/ts-collections";
+import { Check, LucideAngularModule, Search, TriangleAlert } from "lucide-angular";
 import {
     AutoCompleteComponent,
     DropDownFilterableDirective,
+    DropDownFooterTemplateDirective,
     DropDownGroupableDirective,
     DropDownGroupHeaderTemplateDirective,
+    DropDownHeaderTemplateDirective,
+    DropDownItemTemplateDirective,
+    DropDownNoDataTemplateDirective,
+    DropdownPrefixTemplateDirective,
+    DropdownSuffixTemplateDirective,
     DropDownVirtualScrollDirective,
     VirtualScrollOptions
 } from "mona-ui";
@@ -15,8 +22,15 @@ import { FilterableOptions } from "mona-ui/src/lib/common/models/FilterableOptio
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
+    dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
+    dropdownFooterTemplateFeatureConfig,
     dropdownGroupingFeatureConfig,
+    dropdownHeaderTemplateFeatureConfig,
+    dropdownItemTemplateFeatureConfig,
+    dropdownNoDataTemplateFeatureConfig,
+    dropdownPrefixTemplateFeatureConfig,
+    dropdownSuffixTemplateFeatureConfig,
     dropdownVirtualizationFeatureConfig
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -31,9 +45,16 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoCompleteComponent<any>> {
     readonly #injector = createFeatureInjector({
+        dataSet: dropdownDataSetFeatureConfig("autocomplete"),
         filtering: dropdownFilteringFeatureConfig("autocomplete"),
+        footerTemplate: dropdownFooterTemplateFeatureConfig("autocomplete"),
         grouping: dropdownGroupingFeatureConfig("autocomplete"),
-        virtualization: dropdownVirtualizationFeatureConfig("dropdown")
+        headerTemplate: dropdownHeaderTemplateFeatureConfig("autocomplete"),
+        itemTemplate: dropdownItemTemplateFeatureConfig("autocomplete"),
+        noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
+        prefixTemplate: dropdownPrefixTemplateFeatureConfig("autocomplete"),
+        suffixTemplate: dropdownSuffixTemplateFeatureConfig("autocomplete"),
+        virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
     });
     protected readonly config = signal<ComponentConfig<AutoCompleteComponent<any>>>({
         code: ``,
@@ -47,12 +68,36 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 value: false
             },
             itemDisabled: {
-                type: "function",
-                value: (item: any) => false
+                type: "dropdown",
+                value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
+                defaultValue: null,
+                clearable: true,
+                placeholder: "Select a condition..."
+            },
+            loading: {
+                type: "boolean",
+                value: false
             },
             placeholder: {
                 type: "string",
                 value: ""
+            },
+            popupClass: {
+                type: "string",
+                value: ""
+            },
+            popupHeight: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                max: 500,
+                value: null
+            },
+            popupWidth: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                value: null
             },
             rounded: {
                 type: "dropdown",
@@ -93,7 +138,15 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         DropDownGroupableDirective,
         DropDownGroupHeaderTemplateDirective,
         DropDownVirtualScrollDirective,
-        DropDownFilterableDirective
+        DropDownFilterableDirective,
+        DropdownPrefixTemplateDirective,
+        LucideAngularModule,
+        DropdownSuffixTemplateDirective,
+        DropDownFooterTemplateDirective,
+        DropDownItemTemplateDirective,
+        DropDownNoDataTemplateDirective,
+        DropDownHeaderTemplateDirective,
+        CurrencyPipe
     ],
     template: `
         @let featureData = features();
@@ -102,7 +155,11 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             [data]="autoCompleteData()"
             [disabled]="disabled()"
             [itemDisabled]="itemDisabled()"
+            [loading]="loading()"
             [placeholder]="placeholder()"
+            [popupClass]="popupClass()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
             [rounded]="rounded()"
             [showClearButton]="showClearButton()"
             [size]="size()"
@@ -115,9 +172,54 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             [monaDropDownVirtualScroll]="virtualization()"
             [groupBy]="groupBy()"
             class="w-50">
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaDropDownFooterTemplate>
+                    <span class="font-medium">{{ autoCompleteData().length }} item(s)</span>
+                </ng-template>
+            }
             @if (groupingFeatures["groupHeaderTemplate"]?.active) {
                 <ng-template monaDropDownGroupHeaderTemplate let-group>
                     <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+                </ng-template>
+            }
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaDropDownHeaderTemplate>
+                    <span class="text-gray-600 font-semibold px-3 py-0.5 underline">AutoComplete Header</span>
+                </ng-template>
+            }
+            @if (featureData["itemTemplate"].active) {
+                <ng-template monaDropDownItemTemplate let-item>
+                    <div class="flex items-center w-full h-full">
+                        <span class="flex-1">{{ item.text }}</span>
+                        <span>{{ item.price | currency }}</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaDropDownNoDataTemplate>
+                    <span class="text-gray-500">No items found</span>
+                </ng-template>
+            }
+            @if (featureData["prefixTemplate"].active) {
+                <ng-template monaDropdownPrefixTemplate>
+                    <lucide-angular [name]="searchIcon" [size]="16" class="h-full ml-1"></lucide-angular>
+                </ng-template>
+            }
+            @if (featureData["suffixTemplate"].active) {
+                <ng-template monaDropdownSuffixTemplate>
+                    @if (selectedItem()) {
+                        <lucide-angular
+                            [name]="checkIcon"
+                            [size]="16"
+                            class="h-full mr-1"
+                            [style.color]="'var(--color-success)'"></lucide-angular>
+                    } @else {
+                        <lucide-angular
+                            [name]="alertIcon"
+                            [size]="16"
+                            class="h-full mr-1"
+                            [style.color]="'var(--color-warning)'"></lucide-angular>
+                    }
                 </ng-template>
             }
         </mona-auto-complete>
@@ -127,7 +229,12 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     }
 })
 class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {
+    protected readonly alertIcon = TriangleAlert;
     protected readonly autoCompleteData = computed(() => {
+        const dataSet = this.features()["dataSet"].dropdownValue;
+        if (dataSet === "empty") {
+            return [];
+        }
         const virtualization = this.virtualization();
         if (!virtualization.enabled) {
             return dropdownFoodData;
@@ -139,6 +246,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
             })
             .toArray();
     });
+    protected readonly checkIcon = Check;
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly filtering = computed(() => {
         const features = this.features();
@@ -167,6 +275,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         };
         return groupingOptions;
     });
+    protected readonly searchIcon = Search;
     protected readonly selectedItem = signal<unknown | null>(null);
     protected readonly virtualization = computed(() => {
         const features = this.features();
@@ -180,7 +289,11 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>((item: any) => false);
+    public readonly loading = input<ReturnType<AutoCompleteComponent["loading"]>>(false);
     public readonly placeholder = input<ReturnType<AutoCompleteComponent["placeholder"]>>("");
+    public readonly popupClass = input<ReturnType<AutoCompleteComponent["popupClass"]>>("");
+    public readonly popupHeight = input<ReturnType<AutoCompleteComponent["popupHeight"]>>(null);
+    public readonly popupWidth = input<ReturnType<AutoCompleteComponent["popupWidth"]>>(null);
     public readonly rounded = input<ReturnType<AutoCompleteComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<AutoCompleteComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<AutoCompleteComponent["size"]>>("small");

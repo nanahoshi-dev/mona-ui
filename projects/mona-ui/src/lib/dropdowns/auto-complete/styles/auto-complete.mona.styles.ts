@@ -36,7 +36,7 @@ export const autoCompleteTextInputVariants = cva(
     `
         border-none outline-none
         bg-transparent shadow-none
-        px-2 h-full w-full
+        px-2 h-full w-full text-ellipsis
         focus-within:ring-0
     `,
     {
@@ -75,3 +75,5 @@ export const autoCompletePopupVariants = cva(
         }
     }
 );
+
+export const autoCompleteAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);

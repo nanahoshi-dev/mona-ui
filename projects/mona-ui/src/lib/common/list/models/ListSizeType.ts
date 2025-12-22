@@ -1,2 +1,2 @@
-export type ListSizeType = string | undefined;
+export type ListSizeType = string | null | undefined;
 export type ListSizeInputType = ListSizeType | number;

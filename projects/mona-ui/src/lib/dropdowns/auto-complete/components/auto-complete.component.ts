@@ -32,9 +32,11 @@ import { ListHeaderTemplateDirective } from "../../../common/list/directives/lis
 import { ListItemTemplateDirective } from "../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../common/list/directives/list-no-data-template.directive";
 import { ListItem } from "../../../common/list/models/ListItem";
+import { ListSizeInputType } from "../../../common/list/models/ListSizeType";
 import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../common/list/services/list.service";
+import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupService } from "../../../popup/services/popup.service";
@@ -47,8 +49,11 @@ import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down
 import { DropDownHeaderTemplateDirective } from "../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
+import { DropdownPrefixTemplateDirective } from "../../directives/dropdown-prefix-template.directive";
+import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffix-template.directive";
 import { DropdownFieldPredicateType, DropdownFieldSelectionType } from "../../models/DropdownFieldTypes";
 import {
+    autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
     autoCompletePopupThemeVariants,
     autoCompleteTextInputThemeVariants,
@@ -79,7 +84,8 @@ import {
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
         ButtonDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        LoadingIndicatorComponent
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
@@ -103,6 +109,10 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
         return highlightedItem ? highlightedItem.uid : null;
+    });
+    protected readonly affixClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return autoCompleteAffixContainerThemeVariants(theme)();
     });
     protected readonly autoCompleteValue = signal("");
     protected readonly autoCompleteValue$ = new Subject<string>();
@@ -129,33 +139,50 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         return autoCompleteTextInputThemeVariants(theme)({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();
-    protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly popupClasses = computed(() => {
+    protected readonly listPopupClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        return autoCompletePopupThemeVariants(theme)({ rounded, size });
+        const userClass = this.popupClass();
+        const variantClass = autoCompletePopupThemeVariants(theme)({ rounded, size });
+        return twMerge(variantClass, userClass);
     });
+    protected readonly listPopupHeight = computed(() => {
+        const empty = this.isEmpty();
+        const popupHeight = this.popupHeight();
+        if (popupHeight != null) {
+            return popupHeight;
+        }
+        return empty ? 200 : undefined;
+    });
+    protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
+    protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
         mode: "single",
         toggleable: false
     };
     protected readonly selectedKeysChange = output<any[]>();
+    protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
 
     public readonly data = input<Iterable<TData>>([]);
     public readonly disabled = model(false);
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
+    public readonly loading = input(false);
     public readonly placeholder = input("");
+    public readonly popupClass = input("");
+    public readonly popupHeight = input<ListSizeInputType>(null);
+    public readonly popupWidth = input<ListSizeInputType>(null);
     public readonly readonly = input(false);
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
     public readonly showClearButton = input(false);
     public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
-    public readonly textField = input<DropdownFieldSelectionType<TData>>();
+    public readonly textField = input<DropdownFieldSelectionType<TData>>(null);
     public readonly userClass = input<string>("", { alias: "class" });
-    public readonly valueField = input<DropdownFieldSelectionType<TData>>();
+    public readonly valueField = input<DropdownFieldSelectionType<TData>>(null);
 
     public constructor() {
         effect(() => {
@@ -203,6 +230,9 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         event.stopImmediatePropagation();
         this.updateValue("");
         this.autoCompleteValue.set("");
+        this.close();
+        this.focus();
+        this.#listService.clearFilter();
         this.#listService.clearSelections();
     }
 
@@ -217,7 +247,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         }
         const popupRef = this.#popupRef();
         if (popupRef && !popupRef.overlayRef.overlayElement.contains(event.relatedTarget as HTMLElement)) {
-            this.close();
+            // this.close();
         }
     }
 
@@ -244,6 +274,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         if (this.#popupRef()) {
             return;
         }
+        const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
         const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             anchorConnectionPoint: "bottomleft",
@@ -256,7 +287,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             hasBackdrop: false,
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
-            width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
+            width,
             withPush: false
         });
         this.#popupRef.set(popupRef);
