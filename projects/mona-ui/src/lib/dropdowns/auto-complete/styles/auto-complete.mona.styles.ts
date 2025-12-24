@@ -7,6 +7,9 @@ export const autoCompleteBaseVariants = cva(
         bg-background shadow-xs
         focus-within:ring-1 focus-within:ring-primary/40
         transition-[color,box-shadow,border] ease-in-out duration-300
+
+        [&.ng-touched.ng-invalid]:border-error
+        [&.ng-touched.ng-invalid]:ring-error/40
     `,
     {
         variants: {

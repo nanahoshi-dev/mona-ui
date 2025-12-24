@@ -1120,6 +1120,12 @@
         "kind": "input"
       },
       {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the autocomplete component.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "AutoCompleteVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the autocomplete component.",
@@ -1140,7 +1146,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectionType<TData>",
-        "description": "Sets the text field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -1152,7 +1158,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectionType<TData>",
-        "description": "Sets the value field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -2866,8 +2872,26 @@
         "kind": "output"
       },
       {
+        "name": "inputBlur",
+        "type": "FocusEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "inputFocus",
+        "type": "FocusEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "placeholder",
         "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ReturnType<TextBoxComponent[\"size\"]>",
         "description": "",
         "kind": "input"
       }
@@ -2934,6 +2958,12 @@
       {
         "name": "maxHeight",
         "type": "ListSizeInputType",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ReturnType<TextBoxComponent[\"size\"]>",
         "description": "",
         "kind": "input"
       },
@@ -3310,6 +3340,18 @@
         "kind": "output"
       },
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label attribute of the dropdown list component.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "description": "Sets the aria-labelledby attribute of the dropdown list component.",
+        "kind": "input"
+      },
+      {
         "name": "close",
         "type": "PopupCloseEvent",
         "description": "Emits when the popup is about to close. This event is preventable.",
@@ -3367,6 +3409,18 @@
         "name": "popupWidth",
         "type": "ListSizeInputType",
         "description": "Sets the width of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the dropdown list component.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the dropdown list component.",
         "kind": "input"
       },
       {

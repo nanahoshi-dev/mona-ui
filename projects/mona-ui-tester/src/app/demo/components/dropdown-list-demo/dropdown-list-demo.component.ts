@@ -345,7 +345,6 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         };
         return groupingOptions;
     });
-    protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};

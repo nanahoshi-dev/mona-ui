@@ -213,13 +213,13 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     public readonly close = output<PopupCloseEvent>();
 
     /**
-     * @description The data items of the dropdown list.
+     * @description The data items of the dropdown list component.
      * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 
     /**
-     * @description Sets the disabled state of the dropdown list.
+     * @description Sets the disabled state of the dropdown list component.
      */
     public readonly disabled = model(false);
 
@@ -229,7 +229,7 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
-     * @description Sets the loading state of the autocomplete component.
+     * @description Sets the loading state of the dropdown list component.
      * @default false
      */
     public readonly loading = input(false);
@@ -290,13 +290,19 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     public readonly size = input<DropDownListVariantProps["size"]>("medium");
 
     /**
-     * @description The text field name of the data item.
+     * @description Sets the text field of the dropdown list component.
+     * It can be null, string, or a function that takes an item and returns a string.
+     * If null, the item itself will be used as the text representation.
+     * @default null
      */
     public readonly textField = input<DropdownFieldSelectionType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
-     * @description The value field name of the data item.
+     * @description Sets the value field of the dropdown list component.
+     * It can be null, string, or a function that takes an item and returns a string.
+     * If null, the item itself will be used as the value representation.
+     * @default null
      */
     public readonly valueField = input<DropdownFieldSelectionType<TData>>();
 
@@ -322,6 +328,18 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         effect(() => {
             const data = this.data();
             untracked(() => this.#listService.setData(data));
+        });
+        effect(() => {
+            const viewItems = this.#listService.viewItems();
+            if (!viewItems.any()) {
+                this.#listService.highlightedItem.set(null);
+                return;
+            }
+            const selectedItems = this.#listService.selectedListItems();
+            const containsSelectedItems = selectedItems.any(s => viewItems.contains(s));
+            if (!containsSelectedItems) {
+                this.#listService.highlightFirstItem();
+            }
         });
         afterNextRender({
             read: () => {

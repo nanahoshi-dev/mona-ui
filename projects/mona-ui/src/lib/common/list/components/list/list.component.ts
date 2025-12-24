@@ -170,18 +170,6 @@ export class ListComponent<TData> implements OnInit {
         afterNextRender({
             read: () => this.setInitialSelectionOrFocus()
         });
-        effect(() => {
-            const viewItems = this.listService.viewItems();
-            if (!viewItems.any()) {
-                this.listService.highlightedItem.set(null);
-                return;
-            }
-            const selectedItems = this.listService.selectedListItems();
-            const containsSelectedItems = selectedItems.any(s => viewItems.contains(s));
-            if (!containsSelectedItems) {
-                this.listService.highlightFirstItem();
-            }
-        });
     }
 
     public ngOnInit(): void {

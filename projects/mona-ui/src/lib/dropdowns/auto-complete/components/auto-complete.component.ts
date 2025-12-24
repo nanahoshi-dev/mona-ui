@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
+    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -23,7 +24,6 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { LucideAngularModule, X } from "lucide-angular";
 import { debounceTime, Subject, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
@@ -37,6 +37,7 @@ import { SelectableOptions } from "../../../common/list/models/SelectableOptions
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../popup/models/PopupRef";
@@ -66,6 +67,8 @@ import {
 @Component({
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    hostDirectives: [FormFieldValidationDirective],
     providers: [
         ListService,
         {
@@ -85,13 +88,14 @@ import {
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
-        ButtonDirective,
         LucideAngularModule,
         LoadingIndicatorComponent
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-haspopup]": "true",
+        "[attr.aria-readonly]": "readonly() ? true : undefined",
+        "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
         "[attr.tabindex]": "-1",
         "[class]": "baseClass()"
@@ -249,6 +253,12 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     public readonly readonly = input(false);
 
     /**
+     * @description Sets the required state of the autocomplete component.
+     * @default false
+     */
+    public readonly required = input(false);
+
+    /**
      * @description Sets the border radius of the autocomplete component.
      * @default "medium"
      */
@@ -325,22 +335,11 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         this.updateValue(data, false);
     }
 
-    protected onInputBlur(event: FocusEvent): void {
+    protected onInputBlur(): void {
         if (this.#propagateTouch) {
             this.#propagateTouch();
         }
-        const popupRef = this.#popupRef();
-        if (
-            popupRef &&
-            event.relatedTarget &&
-            !this.#hostElementRef.nativeElement.contains(event.relatedTarget as HTMLElement) &&
-            !popupRef.overlayRef.overlayElement.contains(event.relatedTarget as HTMLElement)
-        ) {
-            this.closePopup();
-        }
-        this.#listService.clearSelections();
-        this.#listService.clearFilter();
-        if (this.#value() !== this.autoCompleteValue()) {
+        if (this.#value() !== this.autoCompleteValue() && !this.#popupRef()) {
             this.updateValue(this.autoCompleteValue());
         }
     }
@@ -371,7 +370,10 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         }
     }
 
-    protected onValueClear(event: MouseEvent): void {
+    protected onValueClear(event: MouseEvent | KeyboardEvent): void {
+        if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") {
+            return;
+        }
         event.stopImmediatePropagation();
         this.clear();
         this.closePopup();
@@ -379,7 +381,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     }
 
     protected openPopup(): void {
-        if (this.#popupRef()) {
+        if (this.#popupRef() || this.readonly()) {
             return;
         }
         const event = this.notifyPopupOpen();
