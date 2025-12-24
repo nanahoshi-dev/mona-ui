@@ -1,27 +1,39 @@
-<div class="flex-1 truncate inline-block items-center">
+@if (prefixTemplate()) {
+    <span [class]="affixClass()">
+        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+    </span>
+}
+
+<span [class]="valueContainerClass()">
     @if (!valueTemplate()) {
-        @if (selectedListItem()) {
-            <span>{{valueText()}}</span>
-        } @else {
-            <span>{{placeholder()}}</span>
-        }
+        <div class="flex-1 truncate inline-block items-center">
+            @if (selectedListItem()) {
+                <span>{{ valueText() }}</span>
+            } @else {
+                <span>{{ placeholder() }}</span>
+            }
+        </div>
     } @else {
-        <ng-container [ngTemplateOutlet]="valueTemplate()??null"
+        <ng-container [ngTemplateOutlet]="valueTemplate()"
                       [ngTemplateOutletContext]="{$implicit: selectedDataItem()}"></ng-container>
     }
-</div>
-<div class="flex items-center justify-center ml-2">
-    @if (selectedListItem() && showClearButton()) {
-        <button monaButton look="link" size="small" [tabindex]="-1" (click)="clearValue($event)">
-            <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
-        </button>
-    }
-    <lucide-angular class="opacity-50 size-4" [img]="dropdownIcon"></lucide-angular>
-</div>
+</span>
+
+@if (selectedListItem() && showClearButton() && !loading()) {
+    <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90"
+                    [name]="clearIcon" [size]="14" role="button" (click)="onValueClear($event)"></lucide-angular>
+}
+@if (loading()) {
+    <mona-loading-indicator></mona-loading-indicator>
+}
+
+<lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square" [name]="dropdownIcon"
+                [size]="18"></lucide-angular>
 
 <ng-template #popupTemplate>
-    <div [class]="popupClasses()">
-        <mona-list (itemSelect)="onItemSelect($event)">
+    <div [class]="listPopupClass()" [attr.role]="'region'">
+        <mona-list [listId]="listId" [height]="listPopupHeight()" [focusOnMount]="false"
+                   (itemSelect)="onItemSelect($event)">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>

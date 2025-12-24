@@ -2,6 +2,7 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { range } from "@mirei/ts-collections";
+import { Box, LucideAngularModule, Utensils } from "lucide-angular";
 import {
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
@@ -11,16 +12,22 @@ import {
     DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
+    DropDownNoDataTemplateDirective,
+    DropdownPrefixTemplateDirective,
     DropDownVirtualScrollDirective,
     FilterableOptions,
     GroupableOptions,
+    PreventableEvent,
     VirtualScrollOptions
 } from "mona-ui";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
+    dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownGroupingFeatureConfig,
+    dropdownNoDataTemplateFeatureConfig,
+    dropdownPrefixTemplateFeatureConfig,
     dropdownVirtualizationFeatureConfig
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -35,6 +42,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownListComponent> {
     readonly #injector = createFeatureInjector({
+        dataSet: dropdownDataSetFeatureConfig("autocomplete"),
         filtering: dropdownFilteringFeatureConfig("dropdown"),
         footerTemplate: {
             active: false,
@@ -54,6 +62,20 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             code: ``,
             description: `This template is used to customize the item template of the dropdown list.`,
             name: "Item Template"
+        },
+        noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
+        prefixTemplate: dropdownPrefixTemplateFeatureConfig("dropdown"),
+        preventClose: {
+            active: false,
+            code: ``,
+            description: `The "close" event is fired when the popup is about to close.`,
+            name: "Prevent Close"
+        },
+        preventOpen: {
+            active: false,
+            code: ``,
+            description: `The "open" event is fired when the popup is about to open.`,
+            name: "Prevent Open"
         },
         valueTemplate: {
             active: false,
@@ -80,9 +102,30 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 clearable: true,
                 placeholder: "Select a condition..."
             },
+            loading: {
+                type: "boolean",
+                value: false
+            },
             placeholder: {
                 type: "string",
                 value: "Select an option"
+            },
+            popupClass: {
+                type: "string",
+                value: ""
+            },
+            popupHeight: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                max: 500,
+                value: null
+            },
+            popupWidth: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                value: null
             },
             rounded: {
                 type: "dropdown",
@@ -107,7 +150,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 value: "value"
             }
         },
-        outputs: {},
+        outputs: {
+            close: { type: "event" },
+            open: { type: "event" }
+        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
@@ -131,7 +177,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         DropDownGroupHeaderTemplateDirective,
         DropDownVirtualScrollDirective,
         CurrencyPipe,
-        FormsModule
+        FormsModule,
+        DropDownNoDataTemplateDirective,
+        LucideAngularModule,
+        DropdownPrefixTemplateDirective
     ],
     host: {
         class: "flex flex-col items-center justify-center w-full"
@@ -143,7 +192,11 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             [data]="dropdownData()"
             [disabled]="disabled()"
             [itemDisabled]="itemDisabled()"
+            [loading]="loading()"
             [placeholder]="placeholder()"
+            [popupClass]="popupClass()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
             [rounded]="rounded()"
             [showClearButton]="showClearButton()"
             [size]="size()"
@@ -155,12 +208,19 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             [monaDropDownFilterable]="filtering()"
             [monaDropDownVirtualScroll]="virtualization()"
             [groupBy]="groupBy()"
+            (close)="onPopupClose($event)"
+            (open)="onPopupOpen($event)"
             class="w-44">
             @if (featureData["footerTemplate"].active) {
                 <ng-template monaDropDownFooterTemplate>
                     <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
                         Total items: {{ dropdownData().length }}
                     </div>
+                </ng-template>
+            }
+            @if (groupingFeatures["groupHeaderTemplate"]?.active) {
+                <ng-template monaDropDownGroupHeaderTemplate let-group>
+                    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
                 </ng-template>
             }
             @if (featureData["headerTemplate"].active) {
@@ -181,22 +241,41 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                     </div>
                 </ng-template>
             }
-            @if (featureData["valueTemplate"].active) {
-                <ng-template monaDropDownListValueTemplate let-item>
-                    <span class="text-pink-600 font-bold">{{ item?.text }}</span>
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaDropDownNoDataTemplate>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <lucide-angular [name]="boxIcon"></lucide-angular>
+                        <span>No items found</span>
+                    </div>
                 </ng-template>
             }
-            @if (groupingFeatures["groupHeaderTemplate"]?.active) {
-                <ng-template monaDropDownGroupHeaderTemplate let-group>
-                    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+            @if (featureData["prefixTemplate"].active) {
+                <ng-template monaDropdownPrefixTemplate>
+                    <lucide-angular
+                        [name]="foodIcon"
+                        [size]="16"
+                        class="h-full aspect-square flex items-center justify-center"></lucide-angular>
+                </ng-template>
+            }
+            @if (featureData["valueTemplate"].active) {
+                <ng-template monaDropDownListValueTemplate let-item>
+                    @if (!item) {
+                        <span class="text-gray-500">Select an option...</span>
+                    } @else {
+                        <span class="text-pink-600 font-bold">{{ item?.text }}</span>
+                    }
                 </ng-template>
             }
         </mona-drop-down-list>
-        <!--        <app-code-viewer [code]="selectedItem() | json" language="json"></app-code-viewer>-->
     `
 })
 export class DropdownListWrapperComponent implements ComponentInputsAsSignal<DropdownListComponent> {
+    protected readonly boxIcon = Box;
     protected readonly dropdownData = computed(() => {
+        const dataSet = this.features()["dataSet"].dropdownValue;
+        if (dataSet === "Empty") {
+            return [];
+        }
         const virtualization = this.virtualization();
         if (!virtualization.enabled) {
             return dropdownFoodData;
@@ -220,6 +299,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         };
         return filteringOptions;
     });
+    protected readonly foodIcon = Utensils;
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
@@ -236,7 +316,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         };
         return groupingOptions;
     });
-    protected readonly selectedItem = signal<any>(null);
+    protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};
@@ -249,12 +329,31 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     public readonly data = input<ReturnType<DropdownListComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<DropdownListComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<DropdownListComponent["itemDisabled"]>>("active");
+    public readonly loading = input<ReturnType<DropdownListComponent["loading"]>>(false);
     public readonly placeholder = input<ReturnType<DropdownListComponent["placeholder"]>>("Select an option");
+    public readonly popupClass = input<ReturnType<DropdownListComponent["popupClass"]>>("");
+    public readonly popupHeight = input<ReturnType<DropdownListComponent["popupHeight"]>>(null);
+    public readonly popupWidth = input<ReturnType<DropdownListComponent["popupWidth"]>>(null);
     public readonly rounded = input<ReturnType<DropdownListComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<DropdownListComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<DropdownListComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<DropdownListComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<DropdownListComponent["valueField"]>>("value");
+
+    protected onPopupClose(event: PreventableEvent) {
+        const preventClose = this.features()["preventClose"].active;
+        if (preventClose) {
+            event.preventDefault();
+            console.log("Dropdown List popup prevented from closing");
+        }
+    }
+    protected onPopupOpen(event: PreventableEvent) {
+        const preventOpen = this.features()["preventOpen"].active;
+        if (preventOpen) {
+            event.preventDefault();
+            console.log("Dropdown List popup prevented from opening");
+        }
+    }
 
     protected onValueChange(value: any): void {
         this.selectedItem.set(value);

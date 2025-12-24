@@ -326,13 +326,6 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         this.updateValue(data, false);
     }
 
-    protected clearValue(event: MouseEvent): void {
-        event.stopImmediatePropagation();
-        this.clear();
-        this.closePopup();
-        this.focus();
-    }
-
     protected onInputBlur(event: FocusEvent): void {
         if (this.#propagateTouch) {
             this.#propagateTouch();
@@ -377,6 +370,13 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             event.preventDefault();
             this.handleArrowKeys(event);
         }
+    }
+
+    protected onValueClear(event: MouseEvent): void {
+        event.stopImmediatePropagation();
+        this.clear();
+        this.closePopup();
+        this.focus();
     }
 
     protected openPopup(): void {

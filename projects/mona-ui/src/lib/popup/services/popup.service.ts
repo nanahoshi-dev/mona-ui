@@ -571,7 +571,6 @@ export class PopupService {
                     .elementScrolled()
                     .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
                     .subscribe(() => handleScrollClose());
-
                 subscriptions.push(containerScrollSubscription);
             });
         }
@@ -608,7 +607,6 @@ export class PopupService {
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
         if (resolvedAnchor instanceof HTMLElement) {
             const scrollableContainers = this.getScrollableContainers(resolvedAnchor);
-
             scrollableContainers.forEach(scrollable => {
                 const containerScrollSubscription = scrollable
                     .elementScrolled()
@@ -633,7 +631,6 @@ export class PopupService {
         const anchorElement = this.getAnchorElement(resolvedAnchor);
         const isAnchorClick = anchorElement && anchorElement.contains(eventTarget);
         const isRelevantEventType = this.#outsideEventsToClose.includes(event.type);
-
         return isAnchorClick || !isRelevantEventType;
     }
 

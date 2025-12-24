@@ -17,7 +17,7 @@
             </ul>
         </mona-expansion-panel>
         @if (outputProperties().length > 0) {
-            <mona-expansion-panel rounded="none" class="border-l-0 border-r-0">
+            <mona-expansion-panel rounded="none" class="border-l-0 border-r-0" [class.border-b-0]="!handler">
                 <ng-template monaExpansionPanelTitleTemplate>
                     <span class="text-sm">Outputs</span>
                 </ng-template>

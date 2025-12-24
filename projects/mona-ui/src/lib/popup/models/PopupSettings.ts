@@ -165,7 +165,7 @@ export interface PopupSettings<T = unknown, C = void> {
      * Controls focus restoration behavior when the popup is closed.
      * - true: Always restore focus to anchor
      * - false: Never restore focus (recommended for tooltips)
-     * - "auto": Only restore focus if anchor was focused when popup opened (smart behavior)
+     * - "auto": Only restore focus if the anchor was focused when the popup opened (smart behavior)
      * Default: "auto".
      * @type {boolean | "auto"}
      */
@@ -181,7 +181,6 @@ export interface PopupSettings<T = unknown, C = void> {
 
     /**
      * Whether the popup should track scroll events and reposition itself.
-     * Default: true.
      * @type {boolean}
      */
     withScrollTracking?: boolean;

@@ -9,24 +9,24 @@ export const dropdownListInputVariants = cva(
         shadow-xs
         cursor-pointer select-none
 
-        px-2
-
         hover:bg-accent hover:text-accent-foreground
-
         transition-[color,box-shadow,border] ease-in-out duration-300
-
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
-
         focus-within:ring-1 focus-within:ring-primary/40
-        data-[expanded='true']:ring-1
-        data-[expanded='true']:ring-primary/40
-
         [&.ng-touched.ng-invalid]:border-error
     `,
     {
         variants: {
+            disabled: {
+                true: "pointer-events-none cursor-not-allowed opacity-50",
+                false: ""
+            },
+            expanded: {
+                true: "ring-1 ring-primary/40",
+                false: ""
+            },
+            hasPrefix: {
+                false: "ps-2"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-sm",
@@ -66,3 +66,7 @@ export const dropdownListPopupVariants = cva(
         }
     }
 );
+
+export const dropdownListValueContainerVariants = cva(`overflow-hidden h-full w-full flex items-center`);
+
+export const dropdownListAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);

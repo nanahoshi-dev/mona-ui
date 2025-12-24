@@ -232,6 +232,10 @@ export class ListService<TData> {
         this.selectionChange$.next(item);
     }
 
+    public scrollToItem(item: ListItem<TData>, focus: boolean): void {
+        this.scrollToItem$.next({ item, focus });
+    }
+
     public selectItem(item: ListItem<TData>): void {
         const key = this.getSelectionKey(item);
         const options = this.selectableOptions();

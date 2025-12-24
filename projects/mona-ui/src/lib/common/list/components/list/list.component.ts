@@ -300,7 +300,6 @@ export class ListComponent<TData> implements OnInit {
             const offset = itemHeight * index - rect.height / 2;
             asyncScheduler.schedule(() => {
                 this.virtualScrollViewport()?.scrollToOffset(offset, behavior);
-                // this.virtualScrollViewport()?.scrollToIndex(index, behavior);
                 const scrolledElement = this.#hostElementRef.nativeElement.querySelector(
                     `[data-uid="${item.uid}"]`
                 ) as HTMLElement;

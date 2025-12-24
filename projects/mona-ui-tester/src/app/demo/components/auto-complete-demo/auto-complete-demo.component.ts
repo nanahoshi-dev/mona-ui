@@ -296,7 +296,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     protected readonly grouping = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
-        const groupingOptions: GroupableOptions<unknown, unknown> = {
+        const groupingOptions: GroupableOptions = {
             enabled: features["grouping"].active,
             headerOrder: subFeatures["headerOrder"].dropdownValue,
             orderBy: subFeatures["orderBy"].dropdownValue,
@@ -305,7 +305,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         return groupingOptions;
     });
     protected readonly searchIcon = Search;
-    protected readonly selectedItem = signal<unknown | null>(null);
+    protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};

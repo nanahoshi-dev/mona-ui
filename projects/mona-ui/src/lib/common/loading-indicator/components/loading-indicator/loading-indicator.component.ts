@@ -20,7 +20,7 @@ import { Loader, LucideAngularModule } from "lucide-angular";
         }
     `,
     host: {
-        class: "h-full flex items-center justify-center aspect-square"
+        class: "h-full flex items-center justify-center"
     }
 })
 export class LoadingIndicatorComponent {
