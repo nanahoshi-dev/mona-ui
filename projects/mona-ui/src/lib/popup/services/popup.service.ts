@@ -201,9 +201,8 @@ export class PopupService {
         this.setupCleanupSubscription(popupReference, subscription, settings, originallyFocusedElement);
         if (settings.closeOnScroll) {
             this.setupScrollClosing(settings, popupReference, overlayRef);
-        } else {
-            this.setupScrollTracking(settings, overlayRef, popupReference);
         }
+        this.setupScrollTracking(settings, overlayRef, popupReference);
         this.setupEscapeKeyListener(settings, popupReference);
         this.setupPositionChangeTracking(settings, overlayRef, popupReference);
 
