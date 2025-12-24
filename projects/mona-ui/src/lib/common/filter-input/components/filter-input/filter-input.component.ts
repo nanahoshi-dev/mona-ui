@@ -6,7 +6,6 @@ import {
     effect,
     ElementRef,
     inject,
-    Injector,
     input,
     OnInit,
     output,
@@ -29,20 +28,44 @@ import { FilterChangeEvent } from "../../models/FilterChangeEvent";
 export class FilterInputComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #injector = inject(Injector);
     protected readonly filter$ = new Subject<string>();
     protected readonly filterText = signal("");
 
     public readonly debounce = input(0);
     public readonly filter = input("");
     public readonly filterChange = output<FilterChangeEvent>();
+    public readonly inputBlur = output<FocusEvent>();
+    public readonly inputFocus = output<FocusEvent>();
     public readonly placeholder = input("");
+    public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium");
 
     public constructor() {
         effect(() => {
             const filter = this.filter();
             untracked(() => this.filterText.set(filter));
         });
+        afterNextRender({
+            read: () => {
+                const input = this.#hostElementRef.nativeElement.querySelector("input") as HTMLInputElement;
+                input.focus();
+                fromEvent<KeyboardEvent>(input, "keydown")
+                    .pipe(takeUntilDestroyed(this.#destroyRef))
+                    .subscribe((event: KeyboardEvent) => {
+                        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                            event.preventDefault();
+                            const input = event.target as HTMLInputElement;
+                            input.selectionStart = input.selectionEnd = input.value.length;
+                        } else if (event.key !== "Escape" && event.key !== "Enter") {
+                            event.stopPropagation();
+                        }
+                    });
+            }
+        });
+    }
+
+    public focus(): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input") as HTMLInputElement;
+        input.focus();
     }
 
     public ngOnInit(): void {
@@ -56,23 +79,7 @@ export class FilterInputComponent implements OnInit {
             if (!event.isDefaultPrevented()) {
                 this.filterText.set(value);
             }
+            this.focus();
         });
-        afterNextRender(
-            () => {
-                fromEvent<KeyboardEvent>(
-                    this.#hostElementRef.nativeElement.querySelector("input") as HTMLElement,
-                    "keydown"
-                )
-                    .pipe(takeUntilDestroyed(this.#destroyRef))
-                    .subscribe((event: KeyboardEvent) => {
-                        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-                            event.preventDefault();
-                            const input = event.target as HTMLInputElement;
-                            input.selectionStart = input.selectionEnd = input.value.length;
-                        }
-                    });
-            },
-            { injector: this.#injector }
-        );
     }
 }

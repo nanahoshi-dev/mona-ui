@@ -386,7 +386,9 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         if (event.isDefaultPrevented()) {
             return;
         }
-        const height = this.listPopupHeight();
+
+        const height = this.isEmpty() ? 200 : undefined;
+        const maxHeight = this.listPopupHeight();
         const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
         const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
@@ -399,19 +401,14 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             content: this.popupTemplate(),
             hasBackdrop: false,
             height,
+            maxHeight,
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
             width,
             withPush: false
         });
         this.#popupRef.set(popupRef);
-        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
-            this.close.emit(event);
-        });
-        popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef.set(null);
-            window.setTimeout(() => this.focus());
-        });
+        this.setPopupCloseSubscriptions(popupRef);
     }
 
     private clear(): void {
@@ -441,6 +438,14 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
     }
 
     private handleArrowKeys(event: KeyboardEvent): void {
+        if (event.altKey) {
+            if (event.key === "ArrowDown") {
+                this.openPopup();
+            } else {
+                this.closePopup();
+            }
+            return;
+        }
         const direction = event.key === "ArrowDown" ? "next" : "previous";
         this.#listService.navigate(direction, "highlight", false);
     }
@@ -477,6 +482,16 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         const event = new PreventableEvent("autoCompletePopupOpen");
         this.open.emit(event);
         return event;
+    }
+
+    private setPopupCloseSubscriptions(popupRef: PopupRef): void {
+        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
+            this.close.emit(event);
+        });
+        popupRef.closed.pipe(take(1)).subscribe(() => {
+            this.#popupRef.set(null);
+            window.setTimeout(() => this.focus());
+        });
     }
 
     private setSubscriptions(): void {

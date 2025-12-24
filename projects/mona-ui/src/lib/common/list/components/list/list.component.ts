@@ -21,6 +21,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
 import { PlaceholderComponent } from "../../../../layout/placeholder/components/placeholder/placeholder.component";
 import { FilterInputComponent } from "../../../filter-input/components/filter-input/filter-input.component";
 import { FilterChangeEvent } from "../../../filter-input/models/FilterChangeEvent";
@@ -37,6 +38,7 @@ import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
 import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
 import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.styles";
+import { cycleThroughMatchedItems } from "../../utils/cycleThroughMatchedItems";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
 
@@ -66,6 +68,7 @@ export class ListComponent<TData> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #typeaheadKey$ = new Subject<string>();
+    private readonly filterInput = viewChild(FilterInputComponent);
     protected readonly classes = computed(() => {
         const classes = listVariants();
         return twMerge(classes);
@@ -143,6 +146,7 @@ export class ListComponent<TData> implements OnInit {
     public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly maxHeight = input<ListSizeInputType>(undefined);
+    public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium"); // TODO: Update this to a cva variable when list styles are added
     public readonly textField = input<ListKeySelector<TData, string> | undefined>(null);
     public readonly width = input<ListSizeInputType>(undefined);
 
@@ -165,6 +169,18 @@ export class ListComponent<TData> implements OnInit {
         });
         afterNextRender({
             read: () => this.setInitialSelectionOrFocus()
+        });
+        effect(() => {
+            const viewItems = this.listService.viewItems();
+            if (!viewItems.any()) {
+                this.listService.highlightedItem.set(null);
+                return;
+            }
+            const selectedItems = this.listService.selectedListItems();
+            const containsSelectedItems = selectedItems.any(s => viewItems.contains(s));
+            if (!containsSelectedItems) {
+                this.listService.highlightFirstItem();
+            }
         });
     }
 
@@ -189,28 +205,14 @@ export class ListComponent<TData> implements OnInit {
     }
 
     private cycleThroughMatchedItems(buffer: string): void {
-        const matchedItems = this.listService
-            .viewItems()
-            .where(item => {
+        const nextItem = cycleThroughMatchedItems(
+            this.listService.viewItems(),
+            this.listService.highlightedItem(),
+            item => {
                 const text = this.listService.getItemText(item);
                 return text.toLowerCase().startsWith(buffer.toLowerCase());
-            })
-            .toImmutableList();
-        if (!matchedItems.any()) {
-            return;
-        }
-        const highlightedItem = this.listService.highlightedItem();
-        let nextItem: ListItem<TData> | null;
-        if (highlightedItem) {
-            const currentIndex = matchedItems.indexOf(highlightedItem);
-            if (currentIndex === -1 || currentIndex === matchedItems.count() - 1) {
-                nextItem = matchedItems.firstOrDefault();
-            } else {
-                nextItem = matchedItems.elementAt(currentIndex + 1);
             }
-        } else {
-            nextItem = matchedItems.firstOrDefault();
-        }
+        );
         if (nextItem) {
             const navigationMode = this.listService.navigableOptions().mode;
             this.listService.highlightedItem.set(nextItem);
@@ -249,6 +251,10 @@ export class ListComponent<TData> implements OnInit {
             if (this.listService.selectedKeysChange) {
                 this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
             }
+        }
+        const filterInput = this.filterInput();
+        if (filterInput) {
+            filterInput.focus();
         }
     }
 
@@ -311,7 +317,7 @@ export class ListComponent<TData> implements OnInit {
     }
 
     private selectItem(item: ListItem<TData>): void {
-        const selectedItem = this.listService.selectedListItems();
+        const selectedItems = this.listService.selectedListItems();
         const options = this.listService.selectableOptions();
 
         if (!options.enabled) {
@@ -319,10 +325,10 @@ export class ListComponent<TData> implements OnInit {
         }
 
         if (
-            (options.mode === "single" && !selectedItem.contains(item)) ||
+            (options.mode === "single" && !selectedItems.contains(item)) ||
             (options.mode === "single" && options.toggleable) ||
             options.mode === "multiple" ||
-            (options.mode === "single" && selectedItem.size() > 1)
+            (options.mode === "single" && selectedItems.size() > 1)
         ) {
             this.listService.selectItem(item);
             this.listService.highlightedItem.set(item);

@@ -40,5 +40,5 @@ export class ListItemComponent<TData> {
         return twMerge(classes);
     });
     public readonly item = input.required<ListItem<TData>>();
-    public readonly template = input<TemplateRef<ListItemTemplateContext<TData>> | null>(null);
+    public readonly template = input<TemplateRef<ListItemTemplateContext<TData>> | null>();
 }

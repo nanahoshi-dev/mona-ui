@@ -21,6 +21,7 @@ import { NavigationDirection } from "../models/NavigationDirection";
 import { NavigationMode } from "../models/NavigationMode";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { PagerSettings } from "../models/PagerSettings";
+import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 
 @Injectable()
 export class ListService<TData> {
@@ -149,6 +150,15 @@ export class ListService<TData> {
         this.highlightedItem.set(null);
     }
 
+    public cycleThroughMatchedItems(buffer: string): ListItem<TData> | null {
+        const activeItem = this.highlightedItem() || this.selectedListItems().lastOrDefault();
+        const viewItems = this.viewItems();
+        return cycleThroughMatchedItems(viewItems, activeItem, item => {
+            const text = this.getItemText(item);
+            return text.toLowerCase().startsWith(buffer.toLowerCase());
+        });
+    }
+
     public deselectItems(item: Iterable<ListItem<TData>>): void {
         const keys = from(item)
             .select(i => this.getSelectionKey(i))
@@ -176,6 +186,16 @@ export class ListService<TData> {
             return (item.data as any)?.[textField] ?? "";
         }
         return textField(item.data);
+    }
+
+    public highlightFirstItem(): ListItem<TData> | null {
+        const viewItems = this.viewItems()
+            .where(i => !i.header && !this.isDisabled(i))
+            .toImmutableSet();
+        if (viewItems.isEmpty()) {
+            return null;
+        }
+        return this.navigateFirstForSingleSelection(viewItems, "highlight");
     }
 
     public isDisabled(item: ListItem<TData>): boolean {
@@ -236,7 +256,7 @@ export class ListService<TData> {
         this.scrollToItem$.next({ item, focus });
     }
 
-    public selectItem(item: ListItem<TData>): void {
+    public selectItem(item: ListItem<TData>, scroll: boolean = false, focus: boolean = false): void {
         const key = this.getSelectionKey(item);
         const options = this.selectableOptions();
         if (options.mode === "single") {
@@ -260,6 +280,9 @@ export class ListService<TData> {
                 }
                 return set.add(key);
             });
+        }
+        if (scroll) {
+            this.scrollToItem(item, focus);
         }
         this.notifySelectionChange(item);
     }

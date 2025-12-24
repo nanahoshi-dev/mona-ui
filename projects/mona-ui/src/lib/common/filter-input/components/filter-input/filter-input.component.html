@@ -1,10 +1,14 @@
 <mona-text-box [ngModel]="filterText()"
                [clearButton]="true"
                [placeholder]="placeholder()"
-               class="border-0 border-b border-border rounded-none outline-none shadow-none focus-within:ring-0"
+               (inputFocus)="inputFocus.emit($event)"
+               (inputBlur)="inputBlur.emit($event)"
+               [tabindex]="0"
+               [size]="size()"
+               class="outline-none shadow-none focus-within:ring-1 focus-within:ring-primary/40"
                (ngModelChange)="filter$.next($event)">
     <ng-template monaTextBoxPrefixTemplate>
-        <div class="mona-filter-input-icon">
+        <div class="h-full flex items-center justify-center ps-2">
             <i class="ri-search-line"></i>
         </div>
     </ng-template>

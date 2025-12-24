@@ -23,7 +23,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import { distinctUntilChanged, filter, fromEvent, take, takeUntil, tap, withLatestFrom } from "rxjs";
+import { distinctUntilChanged, filter, fromEvent, Subject, take, takeUntil, tap, withLatestFrom } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
@@ -36,6 +36,7 @@ import { SelectableOptions } from "../../../../common/list/models/SelectableOpti
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { isTypeaheadKey, setupTypeahead } from "../../../../common/utils/typeahead.util";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
@@ -105,10 +106,11 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #navigatedValue = linkedSignal(() => this.#value());
-    readonly #listService = inject(ListService<TData>);
+    readonly #listService = inject<ListService<TData>>(ListService);
     readonly #popupRef = signal<PopupRef | null>(null);
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
+    readonly #typeaheadKey = new Subject<string>();
     readonly #value = signal<TData | null>(null);
     #propagateChange: Action<TData | null> | null = null;
     #propagateTouch: Action | null = null;
@@ -348,7 +350,8 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         if (event.isDefaultPrevented()) {
             return;
         }
-        const height = this.listPopupHeight();
+        const height = this.isEmpty() ? 200 : undefined;
+        const maxHeight = this.listPopupHeight();
         const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
         const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
@@ -362,26 +365,45 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
             content: this.popupTemplate(),
             hasBackdrop: false,
             height,
+            maxHeight,
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
             width,
             withPush: false,
             withScrollTracking: true
         });
+
+        if (this.#listService.filterableOptions().enabled && popupRef) {
+            this.#listService.setNavigableOptions({ mode: "highlight" });
+        }
+
         this.#popupRef.set(popupRef);
         this.notifyValueChangeOnPopupClose();
-        this.scrollToSelectedItem();
-        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
-            this.close.emit(event);
-        });
-        popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef.set(null);
-            this.#listService.clearFilter();
-        });
+        this.handleScrollOnPopupOpen();
+        this.setPopupCloseSubscriptions(popupRef);
     }
 
     private closePopup(): void {
         this.#popupRef()?.close();
+    }
+
+    private cycleThroughMatchedItems(buffer: string): void {
+        const nextItem = this.#listService.cycleThroughMatchedItems(buffer);
+        if (!nextItem) {
+            return;
+        }
+        const selectedItems = this.#listService.selectedListItems();
+        if (selectedItems.contains(nextItem)) {
+            return;
+        }
+        this.#listService.selectItem(nextItem);
+        const expanded = this.expanded();
+        if (!expanded) {
+            this.updateValue(nextItem.data, true);
+        } else {
+            this.scrollToSelectedItem();
+            this.#navigatedValue.set(nextItem.data);
+        }
     }
 
     private focus(): void {
@@ -389,6 +411,14 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     }
 
     private handleArrowKeys(event: KeyboardEvent): void {
+        if (event.altKey) {
+            if (event.key === "ArrowDown") {
+                this.openPopup();
+            } else {
+                this.closePopup();
+            }
+            return;
+        }
         const previousItem = this.selectedListItem();
         const direction = event.key === "ArrowDown" ? "next" : "previous";
         const item = this.#listService.navigate(direction, "select", false);
@@ -409,20 +439,47 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         this.togglePopup();
     }
 
+    private handleHomeEndKeys(event: KeyboardEvent): void {
+        const itemToSelect =
+            event.key === "Home"
+                ? this.#listService.viewItems().firstOrDefault()
+                : this.#listService.viewItems().lastOrDefault();
+        if (!itemToSelect) {
+            return;
+        }
+        this.#listService.selectItem(itemToSelect, true, false);
+        if (!this.expanded()) {
+            this.updateValue(itemToSelect.data, true);
+        } else {
+            this.#navigatedValue.set(itemToSelect.data);
+        }
+    }
+
     private handleKeyDown(event: KeyboardEvent): void {
         if (event.key === "Enter") {
             event.preventDefault();
             this.handleEnterKey();
-        } else if (
-            event.key === "ArrowDown" ||
-            event.key === "ArrowUp" ||
-            event.key === "Home" ||
-            event.key === "End"
-        ) {
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             this.handleArrowKeys(event);
+        } else if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            this.handleHomeEndKeys(event);
+        } else if (event.key === " ") {
+            event.preventDefault();
+            this.togglePopup();
         } else if (event.key === "Escape" || event.key === "Tab") {
             this.closePopup();
+        } else if (isTypeaheadKey(event.key)) {
+            this.#typeaheadKey.next(event.key);
+        }
+    }
+
+    private handleScrollOnPopupOpen(): void {
+        if (this.selectedDataItem()) {
+            this.scrollToSelectedItem();
+        } else {
+            this.#listService.highlightFirstItem();
         }
     }
 
@@ -473,11 +530,32 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
             .subscribe(() => this.togglePopup());
     }
 
+    private setPopupCloseSubscriptions(popupRef: PopupRef): void {
+        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
+            this.close.emit(event);
+        });
+        popupRef.closed.pipe(take(1)).subscribe(() => {
+            this.#popupRef.set(null);
+            this.#listService.setNavigableOptions({ mode: "select" });
+            window.setTimeout(() => {
+                this.#listService.clearFilter();
+                this.focus();
+            });
+        });
+    }
+
     private setSubscriptions(): void {
         this.#listService.selectedKeysChange.subscribe(() => {
             const item = this.selectedDataItem();
             this.updateValue(item);
         });
+        this.setTypeaheadSubscription();
+    }
+
+    private setTypeaheadSubscription(): void {
+        setupTypeahead(this.#typeaheadKey)
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(buffer => this.cycleThroughMatchedItems(buffer));
     }
 
     private togglePopup(): void {
