@@ -1140,7 +1140,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectionType<TData>",
-        "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -1152,7 +1152,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectionType<TData>",
-        "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -3310,6 +3310,12 @@
         "kind": "output"
       },
       {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
         "name": "data",
         "type": "Iterable<TData>",
         "description": "The data items of the dropdown list.",
@@ -3328,9 +3334,39 @@
         "kind": "input"
       },
       {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Sets the loading state of the autocomplete component.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
         "name": "placeholder",
         "type": "string",
         "description": "Placeholder text for the dropdown list when no item is selected.",
+        "kind": "input"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "Sets the class of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "Sets the height of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "Sets the width of the popup element.",
         "kind": "input"
       },
       {

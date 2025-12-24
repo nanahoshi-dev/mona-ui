@@ -152,12 +152,11 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         return twMerge(variantClass, userClass);
     });
     protected readonly listPopupHeight = computed(() => {
-        const empty = this.isEmpty();
         const popupHeight = this.popupHeight();
         if (popupHeight != null) {
             return popupHeight;
         }
-        return empty ? 200 : undefined;
+        return 200;
     });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
@@ -387,6 +386,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
         if (event.isDefaultPrevented()) {
             return;
         }
+        const height = this.listPopupHeight();
         const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
         const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
@@ -398,6 +398,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
+            height,
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
             width,

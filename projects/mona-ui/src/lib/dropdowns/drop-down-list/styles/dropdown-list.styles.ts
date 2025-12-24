@@ -63,4 +63,4 @@ export type DropDownListVariantProps = DropdownListInputVariantProps &
 export type DropDownListVariantInput = Omit<DropdownListInputVariantInput, "expanded" | "hasPrefix"> &
     DropdownListPopupVariantInput &
     DropdownListAffixContainerVariantInput &
-    DropdownListValueContainerVariantInput;
+    Omit<DropdownListValueContainerVariantInput, "hasTemplate">;

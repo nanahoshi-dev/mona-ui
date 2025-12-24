@@ -44,8 +44,7 @@
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" [attr.role]="'region'">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId"
-                   [height]="listPopupHeight()">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>

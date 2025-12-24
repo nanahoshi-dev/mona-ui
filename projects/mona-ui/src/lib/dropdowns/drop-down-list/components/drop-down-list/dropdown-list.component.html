@@ -6,13 +6,13 @@
 
 <span [class]="valueContainerClass()">
     @if (!valueTemplate()) {
-        <div class="flex-1 truncate inline-block items-center">
+        <span>
             @if (selectedListItem()) {
                 <span>{{ valueText() }}</span>
             } @else {
                 <span>{{ placeholder() }}</span>
             }
-        </div>
+        </span>
     } @else {
         <ng-container [ngTemplateOutlet]="valueTemplate()"
                       [ngTemplateOutletContext]="{$implicit: selectedDataItem()}"></ng-container>
@@ -32,8 +32,7 @@
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" [attr.role]="'region'">
-        <mona-list [listId]="listId" [height]="listPopupHeight()" [focusOnMount]="false"
-                   (itemSelect)="onItemSelect($event)">
+        <mona-list [listId]="listId" [focusOnMount]="false" (itemSelect)="onItemSelect($event)">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>

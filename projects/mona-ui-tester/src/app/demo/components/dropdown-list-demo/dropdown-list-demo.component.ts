@@ -262,7 +262,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                     @if (!item) {
                         <span class="text-gray-500">Select an option...</span>
                     } @else {
-                        <span class="text-pink-600 font-bold">{{ item?.text }}</span>
+                        <span class="text-pink-600 font-bold truncate">{{ item?.text }}</span>
                     }
                 </ng-template>
             }
