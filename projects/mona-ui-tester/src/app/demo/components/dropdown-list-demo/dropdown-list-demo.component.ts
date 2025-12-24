@@ -127,6 +127,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 min: 0,
                 value: null
             },
+            readonly: {
+                type: "boolean",
+                value: false
+            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
@@ -197,6 +201,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             [popupClass]="popupClass()"
             [popupHeight]="popupHeight()"
             [popupWidth]="popupWidth()"
+            [readonly]="readonly()"
             [rounded]="rounded()"
             [showClearButton]="showClearButton()"
             [size]="size()"
@@ -334,6 +339,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     public readonly popupClass = input<ReturnType<DropdownListComponent["popupClass"]>>("");
     public readonly popupHeight = input<ReturnType<DropdownListComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<DropdownListComponent["popupWidth"]>>(null);
+    public readonly readonly = input<ReturnType<DropdownListComponent["readonly"]>>(false);
     public readonly rounded = input<ReturnType<DropdownListComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<DropdownListComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<DropdownListComponent["size"]>>("medium");

@@ -94,6 +94,10 @@ import {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
+        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-labelledby]": "ariaLabelledBy()",
+        "[attr.aria-readonly]": "readonly() ? true : undefined",
+        "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
         "[attr.data-expanded]": "expanded()",
         "[attr.tabindex]": "disabled() ? null : 0",
@@ -190,12 +194,25 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     });
 
     /**
+     * @description Sets the aria-label attribute of the dropdown list component.
+     * @default ""
+     */
+    public readonly ariaLabel = input("");
+
+    /**
+     * @description Sets the aria-labelledby attribute of the dropdown list component.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("");
+
+    /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
     public readonly close = output<PopupCloseEvent>();
 
     /**
      * @description The data items of the dropdown list.
+     * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 
@@ -242,6 +259,18 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
      * @default null
      */
     public readonly popupWidth = input<ListSizeInputType>(null);
+
+    /**
+     * @description Sets the readonly state of the dropdown list component.
+     * @default false
+     */
+    public readonly readonly = input(false);
+
+    /**
+     * @description Sets the required state of the dropdown list component.
+     * @default false
+     */
+    public readonly required = input(false);
 
     /**
      * @description Sets the rounded appearance of the dropdown list.
@@ -335,15 +364,20 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         }
     }
 
-    protected onValueClear(event: MouseEvent): void {
+    protected onValueClear(event: MouseEvent | KeyboardEvent): void {
+        if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") {
+            return;
+        }
         event.stopImmediatePropagation();
+        event.preventDefault();
         this.updateValue(null);
         this.#listService.clearSelections();
+        this.focus();
     }
 
     protected openPopup(): void {
         this.focus();
-        if (this.#popupRef()) {
+        if (this.#popupRef() || this.readonly()) {
             return;
         }
         const event = this.notifyPopupOpen();
@@ -523,10 +557,16 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
 
     private setEventListeners(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.readonly())
+            )
             .subscribe(e => this.handleKeyDown(e));
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.readonly())
+            )
             .subscribe(() => this.togglePopup());
     }
 

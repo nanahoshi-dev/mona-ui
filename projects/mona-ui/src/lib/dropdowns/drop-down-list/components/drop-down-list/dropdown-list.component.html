@@ -21,7 +21,9 @@
 
 @if (selectedListItem() && showClearButton() && !loading()) {
     <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90"
-                    [name]="clearIcon" [size]="14" role="button" (click)="onValueClear($event)"></lucide-angular>
+                    [name]="clearIcon" [size]="14" role="button"
+                    aria-label="Clear" title="Clear" [tabindex]="0"
+                    (click)="onValueClear($event)" (keydown)="onValueClear($event)"></lucide-angular>
 }
 @if (loading()) {
     <mona-loading-indicator></mona-loading-indicator>
@@ -31,10 +33,8 @@
                 [size]="18"></lucide-angular>
 
 <ng-template #popupTemplate>
-    <div [class]="listPopupClass()" [attr.role]="'region'">
-        <mona-list [listId]="listId" [focusOnMount]="false"
-                   [size]="size()"
-                   (itemSelect)="onItemSelect($event)">
+    <div [class]="listPopupClass()">
+        <mona-list [listId]="listId" [focusOnMount]="false" [size]="size()" (itemSelect)="onItemSelect($event)">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
