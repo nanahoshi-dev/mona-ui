@@ -14,6 +14,7 @@ export const dropdownListInputVariants = cva(
         focus-within:ring-1 focus-within:ring-primary/40
 
         [&.ng-touched.ng-invalid]:border-error
+        [&.ng-touched.ng-invalid]:ring-error/40
     `,
     {
         variants: {

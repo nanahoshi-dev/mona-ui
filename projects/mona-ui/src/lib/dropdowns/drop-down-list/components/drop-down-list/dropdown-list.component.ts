@@ -53,6 +53,7 @@ import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-n
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownFieldPredicateType, DropdownFieldSelectionType } from "../../../models/DropdownFieldTypes";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
+import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import {
     dropdownListAffixContainerThemeVariants,
     dropdownListInputThemeVariants,
@@ -66,6 +67,7 @@ import {
     selector: "mona-drop-down-list",
     templateUrl: "./dropdown-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
+    hostDirectives: [FormFieldValidationDirective],
     providers: [
         ListService,
         {
