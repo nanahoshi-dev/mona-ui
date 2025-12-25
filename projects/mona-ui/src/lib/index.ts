@@ -39,6 +39,8 @@ export * from "./buttons/split-button/directives/split-button-text-template.dire
 export * from "./common/models/FilterableOptions";
 export * from "./common/models/VirtualScrollOptions";
 
+export * from "./common/directives/form-field-validation.directive";
+
 export * from "./common/filter-input/models/FilterChangeEvent";
 
 export * from "./common/popup-menu/components/popup-menu/popup-menu.component";
@@ -87,7 +89,7 @@ export * from "./dropdowns/directives/drop-down-virtual-scroll.directive";
 export * from "./dropdowns/auto-complete/components/auto-complete.component";
 
 /* Combo Box */
-export * from "./dropdowns/combo-box/combo-box.component";
+export * from "./dropdowns/combo-box/components/combo-box/combo-box.component";
 
 /* Drop Down List */
 export * from "./dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
@@ -267,6 +269,9 @@ export * from "./menus/contextmenu/components/contextmenu-item/context-menu-item
 export * from "./menus/contextmenu/components/contextmenu-radio-group/contextmenu-radio-group.component";
 export * from "./menus/contextmenu/components/contextmenu-radio-item/contextmenu-radio-item.component";
 export * from "./menus/contextmenu/components/contextmenu-separator/context-menu-separator.component";
+export * from "./menus/contextmenu/directives/context-menu-group-template.directive";
+export * from "./menus/contextmenu/directives/context-menu-icon-template.directive";
+export * from "./menus/contextmenu/directives/context-menu-shortcut-template.directive";
 export * from "./menus/contextmenu/directives/context-menu-text-template.directive";
 
 /** Navigation */

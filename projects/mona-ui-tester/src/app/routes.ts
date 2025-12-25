@@ -69,6 +69,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "combo-box",
+                loadComponent: () =>
+                    import("./docs/components/combo-box-doc/combo-box-doc.component").then(m => m.ComboBoxDocComponent)
+            },
+            {
                 path: "contextmenu",
                 loadComponent: () =>
                     import("./docs/components/contextmenu-doc/contextmenu-doc.component").then(

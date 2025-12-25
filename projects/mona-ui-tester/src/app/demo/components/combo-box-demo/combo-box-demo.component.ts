@@ -1,11 +1,12 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { metadata } from "@angular/forms/signals";
 import { range } from "@mirei/ts-collections";
-import { Box, Check, LucideAngularModule, Search, TriangleAlert } from "lucide-angular";
+import { Box, LucideAngularModule, Search } from "lucide-angular";
 import {
-    AutoCompleteComponent,
+    ComboBoxComponent,
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
     DropDownGroupableDirective,
@@ -14,11 +15,9 @@ import {
     DropDownItemTemplateDirective,
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
-    DropdownSuffixTemplateDirective,
     DropDownVirtualScrollDirective,
     FilterableOptions,
     GroupableOptions,
-    PreventableEvent,
     VirtualScrollOptions
 } from "mona-ui";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
@@ -32,7 +31,6 @@ import {
     dropdownItemTemplateFeatureConfig,
     dropdownNoDataTemplateFeatureConfig,
     dropdownPrefixTemplateFeatureConfig,
-    dropdownSuffixTemplateFeatureConfig,
     dropdownVirtualizationFeatureConfig
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -40,37 +38,24 @@ import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 @Component({
-    selector: "app-auto-complete-demo",
+    selector: "app-combo-box-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./auto-complete-demo.component.html",
+    templateUrl: "./combo-box-demo.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoCompleteComponent<any>> {
+export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxComponent> {
     readonly #injector = createFeatureInjector({
-        dataSet: dropdownDataSetFeatureConfig("autocomplete"),
-        filtering: dropdownFilteringFeatureConfig("autocomplete"),
-        footerTemplate: dropdownFooterTemplateFeatureConfig("autocomplete"),
-        grouping: dropdownGroupingFeatureConfig("autocomplete"),
-        headerTemplate: dropdownHeaderTemplateFeatureConfig("autocomplete"),
-        itemTemplate: dropdownItemTemplateFeatureConfig("autocomplete"),
-        noDataTemplate: dropdownNoDataTemplateFeatureConfig("autocomplete"),
-        prefixTemplate: dropdownPrefixTemplateFeatureConfig("autocomplete"),
-        preventClose: {
-            active: false,
-            code: ``,
-            description: `The "close" event is fired when the popup is about to close.`,
-            name: "Prevent Close"
-        },
-        preventOpen: {
-            active: false,
-            code: ``,
-            description: `The "open" event is fired when the popup is about to open.`,
-            name: "Prevent Open"
-        },
-        suffixTemplate: dropdownSuffixTemplateFeatureConfig("autocomplete"),
-        virtualization: dropdownVirtualizationFeatureConfig("autocomplete")
+        dataSet: dropdownDataSetFeatureConfig("combo box"),
+        filtering: dropdownFilteringFeatureConfig("combo box"),
+        footerTemplate: dropdownFooterTemplateFeatureConfig("combo box"),
+        grouping: dropdownGroupingFeatureConfig("combo box"),
+        headerTemplate: dropdownHeaderTemplateFeatureConfig("combo box"),
+        itemTemplate: dropdownItemTemplateFeatureConfig("combo box"),
+        noDataTemplate: dropdownNoDataTemplateFeatureConfig("combo box"),
+        prefixTemplate: dropdownPrefixTemplateFeatureConfig("combo box"),
+        virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
-    protected readonly config = signal<ComponentConfig<AutoCompleteComponent<any>>>({
+    protected readonly config = signal<ComponentConfig<ComboBoxComponent>>({
         code: ``,
         inputs: {
             data: {
@@ -88,9 +73,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 clearable: true,
                 placeholder: "Select a condition..."
             },
-            loading: {
-                type: "boolean",
-                value: false
+            placeholder: {
+                type: "string",
+                value: ""
             },
             readonly: {
                 type: "boolean",
@@ -100,40 +85,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 type: "boolean",
                 value: false
             },
-            placeholder: {
-                type: "string",
-                value: ""
-            },
-            popupClass: {
-                type: "string",
-                value: ""
-            },
-            popupHeight: {
-                type: "number",
-                nullable: true,
-                min: 0,
-                max: 500,
-                value: null
-            },
-            popupWidth: {
-                type: "number",
-                nullable: true,
-                min: 0,
-                value: null
-            },
-            rounded: {
-                type: "dropdown",
-                value: ["none", "small", "medium", "large", "full"],
-                defaultValue: "medium"
-            },
             showClearButton: {
                 type: "boolean",
                 value: false
-            },
-            size: {
-                type: "dropdown",
-                value: ["small", "medium", "large"],
-                defaultValue: "medium"
             },
             textField: {
                 type: "string",
@@ -144,68 +98,55 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 value: "value"
             }
         },
-        outputs: {
-            close: { type: "event" },
-            open: { type: "event" }
-        },
+        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
-    protected readonly metadata = this.getMetadata("AutoCompleteComponent");
+    protected readonly metadata = this.getMetadata("ComboBoxComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
-    protected readonly AutoCompleteWrapperComponent = AutoCompleteWrapperComponent;
+    protected readonly ComboBoxWrapperComponent = ComboBoxWrapperComponent;
 }
 
 @Component({
     imports: [
-        AutoCompleteComponent,
-        FormsModule,
-        DropDownGroupableDirective,
-        DropDownGroupHeaderTemplateDirective,
+        ReactiveFormsModule,
+        ComboBoxComponent,
         DropDownVirtualScrollDirective,
-        DropDownFilterableDirective,
+        DropDownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
         LucideAngularModule,
-        DropdownSuffixTemplateDirective,
         DropDownFooterTemplateDirective,
-        DropDownItemTemplateDirective,
-        DropDownNoDataTemplateDirective,
         DropDownHeaderTemplateDirective,
+        DropDownGroupHeaderTemplateDirective,
+        DropDownGroupableDirective,
+        DropDownFilterableDirective,
         CurrencyPipe,
-        ReactiveFormsModule
+        DropDownItemTemplateDirective
     ],
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <form [formGroup]="formGroup">
-            <mona-auto-complete
-                [data]="autoCompleteData()"
+            <mona-combo-box
+                [data]="comboBoxData()"
                 [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
-                [loading]="loading()"
                 [placeholder]="placeholder()"
-                [popupClass]="popupClass()"
-                [popupHeight]="popupHeight()"
-                [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
                 [required]="required()"
-                [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
-                [size]="size()"
                 [textField]="textField()"
                 [valueField]="valueField()"
                 [monaDropDownGroupable]="grouping()"
                 [monaDropDownFilterable]="filtering()"
                 [monaDropDownVirtualScroll]="virtualization()"
+                [formControl]="formGroup.controls.value"
                 [groupBy]="groupBy()"
-                [formControlName]="'value'"
-                (close)="onPopupClose($event)"
-                (open)="onPopupOpen($event)"
                 class="w-50">
                 @if (featureData["footerTemplate"].active) {
                     <ng-template monaDropDownFooterTemplate>
                         <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
-                            Total items: {{ autoCompleteData().length }}
+                            Total items: {{ comboBoxData().length }}
                         </div>
                     </ng-template>
                 }
@@ -246,37 +187,16 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                         <lucide-angular [name]="searchIcon" [size]="16" class="h-full ml-1"></lucide-angular>
                     </ng-template>
                 }
-                @if (featureData["suffixTemplate"].active) {
-                    <ng-template monaDropdownSuffixTemplate>
-                        @if (selectedItem()) {
-                            <lucide-angular
-                                [name]="checkIcon"
-                                [size]="16"
-                                class="h-full mx-1"
-                                [style.color]="'var(--color-success)'"></lucide-angular>
-                        } @else {
-                            <lucide-angular
-                                [name]="alertIcon"
-                                [size]="16"
-                                class="h-full mx-1"
-                                [style.color]="'var(--color-warning)'"></lucide-angular>
-                        }
-                    </ng-template>
-                }
-            </mona-auto-complete>
+            </mona-combo-box>
         </form>
-    `,
-    host: {
-        class: "h-full"
-    }
+    `
 })
-class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {
+class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxComponent> {
     readonly #formGroup = new FormGroup({
         value: new FormControl<unknown>(null, { nonNullable: false, validators: [] })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
-    protected readonly alertIcon = TriangleAlert;
-    protected readonly autoCompleteData = computed(() => {
+    protected readonly comboBoxData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
             return [];
@@ -288,12 +208,10 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         return range(1, 10000)
             .select(i => {
                 const item = dropdownFoodData[i % dropdownFoodData.length];
-                return { ...item, value: i, text: `${i} - ${item.text}` };
+                return { ...item, value: i, text: `${i} / ${item.text}` };
             })
             .toArray();
     });
-    protected readonly boxIcon = Box;
-    protected readonly checkIcon = Check;
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly filtering = computed(() => {
         const features = this.features();
@@ -323,8 +241,6 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         };
         return groupingOptions;
     });
-    protected readonly searchIcon = Search;
-    protected readonly selectedItem = signal<unknown>(null);
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};
@@ -334,38 +250,20 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         };
         return options;
     });
-    public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
-    public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
-    public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>(null);
-    public readonly loading = input<ReturnType<AutoCompleteComponent["loading"]>>(false);
-    public readonly placeholder = input<ReturnType<AutoCompleteComponent["placeholder"]>>("");
-    public readonly popupClass = input<ReturnType<AutoCompleteComponent["popupClass"]>>("");
-    public readonly popupHeight = input<ReturnType<AutoCompleteComponent["popupHeight"]>>(null);
-    public readonly popupWidth = input<ReturnType<AutoCompleteComponent["popupWidth"]>>(null);
-    public readonly readonly = input<ReturnType<AutoCompleteComponent["readonly"]>>(false);
-    public readonly required = input<ReturnType<AutoCompleteComponent["required"]>>(false);
-    public readonly rounded = input<ReturnType<AutoCompleteComponent["rounded"]>>("medium");
-    public readonly showClearButton = input<ReturnType<AutoCompleteComponent["showClearButton"]>>(false);
-    public readonly size = input<ReturnType<AutoCompleteComponent["size"]>>("small");
-    public readonly textField = input<ReturnType<AutoCompleteComponent["textField"]>>("text");
-    public readonly valueField = input<ReturnType<AutoCompleteComponent["valueField"]>>("value");
+    public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
+    public readonly disabled = model<ReturnType<ComboBoxComponent["disabled"]>>(false);
+    public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);
+    public readonly placeholder = input<ReturnType<ComboBoxComponent["placeholder"]>>("");
+    public readonly readonly = model<ReturnType<ComboBoxComponent["readonly"]>>(false);
+    public readonly required = model<ReturnType<ComboBoxComponent["required"]>>(false);
+    public readonly showClearButton = input<ReturnType<ComboBoxComponent["showClearButton"]>>(false);
+    public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
+    public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
 
     public constructor() {
         effect(() => console.log("Selected item: ", this.#formValue()));
     }
 
-    protected onPopupClose(event: PreventableEvent) {
-        const preventClose = this.features()["preventClose"].active;
-        if (preventClose) {
-            event.preventDefault();
-            console.log("Popup prevented from closing");
-        }
-    }
-    protected onPopupOpen(event: PreventableEvent) {
-        const preventOpen = this.features()["preventOpen"].active;
-        if (preventOpen) {
-            event.preventDefault();
-            console.log("Popup prevented from opening");
-        }
-    }
+    protected readonly boxIcon = Box;
+    protected readonly searchIcon = Search;
 }

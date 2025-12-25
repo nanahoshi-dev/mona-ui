@@ -1,10 +1,10 @@
 import { cva } from "class-variance-authority";
 
-export const autoCompleteBaseVariants = cva(
+export const comboBoxBaseVariants = cva(
     `
-        flex
-        border border-input-border outline-none
+        flex border border-input-border outline-none
         bg-background shadow-xs
+        cursor-pointer
         focus-within:ring-1 focus-within:ring-primary/40
         transition-[color,box-shadow,border] ease-in-out duration-300
 
@@ -27,15 +27,21 @@ export const autoCompleteBaseVariants = cva(
                 full: "rounded-full"
             },
             size: {
-                large: "h-10 text-md",
+                small: "h-8 text-xs",
                 medium: "h-9 text-sm",
-                small: "h-8 text-xs"
+                large: "h-10 text-md"
             }
+        },
+        defaultVariants: {
+            disabled: false,
+            focused: false,
+            rounded: "medium",
+            size: "medium"
         }
     }
 );
 
-export const autoCompleteTextInputVariants = cva(
+export const comboBoxTextInputVariants = cva(
     `
         border-none outline-none
         bg-transparent shadow-none
@@ -55,7 +61,7 @@ export const autoCompleteTextInputVariants = cva(
     }
 );
 
-export const autoCompletePopupVariants = cva(
+export const comboBoxPopupVariants = cva(
     `
         bg-background shadow-md
         border border-input-border
@@ -75,8 +81,12 @@ export const autoCompletePopupVariants = cva(
                 medium: "text-sm",
                 small: "text-xs"
             }
+        },
+        defaultVariants: {
+            rounded: "medium",
+            size: "medium"
         }
     }
 );
 
-export const autoCompleteAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);
+export const comboBoxAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);
