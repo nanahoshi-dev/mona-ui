@@ -107,18 +107,10 @@ import {
     ],
     hostDirectives: [FormFieldValidationDirective],
     host: {
-        "[attr.aria-activedescendant]": "activeDescendant()",
-        "[attr.aria-busy]": "loading() ? true : undefined",
-        "[attr.aria-controls]": "listId",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
-        "[attr.aria-expanded]": "expanded() ? true : undefined",
-        "[attr.aria-haspopup]": "true",
-        "[attr.aria-label]": "ariaLabel()",
-        "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
-        "[attr.role]": '"combobox"',
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()"
     }

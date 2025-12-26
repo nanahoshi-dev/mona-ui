@@ -19,7 +19,7 @@
        [attr.aria-haspopup]="'listbox'"
        [attr.aria-label]="ariaLabel() || undefined"
        [attr.aria-labelledby]="ariaLabelledBy() || undefined"
-       [attr.role]="expanded() ? 'combobox' : 'textbox'"
+       role="combobox"
        (ngModelChange)="comboBoxValue$.next($event)"
        (blur)="onInputBlur($event)"
        (keydown)="onKeydown($event)">
