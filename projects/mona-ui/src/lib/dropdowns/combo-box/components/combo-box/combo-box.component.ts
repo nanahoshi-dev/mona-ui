@@ -40,6 +40,7 @@ import {
     withLatestFrom
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
@@ -47,6 +48,7 @@ import { ListGroupHeaderTemplateDirective } from "../../../../common/list/direct
 import { ListHeaderTemplateDirective } from "../../../../common/list/directives/list-header-template.directive";
 import { ListItemTemplateDirective } from "../../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../../common/list/directives/list-no-data-template.directive";
+import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { SelectableOptions } from "../../../../common/list/models/SelectableOptions";
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
@@ -58,6 +60,7 @@ import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
+import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-down-group-header-template.directive";
@@ -66,10 +69,10 @@ import { DropDownItemTemplateDirective } from "../../../directives/drop-down-ite
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropDownService } from "../../../services/drop-down.service";
-import { dropdownPopupVariants } from "../../../styles/dropdown.style";
 import {
     comboBoxAffixContainerThemeVariants,
     comboBoxBaseThemeVariants,
+    comboBoxPopupThemeVariants,
     comboBoxTextInputThemeVariants,
     ComboBoxVariantInput,
     ComboBoxVariantProps
@@ -102,12 +105,20 @@ import {
         LucideAngularModule,
         LoadingIndicatorComponent
     ],
+    hostDirectives: [FormFieldValidationDirective],
     host: {
+        "[attr.aria-activedescendant]": "activeDescendant()",
+        "[attr.aria-busy]": "loading() ? true : undefined",
+        "[attr.aria-controls]": "listId",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-expanded]": "expanded() ? true : undefined",
         "[attr.aria-haspopup]": "true",
+        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
+        "[attr.role]": '"combobox"',
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()"
     }
@@ -156,13 +167,30 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
         return comboBoxTextInputThemeVariants(theme)({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();
-    protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly popupClasses = computed(() => {
-        return twMerge(dropdownPopupVariants());
+    protected readonly listPopupClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const size = this.size();
+        const userClass = this.popupClass();
+        const variantClass = comboBoxPopupThemeVariants(theme)({ rounded, size });
+        return twMerge(variantClass, userClass);
     });
+    protected readonly listPopupHeight = computed(() => {
+        const popupHeight = this.popupHeight();
+        if (popupHeight != null) {
+            return popupHeight;
+        }
+        return 200;
+    });
+    protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
+    protected readonly resultCountMessage = computed(() => {
+        const count = this.#listService.viewItems().size();
+        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
+    });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
         mode: "single",
@@ -212,7 +240,30 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
      */
     public readonly loading = input(false);
 
+    /**
+     * @description Emits when the popup is about to open. This event is preventable.
+     */
+    public readonly open = output<PreventableEvent>();
+
     public readonly placeholder = input("");
+
+    /**
+     * @description Sets the class of the popup element.
+     * @default ""
+     */
+    public readonly popupClass = input("");
+
+    /**
+     * @description Sets the height of the popup element.
+     * @default 200
+     */
+    public readonly popupHeight = input<ListSizeInputType>(null);
+
+    /**
+     * @description Sets the width of the popup element.
+     * @default null
+     */
+    public readonly popupWidth = input<ListSizeInputType>(null);
 
     /**
      * @description Sets the readonly state of the combo box component.
@@ -249,8 +300,8 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
             const valueField = this.valueField();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                if (this.#value != null) {
-                    this.#listService.setSelectedDataItems([this.#value]);
+                if (this.#value() != null) {
+                    this.#listService.setSelectedDataItems([this.#value()]);
                 }
             });
         });
@@ -271,6 +322,18 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
                 filter(() => !this.readonly())
             )
             .subscribe(() => this.focus());
+        effect(() => {
+            const viewItems = this.#listService.viewItems();
+            if (!viewItems.any()) {
+                this.#listService.highlightedItem.set(null);
+                return;
+            }
+            const selectedItems = this.#listService.selectedListItems();
+            const containsSelectedItems = selectedItems.any(s => viewItems.contains(s));
+            if (!containsSelectedItems) {
+                this.#listService.highlightFirstItem();
+            }
+        });
     }
 
     public onItemSelect(event: SelectionChangeEvent<TData>): void {
@@ -318,6 +381,9 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
         if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") {
             return;
         }
+        if (event instanceof KeyboardEvent && event.key === " ") {
+            event.preventDefault();
+        }
         event.stopImmediatePropagation();
         this.updateValue(null);
         this.#listService.clearSelections();
@@ -328,9 +394,16 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
 
     protected openPopup(): void {
         this.focus();
-        if (this.#popupRef()) {
+        if (this.#popupRef() || this.readonly()) {
             return;
         }
+        const event = this.notifyPopupOpen();
+        if (event.isDefaultPrevented()) {
+            return;
+        }
+        const height = this.isEmpty() ? 200 : undefined;
+        const maxHeight = this.listPopupHeight();
+        const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
         const popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             anchorConnectionPoint: "bottomleft",
@@ -339,21 +412,21 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
                 show: dropdownPopupShowAnimation
             },
             closeOnOutsideClick: true,
+            closeOnScroll: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
+            height,
+            maxHeight,
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
-            width: this.#hostElementRef.nativeElement.getBoundingClientRect().width
+            width,
+            withPush: false,
+            withScrollTracking: true
         });
         this.#popupRef.set(popupRef);
         this.notifyValueChangeOnPopupClose();
-        window.setTimeout(() => {
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input) {
-                input.focus();
-                input.setSelectionRange(-1, -1);
-            }
-        });
+        this.focusAfterPopupClose();
+        this.handleScrollOnPopupOpen();
         this.setPopupCloseSubscriptions(popupRef);
     }
 
@@ -374,6 +447,10 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
             input.focus();
             input.setSelectionRange(-1, -1);
         }
+    }
+
+    private focusAfterPopupClose(): void {
+        window.setTimeout(() => this.focus());
     }
 
     private handleArrowKeys(event: KeyboardEvent): void {
@@ -456,6 +533,15 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
         }
     }
 
+    private handleScrollOnPopupOpen(): void {
+        const item = this.selectedListItem();
+        if (item) {
+            window.setTimeout(() => this.#listService.scrollToItem(item, false));
+        } else {
+            // this.#listService.highlightFirstItem();
+        }
+    }
+
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "select" });
         this.#listService.setSelectableOptions(this.selectableOptions);
@@ -467,6 +553,12 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
     private notifyFilterChange(filter: string): FilterChangeEvent {
         const event = new FilterChangeEvent(filter);
         this.#listService.filterChange.emit(event);
+        return event;
+    }
+
+    private notifyPopupOpen(): PreventableEvent {
+        const event = new PreventableEvent("dropdownListPopupOpen");
+        this.open.emit(event);
         return event;
     }
 
@@ -562,7 +654,7 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
     }
 
     private updateValue(value: TData | null, notify: boolean = true) {
-        const oldValue = this.#value;
+        const oldValue = this.#value();
         this.#value.set(value);
         this.comboBoxValue.set(this.valueText());
         if (notify && oldValue !== value) {

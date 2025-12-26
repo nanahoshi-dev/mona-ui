@@ -169,6 +169,10 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
+    protected readonly resultCountMessage = computed(() => {
+        const count = this.#listService.viewItems().size();
+        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
+    });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
         mode: "single",

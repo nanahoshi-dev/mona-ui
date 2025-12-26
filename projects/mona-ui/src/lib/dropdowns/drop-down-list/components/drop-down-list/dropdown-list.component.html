@@ -19,6 +19,8 @@
     }
 </span>
 
+<span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
+
 @if (selectedListItem() && showClearButton() && !loading()) {
     <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90"
                     [name]="clearIcon" [size]="14" role="button"

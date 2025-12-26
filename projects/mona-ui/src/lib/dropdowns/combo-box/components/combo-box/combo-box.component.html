@@ -19,9 +19,12 @@
        [attr.aria-haspopup]="'listbox'"
        [attr.aria-label]="ariaLabel() || undefined"
        [attr.aria-labelledby]="ariaLabelledBy() || undefined"
+       [attr.role]="expanded() ? 'combobox' : 'textbox'"
        (ngModelChange)="comboBoxValue$.next($event)"
        (blur)="onInputBlur($event)"
        (keydown)="onKeydown($event)">
+
+<span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
 
 @if (showClearButton() && selectedListItem() && !loading()) {
     <span class="px-2">
@@ -40,8 +43,8 @@
                 [size]="18"></lucide-angular>
 
 <ng-template #popupTemplate>
-    <div [class]="popupClasses()">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId">
+    <div [class]="listPopupClass()">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="size()" [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
