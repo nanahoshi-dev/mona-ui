@@ -8,7 +8,6 @@ import {
     Selector,
     toImmutableSet
 } from "@mirei/ts-collections";
-import { PageState } from "../models/PageState";
 import { ReplaySubject, Subject } from "rxjs";
 import { FilterChangeEvent } from "../../filter-input/models/FilterChangeEvent";
 import { FilterableOptions } from "../../models/FilterableOptions";
@@ -19,8 +18,9 @@ import { ListKeySelector } from "../models/ListSelectors";
 import { NavigableOptions } from "../models/NavigableOptions";
 import { NavigationDirection } from "../models/NavigationDirection";
 import { NavigationMode } from "../models/NavigationMode";
-import { SelectableOptions } from "../models/SelectableOptions";
 import { PagerSettings } from "../models/PagerSettings";
+import { PageState } from "../models/PageState";
+import { SelectableOptions } from "../models/SelectableOptions";
 import { cycleThroughMatchedItems } from "../utils/cycleThroughMatchedItems";
 
 @Injectable()
@@ -188,6 +188,13 @@ export class ListService<TData> {
         return textField(item.data);
     }
 
+    public hasActiveItem(): boolean {
+        if (this.viewItems().none()) {
+            return false;
+        }
+        return this.highlightedItem() != null || this.selectedListItems().length > 0;
+    }
+
     public highlightFirstItem(): ListItem<TData> | null {
         const viewItems = this.viewItems()
             .where(i => !i.header && !this.isDisabled(i))
@@ -196,6 +203,19 @@ export class ListService<TData> {
             return null;
         }
         return this.navigateFirstForSingleSelection(viewItems, "highlight");
+    }
+
+    public isActiveItemVisible(): boolean {
+        const viewItems = this.viewItems();
+        if (viewItems.none()) {
+            return false;
+        }
+        const selectedItems = this.selectedListItems();
+        const highlightedItem = this.highlightedItem();
+        if (highlightedItem && viewItems.contains(highlightedItem)) {
+            return true;
+        }
+        return selectedItems.any(s => viewItems.contains(s));
     }
 
     public isDisabled(item: ListItem<TData>): boolean {

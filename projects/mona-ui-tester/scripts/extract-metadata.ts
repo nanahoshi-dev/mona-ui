@@ -33,10 +33,7 @@ function simplifyType(fullType: string): string {
 
     // 1. Remove "import(...)."-like prefixes
     // This handles cases like: import("L:/Codes/.../index").InputSignal<boolean>
-    const importMatch = simplified.match(/import\(.+\)\.(.+)/);
-    if (importMatch && importMatch[1]) {
-        simplified = importMatch[1];
-    }
+    simplified = simplified.replace(/import\([^)]*\)\./g, "");
 
     // 2. Handle InputSignalWithTransform specifically: extract the second generic parameter
     // Regex to match "InputSignalWithTransform<T1, T2>" and capture T2

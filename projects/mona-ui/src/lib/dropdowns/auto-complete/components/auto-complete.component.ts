@@ -6,7 +6,6 @@ import {
     computed,
     contentChild,
     DestroyRef,
-    effect,
     ElementRef,
     forwardRef,
     inject,
@@ -15,7 +14,6 @@ import {
     output,
     signal,
     TemplateRef,
-    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -24,6 +22,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { LucideAngularModule, X } from "lucide-angular";
 import { debounceTime, Subject, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
@@ -37,7 +36,6 @@ import { SelectableOptions } from "../../../common/list/models/SelectableOptions
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
-import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../popup/models/PopupRef";
@@ -52,9 +50,11 @@ import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down
 import { DropDownHeaderTemplateDirective } from "../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
+import { DropdownDataHandlerDirective } from "../../directives/dropdown-data-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../directives/dropdown-prefix-template.directive";
 import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffix-template.directive";
-import { DropdownFieldPredicateType, DropdownFieldSelectionType } from "../../models/DropdownFieldTypes";
+import { DropdownDataInput, DropdownDataInputToken } from "../../models/DropdownDataInput";
+import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../models/DropdownFieldTypes";
 import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
@@ -68,13 +68,18 @@ import {
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective],
     providers: [
         ListService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => AutoCompleteComponent),
             multi: true
+        },
+        {
+            provide: DropdownDataInputToken,
+            useExisting: forwardRef(() => AutoCompleteComponent),
+            multi: false
         }
     ],
     imports: [
@@ -101,7 +106,9 @@ import {
         "[class]": "baseClass()"
     }
 })
-export class AutoCompleteComponent<TData = unknown> implements ControlValueAccessor, AutoCompleteVariantInput {
+export class AutoCompleteComponent<TData = unknown>
+    implements ControlValueAccessor, AutoCompleteVariantInput, DropdownDataInput<TData>
+{
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
@@ -282,7 +289,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
      * If null, the item itself will be used as the text representation.
      * @default null
      */
-    public readonly textField = input<DropdownFieldSelectionType<TData>>(null);
+    public readonly textField = input<DropdownFieldSelectorType<TData>>(null);
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -291,25 +298,9 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
      * If null, the item itself will be used as the value representation.
      * @default null
      */
-    public readonly valueField = input<DropdownFieldSelectionType<TData>>(null);
+    public readonly valueField = input<DropdownFieldSelectorType<TData>>(null);
 
     public constructor() {
-        effect(() => {
-            const textField = this.textField();
-            untracked(() => this.#listService.setTextField(textField ?? ""));
-        });
-        effect(() => {
-            const itemDisabled = this.itemDisabled();
-            untracked(() => this.#listService.setDisabledBy(itemDisabled ?? ""));
-        });
-        effect(() => {
-            const valueField = this.valueField();
-            untracked(() => this.#listService.setValueField(valueField ?? ""));
-        });
-        effect(() => {
-            const data = this.data();
-            untracked(() => this.#listService.setData(data));
-        });
         afterNextRender({
             read: () => {
                 this.initialize();
@@ -400,6 +391,7 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
                 show: dropdownPopupShowAnimation
             },
             closeOnOutsideClick: true,
+            closeOnScroll: true,
             content: this.popupTemplate(),
             hasBackdrop: false,
             height,
@@ -407,7 +399,8 @@ export class AutoCompleteComponent<TData = unknown> implements ControlValueAcces
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
             width,
-            withPush: false
+            withPush: false,
+            withScrollTracking: true
         });
         this.#popupRef.set(popupRef);
         this.setPopupCloseSubscriptions(popupRef);

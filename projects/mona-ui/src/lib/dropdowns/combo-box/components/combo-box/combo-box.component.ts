@@ -11,7 +11,6 @@ import {
     forwardRef,
     inject,
     input,
-    InputSignal,
     linkedSignal,
     model,
     output,
@@ -23,7 +22,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { Predicate, Selector } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import {
     debounceTime,
@@ -67,7 +65,10 @@ import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-d
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
+import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
+import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
+import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropDownService } from "../../../services/drop-down.service";
 import {
     comboBoxAffixContainerThemeVariants,
@@ -88,6 +89,11 @@ import {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => ComboBoxComponent),
             multi: true
+        },
+        {
+            provide: DropdownDataInputToken,
+            useExisting: forwardRef(() => ComboBoxComponent),
+            multi: false
         }
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -105,7 +111,7 @@ import {
         LucideAngularModule,
         LoadingIndicatorComponent
     ],
-    hostDirectives: [FormFieldValidationDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
@@ -115,7 +121,9 @@ import {
         "[class]": "baseClass()"
     }
 })
-export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor, ComboBoxVariantInput {
+export class ComboBoxComponent<TData = unknown>
+    implements ControlValueAccessor, ComboBoxVariantInput, DropdownDataInput<TData>
+{
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef);
     readonly #listService = inject(ListService);
@@ -124,6 +132,10 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<TData | null>(null);
+    readonly #valueNormalizer = computed(() => {
+        const normalizer = this.valueNormalizer();
+        return normalizer ? normalizer : (text$: Observable<string>) => text$.pipe(map(v => v));
+    });
     #propagateChange: Action<TData | null> | null = null;
     #propagateTouch: Action | null = null;
 
@@ -222,9 +234,21 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
      */
     public readonly close = output<PopupCloseEvent>();
 
+    /**
+     * @description The data items of the dropdown list component.
+     * @default []
+     */
     public readonly data = input<Iterable<TData>>([]);
+
+    /**
+     * @description Sets the disabled state of the dropdown list component.
+     */
     public readonly disabled = model(false);
-    public readonly itemDisabled = input<string | Predicate<TData> | null | undefined>("");
+
+    /**
+     * @description A predicate function or the name of the field that determines whether an item is disabled.
+     */
+    public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
      * @description Sets the loading state of the autocomplete component.
@@ -272,34 +296,35 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
     public readonly rounded = input<ComboBoxVariantProps["rounded"]>("medium");
     public readonly showClearButton = input(false);
     public readonly size = input<ComboBoxVariantProps["size"]>("medium");
-    public readonly textField = input<string | Selector<TData, string> | null | undefined>("");
+    public readonly textField = input<DropdownFieldSelectorType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
-    public readonly valueField = input<string | Selector<TData, any> | null | undefined>("");
-    public readonly valueNormalizer: InputSignal<Action<Observable<string>, Observable<any>>> = input(
-        (text$: Observable<string>) => text$.pipe(map(value => value))
-    );
+    public readonly valueField = input<DropdownFieldSelectorType<TData>>();
+    public readonly valueNormalizer = input<Action<Observable<string>, Observable<any>>>();
 
     public constructor() {
         effect(() => {
             const itemDisabled = this.itemDisabled();
             untracked(() => this.#listService.setDisabledBy(itemDisabled ?? ""));
         });
+
         effect(() => {
-            const textField = this.textField();
-            untracked(() => this.#listService.setTextField(textField ?? ""));
-        });
-        effect(() => {
-            const valueField = this.valueField();
-            untracked(() => {
-                this.#listService.setValueField(valueField ?? "");
-                if (this.#value() != null) {
-                    this.#listService.setSelectedDataItems([this.#value()]);
-                }
+            window.setTimeout(() => {
+                this.valueField();
+                untracked(() => {
+                    if (this.#value() != null) {
+                        this.#listService.setSelectedDataItems([this.#value()]);
+                        this.comboBoxValue.set(this.valueText());
+                    }
+                });
             });
         });
+
         effect(() => {
-            const data = this.data();
-            untracked(() => this.#listService.setData(data));
+            window.setTimeout(() => {
+                if (!this.#listService.isActiveItemVisible()) {
+                    this.#listService.highlightFirstItem();
+                }
+            });
         });
         afterNextRender({
             read: () => {
@@ -314,21 +339,10 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
                 filter(() => !this.readonly())
             )
             .subscribe(() => this.focus());
-        effect(() => {
-            const viewItems = this.#listService.viewItems();
-            if (!viewItems.any()) {
-                this.#listService.highlightedItem.set(null);
-                return;
-            }
-            const selectedItems = this.#listService.selectedListItems();
-            const containsSelectedItems = selectedItems.any(s => viewItems.contains(s));
-            if (!containsSelectedItems) {
-                this.#listService.highlightFirstItem();
-            }
-        });
     }
 
     public onItemSelect(event: SelectionChangeEvent<TData>): void {
+        this.updateValue(event.item.data);
         this.closePopup();
     }
 
@@ -358,7 +372,7 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
     }
 
     public writeValue(obj: TData): void {
-        this.updateValue(obj);
+        this.updateValue(obj, false);
         if (obj != null) {
             this.#listService.setSelectedDataItems([obj]);
             this.comboBoxValue.set(this.valueText());
@@ -380,7 +394,6 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
         this.updateValue(null);
         this.#listService.clearSelections();
         this.comboBoxValue.set("");
-        this.#propagateChange?.(null);
         this.focus();
     }
 
@@ -468,7 +481,7 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
     }
 
     private handleCustomValue(): void {
-        this.valueNormalizer()(of(this.comboBoxValue()))
+        this.#valueNormalizer()(of(this.comboBoxValue()))
             .pipe(take(1))
             .subscribe(normalizedValue => {
                 this.#listService.addNewDataItems([normalizedValue]);
@@ -588,11 +601,13 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
         popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
             this.close.emit(event);
         });
-        popupRef.closed.pipe(take(1)).subscribe(() => {
+        popupRef.closed.pipe(take(1)).subscribe(e => {
             this.#popupRef.set(null);
             this.#navigatedValue.set(null);
             this.#listService.clearFilter();
-            window.setTimeout(() => this.focus());
+            if (e.via !== "scroll") {
+                window.setTimeout(() => this.focus());
+            }
         });
     }
 
@@ -631,10 +646,6 @@ export class ComboBoxComponent<TData = unknown> implements ControlValueAccessor,
                 }
                 this.comboBoxValue.set(value);
             });
-        this.#listService.selectedKeysChange.subscribe(() => {
-            const item = this.selectedDataItem();
-            this.updateValue(item);
-        });
     }
 
     private togglePopup(): void {

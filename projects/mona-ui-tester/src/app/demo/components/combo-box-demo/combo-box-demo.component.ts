@@ -2,7 +2,6 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { metadata } from "@angular/forms/signals";
 import { range } from "@mirei/ts-collections";
 import { Box, LucideAngularModule, Search } from "lucide-angular";
 import {
@@ -20,6 +19,7 @@ import {
     GroupableOptions,
     VirtualScrollOptions
 } from "mona-ui";
+import { map, Observable } from "rxjs";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -55,9 +55,23 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         prefixTemplate: dropdownPrefixTemplateFeatureConfig("combo box"),
         virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
+    readonly #valueNormalizer = (text$: Observable<string>) =>
+        text$.pipe(
+            map(v => ({
+                text: v,
+                value: Math.random(),
+                price: Math.random() * 10,
+                category: "Custom",
+                active: true
+            }))
+        );
     protected readonly config = signal<ComponentConfig<ComboBoxComponent>>({
         code: ``,
         inputs: {
+            allowCustomValue: {
+                type: "boolean",
+                value: false
+            },
             data: {
                 type: "iterable",
                 value: []
@@ -96,6 +110,11 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
             valueField: {
                 type: "string",
                 value: "value"
+            },
+            valueNormalizer: {
+                type: "dropdown",
+                value: [this.#valueNormalizer],
+                defaultValue: this.#valueNormalizer
             }
         },
         outputs: {},
@@ -128,6 +147,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <form [formGroup]="formGroup">
             <mona-combo-box
+                [allowCustomValue]="allowCustomValue()"
                 [data]="comboBoxData()"
                 [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
@@ -137,6 +157,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 [showClearButton]="showClearButton()"
                 [textField]="textField()"
                 [valueField]="valueField()"
+                [valueNormalizer]="valueNormalizer()"
                 [monaDropDownGroupable]="grouping()"
                 [monaDropDownFilterable]="filtering()"
                 [monaDropDownVirtualScroll]="virtualization()"
@@ -193,7 +214,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
 })
 class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxComponent> {
     readonly #formGroup = new FormGroup({
-        value: new FormControl<unknown>(null, { nonNullable: false, validators: [] })
+        value: new FormControl<unknown>(dropdownFoodData[1], { nonNullable: false, validators: [] })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
     protected readonly comboBoxData = computed(() => {
@@ -250,6 +271,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         };
         return options;
     });
+    public readonly allowCustomValue = model<ReturnType<ComboBoxComponent["allowCustomValue"]>>(false);
     public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<ComboBoxComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);
@@ -259,6 +281,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly showClearButton = input<ReturnType<ComboBoxComponent["showClearButton"]>>(false);
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
+    public readonly valueNormalizer = input<ReturnType<ComboBoxComponent["valueNormalizer"]>>();
 
     public constructor() {
         effect(() => console.log("Selected item: ", this.#formValue()));

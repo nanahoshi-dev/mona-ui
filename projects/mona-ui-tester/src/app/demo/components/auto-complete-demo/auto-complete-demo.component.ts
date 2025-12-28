@@ -272,7 +272,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 })
 class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {
     readonly #formGroup = new FormGroup({
-        value: new FormControl<unknown>(null, { nonNullable: false, validators: [] })
+        value: new FormControl<string | null>(null, { nonNullable: false, validators: [] })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
     protected readonly alertIcon = TriangleAlert;

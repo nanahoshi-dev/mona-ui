@@ -23,8 +23,9 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import { distinctUntilChanged, filter, fromEvent, Subject, take, takeUntil, tap, withLatestFrom } from "rxjs";
+import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -38,22 +39,23 @@ import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { isTypeaheadKey, setupTypeahead } from "../../../../common/utils/typeahead.util";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
-import { PopupRef } from "../../../../popup/models/PopupRef";
-import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
-import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-down-group-header-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
+import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
+import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
-import { DropdownFieldPredicateType, DropdownFieldSelectionType } from "../../../models/DropdownFieldTypes";
+import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
+import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
+import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
+import { DropDownService } from "../../../services/drop-down.service";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
-import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import {
     dropdownListAffixContainerThemeVariants,
     dropdownListInputThemeVariants,
@@ -67,13 +69,24 @@ import {
     selector: "mona-drop-down-list",
     templateUrl: "./dropdown-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     providers: [
         ListService,
+        DropDownService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => DropdownListComponent),
             multi: true
+        },
+        {
+            provide: DropdownDataInputToken,
+            useExisting: forwardRef(() => DropdownListComponent),
+            multi: false
+        },
+        {
+            provide: DropdownPopupInputToken,
+            useExisting: forwardRef(() => DropdownListComponent),
+            multi: false
         }
     ],
     imports: [
@@ -108,13 +121,14 @@ import {
         "(blur)": "onBlur()"
     }
 })
-export class DropdownListComponent<TData = unknown> implements ControlValueAccessor, DropDownListVariantInput {
+export class DropdownListComponent<TData = unknown>
+    implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
+{
     readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownService = inject(DropDownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #navigatedValue = linkedSignal(() => this.#value());
     readonly #listService = inject<ListService<TData>>(ListService);
-    readonly #popupRef = signal<PopupRef | null>(null);
-    readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey = new Subject<string>();
     readonly #value = signal<TData | null>(null);
@@ -142,7 +156,7 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     });
     protected readonly clearIcon = X;
     protected readonly dropdownIcon = ChevronDown;
-    protected readonly expanded = computed(() => this.#popupRef() !== null);
+    protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
         read: TemplateRef
@@ -158,13 +172,6 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         const userClass = this.popupClass();
         const variantClass = dropdownListPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
-    });
-    protected readonly listPopupHeight = computed(() => {
-        const popupHeight = this.popupHeight();
-        if (popupHeight != null) {
-            return popupHeight;
-        }
-        return 200;
     });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
@@ -299,7 +306,7 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
      * If null, the item itself will be used as the text representation.
      * @default null
      */
-    public readonly textField = input<DropdownFieldSelectionType<TData>>();
+    public readonly textField = input<DropdownFieldSelectorType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -308,47 +315,27 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
      * If null, the item itself will be used as the value representation.
      * @default null
      */
-    public readonly valueField = input<DropdownFieldSelectionType<TData>>();
+    public readonly valueField = input<DropdownFieldSelectorType<TData>>();
 
     public constructor() {
         effect(() => {
-            const textField = this.textField() ?? "";
-            untracked(() => this.#listService.setTextField(textField));
-        });
-        effect(() => {
-            const valueField = this.valueField() ?? "";
-            untracked(() => {
-                this.#listService.setValueField(valueField);
-                const value = this.#value();
-                if (value != null) {
-                    this.#listService.setSelectedDataItems([value]);
-                }
+            window.setTimeout(() => {
+                this.valueField();
+                untracked(() => {
+                    const value = this.#value();
+                    if (value != null) {
+                        this.#listService.setSelectedDataItems([value]);
+                    }
+                });
             });
         });
         effect(() => {
-            const itemDisabled = this.itemDisabled() ?? "";
-            untracked(() => this.#listService.setDisabledBy(itemDisabled));
-        });
-        effect(() => {
-            const data = this.data();
-            untracked(() => this.#listService.setData(data));
-        });
-        effect(() => {
-            const viewItems = this.#listService.viewItems();
-            if (!viewItems.any()) {
-                this.#listService.highlightedItem.set(null);
-                return;
-            }
-            const selectedItems = this.#listService.selectedListItems();
-            const containsSelectedItems = selectedItems.any(s => viewItems.contains(s));
-            if (!containsSelectedItems) {
-                this.#listService.highlightFirstItem();
-            }
+            const popupTemplate = this.popupTemplate();
+            untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
         });
         afterNextRender({
             read: () => {
                 this.initialize();
-                this.setEventListeners();
                 this.setSubscriptions();
             }
         });
@@ -382,6 +369,14 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
     }
 
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
+        if (
+            this.#listService.filterableOptions().enabled &&
+            event.source.via === "keyboard" &&
+            event.source.key !== "Enter"
+        ) {
+            this.#navigatedValue.set(event.item.data);
+            return;
+        }
         this.updateValue(event.item.data, true);
         if (event.source.via === "mouse" || event.source.key === "Enter" || event.source.key === "NumpadEnter") {
             this.closePopup();
@@ -399,50 +394,8 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         this.focus();
     }
 
-    protected openPopup(): void {
-        this.focus();
-        if (this.#popupRef() || this.readonly()) {
-            return;
-        }
-        const event = this.notifyPopupOpen();
-        if (event.isDefaultPrevented()) {
-            return;
-        }
-        const height = this.isEmpty() ? 200 : undefined;
-        const maxHeight = this.listPopupHeight();
-        const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
-        const popupRef = this.#popupService.create({
-            anchor: this.#hostElementRef.nativeElement,
-            anchorConnectionPoint: "bottomleft",
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
-            closeOnOutsideClick: true,
-            closeOnScroll: true,
-            content: this.popupTemplate(),
-            hasBackdrop: false,
-            height,
-            maxHeight,
-            offset: { horizontal: 0, vertical: 4 },
-            popupConnectionPoint: "topleft",
-            width,
-            withPush: false,
-            withScrollTracking: true
-        });
-
-        if (this.#listService.filterableOptions().enabled && popupRef) {
-            this.#listService.setNavigableOptions({ mode: "highlight" });
-        }
-
-        this.#popupRef.set(popupRef);
-        this.notifyValueChangeOnPopupClose();
-        this.handleScrollOnPopupOpen();
-        this.setPopupCloseSubscriptions(popupRef);
-    }
-
     private closePopup(): void {
-        this.#popupRef()?.close();
+        this.#dropdownService.popupRef()?.close();
     }
 
     private cycleThroughMatchedItems(buffer: string): void {
@@ -468,33 +421,20 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         this.#hostElementRef.nativeElement?.focus();
     }
 
-    private handleArrowKeys(event: KeyboardEvent): void {
-        if (event.altKey) {
-            if (event.key === "ArrowDown") {
-                this.openPopup();
+    private handleArrowKeys(): void {
+        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
+            if (!this.expanded()) {
+                this.updateValue(item.data, true);
             } else {
-                this.closePopup();
+                this.#navigatedValue.set(item.data);
             }
-            return;
-        }
-        const previousItem = this.selectedListItem();
-        const direction = event.key === "ArrowDown" ? "next" : "previous";
-        const item = this.#listService.navigate(direction, "select", false);
-        if (!item || previousItem === item) {
-            return;
-        }
-        if (!this.expanded()) {
-            this.updateValue(item.data, true);
-        } else {
-            this.#navigatedValue.set(item.data);
-        }
+        });
     }
 
     private handleEnterKey(): void {
         if (this.expanded() && this.#value() !== this.#navigatedValue()) {
             this.updateValue(this.#navigatedValue(), true);
         }
-        this.togglePopup();
     }
 
     private handleHomeEndKeys(event: KeyboardEvent): void {
@@ -513,62 +453,24 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         }
     }
 
-    private handleKeyDown(event: KeyboardEvent): void {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            this.handleEnterKey();
-        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-            event.preventDefault();
-            this.handleArrowKeys(event);
-        } else if (event.key === "Home" || event.key === "End") {
-            event.preventDefault();
-            this.handleHomeEndKeys(event);
-        } else if (event.key === " ") {
-            event.preventDefault();
-            this.togglePopup();
-        } else if (event.key === "Escape" || event.key === "Tab") {
-            this.closePopup();
-        } else if (isTypeaheadKey(event.key)) {
-            this.#typeaheadKey.next(event.key);
-        }
-    }
-
-    private handleScrollOnPopupOpen(): void {
-        if (this.selectedDataItem()) {
-            this.scrollToSelectedItem();
-        } else {
-            this.#listService.highlightFirstItem();
-        }
+    private handleKeyDown(): void {
+        this.#dropdownService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                this.handleEnterKey();
+            } else if (event.key === "Home" || event.key === "End") {
+                event.preventDefault();
+                this.handleHomeEndKeys(event);
+            } else if (isTypeaheadKey(event.key)) {
+                this.#typeaheadKey.next(event.key);
+            }
+        });
     }
 
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "select" });
         this.#listService.setSelectableOptions(this.selectableOptions);
         this.#listService.selectedKeysChange = this.selectedKeysChange;
-    }
-
-    private notifyPopupOpen(): PreventableEvent {
-        const event = new PreventableEvent("dropdownListPopupOpen");
-        this.open.emit(event);
-        return event;
-    }
-
-    private notifyValueChangeOnPopupClose(): void {
-        const popupRef = this.#popupRef();
-        if (!popupRef) {
-            return;
-        }
-        const selectionChange$ = this.#listService.selectionChange$.pipe(
-            distinctUntilChanged((s1, s2) => s1.data === s2.data)
-        );
-        popupRef.closed
-            .pipe(
-                take(1),
-                withLatestFrom(selectionChange$),
-                filter(() => this.#value() !== this.#navigatedValue()),
-                tap(() => this.updateValue(this.#navigatedValue(), true))
-            )
-            .subscribe();
     }
 
     private scrollToSelectedItem(): void {
@@ -579,40 +481,19 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         window.setTimeout(() => this.#listService.scrollToItem(item, false));
     }
 
-    private setEventListeners(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.readonly())
-            )
-            .subscribe(e => this.handleKeyDown(e));
-        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.readonly())
-            )
-            .subscribe(() => this.togglePopup());
-    }
-
-    private setPopupCloseSubscriptions(popupRef: PopupRef): void {
-        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
-            this.close.emit(event);
-        });
-        popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef.set(null);
-            this.#listService.setNavigableOptions({ mode: "select" });
+    private setPopupCloseSubscriptions(): void {
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             window.setTimeout(() => {
-                this.#listService.clearFilter();
                 this.focus();
             });
+            this.updateValue(this.#navigatedValue(), true);
         });
     }
 
     private setSubscriptions(): void {
-        this.#listService.selectedKeysChange.subscribe(() => {
-            const item = this.selectedDataItem();
-            this.updateValue(item);
-        });
+        this.handleKeyDown();
+        this.handleArrowKeys();
+        this.setPopupCloseSubscriptions();
         this.setTypeaheadSubscription();
     }
 
@@ -620,14 +501,6 @@ export class DropdownListComponent<TData = unknown> implements ControlValueAcces
         setupTypeahead(this.#typeaheadKey)
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(buffer => this.cycleThroughMatchedItems(buffer));
-    }
-
-    private togglePopup(): void {
-        if (this.#popupRef()) {
-            this.closePopup();
-            return;
-        }
-        this.openPopup();
     }
 
     private updateValue(value: TData | null, notify: boolean = true): void {

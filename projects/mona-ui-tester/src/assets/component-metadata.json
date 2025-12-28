@@ -215,84 +215,6 @@
       }
     ]
   },
-  "ComboBoxComponent": {
-    "name": "ComboBoxComponent",
-    "selector": "\"mona-combo-box\"",
-    "inputs": [
-      {
-        "name": "selectedKeysChange",
-        "type": "any[]",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "size",
-        "type": "DropdownSelectorVariantProps[\"size\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "allowCustomValue",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "data",
-        "type": "Iterable<TData>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "itemDisabled",
-        "type": "string | Predicate<TData> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "placeholder",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showClearButton",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "textField",
-        "type": "string | Selector<TData, string> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "valueField",
-        "type": "string | Selector<TData, any> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "valueNormalizer",
-        "type": "any>>",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "DropDownFilterableDirective": {
     "name": "DropDownFilterableDirective",
     "selector": "",
@@ -1145,7 +1067,7 @@
       },
       {
         "name": "textField",
-        "type": "DropdownFieldSelectionType<TData>",
+        "type": "DropdownFieldSelectorType<TData>",
         "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
@@ -1157,7 +1079,7 @@
       },
       {
         "name": "valueField",
-        "type": "DropdownFieldSelectionType<TData>",
+        "type": "DropdownFieldSelectorType<TData>",
         "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
@@ -3329,6 +3251,150 @@
       }
     ]
   },
+  "ComboBoxComponent": {
+    "name": "ComboBoxComponent",
+    "selector": "\"mona-combo-box\"",
+    "inputs": [
+      {
+        "name": "selectedKeysChange",
+        "type": "any[]",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "allowCustomValue",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label attribute of the autocomplete component.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "description": "Sets the aria-labelledby attribute of the autocomplete component.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "data",
+        "type": "Iterable<TData>",
+        "description": "The data items of the dropdown list component.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the dropdown list component.",
+        "kind": "model"
+      },
+      {
+        "name": "itemDisabled",
+        "type": "DropdownFieldPredicateType<TData>",
+        "description": "A predicate function or the name of the field that determines whether an item is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Sets the loading state of the autocomplete component.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "Sets the class of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "Sets the height of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "Sets the width of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the combo box component.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the combo box component.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "ComboBoxVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "ComboBoxVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "textField",
+        "type": "DropdownFieldSelectorType<TData>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "valueField",
+        "type": "DropdownFieldSelectorType<TData>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "valueNormalizer",
+        "type": "Action<Observable<string>, Observable<any>>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "DropdownListComponent": {
     "name": "DropdownListComponent",
     "selector": "\"mona-drop-down-list\"",
@@ -3360,13 +3426,13 @@
       {
         "name": "data",
         "type": "Iterable<TData>",
-        "description": "The data items of the dropdown list.",
+        "description": "The data items of the dropdown list component.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the dropdown list.",
+        "description": "Sets the disabled state of the dropdown list component.",
         "kind": "model"
       },
       {
@@ -3378,7 +3444,7 @@
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the autocomplete component.",
+        "description": "Sets the loading state of the dropdown list component.",
         "kind": "input"
       },
       {
@@ -3443,8 +3509,8 @@
       },
       {
         "name": "textField",
-        "type": "DropdownFieldSelectionType<TData>",
-        "description": "The text field name of the data item.",
+        "type": "DropdownFieldSelectorType<TData>",
+        "description": "Sets the text field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3455,8 +3521,8 @@
       },
       {
         "name": "valueField",
-        "type": "DropdownFieldSelectionType<TData>",
-        "description": "The value field name of the data item.",
+        "type": "DropdownFieldSelectorType<TData>",
+        "description": "Sets the value field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -5015,7 +5081,7 @@
       },
       {
         "name": "items",
-        "type": "any>>",
+        "type": "Iterable<BreadcrumbItem<any>>",
         "description": "",
         "kind": "input"
       }
