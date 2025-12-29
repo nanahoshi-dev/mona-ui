@@ -21,8 +21,7 @@
        [attr.aria-labelledby]="ariaLabelledBy() || undefined"
        role="combobox"
        (ngModelChange)="comboBoxValue$.next($event)"
-       (blur)="onInputBlur($event)"
-       (keydown)="onKeydown($event)">
+       (blur)="onInputBlur($event)">
 
 <span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
 

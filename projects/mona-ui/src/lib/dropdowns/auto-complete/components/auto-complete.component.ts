@@ -230,7 +230,7 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly open = output<PreventableEvent>();
 
     /**
-     * @description Sets the placeholder text of the autocomplete component.
+     * @description Sets the placeholder text to be shown when there is no value selected.
      * @default ""
      */
     public readonly placeholder = input("");

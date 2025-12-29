@@ -1,4 +1,4 @@
-import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
+import { CurrencyPipe, JsonPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
@@ -140,11 +140,14 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         DropDownGroupableDirective,
         DropDownFilterableDirective,
         CurrencyPipe,
-        DropDownItemTemplateDirective
+        DropDownItemTemplateDirective,
+        JsonPipe
     ],
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
+
+        <div>{{ formGroup.controls.value.value?.["text"] || "" }}</div>
         <form [formGroup]="formGroup">
             <mona-combo-box
                 [allowCustomValue]="allowCustomValue()"
@@ -214,7 +217,10 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
 })
 class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxComponent> {
     readonly #formGroup = new FormGroup({
-        value: new FormControl<unknown>(dropdownFoodData[1], { nonNullable: false, validators: [] })
+        value: new FormControl<(typeof dropdownFoodData)[1]>(dropdownFoodData[1], {
+            nonNullable: false,
+            validators: []
+        })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
     protected readonly comboBoxData = computed(() => {

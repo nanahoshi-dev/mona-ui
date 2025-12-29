@@ -28,7 +28,7 @@ export class ListItemComponent<TData> {
         return this.listService.getItemText(item);
     });
     protected readonly isHeader = computed(() => this.item()?.header ?? false);
-    protected readonly listService = inject(ListService<TData>);
+    protected readonly listService = inject(ListService);
     protected readonly textClasses = computed(() => {
         const isHeader = this.isHeader();
         if (isHeader) {

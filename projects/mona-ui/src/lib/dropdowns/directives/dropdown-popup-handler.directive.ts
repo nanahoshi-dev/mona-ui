@@ -27,10 +27,15 @@ export class DropdownPopupHandlerDirective {
             }
         });
         effect(() => {
-            if (!this.#listService.isActiveItemVisible()) {
-                this.#listService.highlightFirstItem();
-            }
+            window.setTimeout(() => {
+                if (!this.#listService.isActiveItemVisible()) {
+                    this.#listService.highlightFirstItem();
+                }
+            });
         });
+        this.#dropdownService.triggerPopupOpen$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => this.openPopup());
     }
 
     private closePopup(): void {
@@ -67,6 +72,9 @@ export class DropdownPopupHandlerDirective {
             this.togglePopup();
         } else if (e.key === "Enter") {
             this.#dropdownService.keydown$.next(e);
+            if (e.defaultPrevented) {
+                return;
+            }
             this.togglePopup();
         } else {
             this.#dropdownService.keydown$.next(e);
@@ -137,7 +145,7 @@ export class DropdownPopupHandlerDirective {
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.#host.readonly())
+                filter(e => !this.#host.readonly() && (e.target as HTMLElement).tagName !== "INPUT")
             )
             .subscribe(() => this.togglePopup());
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
@@ -154,11 +162,9 @@ export class DropdownPopupHandlerDirective {
         });
         popupRef.closed.pipe(take(1)).subscribe(event => {
             this.#dropdownService.popupRef.set(null);
-            // this.#listService.setNavigableOptions({ mode: "select" });
             this.#dropdownService.popupCloseComplete$.next(event);
             window.setTimeout(() => {
                 this.#listService.clearFilter();
-                // this.focus();
             });
         });
     }
