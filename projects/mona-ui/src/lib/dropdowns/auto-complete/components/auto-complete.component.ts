@@ -6,21 +6,24 @@ import {
     computed,
     contentChild,
     DestroyRef,
+    effect,
     ElementRef,
     forwardRef,
     inject,
     input,
+    linkedSignal,
     model,
     output,
     signal,
     TemplateRef,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { LucideAngularModule, X } from "lucide-angular";
-import { debounceTime, Subject, take, takeUntil, tap } from "rxjs";
+import { debounceTime, filter, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
@@ -38,23 +41,23 @@ import { ListService } from "../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
-import { PopupRef } from "../../../popup/models/PopupRef";
-import { PopupService } from "../../../popup/services/popup.service";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { Action } from "../../../utils/Action";
 import { createElementControlId } from "../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../utils/PreventableEvent";
-import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../directives/drop-down-group-header-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../directives/dropdown-data-handler.directive";
+import { DropdownPopupHandlerDirective } from "../../directives/dropdown-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../directives/dropdown-prefix-template.directive";
 import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../models/DropdownFieldTypes";
+import { DropdownPopupInput, DropdownPopupInputToken } from "../../models/DropdownPopupInput";
+import { DropDownService } from "../../services/drop-down.service";
 import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
@@ -68,9 +71,10 @@ import {
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     providers: [
         ListService,
+        DropDownService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => AutoCompleteComponent),
@@ -78,6 +82,11 @@ import {
         },
         {
             provide: DropdownDataInputToken,
+            useExisting: forwardRef(() => AutoCompleteComponent),
+            multi: false
+        },
+        {
+            provide: DropdownPopupInputToken,
             useExisting: forwardRef(() => AutoCompleteComponent),
             multi: false
         }
@@ -107,13 +116,13 @@ import {
     }
 })
 export class AutoCompleteComponent<TData = unknown>
-    implements ControlValueAccessor, AutoCompleteVariantInput, DropdownDataInput<TData>
+    implements ControlValueAccessor, AutoCompleteVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownService = inject(DropDownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
-    readonly #popupRef = signal<PopupRef | null>(null);
-    readonly #popupService = inject(PopupService);
+    readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<string | null>(null);
     #propagateChange: Action<string | null> | null = null;
@@ -127,7 +136,7 @@ export class AutoCompleteComponent<TData = unknown>
         const theme = this.#themeService.theme();
         return autoCompleteAffixContainerThemeVariants(theme)();
     });
-    protected readonly autoCompleteValue = signal("");
+    protected readonly autoCompleteValue = linkedSignal(() => this.#value() ?? "");
     protected readonly autoCompleteValue$ = new Subject<string>();
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -161,13 +170,6 @@ export class AutoCompleteComponent<TData = unknown>
         const userClass = this.popupClass();
         const variantClass = autoCompletePopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
-    });
-    protected readonly listPopupHeight = computed(() => {
-        const popupHeight = this.popupHeight();
-        if (popupHeight != null) {
-            return popupHeight;
-        }
-        return 200;
     });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
@@ -308,6 +310,10 @@ export class AutoCompleteComponent<TData = unknown>
                 this.autoCompleteValue.set(this.#value() ?? "");
             }
         });
+        effect(() => {
+            const popupTemplate = this.popupTemplate();
+            untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
+        });
     }
 
     public registerOnChange(fn: any): void {
@@ -342,25 +348,6 @@ export class AutoCompleteComponent<TData = unknown>
         this.closePopup();
     }
 
-    protected onKeydown(event: KeyboardEvent): void {
-        if (event.key === "Escape") {
-            if (this.#popupRef()) {
-                this.closePopup();
-            } else {
-                this.clear();
-                window.setTimeout(() => this.focus());
-            }
-        } else if (event.key === "Tab") {
-            this.closePopup();
-        } else if (event.key === "Enter") {
-            this.handleEnterKey();
-        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-            event.stopPropagation();
-            event.preventDefault();
-            this.handleArrowKeys(event);
-        }
-    }
-
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
         if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") {
             return;
@@ -371,44 +358,8 @@ export class AutoCompleteComponent<TData = unknown>
         this.focus();
     }
 
-    protected openPopup(): void {
-        if (this.#popupRef() || this.readonly()) {
-            return;
-        }
-        const event = this.notifyPopupOpen();
-        if (event.isDefaultPrevented()) {
-            return;
-        }
-
-        const height = this.isEmpty() ? 200 : undefined;
-        const maxHeight = this.listPopupHeight();
-        const width = this.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
-        const popupRef = this.#popupService.create({
-            anchor: this.#hostElementRef.nativeElement,
-            anchorConnectionPoint: "bottomleft",
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
-            closeOnOutsideClick: true,
-            closeOnScroll: true,
-            content: this.popupTemplate(),
-            hasBackdrop: false,
-            height,
-            maxHeight,
-            offset: { horizontal: 0, vertical: 4 },
-            popupConnectionPoint: "topleft",
-            width,
-            withPush: false,
-            withScrollTracking: true
-        });
-        this.#popupRef.set(popupRef);
-        this.setPopupCloseSubscriptions(popupRef);
-    }
-
     private clear(): void {
         this.updateValue("");
-        this.autoCompleteValue.set("");
         this.#listService.clearSelections();
         this.#listService.clearFilter();
     }
@@ -432,32 +383,49 @@ export class AutoCompleteComponent<TData = unknown>
             .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().startsWith(value.toLowerCase()));
     }
 
-    private handleArrowKeys(event: KeyboardEvent): void {
-        if (event.altKey) {
-            if (event.key === "ArrowDown") {
-                this.openPopup();
-            } else {
+    private handleEnterKey(): void {
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                filter(e => e.key === "Enter"),
+                takeUntilDestroyed(this.#destroyRef),
+                tap(e => e.preventDefault())
+            )
+            .subscribe(() => {
+                const highlightedItem = this.#listService.highlightedItem();
+                const highlightedItemText = highlightedItem ? this.#listService.getItemText(highlightedItem) : "";
+                const autoCompleteValue = this.autoCompleteValue();
+                if (highlightedItemText && autoCompleteValue != null) {
+                    this.autoCompleteValue.set(highlightedItemText);
+                    if (this.#value() !== this.autoCompleteValue()) {
+                        this.updateValue(highlightedItemText);
+                    }
+                } else if (this.#value() !== autoCompleteValue) {
+                    this.updateValue(autoCompleteValue);
+                }
                 this.closePopup();
-            }
-            return;
-        }
-        const direction = event.key === "ArrowDown" ? "next" : "previous";
-        this.#listService.navigate(direction, "highlight", false);
+            });
     }
 
-    private handleEnterKey(): void {
-        const highlightedItem = this.#listService.highlightedItem();
-        const highlightedItemText = highlightedItem ? this.#listService.getItemText(highlightedItem) : "";
-        const autoCompleteValue = this.autoCompleteValue();
-        if (highlightedItemText && autoCompleteValue) {
-            this.autoCompleteValue.set(highlightedItemText);
-            if (this.#value() !== this.autoCompleteValue()) {
-                this.updateValue(highlightedItemText);
-            }
-        } else if (this.#value() !== autoCompleteValue) {
-            this.updateValue(autoCompleteValue);
-        }
-        this.closePopup();
+    private handleEscapeKey(): void {
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                filter(e => e.key === "Escape"),
+                takeUntilDestroyed(this.#destroyRef),
+                tap(e => e.preventDefault())
+            )
+            .subscribe(() => {
+                const autoCompleteValue = this.autoCompleteValue();
+                const value = this.#value();
+                if (value !== autoCompleteValue) {
+                    this.updateValue(autoCompleteValue);
+                } else if (value === autoCompleteValue && !this.#popupRef()) {
+                    this.clear();
+                    this.updateValue(null);
+                    this.#listService.clearFilter();
+                    this.#listService.clearSelections();
+                    window.setTimeout(() => this.focus());
+                }
+            });
     }
 
     private initialize(): void {
@@ -473,38 +441,39 @@ export class AutoCompleteComponent<TData = unknown>
         return event;
     }
 
-    private notifyPopupOpen(): PreventableEvent {
-        const event = new PreventableEvent("autoCompletePopupOpen");
-        this.open.emit(event);
-        return event;
-    }
-
-    private setPopupCloseSubscriptions(popupRef: PopupRef): void {
-        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
-            this.close.emit(event);
-        });
-        popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef.set(null);
-            window.setTimeout(() => this.focus());
+    private setArrowKeyNavigationSubscription(): void {
+        this.#dropdownService.beforeNavigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (!event.altKey) {
+                event.preventDefault();
+            }
+            if (this.#dropdownService.popupRef() && !event.altKey) {
+                const direction = event.key === "ArrowDown" ? "next" : "previous";
+                this.#listService.navigate(direction, "highlight", false);
+            }
         });
     }
 
-    private setSubscriptions(): void {
+    private setAutoCompleteValueChangeSubscription(): void {
         const debounce = this.#listService.filterableOptions().enabled
             ? this.#listService.filterableOptions().debounce
             : 0;
         this.autoCompleteValue$
             .pipe(
-                tap(() => this.openPopup()),
+                tap(value => {
+                    if (value) {
+                        this.#dropdownService.triggerPopupOpen$.next();
+                    } else {
+                        this.closePopup();
+                        this.updateValue(null);
+                        this.#listService.clearFilter();
+                        this.#listService.clearSelections();
+                    }
+                }),
+                filter(value => !!value && value !== this.#value()),
                 debounceTime(debounce),
                 takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe((value: string) => {
-                if (!value) {
-                    this.closePopup();
-                    this.autoCompleteValue.set(value);
-                    return;
-                }
                 if (this.#listService.filterableOptions().enabled) {
                     const event = this.notifyFilterChange(value);
                     if (!event.isDefaultPrevented()) {
@@ -521,7 +490,21 @@ export class AutoCompleteComponent<TData = unknown>
             });
     }
 
-    private updateValue(value: string, notify: boolean = true): void {
+    private setPopupCloseSubscriptions(): void {
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            window.setTimeout(() => this.focus());
+        });
+    }
+
+    private setSubscriptions(): void {
+        this.setAutoCompleteValueChangeSubscription();
+        this.setArrowKeyNavigationSubscription();
+        this.setPopupCloseSubscriptions();
+        this.handleEscapeKey();
+        this.handleEnterKey();
+    }
+
+    private updateValue(value: string | null, notify: boolean = true): void {
         const oldValue = this.#value();
         this.#value.set(value);
         if (notify && oldValue !== value) {

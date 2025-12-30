@@ -43,6 +43,11 @@ export class DropdownPopupHandlerDirective {
     }
 
     private handleArrowKeys(event: KeyboardEvent): void {
+        this.#dropdownService.beforeNavigate$.next(event);
+        if (event.defaultPrevented) {
+            return;
+        }
+        event.preventDefault();
         if (event.altKey) {
             if (event.key === "ArrowDown") {
                 this.openPopup();
@@ -61,8 +66,11 @@ export class DropdownPopupHandlerDirective {
     }
 
     private handleKeyDown(e: KeyboardEvent): void {
+        this.#dropdownService.beforeKeydown$.next(e);
+        if (e.defaultPrevented) {
+            return;
+        }
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-            e.preventDefault();
             this.handleArrowKeys(e);
         } else if (e.key === "Escape") {
             this.closePopup();
@@ -82,9 +90,12 @@ export class DropdownPopupHandlerDirective {
     }
 
     private handleScrollOnPopupOpen(): void {
-        const selectedDataItem = this.#listService.selectedListItems().lastOrDefault()?.data ?? null;
+        const selectedDataItem = this.#listService.selectedListItems().lastOrDefault();
+        const highlightedItem = this.#listService.highlightedItem();
         if (selectedDataItem) {
             this.scrollToSelectedItem();
+        } else if (highlightedItem) {
+            this.scrollToHighlightedItem();
         } else {
             this.#listService.highlightFirstItem();
         }
@@ -131,6 +142,14 @@ export class DropdownPopupHandlerDirective {
         this.setPopupCloseSubscriptions(popupRef);
         this.handleScrollOnPopupOpen();
         this.#dropdownService.popupOpenComplete$.next();
+    }
+
+    private scrollToHighlightedItem(): void {
+        const highlightedItem = this.#listService.highlightedItem();
+        if (!highlightedItem) {
+            return;
+        }
+        window.setTimeout(() => this.#listService.scrollToItem(highlightedItem, false));
     }
 
     private scrollToSelectedItem(): void {

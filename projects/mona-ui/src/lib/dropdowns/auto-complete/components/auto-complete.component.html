@@ -21,8 +21,7 @@
        [attr.aria-label]="ariaLabel() || undefined"
        [attr.aria-labelledby]="ariaLabelledBy() || undefined"
        (ngModelChange)="autoCompleteValue$.next($event)"
-       (blur)="onInputBlur()"
-       (keydown)="onKeydown($event)">
+       (blur)="onInputBlur()">
 
 <span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
 
@@ -47,7 +46,8 @@
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" [attr.role]="'region'">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [listId]="listId">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="size()"
+                   [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>

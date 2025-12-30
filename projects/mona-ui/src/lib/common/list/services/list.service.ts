@@ -188,13 +188,6 @@ export class ListService<TData> {
         return textField(item.data);
     }
 
-    public hasActiveItem(): boolean {
-        if (this.viewItems().none()) {
-            return false;
-        }
-        return this.highlightedItem() != null || this.selectedListItems().length > 0;
-    }
-
     public highlightFirstItem(): ListItem<TData> | null {
         const viewItems = this.viewItems()
             .where(i => !i.header && !this.isDisabled(i))

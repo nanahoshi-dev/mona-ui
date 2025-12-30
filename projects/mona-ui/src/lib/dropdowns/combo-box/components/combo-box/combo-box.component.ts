@@ -54,7 +54,7 @@ import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popu
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
-import { DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
+import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
 import { DropDownService } from "../../../services/drop-down.service";
 import {
     comboBoxAffixContainerThemeVariants,
@@ -113,7 +113,7 @@ import {
     }
 })
 export class ComboBoxComponent<TData = unknown>
-    implements ControlValueAccessor, ComboBoxVariantInput, DropdownDataInput<TData>
+    implements ControlValueAccessor, ComboBoxVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropDownService);
