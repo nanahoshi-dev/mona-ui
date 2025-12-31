@@ -2,13 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const expansionPanelBaseVariants = cva(
     `
-        block bg-background overflow-hidden
+        block w-full bg-background overflow-hidden
         border border-border
         not-last:border-b-transparent not-last:rounded-b-none
-        not-first:rounded-t-none
-        focus-visible:outline-none
-        focus-visible:ring-1 focus-visible:ring-primary/40
-        focus-visible:z-1 focus-visible:relative
+        not-first:rounded-t-none relative
     `,
     {
         variants: {
@@ -32,6 +29,9 @@ export const expansionPanelHeaderVariants = cva(
         text-foreground
         select-none
         transition-border-b duration-200
+        focus-visible:outline-primary/40 focus-visible:border-b-transparent
+        focus-visible:ring-1 focus-visible:ring-primary/40
+        focus-visible:z-10 focus-visible:relative
     `,
     {
         variants: {
@@ -60,9 +60,9 @@ export const expansionPanelIconContainerVariants = cva(``, {
 
 export const expansionPanelContentVariants = cva(
     `
+        text-foreground
         grid
         transition-[grid-template-rows] duration-300 ease-out
-        text-foreground
         [&>div]:overflow-hidden
     `,
     {

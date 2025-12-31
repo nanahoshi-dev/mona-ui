@@ -11,7 +11,8 @@ import {
     inject,
     input,
     model,
-    TemplateRef
+    TemplateRef,
+    viewChild
 } from "@angular/core";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
 import { ExpansionPanelTitleTemplateDirective } from "../../directives/expansion-panel-title-template.directive";
@@ -29,6 +30,7 @@ import { ExpansionPanelIconTemplateDirective } from "../../directives/expansion-
 import { LucideAngularModule, Minus, Plus } from "lucide-angular";
 import { fromEvent } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 
 @Component({
     selector: "mona-expansion-panel",
@@ -37,13 +39,11 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet, LucideAngularModule],
     host: {
-        "[class]": "baseClass()",
-        "[attr.tabindex]": "0"
+        "[class]": "baseClass()"
     }
 })
 export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
     protected readonly actionsTemplateList = contentChildren(ExpansionPanelActionsTemplateDirective, {
         read: TemplateRef
@@ -59,12 +59,14 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
         const expanded = this.expanded();
         return expansionPanelContentThemeVariants(theme)({ expanded });
     });
+    protected readonly contentId = createElementControlId();
     protected readonly expandIcon = Plus;
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         const collapsed = !this.expanded();
         return expansionPanelHeaderThemeVariants(theme)({ collapsed });
     });
+    protected readonly headerRef = viewChild.required<ElementRef<HTMLElement>>("header");
     protected readonly headerTitleClass = computed(() => {
         const theme = this.#themeService.theme();
         return expansionPanelHeaderTitleThemeVariants(theme)();
@@ -100,7 +102,8 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     }
 
     private setKeyboardEvents(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+        const headerElement = this.headerRef().nativeElement;
+        fromEvent<KeyboardEvent>(headerElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 if (event.key === "Enter" || event.key === " ") {
