@@ -383,51 +383,6 @@ export class AutoCompleteComponent<TData = unknown>
             .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().startsWith(value.toLowerCase()));
     }
 
-    private handleEnterKey(): void {
-        this.#dropdownService.beforeKeydown$
-            .pipe(
-                filter(e => e.key === "Enter"),
-                takeUntilDestroyed(this.#destroyRef),
-                tap(e => e.preventDefault())
-            )
-            .subscribe(() => {
-                const highlightedItem = this.#listService.highlightedItem();
-                const highlightedItemText = highlightedItem ? this.#listService.getItemText(highlightedItem) : "";
-                const autoCompleteValue = this.autoCompleteValue();
-                if (highlightedItemText && autoCompleteValue != null) {
-                    this.autoCompleteValue.set(highlightedItemText);
-                    if (this.#value() !== this.autoCompleteValue()) {
-                        this.updateValue(highlightedItemText);
-                    }
-                } else if (this.#value() !== autoCompleteValue) {
-                    this.updateValue(autoCompleteValue);
-                }
-                this.closePopup();
-            });
-    }
-
-    private handleEscapeKey(): void {
-        this.#dropdownService.beforeKeydown$
-            .pipe(
-                filter(e => e.key === "Escape"),
-                takeUntilDestroyed(this.#destroyRef),
-                tap(e => e.preventDefault())
-            )
-            .subscribe(() => {
-                const autoCompleteValue = this.autoCompleteValue();
-                const value = this.#value();
-                if (value !== autoCompleteValue) {
-                    this.updateValue(autoCompleteValue);
-                } else if (value === autoCompleteValue && !this.#popupRef()) {
-                    this.clear();
-                    this.updateValue(null);
-                    this.#listService.clearFilter();
-                    this.#listService.clearSelections();
-                    window.setTimeout(() => this.focus());
-                }
-            });
-    }
-
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "highlight" });
         this.#listService.setSelectableOptions(this.selectableOptions);
@@ -443,11 +398,12 @@ export class AutoCompleteComponent<TData = unknown>
 
     private setArrowKeyNavigationSubscription(): void {
         this.#dropdownService.beforeNavigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            if (!event.altKey) {
+            const keyboardEvent = event.originalEvent as KeyboardEvent;
+            if (!keyboardEvent.altKey) {
                 event.preventDefault();
             }
-            if (this.#dropdownService.popupRef() && !event.altKey) {
-                const direction = event.key === "ArrowDown" ? "next" : "previous";
+            if (this.#dropdownService.popupRef() && !keyboardEvent.altKey) {
+                const direction = keyboardEvent.key === "ArrowDown" ? "next" : "previous";
                 this.#listService.navigate(direction, "highlight", false);
             }
         });
@@ -490,6 +446,51 @@ export class AutoCompleteComponent<TData = unknown>
             });
     }
 
+    private setEnterKeySubscription(): void {
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                filter(e => e.originalEvent?.key === "Enter"),
+                takeUntilDestroyed(this.#destroyRef),
+                tap(e => e.preventDefault())
+            )
+            .subscribe(() => {
+                const highlightedItem = this.#listService.highlightedItem();
+                const highlightedItemText = highlightedItem ? this.#listService.getItemText(highlightedItem) : "";
+                const autoCompleteValue = this.autoCompleteValue();
+                if (highlightedItemText && autoCompleteValue != null) {
+                    this.autoCompleteValue.set(highlightedItemText);
+                    if (this.#value() !== this.autoCompleteValue()) {
+                        this.updateValue(highlightedItemText);
+                    }
+                } else if (this.#value() !== autoCompleteValue) {
+                    this.updateValue(autoCompleteValue);
+                }
+                this.closePopup();
+            });
+    }
+
+    private setEscapeKeySubscription(): void {
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                filter(e => e.originalEvent?.key === "Escape"),
+                takeUntilDestroyed(this.#destroyRef),
+                tap(e => e.preventDefault())
+            )
+            .subscribe(() => {
+                const autoCompleteValue = this.autoCompleteValue();
+                const value = this.#value();
+                if (value !== autoCompleteValue) {
+                    this.updateValue(autoCompleteValue);
+                } else if (value === autoCompleteValue && !this.#popupRef()) {
+                    this.clear();
+                    this.updateValue(null);
+                    this.#listService.clearFilter();
+                    this.#listService.clearSelections();
+                    window.setTimeout(() => this.focus());
+                }
+            });
+    }
+
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             window.setTimeout(() => this.focus());
@@ -500,8 +501,8 @@ export class AutoCompleteComponent<TData = unknown>
         this.setAutoCompleteValueChangeSubscription();
         this.setArrowKeyNavigationSubscription();
         this.setPopupCloseSubscriptions();
-        this.handleEscapeKey();
-        this.handleEnterKey();
+        this.setEscapeKeySubscription();
+        this.setEnterKeySubscription();
     }
 
     private updateValue(value: string | null, notify: boolean = true): void {

@@ -171,7 +171,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
         }
     `,
     host: {
-        class: "w-full"
+        class: "w-full gap-0!"
     }
 })
 class ExpansionPanelWrapperComponent implements ComponentInputsAsSignal<ExpansionPanelComponent> {

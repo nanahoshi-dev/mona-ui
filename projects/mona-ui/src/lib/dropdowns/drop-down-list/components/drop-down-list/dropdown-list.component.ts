@@ -122,8 +122,7 @@ import {
     }
 })
 export class DropdownListComponent<TData = unknown>
-    implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
-{
+    implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropDownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
@@ -432,9 +431,14 @@ export class DropdownListComponent<TData = unknown>
     }
 
     private handleEnterKey(): void {
+        if (!this.expanded()) {
+            this.#dropdownService.triggerPopupOpen$.next();
+            return;
+        }
         if (this.expanded() && this.#value() !== this.#navigatedValue()) {
             this.updateValue(this.#navigatedValue(), true);
         }
+        this.closePopup();
     }
 
     private handleHomeEndKeys(event: KeyboardEvent): void {

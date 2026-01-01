@@ -123,10 +123,6 @@ export class ComboBoxComponent<TData = unknown>
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<TData | null>(null);
-    readonly #valueNormalizer = computed(() => {
-        const normalizer = this.valueNormalizer();
-        return normalizer ? normalizer : (text$: Observable<string>) => text$.pipe(map(v => v));
-    });
     #propagateChange: Action<TData | null> | null = null;
     #propagateTouch: Action | null = null;
 
@@ -289,6 +285,7 @@ export class ComboBoxComponent<TData = unknown>
     public readonly size = input<ComboBoxVariantProps["size"]>("medium");
     public readonly textField = input<DropdownFieldSelectorType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
+    public readonly valueAdd = output<string>();
     public readonly valueField = input<DropdownFieldSelectorType<TData>>();
     public readonly valueNormalizer = input<Action<Observable<string>, Observable<any>>>();
 
@@ -347,11 +344,9 @@ export class ComboBoxComponent<TData = unknown>
     public handleKeydown(): void {
         this.#dropdownService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             if (event.key === "Enter") {
-                this.handleEnterKey(event);
+                this.setEnterKeySubscription(event);
             } else if (event.key === "Tab") {
                 this.closePopup();
-            } else if (event.key === "Escape") {
-                this.handleEscapeKey();
             }
         });
     }
@@ -414,29 +409,77 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private handleCustomValue(): void {
-        this.#valueNormalizer()(of(this.comboBoxValue()))
-            .pipe(take(1))
-            .subscribe(normalizedValue => {
-                this.#listService.addNewDataItems([normalizedValue]);
+        this.valueAdd.emit(this.comboBoxValue());
+        this.closePopup();
+    }
+
+    private initialize(): void {
+        this.#listService.setNavigableOptions({ enabled: true, mode: "highlight" });
+        this.#listService.setSelectableOptions(this.selectableOptions);
+        this.#listService.filterInputVisible.set(false);
+        this.#listService.selectedKeysChange = this.selectedKeysChange;
+        this.comboBoxValue.set(this.valueText());
+    }
+
+    private notifyFilterChange(filter: string): FilterChangeEvent {
+        const event = new FilterChangeEvent(filter);
+        this.#listService.filterChange.emit(event);
+        return event;
+    }
+
+    private setArrowNavigationSubscription(): void {
+        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
+            if (!this.expanded()) {
+                this.#listService.selectItem(item);
+                this.updateValue(item.data, true);
+            } else {
+                this.#navigatedValue.set(item.data);
+            }
+        });
+    }
+
+    private setComboboxValueSubscription(): void {
+        const debounce = this.#listService.filterableOptions().enabled
+            ? this.#listService.filterableOptions().debounce
+            : 0;
+        this.comboBoxValue$
+            .pipe(
+                tap(() => {
+                    if (!this.#popupRef()) {
+                        this.#dropdownService.triggerPopupOpen$.next();
+                    }
+                }),
+                debounceTime(debounce),
+                takeUntilDestroyed(this.#destroyRef),
+                distinctUntilChanged()
+            )
+            .subscribe(value => {
+                if (this.#listService.filterableOptions().enabled) {
+                    const event = this.notifyFilterChange(value);
+                    if (!event.isDefaultPrevented()) {
+                        this.#listService.setFilter(value);
+                    }
+                }
                 const item = this.#listService
                     .viewItems()
                     .where(i => !i.header && !this.#listService.isDisabled(i))
-                    .firstOrDefault(
-                        i => this.#listService.getItemText(i).toLowerCase() === this.comboBoxValue().toLowerCase()
-                    );
+                    .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().includes(value.toLowerCase()));
                 if (item) {
-                    this.#listService.selectItem(item);
-                    this.updateValue(item.data);
+                    this.#listService.clearSelections();
+                    this.#listService.highlightedItem.set(item);
+                    this.#listService.scrollToItem$.next({ item, focus: false });
                 }
+                this.comboBoxValue.set(value);
             });
     }
 
-    private handleEnterKey(event: KeyboardEvent): void {
+    private setEnterKeySubscription(event: KeyboardEvent): void {
         const navigatedValue = this.#navigatedValue();
         const navigatedItem = this.#listService.viewItems().firstOrDefault(item => item.data === navigatedValue);
         const comboBoxValue = this.comboBoxValue();
         const navigatedItemText = navigatedItem ? this.#listService.getItemText(navigatedItem) : "";
-        if (navigatedItemText.toLowerCase() === comboBoxValue.toLowerCase()) {
+        if (navigatedItem && navigatedItemText.toLowerCase() === comboBoxValue.toLowerCase()) {
+            this.#listService.selectItem(navigatedItem);
             this.updateValue(navigatedValue);
             return;
         }
@@ -475,90 +518,57 @@ export class ComboBoxComponent<TData = unknown>
         }
     }
 
-    private handleEscapeKey(): void {
-        if (this.#popupRef()) {
-            this.closePopup();
-        } else {
-            this.clear();
-            window.setTimeout(() => this.focus());
-        }
-    }
-
-    private initialize(): void {
-        this.#listService.setNavigableOptions({ enabled: true, mode: "select" });
-        this.#listService.setSelectableOptions(this.selectableOptions);
-        this.#listService.filterInputVisible.set(false);
-        this.#listService.selectedKeysChange = this.selectedKeysChange;
-        this.comboBoxValue.set(this.valueText());
-    }
-
-    private notifyFilterChange(filter: string): FilterChangeEvent {
-        const event = new FilterChangeEvent(filter);
-        this.#listService.filterChange.emit(event);
-        return event;
-    }
-
-    private setArrowNavigationSubscription(): void {
-        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
-            if (!this.expanded()) {
-                this.updateValue(item.data, true);
-            } else {
-                this.#navigatedValue.set(item.data);
-            }
-        });
+    private setEscapeKeySubscription(): void {
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(e => e.originalEvent?.key === "Escape"),
+                tap(e => e.preventDefault())
+            )
+            .subscribe(() => {
+                if (this.#popupRef()) {
+                    const selectedItem = this.selectedListItem();
+                    if (selectedItem) {
+                        this.comboBoxValue.set(this.#listService.getItemText(selectedItem));
+                    }
+                } else {
+                    this.clear();
+                    window.setTimeout(() => this.focus());
+                }
+                this.closePopup();
+            });
     }
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.updateValue(this.#navigatedValue(), true);
             window.setTimeout(() => {
                 this.focus();
             });
         });
     }
 
-    private setSubscriptions(): void {
-        const debounce = this.#listService.filterableOptions().enabled
-            ? this.#listService.filterableOptions().debounce
-            : 0;
-        this.comboBoxValue$
+    private setSpaceKeySubscription(): void {
+        this.#dropdownService.beforeKeydown$
             .pipe(
-                tap(() => {
-                    if (!this.#popupRef()) {
-                        this.#dropdownService.triggerPopupOpen$.next();
-                    }
-                }),
-                debounceTime(debounce),
                 takeUntilDestroyed(this.#destroyRef),
-                distinctUntilChanged()
+                filter(e => e.originalEvent?.key === " "),
+                tap(e => e.preventDefault())
             )
-            .subscribe(value => {
-                if (this.#listService.filterableOptions().enabled) {
-                    const event = this.notifyFilterChange(value);
-                    if (!event.isDefaultPrevented()) {
-                        this.#listService.setFilter(value);
-                    }
-                }
-                const item = this.#listService
-                    .viewItems()
-                    .where(i => !i.header && !this.#listService.isDisabled(i))
-                    .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().includes(value.toLowerCase()));
-                if (item) {
-                    this.#listService.clearSelections();
-                    this.#listService.highlightedItem.set(item);
-                    this.#listService.scrollToItem$.next({ item, focus: false });
-                }
-                this.comboBoxValue.set(value);
-            });
+            .subscribe();
+    }
+
+    private setSubscriptions(): void {
+        this.setComboboxValueSubscription();
         this.setArrowNavigationSubscription();
         this.handleKeydown();
+        this.setEscapeKeySubscription();
         this.setPopupCloseSubscriptions();
+        this.setSpaceKeySubscription();
     }
 
     private updateValue(value: TData | null, notify: boolean = true) {
         const oldValue = this.#value();
         this.#value.set(value);
-        console.log([oldValue, value, notify]);
         this.comboBoxValue.set(this.valueText());
         if (notify && oldValue !== value) {
             this.#propagateChange?.(value);

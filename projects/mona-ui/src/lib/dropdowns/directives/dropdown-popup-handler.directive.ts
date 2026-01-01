@@ -43,8 +43,9 @@ export class DropdownPopupHandlerDirective {
     }
 
     private handleArrowKeys(event: KeyboardEvent): void {
-        this.#dropdownService.beforeNavigate$.next(event);
-        if (event.defaultPrevented) {
+        const navigateEvent = new PreventableEvent("beforeNavigate", event);
+        this.#dropdownService.beforeNavigate$.next(navigateEvent);
+        if (navigateEvent.isDefaultPrevented()) {
             return;
         }
         event.preventDefault();
@@ -58,7 +59,8 @@ export class DropdownPopupHandlerDirective {
         }
         const previousItem = this.#listService.selectedListItems().lastOrDefault();
         const direction = event.key === "ArrowDown" ? "next" : "previous";
-        const item = this.#listService.navigate(direction, "select", false);
+        const mode = this.#listService.navigableOptions().mode;
+        const item = this.#listService.navigate(direction, mode, false);
         if (!item || previousItem === item) {
             return;
         }
@@ -66,8 +68,9 @@ export class DropdownPopupHandlerDirective {
     }
 
     private handleKeyDown(e: KeyboardEvent): void {
-        this.#dropdownService.beforeKeydown$.next(e);
-        if (e.defaultPrevented) {
+        const event = new PreventableEvent("beforeKeydown", e);
+        this.#dropdownService.beforeKeydown$.next(event);
+        if (event.isDefaultPrevented()) {
             return;
         }
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -182,6 +185,7 @@ export class DropdownPopupHandlerDirective {
         popupRef.closed.pipe(take(1)).subscribe(event => {
             this.#dropdownService.popupRef.set(null);
             this.#dropdownService.popupCloseComplete$.next(event);
+            this.#listService.clearHighlightedItem();
             window.setTimeout(() => {
                 this.#listService.clearFilter();
             });

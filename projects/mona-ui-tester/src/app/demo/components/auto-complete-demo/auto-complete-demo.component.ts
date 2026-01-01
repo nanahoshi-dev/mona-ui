@@ -177,6 +177,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
+        <span>Selected Value: {{ formValue() }}</span>
         <form [formGroup]="formGroup">
             <mona-auto-complete
                 [data]="autoCompleteData()"
@@ -265,16 +266,13 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 }
             </mona-auto-complete>
         </form>
-    `,
-    host: {
-        class: "h-full"
-    }
+    `
 })
 class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {
     readonly #formGroup = new FormGroup({
         value: new FormControl<string | null>(null, { nonNullable: false, validators: [] })
     });
-    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+
     protected readonly alertIcon = TriangleAlert;
     protected readonly autoCompleteData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
@@ -307,6 +305,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         return filteringOptions;
     });
     protected readonly formGroup = this.#formGroup;
+    protected readonly formValue = toSignal(this.#formGroup.controls.value.valueChanges);
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
@@ -351,7 +350,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     public readonly valueField = input<ReturnType<AutoCompleteComponent["valueField"]>>("value");
 
     public constructor() {
-        effect(() => console.log("Selected item: ", this.#formValue()));
+        effect(() => console.log("Selected item: ", this.formValue()));
     }
 
     protected onPopupClose(event: PreventableEvent) {

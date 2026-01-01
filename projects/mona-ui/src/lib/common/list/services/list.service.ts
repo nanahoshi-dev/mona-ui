@@ -137,12 +137,12 @@ export class ListService<TData> {
     public filterChange!: OutputEmitterRef<FilterChangeEvent>;
     public selectedKeysChange!: OutputEmitterRef<Array<any>>;
 
-    public addNewDataItems(dataItems: Iterable<TData>): void {
-        this.#data.update(list => list.addAll(dataItems));
-    }
-
     public clearFilter(): void {
         this.filterText.set("");
+    }
+
+    public clearHighlightedItem(): void {
+        this.highlightedItem.set(null);
     }
 
     public clearSelections(): void {
