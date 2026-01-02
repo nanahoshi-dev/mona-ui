@@ -15,22 +15,25 @@
        [attr.aria-autocomplete]="'list'"
        [attr.aria-busy]="loading()"
        [attr.aria-controls]="listId"
+       [attr.aria-describedby]="ariaDescribedBy() || undefined"
        [attr.aria-expanded]="expanded()"
        [attr.aria-haspopup]="'listbox'"
+       [attr.aria-invalid]="isInvalid() || undefined"
        [attr.aria-label]="ariaLabel() || undefined"
        [attr.aria-labelledby]="ariaLabelledBy() || undefined"
        role="combobox"
        (ngModelChange)="comboBoxValue$.next($event)"
-       (blur)="onInputBlur($event)">
+       (blur)="onInputBlur()">
 
-<span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
+<span class="sr-only" aria-live="polite" aria-atomic="true">{{ liveRegionText() }}</span>
 
 @if (showClearButton() && selectedListItem() && !loading()) {
     <span class="px-2">
-        <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90"
-                        [name]="clearIcon" [size]="14" role="button"
-                        aria-label="Clear" title="Clear" [tabindex]="0"
-                        (click)="onValueClear($event)" (keydown)="onValueClear($event)"></lucide-angular>
+        <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90" [name]="clearIcon"
+                        [size]="14" role="button" aria-label="Clear" title="Clear" [tabindex]="0"
+                        (click)="onValueClear($event)"
+                        (keydown.enter)="onValueClear($event)"
+                        (keydown.space)="onValueClear($event)"></lucide-angular>
     </span>
 }
 

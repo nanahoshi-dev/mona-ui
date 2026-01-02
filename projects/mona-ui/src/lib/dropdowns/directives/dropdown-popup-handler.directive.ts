@@ -1,6 +1,6 @@
 import { afterNextRender, DestroyRef, Directive, effect, ElementRef, inject, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent, take, takeUntil } from "rxjs";
+import { filter, fromEvent, take, takeUntil, timer } from "rxjs";
 import { ListService } from "../../common/list/services/list.service";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { PopupService } from "../../popup/services/popup.service";
@@ -26,13 +26,13 @@ export class DropdownPopupHandlerDirective {
                 this.setKeyboardEvents();
             }
         });
-        effect(() => {
-            window.setTimeout(() => {
+        timer(0)
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
                 if (!this.#listService.isActiveItemVisible()) {
                     this.#listService.highlightFirstItem();
                 }
             });
-        });
         this.#dropdownService.triggerPopupOpen$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => this.openPopup());
@@ -167,7 +167,7 @@ export class DropdownPopupHandlerDirective {
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(e => !this.#host.readonly() && (e.target as HTMLElement).tagName !== "INPUT")
+                filter(e => !this.#host.readonly() && !!e.target && (e.target as HTMLElement).tagName !== "INPUT")
             )
             .subscribe(() => this.togglePopup());
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")

@@ -134,8 +134,23 @@ export class ListService<TData> {
         enabled: false,
         height: 28
     });
+    public readonly itemPositions = computed(() => {
+        const viewItems = this.viewItems();
+        const nonHeaderItems = viewItems.where(i => !i.header).toArray();
+        const positions = new Map<string, { position: number; total: number }>();
+
+        nonHeaderItems.forEach((item, index) => {
+            positions.set(item.uid, { position: index + 1, total: nonHeaderItems.length });
+        });
+
+        return positions;
+    });
     public filterChange!: OutputEmitterRef<FilterChangeEvent>;
     public selectedKeysChange!: OutputEmitterRef<Array<any>>;
+
+    public getItemPosition(item: ListItem<TData>): { position: number; total: number } | null {
+        return this.itemPositions().get(item.uid) ?? null;
+    }
 
     public clearFilter(): void {
         this.filterText.set("");

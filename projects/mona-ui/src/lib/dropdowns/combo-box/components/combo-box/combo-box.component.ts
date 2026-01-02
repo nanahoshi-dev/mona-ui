@@ -23,7 +23,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import { debounceTime, distinctUntilChanged, filter, fromEvent, map, Observable, of, Subject, take, tap } from "rxjs";
+import { debounceTime, distinctUntilChanged, filter, fromEvent, Observable, Subject, tap, timer } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
@@ -38,6 +38,7 @@ import { SelectableOptions } from "../../../../common/list/models/SelectableOpti
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { FormFieldValidationService } from "../../../../common/services/form-field-validation.service";
 import { TextBoxDirective } from "../../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -71,6 +72,7 @@ import {
     providers: [
         ListService,
         DropDownService,
+        FormFieldValidationService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => ComboBoxComponent),
@@ -117,6 +119,7 @@ export class ComboBoxComponent<TData = unknown>
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropDownService);
+    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #listService = inject(ListService);
     readonly #navigatedValue = linkedSignal(() => this.#value());
@@ -163,6 +166,7 @@ export class ComboBoxComponent<TData = unknown>
     });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
+    protected readonly isInvalid = computed(() => this.#formFieldValidationService?.invalid() || false);
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -172,13 +176,24 @@ export class ComboBoxComponent<TData = unknown>
         const variantClass = comboBoxPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
     });
+    protected readonly liveRegionText = computed(() => {
+        const highlightedItem = this.#listService.highlightedItem();
+        const count = this.#listService.viewItems().size();
+
+        if (highlightedItem && this.expanded()) {
+            const text = this.#listService.getItemText(highlightedItem);
+            const positionInfo = this.#listService.getItemPosition(highlightedItem);
+            if (positionInfo) {
+                return `${text}, ${positionInfo.position} of ${positionInfo.total}`;
+            }
+            return text;
+        }
+
+        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
+    });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
-    protected readonly resultCountMessage = computed(() => {
-        const count = this.#listService.viewItems().size();
-        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
-    });
     protected readonly selectableOptions: SelectableOptions = {
         enabled: true,
         mode: "single",
@@ -212,6 +227,13 @@ export class ComboBoxComponent<TData = unknown>
      * @default ""
      */
     public readonly ariaLabelledBy = input("");
+
+    /**
+     * @description Sets the aria-describedby attribute of the combo box input.
+     * Use this to associate error messages or help text with the input.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("");
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -296,23 +318,27 @@ export class ComboBoxComponent<TData = unknown>
         });
 
         effect(() => {
-            window.setTimeout(() => {
-                this.valueField();
-                untracked(() => {
-                    if (this.#value() != null) {
-                        this.#listService.setSelectedDataItems([this.#value()]);
-                        this.comboBoxValue.set(this.valueText());
-                    }
+            this.valueField();
+            timer(0)
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => {
+                    untracked(() => {
+                        if (this.#value() != null) {
+                            this.#listService.setSelectedDataItems([this.#value()]);
+                            this.comboBoxValue.set(this.valueText());
+                        }
+                    });
                 });
-            });
         });
 
         effect(() => {
-            window.setTimeout(() => {
-                if (!this.#listService.isActiveItemVisible()) {
-                    this.#listService.highlightFirstItem();
-                }
-            });
+            timer(0)
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => {
+                    if (!this.#listService.isActiveItemVisible()) {
+                        this.#listService.highlightFirstItem();
+                    }
+                });
         });
         afterNextRender({
             read: () => {
@@ -371,17 +397,12 @@ export class ComboBoxComponent<TData = unknown>
         }
     }
 
-    protected onInputBlur(event: FocusEvent): void {
+    protected onInputBlur(): void {
         this.#propagateTouch?.();
     }
 
-    protected onValueClear(event: MouseEvent | KeyboardEvent): void {
-        if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") {
-            return;
-        }
-        if (event instanceof KeyboardEvent && event.key === " ") {
-            event.preventDefault();
-        }
+    protected onValueClear(event: Event): void {
+        event.preventDefault();
         event.stopImmediatePropagation();
         this.updateValue(null);
         this.#listService.clearSelections();
@@ -533,7 +554,9 @@ export class ComboBoxComponent<TData = unknown>
                     }
                 } else {
                     this.clear();
-                    window.setTimeout(() => this.focus());
+                    timer(0)
+                        .pipe(takeUntilDestroyed(this.#destroyRef))
+                        .subscribe(() => this.focus());
                 }
                 this.closePopup();
             });
@@ -541,9 +564,9 @@ export class ComboBoxComponent<TData = unknown>
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            window.setTimeout(() => {
-                this.focus();
-            });
+            timer(0)
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => this.focus());
         });
     }
 

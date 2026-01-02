@@ -1,7 +1,8 @@
-import { DestroyRef, Directive, ElementRef, inject, signal } from "@angular/core";
+import { DestroyRef, Directive, effect, ElementRef, inject, signal, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NgControl } from "@angular/forms";
 import { fromEvent, merge, startWith } from "rxjs";
+import { FormFieldValidationService } from "../services/form-field-validation.service";
 
 @Directive({
     selector: "[monaFormFieldValidation]",
@@ -12,11 +13,16 @@ import { fromEvent, merge, startWith } from "rxjs";
 export class FormFieldValidationDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject(ElementRef<HTMLElement>);
+    readonly #formFieldValidationService = inject(FormFieldValidationService, { optional: true });
     readonly #ngControl = inject(NgControl, { optional: true, self: true });
     protected readonly invalid = signal(false);
 
     public constructor() {
         queueMicrotask(() => this.setupStatusTracking());
+        effect(() => {
+            const invalid = this.invalid();
+            untracked(() => this.#formFieldValidationService?.invalid.set(invalid));
+        });
     }
 
     private setupStatusTracking(): void {

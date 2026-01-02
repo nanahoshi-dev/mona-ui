@@ -12,7 +12,9 @@ import { ListService } from "../services/list.service";
     host: {
         "[attr.aria-current]": "highlighted()",
         "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-posinset]": "position()",
         "[attr.aria-selected]": "selected()",
+        "[attr.aria-setsize]": "setSize()",
         "[attr.data-disabled]": "disabled()",
         "[attr.data-highlighted]": "highlighted()",
         "[attr.data-selected]": "selected()",
@@ -24,7 +26,15 @@ export class ListItemDirective<TData> {
     readonly #listService = inject(ListService<TData>);
     protected readonly disabled = computed(() => this.#listService.isDisabled(this.item()));
     protected readonly highlighted = computed(() => this.#listService.isHighlighted(this.item()));
+    protected readonly position = computed(() => {
+        const positionInfo = this.#listService.getItemPosition(this.item());
+        return positionInfo?.position ?? null;
+    });
     protected readonly selected = computed(() => this.#listService.isSelected(this.item()));
+    protected readonly setSize = computed(() => {
+        const positionInfo = this.#listService.getItemPosition(this.item());
+        return positionInfo?.total ?? null;
+    });
     protected readonly textClasses = computed(() => {
         const disabled = this.disabled();
         const highlighted = this.highlighted();
