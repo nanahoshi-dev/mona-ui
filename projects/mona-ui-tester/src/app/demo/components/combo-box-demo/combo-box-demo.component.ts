@@ -225,7 +225,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
             .toImmutableSet()
     );
     readonly #formGroup = new FormGroup({
-        value: new FormControl<(typeof dropdownFoodData)[1]>(dropdownFoodData[1], {
+        value: new FormControl<(typeof dropdownFoodData)[1] | null>(null, {
             nonNullable: false,
             validators: []
         })
@@ -309,6 +309,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     }
 
     protected onValueAdd(value: string): void {
+        console.log("Custom value added: ", value);
         const newItem: (typeof dropdownFoodData)[0] = {
             active: true,
             category: "Custom",

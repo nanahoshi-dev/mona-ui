@@ -1,6 +1,6 @@
-import { afterNextRender, DestroyRef, Directive, effect, ElementRef, inject, TemplateRef } from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, ElementRef, inject, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent, take, takeUntil, timer } from "rxjs";
+import { filter, fromEvent, take, takeUntil } from "rxjs";
 import { ListService } from "../../common/list/services/list.service";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { PopupService } from "../../popup/services/popup.service";
@@ -26,13 +26,6 @@ export class DropdownPopupHandlerDirective {
                 this.setKeyboardEvents();
             }
         });
-        timer(0)
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                if (!this.#listService.isActiveItemVisible()) {
-                    this.#listService.highlightFirstItem();
-                }
-            });
         this.#dropdownService.triggerPopupOpen$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => this.openPopup());
@@ -99,8 +92,6 @@ export class DropdownPopupHandlerDirective {
             this.scrollToSelectedItem();
         } else if (highlightedItem) {
             this.scrollToHighlightedItem();
-        } else {
-            this.#listService.highlightFirstItem();
         }
     }
 
@@ -144,7 +135,7 @@ export class DropdownPopupHandlerDirective {
         this.#dropdownService.popupRef.set(popupRef);
         this.setPopupCloseSubscriptions(popupRef);
         this.handleScrollOnPopupOpen();
-        this.#dropdownService.popupOpenComplete$.next();
+        window.setTimeout(() => this.#dropdownService.popupOpenComplete$.next());
     }
 
     private scrollToHighlightedItem(): void {
@@ -188,7 +179,7 @@ export class DropdownPopupHandlerDirective {
             this.#listService.clearHighlightedItem();
             window.setTimeout(() => {
                 this.#listService.clearFilter();
-            });
+            }, 300);
         });
     }
 

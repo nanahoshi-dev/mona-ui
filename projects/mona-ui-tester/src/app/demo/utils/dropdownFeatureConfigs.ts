@@ -30,7 +30,7 @@ export const dropdownFilteringFeatureConfig = <TDropdown = any>(
                 name: "Operator",
                 type: "dropdown",
                 dropdownDataSource: ["contains", "startsWith", "endsWith"],
-                dropdownValue: "contains"
+                dropdownValue: "startsWith"
             }
         }
     };

@@ -50,6 +50,7 @@ export class ListService<TData> {
     });
     public readonly highlightedItem = signal<ListItem<TData> | null>(null);
     public readonly itemFocusOut$ = new Subject<ListItem<TData>>();
+    public readonly navigatedItem$ = new Subject<ListItem<TData> | null>();
     public readonly navigableOptions = signal<NavigableOptions>({
         enabled: false,
         mode: "select",
@@ -181,6 +182,11 @@ export class ListService<TData> {
         this.selectedKeys.update(set => set.removeAll(keys));
     }
 
+    public getFilterDebounceDuration(): number {
+        const filterableOptions = this.filterableOptions();
+        return filterableOptions.enabled ? filterableOptions.debounce : 0;
+    }
+
     public getGroupField(item: ListItem<TData>): any {
         const groupSelector = this.groupBy();
         if (groupSelector == null) {
@@ -203,27 +209,9 @@ export class ListService<TData> {
         return textField(item.data);
     }
 
-    public highlightFirstItem(): ListItem<TData> | null {
-        const viewItems = this.viewItems()
-            .where(i => !i.header && !this.isDisabled(i))
-            .toImmutableSet();
-        if (viewItems.isEmpty()) {
-            return null;
-        }
-        return this.navigateFirstForSingleSelection(viewItems, "highlight");
-    }
-
-    public isActiveItemVisible(): boolean {
+    public getMatchingFilteredItem(text: string): ListItem<TData> | null {
         const viewItems = this.viewItems();
-        if (viewItems.none()) {
-            return false;
-        }
-        const selectedItems = this.selectedListItems();
-        const highlightedItem = this.highlightedItem();
-        if (highlightedItem && viewItems.contains(highlightedItem)) {
-            return true;
-        }
-        return selectedItems.any(s => viewItems.contains(s));
+        return viewItems.firstOrDefault(i => this.filterItem(i, text));
     }
 
     public isDisabled(item: ListItem<TData>): boolean {
@@ -232,6 +220,11 @@ export class ListService<TData> {
             return (item.data as any)?.[disabledBy] ?? false;
         }
         return disabledBy(item.data);
+    }
+
+    public isFilteringEnabled(): boolean {
+        const filterableOptions = this.filterableOptions();
+        return filterableOptions.enabled;
     }
 
     public isHighlighted(item: ListItem<TData>): boolean {
@@ -272,6 +265,7 @@ export class ListService<TData> {
         }
         if (item) {
             this.scrollToItem$.next({ item, focus });
+            this.navigatedItem$.next(item);
         }
         return item;
     }
@@ -392,12 +386,13 @@ export class ListService<TData> {
         const itemText = this.getItemText(item);
         const text = options.caseSensitive ? itemText : itemText.toLowerCase();
         const filter = options.caseSensitive ? filterText : filterText.toLowerCase();
+        const operator = options.enabled ? options.operator : "startsWith";
 
-        if (typeof options.operator === "function") {
-            return options.operator(text, filter);
+        if (typeof operator === "function") {
+            return operator(text, filter);
         }
 
-        switch (options.operator) {
+        switch (operator) {
             case "contains":
                 return text.includes(filter);
             case "startsWith":

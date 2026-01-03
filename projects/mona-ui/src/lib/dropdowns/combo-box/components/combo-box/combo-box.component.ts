@@ -19,11 +19,22 @@ import {
     untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import { debounceTime, distinctUntilChanged, filter, fromEvent, Observable, Subject, tap, timer } from "rxjs";
+import {
+    asyncScheduler,
+    combineLatest,
+    debounceTime,
+    delay,
+    filter,
+    fromEvent,
+    Observable,
+    Subject,
+    take,
+    tap
+} from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
@@ -33,6 +44,7 @@ import { ListGroupHeaderTemplateDirective } from "../../../../common/list/direct
 import { ListHeaderTemplateDirective } from "../../../../common/list/directives/list-header-template.directive";
 import { ListItemTemplateDirective } from "../../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../../common/list/directives/list-no-data-template.directive";
+import { ListItem } from "../../../../common/list/models/ListItem";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { SelectableOptions } from "../../../../common/list/models/SelectableOptions";
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
@@ -125,6 +137,7 @@ export class ComboBoxComponent<TData = unknown>
     readonly #navigatedValue = linkedSignal(() => this.#value());
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
+    readonly #userNavigatedViaArrows = signal(false);
     readonly #value = signal<TData | null>(null);
     #propagateChange: Action<TData | null> | null = null;
     #propagateTouch: Action | null = null;
@@ -149,12 +162,8 @@ export class ComboBoxComponent<TData = unknown>
     });
     protected readonly clearIcon = X;
     protected readonly dropdownIcon = ChevronDown;
-    protected readonly comboBoxValue$ = new Subject<string>();
-    protected readonly comboBoxValue = linkedSignal(() => {
-        const navigatedValue = this.#navigatedValue();
-        const item = this.#listService.viewItems().firstOrDefault(item => item.data === navigatedValue);
-        return item ? this.#listService.getItemText(item) : "";
-    });
+    protected readonly comboBoxValue$ = new Subject<string | null>();
+    protected readonly comboBoxValue = signal("");
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, { read: TemplateRef });
@@ -199,9 +208,6 @@ export class ComboBoxComponent<TData = unknown>
         mode: "single",
         toggleable: false
     };
-    protected readonly selectedDataItem = computed(() => {
-        return this.selectedListItem()?.data ?? null;
-    });
     protected readonly selectedKeysChange = output<any[]>();
     protected readonly selectedListItem = computed(() => {
         return this.#listService.selectedListItems().firstOrDefault();
@@ -317,29 +323,15 @@ export class ComboBoxComponent<TData = unknown>
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
         });
 
-        effect(() => {
-            this.valueField();
-            timer(0)
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => {
-                    untracked(() => {
-                        if (this.#value() != null) {
-                            this.#listService.setSelectedDataItems([this.#value()]);
-                            this.comboBoxValue.set(this.valueText());
-                        }
-                    });
-                });
-        });
+        combineLatest([toObservable(this.valueField), toObservable(this.#value)])
+            .pipe(delay(0, asyncScheduler), takeUntilDestroyed())
+            .subscribe(([, value]) => {
+                if (value != null) {
+                    this.#listService.setSelectedDataItems([value]);
+                    this.comboBoxValue.set(this.valueText());
+                }
+            });
 
-        effect(() => {
-            timer(0)
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => {
-                    if (!this.#listService.isActiveItemVisible()) {
-                        this.#listService.highlightFirstItem();
-                    }
-                });
-        });
         afterNextRender({
             read: () => {
                 this.initialize();
@@ -365,16 +357,6 @@ export class ComboBoxComponent<TData = unknown>
         }
         this.updateValue(event.item.data, true);
         this.closePopup();
-    }
-
-    public handleKeydown(): void {
-        this.#dropdownService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            if (event.key === "Enter") {
-                this.setEnterKeySubscription(event);
-            } else if (event.key === "Tab") {
-                this.closePopup();
-            }
-        });
     }
 
     public registerOnChange(fn: any): void {
@@ -411,6 +393,7 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private clear(): void {
+        this.#navigatedValue.set(null);
         this.updateValue(null);
         this.comboBoxValue.set("");
         this.#listService.clearSelections();
@@ -427,11 +410,6 @@ export class ComboBoxComponent<TData = unknown>
             input.focus();
             input.setSelectionRange(-1, -1);
         }
-    }
-
-    private handleCustomValue(): void {
-        this.valueAdd.emit(this.comboBoxValue());
-        this.closePopup();
     }
 
     private initialize(): void {
@@ -455,88 +433,100 @@ export class ComboBoxComponent<TData = unknown>
                 this.updateValue(item.data, true);
             } else {
                 this.#navigatedValue.set(item.data);
+                this.#userNavigatedViaArrows.set(true);
             }
         });
     }
 
     private setComboboxValueSubscription(): void {
-        const debounce = this.#listService.filterableOptions().enabled
-            ? this.#listService.filterableOptions().debounce
-            : 0;
         this.comboBoxValue$
             .pipe(
-                tap(() => {
-                    if (!this.#popupRef()) {
-                        this.#dropdownService.triggerPopupOpen$.next();
-                    }
-                }),
-                debounceTime(debounce),
                 takeUntilDestroyed(this.#destroyRef),
-                distinctUntilChanged()
+                debounceTime(this.#listService.getFilterDebounceDuration()),
+                filter(value => value !== null)
             )
             .subscribe(value => {
-                if (this.#listService.filterableOptions().enabled) {
+                this.#userNavigatedViaArrows.set(false);
+                if (this.#listService.isFilteringEnabled()) {
                     const event = this.notifyFilterChange(value);
-                    if (!event.isDefaultPrevented()) {
+                    if (event.isDefaultPrevented()) {
+                        return;
+                    }
+                    if (value) {
                         this.#listService.setFilter(value);
+                    } else {
+                        this.#listService.clearFilter();
                     }
                 }
-                const item = this.#listService
-                    .viewItems()
-                    .where(i => !i.header && !this.#listService.isDisabled(i))
-                    .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().includes(value.toLowerCase()));
-                if (item) {
-                    this.#listService.clearSelections();
-                    this.#listService.highlightedItem.set(item);
-                    this.#listService.scrollToItem$.next({ item, focus: false });
+
+                if (this.#popupRef()) {
+                    this.#dropdownService.triggerPopupOpen$.next();
                 }
-                this.comboBoxValue.set(value);
+
+                this.comboBoxValue.set(value ?? "");
+                const item = this.#listService.getMatchingFilteredItem(value);
+                if (item) {
+                    this.#navigatedValue.set(item.data);
+                    this.#listService.highlightedItem.set(item);
+
+                    if (this.#popupRef()) {
+                        this.#listService.scrollToItem$.next({ item, focus: false });
+                    } else {
+                        this.#dropdownService.popupOpenComplete$.pipe(take(1)).subscribe(() => {
+                            this.#listService.scrollToItem$.next({ item, focus: false });
+                        });
+                    }
+                }
             });
     }
 
-    private setEnterKeySubscription(event: KeyboardEvent): void {
-        const navigatedValue = this.#navigatedValue();
-        const navigatedItem = this.#listService.viewItems().firstOrDefault(item => item.data === navigatedValue);
-        const comboBoxValue = this.comboBoxValue();
-        const navigatedItemText = navigatedItem ? this.#listService.getItemText(navigatedItem) : "";
-        if (navigatedItem && navigatedItemText.toLowerCase() === comboBoxValue.toLowerCase()) {
-            this.#listService.selectItem(navigatedItem);
-            this.updateValue(navigatedValue);
+    private handleEnterKey(): void {
+        const comboBoxText = this.comboBoxValue();
+        const highlightedItem = this.#listService.highlightedItem();
+
+        if (this.#userNavigatedViaArrows() && highlightedItem) {
+            this.selectItem(highlightedItem);
             return;
         }
-        if (navigatedItemText.toLowerCase() !== comboBoxValue.toLowerCase() && !this.allowCustomValue()) {
-            this.#navigatedValue.set(null);
-            this.comboBoxValue.set("");
-            return;
-        }
-        if (this.#navigatedValue() && this.expanded() && this.#navigatedValue() !== this.#value()) {
-            this.updateValue(this.#navigatedValue());
-            return;
-        }
-        const item = this.selectedDataItem() || this.#listService.highlightedItem();
-        if (item && this.comboBoxValue() === this.valueText()) {
-            this.updateValue(item);
-        } else if (item && this.comboBoxValue() !== this.valueText()) {
-            const targetItem = this.#listService
-                .viewItems()
-                .firstOrDefault(i =>
-                    this.#listService.getItemText(i).toLowerCase().startsWith(this.comboBoxValue().toLowerCase())
-                );
-            if (targetItem) {
-                this.#listService.selectItem(targetItem);
-                this.updateValue(targetItem.data);
-            } else if (this.allowCustomValue()) {
-                event.preventDefault();
-                this.handleCustomValue();
+
+        if (!this.allowCustomValue()) {
+            if (highlightedItem) {
+                const highlightedText = this.#listService.getItemText(highlightedItem);
+                if (highlightedText.toLowerCase() === comboBoxText.toLowerCase()) {
+                    this.selectItem(highlightedItem);
+                } else {
+                    const matchingItem = this.#listService.getMatchingFilteredItem(comboBoxText);
+                    if (matchingItem) {
+                        this.selectItem(matchingItem);
+                    } else {
+                        this.clear();
+                    }
+                }
             } else {
-                this.comboBoxValue.set("");
+                const matchingItem = this.#listService.getMatchingFilteredItem(comboBoxText);
+                if (matchingItem) {
+                    this.selectItem(matchingItem);
+                } else {
+                    this.clear();
+                }
             }
-        } else if (this.allowCustomValue()) {
-            event.preventDefault();
-            this.handleCustomValue();
         } else {
-            this.comboBoxValue.set("");
+            if (highlightedItem) {
+                const highlightedText = this.#listService.getItemText(highlightedItem);
+                if (highlightedText.toLowerCase() === comboBoxText.toLowerCase()) {
+                    this.selectItem(highlightedItem);
+                } else if (comboBoxText) {
+                    this.valueAdd.emit(comboBoxText);
+                }
+            } else if (comboBoxText) {
+                this.valueAdd.emit(comboBoxText);
+            }
         }
+    }
+
+    private selectItem(item: ListItem<TData>): void {
+        this.#listService.selectItem(item);
+        this.updateValue(item.data);
     }
 
     private setEscapeKeySubscription(): void {
@@ -551,22 +541,37 @@ export class ComboBoxComponent<TData = unknown>
                     const selectedItem = this.selectedListItem();
                     if (selectedItem) {
                         this.comboBoxValue.set(this.#listService.getItemText(selectedItem));
+                        this.#navigatedValue.set(selectedItem.data);
+                    } else {
+                        this.clear();
                     }
+                    this.closePopup();
                 } else {
                     this.clear();
-                    timer(0)
-                        .pipe(takeUntilDestroyed(this.#destroyRef))
-                        .subscribe(() => this.focus());
+                    window.setTimeout(() => this.focus());
                 }
-                this.closePopup();
             });
+    }
+
+    private setKeydownSubscription(): void {
+        this.#dropdownService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                this.handleEnterKey();
+                this.closePopup();
+            } else if (event.key === "Tab") {
+                this.closePopup();
+            }
+        });
     }
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            timer(0)
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => this.focus());
+            this.#userNavigatedViaArrows.set(false);
+            window.setTimeout(() => {
+                this.comboBoxValue$.next(null);
+                this.focus();
+            });
         });
     }
 
@@ -583,10 +588,14 @@ export class ComboBoxComponent<TData = unknown>
     private setSubscriptions(): void {
         this.setComboboxValueSubscription();
         this.setArrowNavigationSubscription();
-        this.handleKeydown();
+        this.setKeydownSubscription();
         this.setEscapeKeySubscription();
         this.setPopupCloseSubscriptions();
         this.setSpaceKeySubscription();
+
+        this.#listService.navigatedItem$.subscribe(e => {
+            this.#navigatedValue.set(e?.data ?? null);
+        });
     }
 
     private updateValue(value: TData | null, notify: boolean = true) {
