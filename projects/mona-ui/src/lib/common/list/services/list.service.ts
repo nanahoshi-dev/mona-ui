@@ -210,8 +210,20 @@ export class ListService<TData> {
     }
 
     public getMatchingFilteredItem(text: string): ListItem<TData> | null {
+        const filterableOptions = this.filterableOptions();
+        const caseSensitive = filterableOptions.enabled ? filterableOptions.caseSensitive : false;
         const viewItems = this.viewItems();
-        return viewItems.firstOrDefault(i => this.filterItem(i, text));
+        const allMatchingItems = viewItems.where(i => this.filterItem(i, text));
+        const fullMatchingItem = viewItems.firstOrDefault(i => {
+            if (!caseSensitive) {
+                return this.getItemText(i) === text;
+            }
+            return this.getItemText(i).toLowerCase() === text.toLowerCase();
+        });
+        if (fullMatchingItem) {
+            return fullMatchingItem;
+        }
+        return allMatchingItems.firstOrDefault();
     }
 
     public isDisabled(item: ListItem<TData>): boolean {

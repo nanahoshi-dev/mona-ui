@@ -297,7 +297,7 @@ export class ListComponent<TData> implements OnInit {
                 const scrolledElement = this.#hostElementRef.nativeElement.querySelector(
                     `[data-uid="${item.uid}"]`
                 ) as HTMLElement;
-                if (scrolledElement) {
+                if (scrolledElement && focus) {
                     scrolledElement.focus();
                 }
             });

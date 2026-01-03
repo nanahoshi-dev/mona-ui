@@ -16,7 +16,7 @@ export class DropDownVirtualScrollDirective<TData> {
         enabled: true,
         height: 28
     };
-    readonly #listService = inject(ListService<TData>);
+    readonly #listService = inject(ListService);
     public readonly options = input<Partial<VirtualScrollOptions> | "">("", {
         alias: "monaDropDownVirtualScroll"
     });

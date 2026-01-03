@@ -459,7 +459,7 @@ export class ComboBoxComponent<TData = unknown>
                     }
                 }
 
-                if (this.#popupRef()) {
+                if (!this.#popupRef()) {
                     this.#dropdownService.triggerPopupOpen$.next();
                 }
 
