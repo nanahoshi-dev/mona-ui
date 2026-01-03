@@ -422,7 +422,7 @@ export class ComboBoxComponent<TData = unknown>
 
     private notifyFilterChange(filter: string): FilterChangeEvent {
         const event = new FilterChangeEvent(filter);
-        this.#listService.filterChange.emit(event);
+        this.#listService.filterChange$.next(event);
         return event;
     }
 

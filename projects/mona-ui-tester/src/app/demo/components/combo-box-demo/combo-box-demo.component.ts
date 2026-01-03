@@ -31,7 +31,8 @@ import {
     dropdownItemTemplateFeatureConfig,
     dropdownNoDataTemplateFeatureConfig,
     dropdownPrefixTemplateFeatureConfig,
-    dropdownVirtualizationFeatureConfig
+    dropdownVirtualizationFeatureConfig,
+    getFormValueText
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -259,12 +260,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     protected readonly formValueText = computed(() => {
         const value = this.#formValue();
         const textField = this.textField();
-        if (typeof textField === "string") {
-            return value ? (value as any)[textField as string] : "";
-        } else if (typeof textField === "function") {
-            return textField(value);
-        }
-        return value ?? "";
+        return getFormValueText(value, textField);
     });
     protected readonly groupBy = computed(() => {
         const features = this.features();

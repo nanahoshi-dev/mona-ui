@@ -177,7 +177,7 @@ export class ListComponent<TData> implements OnInit {
     }
 
     public onFilterChange(event: FilterChangeEvent): void {
-        this.listService.filterChange.emit(event);
+        this.listService.filterChange$.next(event);
         if (!event.isDefaultPrevented()) {
             this.listService.setFilter(event.filter);
         }

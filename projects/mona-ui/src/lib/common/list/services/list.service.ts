@@ -33,6 +33,7 @@ export class ListService<TData> {
             .toImmutableSet();
     });
     public readonly disabledBy = signal<string | Predicate<TData>>("");
+    public readonly filterChange$ = new Subject<FilterChangeEvent>();
     public readonly filterInputVisible = signal(true);
     public readonly filterPlaceholder = signal("");
     public readonly filterText = signal("");
@@ -146,7 +147,6 @@ export class ListService<TData> {
 
         return positions;
     });
-    public filterChange!: OutputEmitterRef<FilterChangeEvent>;
     public selectedKeysChange!: OutputEmitterRef<Array<any>>;
 
     public getItemPosition(item: ListItem<TData>): { position: number; total: number } | null {

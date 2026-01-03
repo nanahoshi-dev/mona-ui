@@ -1,4 +1,15 @@
-import { Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import {
+    afterNextRender,
+    DestroyRef,
+    Directive,
+    effect,
+    inject,
+    input,
+    OnInit,
+    output,
+    untracked
+} from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FilterChangeEvent } from "../../common/filter-input/models/FilterChangeEvent";
 import { ListService } from "../../common/list/services/list.service";
 import { FilterableOptions } from "../../common/models/FilterableOptions";
@@ -12,13 +23,14 @@ import { FilterableOptions } from "../../common/models/FilterableOptions";
     `,
     standalone: true
 })
-export class DropDownFilterableDirective<TData> implements OnInit {
+export class DropDownFilterableDirective<TData> {
     readonly #defaultOptions: FilterableOptions = {
         enabled: true,
         operator: "contains",
         debounce: 0,
         caseSensitive: false
     };
+    readonly #destroyRef = inject(DestroyRef);
     readonly #listService = inject(ListService);
     public readonly filter = input<string>("");
     public readonly filterChange = output<FilterChangeEvent>();
@@ -50,9 +62,12 @@ export class DropDownFilterableDirective<TData> implements OnInit {
                 }
             });
         });
-    }
-
-    public ngOnInit(): void {
-        this.#listService.filterChange = this.filterChange;
+        afterNextRender({
+            read: () => {
+                this.#listService.filterChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(filter => {
+                    this.filterChange.emit(filter);
+                });
+            }
+        });
     }
 }

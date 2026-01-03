@@ -39,7 +39,8 @@ import {
     dropdownGroupingFeatureConfig,
     dropdownNoDataTemplateFeatureConfig,
     dropdownPrefixTemplateFeatureConfig,
-    dropdownVirtualizationFeatureConfig
+    dropdownVirtualizationFeatureConfig,
+    getFormValueText
 } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -202,12 +203,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         DropdownPrefixTemplateDirective,
         ReactiveFormsModule
     ],
-    host: {
-        class: "flex flex-col items-center justify-center w-full"
-    },
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
+        <span>Selected Value: {{ formValueText() }}</span>
         <form [formGroup]="formGroup">
             <mona-drop-down-list
                 [data]="dropdownData()"
@@ -329,6 +328,11 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     });
     protected readonly foodIcon = Utensils;
     protected readonly formGroup = this.#formGroup;
+    protected readonly formValueText = computed(() => {
+        const value = this.#formValue();
+        const textField = this.textField();
+        return getFormValueText(value, textField);
+    });
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};

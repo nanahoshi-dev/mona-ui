@@ -1,3 +1,4 @@
+import { DropdownFieldSelectorType } from "mona-ui/dropdowns/models/DropdownFieldTypes";
 import { ComponentConfigFeatureItemOptions } from "./componentConfig";
 
 export const dropdownFilteringFeatureConfig = <TDropdown = any>(
@@ -189,4 +190,13 @@ export const dropdownVirtualizationFeatureConfig = <TDropdown = any>(
             }
         }
     };
+};
+
+export const getFormValueText = (formValue: any, field: DropdownFieldSelectorType<unknown>) => {
+    if (typeof field === "string") {
+        return formValue ? (formValue as any)[field as string] : "";
+    } else if (typeof field === "function") {
+        return field(formValue);
+    }
+    return formValue ?? "";
 };

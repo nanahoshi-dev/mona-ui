@@ -19,11 +19,11 @@ import {
     untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import { Subject } from "rxjs";
+import { asyncScheduler, combineLatest, delay, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
@@ -122,7 +122,8 @@ import {
     }
 })
 export class DropdownListComponent<TData = unknown>
-    implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput {
+    implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
+{
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropDownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
@@ -317,17 +318,13 @@ export class DropdownListComponent<TData = unknown>
     public readonly valueField = input<DropdownFieldSelectorType<TData>>();
 
     public constructor() {
-        effect(() => {
-            window.setTimeout(() => {
-                this.valueField();
-                untracked(() => {
-                    const value = this.#value();
-                    if (value != null) {
-                        this.#listService.setSelectedDataItems([value]);
-                    }
-                });
+        combineLatest([toObservable(this.valueField), toObservable(this.#value)])
+            .pipe(delay(0, asyncScheduler), takeUntilDestroyed())
+            .subscribe(([, value]) => {
+                if (value != null) {
+                    this.#listService.setSelectedDataItems([value]);
+                }
             });
-        });
         effect(() => {
             const popupTemplate = this.popupTemplate();
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
@@ -337,6 +334,16 @@ export class DropdownListComponent<TData = unknown>
                 this.initialize();
                 this.setSubscriptions();
             }
+        });
+        effect(() => {
+            const filterableOptions = this.#listService.filterableOptions();
+            untracked(() => {
+                if (filterableOptions.enabled) {
+                    this.#listService.setNavigableOptions({ mode: "highlight" });
+                } else {
+                    this.#listService.setNavigableOptions({ mode: "select" });
+                }
+            });
         });
     }
 
@@ -420,16 +427,6 @@ export class DropdownListComponent<TData = unknown>
         this.#hostElementRef.nativeElement?.focus();
     }
 
-    private handleArrowKeys(): void {
-        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
-            if (!this.expanded()) {
-                this.updateValue(item.data, true);
-            } else {
-                this.#navigatedValue.set(item.data);
-            }
-        });
-    }
-
     private handleEnterKey(): void {
         if (!this.expanded()) {
             this.#dropdownService.triggerPopupOpen$.next();
@@ -457,20 +454,6 @@ export class DropdownListComponent<TData = unknown>
         }
     }
 
-    private handleKeyDown(): void {
-        this.#dropdownService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                this.handleEnterKey();
-            } else if (event.key === "Home" || event.key === "End") {
-                event.preventDefault();
-                this.handleHomeEndKeys(event);
-            } else if (isTypeaheadKey(event.key)) {
-                this.#typeaheadKey.next(event.key);
-            }
-        });
-    }
-
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "select" });
         this.#listService.setSelectableOptions(this.selectableOptions);
@@ -485,18 +468,52 @@ export class DropdownListComponent<TData = unknown>
         window.setTimeout(() => this.#listService.scrollToItem(item, false));
     }
 
+    private setArrowKeyNavigationSubscription(): void {
+        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
+            if (!this.expanded()) {
+                this.updateValue(item.data, true);
+            } else {
+                this.#navigatedValue.set(item.data);
+            }
+        });
+    }
+
+    private setFilterChangeSubscription(): void {
+        this.#listService.filterChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (event.filter) {
+                const item = this.#listService.getMatchingFilteredItem(event.filter);
+                if (item) {
+                    this.#listService.highlightedItem.set(item);
+                }
+            }
+        });
+    }
+
+    private setKeydownSubscription(): void {
+        this.#dropdownService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                this.handleEnterKey();
+            } else if (event.key === "Home" || event.key === "End") {
+                event.preventDefault();
+                this.handleHomeEndKeys(event);
+            } else if (isTypeaheadKey(event.key)) {
+                this.#typeaheadKey.next(event.key);
+            }
+        });
+    }
+
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            window.setTimeout(() => {
-                this.focus();
-            });
             this.updateValue(this.#navigatedValue(), true);
+            window.setTimeout(() => this.focus());
         });
     }
 
     private setSubscriptions(): void {
-        this.handleKeyDown();
-        this.handleArrowKeys();
+        this.setKeydownSubscription();
+        this.setArrowKeyNavigationSubscription();
+        this.setFilterChangeSubscription();
         this.setPopupCloseSubscriptions();
         this.setTypeaheadSubscription();
     }
