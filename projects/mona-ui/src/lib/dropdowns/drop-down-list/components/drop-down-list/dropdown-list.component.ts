@@ -54,7 +54,7 @@ import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-pr
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
-import { DropDownService } from "../../../services/drop-down.service";
+import { DropdownService } from "../../../services/dropdown.service";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
 import {
     dropdownListAffixContainerThemeVariants,
@@ -72,7 +72,7 @@ import {
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     providers: [
         ListService,
-        DropDownService,
+        DropdownService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => DropdownListComponent),
@@ -125,7 +125,7 @@ export class DropdownListComponent<TData = unknown>
     implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #dropdownService = inject(DropDownService);
+    readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #navigatedValue = linkedSignal(() => this.#value());
     readonly #listService = inject<ListService<TData>>(ListService);
@@ -510,8 +510,8 @@ export class DropdownListComponent<TData = unknown>
     }
 
     private setSubscriptions(): void {
-        this.setKeydownSubscription();
         this.setArrowKeyNavigationSubscription();
+        this.setKeydownSubscription();
         this.setFilterChangeSubscription();
         this.setPopupCloseSubscriptions();
         this.setTypeaheadSubscription();

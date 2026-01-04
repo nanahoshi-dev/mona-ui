@@ -7,7 +7,7 @@ import { PopupRef } from "../../popup/models/PopupRef";
 import { PreventableEvent } from "../../utils/PreventableEvent";
 
 @Injectable()
-export class DropDownService {
+export class DropdownService {
     public readonly beforeKeydown$ = new Subject<PreventableEvent<KeyboardEvent>>();
     public readonly beforeNavigate$ = new Subject<PreventableEvent<KeyboardEvent>>();
     public readonly navigate$ = new Subject<{ item: ListItem<any> }>();

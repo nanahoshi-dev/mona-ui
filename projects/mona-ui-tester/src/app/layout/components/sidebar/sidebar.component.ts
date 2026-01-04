@@ -109,6 +109,10 @@ export class SidebarComponent {
                     path: "/menubar"
                 },
                 {
+                    text: "Multi Select",
+                    path: "/multi-select"
+                },
+                {
                     text: "Numeric Text Box",
                     path: "/numeric-textbox"
                 },

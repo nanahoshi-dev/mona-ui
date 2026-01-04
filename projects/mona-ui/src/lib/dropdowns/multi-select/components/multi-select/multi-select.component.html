@@ -1,37 +1,40 @@
-<div class="flex-1 truncate flex items-center gap-1 flex-wrap">
+<div [class]="itemContainerClass()">
     @for (pair of valueTextMap(); track pair.key) {
-        <mona-chip look="outline" [tabindex]="-1" [removable]="true"
-                   class="py-0"
-                   (remove)="onSelectedItemRemove($event, pair.key)">
-            @if (!tagTemplate()) {
-                <span>{{pair.value}}</span>
-            } @else {
-                <ng-container [ngTemplateOutlet]="tagTemplate()??null"
-                              [ngTemplateOutletContext]="{$implicit: pair.key.data}"></ng-container>
+        <mona-chip look="default" [tabindex]="-1" [removable]="true"
+                   [rounded]="rounded()"
+                   [size]="size()"
+                   [label]="pair.value"
+                   (remove)="onSelectedItemRemove($event, pair.key!)">
+            @if (tagTemplate()) {
+                <ng-container [ngTemplateOutlet]="tagTemplate()"
+                              [ngTemplateOutletContext]="{$implicit: pair.key!.data}"></ng-container>
             }
         </mona-chip>
     }
 
     @if (tagCount() >= 0 && selectedListItems().length > tagCount()) {
         <mona-chip look="outline" [tabindex]="-1" [removable]="true"
+                   [label]="summaryTagText()"
+                   [rounded]="rounded()" [size]="size()"
                    (remove)="onSelectedItemGroupRemove($event)">
-            @if (!summaryTagTemplate()) {
-                <span>{{summaryTagText()}}</span>
-            } @else {
+            @if (summaryTagTemplate()) {
                 <ng-container [ngTemplateOutlet]="summaryTagTemplate()"
                               [ngTemplateOutletContext]="{$implicit: selectedDataItems()}"></ng-container>
             }
         </mona-chip>
     }
 </div>
+
 <div class="flex items-center justify-center">
     @if (showClearButton() && selectedListItems().length !== 0) {
         <button monaButton look="link" size="small" [tabindex]="-1" class="h-full" (click)="clearValue($event)">
             <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
         </button>
     }
-    <lucide-angular class="opacity-50 size-4" [img]="dropdownIcon"></lucide-angular>
 </div>
+
+<lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square mx-1" [name]="dropdownIcon"
+                [size]="18"></lucide-angular>
 
 <ng-template #popupTemplate>
     <div [class]="popupClasses()">

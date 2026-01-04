@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from "@angular/core";
+import { CircleX, LucideAngularModule } from "lucide-angular";
 import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
@@ -7,6 +8,7 @@ import { twMerge } from "tailwind-merge";
     selector: "mona-chip",
     templateUrl: "./chip.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [LucideAngularModule],
     host: {
         "[class]": "classes()",
         "[class.mona-chip]": "true",
@@ -26,6 +28,20 @@ export class ChipComponent implements ChipVariantInputs {
         const variantClasses = chipThemeVariants(theme)({ look, rounded, size });
         return twMerge(variantClasses, userClass);
     });
+    protected readonly iconSize = computed(() => {
+        const size = this.size();
+        switch (size) {
+            case "small":
+                return 13;
+            case "medium":
+                return 14;
+            case "large":
+                return 16;
+            default:
+                return 14;
+        }
+    });
+    protected readonly removeIcon = CircleX;
 
     /**
      * @description Sets the disabled state of the chip.

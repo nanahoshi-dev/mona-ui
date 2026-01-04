@@ -2,8 +2,8 @@ import { cva } from "class-variance-authority";
 
 export const chipVariants = cva(
     `
-        inline-flex items-center justify-center gap-1.5
-        text-xs font-medium cursor-pointer
+        inline-flex items-center justify-between gap-1.5
+        text-xs font-medium cursor-pointer shrink-0
         outline-none
         data-[disabled]:pointer-events-none data-[disabled]:opacity-50
         data-[disabled]:cursor-not-allowed data-[disabled]:select-none
@@ -65,18 +65,9 @@ export const chipVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                small: `
-                    px-1 py-0.5
-                    [&_.mona-chip-remove>svg]:w-3 [&_.mona-chip-remove>svg]:h-3
-                `,
-                medium: `
-                    px-1.5 py-1
-                    [&_.mona-chip-remove>svg]:w-3 [&_.mona-chip-remove>svg]:h-3
-                `,
-                large: `
-                    px-2 py-1.5
-                    [&_.mona-chip-remove>svg]:w-3.5 [&_.mona-chip-remove>svg]:h-3.5
-                `
+                small: `px-1 py-0.5`,
+                medium: `px-1.5 py-1`,
+                large: `px-2 py-1.5`
             }
         }
     }

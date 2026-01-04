@@ -68,7 +68,7 @@ import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-pr
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
-import { DropDownService } from "../../../services/drop-down.service";
+import { DropdownService } from "../../../services/dropdown.service";
 import {
     comboBoxAffixContainerThemeVariants,
     comboBoxBaseThemeVariants,
@@ -83,7 +83,7 @@ import {
     templateUrl: "./combo-box.component.html",
     providers: [
         ListService,
-        DropDownService,
+        DropdownService,
         FormFieldValidationService,
         {
             provide: NG_VALUE_ACCESSOR,
@@ -130,7 +130,7 @@ export class ComboBoxComponent<TData = unknown>
     implements ControlValueAccessor, ComboBoxVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #dropdownService = inject(DropDownService);
+    readonly #dropdownService = inject(DropdownService);
     readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #listService = inject(ListService);

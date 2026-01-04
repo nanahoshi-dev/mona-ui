@@ -127,6 +127,13 @@ export const routes: Routes = [
                     import("./docs/components/menubar-doc/menubar-doc.component").then(m => m.MenubarDocComponent)
             },
             {
+                path: "multi-select",
+                loadComponent: () =>
+                    import("./docs/components/multi-select-doc/multi-select-doc.component").then(
+                        m => m.MultiSelectDocComponent
+                    )
+            },
+            {
                 path: "numeric-textbox",
                 loadComponent: () =>
                     import("./docs/components/numeric-textbox-doc/numeric-textbox-doc.component").then(

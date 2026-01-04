@@ -56,7 +56,7 @@ import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffi
 import { DropdownDataInput, DropdownDataInputToken } from "../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../models/DropdownPopupInput";
-import { DropDownService } from "../../services/drop-down.service";
+import { DropdownService } from "../../services/dropdown.service";
 import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
@@ -73,7 +73,7 @@ import {
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     providers: [
         ListService,
-        DropDownService,
+        DropdownService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => AutoCompleteComponent),
@@ -117,7 +117,7 @@ export class AutoCompleteComponent<TData = unknown>
     implements ControlValueAccessor, AutoCompleteVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #dropdownService = inject(DropDownService);
+    readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;

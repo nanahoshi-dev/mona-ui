@@ -7,14 +7,14 @@ import { PopupService } from "../../popup/services/popup.service";
 import { PreventableEvent } from "../../utils/PreventableEvent";
 import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../animations/dropdown.animation";
 import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
-import { DropDownService } from "../services/drop-down.service";
+import { DropdownService } from "../services/dropdown.service";
 
 @Directive({
     selector: "[monaDropdownPopupHandler]"
 })
 export class DropdownPopupHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #dropdownService = inject(DropDownService);
+    readonly #dropdownService = inject(DropdownService);
     readonly #listService = inject(ListService);
     readonly #host = inject(DropdownPopupInputToken);
     readonly #hostElementRef = inject(ElementRef);

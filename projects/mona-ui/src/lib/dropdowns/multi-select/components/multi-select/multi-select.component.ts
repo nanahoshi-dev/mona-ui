@@ -24,6 +24,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { Predicate } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { ComboBoxVariantProps } from "../../../combo-box/styles/combo-box.styles";
 import {
     dropdownPopupVariants,
     DropdownSelectorVariantProps,
@@ -53,6 +55,12 @@ import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-h
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
+import {
+    multiSelectBaseThemeVariants,
+    multiSelectItemContainerThemeVariants,
+    MultiSelectVariantInput,
+    MultiSelectVariantProps
+} from "../../styles/multi-select.styles";
 
 @Component({
     selector: "mona-multi-select",
@@ -84,26 +92,30 @@ import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-t
         "[attr.aria-haspopup]": "true",
         "[attr.data-disabled]": "disabled()",
         "[attr.tabindex]": "disabled() ? null : 0",
-        "[class]": "classes()"
+        "[class]": "baseClass()"
     }
 })
-export class MultiSelectComponent<TData>
-    implements OnInit, OnDestroy, ControlValueAccessor, MultiSelectSelectorVariantInput
+export class MultiSelectComponent<TData = unknown>
+    implements OnInit, OnDestroy, ControlValueAccessor, MultiSelectVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService: ListService<TData> = inject(ListService);
     readonly #popupService = inject(PopupService);
+    readonly #themeService = inject(ThemeService);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<TData[]> | null = null;
     #resizeObserver: ResizeObserver | null = null;
     #value: TData[] = [];
 
-    protected readonly classes = computed(() => {
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const focused = this.#popupRef != null;
+        const rounded = this.rounded();
         const size = this.size();
-        const classes = multiSelectSelectorVariants({ size });
+        const variantClass = multiSelectBaseThemeVariants(theme)({ focused, rounded, size });
         const userClass = this.userClass();
-        return twMerge(classes, userClass);
+        return twMerge(variantClass, userClass);
     });
     protected readonly clearIcon = X;
     protected readonly dropdownIcon = ChevronDown;
@@ -112,6 +124,11 @@ export class MultiSelectComponent<TData>
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly itemContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        return multiSelectItemContainerThemeVariants(theme)({ rounded });
+    });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupClasses = computed(() => {
@@ -157,17 +174,18 @@ export class MultiSelectComponent<TData>
         return tagCount;
     });
 
-    public readonly size = input<DropdownSelectorVariantProps["size"]>("default");
+    public readonly size = input<MultiSelectVariantProps["size"]>("medium");
     public readonly summaryTagTemplate = signal<TemplateRef<any> | null>(null);
     public readonly tagCount = signal(-1);
     public readonly userClass = input<string>("", { alias: "class" });
 
     public data = input<Iterable<TData>>([]);
     public disabled = model(false);
-    public itemDisabled = input<string | Predicate<TData> | null | undefined>("");
+    public itemDisabled = input<string | Predicate<TData> | null>();
+    public readonly rounded = input<MultiSelectVariantProps["rounded"]>("medium");
     public showClearButton = input(true);
-    public textField = input<string | null | undefined>("");
-    public valueField = input<string | null | undefined>("");
+    public textField = input<string | null>();
+    public valueField = input<string | null>();
 
     public constructor() {
         effect(() => {

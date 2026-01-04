@@ -22,7 +22,7 @@ import { fromEvent, take } from "rxjs";
 import { AnimationState } from "../../animations/models/AnimationState";
 import { PopupAnimationService } from "../../animations/services/popup-animation.service";
 import { ButtonDirective } from "../../buttons/button/directives/button.directive";
-import { DropDownService } from "../../dropdowns/services/drop-down.service";
+import { DropdownService } from "../../dropdowns/services/dropdown.service";
 import { TextBoxDirective } from "../../inputs/text-box/directives/text-box.directive";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { PopupService } from "../../popup/services/popup.service";
@@ -134,7 +134,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
             hasBackdrop: false,
             withPush: false,
             closeOnOutsideClick: false,
-            positions: DropDownService.getDefaultPositions()
+            positions: DropdownService.getDefaultPositions()
         });
         this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.popupRef);
         this.#popupAnimationService.animateDropdown(this.popupRef, AnimationState.Show);
