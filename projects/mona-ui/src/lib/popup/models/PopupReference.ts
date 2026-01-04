@@ -29,12 +29,13 @@ export class PopupReference implements PopupRefParams {
             result instanceof PopupCloseEvent
                 ? result
                 : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
-        this.closed$.next(event);
-        this.closed$.complete();
+
         /**
          * A delay is added to allow animations to complete before the overlay is disposed.
          */
         asyncScheduler.schedule(() => {
+            this.closed$.next(event);
+            this.closed$.complete();
             this.positionChanges$.complete();
             this.overlayRef.dispose();
         }, delay);

@@ -16,6 +16,7 @@ export class DropDownService {
     public readonly popupOpenComplete$ = new Subject<void>();
     public readonly popupRef = signal<PopupRef | null>(null);
     public readonly popupTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly restoreFocus = signal<boolean | "auto">("auto");
     public readonly triggerPopupOpen$ = new Subject<void>();
 
     public static getDefaultPositions(): ConnectionPositionPair[] {

@@ -111,6 +111,7 @@ export class DropdownPopupHandlerDirective {
         const content = this.#dropdownService.popupTemplate() as TemplateRef<any>;
         const height = this.#listService.viewItems().none() ? 200 : undefined;
         const maxHeight = this.#host.popupHeight() != null ? (this.#host.popupHeight() ?? undefined) : 200;
+        const restoreFocus = this.#dropdownService.restoreFocus();
         const width = this.#host.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
 
         popupRef = this.#popupService.create({
@@ -128,6 +129,7 @@ export class DropdownPopupHandlerDirective {
             maxHeight,
             offset: { horizontal: 0, vertical: 4 },
             popupConnectionPoint: "topleft",
+            restoreFocus,
             width,
             withPush: false,
             withScrollTracking: true
@@ -177,9 +179,7 @@ export class DropdownPopupHandlerDirective {
             this.#dropdownService.popupRef.set(null);
             this.#dropdownService.popupCloseComplete$.next(event);
             this.#listService.clearHighlightedItem();
-            window.setTimeout(() => {
-                this.#listService.clearFilter();
-            }, 300);
+            this.#listService.clearFilter();
         });
     }
 

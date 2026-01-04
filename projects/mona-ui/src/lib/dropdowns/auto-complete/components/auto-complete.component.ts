@@ -21,9 +21,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { LucideAngularModule, X } from "lucide-angular";
-import { debounceTime, filter, Subject, tap } from "rxjs";
+import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
@@ -38,6 +37,7 @@ import { SelectableOptions } from "../../../common/list/models/SelectableOptions
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../theme/services/theme.service";
@@ -93,7 +93,6 @@ import {
     imports: [
         TextBoxDirective,
         FormsModule,
-        FontAwesomeModule,
         NgTemplateOutlet,
         ListComponent,
         ListGroupHeaderTemplateDirective,
@@ -219,7 +218,11 @@ export class AutoCompleteComponent<TData = unknown>
      */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
-    public readonly highlightFirst = input(false);
+    /**
+     * @description Defines whether the first matching item should be highlighted while typing.
+     * @default true
+     */
+    public readonly highlightFirst = input(true);
 
     /**
      * @description Sets the loading state of the autocomplete component.
@@ -308,7 +311,6 @@ export class AutoCompleteComponent<TData = unknown>
             read: () => {
                 this.initialize();
                 this.setSubscriptions();
-                this.autoCompleteValue.set(this.#value() ?? "");
             }
         });
         effect(() => {
@@ -347,6 +349,7 @@ export class AutoCompleteComponent<TData = unknown>
         this.updateValue(itemText);
         this.autoCompleteValue.set(itemText);
         this.closePopup();
+        rxTimeout(this.#destroyRef, () => this.focus(), 300);
     }
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
@@ -356,7 +359,6 @@ export class AutoCompleteComponent<TData = unknown>
         event.stopImmediatePropagation();
         this.clear(true);
         this.closePopup();
-        this.focus();
     }
 
     private clear(notify: boolean): void {
@@ -373,19 +375,18 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private focus(): void {
-        window.setTimeout(() => {
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input) {
-                input.focus();
-                input.setSelectionRange(-1, -1);
-            }
-        });
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
     }
 
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "highlight" });
         this.#listService.setSelectableOptions(this.selectableOptions);
         this.#listService.filterInputVisible.set(false);
+        this.#dropdownService.restoreFocus.set(false);
     }
 
     private notifyFilterChange(filter: string): FilterChangeEvent {
@@ -408,11 +409,12 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private setAutoCompleteValueChangeSubscription(): void {
+        const debounceDuration = this.#listService.getFilterDebounceDuration();
         this.autoCompleteValue$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 filter(value => value !== null),
-                debounceTime(this.#listService.getFilterDebounceDuration())
+                debounceDuration > 0 ? debounceTime(debounceDuration) : identity
             )
             .subscribe((value: string) => {
                 if (this.#listService.isFilteringEnabled()) {
@@ -426,8 +428,10 @@ export class AutoCompleteComponent<TData = unknown>
                 }
 
                 if (!value) {
+                    this.#popupRef()
+                        ?.closed.pipe(take(1))
+                        .subscribe(() => this.clear(false));
                     this.closePopup();
-                    window.setTimeout(() => this.clear(false), 200);
                     return;
                 }
 
@@ -456,14 +460,15 @@ export class AutoCompleteComponent<TData = unknown>
             )
             .subscribe(() => {
                 const highlightedItem = this.#listService.highlightedItem();
-                const highlightedItemText = highlightedItem ? this.#listService.getItemText(highlightedItem) : "";
                 const autoCompleteValue = this.autoCompleteValue();
-                if (highlightedItemText && autoCompleteValue != null) {
+                if (highlightedItem) {
+                    const highlightedItemText = this.#listService.getItemText(highlightedItem);
                     this.autoCompleteValue.set(highlightedItemText);
-                    if (this.#value() !== this.autoCompleteValue()) {
-                        this.updateValue(highlightedItemText);
-                    }
-                } else if (this.#value() !== autoCompleteValue) {
+                    this.updateValue(highlightedItemText);
+                    this.closePopup();
+                    return;
+                }
+                if (this.#value() !== autoCompleteValue) {
                     this.updateValue(autoCompleteValue);
                 }
                 this.closePopup();
@@ -475,35 +480,34 @@ export class AutoCompleteComponent<TData = unknown>
             .pipe(
                 filter(e => e.originalEvent?.key === "Escape"),
                 takeUntilDestroyed(this.#destroyRef),
-                tap(e => e.preventDefault())
+                tap(e => {
+                    e.preventDefault();
+                    e.originalEvent?.stopImmediatePropagation();
+                })
             )
             .subscribe(() => {
-                const autoCompleteValue = this.autoCompleteValue();
-                const value = this.#value();
-                if (value !== autoCompleteValue) {
-                    this.updateValue(autoCompleteValue);
-                } else if (value === autoCompleteValue && !this.#popupRef()) {
-                    this.clear(true);
-                    this.focus();
+                if (this.#popupRef()) {
+                    this.closePopup();
+                    return;
+                }
+                if (this.autoCompleteValue()) {
+                    this.clear(false);
                 }
             });
     }
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.focus();
-            window.setTimeout(() => {
-                this.autoCompleteValue$.next(null);
-            });
+            this.autoCompleteValue$.next(null);
         });
     }
 
     private setSubscriptions(): void {
         this.setAutoCompleteValueChangeSubscription();
         this.setArrowKeyNavigationSubscription();
-        this.setPopupCloseSubscriptions();
-        this.setEscapeKeySubscription();
         this.setEnterKeySubscription();
+        this.setEscapeKeySubscription();
+        this.setPopupCloseSubscriptions();
     }
 
     private updateValue(value: string | null, notify: boolean = true): void {

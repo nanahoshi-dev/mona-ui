@@ -81,6 +81,10 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 type: "boolean",
                 value: false
             },
+            highlightFirst: {
+                type: "boolean",
+                value: true
+            },
             itemDisabled: {
                 type: "dropdown",
                 value: ["active", (item: any) => item.price > 5, (item: any) => item.price < 5],
@@ -182,6 +186,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
             <mona-auto-complete
                 [data]="autoCompleteData()"
                 [disabled]="disabled()"
+                [highlightFirst]="highlightFirst()"
                 [itemDisabled]="itemDisabled()"
                 [loading]="loading()"
                 [placeholder]="placeholder()"
@@ -335,6 +340,7 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     });
     public readonly data = input<ReturnType<AutoCompleteComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<AutoCompleteComponent["disabled"]>>(false);
+    public readonly highlightFirst = input<ReturnType<AutoCompleteComponent["highlightFirst"]>>(true);
     public readonly itemDisabled = input<ReturnType<AutoCompleteComponent["itemDisabled"]>>(null);
     public readonly loading = input<ReturnType<AutoCompleteComponent["loading"]>>(false);
     public readonly placeholder = input<ReturnType<AutoCompleteComponent["placeholder"]>>("");

@@ -1000,6 +1000,12 @@
         "kind": "input"
       },
       {
+        "name": "highlightFirst",
+        "type": "boolean",
+        "description": "Defines whether the first matching item should be highlighted while typing.",
+        "kind": "input"
+      },
+      {
         "name": "loading",
         "type": "boolean",
         "description": "Sets the loading state of the autocomplete component.",
@@ -1014,7 +1020,7 @@
       {
         "name": "placeholder",
         "type": "string",
-        "description": "Sets the placeholder text of the autocomplete component.",
+        "description": "Sets the placeholder text to be shown when there is no value selected.",
         "kind": "input"
       },
       {
@@ -3280,6 +3286,12 @@
         "kind": "input"
       },
       {
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "description": "Sets the aria-describedby attribute of the combo box input.\nUse this to associate error messages or help text with the input.",
+        "kind": "input"
+      },
+      {
         "name": "close",
         "type": "PopupCloseEvent",
         "description": "Emits when the popup is about to close. This event is preventable.",
@@ -3318,7 +3330,7 @@
       {
         "name": "placeholder",
         "type": "string",
-        "description": "",
+        "description": "Sets the placeholder text to be shown when there is no value selected.",
         "kind": "input"
       },
       {
@@ -3380,6 +3392,12 @@
         "type": "string",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "valueAdd",
+        "type": "string",
+        "description": "",
+        "kind": "output"
       },
       {
         "name": "valueField",
