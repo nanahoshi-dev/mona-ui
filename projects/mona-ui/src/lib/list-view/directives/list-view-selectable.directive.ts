@@ -1,4 +1,16 @@
-import { Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import {
+    afterNextRender,
+    DestroyRef,
+    Directive,
+    effect,
+    EventEmitter,
+    inject,
+    input,
+    OnInit,
+    output,
+    untracked
+} from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ListKeySelector } from "../../common/list/models/ListSelectors";
 import { SelectableOptions } from "../../common/list/models/SelectableOptions";
 import { ListService } from "../../common/list/services/list.service";
@@ -7,12 +19,13 @@ import { ListService } from "../../common/list/services/list.service";
     selector: "mona-list-view[monaListViewSelectable]",
     standalone: true
 })
-export class ListViewSelectableDirective<T, K = unknown> implements OnInit {
+export class ListViewSelectableDirective<T, K = unknown> {
     readonly #defaultOptions: SelectableOptions = {
         mode: "single",
         enabled: true,
         toggleable: false
     };
+    readonly #destroyRef = inject(DestroyRef);
     readonly #listService = inject<ListService<T>>(ListService);
 
     public readonly selectedKeysChange = output<Array<K>>();
@@ -48,9 +61,12 @@ export class ListViewSelectableDirective<T, K = unknown> implements OnInit {
                 }
             });
         });
-    }
-
-    public ngOnInit(): void {
-        this.#listService.selectedKeysChange = this.selectedKeysChange;
+        afterNextRender({
+            read: () => {
+                this.#listService.selectedKeysChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(keys => {
+                    this.selectedKeysChange.emit(keys);
+                });
+            }
+        });
     }
 }

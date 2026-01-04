@@ -405,18 +405,19 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private focus(): void {
-        const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input && !this.readonly()) {
-            input.focus();
-            input.setSelectionRange(-1, -1);
-        }
+        window.setTimeout(() => {
+            const input = this.#hostElementRef.nativeElement.querySelector("input");
+            if (input && !this.readonly()) {
+                input.focus();
+                input.setSelectionRange(-1, -1);
+            }
+        });
     }
 
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "highlight" });
         this.#listService.setSelectableOptions(this.selectableOptions);
         this.#listService.filterInputVisible.set(false);
-        this.#listService.selectedKeysChange = this.selectedKeysChange;
         this.comboBoxValue.set(this.valueText());
     }
 
@@ -548,7 +549,7 @@ export class ComboBoxComponent<TData = unknown>
                     this.closePopup();
                 } else {
                     this.clear();
-                    window.setTimeout(() => this.focus());
+                    this.focus();
                 }
             });
     }
@@ -568,9 +569,9 @@ export class ComboBoxComponent<TData = unknown>
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.#userNavigatedViaArrows.set(false);
+            this.focus();
             window.setTimeout(() => {
                 this.comboBoxValue$.next(null);
-                this.focus();
             });
         });
     }

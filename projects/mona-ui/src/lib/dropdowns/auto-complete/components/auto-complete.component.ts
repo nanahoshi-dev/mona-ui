@@ -33,7 +33,6 @@ import { ListGroupHeaderTemplateDirective } from "../../../common/list/directive
 import { ListHeaderTemplateDirective } from "../../../common/list/directives/list-header-template.directive";
 import { ListItemTemplateDirective } from "../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../common/list/directives/list-no-data-template.directive";
-import { ListItem } from "../../../common/list/models/ListItem";
 import { ListSizeInputType } from "../../../common/list/models/ListSizeType";
 import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
@@ -137,7 +136,7 @@ export class AutoCompleteComponent<TData = unknown>
         return autoCompleteAffixContainerThemeVariants(theme)();
     });
     protected readonly autoCompleteValue = linkedSignal(() => this.#value() ?? "");
-    protected readonly autoCompleteValue$ = new Subject<string>();
+    protected readonly autoCompleteValue$ = new Subject<string | null>();
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
@@ -219,6 +218,8 @@ export class AutoCompleteComponent<TData = unknown>
      * @description Sets the predicate function that determines whether an item is disabled.
      */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
+
+    public readonly highlightFirst = input(false);
 
     /**
      * @description Sets the loading state of the autocomplete component.
@@ -353,15 +354,18 @@ export class AutoCompleteComponent<TData = unknown>
             return;
         }
         event.stopImmediatePropagation();
-        this.clear();
+        this.clear(true);
         this.closePopup();
         this.focus();
     }
 
-    private clear(): void {
-        this.updateValue("");
+    private clear(notify: boolean): void {
+        this.autoCompleteValue.set("");
         this.#listService.clearSelections();
         this.#listService.clearFilter();
+        if (notify) {
+            this.updateValue(null);
+        }
     }
 
     private closePopup(): void {
@@ -369,24 +373,18 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private focus(): void {
-        const input = this.#hostElementRef.nativeElement.querySelector("input");
-        if (input) {
-            input.focus();
-            input.setSelectionRange(-1, -1);
-        }
-    }
-
-    private getItemStartsWith(value: string): ListItem<TData> | null {
-        return this.#listService
-            .viewItems()
-            .where(i => !i.header && !this.#listService.isDisabled(i))
-            .firstOrDefault(i => this.#listService.getItemText(i).toLowerCase().startsWith(value.toLowerCase()));
+        window.setTimeout(() => {
+            const input = this.#hostElementRef.nativeElement.querySelector("input");
+            if (input) {
+                input.focus();
+                input.setSelectionRange(-1, -1);
+            }
+        });
     }
 
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "highlight" });
         this.#listService.setSelectableOptions(this.selectableOptions);
-        this.#listService.selectedKeysChange = this.selectedKeysChange;
         this.#listService.filterInputVisible.set(false);
     }
 
@@ -410,39 +408,42 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private setAutoCompleteValueChangeSubscription(): void {
-        const debounce = this.#listService.filterableOptions().enabled
-            ? this.#listService.filterableOptions().debounce
-            : 0;
         this.autoCompleteValue$
             .pipe(
-                tap(value => {
-                    if (value) {
-                        this.#dropdownService.triggerPopupOpen$.next();
-                    } else {
-                        this.closePopup();
-                        this.updateValue(null);
-                        this.#listService.clearFilter();
-                        this.#listService.clearSelections();
-                    }
-                }),
-                filter(value => !!value && value !== this.#value()),
-                debounceTime(debounce),
-                takeUntilDestroyed(this.#destroyRef)
+                takeUntilDestroyed(this.#destroyRef),
+                filter(value => value !== null),
+                debounceTime(this.#listService.getFilterDebounceDuration())
             )
             .subscribe((value: string) => {
-                if (this.#listService.filterableOptions().enabled) {
+                if (this.#listService.isFilteringEnabled()) {
                     const event = this.notifyFilterChange(value);
-                    if (!event.isDefaultPrevented()) {
+                    if (event.isDefaultPrevented()) {
+                        return;
+                    }
+                    if (value) {
                         this.#listService.setFilter(value);
                     }
                 }
-                const item = this.getItemStartsWith(value);
-                this.#listService.clearSelections();
-                this.#listService.highlightedItem.set(item);
-                if (item) {
-                    this.#listService.scrollToItem$.next({ item, focus: false });
+
+                if (!value) {
+                    this.closePopup();
+                    window.setTimeout(() => this.clear(false), 200);
+                    return;
                 }
+
+                if (!this.#popupRef()) {
+                    this.#dropdownService.triggerPopupOpen$.next();
+                }
+
                 this.autoCompleteValue.set(value);
+                const item = this.#listService.getMatchingFilteredItem(value);
+                if (this.highlightFirst()) {
+                    this.#listService.clearSelections();
+                    this.#listService.highlightedItem.set(item);
+                    if (item) {
+                        this.#listService.scrollToItem$.next({ item, focus: false });
+                    }
+                }
             });
     }
 
@@ -482,18 +483,18 @@ export class AutoCompleteComponent<TData = unknown>
                 if (value !== autoCompleteValue) {
                     this.updateValue(autoCompleteValue);
                 } else if (value === autoCompleteValue && !this.#popupRef()) {
-                    this.clear();
-                    this.updateValue(null);
-                    this.#listService.clearFilter();
-                    this.#listService.clearSelections();
-                    window.setTimeout(() => this.focus());
+                    this.clear(true);
+                    this.focus();
                 }
             });
     }
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            window.setTimeout(() => this.focus());
+            this.focus();
+            window.setTimeout(() => {
+                this.autoCompleteValue$.next(null);
+            });
         });
     }
 

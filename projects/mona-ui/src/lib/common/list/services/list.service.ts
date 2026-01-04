@@ -77,6 +77,7 @@ export class ListService<TData> {
         toggleable: false
     });
     public readonly selectedKeys = signal(ImmutableSet.create<any>());
+    public readonly selectedKeysChange$ = new Subject<Array<any>>();
     public readonly selectedListItems = computed(() => {
         const selectedKeys = this.selectedKeys();
         return selectedKeys
@@ -147,7 +148,6 @@ export class ListService<TData> {
 
         return positions;
     });
-    public selectedKeysChange!: OutputEmitterRef<Array<any>>;
 
     public getItemPosition(item: ListItem<TData>): { position: number; total: number } | null {
         return this.itemPositions().get(item.uid) ?? null;

@@ -236,9 +236,7 @@ export class ListComponent<TData> implements OnInit {
             if (previousSelectedItems.contains(item)) {
                 return;
             }
-            if (this.listService.selectedKeysChange) {
-                this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
-            }
+            this.listService.selectedKeysChange$.next(this.listService.selectedKeys().toArray());
         }
         const filterInput = this.filterInput();
         if (filterInput) {
@@ -320,9 +318,7 @@ export class ListComponent<TData> implements OnInit {
         ) {
             this.listService.selectItem(item);
             this.listService.highlightedItem.set(item);
-            if (this.listService.selectedKeysChange) {
-                this.listService.selectedKeysChange.emit(this.listService.selectedKeys().toArray());
-            }
+            this.listService.selectedKeysChange$.next(this.listService.selectedKeys().toArray());
         }
     }
 

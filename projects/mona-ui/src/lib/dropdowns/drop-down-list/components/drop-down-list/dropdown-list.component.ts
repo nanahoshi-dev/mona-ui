@@ -457,7 +457,6 @@ export class DropdownListComponent<TData = unknown>
     private initialize(): void {
         this.#listService.setNavigableOptions({ enabled: true, mode: "select" });
         this.#listService.setSelectableOptions(this.selectableOptions);
-        this.#listService.selectedKeysChange = this.selectedKeysChange;
     }
 
     private scrollToSelectedItem(): void {

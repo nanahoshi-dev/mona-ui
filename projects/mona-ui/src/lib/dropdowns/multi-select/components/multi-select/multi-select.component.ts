@@ -316,7 +316,6 @@ export class MultiSelectComponent<TData>
             enabled: true,
             mode: "multiple"
         });
-        this.#listService.selectedKeysChange = this.selectedKeysChange;
     }
 
     private notifyValueChange(): void {
