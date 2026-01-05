@@ -24,18 +24,11 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { Predicate } from "@mirei/ts-collections";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { ComboBoxVariantProps } from "../../../combo-box/styles/combo-box.styles";
-import {
-    dropdownPopupVariants,
-    DropdownSelectorVariantProps,
-    MultiSelectSelectorVariantInput,
-    multiSelectSelectorVariants
-} from "../../../styles/dropdown.style";
-import { fromEvent, take } from "rxjs";
+import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ChipComponent } from "../../../../buttons/chip/component/chip.component";
+import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -43,17 +36,27 @@ import { ListHeaderTemplateDirective } from "../../../../common/list/directives/
 import { ListItemTemplateDirective } from "../../../../common/list/directives/list-item-template.directive";
 import { ListNoDataTemplateDirective } from "../../../../common/list/directives/list-no-data-template.directive";
 import { ListItem } from "../../../../common/list/models/ListItem";
+import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
-import { PopupRef } from "../../../../popup/models/PopupRef";
+import { FormFieldValidationService } from "../../../../common/services/form-field-validation.service";
+import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { PopupService } from "../../../../popup/services/popup.service";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
-import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
+import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-down-group-header-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
+import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
+import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
+import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
+import { DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
+import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
+import { DropdownService } from "../../../services/dropdown.service";
+import { dropdownPopupVariants } from "../../../styles/dropdown.style";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
 import {
     multiSelectBaseThemeVariants,
@@ -67,10 +70,22 @@ import {
     templateUrl: "./multi-select.component.html",
     providers: [
         ListService,
+        DropdownService,
+        FormFieldValidationService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => MultiSelectComponent),
             multi: true
+        },
+        {
+            provide: DropdownDataInputToken,
+            useExisting: forwardRef(() => MultiSelectComponent),
+            multi: false
+        },
+        {
+            provide: DropdownPopupInputToken,
+            useExisting: forwardRef(() => MultiSelectComponent),
+            multi: false
         }
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -87,6 +102,7 @@ import {
         ListNoDataTemplateDirective,
         LucideAngularModule
     ],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-haspopup]": "true",
@@ -96,21 +112,33 @@ import {
     }
 })
 export class MultiSelectComponent<TData = unknown>
-    implements OnInit, OnDestroy, ControlValueAccessor, MultiSelectVariantInput
+    implements
+        OnInit,
+        OnDestroy,
+        ControlValueAccessor,
+        MultiSelectVariantInput,
+        DropdownDataInput<TData>,
+        DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownService = inject(DropdownService);
+    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService: ListService<TData> = inject(ListService);
+    readonly #popupRef = this.#dropdownService.popupRef;
     readonly #popupService = inject(PopupService);
     readonly #themeService = inject(ThemeService);
-    #popupRef: PopupRef | null = null;
     #propagateChange: Action<TData[]> | null = null;
     #resizeObserver: ResizeObserver | null = null;
     #value: TData[] = [];
 
+    protected readonly activeDescendant = computed(() => {
+        const highlightedItem = this.#listService.highlightedItem();
+        return highlightedItem ? highlightedItem.uid : null;
+    });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const focused = this.#popupRef != null;
+        const focused = this.#popupRef() != null;
         const rounded = this.rounded();
         const size = this.size();
         const variantClass = multiSelectBaseThemeVariants(theme)({ focused, rounded, size });
@@ -179,15 +207,43 @@ export class MultiSelectComponent<TData = unknown>
     public readonly tagCount = signal(-1);
     public readonly userClass = input<string>("", { alias: "class" });
 
-    public data = input<Iterable<TData>>([]);
-    public disabled = model(false);
-    public itemDisabled = input<string | Predicate<TData> | null>();
+    /**
+     * @description Emits when the popup is about to close. This event is preventable.
+     */
+    public readonly close = output<PopupCloseEvent>();
+    public readonly data = input<Iterable<TData>>([]);
+    public readonly disabled = model(false);
+    public readonly itemDisabled = input<string | Predicate<TData> | null>();
+    /**
+     * @description Sets the readonly state of the combo box component.
+     * @default false
+     */
+    public readonly readonly = input(false);
+    /**
+     * @description Emits when the popup is about to open. This event is preventable.
+     */
+    public readonly open = output<PreventableEvent>();
+    /**
+     * @description Sets the height of the popup element.
+     * @default 200
+     */
+    public readonly popupHeight = input<ListSizeInputType>(null);
+
+    /**
+     * @description Sets the width of the popup element.
+     * @default null
+     */
+    public readonly popupWidth = input<ListSizeInputType>(null);
     public readonly rounded = input<MultiSelectVariantProps["rounded"]>("medium");
-    public showClearButton = input(true);
-    public textField = input<string | null>();
-    public valueField = input<string | null>();
+    public readonly showClearButton = input(true);
+    public readonly textField = input<DropdownFieldSelectorType<TData>>();
+    public readonly valueField = input<DropdownFieldSelectorType<TData>>();
 
     public constructor() {
+        effect(() => {
+            const popupTemplate = this.popupTemplate();
+            untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
+        });
         effect(() => {
             const valueField = this.valueField();
             untracked(() => {
@@ -216,9 +272,8 @@ export class MultiSelectComponent<TData = unknown>
         this.notifyValueChange();
     }
 
-    public close(): void {
-        this.#popupRef?.close();
-        this.#popupRef = null;
+    public closePopup(): void {
+        this.#popupRef()?.close();
     }
 
     public ngOnDestroy(): void {
@@ -253,33 +308,6 @@ export class MultiSelectComponent<TData = unknown>
         this.notifyValueChange();
     }
 
-    public open(): void {
-        if (this.#popupRef) {
-            return;
-        }
-        this.focus();
-        this.#popupRef = this.#popupService.create({
-            anchor: this.#hostElementRef.nativeElement,
-            anchorConnectionPoint: "bottomleft",
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
-            closeOnOutsideClick: true,
-            content: this.popupTemplate(),
-            hasBackdrop: false,
-            offset: { horizontal: 0, vertical: 4 },
-            popupConnectionPoint: "topleft",
-            width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            withPush: false
-        });
-        this.#popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef = null;
-            this.#listService.highlightedItem.set(null);
-            this.#listService.clearFilter();
-        });
-    }
-
     public registerOnChange(fn: any): void {
         this.#propagateChange = fn;
     }
@@ -310,8 +338,8 @@ export class MultiSelectComponent<TData = unknown>
     }
 
     private handleEnterKey(): void {
-        if (!this.#popupRef) {
-            this.open();
+        if (!this.#popupRef()) {
+            this.#dropdownService.triggerPopupOpen$.next();
             return;
         }
         const highlightedItem = this.#listService.highlightedItem();
@@ -343,26 +371,13 @@ export class MultiSelectComponent<TData = unknown>
     private setEventListeners(): void {
         this.#resizeObserver = new ResizeObserver(() => {
             window.setTimeout(() => {
-                this.#popupRef?.overlayRef.updatePosition();
-                this.#popupRef?.overlayRef.updateSize({
+                this.#popupRef()?.overlayRef.updatePosition();
+                this.#popupRef()?.overlayRef.updateSize({
                     width: this.#hostElementRef.nativeElement.getBoundingClientRect().width
                 });
             });
         });
         this.#resizeObserver.observe(this.#hostElementRef.nativeElement);
-
-        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                if (this.disabled()) {
-                    return;
-                }
-                if (this.#popupRef) {
-                    this.close();
-                    return;
-                }
-                this.open();
-            });
 
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
@@ -371,24 +386,10 @@ export class MultiSelectComponent<TData = unknown>
                     event.preventDefault();
                     this.handleEnterKey();
                 } else if (event.key === "Escape") {
-                    this.close();
+                    this.closePopup();
                 } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                     event.preventDefault();
                     this.handleArrowKeys(event);
-                }
-            });
-        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                const target = event.relatedTarget as HTMLElement;
-                if (
-                    !(
-                        target &&
-                        (this.#hostElementRef.nativeElement.contains(target) ||
-                            this.#popupRef?.overlayRef.overlayElement.contains(target))
-                    )
-                ) {
-                    this.close();
                 }
             });
     }
