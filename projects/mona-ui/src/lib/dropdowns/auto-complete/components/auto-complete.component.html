@@ -23,8 +23,6 @@
        (ngModelChange)="autoCompleteValue$.next($event)"
        (blur)="onInputBlur()">
 
-<span class="sr-only" aria-live="polite">{{ resultCountMessage() }}</span>
-
 @if (showClearButton() && autoCompleteValue() && !loading()) {
     <span class="px-2">
         <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90 cursor-pointer"
@@ -43,6 +41,8 @@
         <ng-container [ngTemplateOutlet]="suffixTemplate()"></ng-container>
     </span>
 }
+
+<span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()" [attr.role]="'region'">

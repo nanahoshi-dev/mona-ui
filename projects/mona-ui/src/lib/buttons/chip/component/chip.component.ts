@@ -86,4 +86,11 @@ export class ChipComponent implements ChipVariantInputs {
      */
     public readonly tabindex = input<number | string>(0);
     public readonly userClass = input<string>("", { alias: "class" });
+
+    protected onRemoveClick(event: Event): void {
+        if (event instanceof KeyboardEvent && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+        }
+        this.remove.emit(event);
+    }
 }

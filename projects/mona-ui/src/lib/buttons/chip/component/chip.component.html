@@ -4,5 +4,9 @@
     <ng-content></ng-content>
 }
 @if (removable()) {
-    <lucide-angular [name]="removeIcon" [size]="iconSize()" role="button" (click)="remove.emit($event)"></lucide-angular>
+    @let ariaLabel = "Remove, " + (label() || "item");
+    <lucide-angular [name]="removeIcon" [size]="iconSize()" role="button" [tabindex]="disabled() ? null : 0"
+                    [attr.aria-label]="ariaLabel"
+                    (click)="onRemoveClick($event)" (keydown.enter)="onRemoveClick($event)"
+                    (keydown.space)="onRemoveClick($event)"></lucide-angular>
 }

@@ -52,3 +52,5 @@ export const multiSelectItemContainerVariants = cva(
         }
     }
 );
+
+export const multiSelectAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);

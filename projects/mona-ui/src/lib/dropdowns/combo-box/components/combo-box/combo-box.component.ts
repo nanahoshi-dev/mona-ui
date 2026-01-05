@@ -23,18 +23,7 @@ import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
-import {
-    asyncScheduler,
-    combineLatest,
-    debounceTime,
-    delay,
-    filter,
-    fromEvent,
-    Observable,
-    Subject,
-    take,
-    tap
-} from "rxjs";
+import { asyncScheduler, combineLatest, debounceTime, delay, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
@@ -51,6 +40,7 @@ import { SelectionChangeEvent } from "../../../../common/list/models/SelectionCh
 import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { FormFieldValidationService } from "../../../../common/services/form-field-validation.service";
+import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../../common/styles/dropdown-popup.styles";
 import { TextBoxDirective } from "../../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -63,6 +53,7 @@ import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-h
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
+import { DropdownLiveRegionDirective } from "../../../directives/dropdown-live-region.directive";
 import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
@@ -72,7 +63,6 @@ import { DropdownService } from "../../../services/dropdown.service";
 import {
     comboBoxAffixContainerThemeVariants,
     comboBoxBaseThemeVariants,
-    comboBoxPopupThemeVariants,
     comboBoxTextInputThemeVariants,
     ComboBoxVariantInput,
     ComboBoxVariantProps
@@ -114,7 +104,8 @@ import {
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
         LucideAngularModule,
-        LoadingIndicatorComponent
+        LoadingIndicatorComponent,
+        DropdownLiveRegionDirective
     ],
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     host: {
@@ -127,7 +118,12 @@ import {
     }
 })
 export class ComboBoxComponent<TData = unknown>
-    implements ControlValueAccessor, ComboBoxVariantInput, DropdownDataInput<TData>, DropdownPopupInput
+    implements
+        ControlValueAccessor,
+        ComboBoxVariantInput,
+        DropdownDataInput<TData>,
+        DropdownPopupInput,
+        DropdownPopupVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
@@ -173,32 +169,16 @@ export class ComboBoxComponent<TData = unknown>
         const rounded = this.rounded();
         return comboBoxTextInputThemeVariants(theme)({ rounded });
     });
-    protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
-    protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly isInvalid = computed(() => this.#formFieldValidationService?.invalid() || false);
+    protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = comboBoxPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
-    });
-    protected readonly liveRegionText = computed(() => {
-        const highlightedItem = this.#listService.highlightedItem();
-        const count = this.#listService.viewItems().size();
-
-        if (highlightedItem && this.expanded()) {
-            const text = this.#listService.getItemText(highlightedItem);
-            const positionInfo = this.#listService.getItemPosition(highlightedItem);
-            if (positionInfo) {
-                return `${text}, ${positionInfo.position} of ${positionInfo.total}`;
-            }
-            return text;
-        }
-
-        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
     });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
@@ -208,7 +188,6 @@ export class ComboBoxComponent<TData = unknown>
         mode: "single",
         toggleable: false
     };
-    protected readonly selectedKeysChange = output<any[]>();
     protected readonly selectedListItem = computed(() => {
         return this.#listService.selectedListItems().firstOrDefault();
     });
@@ -220,6 +199,10 @@ export class ComboBoxComponent<TData = unknown>
         return this.#listService.getItemText(listItem);
     });
 
+    /**
+     * @description Whether to allow custom values to be entered in the combo box.
+     * @default false
+     */
     public readonly allowCustomValue = input(false);
 
     /**
@@ -247,6 +230,11 @@ export class ComboBoxComponent<TData = unknown>
     public readonly close = output<PopupCloseEvent>();
 
     /**
+     * @description Emits after the popup is closed.
+     */
+    public readonly closed = output();
+
+    /**
      * @description The data items of the dropdown list component.
      * @default []
      */
@@ -272,6 +260,11 @@ export class ComboBoxComponent<TData = unknown>
      * @description Emits when the popup is about to open. This event is preventable.
      */
     public readonly open = output<PreventableEvent>();
+
+    /**
+     * @description Emits after the popup is opened.
+     */
+    public readonly opened = output();
 
     /**
      * @description Sets the placeholder text to be shown when there is no value selected.
@@ -308,14 +301,46 @@ export class ComboBoxComponent<TData = unknown>
      */
     public readonly required = input(false);
 
+    /**
+     * @description Sets the border radius of the combo box component.
+     * @default "medium"
+     */
     public readonly rounded = input<ComboBoxVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Whether to show the clear button when an item is selected.
+     * @default false
+     */
     public readonly showClearButton = input(false);
+
+    /**
+     * @description The size of the combo box component.
+     * @default "medium"
+     */
     public readonly size = input<ComboBoxVariantProps["size"]>("medium");
+
+    /**
+     * @description Sets the text field of the combo box component.
+     * It can be null, string, or a function that takes an item and returns a string.
+     * If null, the item itself will be used as the text representation.
+     * @default null
+     */
     public readonly textField = input<DropdownFieldSelectorType<TData>>();
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Emits when user presses enter after typing in the combo box input.
+     * Only emitted when {@link allowCustomValue} is true.
+     */
     public readonly valueAdd = output<string>();
+
+    /**
+     * @description Sets the value field of the combo box component.
+     * It can be null, string, or a function that takes an item and returns a string.
+     * If null, the item itself will be used as the value representation.
+     * @default null
+     */
     public readonly valueField = input<DropdownFieldSelectorType<TData>>();
-    public readonly valueNormalizer = input<Action<Observable<string>, Observable<any>>>();
 
     public constructor() {
         effect(() => {
@@ -346,19 +371,6 @@ export class ComboBoxComponent<TData = unknown>
             .subscribe(() => this.focus());
     }
 
-    public onItemSelect(event: SelectionChangeEvent<TData>): void {
-        if (
-            this.#listService.filterableOptions().enabled &&
-            event.source.via === "keyboard" &&
-            event.source.key !== "Enter"
-        ) {
-            this.#navigatedValue.set(event.item.data);
-            return;
-        }
-        this.updateValue(event.item.data, true);
-        this.closePopup();
-    }
-
     public registerOnChange(fn: any): void {
         this.#propagateChange = fn;
     }
@@ -381,6 +393,19 @@ export class ComboBoxComponent<TData = unknown>
 
     protected onInputBlur(): void {
         this.#propagateTouch?.();
+    }
+
+    protected onItemSelect(event: SelectionChangeEvent<TData>): void {
+        if (
+            this.#listService.filterableOptions().enabled &&
+            event.source.via === "keyboard" &&
+            event.source.key !== "Enter"
+        ) {
+            this.#navigatedValue.set(event.item.data);
+            return;
+        }
+        this.updateValue(event.item.data, true);
+        this.closePopup();
     }
 
     protected onValueClear(event: Event): void {
@@ -566,6 +591,12 @@ export class ComboBoxComponent<TData = unknown>
         });
     }
 
+    private setNavigatedItemSubscription(): void {
+        this.#listService.navigatedItem$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
+            this.#navigatedValue.set(e?.data ?? null);
+        });
+    }
+
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.#userNavigatedViaArrows.set(false);
@@ -587,16 +618,13 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private setSubscriptions(): void {
-        this.setComboboxValueSubscription();
         this.setArrowNavigationSubscription();
-        this.setKeydownSubscription();
+        this.setComboboxValueSubscription();
         this.setEscapeKeySubscription();
+        this.setKeydownSubscription();
+        this.setNavigatedItemSubscription();
         this.setPopupCloseSubscriptions();
         this.setSpaceKeySubscription();
-
-        this.#listService.navigatedItem$.subscribe(e => {
-            this.#navigatedValue.set(e?.data ?? null);
-        });
     }
 
     private updateValue(value: TData | null, notify: boolean = true) {

@@ -1,13 +1,36 @@
-import { NgComponentOutlet } from "@angular/common";
+import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { aggregate, range } from "@mirei/ts-collections";
-import { DropDownVirtualScrollDirective, MultiSelectComponent, VirtualScrollOptions } from "mona-ui";
+import { range } from "@mirei/ts-collections";
+import { Box, LucideAngularModule, Search } from "lucide-angular";
+import {
+    DropDownFilterableDirective,
+    DropDownFooterTemplateDirective,
+    DropDownHeaderTemplateDirective,
+    DropDownItemTemplateDirective,
+    DropDownNoDataTemplateDirective,
+    DropdownPrefixTemplateDirective,
+    DropDownVirtualScrollDirective,
+    FilterableOptions,
+    MultiSelectComponent,
+    MultiSelectSummaryTagDirective,
+    MultiSelectSummaryTagTemplateDirective,
+    MultiSelectTagTemplateDirective,
+    PreventableEvent,
+    VirtualScrollOptions
+} from "mona-ui";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
     dropdownDataSetFeatureConfig,
+    dropdownFilteringFeatureConfig,
+    dropdownFooterTemplateFeatureConfig,
+    dropdownHeaderTemplateFeatureConfig,
+    dropdownItemTemplateFeatureConfig,
+    dropdownNoDataTemplateFeatureConfig,
+    dropdownPrefixTemplateFeatureConfig,
+    dropdownPreventPopupEventFeatureConfig,
     dropdownVirtualizationFeatureConfig,
     getFormValueText
 } from "../../utils/dropdownFeatureConfigs";
@@ -24,11 +47,52 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectComponent> {
     readonly #injector = createFeatureInjector({
         dataSet: dropdownDataSetFeatureConfig("multi select"),
+        filtering: dropdownFilteringFeatureConfig("multi select"),
+        footerTemplate: dropdownFooterTemplateFeatureConfig("multi select"),
+        headerTemplate: dropdownHeaderTemplateFeatureConfig("multi select"),
+        itemTemplate: dropdownItemTemplateFeatureConfig("multi select"),
+        noDataTemplate: dropdownNoDataTemplateFeatureConfig("multi select"),
+        prefixTemplate: dropdownPrefixTemplateFeatureConfig("multi select"),
+        preventClose: dropdownPreventPopupEventFeatureConfig("close"),
+        preventOpen: dropdownPreventPopupEventFeatureConfig("open"),
+        summaryTag: {
+            code: ``,
+            active: false,
+            name: "Summary Tag",
+            description: "Customizes the summary tag for the multi-select component.",
+            subFeatures: {
+                tagCount: {
+                    code: ``,
+                    active: false,
+                    name: "Tag Count",
+                    description: "The number of selected items to display in the summary tag.",
+                    type: "number",
+                    numericMin: -1,
+                    numericValue: 3
+                },
+                tagTemplate: {
+                    code: ``,
+                    active: false,
+                    name: "Tag Template",
+                    description: "Customizes the summary tag for the multi-select component."
+                }
+            }
+        },
+        tagTemplate: {
+            code: ``,
+            active: false,
+            name: "Tag Template",
+            description: "Customizes the tag for the multi-select component."
+        },
         virtualization: dropdownVirtualizationFeatureConfig("multi select")
     });
     protected readonly config = signal<ComponentConfig<MultiSelectComponent>>({
         code: ``,
         inputs: {
+            autoClose: {
+                type: "boolean",
+                value: false
+            },
             data: {
                 type: "object"
             },
@@ -42,6 +106,35 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 defaultValue: null,
                 clearable: true,
                 placeholder: "Select a condition..."
+            },
+            loading: {
+                type: "boolean",
+                value: false
+            },
+            popupClass: {
+                type: "string",
+                value: ""
+            },
+            popupHeight: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                max: 500,
+                value: null
+            },
+            popupWidth: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                value: null
+            },
+            readonly: {
+                type: "boolean",
+                value: false
+            },
+            required: {
+                type: "boolean",
+                value: false
             },
             rounded: {
                 type: "dropdown",
@@ -76,31 +169,124 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
 }
 
 @Component({
-    imports: [ReactiveFormsModule, MultiSelectComponent, DropDownVirtualScrollDirective],
+    imports: [
+        ReactiveFormsModule,
+        MultiSelectComponent,
+        DropDownVirtualScrollDirective,
+        DropDownFooterTemplateDirective,
+        DropDownHeaderTemplateDirective,
+        CurrencyPipe,
+        DropDownItemTemplateDirective,
+        DropDownNoDataTemplateDirective,
+        LucideAngularModule,
+        DropdownPrefixTemplateDirective,
+        DropDownFilterableDirective,
+        MultiSelectSummaryTagTemplateDirective,
+        MultiSelectSummaryTagDirective,
+        MultiSelectTagTemplateDirective
+    ],
     template: `
-        <!--        @let featureData = features();-->
-        <span>Selected Values: {{ formValueText() }}</span>
+        @let featureData = features();
+        @let tagConfigData = tagConfig();
+        <span>Selected Items: {{ formValueText() }}</span>
         <form [formGroup]="formGroup">
             <mona-multi-select
+                [autoClose]="autoClose()"
                 [data]="multiSelectData()"
                 [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
+                [loading]="loading()"
+                [popupClass]="popupClass()"
+                [popupHeight]="popupHeight()"
+                [popupWidth]="popupWidth()"
+                [readonly]="readonly()"
+                [required]="required()"
                 [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
                 [size]="size()"
                 [textField]="textField()"
                 [valueField]="valueField()"
+                [monaDropDownFilterable]="filtering()"
                 [monaDropDownVirtualScroll]="virtualization()"
-                class="w-80"></mona-multi-select>
+                [monaMultiSelectSummaryTag]="tagConfigData.count"
+                [formControlName]="'value'"
+                (close)="onPopupClose($event)"
+                (closed)="onPopupClosed()"
+                (open)="onPopupOpen($event)"
+                (opened)="onPopupOpened()"
+                class="w-60">
+                @if (featureData["footerTemplate"].active) {
+                    <ng-template monaDropDownFooterTemplate>
+                        <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                            Total items: {{ multiSelectData().length }}
+                        </div>
+                    </ng-template>
+                }
+                @if (featureData["headerTemplate"].active) {
+                    <ng-template monaDropDownHeaderTemplate>
+                        <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                            Select your favorite foods
+                        </div>
+                    </ng-template>
+                }
+                @if (featureData["itemTemplate"].active) {
+                    <ng-template monaDropDownItemTemplate let-item>
+                        <div class="flex flex-row w-full">
+                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                            <span class="flex-1 {{ color }}">{{ item.text }}</span>
+                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                                item.price | currency
+                            }}</span>
+                        </div>
+                    </ng-template>
+                }
+                @if (featureData["noDataTemplate"].active) {
+                    <ng-template monaDropDownNoDataTemplate>
+                        <div
+                            class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                            <lucide-angular [name]="boxIcon"></lucide-angular>
+                            <span>No items found</span>
+                        </div>
+                    </ng-template>
+                }
+                @if (featureData["prefixTemplate"].active) {
+                    <ng-template monaDropdownPrefixTemplate>
+                        <lucide-angular [name]="searchIcon" [size]="16" class="h-full ms-1"></lucide-angular>
+                    </ng-template>
+                }
+                @if (tagConfigData.template) {
+                    <ng-template monaMultiSelectSummaryTagTemplate let-items let-tagCount="tagCount">
+                        @let prefix = tagCount !== 0 ? "and" : "";
+                        <span class="text-blue-400"> {{ prefix }} {{ items.length - tagCount }} more... </span>
+                    </ng-template>
+                }
+                @if (featureData["tagTemplate"].active) {
+                    <ng-template monaMultiSelectTagTemplate let-item>
+                        <span class="italic text-violet-600">{{ item.text }}</span>
+                    </ng-template>
+                }
+            </mona-multi-select>
         </form>
     `
 })
 class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelectComponent> {
     readonly #formGroup = new FormGroup({
-        value: new FormControl<unknown[]>([], { nonNullable: true, validators: [] })
+        value: new FormControl<unknown[]>([14], { nonNullable: true, validators: [] })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+    protected readonly boxIcon = Box;
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filtering = computed(() => {
+        const features = this.features();
+        const subFeatures = features["filtering"]?.subFeatures || {};
+        const filteringOptions: FilterableOptions = {
+            caseSensitive: subFeatures["caseSensitive"].active,
+            debounce: subFeatures["debounce"].numericValue ?? 0,
+            enabled: features["filtering"].active,
+            operator: subFeatures["operator"].dropdownValue
+        };
+        return filteringOptions;
+    });
     protected readonly formGroup = this.#formGroup;
     protected readonly formValueText = computed(() => {
         const value = this.#formValue();
@@ -108,7 +294,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         if (!value) {
             return "";
         }
-        return aggregate(value, (acc, item) => `${acc}, ${getFormValueText(value, textField)}`, "");
+        return value.map(item => getFormValueText(item, textField)).join(", ");
     });
     protected readonly multiSelectData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
@@ -126,6 +312,16 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
             })
             .toArray();
     });
+    protected readonly searchIcon = Search;
+    protected readonly tagConfig = computed(() => {
+        const features = this.features();
+        const subFeatures = features["summaryTag"]?.subFeatures || {};
+        const active = features["summaryTag"].active;
+        return {
+            count: active ? (subFeatures["tagCount"].numericValue ?? 3) : -1,
+            template: active ? subFeatures["tagTemplate"].active : false
+        };
+    });
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};
@@ -136,9 +332,16 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         return options;
     });
 
+    public readonly autoClose = input<ReturnType<MultiSelectComponent["autoClose"]>>(false);
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<MultiSelectComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<MultiSelectComponent["itemDisabled"]>>(() => false);
+    public readonly loading = input<ReturnType<MultiSelectComponent["loading"]>>(false);
+    public readonly popupClass = input<ReturnType<MultiSelectComponent["popupClass"]>>("");
+    public readonly popupHeight = input<ReturnType<MultiSelectComponent["popupHeight"]>>(null);
+    public readonly popupWidth = input<ReturnType<MultiSelectComponent["popupWidth"]>>(null);
+    public readonly readonly = input<ReturnType<MultiSelectComponent["readonly"]>>(false);
+    public readonly required = input<ReturnType<MultiSelectComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<MultiSelectComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<MultiSelectComponent["showClearButton"]>>(true);
     public readonly size = input<ReturnType<MultiSelectComponent["size"]>>("medium");
@@ -146,4 +349,28 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     public readonly tagCount = input<ReturnType<MultiSelectComponent["tagCount"]>>(-1);
     public readonly textField = input<ReturnType<MultiSelectComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<MultiSelectComponent["valueField"]>>("value");
+
+    protected onPopupClose(event: PreventableEvent) {
+        const preventClose = this.features()["preventClose"].active;
+        if (preventClose) {
+            event.preventDefault();
+            console.log("Multi select popup prevented from closing");
+        }
+    }
+
+    protected onPopupClosed(): void {
+        console.log("Multi select popup closed");
+    }
+
+    protected onPopupOpen(event: PreventableEvent) {
+        const preventOpen = this.features()["preventOpen"].active;
+        if (preventOpen) {
+            event.preventDefault();
+            console.log("Multi select popup prevented from opening");
+        }
+    }
+
+    protected onPopupOpened(): void {
+        console.log("Multi select popup opened");
+    }
 }

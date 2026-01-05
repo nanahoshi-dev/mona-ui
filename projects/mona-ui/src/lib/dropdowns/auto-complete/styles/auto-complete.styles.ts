@@ -4,7 +4,6 @@ import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     autoCompleteAffixContainerVariants as monaAutoCompleteAffixContainerVariants,
     autoCompleteBaseVariants as monaAutoCompleteBaseVariants,
-    autoCompletePopupVariants as monaAutoCompletePopupVariants,
     autoCompleteTextInputVariants as monaAutoCompleteTextInputVariants
 } from "./auto-complete.mona.styles";
 
@@ -14,15 +13,6 @@ export const autoCompleteBaseThemeVariants = (theme: ThemeStyle) => {
             return monaAutoCompleteBaseVariants;
         default:
             return monaAutoCompleteBaseVariants;
-    }
-};
-
-export const autoCompletePopupThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompletePopupVariants;
-        default:
-            return monaAutoCompletePopupVariants;
     }
 };
 
@@ -47,9 +37,6 @@ export const autoCompleteAffixContainerThemeVariants = (theme: ThemeStyle) => {
 type AutoCompleteBaseVariantProps = VariantProps<ReturnType<typeof autoCompleteBaseThemeVariants>>;
 type AutoCompleteBaseVariantInput = VariantInputs<AutoCompleteBaseVariantProps>;
 
-type AutoCompletePopupVariantProps = VariantProps<ReturnType<typeof autoCompletePopupThemeVariants>>;
-type AutoCompletePopupVariantInput = VariantInputs<AutoCompletePopupVariantProps>;
-
 type AutoCompleteTextInputVariantProps = VariantProps<ReturnType<typeof autoCompleteTextInputThemeVariants>>;
 type AutoCompleteTextInputVariantInput = VariantInputs<AutoCompleteTextInputVariantProps>;
 
@@ -57,10 +44,8 @@ type AutoCompleteAffixContainerVariantProps = VariantProps<ReturnType<typeof aut
 type AutoCompleteAffixContainerVariantInput = VariantInputs<AutoCompleteAffixContainerVariantProps>;
 
 export type AutoCompleteVariantProps = AutoCompleteBaseVariantProps &
-    AutoCompletePopupVariantProps &
     AutoCompleteTextInputVariantProps &
     AutoCompleteAffixContainerVariantProps;
 export type AutoCompleteVariantInput = Omit<AutoCompleteBaseVariantInput, "focused"> &
-    AutoCompletePopupVariantInput &
     AutoCompleteTextInputVariantInput &
     AutoCompleteAffixContainerVariantInput;

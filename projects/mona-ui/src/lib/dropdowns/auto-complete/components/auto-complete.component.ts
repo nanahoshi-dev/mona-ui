@@ -37,6 +37,7 @@ import { SelectableOptions } from "../../../common/list/models/SelectableOptions
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../common/styles/dropdown-popup.styles";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
@@ -50,6 +51,7 @@ import { DropDownHeaderTemplateDirective } from "../../directives/drop-down-head
 import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../directives/dropdown-data-handler.directive";
+import { DropdownLiveRegionDirective } from "../../directives/dropdown-live-region.directive";
 import { DropdownPopupHandlerDirective } from "../../directives/dropdown-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../directives/dropdown-prefix-template.directive";
 import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffix-template.directive";
@@ -60,7 +62,6 @@ import { DropdownService } from "../../services/dropdown.service";
 import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
-    autoCompletePopupThemeVariants,
     autoCompleteTextInputThemeVariants,
     AutoCompleteVariantInput,
     AutoCompleteVariantProps
@@ -101,7 +102,8 @@ import {
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
         LucideAngularModule,
-        LoadingIndicatorComponent
+        LoadingIndicatorComponent,
+        DropdownLiveRegionDirective
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
@@ -114,7 +116,12 @@ import {
     }
 })
 export class AutoCompleteComponent<TData = unknown>
-    implements ControlValueAccessor, AutoCompleteVariantInput, DropdownDataInput<TData>, DropdownPopupInput
+    implements
+        ControlValueAccessor,
+        AutoCompleteVariantInput,
+        DropdownDataInput<TData>,
+        DropdownPopupInput,
+        DropdownPopupVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
@@ -166,7 +173,7 @@ export class AutoCompleteComponent<TData = unknown>
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = autoCompletePopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
@@ -177,11 +184,6 @@ export class AutoCompleteComponent<TData = unknown>
         mode: "single",
         toggleable: false
     };
-    protected readonly resultCountMessage = computed(() => {
-        const count = this.#listService.viewItems().size();
-        return count === 0 ? "No results found" : `${count} result${count === 1 ? "" : "s"} available`;
-    });
-    protected readonly selectedKeysChange = output<any[]>();
     protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
 
     /**
@@ -200,6 +202,11 @@ export class AutoCompleteComponent<TData = unknown>
      * @description Emits when the popup is about to close. This event is preventable.
      */
     public readonly close = output<PopupCloseEvent>();
+
+    /**
+     * @description Emits after the popup is closed.
+     */
+    public readonly closed = output();
 
     /**
      * @description Sets the data of the autocomplete component.
@@ -234,6 +241,11 @@ export class AutoCompleteComponent<TData = unknown>
      * @description Emits when the popup is about to open. This event is preventable.
      */
     public readonly open = output<PreventableEvent>();
+
+    /**
+     * @description Emits after the popup is opened.
+     */
+    public readonly opened = output();
 
     /**
      * @description Sets the placeholder text to be shown when there is no value selected.
@@ -496,6 +508,16 @@ export class AutoCompleteComponent<TData = unknown>
             });
     }
 
+    private setSpaceKeySubscription(): void {
+        this.#dropdownService.beforeKeydown$
+            .pipe(
+                filter(e => e.originalEvent?.key === " "),
+                takeUntilDestroyed(this.#destroyRef),
+                tap(e => e.preventDefault())
+            )
+            .subscribe();
+    }
+
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.autoCompleteValue$.next(null);
@@ -508,6 +530,7 @@ export class AutoCompleteComponent<TData = unknown>
         this.setEnterKeySubscription();
         this.setEscapeKeySubscription();
         this.setPopupCloseSubscriptions();
+        this.setSpaceKeySubscription();
     }
 
     private updateValue(value: string | null, notify: boolean = true): void {

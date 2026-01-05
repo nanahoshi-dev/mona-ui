@@ -1,44 +1,62 @@
+@if (prefixTemplate()) {
+    <span [class]="affixClass()">
+        <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+    </span>
+}
+
 <div [class]="itemContainerClass()">
     @for (pair of valueTextMap(); track pair.key) {
         <mona-chip look="default" [tabindex]="-1" [removable]="true"
                    [rounded]="rounded()"
                    [size]="size()"
-                   [label]="pair.value"
                    (remove)="onSelectedItemRemove($event, pair.key!)">
             @if (tagTemplate()) {
                 <ng-container [ngTemplateOutlet]="tagTemplate()"
                               [ngTemplateOutletContext]="{$implicit: pair.key!.data}"></ng-container>
+            } @else {
+                {{ pair.value }}
             }
         </mona-chip>
     }
 
     @if (tagCount() >= 0 && selectedListItems().length > tagCount()) {
         <mona-chip look="outline" [tabindex]="-1" [removable]="true"
-                   [label]="summaryTagText()"
                    [rounded]="rounded()" [size]="size()"
                    (remove)="onSelectedItemGroupRemove($event)">
+            @let remainingCount = selectedDataItems().length - tagCount();
             @if (summaryTagTemplate()) {
                 <ng-container [ngTemplateOutlet]="summaryTagTemplate()"
-                              [ngTemplateOutletContext]="{$implicit: selectedDataItems()}"></ng-container>
+                              [ngTemplateOutletContext]="{$implicit: selectedDataItems(), tagCount: tagCount()}"></ng-container>
+            } @else {
+                @let itemLabel = remainingCount === 1 ? "item" : "items";
+                + {{ remainingCount }} {{ itemLabel }}
             }
         </mona-chip>
     }
 </div>
 
-<div class="flex items-center justify-center">
-    @if (showClearButton() && selectedListItems().length !== 0) {
-        <button monaButton look="link" size="small" [tabindex]="-1" class="h-full" (click)="clearValue($event)">
-            <lucide-angular class="opacity-50 size-4 hover:opacity-90" [img]="clearIcon"></lucide-angular>
-        </button>
-    }
-</div>
+@if (showClearButton() && selectedListItems().length !== 0) {
+    <span class="px-2">
+        <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90" [name]="clearIcon"
+                        [size]="14" role="button" aria-label="Clear" title="Clear" [tabindex]="0"
+                        (click)="onValueClear($event)"
+                        (keydown.enter)="onValueClear($event)"
+                        (keydown.space)="onValueClear($event)"></lucide-angular>
+    </span>
+}
+
+@if (loading()) {
+    <mona-loading-indicator></mona-loading-indicator>
+}
 
 <lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square mx-1" [name]="dropdownIcon"
                 [size]="18"></lucide-angular>
 
+<span monaDropdownLiveRegion></span>
+
 <ng-template #popupTemplate>
-    <div [class]="popupClasses()">
-        <mona-list (itemSelect)="onItemSelect($event)">
+    <div [class]="listPopupClass()">
+        <mona-list [listId]="listId" [focusOnMount]="false" [size]="size()" (itemSelect)="onItemSelect()">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>

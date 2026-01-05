@@ -37,6 +37,7 @@ import { SelectableOptions } from "../../../../common/list/models/SelectableOpti
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { dropdownPopupThemeVariants } from "../../../../common/styles/dropdown-popup.styles";
 import { isTypeaheadKey, setupTypeahead } from "../../../../common/utils/typeahead.util";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -49,6 +50,7 @@ import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-h
 import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
+import { DropdownLiveRegionDirective } from "../../../directives/dropdown-live-region.directive";
 import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
@@ -59,7 +61,6 @@ import { DropDownListValueTemplateDirective } from "../../directives/drop-down-l
 import {
     dropdownListAffixContainerThemeVariants,
     dropdownListInputThemeVariants,
-    dropdownListPopupThemeVariants,
     dropdownListValueContainerThemeVariants,
     DropDownListVariantInput,
     DropDownListVariantProps
@@ -100,7 +101,8 @@ import {
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
         LucideAngularModule,
-        LoadingIndicatorComponent
+        LoadingIndicatorComponent,
+        DropdownLiveRegionDirective
     ],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
@@ -170,7 +172,7 @@ export class DropdownListComponent<TData = unknown>
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = dropdownListPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
@@ -188,7 +190,6 @@ export class DropdownListComponent<TData = unknown>
     protected readonly selectedDataItem = computed(() => {
         return this.selectedListItem()?.data ?? null;
     });
-    protected readonly selectedKeysChange = output<any[]>();
     protected readonly selectedListItem = computed(() => {
         return this.#listService.selectedListItems().firstOrDefault();
     });
@@ -224,6 +225,11 @@ export class DropdownListComponent<TData = unknown>
     public readonly close = output<PopupCloseEvent>();
 
     /**
+     * @description Emits after the popup is closed.
+     */
+    public readonly closed = output();
+
+    /**
      * @description The data items of the dropdown list component.
      * @default []
      */
@@ -249,6 +255,11 @@ export class DropdownListComponent<TData = unknown>
      * @description Emits when the popup is about to open. This event is preventable.
      */
     public readonly open = output<PreventableEvent>();
+
+    /**
+     * @description Emits after the popup is opened.
+     */
+    public readonly opened = output();
 
     /**
      * @description Placeholder text for the dropdown list when no item is selected.
@@ -286,17 +297,20 @@ export class DropdownListComponent<TData = unknown>
     public readonly required = input(false);
 
     /**
-     * @description Sets the rounded appearance of the dropdown list.
+     * @description Sets the border radius of the dropdown list component.
+     * @default "medium"
      */
     public readonly rounded = input<DropDownListVariantProps["rounded"]>("medium");
 
     /**
      * @description Whether to show the clear button when an item is selected.
+     * @default false
      */
     public readonly showClearButton = input(false);
 
     /**
-     * @description The size of the dropdown list.
+     * @description The size of the dropdown list component.
+     * @default "medium"
      */
     public readonly size = input<DropDownListVariantProps["size"]>("medium");
 

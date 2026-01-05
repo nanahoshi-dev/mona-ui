@@ -19,7 +19,6 @@ import {
     GroupableOptions,
     VirtualScrollOptions
 } from "mona-ui";
-import { map, Observable } from "rxjs";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -56,16 +55,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         prefixTemplate: dropdownPrefixTemplateFeatureConfig("combo box"),
         virtualization: dropdownVirtualizationFeatureConfig("combo box")
     });
-    readonly #valueNormalizer = (text$: Observable<string>) =>
-        text$.pipe(
-            map(v => ({
-                text: v,
-                value: Math.random(),
-                price: Math.random() * 10,
-                category: "Custom",
-                active: true
-            }))
-        );
     protected readonly config = signal<ComponentConfig<ComboBoxComponent>>({
         code: ``,
         inputs: {
@@ -111,11 +100,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
             valueField: {
                 type: "string",
                 value: "value"
-            },
-            valueNormalizer: {
-                type: "dropdown",
-                value: [this.#valueNormalizer],
-                defaultValue: this.#valueNormalizer
             }
         },
         outputs: {},
@@ -159,7 +143,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 [showClearButton]="showClearButton()"
                 [textField]="textField()"
                 [valueField]="valueField()"
-                [valueNormalizer]="valueNormalizer()"
                 [monaDropDownGroupable]="grouping()"
                 [monaDropDownFilterable]="filtering()"
                 [monaDropDownVirtualScroll]="virtualization()"
@@ -298,7 +281,6 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly showClearButton = input<ReturnType<ComboBoxComponent["showClearButton"]>>(false);
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
-    public readonly valueNormalizer = input<ReturnType<ComboBoxComponent["valueNormalizer"]>>();
 
     public constructor() {
         effect(() => console.log("Selected item: ", this.#formValue()));

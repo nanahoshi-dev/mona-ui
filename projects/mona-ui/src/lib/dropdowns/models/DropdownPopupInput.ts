@@ -5,7 +5,9 @@ import { PreventableEvent } from "../../utils/PreventableEvent";
 
 export interface DropdownPopupInput {
     readonly close: OutputEmitterRef<PopupCloseEvent>;
+    readonly closed: OutputEmitterRef<void>;
     readonly open: OutputEmitterRef<PreventableEvent>;
+    readonly opened: OutputEmitterRef<void>;
     readonly readonly: InputSignal<boolean>;
     readonly popupHeight: InputSignal<ListSizeInputType>;
     readonly popupWidth: InputSignal<ListSizeInputType>;

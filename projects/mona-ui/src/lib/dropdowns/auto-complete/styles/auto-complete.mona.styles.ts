@@ -55,28 +55,4 @@ export const autoCompleteTextInputVariants = cva(
     }
 );
 
-export const autoCompletePopupVariants = cva(
-    `
-        bg-background shadow-md
-        border border-input-border
-        h-full max-h-64 overflow-auto
-    `,
-    {
-        variants: {
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-lg"
-            },
-            size: {
-                large: "text-md",
-                medium: "text-sm",
-                small: "text-xs"
-            }
-        }
-    }
-);
-
 export const autoCompleteAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);

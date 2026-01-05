@@ -4,7 +4,6 @@ import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     comboBoxBaseVariants as monaComboBoxBaseVariants,
     comboBoxAffixContainerVariants as monaComboBoxAffixContainerVariants,
-    comboBoxPopupVariants as monaComboBoxPopupVariants,
     comboBoxTextInputVariants as monaComboBoxTextInputVariants
 } from "./combo-box.mona.styles";
 
@@ -14,15 +13,6 @@ export const comboBoxBaseThemeVariants = (theme: ThemeStyle) => {
             return monaComboBoxBaseVariants;
         default:
             return monaComboBoxBaseVariants;
-    }
-};
-
-export const comboBoxPopupThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxPopupVariants;
-        default:
-            return monaComboBoxPopupVariants;
     }
 };
 
@@ -47,9 +37,6 @@ export const comboBoxAffixContainerThemeVariants = (theme: ThemeStyle) => {
 type ComboBoxBaseVariantProps = VariantProps<ReturnType<typeof comboBoxBaseThemeVariants>>;
 type ComboBoxBaseVariantInput = VariantInputs<ComboBoxBaseVariantProps>;
 
-type ComboBoxPopupVariantProps = VariantProps<ReturnType<typeof comboBoxPopupThemeVariants>>;
-type ComboBoxPopupVariantInput = VariantInputs<ComboBoxPopupVariantProps>;
-
 type ComboBoxTextInputVariantProps = VariantProps<ReturnType<typeof comboBoxTextInputThemeVariants>>;
 type ComboBoxTextInputVariantInput = VariantInputs<ComboBoxTextInputVariantProps>;
 
@@ -57,10 +44,8 @@ type ComboBoxAffixContainerVariantProps = VariantProps<ReturnType<typeof comboBo
 type ComboBoxAffixContainerVariantInput = VariantInputs<ComboBoxAffixContainerVariantProps>;
 
 export type ComboBoxVariantProps = ComboBoxBaseVariantProps &
-    ComboBoxPopupVariantProps &
     ComboBoxTextInputVariantProps &
     ComboBoxAffixContainerVariantProps;
 export type ComboBoxVariantInput = Omit<ComboBoxBaseVariantInput, "focused"> &
-    ComboBoxPopupVariantInput &
     ComboBoxTextInputVariantInput &
     ComboBoxAffixContainerVariantInput;

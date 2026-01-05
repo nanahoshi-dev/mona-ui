@@ -73,6 +73,7 @@ export class DropdownPopupHandlerDirective {
         } else if (e.key === "Tab") {
             this.closePopup();
         } else if (e.key === " ") {
+            e.preventDefault();
             this.togglePopup();
         } else if (e.key === "Enter") {
             this.#dropdownService.keydown$.next(e);
@@ -137,7 +138,10 @@ export class DropdownPopupHandlerDirective {
         this.#dropdownService.popupRef.set(popupRef);
         this.setPopupCloseSubscriptions(popupRef);
         this.handleScrollOnPopupOpen();
-        window.setTimeout(() => this.#dropdownService.popupOpenComplete$.next());
+        window.setTimeout(() => {
+            this.#dropdownService.popupOpenComplete$.next();
+            this.#host.opened.emit();
+        });
     }
 
     private scrollToHighlightedItem(): void {
@@ -180,6 +184,7 @@ export class DropdownPopupHandlerDirective {
             this.#dropdownService.popupCloseComplete$.next(event);
             this.#listService.clearHighlightedItem();
             this.#listService.clearFilter();
+            this.#host.closed.emit();
         });
     }
 

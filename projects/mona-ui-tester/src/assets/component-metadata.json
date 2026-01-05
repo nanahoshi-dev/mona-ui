@@ -958,12 +958,6 @@
     "selector": "\"mona-auto-complete\"",
     "inputs": [
       {
-        "name": "selectedKeysChange",
-        "type": "any[]",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "ariaLabel",
         "type": "string",
         "description": "Sets the aria-label attribute of the autocomplete component.",
@@ -979,6 +973,12 @@
         "name": "close",
         "type": "PopupCloseEvent",
         "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
         "kind": "output"
       },
       {
@@ -1015,6 +1015,12 @@
         "name": "open",
         "type": "PreventableEvent",
         "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
         "kind": "output"
       },
       {
@@ -1182,7 +1188,7 @@
       {
         "name": "tagCount",
         "type": "number",
-        "description": "",
+        "description": "Sets the number of tags to display before the summary tag is displayed.",
         "kind": "input"
       }
     ]
@@ -3262,15 +3268,9 @@
     "selector": "\"mona-combo-box\"",
     "inputs": [
       {
-        "name": "selectedKeysChange",
-        "type": "any[]",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "allowCustomValue",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to allow custom values to be entered in the combo box.",
         "kind": "input"
       },
       {
@@ -3295,6 +3295,12 @@
         "name": "close",
         "type": "PopupCloseEvent",
         "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
         "kind": "output"
       },
       {
@@ -3325,6 +3331,12 @@
         "name": "open",
         "type": "PreventableEvent",
         "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
         "kind": "output"
       },
       {
@@ -3366,25 +3378,25 @@
       {
         "name": "rounded",
         "type": "ComboBoxVariantProps[\"rounded\"]",
-        "description": "",
+        "description": "Sets the border radius of the combo box component.",
         "kind": "input"
       },
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "",
+        "description": "Whether to show the clear button when an item is selected.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "ComboBoxVariantProps[\"size\"]",
-        "description": "",
+        "description": "The size of the combo box component.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "",
+        "description": "Sets the text field of the combo box component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3396,19 +3408,13 @@
       {
         "name": "valueAdd",
         "type": "string",
-        "description": "",
+        "description": "Emits when user presses enter after typing in the combo box input.\nOnly emitted when {@link allowCustomValue} is true.",
         "kind": "output"
       },
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "valueNormalizer",
-        "type": "Action<Observable<string>, Observable<any>>",
-        "description": "",
+        "description": "Sets the value field of the combo box component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -3417,12 +3423,6 @@
     "name": "DropdownListComponent",
     "selector": "\"mona-drop-down-list\"",
     "inputs": [
-      {
-        "name": "selectedKeysChange",
-        "type": "any[]",
-        "description": "",
-        "kind": "output"
-      },
       {
         "name": "ariaLabel",
         "type": "string",
@@ -3439,6 +3439,12 @@
         "name": "close",
         "type": "PopupCloseEvent",
         "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
         "kind": "output"
       },
       {
@@ -3469,6 +3475,12 @@
         "name": "open",
         "type": "PreventableEvent",
         "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
         "kind": "output"
       },
       {
@@ -3510,7 +3522,7 @@
       {
         "name": "rounded",
         "type": "DropDownListVariantProps[\"rounded\"]",
-        "description": "Sets the rounded appearance of the dropdown list.",
+        "description": "Sets the border radius of the dropdown list component.",
         "kind": "input"
       },
       {
@@ -3522,13 +3534,13 @@
       {
         "name": "size",
         "type": "DropDownListVariantProps[\"size\"]",
-        "description": "The size of the dropdown list.",
+        "description": "The size of the dropdown list component.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3540,7 +3552,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -3598,15 +3610,123 @@
     "selector": "\"mona-multi-select\"",
     "inputs": [
       {
-        "name": "selectedKeysChange",
-        "type": "any[]",
-        "description": "",
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label attribute of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "description": "Sets the aria-labelledby attribute of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "autoClose",
+        "type": "boolean",
+        "description": "Sets whether the popup should close after selecting an item.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
         "kind": "output"
       },
       {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "data",
+        "type": "Iterable<TData>",
+        "description": "Sets the data of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the multi select component.",
+        "kind": "model"
+      },
+      {
+        "name": "itemDisabled",
+        "type": "DropdownFieldPredicateType<TData>",
+        "description": "A predicate function or the name of the field that determines whether an item is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Sets the loading state of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
+        "kind": "output"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "Sets the class of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "Sets the height of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "Sets the width of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "MultiSelectVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "Whether to show the clear button when an item is selected.",
+        "kind": "input"
+      },
+      {
         "name": "size",
-        "type": "DropdownSelectorVariantProps[\"size\"]",
-        "description": "",
+        "type": "MultiSelectVariantProps[\"size\"]",
+        "description": "The size of the multi select component.",
+        "kind": "input"
+      },
+      {
+        "name": "textField",
+        "type": "DropdownFieldSelectorType<TData>",
+        "description": "Sets the text field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3616,39 +3736,9 @@
         "kind": "input"
       },
       {
-        "name": "data",
-        "type": "Iterable<TData>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "itemDisabled",
-        "type": "string | Predicate<TData> | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showClearButton",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "textField",
-        "type": "string | null | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
         "name": "valueField",
-        "type": "string | null | undefined",
-        "description": "",
+        "type": "DropdownFieldSelectorType<TData>",
+        "description": "Sets the value field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]

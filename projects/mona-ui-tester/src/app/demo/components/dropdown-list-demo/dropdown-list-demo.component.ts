@@ -1,17 +1,7 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import {
-    afterNextRender,
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    input,
-    model,
-    signal
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from "@angular/forms";
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { range } from "@mirei/ts-collections";
 import { Box, LucideAngularModule, Utensils } from "lucide-angular";
 import {

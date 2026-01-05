@@ -25,8 +25,6 @@
        (ngModelChange)="comboBoxValue$.next($event)"
        (blur)="onInputBlur()">
 
-<span class="sr-only" aria-live="polite" aria-atomic="true">{{ liveRegionText() }}</span>
-
 @if (showClearButton() && selectedListItem() && !loading()) {
     <span class="px-2">
         <lucide-angular class="opacity-50 h-full flex items-center justify-center hover:opacity-90" [name]="clearIcon"
@@ -43,6 +41,8 @@
 
 <lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square" [name]="dropdownIcon"
                 [size]="18"></lucide-angular>
+
+<span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
     <div [class]="listPopupClass()">

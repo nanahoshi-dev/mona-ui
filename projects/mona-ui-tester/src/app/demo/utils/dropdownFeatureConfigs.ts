@@ -116,6 +116,17 @@ export const dropdownPrefixTemplateFeatureConfig = <TDropdown = any>(
     };
 };
 
+export const dropdownPreventPopupEventFeatureConfig = <TDropdown = any>(
+    eventType: string
+): ComponentConfigFeatureItemOptions<TDropdown> => {
+    return {
+        code: ``,
+        active: false,
+        description: `The "${eventType}" event is fired when the popup is about to ${eventType}`,
+        name: `Prevent ${eventType.charAt(0).toUpperCase() + eventType.slice(1)}`
+    };
+};
+
 export const dropdownSuffixTemplateFeatureConfig = <TDropdown = any>(
     type: string
 ): ComponentConfigFeatureItemOptions<TDropdown> => {

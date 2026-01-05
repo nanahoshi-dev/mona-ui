@@ -4,7 +4,6 @@ import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     dropdownListAffixContainerVariants as monaDropdownListAffixContainerVariants,
     dropdownListInputVariants as monaDropdownListInputVariants,
-    dropdownListPopupVariants as monaDropdownListPopupVariants,
     dropdownListValueContainerVariants as monaDropdownListValueContainerVariants
 } from "./dropdown-list.mona.styles";
 
@@ -26,15 +25,6 @@ export const dropdownListInputThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
-export const dropdownListPopupThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDropdownListPopupVariants;
-        default:
-            return monaDropdownListPopupVariants;
-    }
-};
-
 export const dropdownListValueContainerThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
@@ -47,9 +37,6 @@ export const dropdownListValueContainerThemeVariants = (theme: ThemeStyle) => {
 type DropdownListInputVariantProps = VariantProps<ReturnType<typeof dropdownListInputThemeVariants>>;
 type DropdownListInputVariantInput = VariantInputs<DropdownListInputVariantProps>;
 
-type DropdownListPopupVariantProps = VariantProps<ReturnType<typeof dropdownListPopupThemeVariants>>;
-type DropdownListPopupVariantInput = VariantInputs<DropdownListPopupVariantProps>;
-
 type DropdownListAffixContainerVariantProps = VariantProps<ReturnType<typeof dropdownListAffixContainerThemeVariants>>;
 type DropdownListAffixContainerVariantInput = VariantInputs<DropdownListAffixContainerVariantProps>;
 
@@ -57,10 +44,8 @@ type DropdownListValueContainerVariantProps = VariantProps<ReturnType<typeof dro
 type DropdownListValueContainerVariantInput = VariantInputs<DropdownListValueContainerVariantProps>;
 
 export type DropDownListVariantProps = DropdownListInputVariantProps &
-    DropdownListPopupVariantProps &
     DropdownListAffixContainerVariantProps &
     DropdownListValueContainerVariantProps;
 export type DropDownListVariantInput = Omit<DropdownListInputVariantInput, "expanded" | "hasPrefix"> &
-    DropdownListPopupVariantInput &
     DropdownListAffixContainerVariantInput &
     Omit<DropdownListValueContainerVariantInput, "hasTemplate">;

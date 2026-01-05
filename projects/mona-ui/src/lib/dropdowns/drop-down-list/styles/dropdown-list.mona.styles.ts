@@ -45,30 +45,6 @@ export const dropdownListInputVariants = cva(
     }
 );
 
-export const dropdownListPopupVariants = cva(
-    `
-        bg-background shadow-md
-        border border-input-border
-        h-full overflow-auto
-    `,
-    {
-        variants: {
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-lg"
-            },
-            size: {
-                large: "text-md",
-                medium: "text-sm",
-                small: "text-xs"
-            }
-        }
-    }
-);
-
 export const dropdownListValueContainerVariants = cva(`overflow-hidden h-full w-full flex items-center`, {
     variants: {
         hasTemplate: {
