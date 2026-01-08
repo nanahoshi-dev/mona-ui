@@ -25,6 +25,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import { asyncScheduler, combineLatest, debounceTime, delay, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
@@ -105,7 +106,8 @@ import {
         ListItemTemplateDirective,
         LucideAngularModule,
         LoadingIndicatorComponent,
-        DropdownLiveRegionDirective
+        DropdownLiveRegionDirective,
+        ClearButtonComponent
     ],
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     host: {
@@ -113,6 +115,7 @@ import {
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
+        "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()"
     }
@@ -206,6 +209,13 @@ export class ComboBoxComponent<TData = unknown>
     public readonly allowCustomValue = input(false);
 
     /**
+     * @description Sets the aria-describedby attribute of the combo box input.
+     * Use this to associate error messages or help text with the input.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("");
+
+    /**
      * @description Sets the aria-label attribute of the autocomplete component.
      * @default ""
      */
@@ -216,13 +226,6 @@ export class ComboBoxComponent<TData = unknown>
      * @default ""
      */
     public readonly ariaLabelledBy = input("");
-
-    /**
-     * @description Sets the aria-describedby attribute of the combo box input.
-     * Use this to associate error messages or help text with the input.
-     * @default ""
-     */
-    public readonly ariaDescribedBy = input("");
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -236,7 +239,6 @@ export class ComboBoxComponent<TData = unknown>
 
     /**
      * @description The data items of the dropdown list component.
-     * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 

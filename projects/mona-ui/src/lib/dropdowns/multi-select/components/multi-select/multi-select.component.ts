@@ -25,6 +25,7 @@ import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipComponent } from "../../../../buttons/chip/component/chip.component";
+import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
@@ -105,7 +106,8 @@ import {
         ListNoDataTemplateDirective,
         LucideAngularModule,
         LoadingIndicatorComponent,
-        DropdownLiveRegionDirective
+        DropdownLiveRegionDirective,
+        ClearButtonComponent
     ],
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
     host: {
@@ -120,8 +122,7 @@ import {
         "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled()",
-        "[attr.data-expanded]": "expanded()",
+        "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
@@ -377,6 +378,9 @@ export class MultiSelectComponent<TData = unknown>
 
     public onSelectedItemRemove(event: Event, listItem: ListItem<TData>): void {
         event.stopImmediatePropagation();
+        if (this.readonly() || this.disabled()) {
+            return;
+        }
         this.#listService.deselectItems([listItem]);
         this.updateValue(this.selectedDataItems().toArray());
         this.focus();
@@ -384,6 +388,9 @@ export class MultiSelectComponent<TData = unknown>
 
     public onSelectedItemGroupRemove(event: Event): void {
         event.stopImmediatePropagation();
+        if (this.readonly() || this.disabled()) {
+            return;
+        }
         const selectedItemCount = this.selectedListItems().size();
         const removedItems = this.selectedListItems()
             .takeLast(selectedItemCount - this.visibleTagCount())
@@ -462,6 +469,23 @@ export class MultiSelectComponent<TData = unknown>
         this.#listService.setSelectableOptions({ enabled: true, mode: "multiple" });
     }
 
+    private setBackspaceKeySubscription(): void {
+        this.#dropdownService.keydown$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(e => e.key === "Backspace"),
+                tap(e => e.preventDefault())
+            )
+            .subscribe(() => {
+                const selectedItems = this.selectedListItems();
+                if (selectedItems.isEmpty()) {
+                    return;
+                }
+                const lastSelectedItem = selectedItems.last();
+                this.#listService.deselectItems([lastSelectedItem]);
+            });
+    }
+
     private setEnterKeySubscription(): void {
         this.#dropdownService.keydown$
             .pipe(
@@ -479,6 +503,7 @@ export class MultiSelectComponent<TData = unknown>
     }
 
     private setSubscriptions(): void {
+        this.setBackspaceKeySubscription();
         this.setEnterKeySubscription();
     }
 

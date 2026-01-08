@@ -25,6 +25,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
 import { asyncScheduler, combineLatest, delay, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
 import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
@@ -102,7 +103,8 @@ import {
         ListNoDataTemplateDirective,
         LucideAngularModule,
         LoadingIndicatorComponent,
-        DropdownLiveRegionDirective
+        DropdownLiveRegionDirective,
+        ClearButtonComponent
     ],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
@@ -115,11 +117,9 @@ import {
         "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled()",
-        "[attr.data-expanded]": "expanded()",
+        "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()",
-        "[attr.role]": "'combobox'",
         "(blur)": "onBlur()"
     }
 })

@@ -24,6 +24,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { LucideAngularModule, X } from "lucide-angular";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { ClearButtonComponent } from "../../../common/clear-button/components/clear-button/clear-button.component";
 import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../common/list/components/list/list.component";
@@ -103,7 +104,8 @@ import {
         ListItemTemplateDirective,
         LucideAngularModule,
         LoadingIndicatorComponent,
-        DropdownLiveRegionDirective
+        DropdownLiveRegionDirective,
+        ClearButtonComponent
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
@@ -187,6 +189,13 @@ export class AutoCompleteComponent<TData = unknown>
     protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
 
     /**
+     * @description Sets the aria-describedby attribute of the autocomplete input.
+     * Use this to associate error messages or help text with the input.
+     * @default ""
+     */
+    public readonly ariaDescribedBy = input("");
+
+    /**
      * @description Sets the aria-label attribute of the autocomplete component.
      * @default ""
      */
@@ -210,7 +219,6 @@ export class AutoCompleteComponent<TData = unknown>
 
     /**
      * @description Sets the data of the autocomplete component.
-     * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 

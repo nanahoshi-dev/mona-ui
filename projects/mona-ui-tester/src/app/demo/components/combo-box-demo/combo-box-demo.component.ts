@@ -77,6 +77,10 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 clearable: true,
                 placeholder: "Select a condition..."
             },
+            loading: {
+                type: "boolean",
+                value: false
+            },
             placeholder: {
                 type: "string",
                 value: ""
@@ -137,6 +141,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 [data]="comboBoxData()"
                 [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
+                [loading]="loading()"
                 [placeholder]="placeholder()"
                 [readonly]="readonly()"
                 [required]="required()"
@@ -275,6 +280,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly data = input<ReturnType<ComboBoxComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<ComboBoxComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);
+    public readonly loading = model<ReturnType<ComboBoxComponent["loading"]>>(false);
     public readonly placeholder = input<ReturnType<ComboBoxComponent["placeholder"]>>("");
     public readonly readonly = model<ReturnType<ComboBoxComponent["readonly"]>>(false);
     public readonly required = model<ReturnType<ComboBoxComponent["required"]>>(false);
