@@ -117,14 +117,6 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 defaultValue: "text"
             }
         },
-        outputs: {
-            inputBlur: {
-                type: "event"
-            },
-            inputFocus: {
-                type: "event"
-            }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

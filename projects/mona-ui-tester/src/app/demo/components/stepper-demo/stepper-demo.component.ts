@@ -154,7 +154,6 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
                 ]
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

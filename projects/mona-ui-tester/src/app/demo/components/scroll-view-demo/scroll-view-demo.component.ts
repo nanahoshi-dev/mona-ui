@@ -80,7 +80,6 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
                 value: "640px"
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

@@ -228,11 +228,6 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 value: "280px"
             }
         },
-        outputs: {
-            actionClick: {
-                type: "event"
-            }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

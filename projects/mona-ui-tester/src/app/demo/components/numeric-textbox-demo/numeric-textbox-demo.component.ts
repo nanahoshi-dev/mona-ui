@@ -110,17 +110,6 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
                 value: 1
             }
         },
-        outputs: {
-            inputBlur: {
-                type: "event"
-            },
-            inputFocus: {
-                type: "event"
-            },
-            inputFocusOut: {
-                type: "event"
-            }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

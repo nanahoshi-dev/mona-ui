@@ -57,8 +57,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
                 type: "boolean",
                 value: true
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("ColorGradientComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);

@@ -85,6 +85,23 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 type: "string",
                 value: ""
             },
+            popupClass: {
+                type: "string",
+                value: ""
+            },
+            popupHeight: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                max: 500,
+                value: null
+            },
+            popupWidth: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                value: null
+            },
             readonly: {
                 type: "boolean",
                 value: false
@@ -93,9 +110,19 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 type: "boolean",
                 value: false
             },
+            rounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "medium"
+            },
             showClearButton: {
                 type: "boolean",
                 value: false
+            },
+            size: {
+                type: "dropdown",
+                value: ["medium", "small", "large"],
+                defaultValue: "medium"
             },
             textField: {
                 type: "string",
@@ -106,7 +133,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 value: "value"
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
@@ -143,9 +169,14 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 [itemDisabled]="itemDisabled()"
                 [loading]="loading()"
                 [placeholder]="placeholder()"
+                [popupClass]="popupClass()"
+                [popupHeight]="popupHeight()"
+                [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
                 [required]="required()"
+                [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
+                [size]="size()"
                 [textField]="textField()"
                 [valueField]="valueField()"
                 [monaDropDownGroupable]="grouping()"
@@ -282,9 +313,14 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly itemDisabled = input<ReturnType<ComboBoxComponent["itemDisabled"]>>(null);
     public readonly loading = model<ReturnType<ComboBoxComponent["loading"]>>(false);
     public readonly placeholder = input<ReturnType<ComboBoxComponent["placeholder"]>>("");
+    public readonly popupClass = input<ReturnType<ComboBoxComponent["popupClass"]>>("");
+    public readonly popupHeight = input<ReturnType<ComboBoxComponent["popupHeight"]>>(null);
+    public readonly popupWidth = input<ReturnType<ComboBoxComponent["popupWidth"]>>(null);
     public readonly readonly = model<ReturnType<ComboBoxComponent["readonly"]>>(false);
     public readonly required = model<ReturnType<ComboBoxComponent["required"]>>(false);
+    public readonly rounded = input<ReturnType<ComboBoxComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<ComboBoxComponent["showClearButton"]>>(false);
+    public readonly size = input<ReturnType<ComboBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
 

@@ -24,7 +24,7 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
             `,
             active: false,
             description: "Custom label template for the progress bar",
-            name: "Label Template",
+            name: "Label Template"
         }
     });
     protected readonly config = signal<ComponentConfig<CircularProgressBarComponent>>({
@@ -75,9 +75,8 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
             value: {
                 type: "number",
                 value: 25
-            },
+            }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

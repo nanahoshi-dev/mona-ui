@@ -158,8 +158,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
                 type: "boolean",
                 value: true
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("PopupComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);

@@ -129,12 +129,6 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
                 value: ""
             }
         },
-        outputs: {
-            hidden: { type: "event" },
-            hide: { type: "event" },
-            shown: { type: "event" },
-            show: { type: "event" }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

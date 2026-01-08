@@ -66,20 +66,6 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
             }
-        },
-        outputs: {
-            inputBlur: {
-                type: "event",
-                description: "Emitted when the checkbox loses focus."
-            },
-            inputChange: {
-                type: "event",
-                description: "Emitted when the checkbox value changes."
-            },
-            inputFocus: {
-                type: "event",
-                description: "Emitted when the checkbox gains focus."
-            }
         }
     });
     protected readonly metadata = this.getMetadata("CheckBoxComponent");

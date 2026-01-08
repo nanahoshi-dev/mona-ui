@@ -66,7 +66,6 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
                 defaultValue: "palette"
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

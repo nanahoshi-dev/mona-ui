@@ -73,8 +73,7 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
                 type: "string",
                 value: "100px"
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("AvatarComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);

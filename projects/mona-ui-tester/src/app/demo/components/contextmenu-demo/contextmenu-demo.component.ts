@@ -267,9 +267,6 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
                 value: ""
             }
         },
-        outputs: {
-            menuClick: { type: "event" }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

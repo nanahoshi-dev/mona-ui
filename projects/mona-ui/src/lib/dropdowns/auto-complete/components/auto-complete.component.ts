@@ -21,7 +21,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { LucideAngularModule, X } from "lucide-angular";
+import { LucideAngularModule } from "lucide-angular";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../common/clear-button/components/clear-button/clear-button.component";
@@ -155,7 +155,6 @@ export class AutoCompleteComponent<TData = unknown>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
-    protected readonly clearIcon = X;
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {

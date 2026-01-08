@@ -273,10 +273,6 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
                 value: "Mona"
             }
         },
-        outputs: {
-            buttonClick: { type: "event" },
-            menuItemClick: { type: "event" }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

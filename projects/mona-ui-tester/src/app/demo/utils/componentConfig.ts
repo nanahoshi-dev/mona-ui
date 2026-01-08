@@ -110,7 +110,7 @@ export type ComponentConfig<TComponent> = {
     code?: string; // TODO: Remove this
     featureHandler?: FeatureConfigHandler;
     inputs: ComponentConfigInputType<TComponent>;
-    outputs: ComponentConfigOutputType<TComponent>;
+    outputs?: ComponentConfigOutputType<TComponent>;
 };
 
 export type ProcessedConfigItem<TValue = any, TDefault = any> = {
@@ -138,7 +138,7 @@ export function createComponentPropertyConfig<TComponent>(
     config: ComponentConfig<TComponent>
 ): ComponentPropertyConfig {
     const inputs = createComponentInputConfigArray(config.inputs);
-    const outputs = createComponentOutputConfigArray(config.outputs);
+    const outputs = config.outputs ? createComponentOutputConfigArray(config.outputs) : [];
     const templates = config.featureHandler;
     return { inputs, outputs, templates };
 }

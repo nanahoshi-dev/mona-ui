@@ -51,8 +51,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
                 value: ["medium", "small", "large"],
                 defaultValue: "medium"
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("ButtonGroupComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["ButtonGroupItemComponent"]);

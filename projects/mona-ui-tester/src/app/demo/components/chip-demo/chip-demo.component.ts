@@ -54,11 +54,6 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             }
-        },
-        outputs: {
-            remove: {
-                type: "event"
-            }
         }
     });
     protected readonly metadata = this.getMetadata("ChipComponent");

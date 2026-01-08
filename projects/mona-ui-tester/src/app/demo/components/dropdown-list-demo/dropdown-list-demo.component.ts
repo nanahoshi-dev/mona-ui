@@ -160,10 +160,6 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                 value: "value"
             }
         },
-        outputs: {
-            close: { type: "event" },
-            open: { type: "event" }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

@@ -34,7 +34,6 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
                 defaultValue: "medium"
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

@@ -148,10 +148,6 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 value: "value"
             }
         },
-        outputs: {
-            close: { type: "event" },
-            open: { type: "event" }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

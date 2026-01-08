@@ -396,11 +396,6 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
                 defaultValue: "medium"
             }
         },
-        outputs: {
-            menuItemClick: {
-                type: "event"
-            }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

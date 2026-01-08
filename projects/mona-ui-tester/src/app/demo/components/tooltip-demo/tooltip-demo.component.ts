@@ -42,8 +42,7 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
                 value: ["button[look='primary']", "button", "a", ".text-box"],
                 defaultValue: "a"
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("TooltipComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["TooltipDirective"]);

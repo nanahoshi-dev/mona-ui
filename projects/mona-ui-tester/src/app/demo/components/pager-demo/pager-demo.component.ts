@@ -316,10 +316,6 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 min: 1
             }
         },
-        outputs: {
-            pageChange: { type: "event" },
-            pageSizeChange: { type: "event" }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

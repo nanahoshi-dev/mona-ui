@@ -346,11 +346,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 value: "200px"
             }
         },
-        outputs: {
-            scrollBottom: {
-                type: "event"
-            }
-        },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

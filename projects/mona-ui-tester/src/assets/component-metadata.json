@@ -958,6 +958,12 @@
     "selector": "\"mona-auto-complete\"",
     "inputs": [
       {
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "description": "Sets the aria-describedby attribute of the autocomplete input.\nUse this to associate error messages or help text with the input.",
+        "kind": "input"
+      },
+      {
         "name": "ariaLabel",
         "type": "string",
         "description": "Sets the aria-label attribute of the autocomplete component.",
@@ -2783,6 +2789,18 @@
       }
     ]
   },
+  "ClearButtonComponent": {
+    "name": "ClearButtonComponent",
+    "selector": "\"mona-clear-button\"",
+    "inputs": [
+      {
+        "name": "clear",
+        "type": "KeyboardEvent | MouseEvent",
+        "description": "",
+        "kind": "output"
+      }
+    ]
+  },
   "FilterInputComponent": {
     "name": "FilterInputComponent",
     "selector": "\"mona-filter-input\"",
@@ -3274,6 +3292,12 @@
         "kind": "input"
       },
       {
+        "name": "ariaDescribedBy",
+        "type": "string",
+        "description": "Sets the aria-describedby attribute of the combo box input.\nUse this to associate error messages or help text with the input.",
+        "kind": "input"
+      },
+      {
         "name": "ariaLabel",
         "type": "string",
         "description": "Sets the aria-label attribute of the autocomplete component.",
@@ -3283,12 +3307,6 @@
         "name": "ariaLabelledBy",
         "type": "string",
         "description": "Sets the aria-labelledby attribute of the autocomplete component.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaDescribedBy",
-        "type": "string",
-        "description": "Sets the aria-describedby attribute of the combo box input.\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
@@ -3540,7 +3558,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3552,7 +3570,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]

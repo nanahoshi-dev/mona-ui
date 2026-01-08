@@ -22,7 +22,7 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
+import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import { asyncScheduler, combineLatest, debounceTime, delay, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
@@ -159,7 +159,6 @@ export class ComboBoxComponent<TData = unknown>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
-    protected readonly clearIcon = X;
     protected readonly dropdownIcon = ChevronDown;
     protected readonly comboBoxValue$ = new Subject<string | null>();
     protected readonly comboBoxValue = signal("");

@@ -270,7 +270,6 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
                 value: "Dropdown Button"
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

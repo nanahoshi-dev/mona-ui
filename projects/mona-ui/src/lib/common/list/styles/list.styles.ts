@@ -45,7 +45,7 @@ export const listItemVariants = cva(
     {
         variants: {
             highlighted: {
-                true: "bg-accent text-accent-foreground rounded-none",
+                true: "bg-accent text-accent-foreground rounded-none inset-ring-1 inset-ring-gray-400/70",
                 false: ""
             },
             selected: {

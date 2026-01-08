@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { where } from "@mirei/ts-collections";
 import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
@@ -42,7 +43,23 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 export class ConfigComponent<C> {
     readonly #componentPropertyConfig = computed(() => {
         const config = this.config();
-        return createComponentPropertyConfig(config);
+        const metadata = this.metadata();
+        let updatedConfig = config;
+        let updatedOutputs = config.outputs;
+        if (
+            metadata &&
+            Object.keys(metadata).length > 0 &&
+            (!config.outputs || Object.keys(config.outputs).length === 0)
+        ) {
+            updatedOutputs = where(metadata.inputs, i => i.kind === "output")
+                .select(i => [i.name, { type: "event" }] as const)
+                .toObject(
+                    e => e[0],
+                    e => e[1]
+                );
+            updatedConfig = { ...config, outputs: updatedOutputs };
+        }
+        return createComponentPropertyConfig(updatedConfig);
     });
     protected readonly codeIcon = Code;
     public readonly config = input.required<ComponentConfig<C>>();

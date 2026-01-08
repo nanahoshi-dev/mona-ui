@@ -158,17 +158,6 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
                 type: "string",
                 value: "Autumn"
             }
-        },
-        outputs: {
-            inputBlur: {
-                type: "event"
-            },
-            inputFocus: {
-                type: "event"
-            },
-            inputClick: {
-                type: "event"
-            }
         }
     });
     protected readonly metadata = this.getMetadata("RadioButtonComponent");

@@ -116,7 +116,6 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
                 value: ""
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

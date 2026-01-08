@@ -98,7 +98,6 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
                 defaultValue: "medium"
             }
         },
-        outputs: {},
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;

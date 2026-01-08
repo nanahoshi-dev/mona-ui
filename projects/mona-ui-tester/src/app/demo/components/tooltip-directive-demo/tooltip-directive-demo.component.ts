@@ -36,8 +36,7 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
                 defaultValue: "medium",
                 alias: "tooltipRounded"
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("TooltipDirective");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);

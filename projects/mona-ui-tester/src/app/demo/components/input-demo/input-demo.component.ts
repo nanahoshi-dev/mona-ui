@@ -26,8 +26,7 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             }
-        },
-        outputs: {}
+        }
     });
     protected readonly metadata = this.getMetadata("TextBoxDirective");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
