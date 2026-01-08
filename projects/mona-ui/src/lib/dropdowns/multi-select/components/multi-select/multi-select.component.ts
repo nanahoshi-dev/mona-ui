@@ -167,7 +167,6 @@ export class MultiSelectComponent<TData = unknown>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
-    protected readonly clearIcon = X;
     protected readonly dropdownIcon = ChevronDown;
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
@@ -207,12 +206,14 @@ export class MultiSelectComponent<TData = unknown>
     });
     protected readonly valueTextMap = computed(() => {
         const tagCount = this.visibleTagCount();
-        return this.selectedListItems()
+        const x = this.selectedListItems()
             .take(tagCount)
             .toImmutableDictionary(
                 i => i,
                 i => this.#listService.getItemText(i)
             );
+        console.log("x", x.toArray(), tagCount);
+        return x;
     });
     protected readonly visibleTagCount = computed(() => {
         const tagCount = this.tagCount();
@@ -240,6 +241,12 @@ export class MultiSelectComponent<TData = unknown>
      * @default false
      */
     public readonly autoClose = input(false);
+
+    /**
+     * @description Sets whether the checkbox should be visible.
+     * @default false
+     */
+    public readonly checkboxes = input(false);
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -348,6 +355,13 @@ export class MultiSelectComponent<TData = unknown>
     public readonly valueField = input<DropdownFieldSelectorType<TData>>();
 
     public constructor() {
+        afterNextRender({
+            read: () => {
+                this.initialize();
+                this.setEventListeners();
+                this.setSubscriptions();
+            }
+        });
         effect(() => {
             const popupTemplate = this.popupTemplate();
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
@@ -359,12 +373,9 @@ export class MultiSelectComponent<TData = unknown>
                 this.#listService.setSelectedDataItems(this.#value());
             });
         });
-        afterNextRender({
-            read: () => {
-                this.initialize();
-                this.setEventListeners();
-                this.setSubscriptions();
-            }
+        effect(() => {
+            const checkboxVisible = this.checkboxes();
+            untracked(() => this.#listService.setSelectableOptions({ checkboxes: checkboxVisible }));
         });
         inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
     }
@@ -424,6 +435,9 @@ export class MultiSelectComponent<TData = unknown>
     }
 
     protected onValueClear(event: Event): void {
+        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
+            return;
+        }
         event.preventDefault();
         event.stopImmediatePropagation();
         this.updateValue([]);
@@ -505,6 +519,12 @@ export class MultiSelectComponent<TData = unknown>
     private setSubscriptions(): void {
         this.setBackspaceKeySubscription();
         this.setEnterKeySubscription();
+
+        this.#listService.selectedKeysChange$.subscribe(() => {
+            console.log(this.#listService.selectedKeys().toArray());
+            console.log(this.selectedListItems().toArray());
+            this.updateValue(this.selectedDataItems().toArray());
+        });
     }
 
     private updateValue(value: TData[], notify: boolean = true): void {

@@ -1,7 +1,7 @@
 import { computed, Directive, effect, ElementRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
-import { listItemVariants } from "../styles/list.styles";
+import { listItemContentVariants } from "../styles/list.styles";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";
@@ -39,7 +39,8 @@ export class ListItemDirective<TData> {
         const disabled = this.disabled();
         const highlighted = this.highlighted();
         const selected = this.selected();
-        const classes = listItemVariants({ disabled, highlighted, selected });
+        const checkboxes = this.#listService.selectableOptions().checkboxes;
+        const classes = listItemContentVariants({ disabled, highlighted, selected, checkboxes });
         return twMerge(classes);
     });
     public readonly item = input.required<ListItem<TData>>();

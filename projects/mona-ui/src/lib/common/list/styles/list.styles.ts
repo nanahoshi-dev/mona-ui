@@ -31,11 +31,13 @@ export const listGroupHeaderTextVariants = cva(`select-none`, {
     }
 });
 
-export const listItemTextVariants = cva(``, {
-    variants: {}
-});
+export const listItemBaseVariants = cva(
+    `
+        w-full h-full flex gap-2 items-center
+    `
+);
 
-export const listItemVariants = cva(
+export const listItemContentVariants = cva(
     `
         relative flex cursor-default select-none items-center
         outline-none px-3 py-1
@@ -44,6 +46,10 @@ export const listItemVariants = cva(
     `,
     {
         variants: {
+            checkboxes: {
+                true: "gap-2",
+                false: ""
+            },
             highlighted: {
                 true: "bg-accent text-accent-foreground rounded-none inset-ring-1 inset-ring-gray-400/70",
                 false: ""
@@ -60,6 +66,7 @@ export const listItemVariants = cva(
         compoundVariants: [
             {
                 selected: true,
+                checkboxes: false,
                 class: `
                     bg-primary text-primary-foreground rounded-none
                     hover:bg-primary hover:text-primary-foreground
@@ -69,11 +76,17 @@ export const listItemVariants = cva(
             {
                 highlighted: true,
                 selected: true,
+                checkboxes: false,
                 class: `
                     bg-primary text-primary-foreground rounded-none
                     hover:bg-primary hover:text-primary-foreground
                     focus:bg-primary focus:text-primary-foreground
                 `
+            },
+            {
+                selected: true,
+                checkboxes: true,
+                class: `bg-transparent text-foreground`
             }
         ]
     }

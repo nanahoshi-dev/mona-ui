@@ -1,6 +1,12 @@
+@if (checkboxes()) {
+    <input type="checkbox" [ngModel]="itemChecked()" monaCheckbox class="aspect-square"
+           (click)="$event.stopPropagation()"
+           (ngModelChange)="onCheckboxChange($event)" (change)="$event.preventDefault()"/>
+}
+
 @if (template()) {
     <ng-container [ngTemplateOutlet]="template()"
                   [ngTemplateOutletContext]="{$implicit: dataItem()}"></ng-container>
 } @else {
-    <span [class]="textClasses()">{{itemText()}}</span>
+    <span [class]="textClasses()">{{ itemText() }}</span>
 }

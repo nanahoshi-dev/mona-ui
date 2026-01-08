@@ -7,12 +7,14 @@ import { Box, LucideAngularModule, Search } from "lucide-angular";
 import {
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
+    DropDownGroupableDirective,
     DropDownHeaderTemplateDirective,
     DropDownItemTemplateDirective,
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropDownVirtualScrollDirective,
     FilterableOptions,
+    GroupableOptions,
     MultiSelectComponent,
     MultiSelectSummaryTagDirective,
     MultiSelectSummaryTagTemplateDirective,
@@ -26,6 +28,7 @@ import {
     dropdownDataSetFeatureConfig,
     dropdownFilteringFeatureConfig,
     dropdownFooterTemplateFeatureConfig,
+    dropdownGroupingFeatureConfig,
     dropdownHeaderTemplateFeatureConfig,
     dropdownItemTemplateFeatureConfig,
     dropdownNoDataTemplateFeatureConfig,
@@ -49,6 +52,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         dataSet: dropdownDataSetFeatureConfig("multi select"),
         filtering: dropdownFilteringFeatureConfig("multi select"),
         footerTemplate: dropdownFooterTemplateFeatureConfig("multi select"),
+        grouping: dropdownGroupingFeatureConfig("multi select"),
         headerTemplate: dropdownHeaderTemplateFeatureConfig("multi select"),
         itemTemplate: dropdownItemTemplateFeatureConfig("multi select"),
         noDataTemplate: dropdownNoDataTemplateFeatureConfig("multi select"),
@@ -90,6 +94,10 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         code: ``,
         inputs: {
             autoClose: {
+                type: "boolean",
+                value: false
+            },
+            checkboxes: {
                 type: "boolean",
                 value: false
             },
@@ -182,7 +190,8 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         DropDownFilterableDirective,
         MultiSelectSummaryTagTemplateDirective,
         MultiSelectSummaryTagDirective,
-        MultiSelectTagTemplateDirective
+        MultiSelectTagTemplateDirective,
+        DropDownGroupableDirective
     ],
     template: `
         @let featureData = features();
@@ -191,6 +200,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         <form [formGroup]="formGroup">
             <mona-multi-select
                 [autoClose]="autoClose()"
+                [checkboxes]="checkboxes()"
                 [data]="multiSelectData()"
                 [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
@@ -206,9 +216,11 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 [textField]="textField()"
                 [valueField]="valueField()"
                 [monaDropDownFilterable]="filtering()"
+                [monaDropDownGroupable]="grouping()"
                 [monaDropDownVirtualScroll]="virtualization()"
                 [monaMultiSelectSummaryTag]="tagConfigData.count"
                 [formControlName]="'value'"
+                [groupBy]="groupBy()"
                 (close)="onPopupClose($event)"
                 (closed)="onPopupClosed()"
                 (open)="onPopupOpen($event)"
@@ -295,6 +307,22 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         }
         return value.map(item => getFormValueText(item, textField)).join(", ");
     });
+    protected readonly groupBy = computed(() => {
+        const features = this.features();
+        const subFeatures = features["grouping"]?.subFeatures || {};
+        return subFeatures["groupBy"].dropdownValue;
+    });
+    protected readonly grouping = computed(() => {
+        const features = this.features();
+        const subFeatures = features["grouping"]?.subFeatures || {};
+        const groupingOptions: GroupableOptions = {
+            enabled: features["grouping"].active,
+            headerOrder: subFeatures["headerOrder"].dropdownValue,
+            orderBy: subFeatures["orderBy"].dropdownValue,
+            orderByDirection: subFeatures["orderByDirection"].dropdownValue
+        };
+        return groupingOptions;
+    });
     protected readonly multiSelectData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -332,6 +360,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     });
 
     public readonly autoClose = input<ReturnType<MultiSelectComponent["autoClose"]>>(false);
+    public readonly checkboxes = input<ReturnType<MultiSelectComponent["checkboxes"]>>(false);
     public readonly data = input<ReturnType<MultiSelectComponent["data"]>>([]);
     public readonly disabled = model<ReturnType<MultiSelectComponent["disabled"]>>(false);
     public readonly itemDisabled = input<ReturnType<MultiSelectComponent["itemDisabled"]>>(() => false);

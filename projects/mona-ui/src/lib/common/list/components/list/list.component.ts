@@ -176,20 +176,19 @@ export class ListComponent<TData> implements OnInit {
         this.setSubscriptions();
     }
 
-    public onFilterChange(event: FilterChangeEvent): void {
+    protected onFilterChange(event: FilterChangeEvent): void {
         this.listService.filterChange$.next(event);
         if (!event.isDefaultPrevented()) {
             this.listService.setFilter(event.filter);
         }
     }
 
-    public onListItemClick(item: ListItem<TData>): void {
-        this.listService.highlightedItem.set(item);
-        if (!this.listService.selectableOptions().enabled) {
-            return;
-        }
-        this.selectItem(item);
-        this.itemSelect.emit({ item, source: { via: "mouse" } });
+    protected onListItemCheck(item: ListItem<TData>): void {
+        this.toggleItem(item);
+    }
+
+    protected onListItemClick(item: ListItem<TData>): void {
+        this.toggleItem(item);
     }
 
     private cycleThroughMatchedItems(buffer: string): void {
@@ -412,5 +411,14 @@ export class ListComponent<TData> implements OnInit {
         setupTypeahead(this.#typeaheadKey$)
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(buffer => this.cycleThroughMatchedItems(buffer));
+    }
+
+    private toggleItem(item: ListItem<TData>): void {
+        this.listService.highlightedItem.set(item);
+        if (!this.listService.selectableOptions().enabled) {
+            return;
+        }
+        this.selectItem(item);
+        this.itemSelect.emit({ item, source: { via: "mouse" } });
     }
 }

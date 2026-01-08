@@ -35,7 +35,7 @@
     }
 </div>
 
-@if (showClearButton() && selectedListItems().length !== 0) {
+@if (showClearButton() && selectedListItems().length !== 0 && !loading()) {
     <mona-clear-button (clear)="onValueClear($event)"></mona-clear-button>
 }
 

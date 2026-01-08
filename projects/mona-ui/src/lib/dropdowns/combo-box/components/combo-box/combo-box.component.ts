@@ -410,6 +410,9 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     protected onValueClear(event: Event): void {
+        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
+            return;
+        }
         event.preventDefault();
         event.stopImmediatePropagation();
         this.updateValue(null);

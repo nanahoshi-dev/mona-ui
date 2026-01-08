@@ -72,8 +72,9 @@ export class ListService<TData> {
         focus: boolean;
     }>(1);
     public readonly selectableOptions = signal<SelectableOptions>({
-        mode: "single",
+        checkboxes: false,
         enabled: false,
+        mode: "single",
         toggleable: false
     });
     public readonly selectedKeys = signal(ImmutableSet.create<any>());

@@ -399,7 +399,7 @@ export class DropdownListComponent<TData = unknown>
     }
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
-        if (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ") {
+        if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
             return;
         }
         event.stopImmediatePropagation();
