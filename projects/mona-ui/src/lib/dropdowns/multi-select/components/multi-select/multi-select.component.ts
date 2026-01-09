@@ -497,6 +497,7 @@ export class MultiSelectComponent<TData = unknown>
                 }
                 const lastSelectedItem = selectedItems.last();
                 this.#listService.deselectItems([lastSelectedItem]);
+                this.updateValue(this.selectedDataItems().toArray());
             });
     }
 
@@ -519,12 +520,6 @@ export class MultiSelectComponent<TData = unknown>
     private setSubscriptions(): void {
         this.setBackspaceKeySubscription();
         this.setEnterKeySubscription();
-
-        this.#listService.selectedKeysChange$.subscribe(() => {
-            console.log(this.#listService.selectedKeys().toArray());
-            console.log(this.selectedListItems().toArray());
-            this.updateValue(this.selectedDataItems().toArray());
-        });
     }
 
     private updateValue(value: TData[], notify: boolean = true): void {

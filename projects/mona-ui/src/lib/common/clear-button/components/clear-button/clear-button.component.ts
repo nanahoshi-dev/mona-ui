@@ -7,7 +7,7 @@ import { LucideAngularModule, X } from "lucide-angular";
     templateUrl: "./clear-button.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        class: "opacity-50 h-full flex items-center justify-center hover:opacity-90"
+        class: "opacity-50 h-full flex items-center justify-center hover:opacity-90 focus:ring-1 focus:ring-primary/40 focus:outline-none"
     }
 })
 export class ClearButtonComponent {

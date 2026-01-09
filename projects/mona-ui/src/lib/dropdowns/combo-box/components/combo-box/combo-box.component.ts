@@ -42,6 +42,7 @@ import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { FormFieldValidationService } from "../../../../common/services/form-field-validation.service";
 import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../../common/styles/dropdown-popup.styles";
+import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { TextBoxDirective } from "../../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -434,11 +435,11 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private focus(): void {
-        window.setTimeout(() => {
+        rxTimeout(this.#destroyRef, () => {
             const input = this.#hostElementRef.nativeElement.querySelector("input");
             if (input && !this.readonly()) {
                 input.focus();
-                input.setSelectionRange(-1, -1);
+                input.setSelectionRange(input.value.length, input.value.length);
             }
         });
     }

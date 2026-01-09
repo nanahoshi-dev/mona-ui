@@ -109,7 +109,7 @@ import {
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
-        "[attr.aria-haspopup]": "true",
+        "[attr.aria-haspopup]": "'listbox'",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
