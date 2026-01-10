@@ -28,7 +28,7 @@ import { TextBoxDirective } from "../../inputs/text-box/directives/text-box.dire
 import { PopupRef } from "../../popup/models/PopupRef";
 import { PopupService } from "../../popup/services/popup.service";
 import { Action } from "../../utils/Action";
-import { CalendarComponent } from "../calendar/calendar.component";
+import { CalendarComponent } from "../calendar/components/calendar/calendar.component";
 import { HourFormat } from "../models/HourFormat";
 import { TimeSelectorComponent } from "../time-selector/time-selector.component";
 

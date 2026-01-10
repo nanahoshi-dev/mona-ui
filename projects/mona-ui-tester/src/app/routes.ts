@@ -31,6 +31,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "calendar",
+                loadComponent: () =>
+                    import("./docs/components/calendar-doc/calendar-doc.component").then(m => m.CalendarDocComponent)
+            },
+            {
                 path: "checkbox",
                 loadComponent: () =>
                     import("./docs/components/checkbox-doc/checkbox-doc.component").then(m => m.CheckboxDocComponent)

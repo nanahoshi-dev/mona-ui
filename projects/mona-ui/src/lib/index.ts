@@ -67,7 +67,7 @@ export * from "./common/tree/models/NodeSelectEvent";
 export * from "./common/tree/models/SelectableOptions";
 
 /** Date Inputs */
-export * from "./date-inputs/calendar/calendar.component";
+export * from "./date-inputs/calendar/components/calendar/calendar.component";
 export * from "./date-inputs/date-picker/date-picker.component";
 export * from "./date-inputs/date-time-picker/date-time-picker.component";
 export * from "./date-inputs/time-picker/time-picker.component";

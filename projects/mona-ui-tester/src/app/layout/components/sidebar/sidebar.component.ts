@@ -45,6 +45,10 @@ export class SidebarComponent {
                     path: "/button-group"
                 },
                 {
+                    text: "Calendar",
+                    path: "/calendar"
+                },
+                {
                     text: "Checkbox",
                     path: "/checkbox"
                 },

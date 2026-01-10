@@ -1,0 +1,104 @@
+<div [class]="headerClass()">
+    <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('prev')">
+        <fa-icon [icon]="prevMonthIcon"></fa-icon>
+    </button>
+    @switch (calendarView()) {
+        @case ('month') {
+            <button monaButton [rounded]="rounded()" [size]="size()"
+                    (click)="onViewChangeClick('year')">{{ navigatedDate()|date:'MMMM yyyy':timezone }}
+            </button>
+        }
+        @case ('year') {
+            <button monaButton [rounded]="rounded()" [size]="size()"
+                    (click)="onViewChangeClick('decade')">{{ navigatedDate()|date:'yyyy':timezone }}
+            </button>
+        }
+        @case ('decade') {
+            <button monaButton [rounded]="rounded()" [size]="size()">{{ decadeYears()[0] }}
+                - {{ decadeYears()[decadeYears().length - 1] }}
+            </button>
+        }
+    }
+    <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('next')">
+        <fa-icon [icon]="nextMonthIcon"></fa-icon>
+    </button>
+</div>
+@if (calendarView() === 'month') {
+    <div class="mona-calendar-month-view" style="width: 100%;">
+        <table class="mona-calendar-month-view-table">
+            <thead>
+            <tr>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+                <th>Sun</th>
+            </tr>
+            </thead>
+            <tbody>
+                @for (row of monthDictChunked(); track $index) {
+                    <tr>
+                        @for (entry of row; track entry.key) {
+                            <td (click)="onDayClick(entry.key, $event)"
+                                monaMonthViewDay
+                                [disabled]="disabled()"
+                                [disabledDates]="disabledDates()"
+                                [min]="min()"
+                                [max]="max()"
+                                [monthBounds]="[monthBounds().start, monthBounds().end]"
+                                [navigatedDate]="navigatedDate()"
+                                [value]="selectedDates()"
+                                [entry]="entry">
+                                <span>{{ entry.value }}</span>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+} @else if (calendarView() === 'year') {
+    <table [class]="yearTableClass()">
+        <tr>
+            <td (click)="onMonthClick(1)">Jan</td>
+            <td (click)="onMonthClick(2)">Feb</td>
+            <td (click)="onMonthClick(3)">Mar</td>
+        </tr>
+        <tr>
+            <td (click)="onMonthClick(4)">Apr</td>
+            <td (click)="onMonthClick(5)">May</td>
+            <td (click)="onMonthClick(6)">Jun</td>
+        </tr>
+        <tr>
+            <td (click)="onMonthClick(7)">Jul</td>
+            <td (click)="onMonthClick(8)">Aug</td>
+            <td (click)="onMonthClick(9)">Sep</td>
+        </tr>
+        <tr>
+            <td (click)="onMonthClick(10)">Oct</td>
+            <td (click)="onMonthClick(11)">Nov</td>
+            <td (click)="onMonthClick(12)">Dec</td>
+        </tr>
+    </table>
+} @else if (calendarView() === 'decade') {
+    <table [class]="decadeTableClass()">
+        <tr>
+            <td (click)="onYearClick(decadeYears()[0])">{{ decadeYears()[0] }}</td>
+            <td (click)="onYearClick(decadeYears()[1])">{{ decadeYears()[1] }}</td>
+            <td (click)="onYearClick(decadeYears()[2])">{{ decadeYears()[2] }}</td>
+            <td (click)="onYearClick(decadeYears()[3])">{{ decadeYears()[3] }}</td>
+        </tr>
+        <tr>
+            <td (click)="onYearClick(decadeYears()[4])">{{ decadeYears()[4] }}</td>
+            <td (click)="onYearClick(decadeYears()[5])">{{ decadeYears()[5] }}</td>
+            <td (click)="onYearClick(decadeYears()[6])">{{ decadeYears()[6] }}</td>
+            <td (click)="onYearClick(decadeYears()[7])">{{ decadeYears()[7] }}</td>
+        </tr>
+        <tr>
+            <td (click)="onYearClick(decadeYears()[8])">{{ decadeYears()[8] }}</td>
+            <td (click)="onYearClick(decadeYears()[9])">{{ decadeYears()[9] }}</td>
+        </tr>
+    </table>
+}
