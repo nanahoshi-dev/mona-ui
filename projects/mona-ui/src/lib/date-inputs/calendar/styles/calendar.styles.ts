@@ -3,10 +3,12 @@ import { ThemeStyle } from "../../../theme/models/Theme";
 import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     calendarBaseVariants as monaCalendarBaseVariants,
+    calendarDecadeViewCellVariants as monaCalendarDecadeViewCellVariants,
     calendarDecadeViewTableVariants as monaCalendarDecadeViewTableVariants,
     calendarHeaderVariants as monaCalendarHeaderVariants,
     calendarMonthViewDayVariants as monaCalendarMonthViewDayVariants,
     calendarMonthViewTableVariants as monaCalendarMonthViewTableVariants,
+    calendarYearViewCellVariants as monaCalendarYearViewCellVariants,
     calendarYearViewTableVariants as monaCalendarYearViewTableVariants
 } from "./calendar.mona.styles";
 
@@ -37,6 +39,15 @@ export const calendarDecadeViewTableThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const calendarDecadeViewCellThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaCalendarDecadeViewCellVariants;
+        default:
+            return monaCalendarDecadeViewCellVariants;
+    }
+};
+
 export const calendarMonthViewDayThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
@@ -64,6 +75,15 @@ export const calendarYearViewTableThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const calendarYearViewCellThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaCalendarYearViewCellVariants;
+        default:
+            return monaCalendarYearViewCellVariants;
+    }
+};
+
 type CalendarBaseVariantProps = VariantProps<ReturnType<typeof calendarBaseThemeVariants>>;
 type CalendarBaseVariantInput = VariantInputs<CalendarBaseVariantProps>;
 
@@ -72,6 +92,9 @@ type CalendarHeaderVariantInput = VariantInputs<CalendarHeaderVariantProps>;
 
 type CalendarDecadeViewTableVariantProps = VariantProps<ReturnType<typeof calendarDecadeViewTableThemeVariants>>;
 type CalendarDecadeViewTableVariantInput = VariantInputs<CalendarDecadeViewTableVariantProps>;
+
+type CalendarDecadeViewCellVariantProps = VariantProps<ReturnType<typeof calendarDecadeViewCellThemeVariants>>;
+type CalendarDecadeViewCellVariantInput = VariantInputs<CalendarDecadeViewCellVariantProps>;
 
 type CalendarMonthViewDayVariantProps = VariantProps<ReturnType<typeof calendarMonthViewDayThemeVariants>>;
 type CalendarMonthViewDayVariantInput = VariantInputs<CalendarMonthViewDayVariantProps>;
@@ -82,15 +105,23 @@ type CalendarMonthViewTableVariantInput = VariantInputs<CalendarMonthViewTableVa
 type CalendarYearViewTableVariantProps = VariantProps<ReturnType<typeof calendarYearViewTableThemeVariants>>;
 type CalendarYearViewTableVariantInput = VariantInputs<CalendarYearViewTableVariantProps>;
 
+type CalendarYearViewCellVariantProps = VariantProps<ReturnType<typeof calendarYearViewCellThemeVariants>>;
+type CalendarYearViewCellVariantInput = VariantInputs<CalendarYearViewCellVariantProps>;
+
 export type CalendarVariantProps = CalendarBaseVariantProps &
     CalendarHeaderVariantProps &
     CalendarDecadeViewTableVariantProps &
+    CalendarDecadeViewCellVariantProps &
     CalendarMonthViewDayVariantProps &
     CalendarMonthViewTableVariantProps &
-    CalendarYearViewTableVariantProps;
+    CalendarYearViewTableVariantProps &
+    CalendarYearViewCellVariantProps;
 export type CalendarVariantInput = CalendarBaseVariantInput &
     CalendarHeaderVariantInput &
     CalendarDecadeViewTableVariantInput &
+    Omit<CalendarDecadeViewCellVariantInput, "focused"> &
     Omit<CalendarMonthViewDayVariantInput, "disabled" | "focused" | "outside" | "selected"> &
     CalendarMonthViewTableVariantInput &
-    CalendarYearViewTableVariantInput;
+    CalendarYearViewTableVariantInput &
+    Omit<CalendarYearViewCellVariantInput, "focused">;
+

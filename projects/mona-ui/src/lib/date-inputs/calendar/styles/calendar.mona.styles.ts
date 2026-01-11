@@ -36,25 +36,7 @@ export const calendarDecadeViewTableVariants = cva(
         [&_th,_td]:text-center
         [&_th,_td]:h-12
         [&_td]:cursor-pointer
-        [&_td]:hover:bg-hover
-        [&_td]:active:bg-active
-    `,
-    {
-        variants: {
-            rounded: {
-                none: "[&_th,_td]:rounded-none",
-                small: "[&_th,_td]:rounded-sm",
-                medium: "[&_th,_td]:rounded-md",
-                large: "[&_th,_td]:rounded-lg",
-                full: "[&_th,_td]:rounded-full"
-            },
-            size: {
-                large: "[&_th,_td]:text-lg",
-                medium: "[&_th,_td]:text-md",
-                small: "[&_th,_td]:text-sm"
-            }
-        }
-    }
+    `
 );
 
 export const calendarHeaderVariants = cva(
@@ -137,22 +119,56 @@ export const calendarYearViewTableVariants = cva(
         [&_th,_td]:text-center
         [&_th,_td]:h-12
         [&_td]:cursor-pointer
-        [&_td]:hover:bg-hover
-        [&_td]:active:bg-active
+    `
+);
+
+export const calendarYearViewCellVariants = cva(
+    `
+        hover:bg-hover
+        active:bg-active
     `,
     {
         variants: {
+            focused: {
+                true: "ring-1 ring-inset ring-primary/40 bg-accent"
+            },
             rounded: {
-                none: "[&_th,_td]:rounded-none",
-                small: "[&_th,_td]:rounded-sm",
-                medium: "[&_th,_td]:rounded-md",
-                large: "[&_th,_td]:rounded-lg",
-                full: "[&_th,_td]:rounded-full"
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full"
             },
             size: {
-                large: "[&_th,_td]:text-lg",
-                medium: "[&_th,_td]:text-md",
-                small: "[&_th,_td]:text-sm"
+                large: "text-lg",
+                medium: "text-md",
+                small: "text-sm"
+            }
+        }
+    }
+);
+
+export const calendarDecadeViewCellVariants = cva(
+    `
+        hover:bg-hover
+        active:bg-active
+    `,
+    {
+        variants: {
+            focused: {
+                true: "ring-1 ring-inset ring-primary/40 bg-accent"
+            },
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full"
+            },
+            size: {
+                large: "text-lg",
+                medium: "text-md",
+                small: "text-sm"
             }
         }
     }

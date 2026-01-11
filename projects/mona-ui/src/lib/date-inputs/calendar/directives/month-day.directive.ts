@@ -5,12 +5,12 @@ import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styl
 import { compareDates } from "../utils/compareDates";
 
 @Directive({
-    selector: "td[monaMonthViewDay]",
+    selector: "td[monaMonthDay]",
     host: {
         "[class]": "baseClass()"
     }
 })
-export class MonthViewDayDirective {
+export class MonthDayDirective {
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();

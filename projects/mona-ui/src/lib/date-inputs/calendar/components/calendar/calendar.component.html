@@ -4,13 +4,15 @@
     </button>
     @switch (calendarView()) {
         @case ('month') {
-            <button monaButton [rounded]="rounded()" [size]="size()"
-                    (click)="onViewChangeClick('year')">{{ navigatedDate()|date:'MMMM yyyy':timezone }}
+            <button monaButton [rounded]="rounded()" [size]="size()" (click)="onViewChangeClick('year')">{{
+                    navigatedDate()|date:'MMMM yyyy':timezone
+                }}
             </button>
         }
         @case ('year') {
-            <button monaButton [rounded]="rounded()" [size]="size()"
-                    (click)="onViewChangeClick('decade')">{{ navigatedDate()|date:'yyyy':timezone }}
+            <button monaButton [rounded]="rounded()" [size]="size()" (click)="onViewChangeClick('decade')">{{
+                    navigatedDate()|date:'yyyy':timezone
+                }}
             </button>
         }
         @case ('decade') {
@@ -36,18 +38,10 @@
             @for (row of monthDictChunked(); track $index) {
                 <tr>
                     @for (entry of row; track entry.key) {
-                        <td (click)="onDayClick(entry.key, $event)"
-                            monaMonthViewDay
-                            [disabled]="disabled()"
-                            [disabledDates]="disabledDates()"
-                            [min]="min()"
-                            [max]="max()"
-                            [monthBounds]="[monthBounds().start, monthBounds().end]"
-                            [navigatedDate]="navigatedDate()"
-                            [rounded]="rounded()"
-                            [size]="size()"
-                            [value]="selectedDates()"
-                            [entry]="entry">
+                        <td (click)="onDayClick(entry.key, $event)" monaMonthDay [disabled]="disabled()"
+                            [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
+                            [monthBounds]="[monthBounds().start, monthBounds().end]" [navigatedDate]="navigatedDate()"
+                            [rounded]="rounded()" [size]="size()" [value]="selectedDates()" [entry]="entry">
                             <span>{{ entry.value }}</span>
                         </td>
                     }
@@ -60,7 +54,10 @@
         @for (row of months(); track $index) {
             <tr>
                 @for (monthItem of row; track monthItem) {
-                    <td (click)="onMonthClick(monthItem[0])">{{ monthItem[1] }}</td>
+                    <td (click)="onMonthClick(monthItem[0])" monaYearMonth [month]="monthItem[0]"
+                        [navigatedDate]="navigatedDate()" [rounded]="rounded()" [size]="size()">
+                        {{ monthItem[1] }}
+                    </td>
                 }
             </tr>
         }
@@ -70,7 +67,10 @@
         @for (row of decadeYears(); track $index) {
             <tr>
                 @for (year of row; track year) {
-                    <td (click)="onYearClick(year)">{{ year }}</td>
+                    <td (click)="onYearClick(year)" monaDecadeYear
+                        [navigatedDate]="navigatedDate()" [rounded]="rounded()" [size]="size()" [year]="year">
+                        {{ year }}
+                    </td>
                 }
             </tr>
         }

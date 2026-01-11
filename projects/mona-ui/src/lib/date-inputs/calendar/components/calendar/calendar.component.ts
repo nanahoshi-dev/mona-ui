@@ -24,7 +24,9 @@ import { ButtonDirective } from "../../../../buttons/button/directives/button.di
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { CalendarView } from "../../../models/CalendarView";
-import { MonthViewDayDirective } from "../../directives/month-view-day.directive";
+import { DecadeYearDirective } from "../../directives/decade-year.directive";
+import { MonthDayDirective } from "../../directives/month-day.directive";
+import { YearMonthDirective } from "../../directives/year-month.directive";
 import { CalendarSelection } from "../../models/CalendarSelection";
 import { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
 import {
@@ -48,7 +50,14 @@ import {
             multi: true
         }
     ],
-    imports: [ButtonDirective, DatePipe, MonthViewDayDirective, LucideAngularModule],
+    imports: [
+        ButtonDirective,
+        DatePipe,
+        MonthDayDirective,
+        LucideAngularModule,
+        DecadeYearDirective,
+        YearMonthDirective
+    ],
     host: {
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()",
@@ -134,9 +143,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     });
     protected readonly decadeTableClass = computed(() => {
         const theme = this.#themeService.theme();
-        const rounded = this.rounded();
-        const size = this.size();
-        return calendarDecadeViewTableThemeVariants(theme)({ rounded, size });
+        return calendarDecadeViewTableThemeVariants(theme)();
     });
     protected readonly decadeYears = computed(() => {
         const decadeStart = this.decadeStart();
@@ -209,9 +216,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     });
     protected readonly yearTableClass = computed(() => {
         const theme = this.#themeService.theme();
-        const rounded = this.rounded();
-        const size = this.size();
-        return calendarYearViewTableThemeVariants(theme)({ rounded, size });
+        return calendarYearViewTableThemeVariants(theme)();
     });
 
     /**
