@@ -60,7 +60,7 @@
         @for (row of months(); track $index) {
             <tr>
                 @for (monthItem of row; track monthItem) {
-                    <td (click)="onMonthClick(monthItem[0])" [tabindex]="disabled() ? -1 : 0">{{ monthItem[1] }}</td>
+                    <td (click)="onMonthClick(monthItem[0])">{{ monthItem[1] }}</td>
                 }
             </tr>
         }
@@ -70,7 +70,7 @@
         @for (row of decadeYears(); track $index) {
             <tr>
                 @for (year of row; track year) {
-                    <td (click)="onYearClick(year)" [tabindex]="disabled() ? -1 : 0">{{ year }}</td>
+                    <td (click)="onYearClick(year)">{{ year }}</td>
                 }
             </tr>
         }

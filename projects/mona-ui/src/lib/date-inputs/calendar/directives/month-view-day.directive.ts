@@ -7,7 +7,6 @@ import { compareDates } from "../utils/compareDates";
 @Directive({
     selector: "td[monaMonthViewDay]",
     host: {
-        "[attr.tabindex]": "dayDisabled() ? -1 : 0",
         "[class]": "baseClass()"
     }
 })

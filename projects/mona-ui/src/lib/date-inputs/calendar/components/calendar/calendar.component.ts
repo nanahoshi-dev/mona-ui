@@ -1,9 +1,11 @@
 import { DatePipe } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
+    ElementRef,
     forwardRef,
     inject,
     input,
@@ -13,10 +15,10 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
+import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
-import { bufferCount, Subject, tap } from "rxjs";
+import { bufferCount, distinctUntilChanged, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -48,12 +50,14 @@ import {
     ],
     imports: [ButtonDirective, DatePipe, MonthViewDayDirective, LucideAngularModule],
     host: {
+        "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
     }
 })
 export class CalendarComponent implements OnInit, ControlValueAccessor, CalendarVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #monthDict = computed(() => {
         const day = this.navigatedDate();
         const firstDayOfMonth = DateTime.fromJSDate(day).startOf("month");
@@ -256,9 +260,14 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     public constructor() {
         toObservable(this.value)
-            .pipe(takeUntilDestroyed())
+            .pipe(takeUntilDestroyed(), distinctUntilChanged())
             .subscribe(() => this.#propagateChange?.(this.value()));
-        this.setRangeChangeSubscription();
+        afterNextRender({
+            read: () => {
+                this.setupKeyboardNavigation();
+                this.setRangeChangeSubscription();
+            }
+        });
     }
 
     public ngOnInit(): void {
@@ -402,6 +411,340 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
     }
 
+    private handleKeydown(event: KeyboardEvent): void {
+        if (this.disabled()) {
+            return;
+        }
+        const view = this.calendarView();
+        const isCtrlOrCmd = event.ctrlKey || event.metaKey;
+        const isShift = event.shiftKey;
+        const selection = this.selection();
+
+        // Handle multiple selection mode shortcuts
+        if (selection === "multiple" && (isCtrlOrCmd || isShift)) {
+            if (this.handleMultipleSelectionKeyboard(event, isCtrlOrCmd, isShift)) {
+                return;
+            }
+        }
+
+        switch (event.key) {
+            case "ArrowUp":
+                event.preventDefault();
+                if (isCtrlOrCmd) {
+                    this.switchToUpperView();
+                } else {
+                    this.navigateByWeeksOrRows(-1, view);
+                }
+                break;
+            case "ArrowDown":
+                event.preventDefault();
+                if (isCtrlOrCmd) {
+                    this.switchToLowerView();
+                } else {
+                    this.navigateByWeeksOrRows(1, view);
+                }
+                break;
+            case "ArrowLeft":
+                event.preventDefault();
+                if (isCtrlOrCmd) {
+                    this.navigatePeriodKeyboard("prev");
+                } else {
+                    this.navigateByDaysOrCells(-1, view);
+                }
+                break;
+            case "ArrowRight":
+                event.preventDefault();
+                if (isCtrlOrCmd) {
+                    this.navigatePeriodKeyboard("next");
+                } else {
+                    this.navigateByDaysOrCells(1, view);
+                }
+                break;
+            case "Enter":
+                event.preventDefault();
+                if (isCtrlOrCmd && selection === "multiple") {
+                    this.toggleFocusedDateInSelection();
+                } else if (isShift && selection === "multiple") {
+                    this.selectRangeToFocused();
+                } else {
+                    this.selectFocusedItem();
+                }
+                break;
+            case "Home":
+                event.preventDefault();
+                this.navigateToStart(view);
+                break;
+            case "End":
+                event.preventDefault();
+                this.navigateToEnd(view);
+                break;
+            case "PageUp":
+                event.preventDefault();
+                this.navigateByPeriod(-1, view);
+                break;
+            case "PageDown":
+                event.preventDefault();
+                this.navigateByPeriod(1, view);
+                break;
+            case "t":
+            case "T":
+                if (!isCtrlOrCmd && !isShift) {
+                    event.preventDefault();
+                    this.navigateToToday();
+                }
+                break;
+        }
+    }
+
+    private handleMultipleSelectionKeyboard(event: KeyboardEvent, isCtrlOrCmd: boolean, isShift: boolean): boolean {
+        if (this.calendarView() !== "month") {
+            return false;
+        }
+        if (isShift && !isCtrlOrCmd) {
+            switch (event.key) {
+                case "ArrowLeft":
+                    event.preventDefault();
+                    this.extendSelection(-1);
+                    return true;
+                case "ArrowRight":
+                    event.preventDefault();
+                    this.extendSelection(1);
+                    return true;
+                case "ArrowUp":
+                    event.preventDefault();
+                    this.extendSelection(-7);
+                    return true;
+                case "ArrowDown":
+                    event.preventDefault();
+                    this.extendSelection(7);
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private extendSelection(offset: number): void {
+        const currentDate = this.navigatedDate();
+        const newDate = DateTime.fromJSDate(currentDate).plus({ days: offset }).toJSDate();
+        if (this.isDateDisabled(newDate)) {
+            return;
+        }
+        const currentSelection = this.selectedDates();
+        const dateTime = DateTime.fromJSDate(newDate);
+        const isAlreadySelected = currentSelection.some(d => DateTime.fromJSDate(d).hasSame(dateTime, "day"));
+        if (!isAlreadySelected) {
+            this.setCurrentDate([...currentSelection, newDate]);
+        }
+        this.navigatedDate.set(newDate);
+    }
+
+    private isDateDisabled(date: Date): boolean {
+        const disabledDates = this.disabledDates();
+        const max = this.max();
+        const min = this.min();
+        return (
+            any(disabledDates, d => this.isSameDay(date, d)) ||
+            (max != null && date > max) ||
+            (min != null && date < min)
+        );
+    }
+
+    private isSameDay(date1: Date, date2: Date): boolean {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+        );
+    }
+
+    private navigateByDaysOrCells(offset: number, view: CalendarView): void {
+        const currentDate = this.navigatedDate();
+        const dateTime = DateTime.fromJSDate(currentDate);
+        let newDate: Date;
+
+        switch (view) {
+            case "month":
+                newDate = dateTime.plus({ days: offset }).toJSDate();
+                break;
+            case "year":
+                newDate = dateTime.plus({ months: offset }).toJSDate();
+                break;
+            case "decade":
+                newDate = dateTime.plus({ years: offset }).toJSDate();
+                break;
+        }
+
+        if (view === "month" && this.isDateDisabled(newDate)) {
+            return;
+        }
+        this.navigatedDate.set(newDate);
+    }
+
+    private navigateByPeriod(offset: number, view: CalendarView): void {
+        const currentDate = this.navigatedDate();
+        const dateTime = DateTime.fromJSDate(currentDate);
+        let newDate: Date;
+
+        switch (view) {
+            case "month":
+                newDate = dateTime.plus({ months: offset }).toJSDate();
+                break;
+            case "year":
+                newDate = dateTime.plus({ years: offset }).toJSDate();
+                break;
+            case "decade":
+                newDate = dateTime.plus({ years: offset * 10 }).toJSDate();
+                break;
+        }
+
+        if (view === "month" && this.isDateDisabled(newDate)) {
+            const direction = offset > 0 ? 1 : -1;
+            const maxAttempts = 31;
+            for (let i = 1; i <= maxAttempts; i++) {
+                const adjustedDate = DateTime.fromJSDate(newDate)
+                    .plus({ days: direction * i })
+                    .toJSDate();
+                if (!this.isDateDisabled(adjustedDate)) {
+                    newDate = adjustedDate;
+                    break;
+                }
+            }
+        }
+        this.navigatedDate.set(newDate);
+    }
+
+    private navigateByWeeksOrRows(offset: number, view: CalendarView): void {
+        const currentDate = this.navigatedDate();
+        const dateTime = DateTime.fromJSDate(currentDate);
+        let newDate: Date;
+
+        switch (view) {
+            case "month":
+                newDate = dateTime.plus({ weeks: offset }).toJSDate();
+                break;
+            case "year":
+                newDate = dateTime.plus({ months: offset * 3 }).toJSDate();
+                break;
+            case "decade":
+                newDate = dateTime.plus({ years: offset * 4 }).toJSDate();
+                break;
+        }
+
+        if (view === "month" && this.isDateDisabled(newDate)) {
+            return;
+        }
+        this.navigatedDate.set(newDate);
+    }
+
+    private navigatePeriodKeyboard(direction: "prev" | "next"): void {
+        this.onNavigationClick(direction);
+    }
+
+    private navigateToEnd(view: CalendarView): void {
+        const currentDate = this.navigatedDate();
+        const dateTime = DateTime.fromJSDate(currentDate);
+        let newDate: Date;
+
+        switch (view) {
+            case "month":
+                newDate = dateTime.endOf("month").toJSDate();
+                if (this.isDateDisabled(newDate)) {
+                    for (let i = newDate.getDate() - 1; i >= 1; i--) {
+                        const testDate = dateTime.set({ day: i }).toJSDate();
+                        if (!this.isDateDisabled(testDate)) {
+                            newDate = testDate;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case "year":
+                newDate = dateTime.set({ month: 12 }).toJSDate();
+                break;
+            case "decade":
+                const yearEnd = this.decadeEnd();
+                newDate = dateTime.set({ year: yearEnd }).toJSDate();
+                break;
+        }
+
+        this.navigatedDate.set(newDate);
+    }
+
+    private navigateToStart(view: CalendarView): void {
+        const currentDate = this.navigatedDate();
+        const dateTime = DateTime.fromJSDate(currentDate);
+        let newDate: Date;
+
+        switch (view) {
+            case "month":
+                newDate = dateTime.startOf("month").toJSDate();
+                if (this.isDateDisabled(newDate)) {
+                    const daysInMonth = dateTime.daysInMonth ?? 31;
+                    for (let i = 2; i <= daysInMonth; i++) {
+                        const testDate = dateTime.set({ day: i }).toJSDate();
+                        if (!this.isDateDisabled(testDate)) {
+                            newDate = testDate;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case "year":
+                newDate = dateTime.set({ month: 1 }).toJSDate();
+                break;
+            case "decade":
+                const yearStart = this.decadeStart();
+                newDate = dateTime.set({ year: yearStart }).toJSDate();
+                break;
+        }
+
+        this.navigatedDate.set(newDate);
+    }
+
+    private navigateToToday(): void {
+        const today = DateTime.now().toJSDate();
+        if (this.isDateDisabled(today)) {
+            return;
+        }
+        this.navigatedDate.set(today);
+        this.calendarView.set("month");
+    }
+
+    private selectFocusedItem(): void {
+        const view = this.calendarView();
+        const currentDate = this.navigatedDate();
+
+        switch (view) {
+            case "month":
+                if (!this.isDateDisabled(currentDate)) {
+                    const selection = this.selection();
+                    if (selection === "single") {
+                        this.handleSingleSelection(currentDate);
+                    } else if (selection === "multiple") {
+                        this.handleSingleSelection(currentDate);
+                    } else if (selection === "range") {
+                        this.#rangeChange$.next(currentDate);
+                    }
+                }
+                break;
+            case "year":
+                this.calendarView.set("month");
+                break;
+            case "decade":
+                this.calendarView.set("year");
+                break;
+        }
+    }
+
+    private selectRangeToFocused(): void {
+        const focusedDate = this.navigatedDate();
+        if (this.isDateDisabled(focusedDate)) {
+            return;
+        }
+        const selectedDates = this.getDatesForMultipleSelection(focusedDate);
+        this.setCurrentDate(selectedDates);
+    }
+
     private setCurrentDate(date: Date | Date[] | null): void {
         this.selectedDates.set(this.getDateArray(date));
         this.#propagateChange?.(date);
@@ -437,5 +780,51 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 })
             )
             .subscribe();
+    }
+
+    private setupKeyboardNavigation(): void {
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.handleKeydown(event));
+    }
+
+    private switchToLowerView(): void {
+        const view = this.calendarView();
+        switch (view) {
+            case "decade":
+                this.calendarView.set("year");
+                break;
+            case "year":
+                this.calendarView.set("month");
+                break;
+        }
+    }
+
+    private switchToUpperView(): void {
+        const view = this.calendarView();
+        switch (view) {
+            case "month":
+                this.calendarView.set("year");
+                break;
+            case "year":
+                this.calendarView.set("decade");
+                break;
+        }
+    }
+
+    private toggleFocusedDateInSelection(): void {
+        const focusedDate = this.navigatedDate();
+        if (this.isDateDisabled(focusedDate)) {
+            return;
+        }
+        const currentSelection = this.selectedDates();
+        const dateTime = DateTime.fromJSDate(focusedDate);
+        const isAlreadySelected = currentSelection.some(d => DateTime.fromJSDate(d).hasSame(dateTime, "day"));
+        if (isAlreadySelected) {
+            const newSelection = currentSelection.filter(d => !DateTime.fromJSDate(d).hasSame(dateTime, "day"));
+            this.setCurrentDate(newSelection);
+        } else {
+            this.setCurrentDate([...currentSelection, focusedDate]);
+        }
     }
 }
