@@ -6,6 +6,7 @@ import { CalendarVariantProps, calendarYearViewCellThemeVariants } from "../styl
 @Directive({
     selector: "td[monaYearMonth]",
     host: {
+        "[attr.tabindex]": "focused() ? 0 : -1",
         "[class]": "baseClass()"
     }
 })
@@ -13,11 +14,14 @@ export class YearMonthDirective {
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const navigatedMonth = DateTime.fromJSDate(this.navigatedDate()).month;
-        const focused = this.month() === navigatedMonth;
+        const focused = this.focused();
         const rounded = this.rounded();
         const size = this.size();
         return calendarYearViewCellThemeVariants(theme)({ focused, rounded, size });
+    });
+    protected readonly focused = computed(() => {
+        const navigatedMonth = DateTime.fromJSDate(this.navigatedDate()).month;
+        return this.month() === navigatedMonth;
     });
 
     public readonly navigatedDate = input.required<Date>();

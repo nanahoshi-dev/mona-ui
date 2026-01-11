@@ -6,6 +6,7 @@ import { calendarDecadeViewCellThemeVariants, CalendarVariantProps } from "../st
 @Directive({
     selector: "td[monaDecadeYear]",
     host: {
+        "[attr.tabindex]": "focused() ? 0 : -1",
         "[class]": "baseClass()"
     }
 })
@@ -13,11 +14,14 @@ export class DecadeYearDirective {
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const navigatedYear = DateTime.fromJSDate(this.navigatedDate()).year;
-        const focused = this.year() === navigatedYear;
+        const focused = this.focused();
         const rounded = this.rounded();
         const size = this.size();
         return calendarDecadeViewCellThemeVariants(theme)({ focused, rounded, size });
+    });
+    protected readonly focused = computed(() => {
+        const navigatedYear = DateTime.fromJSDate(this.navigatedDate()).year;
+        return this.year() === navigatedYear;
     });
 
     public readonly navigatedDate = input.required<Date>();

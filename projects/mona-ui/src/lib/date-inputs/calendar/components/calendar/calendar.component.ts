@@ -21,6 +21,7 @@ import { DateTime, DurationObjectUnits } from "luxon";
 import { bufferCount, distinctUntilChanged, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { CalendarView } from "../../../models/CalendarView";
@@ -59,7 +60,7 @@ import {
         YearMonthDirective
     ],
     host: {
-        "role": "application",
+        role: "application",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()",
@@ -234,9 +235,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             { short: "Fri", full: "Friday" },
             { short: "Sat", full: "Saturday" }
         ];
-        return firstDayOfWeek === "monday"
-            ? [...days.slice(1), days[0]]
-            : days;
+        return firstDayOfWeek === "monday" ? [...days.slice(1), days[0]] : days;
     });
     protected readonly yearTableClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -382,6 +381,11 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         this.calendarView.set("year");
     }
 
+    private focusActiveCell(): void {
+        const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>('td[tabindex="0"]');
+        activeCell?.focus();
+    }
+
     private getDateArray(date: Date | Date[] | null): Date[] {
         return Array.isArray(date) ? date : [date ?? DateTime.now().toJSDate()];
     }
@@ -452,9 +456,12 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         // Handle multiple selection mode shortcuts
         if (selection === "multiple" && (isCtrlOrCmd || isShift)) {
             if (this.handleMultipleSelectionKeyboard(event, isCtrlOrCmd, isShift)) {
+                this.focusActiveCell();
                 return;
             }
         }
+
+        let shouldFocusCell = false;
 
         switch (event.key) {
             case "ArrowUp":
@@ -464,6 +471,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.navigateByWeeksOrRows(-1, view);
                 }
+                shouldFocusCell = true;
                 break;
             case "ArrowDown":
                 event.preventDefault();
@@ -472,6 +480,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.navigateByWeeksOrRows(1, view);
                 }
+                shouldFocusCell = true;
                 break;
             case "ArrowLeft":
                 event.preventDefault();
@@ -480,6 +489,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.navigateByDaysOrCells(-1, view);
                 }
+                shouldFocusCell = true;
                 break;
             case "ArrowRight":
                 event.preventDefault();
@@ -488,6 +498,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.navigateByDaysOrCells(1, view);
                 }
+                shouldFocusCell = true;
                 break;
             case "Enter":
                 event.preventDefault();
@@ -498,30 +509,40 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.selectFocusedItem();
                 }
+                shouldFocusCell = true;
                 break;
             case "Home":
                 event.preventDefault();
                 this.navigateToStart(view);
+                shouldFocusCell = true;
                 break;
             case "End":
                 event.preventDefault();
                 this.navigateToEnd(view);
+                shouldFocusCell = true;
                 break;
             case "PageUp":
                 event.preventDefault();
                 this.navigateByPeriod(-1, view);
+                shouldFocusCell = true;
                 break;
             case "PageDown":
                 event.preventDefault();
                 this.navigateByPeriod(1, view);
+                shouldFocusCell = true;
                 break;
             case "t":
             case "T":
                 if (!isCtrlOrCmd && !isShift) {
                     event.preventDefault();
                     this.navigateToToday();
+                    shouldFocusCell = true;
                 }
                 break;
+        }
+
+        if (shouldFocusCell) {
+            rxTimeout(this.#destroyRef, () => this.focusActiveCell());
         }
     }
 

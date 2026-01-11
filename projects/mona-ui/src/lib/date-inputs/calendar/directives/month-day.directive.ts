@@ -7,6 +7,7 @@ import { compareDates } from "../utils/compareDates";
 @Directive({
     selector: "td[monaMonthDay]",
     host: {
+        "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-selected]": "selected() ? 'true' : null",
         "[attr.aria-current]": "isToday() ? 'date' : null",
         "[attr.aria-disabled]": "dayDisabled() ? 'true' : null",
