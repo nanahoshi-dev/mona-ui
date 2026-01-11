@@ -29,6 +29,11 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 type: "iterable",
                 value: []
             },
+            firstDay: {
+                type: "dropdown",
+                value: ["sunday", "monday"],
+                defaultValue: "monday"
+            },
             max: {
                 type: "dropdown",
                 value: [DateTime.now().plus({ day: 5 }).toJSDate()],
@@ -72,6 +77,7 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
             <mona-calendar
                 [disabled]="disabled()"
                 [disabledDates]="disabledDates()"
+                [firstDay]="firstDay()"
                 [formControl]="formGroup.controls.value"
                 [max]="max()"
                 [min]="min()"
@@ -96,6 +102,7 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
     protected readonly selectedDate = model<DateTime | DateTime[]>(DateTime.now());
     public readonly disabled = model<ReturnType<CalendarComponent["disabled"]>>(false);
     public readonly disabledDates = input<ReturnType<CalendarComponent["disabledDates"]>>([]);
+    public readonly firstDay = input<ReturnType<CalendarComponent["firstDay"]>>("monday");
     public readonly max = input<ReturnType<CalendarComponent["max"]>>(null);
     public readonly min = input<ReturnType<CalendarComponent["min"]>>(null);
     public readonly rounded = input<ReturnType<CalendarComponent["rounded"]>>("none");

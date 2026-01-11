@@ -62,5 +62,6 @@ export class MonthViewDayDirective {
     public readonly monthBounds = input.required<[Date, Date]>();
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
+    public readonly size = input.required<CalendarVariantProps["size"]>();
     public readonly value = input.required<Date | Date[] | null>();
 }

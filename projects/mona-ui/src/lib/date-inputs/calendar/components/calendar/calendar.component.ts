@@ -17,12 +17,14 @@ import { Dictionary, lastOrDefault, range, select } from "@mirei/ts-collections"
 import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
 import { bufferCount, Subject, tap } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { CalendarView } from "../../../models/CalendarView";
 import { MonthViewDayDirective } from "../../directives/month-view-day.directive";
 import { CalendarSelection } from "../../models/CalendarSelection";
+import { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
 import {
     calendarBaseThemeVariants,
     calendarDecadeViewTableThemeVariants,
@@ -56,15 +58,46 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const day = this.navigatedDate();
         const firstDayOfMonth = DateTime.fromJSDate(day).startOf("month");
         const lastDayOfMonth = DateTime.fromJSDate(day).endOf("month");
-        const firstDayOfCalendar = firstDayOfMonth.startOf("week");
-        const lastDayOfCalendar = lastDayOfMonth.endOf("week");
+        const firstDayOfWeek = this.firstDay() === "monday" ? 1 : 0;
+
+        let firstDayOfCalendar: DateTime;
+        const monthStartWeekday = firstDayOfMonth.weekday;
+
+        if (firstDayOfWeek === 0) {
+            const daysToSubtract = monthStartWeekday === 7 ? 0 : monthStartWeekday;
+            firstDayOfCalendar = firstDayOfMonth.minus({ days: daysToSubtract });
+        } else {
+            firstDayOfCalendar = firstDayOfMonth.startOf("week");
+        }
+
+        let lastDayOfCalendar: DateTime;
+        const monthEndWeekday = lastDayOfMonth.weekday;
+
+        if (firstDayOfWeek === 0) {
+            const daysToAdd = monthEndWeekday === 7 ? 6 : 6 - monthEndWeekday;
+            lastDayOfCalendar = lastDayOfMonth.plus({ days: daysToAdd });
+        } else {
+            lastDayOfCalendar = lastDayOfMonth.endOf("week");
+        }
+
         const dictionary = new Dictionary<Date, number>();
         for (let i = firstDayOfCalendar; i <= lastDayOfCalendar; i = i.plus({ days: 1 })) {
             dictionary.add(i.toJSDate(), i.day);
         }
-        if (lastDayOfMonth.weekday === 7) {
+
+        if (firstDayOfWeek === 0 && monthEndWeekday === 7) {
             for (let i = 0; i < 7; i++) {
-                dictionary.add(lastDayOfMonth.plus({ days: i + 1 }).toJSDate(), i + 1);
+                dictionary.add(
+                    lastDayOfMonth.plus({ days: i + 1 }).toJSDate(),
+                    lastDayOfMonth.plus({ days: i + 1 }).day
+                );
+            }
+        } else if (firstDayOfWeek === 1 && monthEndWeekday === 7) {
+            for (let i = 0; i < 7; i++) {
+                dictionary.add(
+                    lastDayOfMonth.plus({ days: i + 1 }).toJSDate(),
+                    lastDayOfMonth.plus({ days: i + 1 }).day
+                );
             }
         }
         return dictionary.toImmutableDictionary(
@@ -81,12 +114,16 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const disabled = this.disabled();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
         const size = this.size();
-        return calendarBaseThemeVariants(theme)({ disabled, rounded, size });
+        const variantClass = calendarBaseThemeVariants(theme)({ disabled, rounded, size });
+        const userClass = this.userClass();
+        return twMerge(variantClass, userClass);
     });
     protected readonly calendarView = signal<CalendarView>("month");
     protected readonly decadeTableClass = computed(() => {
         const theme = this.#themeService.theme();
-        return calendarDecadeViewTableThemeVariants(theme)();
+        const rounded = this.rounded();
+        const size = this.size();
+        return calendarDecadeViewTableThemeVariants(theme)({ rounded, size });
     });
     protected readonly decadeYears = computed(() => {
         const navigatedDate = this.navigatedDate();
@@ -144,18 +181,28 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
         return [];
     });
+    protected readonly weekdays = computed(() => {
+        const firstDayOfWeek = this.firstDay();
+        return firstDayOfWeek === "monday"
+            ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+            : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    });
     protected readonly yearTableClass = computed(() => {
         const theme = this.#themeService.theme();
-        return calendarYearViewTableThemeVariants(theme)();
+        const rounded = this.rounded();
+        const size = this.size();
+        return calendarYearViewTableThemeVariants(theme)({ rounded, size });
     });
 
     public readonly disabled = model(false);
     public readonly disabledDates = input<Iterable<Date>>([]);
+    public readonly firstDay = input<FirstDayOfWeek>("monday");
     public readonly max = input<Date | null>(null);
     public readonly min = input<Date | null>(null);
     public readonly rounded = input<CalendarVariantProps["rounded"]>("medium");
     public readonly selection = input<CalendarSelection>("single");
     public readonly size = input<CalendarVariantProps["size"]>("medium");
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
         toObservable(this.value)

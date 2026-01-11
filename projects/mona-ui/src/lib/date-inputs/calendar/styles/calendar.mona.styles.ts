@@ -38,7 +38,23 @@ export const calendarDecadeViewTableVariants = cva(
         [&_td]:cursor-pointer
         [&_td]:hover:bg-hover
         [&_td]:active:bg-active
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "[&_th,_td]:rounded-none",
+                small: "[&_th,_td]:rounded-sm",
+                medium: "[&_th,_td]:rounded-md",
+                large: "[&_th,_td]:rounded-lg",
+                full: "[&_th,_td]:rounded-full"
+            },
+            size: {
+                large: "[&_th,_td]:text-lg",
+                medium: "[&_th,_td]:text-md",
+                small: "[&_th,_td]:text-sm"
+            }
+        }
+    }
 );
 
 export const calendarHeaderVariants = cva(
@@ -83,6 +99,11 @@ export const calendarMonthViewDayVariants = cva(
             },
             selected: {
                 true: "bg-primary text-primary-foreground hover:bg-primary-hover"
+            },
+            size: {
+                large: "text-lg",
+                medium: "text-md",
+                small: "text-sm"
             }
         },
         defaultVariants: {
@@ -118,5 +139,21 @@ export const calendarYearViewTableVariants = cva(
         [&_td]:cursor-pointer
         [&_td]:hover:bg-hover
         [&_td]:active:bg-active
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "[&_th,_td]:rounded-none",
+                small: "[&_th,_td]:rounded-sm",
+                medium: "[&_th,_td]:rounded-md",
+                large: "[&_th,_td]:rounded-lg",
+                full: "[&_th,_td]:rounded-full"
+            },
+            size: {
+                large: "[&_th,_td]:text-lg",
+                medium: "[&_th,_td]:text-md",
+                small: "[&_th,_td]:text-sm"
+            }
+        }
+    }
 );

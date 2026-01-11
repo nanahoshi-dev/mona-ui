@@ -27,13 +27,9 @@
     <table [class]="monthTableClass()">
         <thead>
         <tr>
-            <th>Mon</th>
-            <th>Tue</th>
-            <th>Wed</th>
-            <th>Thu</th>
-            <th>Fri</th>
-            <th>Sat</th>
-            <th>Sun</th>
+            @for (day of weekdays(); track day) {
+                <th>{{ day }}</th>
+            }
         </tr>
         </thead>
         <tbody>
@@ -49,6 +45,7 @@
                             [monthBounds]="[monthBounds().start, monthBounds().end]"
                             [navigatedDate]="navigatedDate()"
                             [rounded]="rounded()"
+                            [size]="size()"
                             [value]="selectedDates()"
                             [entry]="entry">
                             <span>{{ entry.value }}</span>
