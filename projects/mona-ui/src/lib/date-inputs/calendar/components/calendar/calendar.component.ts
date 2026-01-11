@@ -3,6 +3,7 @@ import {
     ChangeDetectionStrategy,
     Component,
     computed,
+    DestroyRef,
     forwardRef,
     inject,
     input,
@@ -12,10 +13,10 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Dictionary, lastOrDefault, range, select } from "@mirei/ts-collections";
+import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
+import { bufferCount, Subject, tap } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
@@ -26,6 +27,7 @@ import {
     calendarBaseThemeVariants,
     calendarDecadeViewTableThemeVariants,
     calendarHeaderThemeVariants,
+    calendarMonthViewTableThemeVariants,
     CalendarVariantInput,
     CalendarVariantProps,
     calendarYearViewTableThemeVariants
@@ -34,7 +36,6 @@ import {
 @Component({
     selector: "mona-calendar",
     templateUrl: "./calendar.component.html",
-    styleUrls: ["./calendar.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
@@ -43,13 +44,14 @@ import {
             multi: true
         }
     ],
-    imports: [ButtonDirective, FontAwesomeModule, DatePipe, MonthViewDayDirective],
+    imports: [ButtonDirective, DatePipe, MonthViewDayDirective, LucideAngularModule],
     host: {
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
     }
 })
 export class CalendarComponent implements OnInit, ControlValueAccessor, CalendarVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #monthDict = computed(() => {
         const day = this.navigatedDate();
         const firstDayOfMonth = DateTime.fromJSDate(day).startOf("month");
@@ -70,6 +72,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             e => e.value
         );
     });
+    readonly #rangeChange$ = new Subject<Date>();
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | Date[] | null> | null = null;
     #propagateTouched: Action | null = null;
@@ -114,9 +117,13 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             )
             .toImmutableSet();
     });
+    protected readonly monthTableClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return calendarMonthViewTableThemeVariants(theme)();
+    });
     protected readonly navigatedDate = signal(new Date());
-    protected readonly nextMonthIcon = faChevronRight;
-    protected readonly prevMonthIcon = faChevronLeft;
+    protected readonly nextMonthIcon = ChevronRight;
+    protected readonly prevMonthIcon = ChevronLeft;
     protected readonly selectedDates = signal<Date[]>([]);
     protected readonly timezone = DateTime.local().zoneName ?? undefined;
     protected readonly value = computed(() => {
@@ -154,6 +161,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         toObservable(this.value)
             .pipe(takeUntilDestroyed())
             .subscribe(() => this.#propagateChange?.(this.value()));
+        this.setRangeChangeSubscription();
     }
 
     public ngOnInit(): void {
@@ -179,7 +187,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     }
 
     public writeValue(date: Date | Date[] | null | undefined): void {
-        // this.value.set(date ?? null);
         this.selectedDates.set(this.getDateArray(date ?? null));
         const navigatedDate = Array.isArray(date)
             ? (lastOrDefault(date) ?? DateTime.now().toJSDate())
@@ -204,7 +211,8 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 this.handleSingleSelection(date);
             }
         } else if (selection === "range") {
-            this.handleRangeSelection(date);
+            this.#rangeChange$.next(date);
+            this.navigatedDate.set(date);
         }
     }
 
@@ -281,11 +289,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
     }
 
-    private handleRangeSelection(date: Date): void {
-        const selectedDates = this.getDatesForMultipleSelection(date);
-        this.setCurrentDate(selectedDates);
-    }
-
     private handleSingleSelection(date: Date): void {
         const value = this.selectedDates();
         if (value) {
@@ -315,5 +318,27 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
         const newNavigatedDate = value ?? DateTime.now().toJSDate();
         this.navigatedDate.set(newNavigatedDate);
+    }
+
+    private setRangeChangeSubscription(): void {
+        this.#rangeChange$
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                tap(date => this.selectedDates.set([date])),
+                bufferCount(2, 2),
+                tap(([date1, date2]) => {
+                    const dateTime1 = DateTime.fromJSDate(date1);
+                    const dateTime2 = DateTime.fromJSDate(date2);
+                    const startDate = dateTime1.diff(dateTime2, "days").days < 0 ? dateTime1 : dateTime2;
+                    const endDate = dateTime1.diff(dateTime2, "days").days < 0 ? dateTime2 : dateTime1;
+                    const totalDays = endDate.diff(startDate, "days").days + 1;
+                    const selectedDates = range(0, totalDays)
+                        .select(i => startDate.plus({ days: i }).toJSDate())
+                        .toArray();
+                    this.setCurrentDate(selectedDates);
+                    this.navigatedDate.set(date2);
+                })
+            )
+            .subscribe();
     }
 }

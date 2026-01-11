@@ -1,6 +1,6 @@
 <div [class]="headerClass()">
     <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('prev')">
-        <fa-icon [icon]="prevMonthIcon"></fa-icon>
+        <lucide-angular [name]="prevMonthIcon"></lucide-angular>
     </button>
     @switch (calendarView()) {
         @case ('month') {
@@ -20,45 +20,44 @@
         }
     }
     <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('next')">
-        <fa-icon [icon]="nextMonthIcon"></fa-icon>
+        <lucide-angular [name]="nextMonthIcon"></lucide-angular>
     </button>
 </div>
 @if (calendarView() === 'month') {
-    <div class="mona-calendar-month-view" style="width: 100%;">
-        <table class="mona-calendar-month-view-table">
-            <thead>
-            <tr>
-                <th>Mon</th>
-                <th>Tue</th>
-                <th>Wed</th>
-                <th>Thu</th>
-                <th>Fri</th>
-                <th>Sat</th>
-                <th>Sun</th>
-            </tr>
-            </thead>
-            <tbody>
-                @for (row of monthDictChunked(); track $index) {
-                    <tr>
-                        @for (entry of row; track entry.key) {
-                            <td (click)="onDayClick(entry.key, $event)"
-                                monaMonthViewDay
-                                [disabled]="disabled()"
-                                [disabledDates]="disabledDates()"
-                                [min]="min()"
-                                [max]="max()"
-                                [monthBounds]="[monthBounds().start, monthBounds().end]"
-                                [navigatedDate]="navigatedDate()"
-                                [value]="selectedDates()"
-                                [entry]="entry">
-                                <span>{{ entry.value }}</span>
-                            </td>
-                        }
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+    <table [class]="monthTableClass()">
+        <thead>
+        <tr>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+        </tr>
+        </thead>
+        <tbody>
+            @for (row of monthDictChunked(); track $index) {
+                <tr>
+                    @for (entry of row; track entry.key) {
+                        <td (click)="onDayClick(entry.key, $event)"
+                            monaMonthViewDay
+                            [disabled]="disabled()"
+                            [disabledDates]="disabledDates()"
+                            [min]="min()"
+                            [max]="max()"
+                            [monthBounds]="[monthBounds().start, monthBounds().end]"
+                            [navigatedDate]="navigatedDate()"
+                            [rounded]="rounded()"
+                            [value]="selectedDates()"
+                            [entry]="entry">
+                            <span>{{ entry.value }}</span>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
 } @else if (calendarView() === 'year') {
     <table [class]="yearTableClass()">
         <tr>

@@ -6,6 +6,7 @@ import {
     calendarDecadeViewTableVariants as monaCalendarDecadeViewTableVariants,
     calendarHeaderVariants as monaCalendarHeaderVariants,
     calendarMonthViewDayVariants as monaCalendarMonthViewDayVariants,
+    calendarMonthViewTableVariants as monaCalendarMonthViewTableVariants,
     calendarYearViewTableVariants as monaCalendarYearViewTableVariants
 } from "./calendar.mona.styles";
 
@@ -45,6 +46,15 @@ export const calendarMonthViewDayThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const calendarMonthViewTableThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaCalendarMonthViewTableVariants;
+        default:
+            return monaCalendarMonthViewTableVariants;
+    }
+};
+
 export const calendarYearViewTableThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
@@ -66,6 +76,9 @@ type CalendarDecadeViewTableVariantInput = VariantInputs<CalendarDecadeViewTable
 type CalendarMonthViewDayVariantProps = VariantProps<ReturnType<typeof calendarMonthViewDayThemeVariants>>;
 type CalendarMonthViewDayVariantInput = VariantInputs<CalendarMonthViewDayVariantProps>;
 
+type CalendarMonthViewTableVariantProps = VariantProps<ReturnType<typeof calendarMonthViewTableThemeVariants>>;
+type CalendarMonthViewTableVariantInput = VariantInputs<CalendarMonthViewTableVariantProps>;
+
 type CalendarYearViewTableVariantProps = VariantProps<ReturnType<typeof calendarYearViewTableThemeVariants>>;
 type CalendarYearViewTableVariantInput = VariantInputs<CalendarYearViewTableVariantProps>;
 
@@ -73,9 +86,11 @@ export type CalendarVariantProps = CalendarBaseVariantProps &
     CalendarHeaderVariantProps &
     CalendarDecadeViewTableVariantProps &
     CalendarMonthViewDayVariantProps &
+    CalendarMonthViewTableVariantProps &
     CalendarYearViewTableVariantProps;
 export type CalendarVariantInput = CalendarBaseVariantInput &
     CalendarHeaderVariantInput &
     CalendarDecadeViewTableVariantInput &
     Omit<CalendarMonthViewDayVariantInput, "disabled" | "focused" | "outside" | "selected"> &
+    CalendarMonthViewTableVariantInput &
     CalendarYearViewTableVariantInput;

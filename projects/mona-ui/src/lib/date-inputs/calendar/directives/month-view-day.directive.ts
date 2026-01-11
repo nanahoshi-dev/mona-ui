@@ -1,16 +1,12 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { any, exactly, KeyValuePair } from "@mirei/ts-collections";
 import { ThemeService } from "../../../theme/services/theme.service";
-import { calendarMonthViewDayThemeVariants } from "../styles/calendar.styles";
+import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 import { compareDates } from "../utils/compareDates";
 
 @Directive({
     selector: "td[monaMonthViewDay]",
     host: {
-        "[attr.data-disabled]": "dayDisabled()",
-        "[attr.data-focused]": "focused()",
-        "[attr.data-outside]": "outside()",
-        "[attr.data-selected]": "selected()",
         "[attr.tabindex]": "dayDisabled() ? -1 : 0",
         "[class]": "baseClass()"
     }
@@ -22,8 +18,9 @@ export class MonthViewDayDirective {
         const disabled = this.dayDisabled();
         const focused = this.focused();
         const outside = this.outside();
+        const rounded = this.rounded();
         const selected = this.selected();
-        return calendarMonthViewDayThemeVariants(theme)({ disabled, focused, outside, selected });
+        return calendarMonthViewDayThemeVariants(theme)({ disabled, focused, outside, rounded, selected });
     });
     protected readonly dayDisabled = computed(() => {
         const disabled = this.disabled();
@@ -64,5 +61,6 @@ export class MonthViewDayDirective {
     public readonly min = input.required<Date | null>();
     public readonly monthBounds = input.required<[Date, Date]>();
     public readonly navigatedDate = input.required<Date>();
+    public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly value = input.required<Date | Date[] | null>();
 }
