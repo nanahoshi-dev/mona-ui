@@ -1,5 +1,5 @@
 <div [class]="headerClass()">
-    <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('prev')">
+    <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('prev')" aria-label="Previous">
         <lucide-angular [name]="prevMonthIcon"></lucide-angular>
     </button>
     @switch (calendarView()) {
@@ -21,16 +21,19 @@
             </button>
         }
     }
-    <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('next')">
+    <button monaButton [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('next')" aria-label="Next">
         <lucide-angular [name]="nextMonthIcon"></lucide-angular>
     </button>
 </div>
+
+<div aria-live="polite" aria-atomic="true" class="sr-only">{{ ariaLabel() }}</div>
+
 @if (calendarView() === 'month') {
-    <table [class]="monthTableClass()">
+    <table role="grid" [class]="monthTableClass()">
         <thead>
         <tr>
-            @for (day of weekdays(); track day) {
-                <th>{{ day }}</th>
+            @for (day of weekdays(); track day.short) {
+                <th [attr.abbr]="day.full">{{ day.short }}</th>
             }
         </tr>
         </thead>
@@ -50,12 +53,13 @@
         </tbody>
     </table>
 } @else if (calendarView() === 'year') {
-    <table [class]="yearTableClass()">
+    <table role="grid" [class]="yearTableClass()">
         @for (row of months(); track $index) {
             <tr>
                 @for (monthItem of row; track monthItem) {
                     <td (click)="onMonthClick(monthItem[0])" monaYearMonth [month]="monthItem[0]"
-                        [navigatedDate]="navigatedDate()" [rounded]="rounded()" [size]="size()">
+                        [navigatedDate]="navigatedDate()"
+                        [rounded]="rounded()" [size]="size()">
                         {{ monthItem[1] }}
                     </td>
                 }
@@ -63,12 +67,13 @@
         }
     </table>
 } @else if (calendarView() === 'decade') {
-    <table [class]="decadeTableClass()">
+    <table role="grid" [class]="decadeTableClass()">
         @for (row of decadeYears(); track $index) {
             <tr>
                 @for (year of row; track year) {
-                    <td (click)="onYearClick(year)" monaDecadeYear
-                        [navigatedDate]="navigatedDate()" [rounded]="rounded()" [size]="size()" [year]="year">
+                    <td (click)="onYearClick(year)" monaDecadeYear [navigatedDate]="navigatedDate()"
+                        [rounded]="rounded()"
+                        [size]="size()" [year]="year">
                         {{ year }}
                     </td>
                 }

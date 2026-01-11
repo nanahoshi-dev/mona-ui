@@ -7,6 +7,9 @@ import { compareDates } from "../utils/compareDates";
 @Directive({
     selector: "td[monaMonthDay]",
     host: {
+        "[attr.aria-selected]": "selected() ? 'true' : null",
+        "[attr.aria-current]": "isToday() ? 'date' : null",
+        "[attr.aria-disabled]": "dayDisabled() ? 'true' : null",
         "[class]": "baseClass()"
     }
 })
@@ -38,6 +41,11 @@ export class MonthDayDirective {
         const entry = this.entry();
         const navigatedDate = this.navigatedDate();
         return compareDates(entry.key, navigatedDate, "==");
+    });
+    protected readonly isToday = computed(() => {
+        const entry = this.entry();
+        const today = new Date();
+        return compareDates(entry.key, today, "==");
     });
     protected readonly outside = computed(() => {
         const entry = this.entry();

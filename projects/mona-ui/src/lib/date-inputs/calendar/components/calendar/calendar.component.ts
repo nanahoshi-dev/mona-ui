@@ -59,6 +59,8 @@ import {
         YearMonthDirective
     ],
     host: {
+        "role": "application",
+        "[attr.aria-label]": "ariaLabel()",
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
@@ -130,6 +132,19 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const variantClass = calendarBaseThemeVariants(theme)({ disabled, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
+    });
+    protected readonly ariaLabel = computed(() => {
+        const view = this.calendarView();
+        const navigatedDate = this.navigatedDate();
+        const date = DateTime.fromJSDate(navigatedDate);
+        switch (view) {
+            case "month":
+                return `Calendar, ${date.toFormat("MMMM yyyy")}`;
+            case "year":
+                return `Year view, ${date.toFormat("yyyy")}`;
+            case "decade":
+                return `Decade view, ${this.decadeStart()} - ${this.decadeEnd()}`;
+        }
     });
     protected readonly calendarView = signal<CalendarView>("month");
     protected readonly decadeEnd = computed(() => {
@@ -210,9 +225,18 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     });
     protected readonly weekdays = computed(() => {
         const firstDayOfWeek = this.firstDay();
+        const days = [
+            { short: "Sun", full: "Sunday" },
+            { short: "Mon", full: "Monday" },
+            { short: "Tue", full: "Tuesday" },
+            { short: "Wed", full: "Wednesday" },
+            { short: "Thu", full: "Thursday" },
+            { short: "Fri", full: "Friday" },
+            { short: "Sat", full: "Saturday" }
+        ];
         return firstDayOfWeek === "monday"
-            ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-            : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            ? [...days.slice(1), days[0]]
+            : days;
     });
     protected readonly yearTableClass = computed(() => {
         const theme = this.#themeService.theme();
