@@ -13,7 +13,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { Dictionary, lastOrDefault, range, select } from "@mirei/ts-collections";
+import { Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
 import { bufferCount, Subject, tap } from "rxjs";
@@ -119,6 +119,15 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return twMerge(variantClass, userClass);
     });
     protected readonly calendarView = signal<CalendarView>("month");
+    protected readonly decadeEnd = computed(() => {
+        return this.decadeStart() + 9;
+    });
+    protected readonly decadeStart = computed(() => {
+        const navigatedDate = this.navigatedDate();
+        const date = DateTime.fromJSDate(navigatedDate);
+        const year = date.year;
+        return year - (year % 10);
+    });
     protected readonly decadeTableClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -126,11 +135,11 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return calendarDecadeViewTableThemeVariants(theme)({ rounded, size });
     });
     protected readonly decadeYears = computed(() => {
-        const navigatedDate = this.navigatedDate();
-        const date = DateTime.fromJSDate(navigatedDate);
-        const year = date.year;
-        const decadeStart = year - (year % 10);
-        return Array.from({ length: 10 }, (_, i) => decadeStart + i);
+        const decadeStart = this.decadeStart();
+        return range(decadeStart, 10)
+            .chunk(4)
+            .select(e => e.toArray())
+            .toArray();
     });
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -157,6 +166,13 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     protected readonly monthTableClass = computed(() => {
         const theme = this.#themeService.theme();
         return calendarMonthViewTableThemeVariants(theme)();
+    });
+    protected readonly months = computed(() => {
+        const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return index(names)
+            .chunk(3)
+            .select(e => e.select(m => [m[0] + 1, m[1]] as const).toImmutableSet())
+            .toImmutableSet();
     });
     protected readonly navigatedDate = signal(new Date());
     protected readonly nextMonthIcon = ChevronRight;
@@ -194,13 +210,47 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return calendarYearViewTableThemeVariants(theme)({ rounded, size });
     });
 
+    /**
+     * @description Sets the disabled state of the calendar.
+     */
     public readonly disabled = model(false);
+
+    /**
+     * @description Sets the disabled dates of the calendar.
+     */
     public readonly disabledDates = input<Iterable<Date>>([]);
+
+    /**
+     * @description Sets the first day of the week.
+     * @default "monday"
+     */
     public readonly firstDay = input<FirstDayOfWeek>("monday");
+
+    /**
+     * @description Sets the maximum date that can be selected.
+     */
     public readonly max = input<Date | null>(null);
+
+    /**
+     * @description Sets the minimum date that can be selected.
+     */
     public readonly min = input<Date | null>(null);
+
+    /**
+     * @description Sets the border radius of the calendar.
+     */
     public readonly rounded = input<CalendarVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Sets the selection mode of the calendar.
+     * @default "single"
+     */
     public readonly selection = input<CalendarSelection>("single");
+
+    /**
+     * @description Sets the size of the calendar.
+     * @default "medium"
+     */
     public readonly size = input<CalendarVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
 

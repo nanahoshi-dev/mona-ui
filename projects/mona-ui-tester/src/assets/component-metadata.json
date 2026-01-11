@@ -1,34 +1,4 @@
 {
-  "CalendarComponent": {
-    "name": "CalendarComponent",
-    "selector": "\"mona-calendar\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "disabledDates",
-        "type": "Iterable<Date>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "DatePickerComponent": {
     "name": "DatePickerComponent",
     "selector": "\"mona-date-picker\"",
@@ -894,7 +864,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the chip.\n\nIf the label is set, the chip will display the label instead of the content.",
+        "description": "Sets the label of the chip.\r\n\r\nIf the label is set, the chip will display the label instead of the content.",
         "kind": "input"
       },
       {
@@ -906,7 +876,7 @@
       {
         "name": "removable",
         "type": "boolean",
-        "description": "Sets the removable state of the chip.\nIf true, the chip will display a remove icon.",
+        "description": "Sets the removable state of the chip.\r\nIf true, the chip will display a remove icon.",
         "kind": "input"
       },
       {
@@ -953,6 +923,72 @@
       }
     ]
   },
+  "MonthViewDayDirective": {
+    "name": "MonthViewDayDirective",
+    "selector": "\"td[monaMonthViewDay]\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "disabledDates",
+        "type": "Iterable<Date>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "entry",
+        "type": "KeyValuePair<Date, number>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "monthBounds",
+        "type": "[Date, Date]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "navigatedDate",
+        "type": "Date",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "CalendarVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "CalendarVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Date | Date[] | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "AutoCompleteComponent": {
     "name": "AutoCompleteComponent",
     "selector": "\"mona-auto-complete\"",
@@ -960,7 +996,7 @@
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "Sets the aria-describedby attribute of the autocomplete input.\nUse this to associate error messages or help text with the input.",
+        "description": "Sets the aria-describedby attribute of the autocomplete input.\r\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
@@ -1086,7 +1122,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -1098,7 +1134,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -2938,6 +2974,12 @@
     "selector": "\"mona-list-item\"",
     "inputs": [
       {
+        "name": "checked",
+        "type": "boolean",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "item",
         "type": "ListItem<TData>",
         "description": "",
@@ -3281,6 +3323,66 @@
       }
     ]
   },
+  "CalendarComponent": {
+    "name": "CalendarComponent",
+    "selector": "\"mona-calendar\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the calendar.",
+        "kind": "model"
+      },
+      {
+        "name": "disabledDates",
+        "type": "Iterable<Date>",
+        "description": "Sets the disabled dates of the calendar.",
+        "kind": "input"
+      },
+      {
+        "name": "firstDay",
+        "type": "FirstDayOfWeek",
+        "description": "Sets the first day of the week.",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "Date | null",
+        "description": "Sets the maximum date that can be selected.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "Date | null",
+        "description": "Sets the minimum date that can be selected.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "CalendarVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the calendar.",
+        "kind": "input"
+      },
+      {
+        "name": "selection",
+        "type": "CalendarSelection",
+        "description": "Sets the selection mode of the calendar.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "CalendarVariantProps[\"size\"]",
+        "description": "Sets the size of the calendar.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "ComboBoxComponent": {
     "name": "ComboBoxComponent",
     "selector": "\"mona-combo-box\"",
@@ -3294,7 +3396,7 @@
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "Sets the aria-describedby attribute of the combo box input.\nUse this to associate error messages or help text with the input.",
+        "description": "Sets the aria-describedby attribute of the combo box input.\r\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
@@ -3414,7 +3516,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the combo box component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the combo box component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3426,13 +3528,13 @@
       {
         "name": "valueAdd",
         "type": "string",
-        "description": "Emits when user presses enter after typing in the combo box input.\nOnly emitted when {@link allowCustomValue} is true.",
+        "description": "Emits when user presses enter after typing in the combo box input.\r\nOnly emitted when {@link allowCustomValue} is true.",
         "kind": "output"
       },
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the combo box component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the combo box component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -3558,7 +3660,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3570,7 +3672,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the dropdown list component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]
@@ -3643,6 +3745,12 @@
         "name": "autoClose",
         "type": "boolean",
         "description": "Sets whether the popup should close after selecting an item.",
+        "kind": "input"
+      },
+      {
+        "name": "checkboxes",
+        "type": "boolean",
+        "description": "Sets whether the checkbox should be visible.",
         "kind": "input"
       },
       {
@@ -3744,7 +3852,7 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the multi select component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
@@ -3756,7 +3864,7 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the multi select component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       }
     ]

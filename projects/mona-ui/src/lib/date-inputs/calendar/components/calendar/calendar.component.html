@@ -14,8 +14,8 @@
             </button>
         }
         @case ('decade') {
-            <button monaButton [rounded]="rounded()" [size]="size()">{{ decadeYears()[0] }}
-                - {{ decadeYears()[decadeYears().length - 1] }}
+            <button monaButton [rounded]="rounded()" [size]="size()">
+                {{ decadeStart() }} - {{ decadeEnd() }}
             </button>
         }
     }
@@ -57,44 +57,22 @@
     </table>
 } @else if (calendarView() === 'year') {
     <table [class]="yearTableClass()">
-        <tr>
-            <td (click)="onMonthClick(1)">Jan</td>
-            <td (click)="onMonthClick(2)">Feb</td>
-            <td (click)="onMonthClick(3)">Mar</td>
-        </tr>
-        <tr>
-            <td (click)="onMonthClick(4)">Apr</td>
-            <td (click)="onMonthClick(5)">May</td>
-            <td (click)="onMonthClick(6)">Jun</td>
-        </tr>
-        <tr>
-            <td (click)="onMonthClick(7)">Jul</td>
-            <td (click)="onMonthClick(8)">Aug</td>
-            <td (click)="onMonthClick(9)">Sep</td>
-        </tr>
-        <tr>
-            <td (click)="onMonthClick(10)">Oct</td>
-            <td (click)="onMonthClick(11)">Nov</td>
-            <td (click)="onMonthClick(12)">Dec</td>
-        </tr>
+        @for (row of months(); track $index) {
+            <tr>
+                @for (monthItem of row; track monthItem) {
+                    <td (click)="onMonthClick(monthItem[0])" [tabindex]="disabled() ? -1 : 0">{{ monthItem[1] }}</td>
+                }
+            </tr>
+        }
     </table>
 } @else if (calendarView() === 'decade') {
     <table [class]="decadeTableClass()">
-        <tr>
-            <td (click)="onYearClick(decadeYears()[0])">{{ decadeYears()[0] }}</td>
-            <td (click)="onYearClick(decadeYears()[1])">{{ decadeYears()[1] }}</td>
-            <td (click)="onYearClick(decadeYears()[2])">{{ decadeYears()[2] }}</td>
-            <td (click)="onYearClick(decadeYears()[3])">{{ decadeYears()[3] }}</td>
-        </tr>
-        <tr>
-            <td (click)="onYearClick(decadeYears()[4])">{{ decadeYears()[4] }}</td>
-            <td (click)="onYearClick(decadeYears()[5])">{{ decadeYears()[5] }}</td>
-            <td (click)="onYearClick(decadeYears()[6])">{{ decadeYears()[6] }}</td>
-            <td (click)="onYearClick(decadeYears()[7])">{{ decadeYears()[7] }}</td>
-        </tr>
-        <tr>
-            <td (click)="onYearClick(decadeYears()[8])">{{ decadeYears()[8] }}</td>
-            <td (click)="onYearClick(decadeYears()[9])">{{ decadeYears()[9] }}</td>
-        </tr>
+        @for (row of decadeYears(); track $index) {
+            <tr>
+                @for (year of row; track year) {
+                    <td (click)="onYearClick(year)" [tabindex]="disabled() ? -1 : 0">{{ year }}</td>
+                }
+            </tr>
+        }
     </table>
 }
