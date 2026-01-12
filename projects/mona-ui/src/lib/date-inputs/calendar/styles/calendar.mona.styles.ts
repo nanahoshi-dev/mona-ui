@@ -86,8 +86,18 @@ export const calendarMonthViewDayVariants = cva(
                 large: "text-lg",
                 medium: "text-md",
                 small: "text-sm"
+            },
+            today: {
+                true: "font-bold text-primary"
             }
         },
+        compoundVariants: [
+            {
+                selected: true,
+                today: true,
+                class: "text-primary-foreground"
+            }
+        ],
         defaultVariants: {
             rounded: "medium"
         }

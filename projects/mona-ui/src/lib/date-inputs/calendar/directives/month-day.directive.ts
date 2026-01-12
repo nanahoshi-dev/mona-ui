@@ -23,7 +23,8 @@ export class MonthDayDirective {
         const outside = this.outside();
         const rounded = this.rounded();
         const selected = this.selected();
-        return calendarMonthViewDayThemeVariants(theme)({ disabled, focused, outside, rounded, selected });
+        const today = this.isToday();
+        return calendarMonthViewDayThemeVariants(theme)({ disabled, focused, outside, rounded, selected, today });
     });
     protected readonly dayDisabled = computed(() => {
         const disabled = this.disabled();
@@ -34,8 +35,8 @@ export class MonthDayDirective {
         return (
             disabled ||
             any(disabledDates, d => compareDates(entry.key, d, "==")) ||
-            compareDates(entry.key, max, ">=") ||
-            compareDates(entry.key, min, "<=")
+            compareDates(entry.key, max, ">") ||
+            compareDates(entry.key, min, "<")
         );
     });
     protected readonly focused = computed(() => {

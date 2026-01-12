@@ -372,6 +372,13 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         this.navigatedDate.set(direction === "prev" ? date.minus(unit).toJSDate() : date.plus(unit).toJSDate());
     }
 
+    protected onTodayButtonClick(): void {
+        const currentDate = DateTime.now().toJSDate();
+        this.setCurrentDate(currentDate);
+        this.navigatedDate.set(currentDate);
+        this.calendarView.set("month");
+    }
+
     protected onViewChangeClick(view: CalendarView): void {
         this.calendarView.set(view);
     }
