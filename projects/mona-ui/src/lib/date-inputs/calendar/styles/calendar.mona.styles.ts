@@ -14,6 +14,9 @@ export const calendarBaseVariants = cva(
             disabled: {
                 true: "opacity-50 cursor-not-allowed pointer-events-none"
             },
+            readonly: {
+                true: "pointer-events-none"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-sm",

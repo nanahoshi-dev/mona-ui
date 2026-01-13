@@ -24,6 +24,7 @@ import { ButtonDirective } from "../../../../buttons/button/directives/button.di
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { CalendarView } from "../../../models/CalendarView";
 import { DecadeYearDirective } from "../../directives/decade-year.directive";
 import { MonthDayDirective } from "../../directives/month-day.directive";
@@ -125,15 +126,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | Date[] | null> | null = null;
     #propagateTouched: Action | null = null;
-    protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        const disabled = this.disabled();
-        const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        const size = this.size();
-        const variantClass = calendarBaseThemeVariants(theme)({ disabled, rounded, size });
-        const userClass = this.userClass();
-        return twMerge(variantClass, userClass);
-    });
     protected readonly ariaLabel = computed(() => {
         const view = this.calendarView();
         const navigatedDate = this.navigatedDate();
@@ -146,6 +138,16 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             case "decade":
                 return `Decade view, ${this.decadeStart()} - ${this.decadeEnd()}`;
         }
+    });
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const disabled = this.disabled();
+        const readonly = this.readonly();
+        const rounded = this.rounded() === "full" ? "large" : this.rounded();
+        const size = this.size();
+        const variantClass = calendarBaseThemeVariants(theme)({ disabled, readonly, rounded, size });
+        const userClass = this.userClass();
+        return twMerge(variantClass, userClass);
     });
     protected readonly calendarView = signal<CalendarView>("month");
     protected readonly decadeEnd = computed(() => {
@@ -168,6 +170,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             .select(e => e.toArray())
             .toArray();
     });
+    protected readonly gridId = createElementControlId();
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         return calendarHeaderThemeVariants(theme)({});
@@ -202,10 +205,36 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             .toImmutableSet();
     });
     protected readonly navigatedDate = signal(new Date());
+    protected readonly nextButtonLabel = computed(() => {
+        const view = this.calendarView();
+        switch (view) {
+            case "month":
+                return "Next month";
+            case "year":
+                return "Next year";
+            case "decade":
+                return "Next decade";
+        }
+    });
     protected readonly nextMonthIcon = ChevronRight;
+    protected readonly prevButtonLabel = computed(() => {
+        const view = this.calendarView();
+        switch (view) {
+            case "month":
+                return "Previous month";
+            case "year":
+                return "Previous year";
+            case "decade":
+                return "Previous decade";
+        }
+    });
     protected readonly prevMonthIcon = ChevronLeft;
     protected readonly selectedDates = signal<Date[]>([]);
     protected readonly timezone = DateTime.local().zoneName ?? undefined;
+    protected readonly todayButtonLabel = computed(() => {
+        const today = DateTime.now();
+        return `Go to today, ${today.toFormat("MMMM d, yyyy")}`;
+    });
     protected readonly value = computed(() => {
         const selection = this.selection();
         const selectedDates = this.selectedDates();
@@ -223,6 +252,18 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             return [];
         }
         return [];
+    });
+    protected readonly viewSwitchButtonLabel = computed(() => {
+        const view = this.calendarView();
+        const date = DateTime.fromJSDate(this.navigatedDate());
+        switch (view) {
+            case "month":
+                return `Switch to year view, currently ${date.toFormat("MMMM yyyy")}`;
+            case "year":
+                return `Switch to decade view, currently ${date.toFormat("yyyy")}`;
+            case "decade":
+                return `${this.decadeStart()} to ${this.decadeEnd()}`;
+        }
     });
     protected readonly weekdays = computed(() => {
         const firstDayOfWeek = this.firstDay();
@@ -269,7 +310,14 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     public readonly min = input<Date | null>(null);
 
     /**
+     * @description Sets the readonly state of the calendar.
+     * @default false
+     */
+    public readonly readonly = input(false);
+
+    /**
      * @description Sets the border radius of the calendar.
+     * @default "medium"
      */
     public readonly rounded = input<CalendarVariantProps["rounded"]>("medium");
 
@@ -388,6 +436,21 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         this.calendarView.set("year");
     }
 
+    private extendSelection(offset: number): void {
+        const currentDate = this.navigatedDate();
+        const newDate = DateTime.fromJSDate(currentDate).plus({ days: offset }).toJSDate();
+        if (this.isDateDisabled(newDate)) {
+            return;
+        }
+        const currentSelection = this.selectedDates();
+        const dateTime = DateTime.fromJSDate(newDate);
+        const isAlreadySelected = currentSelection.some(d => DateTime.fromJSDate(d).hasSame(dateTime, "day"));
+        if (!isAlreadySelected) {
+            this.setCurrentDate([...currentSelection, newDate]);
+        }
+        this.navigatedDate.set(newDate);
+    }
+
     private focusActiveCell(): void {
         const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>('td[tabindex="0"]');
         activeCell?.focus();
@@ -405,50 +468,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return range(0, totalDays)
             .select(i => DateTime.fromJSDate(startDate).plus({ days: i }).toJSDate())
             .toArray();
-    }
-
-    private handleMultipleSelection(date: Date, rangedSelection: boolean): void {
-        const value = this.selectedDates();
-        if (value.length === 0) {
-            this.setCurrentDate([date]);
-            this.navigatedDate.set(date);
-            return;
-        }
-        if (!rangedSelection) {
-            const date1 = DateTime.fromJSDate(date);
-            const valueList = this.getDateArray(value);
-            const selectedDates = select(valueList, e => DateTime.fromJSDate(e));
-            const alreadySelected = selectedDates.any(e => e.equals(date1));
-            if (alreadySelected) {
-                const newDates = selectedDates
-                    .where(e => !e.equals(date1))
-                    .select(e => e.toJSDate())
-                    .toArray();
-                this.setCurrentDate(newDates);
-            } else {
-                this.setCurrentDate([...valueList, date]);
-            }
-            this.navigatedDate.set(date);
-        } else {
-            const selectedDates = this.getDatesForMultipleSelection(date);
-            this.setCurrentDate(selectedDates);
-        }
-    }
-
-    private handleSingleSelection(date: Date): void {
-        const value = this.selectedDates();
-        if (value) {
-            const date1 = DateTime.fromJSDate(date);
-            const valueItem = lastOrDefault(value) ?? DateTime.now().toJSDate();
-            const newDate = DateTime.fromJSDate(valueItem)
-                .set({ day: date1.day, month: date1.month, year: date1.year })
-                .toJSDate();
-            this.navigatedDate.set(newDate);
-            this.setCurrentDate(newDate);
-        } else {
-            this.navigatedDate.set(date);
-            this.setCurrentDate(date);
-        }
     }
 
     private handleKeydown(event: KeyboardEvent): void {
@@ -508,6 +527,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 shouldFocusCell = true;
                 break;
             case "Enter":
+            case " ":
                 event.preventDefault();
                 if (isCtrlOrCmd && selection === "multiple") {
                     this.toggleFocusedDateInSelection();
@@ -553,6 +573,34 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
     }
 
+    private handleMultipleSelection(date: Date, rangedSelection: boolean): void {
+        const value = this.selectedDates();
+        if (value.length === 0) {
+            this.setCurrentDate([date]);
+            this.navigatedDate.set(date);
+            return;
+        }
+        if (!rangedSelection) {
+            const date1 = DateTime.fromJSDate(date);
+            const valueList = this.getDateArray(value);
+            const selectedDates = select(valueList, e => DateTime.fromJSDate(e));
+            const alreadySelected = selectedDates.any(e => e.equals(date1));
+            if (alreadySelected) {
+                const newDates = selectedDates
+                    .where(e => !e.equals(date1))
+                    .select(e => e.toJSDate())
+                    .toArray();
+                this.setCurrentDate(newDates);
+            } else {
+                this.setCurrentDate([...valueList, date]);
+            }
+            this.navigatedDate.set(date);
+        } else {
+            const selectedDates = this.getDatesForMultipleSelection(date);
+            this.setCurrentDate(selectedDates);
+        }
+    }
+
     private handleMultipleSelectionKeyboard(event: KeyboardEvent, isCtrlOrCmd: boolean, isShift: boolean): boolean {
         if (this.calendarView() !== "month") {
             return false;
@@ -580,19 +628,20 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return false;
     }
 
-    private extendSelection(offset: number): void {
-        const currentDate = this.navigatedDate();
-        const newDate = DateTime.fromJSDate(currentDate).plus({ days: offset }).toJSDate();
-        if (this.isDateDisabled(newDate)) {
-            return;
+    private handleSingleSelection(date: Date): void {
+        const value = this.selectedDates();
+        if (value) {
+            const date1 = DateTime.fromJSDate(date);
+            const valueItem = lastOrDefault(value) ?? DateTime.now().toJSDate();
+            const newDate = DateTime.fromJSDate(valueItem)
+                .set({ day: date1.day, month: date1.month, year: date1.year })
+                .toJSDate();
+            this.navigatedDate.set(newDate);
+            this.setCurrentDate(newDate);
+        } else {
+            this.navigatedDate.set(date);
+            this.setCurrentDate(date);
         }
-        const currentSelection = this.selectedDates();
-        const dateTime = DateTime.fromJSDate(newDate);
-        const isAlreadySelected = currentSelection.some(d => DateTime.fromJSDate(d).hasSame(dateTime, "day"));
-        if (!isAlreadySelected) {
-            this.setCurrentDate([...currentSelection, newDate]);
-        }
-        this.navigatedDate.set(newDate);
     }
 
     private isDateDisabled(date: Date): boolean {
