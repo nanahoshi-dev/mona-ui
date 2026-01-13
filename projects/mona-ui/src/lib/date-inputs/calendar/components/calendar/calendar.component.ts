@@ -1,17 +1,21 @@
-import { DatePipe } from "@angular/common";
+import { DatePipe, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
+    contentChild,
     DestroyRef,
+    effect,
     ElementRef,
     forwardRef,
     inject,
     input,
     model,
     OnInit,
-    signal
+    signal,
+    TemplateRef,
+    untracked
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
@@ -26,6 +30,9 @@ import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { CalendarView } from "../../../models/CalendarView";
+import { CalendarDecadeCellTemplateDirective } from "../../directives/calendar-decade-cell-template.directive";
+import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-month-cell-template.directive";
+import { CalendarYearCellTemplateDirective } from "../../directives/calendar-year-cell-template.directive";
 import { DecadeYearDirective } from "../../directives/decade-year.directive";
 import { MonthDayDirective } from "../../directives/month-day.directive";
 import { YearMonthDirective } from "../../directives/year-month.directive";
@@ -40,6 +47,7 @@ import {
     CalendarVariantProps,
     calendarYearViewTableThemeVariants
 } from "../../styles/calendar.styles";
+import { compareDates } from "../../utils/compareDates";
 
 @Component({
     selector: "mona-calendar",
@@ -58,7 +66,8 @@ import {
         MonthDayDirective,
         LucideAngularModule,
         DecadeYearDirective,
-        YearMonthDirective
+        YearMonthDirective,
+        NgTemplateOutlet
     ],
     host: {
         role: "application",
@@ -150,6 +159,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return twMerge(variantClass, userClass);
     });
     protected readonly calendarView = signal<CalendarView>("month");
+    protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective, { read: TemplateRef });
     protected readonly decadeEnd = computed(() => {
         return this.decadeStart() + 9;
     });
@@ -181,6 +191,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const lastDayOfMonth = DateTime.fromJSDate(navigatedDate).endOf("month");
         return { start: firstDayOfMonth.toJSDate(), end: lastDayOfMonth.toJSDate() };
     });
+    protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective, { read: TemplateRef });
     protected readonly monthDictChunked = computed(() => {
         const dict = this.#monthDict();
         return dict
@@ -278,6 +289,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         ];
         return firstDayOfWeek === "monday" ? [...days.slice(1), days[0]] : days;
     });
+    protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective, { read: TemplateRef });
     protected readonly yearTableClass = computed(() => {
         const theme = this.#themeService.theme();
         return calendarYearViewTableThemeVariants(theme)();
@@ -344,6 +356,20 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 this.setRangeChangeSubscription();
             }
         });
+        effect(() => {
+            const min = this.min();
+            const max = this.max();
+            this.disabledDates();
+            untracked(() => {
+                const navigationDate = this.navigatedDate();
+                if (this.isDateDisabled(navigationDate)) {
+                    const newDate = min ?? max;
+                    if (newDate) {
+                        this.navigatedDate.set(newDate);
+                    }
+                }
+            });
+        });
     }
 
     public ngOnInit(): void {
@@ -396,6 +422,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             this.#rangeChange$.next(date);
             this.navigatedDate.set(date);
         }
+        this.focusActiveCell();
     }
 
     protected onMonthClick(month: number): void {
@@ -452,8 +479,10 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     }
 
     private focusActiveCell(): void {
-        const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>('td[tabindex="0"]');
-        activeCell?.focus();
+        rxTimeout(this.#destroyRef, () => {
+            const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>('td[tabindex="0"]');
+            activeCell?.focus();
+        });
     }
 
     private getDateArray(date: Date | Date[] | null): Date[] {
@@ -479,7 +508,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const isShift = event.shiftKey;
         const selection = this.selection();
 
-        // Handle multiple selection mode shortcuts
         if (selection === "multiple" && (isCtrlOrCmd || isShift)) {
             if (this.handleMultipleSelectionKeyboard(event, isCtrlOrCmd, isShift)) {
                 this.focusActiveCell();
@@ -488,7 +516,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
 
         let shouldFocusCell = false;
-
         switch (event.key) {
             case "ArrowUp":
                 event.preventDefault();
@@ -527,7 +554,12 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 shouldFocusCell = true;
                 break;
             case "Enter":
-            case " ":
+            case " ": {
+                const target = event.target as HTMLElement;
+                if (target.tagName === "BUTTON" || target.closest("button")) {
+                    this.focusActiveCell();
+                    return;
+                }
                 event.preventDefault();
                 if (isCtrlOrCmd && selection === "multiple") {
                     this.toggleFocusedDateInSelection();
@@ -538,6 +570,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 }
                 shouldFocusCell = true;
                 break;
+            }
             case "Home":
                 event.preventDefault();
                 this.navigateToStart(view);
@@ -569,7 +602,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
 
         if (shouldFocusCell) {
-            rxTimeout(this.#destroyRef, () => this.focusActiveCell());
+            this.focusActiveCell();
         }
     }
 
@@ -649,17 +682,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const max = this.max();
         const min = this.min();
         return (
-            any(disabledDates, d => this.isSameDay(date, d)) ||
-            (max != null && date > max) ||
-            (min != null && date < min)
-        );
-    }
-
-    private isSameDay(date1: Date, date2: Date): boolean {
-        return (
-            date1.getFullYear() === date2.getFullYear() &&
-            date1.getMonth() === date2.getMonth() &&
-            date1.getDate() === date2.getDate()
+            any(disabledDates, d => compareDates(date, d, "==")) ||
+            compareDates(date, max, ">") ||
+            compareDates(date, min, "<")
         );
     }
 

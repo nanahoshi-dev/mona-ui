@@ -92,7 +92,8 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
     });
     protected readonly listItemClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return menubarListItemThemeVariants(theme)();
+        const rounded = this.rounded();
+        return menubarListItemThemeVariants(theme)({ rounded });
     });
     protected readonly menuIdList = computed(() => {
         return this.menuList().map(() => createElementControlId());

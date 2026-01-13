@@ -47,6 +47,6 @@ export class YearMonthDirective {
     public readonly month = input.required<number>();
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
-    public readonly selectedDate = input<Date | null>(null);
+    public readonly selectedDate = input<Date | null>();
     public readonly size = input.required<CalendarVariantProps["size"]>();
 }

@@ -46,31 +46,28 @@ export const calendarHeaderVariants = cva(
     `
         flex items-center justify-center
         w-full
-        [&>button+button]:border-s-0
+        [&>button+button]:not-focus:border-s-0
         [&>button:nth-of-type(1)]:rounded-se-none
         [&>button:nth-of-type(1)]:rounded-ee-none
         [&>button:nth-of-type(2)]:flex-1
         [&>button:nth-of-type(2)]:rounded-none
         [&>button:nth-of-type(3)]:rounded-ss-none
         [&>button:nth-of-type(3)]:rounded-es-none
-        [&>button]:bg-secondary
+        [&>button]:outline-none
     `
 );
 
 export const calendarMonthViewDayVariants = cva(
     `
-        focus-visible:ring-1 ring-inset ring-primary/40
-        focus-visible:outline-none
-        hover:bg-hover
-        cursor-pointer
+        hover:bg-hover cursor-pointer
     `,
     {
         variants: {
             disabled: {
-                true: "opacity-50 cursor-not-allowed"
+                true: "opacity-50 cursor-not-allowed pointer-events-none"
             },
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent"
+                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
             },
             outside: {
                 true: "opacity-50"
@@ -143,7 +140,7 @@ export const calendarYearViewCellVariants = cva(
     {
         variants: {
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent"
+                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
             },
             rounded: {
                 none: "rounded-none",
@@ -169,7 +166,7 @@ export const calendarDecadeViewCellVariants = cva(
     {
         variants: {
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent"
+                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
             },
             rounded: {
                 none: "rounded-none",

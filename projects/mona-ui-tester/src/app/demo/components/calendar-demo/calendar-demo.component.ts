@@ -3,9 +3,13 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, model, sig
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { DateTime } from "luxon";
-import { CalendarComponent } from "mona-ui";
+import {
+    CalendarComponent,
+    CalendarDecadeCellTemplateDirective,
+    CalendarMonthCellTemplateDirective,
+    CalendarYearCellTemplateDirective
+} from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
-import { getFormValueText } from "../../utils/dropdownFeatureConfigs";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -17,7 +21,26 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CalendarDemoComponent extends AbstractDemoComponent<CalendarComponent> {
-    readonly #injector = createFeatureInjector({});
+    readonly #injector = createFeatureInjector({
+        decadeCellTemplate: {
+            code: ``,
+            active: false,
+            description: `A custom decade cell template that can be used to customize the appearance of the calendar decade cells.`,
+            name: "Decade Cell Template"
+        },
+        monthCellTemplate: {
+            code: ``,
+            active: false,
+            description: `A custom month cell template that can be used to customize the appearance of the calendar month cells.`,
+            name: "Month Cell Template"
+        },
+        yearCellTemplate: {
+            code: ``,
+            active: false,
+            description: `A custom year cell template that can be used to customize the appearance of the calendar year cells.`,
+            name: "Year Cell Template"
+        }
+    });
     protected readonly config = signal<ComponentConfig<CalendarComponent>>({
         code: ``,
         inputs: {
@@ -44,10 +67,14 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 value: [DateTime.now().minus({ day: 10 }).toJSDate()],
                 defaultValue: null
             },
+            readonly: {
+                type: "boolean",
+                value: false
+            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
-                defaultValue: "none"
+                defaultValue: "medium"
             },
             selection: {
                 type: "dropdown",
@@ -69,9 +96,15 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
 }
 
 @Component({
-    imports: [CalendarComponent, ReactiveFormsModule],
+    imports: [
+        CalendarComponent,
+        ReactiveFormsModule,
+        CalendarMonthCellTemplateDirective,
+        CalendarYearCellTemplateDirective,
+        CalendarDecadeCellTemplateDirective
+    ],
     template: `
-        <!--        @let featureData = features();-->
+        @let featureData = features();
         <span>{{ formValueText() }}</span>
         <form [formGroup]="formGroup">
             <mona-calendar
@@ -81,9 +114,31 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 [formControl]="formGroup.controls.value"
                 [max]="max()"
                 [min]="min()"
+                [readonly]="readonly()"
                 [rounded]="rounded()"
                 [selection]="selection()"
-                [size]="size()"></mona-calendar>
+                [size]="size()">
+                @if (featureData && featureData["decadeCellTemplate"].active) {
+                    <ng-template monaCalendarDecadeCellTemplate let-year>
+                        <span class="text-amber-700 italic">{{ year }}</span>
+                    </ng-template>
+                }
+                @if (featureData && featureData["monthCellTemplate"].active) {
+                    <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                        <span [class.text-violet-600]="day % 2 === 0" [class.text-blue-500]="day % 2 !== 0">
+                            {{ day }}
+                        </span>
+                    </ng-template>
+                }
+                @if (featureData && featureData["yearCellTemplate"].active) {
+                    <ng-template monaCalendarYearCellTemplate let-month let-text="text">
+                        <span
+                            >{{ text }} |
+                            <span class="text-green-500">{{ month }}</span>
+                        </span>
+                    </ng-template>
+                }
+            </mona-calendar>
         </form>
     `
 })
@@ -105,6 +160,7 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
     public readonly firstDay = input<ReturnType<CalendarComponent["firstDay"]>>("monday");
     public readonly max = input<ReturnType<CalendarComponent["max"]>>(null);
     public readonly min = input<ReturnType<CalendarComponent["min"]>>(null);
+    public readonly readonly = input<ReturnType<CalendarComponent["readonly"]>>(false);
     public readonly rounded = input<ReturnType<CalendarComponent["rounded"]>>("none");
     public readonly selection = input<ReturnType<CalendarComponent["selection"]>>("single");
     public readonly size = input<ReturnType<CalendarComponent["size"]>>("medium");

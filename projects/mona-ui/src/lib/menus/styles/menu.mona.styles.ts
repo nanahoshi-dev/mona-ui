@@ -117,13 +117,23 @@ export const menubarListItemVariants = cva(
         data-[disabled='true']:opacity-50
         data-[active='true']:bg-accent
         data-[active='true']:text-accent-foreground
-
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                none: "rounded-none"
+            }
+        }
+    }
 );
 
 export const menubarListVariants = cva(
     `
         w-full h-full list-none
         flex items-center select-none
+        p-1
     `
 );

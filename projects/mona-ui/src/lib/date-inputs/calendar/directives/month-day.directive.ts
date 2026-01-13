@@ -1,4 +1,4 @@
-import { computed, Directive, inject, input } from "@angular/core";
+import { computed, Directive, inject, input, output } from "@angular/core";
 import { any, exactly, KeyValuePair } from "@mirei/ts-collections";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
@@ -11,7 +11,8 @@ import { compareDates } from "../utils/compareDates";
         "[attr.aria-selected]": "selected() ? 'true' : null",
         "[attr.aria-current]": "isToday() ? 'date' : null",
         "[attr.aria-disabled]": "dayDisabled() ? 'true' : null",
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(click)": "onClick($event)"
     }
 })
 export class MonthDayDirective {
@@ -63,6 +64,7 @@ export class MonthDayDirective {
         }
         return compareDates(entry.key, value, "==");
     });
+    public readonly daySelect = output<{ date: Date; event: MouseEvent }>();
     public readonly disabled = input.required<boolean>();
     public readonly disabledDates = input.required<Iterable<Date>>();
     public readonly entry = input.required<KeyValuePair<Date, number>>();
@@ -73,4 +75,12 @@ export class MonthDayDirective {
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly size = input.required<CalendarVariantProps["size"]>();
     public readonly value = input.required<Date | Date[] | null>();
+
+    protected onClick(event: MouseEvent) {
+        if (this.disabled()) {
+            return;
+        }
+        event.preventDefault();
+        this.daySelect.emit({ date: this.entry().key, event });
+    }
 }
