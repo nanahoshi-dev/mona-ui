@@ -68,8 +68,8 @@ export class MonthDayDirective {
     public readonly disabled = input.required<boolean>();
     public readonly disabledDates = input.required<Iterable<Date>>();
     public readonly entry = input.required<KeyValuePair<Date, number>>();
-    public readonly max = input.required<Date | null>();
-    public readonly min = input.required<Date | null>();
+    public readonly max = input.required<Date | null | undefined>();
+    public readonly min = input.required<Date | null | undefined>();
     public readonly monthBounds = input.required<[Date, Date]>();
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();

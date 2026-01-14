@@ -86,6 +86,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "date-picker",
+                loadComponent: () =>
+                    import("./docs/components/date-picker-doc/date-picker-doc.component").then(
+                        m => m.DatePickerDocComponent
+                    )
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/dropdown-button-doc/dropdown-button-doc.component").then(

@@ -316,12 +316,12 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     /**
      * @description Sets the maximum date that can be selected.
      */
-    public readonly max = input<Date | null>(null);
+    public readonly max = input<Date | null>();
 
     /**
      * @description Sets the minimum date that can be selected.
      */
-    public readonly min = input<Date | null>(null);
+    public readonly min = input<Date | null>();
 
     /**
      * @description Sets the readonly state of the calendar.

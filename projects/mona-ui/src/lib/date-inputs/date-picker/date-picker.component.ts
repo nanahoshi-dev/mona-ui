@@ -70,8 +70,8 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
     public disabled = model(false);
     public disabledDates = input<Iterable<Date>>([]);
     public format = input("dd/MM/yyyy");
-    public max = input<Date | null>(null);
-    public min = input<Date | null>(null);
+    public max = input<Date | null>();
+    public min = input<Date | null>();
     public readonly = input(false);
 
     public ngOnInit(): void {
@@ -81,15 +81,15 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
 
     public onCalendarValueChange(date: Date | null): void {
         this.setCurrentDate(date);
-        this.animateClose();
-        this.popupRef?.closeWithDelay();
+        // this.animateClose();
+        // this.popupRef?.closeWithDelay();
     }
 
     public onDateInputBlur(): void {
         if (this.popupRef) {
             return;
         }
-        if (!this.currentDateString && this.value()) {
+        if (!this.currentDateString() && this.value()) {
             this.setCurrentDate(null);
             return;
         }
@@ -120,7 +120,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
     }
 
     public onDateInputButtonClick(): void {
-        if (!this.datePopupTemplateRef || this.readonly() || this.popupRef) {
+        if (!this.datePopupTemplateRef() || this.readonly() || this.popupRef) {
             return;
         }
         const input = this.#hostElementRef.nativeElement.querySelector("input") as HTMLElement;
@@ -136,8 +136,8 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
             closeOnOutsideClick: false,
             positions: DropdownService.getDefaultPositions()
         });
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.popupRef);
-        this.#popupAnimationService.animateDropdown(this.popupRef, AnimationState.Show);
+        // this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.popupRef);
+        // this.#popupAnimationService.animateDropdown(this.popupRef, AnimationState.Show);
         this.popupRef.closed.pipe(take(1)).subscribe(() => {
             this.popupRef = null;
             this.#focusMonitor.focusVia(input, "program");
@@ -168,7 +168,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
         if (!this.popupRef) {
             return;
         }
-        this.#popupAnimationService.animateDropdown(this.popupRef, AnimationState.Hide);
+        // this.#popupAnimationService.animateDropdown(this.popupRef, AnimationState.Hide);
     }
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {

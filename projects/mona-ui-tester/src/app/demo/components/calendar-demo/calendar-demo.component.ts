@@ -159,7 +159,6 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
         const valueList = Array.isArray(value) ? value : [value];
         return valueList.map(v => (v ? DateTime.fromJSDate(v).toFormat("yyyy-MM-dd") : "null")).join(", ");
     });
-    protected readonly selectedDate = model<DateTime | DateTime[]>(DateTime.now());
     public readonly disabled = model<ReturnType<CalendarComponent["disabled"]>>(false);
     public readonly disabledDates = input<ReturnType<CalendarComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<CalendarComponent["firstDay"]>>("monday");

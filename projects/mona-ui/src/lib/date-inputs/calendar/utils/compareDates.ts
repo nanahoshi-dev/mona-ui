@@ -1,6 +1,10 @@
 export type DateComparisonOperator = "==" | "!=" | "<" | "<=" | ">" | ">=";
 
-export const compareDates = (date1: Date | null, date2: Date | null, operator: DateComparisonOperator): boolean => {
+export const compareDates = (
+    date1: Date | null | undefined,
+    date2: Date | null | undefined,
+    operator: DateComparisonOperator
+): boolean => {
     if (!date1 || !date2) {
         return false;
     }

@@ -81,6 +81,10 @@ export class SidebarComponent {
                     path: "/contextmenu"
                 },
                 {
+                    text: "Date Picker",
+                    path: "/date-picker"
+                },
+                {
                     text: "Dropdown Button",
                     path: "/dropdown-button"
                 },
