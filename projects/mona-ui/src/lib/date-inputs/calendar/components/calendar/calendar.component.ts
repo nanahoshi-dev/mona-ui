@@ -26,6 +26,7 @@ import { bufferCount, distinctUntilChanged, fromEvent, Subject, tap } from "rxjs
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
+import { TakeFirstPipe } from "../../../../pipes/take-first.pipe";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
@@ -67,7 +68,8 @@ import { compareDates } from "../../utils/compareDates";
         LucideAngularModule,
         DecadeYearDirective,
         YearMonthDirective,
-        NgTemplateOutlet
+        NgTemplateOutlet,
+        TakeFirstPipe
     ],
     host: {
         role: "application",
@@ -345,6 +347,12 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
      */
     public readonly size = input<CalendarVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Enables the display of week numbers in the calendar.
+     * @default false
+     */
+    public readonly weekNumber = input<boolean>(false);
 
     public constructor() {
         toObservable(this.value)

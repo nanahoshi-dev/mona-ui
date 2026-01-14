@@ -923,10 +923,52 @@
       }
     ]
   },
-  "MonthViewDayDirective": {
-    "name": "MonthViewDayDirective",
-    "selector": "\"td[monaMonthViewDay]\"",
+  "DecadeYearDirective": {
+    "name": "DecadeYearDirective",
+    "selector": "\"td[monaDecadeYear]\"",
     "inputs": [
+      {
+        "name": "navigatedDate",
+        "type": "Date",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "CalendarVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "selectedDate",
+        "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "CalendarVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "year",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "MonthDayDirective": {
+    "name": "MonthDayDirective",
+    "selector": "\"td[monaMonthDay]\"",
+    "inputs": [
+      {
+        "name": "daySelect",
+        "type": "{ date: Date; event: MouseEvent }",
+        "description": "",
+        "kind": "output"
+      },
       {
         "name": "disabled",
         "type": "boolean",
@@ -984,6 +1026,42 @@
       {
         "name": "value",
         "type": "Date | Date[] | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "YearMonthDirective": {
+    "name": "YearMonthDirective",
+    "selector": "\"td[monaYearMonth]\"",
+    "inputs": [
+      {
+        "name": "month",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "navigatedDate",
+        "type": "Date",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "CalendarVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "selectedDate",
+        "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "CalendarVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
       }
@@ -3358,6 +3436,12 @@
         "kind": "input"
       },
       {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the calendar.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "CalendarVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the calendar.",
@@ -3379,6 +3463,12 @@
         "name": "userClass",
         "type": "string",
         "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "weekNumber",
+        "type": "boolean",
+        "description": "Enables the display of week numbers in the calendar.",
         "kind": "input"
       }
     ]

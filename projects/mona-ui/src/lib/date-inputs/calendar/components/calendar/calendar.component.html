@@ -34,6 +34,9 @@
     <table role="grid" [class]="monthTableClass()" [attr.aria-labelledby]="gridId + '-heading'">
         <thead>
             <tr>
+                @if (weekNumber()) {
+                    <th></th>
+                }
                 @for (day of weekdays(); track day.short) {
                     <th [attr.abbr]="day.full">{{ day.short }}</th>
                 }
@@ -42,6 +45,13 @@
         <tbody>
             @for (row of monthDictChunked(); track $index) {
                 <tr>
+                    @if (weekNumber()) {
+                        @let firstEntry = row|monaTakeFirst;
+                        @if (firstEntry) {
+                            @let week = firstEntry.key | date: 'w';
+                            <td [attr.data-week]="week">{{ week }}</td>
+                        }
+                    }
                     @for (entry of row; track entry.key) {
                         <td (daySelect)="onDayClick($event.date, $event.event)" monaMonthDay [disabled]="disabled()"
                             [disabledDates]="disabledDates()" [min]="min()" [max]="max()"

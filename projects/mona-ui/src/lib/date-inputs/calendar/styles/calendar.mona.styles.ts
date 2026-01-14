@@ -120,6 +120,9 @@ export const calendarMonthViewTableVariants = cva(
         [&>tbody_td]:py-1
         [&>tbody_td]:px-0
         [&>tbody>tr:first>td]:mt-1
+        [&>tbody>tr>td[data-week]]:text-center
+        [&>tbody>tr>td[data-week]]:text-sm
+        [&>tbody>tr>td[data-week]]:text-foreground/70
     `
 );
 
