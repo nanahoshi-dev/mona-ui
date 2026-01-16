@@ -17,8 +17,8 @@ export class PopupRef {
 
     /**
      * Closes the popup after a delay.
-     * When popup is closed, the overlay element is removed from the DOM instantly.
-     * This causes the animation of the child elements to not play, therefore
+     * When the popup is closed, the overlay element is removed from the DOM instantly.
+     * This causes the animation of the child elements to not play, therefore,
      * a delay is added to allow the animation to play.
      *
      * @see {@link https://github.com/angular/angular/issues/23302} for more information.
@@ -39,6 +39,10 @@ export class PopupRef {
 
     public get component(): ComponentRef<any> | null {
         return this.#options.component;
+    }
+
+    public get opened(): Observable<void> {
+        return this.#options.opened$;
     }
 
     public get overlayRef(): OverlayRef {

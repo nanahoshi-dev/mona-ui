@@ -39,7 +39,7 @@ export * from "./buttons/split-button/directives/split-button-text-template.dire
 export * from "./common/models/FilterableOptions";
 export * from "./common/models/VirtualScrollOptions";
 
-export * from "./common/directives/form-field-validation.directive";
+export * from "./common/forms/directives/form-field-validation.directive";
 
 export * from "./common/filter-input/models/FilterChangeEvent";
 
@@ -86,7 +86,7 @@ export * from "./dropdowns/directives/drop-down-header-template.directive";
 export * from "./dropdowns/directives/drop-down-item-template.directive";
 export * from "./dropdowns/directives/drop-down-no-data-template.directive";
 export * from "./dropdowns/directives/dropdown-data-handler.directive";
-export * from "./dropdowns/directives/dropdown-popup-handler.directive";
+export * from "./dropdowns/directives/dropdown-list-popup-handler.directive";
 export * from "./dropdowns/directives/dropdown-prefix-template.directive";
 export * from "./dropdowns/directives/dropdown-suffix-template.directive";
 export * from "./dropdowns/directives/drop-down-virtual-scroll.directive";

@@ -24,7 +24,7 @@ import { fromEvent, take } from "rxjs";
 import { AnimationState } from "../../animations/models/AnimationState";
 import { PopupAnimationService } from "../../animations/services/popup-animation.service";
 import { ButtonDirective } from "../../buttons/button/directives/button.directive";
-import { DropdownService } from "../../dropdowns/services/dropdown.service";
+import { DropdownService } from "../../common/dropdown/services/dropdown.service";
 import { TextBoxDirective } from "../../inputs/text-box/directives/text-box.directive";
 import { PopupRef } from "../../popup/models/PopupRef";
 import { PopupService } from "../../popup/services/popup.service";

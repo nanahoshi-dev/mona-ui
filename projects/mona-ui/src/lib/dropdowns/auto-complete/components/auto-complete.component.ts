@@ -25,7 +25,7 @@ import { LucideAngularModule } from "lucide-angular";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../common/directives/form-field-validation.directive";
+import { FormFieldValidationDirective } from "../../../common/forms/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
@@ -53,13 +53,14 @@ import { DropDownItemTemplateDirective } from "../../directives/drop-down-item-t
 import { DropDownNoDataTemplateDirective } from "../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../directives/dropdown-data-handler.directive";
 import { DropdownLiveRegionDirective } from "../../directives/dropdown-live-region.directive";
-import { DropdownPopupHandlerDirective } from "../../directives/dropdown-popup-handler.directive";
+import { DropdownListPopupHandlerDirective } from "../../directives/dropdown-list-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../directives/dropdown-prefix-template.directive";
 import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../models/DropdownPopupInput";
-import { DropdownService } from "../../services/dropdown.service";
+import { DropdownService } from "../../../common/dropdown/services/dropdown.service";
+import { DropdownListService } from "../../services/dropdown-list.service";
 import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
@@ -72,7 +73,7 @@ import {
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     providers: [
         ListService,
         DropdownService,
@@ -455,7 +456,7 @@ export class AutoCompleteComponent<TData = unknown>
                 }
 
                 if (!this.#popupRef()) {
-                    this.#dropdownService.triggerPopupOpen$.next();
+                    this.#dropdownService.triggerPopupOpen$.next({});
                 }
 
                 this.autoCompleteValue.set(value);

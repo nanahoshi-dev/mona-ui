@@ -26,7 +26,7 @@ import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import { asyncScheduler, combineLatest, delay, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
+import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -52,12 +52,13 @@ import { DropDownItemTemplateDirective } from "../../../directives/drop-down-ite
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
 import { DropdownLiveRegionDirective } from "../../../directives/dropdown-live-region.directive";
-import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
+import { DropdownListPopupHandlerDirective } from "../../../directives/dropdown-list-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
-import { DropdownService } from "../../../services/dropdown.service";
+import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
+import { DropdownListService } from "../../../services/dropdown-list.service";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
 import {
     dropdownListAffixContainerThemeVariants,
@@ -71,10 +72,11 @@ import {
     selector: "mona-drop-down-list",
     templateUrl: "./dropdown-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     providers: [
         ListService,
         DropdownService,
+        DropdownListService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => DropdownListComponent),
@@ -127,6 +129,7 @@ export class DropdownListComponent<TData = unknown>
     implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownListService = inject(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #navigatedValue = linkedSignal(() => this.#value());
@@ -438,7 +441,7 @@ export class DropdownListComponent<TData = unknown>
 
     private handleEnterKey(): void {
         if (!this.expanded()) {
-            this.#dropdownService.triggerPopupOpen$.next();
+            this.#dropdownService.triggerPopupOpen$.next({});
             return;
         }
         if (this.expanded() && this.#value() !== this.#navigatedValue()) {
@@ -477,7 +480,7 @@ export class DropdownListComponent<TData = unknown>
     }
 
     private setArrowKeyNavigationSubscription(): void {
-        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
+        this.#dropdownListService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
             if (!this.expanded()) {
                 this.updateValue(item.data, true);
             } else {

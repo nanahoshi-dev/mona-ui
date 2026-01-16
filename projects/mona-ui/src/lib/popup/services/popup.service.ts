@@ -194,6 +194,9 @@ export class PopupService {
         const popupReference = new PopupReference(overlayRef);
         const originallyFocusedElement = this.captureOriginalFocus(settings);
         const injector = this.createInjector(settings, popupReference);
+
+        popupReference.notifyOpen();
+
         const animationElement = this.attachContent(settings, popupReference, overlayRef, injector);
 
         this.setupAnimations(settings.animation, animationElement, popupReference);

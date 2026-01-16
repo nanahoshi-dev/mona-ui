@@ -1,34 +1,45 @@
-import { afterNextRender, DestroyRef, Directive, ElementRef, inject, TemplateRef } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent, take, takeUntil } from "rxjs";
+import { afterNextRender, DestroyRef, Directive, ElementRef, inject } from "@angular/core";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { filter, fromEvent, switchMap, take } from "rxjs";
+import { DropdownPopupHandlerDirective } from "../../common/dropdown/directives/dropdown-popup-handler.directive";
+import { DropdownService } from "../../common/dropdown/services/dropdown.service";
 import { ListService } from "../../common/list/services/list.service";
-import { PopupRef } from "../../popup/models/PopupRef";
-import { PopupService } from "../../popup/services/popup.service";
 import { PreventableEvent } from "../../utils/PreventableEvent";
-import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../animations/dropdown.animation";
 import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
-import { DropdownService } from "../services/dropdown.service";
+import { DropdownListService } from "../services/dropdown-list.service";
 
 @Directive({
-    selector: "[monaDropdownPopupHandler]"
+    selector: "[monaDropdownListPopupHandler]",
+    hostDirectives: [DropdownPopupHandlerDirective]
 })
-export class DropdownPopupHandlerDirective {
+export class DropdownListPopupHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownListService = inject(DropdownListService, { optional: true });
     readonly #dropdownService = inject(DropdownService);
-    readonly #listService = inject(ListService);
     readonly #host = inject(DropdownPopupInputToken);
     readonly #hostElementRef = inject(ElementRef);
-    readonly #popupService = inject(PopupService);
+    readonly #listService = inject(ListService);
+    readonly #popupClosed$ = toObservable(this.#dropdownService.popupRef).pipe(
+        filter(popupRef => !!popupRef),
+        switchMap(popupRef => popupRef.closed.pipe(take(1)))
+    );
+    readonly #popupOpened$ = toObservable(this.#dropdownService.popupRef).pipe(
+        filter(popupRef => !!popupRef),
+        switchMap(popupRef => popupRef.opened.pipe(take(1)))
+    );
 
     public constructor() {
         afterNextRender({
             read: () => {
                 this.setKeyboardEvents();
+                this.#popupClosed$
+                    .pipe(takeUntilDestroyed(this.#destroyRef))
+                    .subscribe(() => this.setPopupCloseSubscriptions());
+                this.#popupOpened$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+                    this.handleScrollOnPopupOpen();
+                });
             }
         });
-        this.#dropdownService.triggerPopupOpen$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => this.openPopup());
     }
 
     private closePopup(): void {
@@ -44,7 +55,7 @@ export class DropdownPopupHandlerDirective {
         event.preventDefault();
         if (event.altKey) {
             if (event.key === "ArrowDown") {
-                this.openPopup();
+                this.#dropdownService.triggerPopupOpen$.next({});
             } else {
                 this.closePopup();
             }
@@ -57,7 +68,7 @@ export class DropdownPopupHandlerDirective {
         if (!item || previousItem === item) {
             return;
         }
-        this.#dropdownService.navigate$.next({ item });
+        this.#dropdownListService?.navigate$.next({ item });
     }
 
     private handleKeyDown(e: KeyboardEvent): void {
@@ -74,13 +85,13 @@ export class DropdownPopupHandlerDirective {
             this.closePopup();
         } else if (e.key === " ") {
             e.preventDefault();
-            this.togglePopup();
+            this.#dropdownService.triggerPopupToggle$.next({});
         } else if (e.key === "Enter") {
             this.#dropdownService.keydown$.next(e);
             if (e.defaultPrevented) {
                 return;
             }
-            this.togglePopup();
+            this.#dropdownService.triggerPopupToggle$.next({});
         } else {
             this.#dropdownService.keydown$.next(e);
         }
@@ -94,54 +105,6 @@ export class DropdownPopupHandlerDirective {
         } else if (highlightedItem) {
             this.scrollToHighlightedItem();
         }
-    }
-
-    private openPopup(): void {
-        let popupRef = this.#dropdownService.popupRef();
-        if (popupRef || this.#host.readonly()) {
-            return;
-        }
-
-        const event = new PreventableEvent("popupOpen");
-        this.#host.open.emit(event);
-        if (event.isDefaultPrevented()) {
-            return;
-        }
-
-        const anchor = this.#hostElementRef.nativeElement;
-        const content = this.#dropdownService.popupTemplate() as TemplateRef<any>;
-        const height = this.#listService.viewItems().none() ? 200 : undefined;
-        const maxHeight = this.#host.popupHeight() != null ? (this.#host.popupHeight() ?? undefined) : 200;
-        const restoreFocus = this.#dropdownService.restoreFocus();
-        const width = this.#host.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
-
-        popupRef = this.#popupService.create({
-            anchor,
-            anchorConnectionPoint: "bottomleft",
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
-            content,
-            closeOnOutsideClick: true,
-            closeOnScroll: true,
-            hasBackdrop: false,
-            height,
-            maxHeight,
-            offset: { horizontal: 0, vertical: 4 },
-            popupConnectionPoint: "topleft",
-            restoreFocus,
-            width,
-            withPush: false,
-            withScrollTracking: true
-        });
-        this.#dropdownService.popupRef.set(popupRef);
-        this.setPopupCloseSubscriptions(popupRef);
-        this.handleScrollOnPopupOpen();
-        window.setTimeout(() => {
-            this.#dropdownService.popupOpenComplete$.next();
-            this.#host.opened.emit();
-        });
     }
 
     private scrollToHighlightedItem(): void {
@@ -166,7 +129,7 @@ export class DropdownPopupHandlerDirective {
                 takeUntilDestroyed(this.#destroyRef),
                 filter(e => !this.#host.readonly() && !!e.target && (e.target as HTMLElement).tagName !== "INPUT")
             )
-            .subscribe(() => this.togglePopup());
+            .subscribe(() => this.#dropdownService.triggerPopupToggle$.next({}));
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
@@ -175,24 +138,8 @@ export class DropdownPopupHandlerDirective {
             .subscribe(e => this.handleKeyDown(e));
     }
 
-    private setPopupCloseSubscriptions(popupRef: PopupRef): void {
-        popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
-            this.#host.close.emit(event);
-        });
-        popupRef.closed.pipe(take(1)).subscribe(event => {
-            this.#dropdownService.popupRef.set(null);
-            this.#dropdownService.popupCloseComplete$.next(event);
-            this.#listService.clearHighlightedItem();
-            this.#listService.clearFilter();
-            this.#host.closed.emit();
-        });
-    }
-
-    private togglePopup(): void {
-        if (this.#dropdownService.popupRef()) {
-            this.closePopup();
-            return;
-        }
-        this.openPopup();
+    private setPopupCloseSubscriptions(): void {
+        this.#listService.clearHighlightedItem();
+        this.#listService.clearFilter();
     }
 }

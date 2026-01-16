@@ -26,7 +26,7 @@ import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import { asyncScheduler, combineLatest, debounceTime, delay, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
+import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
@@ -40,7 +40,7 @@ import { SelectableOptions } from "../../../../common/list/models/SelectableOpti
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
-import { FormFieldValidationService } from "../../../../common/services/form-field-validation.service";
+import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../../common/styles/dropdown-popup.styles";
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { TextBoxDirective } from "../../../../inputs/text-box/directives/text-box.directive";
@@ -56,12 +56,13 @@ import { DropDownItemTemplateDirective } from "../../../directives/drop-down-ite
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
 import { DropdownLiveRegionDirective } from "../../../directives/dropdown-live-region.directive";
-import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
+import { DropdownListPopupHandlerDirective } from "../../../directives/dropdown-list-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
-import { DropdownService } from "../../../services/dropdown.service";
+import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
+import { DropdownListService } from "../../../services/dropdown-list.service";
 import {
     comboBoxAffixContainerThemeVariants,
     comboBoxBaseThemeVariants,
@@ -76,6 +77,7 @@ import {
     providers: [
         ListService,
         DropdownService,
+        DropdownListService,
         FormFieldValidationService,
         {
             provide: NG_VALUE_ACCESSOR,
@@ -110,7 +112,7 @@ import {
         DropdownLiveRegionDirective,
         ClearButtonComponent
     ],
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
@@ -130,6 +132,7 @@ export class ComboBoxComponent<TData = unknown>
         DropdownPopupVariantInput
 {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownListService = inject(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef = inject(ElementRef);
@@ -458,7 +461,7 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private setArrowNavigationSubscription(): void {
-        this.#dropdownService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
+        this.#dropdownListService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
             if (!this.expanded()) {
                 this.#listService.selectItem(item);
                 this.updateValue(item.data, true);
@@ -491,7 +494,7 @@ export class ComboBoxComponent<TData = unknown>
                 }
 
                 if (!this.#popupRef()) {
-                    this.#dropdownService.triggerPopupOpen$.next();
+                    this.#dropdownService.triggerPopupOpen$.next({});
                 }
 
                 this.comboBoxValue.set(value ?? "");

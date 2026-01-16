@@ -26,7 +26,7 @@ import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipComponent } from "../../../../buttons/chip/component/chip.component";
 import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../../common/directives/form-field-validation.directive";
+import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -37,7 +37,7 @@ import { ListItem } from "../../../../common/list/models/ListItem";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { ListService } from "../../../../common/list/services/list.service";
 import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
-import { FormFieldValidationService } from "../../../../common/services/form-field-validation.service";
+import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../../common/styles/dropdown-popup.styles";
 import { restoreOverlayScroll } from "../../../../common/utils/restoreOverlayScroll";
 import { rxFromResize } from "../../../../common/utils/rxFromResize";
@@ -53,12 +53,12 @@ import { DropDownItemTemplateDirective } from "../../../directives/drop-down-ite
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
 import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
 import { DropdownLiveRegionDirective } from "../../../directives/dropdown-live-region.directive";
-import { DropdownPopupHandlerDirective } from "../../../directives/dropdown-popup-handler.directive";
+import { DropdownListPopupHandlerDirective } from "../../../directives/dropdown-list-popup-handler.directive";
 import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
-import { DropdownService } from "../../../services/dropdown.service";
+import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
 import { MultiSelectService } from "../../services/multi-select.service";
 import {
@@ -109,7 +109,7 @@ import {
         DropdownLiveRegionDirective,
         ClearButtonComponent
     ],
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownPopupHandlerDirective],
+    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
@@ -140,7 +140,7 @@ export class MultiSelectComponent<TData = unknown>
     readonly #dropdownService = inject(DropdownService);
     readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #listService: ListService<TData> = inject(ListService);
+    readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
@@ -451,7 +451,7 @@ export class MultiSelectComponent<TData = unknown>
 
     private handleEnterKey(): void {
         if (!this.#popupRef()) {
-            this.#dropdownService.triggerPopupOpen$.next();
+            this.#dropdownService.triggerPopupOpen$.next({});
             return;
         }
         const highlightedItem = this.#listService.highlightedItem();

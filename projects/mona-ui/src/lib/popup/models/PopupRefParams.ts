@@ -12,6 +12,8 @@ export interface PopupRefParams {
 
     get component(): ComponentRef<any> | null;
 
+    get opened$(): Observable<void>;
+
     get overlayRef(): OverlayRef;
 
     get positionChanges$(): Observable<ConnectionPositionPair>;

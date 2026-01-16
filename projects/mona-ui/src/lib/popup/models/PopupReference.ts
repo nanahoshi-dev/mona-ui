@@ -1,6 +1,6 @@
 import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentRef } from "@angular/core";
-import { asyncScheduler, Observable, Subject } from "rxjs";
+import { asyncScheduler, Observable, ReplaySubject, Subject, tap } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "./PopupCloseEvent";
 import { PopupRef } from "./PopupRef";
 import { PopupRefParams } from "./PopupRefParams";
@@ -12,6 +12,7 @@ export class PopupReference implements PopupRefParams {
     public readonly beforeClosed$ = new Subject<PopupCloseEvent>();
     public readonly closeStart$ = new Subject<PopupCloseEvent>();
     public readonly closed$ = new Subject<PopupCloseEvent>();
+    public readonly opened$ = new ReplaySubject<void>(1);
     public readonly positionChanges$ = new Subject<ConnectionPositionPair>();
     public componentRef?: ComponentRef<any>;
 
@@ -43,6 +44,10 @@ export class PopupReference implements PopupRefParams {
         }, delay);
     }
 
+    public notifyOpen(): void {
+        this.opened$.next();
+    }
+
     public get beforeClose$(): Observable<PopupCloseEvent> {
         return this.beforeClosed$.asObservable();
     }
@@ -53,6 +58,10 @@ export class PopupReference implements PopupRefParams {
 
     public get component(): ComponentRef<any> | null {
         return this.componentRef ?? null;
+    }
+
+    public get opened(): Observable<void> {
+        return this.opened$.pipe(tap(e => console.log("FFF: ", e)));
     }
 
     public get overlayRef(): OverlayRef {
