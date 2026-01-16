@@ -12,6 +12,7 @@ export class DropdownService {
     public readonly beforeNavigate$ = new Subject<PreventableEvent<KeyboardEvent>>();
     public readonly keydown$ = new Subject<KeyboardEvent>();
     public readonly popupCloseComplete$ = new Subject<PopupCloseEvent>();
+    public readonly popupCloseStart$ = new Subject<PopupCloseEvent>();
     public readonly popupOpenComplete$ = new Subject<void>();
     public readonly popupRef = signal<PopupRef | null>(null);
     public readonly popupTemplate = signal<TemplateRef<any> | null>(null);

@@ -8,6 +8,8 @@ export interface PopupRefParams {
 
     get beforeClose$(): Observable<PopupCloseEvent>;
 
+    get closeStart$(): Observable<PopupCloseEvent>;
+
     get closed$(): Observable<PopupCloseEvent>;
 
     get component(): ComponentRef<any> | null;

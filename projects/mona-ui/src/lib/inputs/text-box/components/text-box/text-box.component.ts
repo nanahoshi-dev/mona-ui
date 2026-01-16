@@ -98,6 +98,11 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     public readonly readonly = input<boolean>(false);
 
     /**
+     * @description Sets the required state of the text box.
+     */
+    public readonly required = input<boolean>(false);
+
+    /**
      * @description Sets the border radius of the text box.
      */
     public readonly rounded = input<TextBoxVariantProps["rounded"]>("medium");

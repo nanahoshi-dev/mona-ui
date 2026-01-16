@@ -18,7 +18,7 @@ export class PopupReference implements PopupRefParams {
 
     public constructor(public readonly overlayReference: OverlayRef) {}
 
-    public close<R>(result?: R, delay: number = 300): void {
+    public close<R>(result?: R, delay: number = 190): void {
         const beforeCloseEvent = new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
         this.beforeClosed$.next(beforeCloseEvent);
 
@@ -31,14 +31,13 @@ export class PopupReference implements PopupRefParams {
                 ? result
                 : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
 
-        // TODO: Add an event where close is triggered but animation is not yet complete.
-        this.closed$.next(event);
-        this.closed$.complete();
-
         /**
          * A delay is added to allow animations to complete before the overlay is disposed of.
          */
         asyncScheduler.schedule(() => {
+            // TODO: Add an event where close is triggered but animation is not yet complete.
+            this.closed$.next(event);
+            this.closed$.complete();
             this.positionChanges$.complete();
             this.overlayRef.dispose();
         }, delay);
@@ -50,6 +49,10 @@ export class PopupReference implements PopupRefParams {
 
     public get beforeClose$(): Observable<PopupCloseEvent> {
         return this.beforeClosed$.asObservable();
+    }
+
+    public get closeStart(): Observable<PopupCloseEvent> {
+        return this.closeStart$.asObservable();
     }
 
     public get closed(): Observable<PopupCloseEvent> {

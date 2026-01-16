@@ -10,6 +10,11 @@ import {
     CalendarYearCellTemplateDirective
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import {
+    calendarDecadeCellTemplateFeatureConfig,
+    calendarMonthCellTemplateFeatureConfig,
+    calendarYearCellTemplateFeatureConfig
+} from "../../utils/dateInputFeatureConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -22,24 +27,9 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class CalendarDemoComponent extends AbstractDemoComponent<CalendarComponent> {
     readonly #injector = createFeatureInjector({
-        decadeCellTemplate: {
-            code: ``,
-            active: false,
-            description: `A custom decade cell template that can be used to customize the appearance of the calendar decade cells.`,
-            name: "Decade Cell Template"
-        },
-        monthCellTemplate: {
-            code: ``,
-            active: false,
-            description: `A custom month cell template that can be used to customize the appearance of the calendar month cells.`,
-            name: "Month Cell Template"
-        },
-        yearCellTemplate: {
-            code: ``,
-            active: false,
-            description: `A custom year cell template that can be used to customize the appearance of the calendar year cells.`,
-            name: "Year Cell Template"
-        }
+        decadeCellTemplate: calendarDecadeCellTemplateFeatureConfig(),
+        monthCellTemplate: calendarMonthCellTemplateFeatureConfig(),
+        yearCellTemplate: calendarYearCellTemplateFeatureConfig()
     });
     protected readonly config = signal<ComponentConfig<CalendarComponent>>({
         code: ``,

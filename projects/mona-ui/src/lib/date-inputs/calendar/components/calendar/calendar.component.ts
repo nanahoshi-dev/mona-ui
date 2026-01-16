@@ -22,7 +22,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
-import { bufferCount, distinctUntilChanged, fromEvent, Subject, tap } from "rxjs";
+import { bufferCount, distinctUntilChanged, fromEvent, skip, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
@@ -161,7 +161,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return twMerge(variantClass, userClass);
     });
     protected readonly calendarView = signal<CalendarView>("month");
-    protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective, { read: TemplateRef });
+    protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly decadeEnd = computed(() => {
         return this.decadeStart() + 9;
     });
@@ -193,7 +193,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const lastDayOfMonth = DateTime.fromJSDate(navigatedDate).endOf("month");
         return { start: firstDayOfMonth.toJSDate(), end: lastDayOfMonth.toJSDate() };
     });
-    protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective, { read: TemplateRef });
+    protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly monthDictChunked = computed(() => {
         const dict = this.#monthDict();
         return dict
@@ -291,7 +291,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         ];
         return firstDayOfWeek === "monday" ? [...days.slice(1), days[0]] : days;
     });
-    protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective, { read: TemplateRef });
+    protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
     protected readonly yearTableClass = computed(() => {
         const theme = this.#themeService.theme();
         return calendarYearViewTableThemeVariants(theme)();
@@ -355,13 +355,11 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     public readonly weekNumber = input<boolean>(false);
 
     public constructor() {
-        toObservable(this.value)
-            .pipe(takeUntilDestroyed(), distinctUntilChanged())
-            .subscribe(() => this.#propagateChange?.(this.value()));
         afterNextRender({
             read: () => {
                 this.setupKeyboardNavigation();
                 this.setRangeChangeSubscription();
+                this.focusActiveCell();
             }
         });
         effect(() => {
@@ -431,6 +429,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             this.navigatedDate.set(date);
         }
         this.focusActiveCell();
+        this.#propagateChange?.(this.value());
     }
 
     protected onMonthClick(month: number): void {
@@ -460,6 +459,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         this.setCurrentDate(currentDate);
         this.navigatedDate.set(currentDate);
         this.calendarView.set("month");
+        this.#propagateChange?.(this.value());
     }
 
     protected onViewChangeClick(view: CalendarView): void {
@@ -576,6 +576,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.selectFocusedItem();
                 }
+                this.#propagateChange?.(this.value());
                 shouldFocusCell = true;
                 break;
             }
@@ -886,7 +887,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     private setCurrentDate(date: Date | Date[] | null): void {
         this.selectedDates.set(this.getDateArray(date));
-        this.#propagateChange?.(date);
     }
 
     private setDateValues(): void {

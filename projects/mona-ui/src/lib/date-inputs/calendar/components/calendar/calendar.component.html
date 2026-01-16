@@ -58,7 +58,7 @@
                             [monthBounds]="[monthBounds().start, monthBounds().end]" [navigatedDate]="navigatedDate()"
                             [rounded]="rounded()" [size]="size()" [value]="selectedDates()" [entry]="entry">
                             @if (monthCellTemplate()) {
-                                <ng-container [ngTemplateOutlet]="monthCellTemplate()"
+                                <ng-container [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
                                               [ngTemplateOutletContext]="{$implicit: entry.value, date: entry.key }"></ng-container>
                             } @else {
                                 <span>{{ entry.value }}</span>
@@ -78,7 +78,7 @@
                         [navigatedDate]="navigatedDate()"
                         [rounded]="rounded()" [size]="size()" [selectedDate]="selectedDates()[0]">
                         @if (yearCellTemplate()) {
-                            <ng-container [ngTemplateOutlet]="yearCellTemplate()"
+                            <ng-container [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
                                           [ngTemplateOutletContext]="{$implicit: monthItem[0], text: monthItem[1]}">
                             </ng-container>
                         } @else {
@@ -98,7 +98,7 @@
                         [rounded]="rounded()"
                         [size]="size()" [year]="year" [selectedDate]="selectedDates()[0]">
                         @if (decadeCellTemplate()) {
-                            <ng-container [ngTemplateOutlet]="decadeCellTemplate()"
+                            <ng-container [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
                                           [ngTemplateOutletContext]="{$implicit: year}">
                             </ng-container>
                         } @else {

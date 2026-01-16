@@ -67,12 +67,14 @@ export * from "./common/tree/models/NodeSelectEvent";
 export * from "./common/tree/models/SelectableOptions";
 
 /** Date Inputs */
+export * from "./date-inputs/directives/date-input-prefix-template.directive";
+
 export * from "./date-inputs/calendar/components/calendar/calendar.component";
 export * from "./date-inputs/calendar/directives/calendar-decade-cell-template.directive";
 export * from "./date-inputs/calendar/directives/calendar-month-cell-template.directive";
 export * from "./date-inputs/calendar/directives/calendar-year-cell-template.directive";
 
-export * from "./date-inputs/date-picker/date-picker.component";
+export * from "./date-inputs/date-picker/components/date-picker/date-picker.component";
 export * from "./date-inputs/date-time-picker/date-time-picker.component";
 export * from "./date-inputs/time-picker/time-picker.component";
 

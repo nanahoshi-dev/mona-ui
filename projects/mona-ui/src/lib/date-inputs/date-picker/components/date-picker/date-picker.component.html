@@ -1,0 +1,45 @@
+<mona-text-box (inputBlur)="onDateInputBlur()" (ngModelChange)="onDateStringEdit($event)" [disabled]="disabled()"
+               [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly()"
+               [required]="required()" [clearButton]="showClearButton()"
+               [rounded]="rounded()" [size]="size()">
+    @if (prefixTemplate()) {
+        <ng-template monaTextBoxPrefixTemplate>
+            <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+        </ng-template>
+    }
+    <ng-template monaTextBoxSuffixTemplate>
+        <span role="button" class="h-full aspect-square flex items-center justify-center cursor-pointer"
+              (click)="onDateInputButtonClick()">
+            <i class="ri-calendar-line"></i>
+        </span>
+    </ng-template>
+</mona-text-box>
+
+<ng-template #popupTemplate>
+    <div [class]="pickerPopupClass()">
+        <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
+                       [rounded]="rounded()" [size]="size()" [weekNumber]="weekNumber()"
+                       [firstDay]="firstDay()"
+                       [ngModel]="value()"
+                       (ngModelChange)="onCalendarValueChange($event)">
+            @if (decadeCellTemplate()) {
+                <ng-template monaCalendarDecadeCellTemplate let-year>
+                    <ng-container [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
+                                  [ngTemplateOutletContext]="{$implicit: year}"></ng-container>
+                </ng-template>
+            }
+            @if (monthCellTemplate()) {
+                <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                    <ng-container [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
+                                  [ngTemplateOutletContext]="{$implicit: day, date}"></ng-container>
+                </ng-template>
+            }
+            @if (yearCellTemplate()) {
+                <ng-template monaCalendarYearCellTemplate let-year let-text="text">
+                    <ng-container [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
+                                  [ngTemplateOutletContext]="{$implicit: year, text}"></ng-container>
+                </ng-template>
+            }
+        </mona-calendar>
+    </div>
+</ng-template>

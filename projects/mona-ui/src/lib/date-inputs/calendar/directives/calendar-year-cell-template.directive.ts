@@ -1,6 +1,9 @@
-import { Directive } from "@angular/core";
+import { Directive, inject, TemplateRef } from "@angular/core";
+import { YearCellTemplateContext } from "../models/CalendarTemplateContext";
 
 @Directive({
     selector: "ng-template[monaCalendarYearCellTemplate]"
 })
-export class CalendarYearCellTemplateDirective {}
+export class CalendarYearCellTemplateDirective {
+    public readonly templateRef = inject<TemplateRef<YearCellTemplateContext>>(TemplateRef);
+}

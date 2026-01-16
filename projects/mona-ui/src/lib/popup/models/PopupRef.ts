@@ -29,26 +29,70 @@ export class PopupRef {
         asapScheduler.schedule(() => this.close(result), delay);
     }
 
+    /**
+     * @description Emitted when the popup is about to close.
+     * This event can be prevented. If it is prevented, the popup will not close.
+     */
     public get beforeClose(): Observable<PopupCloseEvent> {
         return this.#options.beforeClose$;
     }
 
+    /**
+     * @description Emitted when the popup is about to close.
+     * This is intended for internal use only.
+     */
+    public get closeStart(): Observable<PopupCloseEvent> {
+        return this.#options.closeStart$;
+    }
+
+    /**
+     * @description Emitted when the popup is closed.
+     * This event is emitted after the animation completes.
+     * Preventing this event has no effect.
+     */
     public get closed(): Observable<PopupCloseEvent> {
         return this.#options.closed$;
     }
 
+    /**
+     * @description Reference to the component hosted in the popup.
+     * This is `null` if the popup does not contain a component.
+     */
     public get component(): ComponentRef<any> | null {
         return this.#options.component;
     }
 
+    /**
+     * @description Emitted when the popup is opened.
+     */
     public get opened(): Observable<void> {
         return this.#options.opened$;
     }
 
+    /**
+     * @description Reference to the underlying CDK overlay.
+     * Use this reference to manipulate the overlay directly, such as to set its size or position.
+     * @see {@link https://material.angular.io/cdk/overlay/overview} for more information.
+     * @example
+     * ```ts
+     * const overlayRef = popupRef.overlayRef;
+     * overlayRef.updateSize({ width: '500px', height: '300px' });
+     * ```
+     */
     public get overlayRef(): OverlayRef {
         return this.#options.overlayRef;
     }
 
+    /**
+     * @description Returns the position pair of the popup's anchor element.
+     * @example
+     * ```ts
+     * const positionChanges$ = popupRef.positionChanges;
+     * positionChanges$.subscribe(pair => {
+     *   console.log(`Popup position changed to: ${pair.originX} ${pair.originY} -> ${pair.overlayX} ${pair.overlayY}`);
+     * });
+     * ```
+     */
     public get positionChanges(): Observable<ConnectionPositionPair> {
         return this.#options.positionChanges$;
     }

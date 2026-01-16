@@ -1,46 +1,4 @@
 {
-  "DatePickerComponent": {
-    "name": "DatePickerComponent",
-    "selector": "\"mona-date-picker\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "disabledDates",
-        "type": "Iterable<Date>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "format",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "readonly",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "DateTimePickerComponent": {
     "name": "DateTimePickerComponent",
     "selector": "\"mona-date-time-picker\"",
@@ -989,13 +947,13 @@
       },
       {
         "name": "max",
-        "type": "Date | null",
+        "type": "Date | null | undefined",
         "description": "",
         "kind": "input"
       },
       {
         "name": "min",
-        "type": "Date | null",
+        "type": "Date | null | undefined",
         "description": "",
         "kind": "input"
       },
@@ -2322,13 +2280,13 @@
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Whether to animate the tree.\n\nIf true, the tree will animate when expanding or collapsing nodes.",
+        "description": "Whether to animate the tree.\r\n\r\nIf true, the tree will animate when expanding or collapsing nodes.",
         "kind": "input"
       },
       {
         "name": "children",
         "type": "ChildrenSelector<T>",
-        "description": "The children selector for the tree.\n\nIt can be either of the following:\n- A string representing the property name of the children.\n- A function that returns the children of a node.\n- A function that returns an observable that emits the children of a node.",
+        "description": "The children selector for the tree.\r\n\r\nIt can be either of the following:\r\n- A string representing the property name of the children.\r\n- A function that returns the children of a node.\r\n- A function that returns an observable that emits the children of a node.",
         "kind": "input"
       },
       {
@@ -2340,19 +2298,19 @@
       {
         "name": "hasChildren",
         "type": "Predicate<T> | null",
-        "description": "The predicate to determine if a node has children.\n\nRequired if the children selector is set to a function that returns an observable.",
+        "description": "The predicate to determine if a node has children.\r\n\r\nRequired if the children selector is set to a function that returns an observable.",
         "kind": "input"
       },
       {
         "name": "idField",
         "type": "string",
-        "description": "The field that represents the unique identifier of a node.\n\nThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the unique identifier of a node.\r\n\r\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "DataStructure",
-        "description": "The data structure of the tree.\n\nIt can be either of the following:\n- `flat`: The tree is a flat list of nodes.\n- `hierarchical`: The tree is a hierarchical structure.\n\nIf the data structure is set to `flat`, the following fields are required:\n- idField\n- parentIdField\n\nIf the data structure is set to `hierarchical`, the following fields are required:\n- children\n- hasChildren",
+        "description": "The data structure of the tree.\r\n\r\nIt can be either of the following:\r\n- `flat`: The tree is a flat list of nodes.\r\n- `hierarchical`: The tree is a hierarchical structure.\r\n\r\nIf the data structure is set to `flat`, the following fields are required:\r\n- idField\r\n- parentIdField\r\n\r\nIf the data structure is set to `hierarchical`, the following fields are required:\r\n- children\r\n- hasChildren",
         "kind": "input"
       },
       {
@@ -2364,7 +2322,7 @@
       {
         "name": "textField",
         "type": "string | Selector<T, string>",
-        "description": "The text field for the tree.\n\nIt can be either of the following:\n- A string representing the property name of the text.\n- A function that returns the text of a node.",
+        "description": "The text field for the tree.\r\n\r\nIt can be either of the following:\r\n- A string representing the property name of the text.\r\n- A function that returns the text of a node.",
         "kind": "input"
       }
     ]
@@ -3473,6 +3431,126 @@
       }
     ]
   },
+  "DatePickerComponent": {
+    "name": "DatePickerComponent",
+    "selector": "\"mona-date-picker\"",
+    "inputs": [
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the date picker.",
+        "kind": "model"
+      },
+      {
+        "name": "disabledDates",
+        "type": "Iterable<Date>",
+        "description": "Sets the disabled dates of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "description": "Sets the date format of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "Date | null",
+        "description": "Sets the maximum date of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "Date | null",
+        "description": "Sets the minimum date of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
+        "kind": "output"
+      },
+      {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Placeholder text for the dropdown list when no item is selected.",
+        "kind": "input"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "Sets the class of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "Sets the height of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "Sets the width of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "DatePickerVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "DatePickerVariantProps[\"size\"]",
+        "description": "Sets the size of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "weekNumber",
+        "type": "boolean",
+        "description": "Enables the display of week numbers in the calendar.",
+        "kind": "input"
+      }
+    ]
+  },
   "ComboBoxComponent": {
     "name": "ComboBoxComponent",
     "selector": "\"mona-combo-box\"",
@@ -3996,7 +4074,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label text of the checkbox.\nIf provided, it will take precedence over the content inside the checkbox.",
+        "description": "Sets the label text of the checkbox.\r\nIf provided, it will take precedence over the content inside the checkbox.",
         "kind": "input"
       },
       {
@@ -4332,7 +4410,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the radio button.\nIf provided, it will take precedence over the content inside the radio button.",
+        "description": "Sets the label of the radio button.\r\nIf provided, it will take precedence over the content inside the radio button.",
         "kind": "input"
       },
       {
@@ -4452,7 +4530,7 @@
       {
         "name": "showLabels",
         "type": "boolean",
-        "description": "Sets whether to show labels on the slider.\nOnly applicable if `showTicks` is `true`.",
+        "description": "Sets whether to show labels on the slider.\r\nOnly applicable if `showTicks` is `true`.",
         "kind": "input"
       },
       {
@@ -4482,7 +4560,7 @@
       {
         "name": "trackSize",
         "type": "string | number | null",
-        "description": "Sets the size of the slider track.\nFor horizontal sliders, this sets the height.\nFor vertical sliders, this sets the width.",
+        "description": "Sets the size of the slider track.\r\nFor horizontal sliders, this sets the height.\r\nFor vertical sliders, this sets the width.",
         "kind": "input"
       }
     ]
@@ -4560,7 +4638,7 @@
       {
         "name": "inputStyle",
         "type": "string | Partial<CSSStyleDeclaration> | null",
-        "description": "Sets the style for the input element.\nCan be a string or a partial CSSStyleDeclaration.",
+        "description": "Sets the style for the input element.\r\nCan be a string or a partial CSSStyleDeclaration.",
         "kind": "input"
       },
       {
@@ -4573,6 +4651,12 @@
         "name": "readonly",
         "type": "boolean",
         "description": "Sets the readonly state of the text box.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the text box.",
         "kind": "input"
       },
       {
@@ -4590,7 +4674,7 @@
       {
         "name": "type",
         "type": "InputType",
-        "description": "Sets the type of the input element.\nDefaults to \"text\".",
+        "description": "Sets the type of the input element.\r\nDefaults to \"text\".",
         "kind": "input"
       },
       {
@@ -5622,7 +5706,7 @@
       {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

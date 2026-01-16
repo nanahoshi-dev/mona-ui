@@ -54,9 +54,12 @@ export class DropdownPopupHandlerDirective {
         const anchor = this.#hostElementRef.nativeElement;
         const content = this.#dropdownService.popupTemplate() as TemplateRef<any>;
         const height = settings.height;
-        const maxHeight = this.#host.popupHeight() != null ? (this.#host.popupHeight() ?? undefined) : 200;
+        const maxHeight =
+            settings.maxHeight ?? (this.#host.popupHeight() != null ? this.#host.popupHeight() || undefined : 200);
         const restoreFocus = this.#dropdownService.restoreFocus();
-        const width = this.#host.popupWidth() ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
+        const width =
+            settings.width ??
+            (this.#host.popupWidth() || this.#hostElementRef.nativeElement.getBoundingClientRect().width);
 
         popupRef = this.#popupService.create({
             anchor,
@@ -89,6 +92,9 @@ export class DropdownPopupHandlerDirective {
     private setPopupCloseSubscriptions(popupRef: PopupRef): void {
         popupRef.beforeClose.pipe(takeUntil(popupRef.closed)).subscribe(event => {
             this.#host.close.emit(event);
+        });
+        popupRef.closeStart.pipe(takeUntil(popupRef.closed)).subscribe(event => {
+            this.#dropdownService.popupCloseStart$.next(event);
         });
         popupRef.closed.pipe(take(1)).subscribe(event => {
             this.#dropdownService.popupRef.set(null);
