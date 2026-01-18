@@ -40,6 +40,7 @@ export * from "./common/models/FilterableOptions";
 export * from "./common/models/VirtualScrollOptions";
 
 export * from "./common/forms/directives/form-field-validation.directive";
+export * from "./common/dropdown/directives/dropdown-popup-handler.directive";
 
 export * from "./common/filter-input/models/FilterChangeEvent";
 

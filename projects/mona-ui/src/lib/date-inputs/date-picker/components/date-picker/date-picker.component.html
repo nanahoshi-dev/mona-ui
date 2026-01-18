@@ -1,26 +1,26 @@
 <mona-text-box (inputBlur)="onDateInputBlur()" (ngModelChange)="onDateStringEdit($event)" [disabled]="disabled()"
                [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly()"
-               [required]="required()" [clearButton]="showClearButton()"
-               [rounded]="rounded()" [size]="size()">
+               [required]="required()"
+               [clearButton]="showClearButton()" [rounded]="rounded()" [size]="size()">
     @if (prefixTemplate()) {
         <ng-template monaTextBoxPrefixTemplate>
             <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
         </ng-template>
     }
     <ng-template monaTextBoxSuffixTemplate>
-        <span role="button" class="h-full aspect-square flex items-center justify-center cursor-pointer"
-              (click)="onDateInputButtonClick()">
+        <button monaButton look="ghost" [iconOnly]="true" class="rounded-none"
+                [attr.aria-label]="'Open calendar'" [attr.aria-expanded]="expanded()"
+                [disabled]="disabled() || readonly()"
+                [tabindex]="-1" (click)="onDateInputButtonClick()">
             <i class="ri-calendar-line"></i>
-        </span>
+        </button>
     </ng-template>
 </mona-text-box>
 
 <ng-template #popupTemplate>
-    <div [class]="pickerPopupClass()">
-        <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
-                       [rounded]="rounded()" [size]="size()" [weekNumber]="weekNumber()"
-                       [firstDay]="firstDay()"
-                       [ngModel]="value()"
+    <div [class]="pickerPopupClass()" [id]="popupId">
+        <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()" [rounded]="rounded()"
+                       [size]="size()" [weekNumber]="weekNumber()" [firstDay]="firstDay()" [ngModel]="value()"
                        (ngModelChange)="onCalendarValueChange($event)">
             @if (decadeCellTemplate()) {
                 <ng-template monaCalendarDecadeCellTemplate let-year>

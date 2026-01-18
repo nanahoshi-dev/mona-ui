@@ -25,6 +25,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
@@ -35,6 +36,7 @@ import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/dire
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarComponent } from "../../../calendar/components/calendar/calendar.component";
 import { CalendarDecadeCellTemplateDirective } from "../../../calendar/directives/calendar-decade-cell-template.directive";
@@ -76,15 +78,16 @@ import {
         NgTemplateOutlet,
         CalendarMonthCellTemplateDirective,
         CalendarYearCellTemplateDirective,
-        TextBoxPrefixTemplateDirective
+        TextBoxPrefixTemplateDirective,
+        ButtonDirective
     ],
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {
-        "[attr.aria-disabled]": "disabled() ? true : undefined",
-        "[attr.aria-readonly]": "readonly() ? true : undefined",
-        "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.role]": "'grid'",
-        "[attr.tabindex]": "disabled() ? null : 0",
+        "[attr.aria-controls]": "popupId",
+        "[attr.aria-expanded]": "expanded()",
+        "[attr.aria-haspopup]": "'grid'",
+        "[attr.aria-label]": "ariaLabel() || undefined",
+        "[attr.aria-labelledby]": "ariaLabelledBy() || undefined",
         "[class]": "baseClass()"
     }
 })
@@ -114,6 +117,7 @@ export class DatePickerComponent
         return DateTime.fromJSDate(value).toFormat(format);
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
+    protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
@@ -124,10 +128,23 @@ export class DatePickerComponent
         const variantClass = datePopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
     });
+    protected readonly popupId = createElementControlId();
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DateInputPrefixTemplateDirective, { read: TemplateRef });
     protected readonly value = signal<Date | null>(null);
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
+
+    /**
+     * @description Sets the aria-label attribute of the date picker.
+     * @default ""
+     */
+    public readonly ariaLabel = input("");
+
+    /**
+     * @description Sets the aria-labelledby attribute of the date picker.
+     * @default ""
+     */
+    public readonly ariaLabelledBy = input("");
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -318,11 +335,21 @@ export class DatePickerComponent
             popupRef.close();
             return;
         }
-        this.#dropdownService.triggerPopupOpen$.next({ height: "auto", maxHeight: "fit-content", width: "auto" });
+        this.#dropdownService.triggerPopupOpen$.next({
+            height: "auto",
+            maxHeight: "auto",
+            width: "auto",
+            closeOnScroll: false,
+            withScrollTracking: true
+        });
     }
 
     protected onDateStringEdit(dateString: string): void {
         this.currentDateString.set(dateString);
+    }
+
+    private closePopup(): void {
+        this.#dropdownService.popupRef()?.close();
     }
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
@@ -343,6 +370,30 @@ export class DatePickerComponent
         }
     }
 
+    private handleKeydown(event: KeyboardEvent): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
+
+        if (event.altKey && event.key === "ArrowDown") {
+            event.preventDefault();
+            this.openPopup();
+        } else if ((event.altKey && event.key === "ArrowUp") || event.key === "Escape") {
+            event.preventDefault();
+            this.closePopup();
+        }
+    }
+
+    private openPopup(): void {
+        if (!this.#dropdownService.popupRef()) {
+            this.#dropdownService.triggerPopupOpen$.next({
+                height: "auto",
+                maxHeight: "fit-content",
+                width: "auto"
+            });
+        }
+    }
+
     private setCurrentDate(date: Date | null): void {
         const newDate = date ? new Date(date) : null;
         this.value.set(newDate);
@@ -351,6 +402,12 @@ export class DatePickerComponent
 
     private setDateValues(): void {
         this.navigatedDate.set(this.value() ?? DateTime.now().toJSDate());
+    }
+
+    private setKeyboardSubscriptions(): void {
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.handleKeydown(event));
     }
 
     private setPopupCloseSubscriptions(): void {
@@ -363,5 +420,6 @@ export class DatePickerComponent
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => this.focus());
+        this.setKeyboardSubscriptions();
     }
 }

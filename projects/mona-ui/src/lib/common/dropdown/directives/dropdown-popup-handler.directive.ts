@@ -52,34 +52,42 @@ export class DropdownPopupHandlerDirective {
         }
 
         const anchor = this.#hostElementRef.nativeElement;
+        const anchorConnectionPoint = settings.anchorConnectionPoint ?? "bottomleft";
         const content = this.#dropdownService.popupTemplate() as TemplateRef<any>;
+        const closeOnOutsideClick = settings.closeOnOutsideClick ?? true;
+        const closeOnScroll = settings.closeOnScroll ?? true;
+        const hasBackdrop = settings.hasBackdrop ?? false;
         const height = settings.height;
         const maxHeight =
             settings.maxHeight ?? (this.#host.popupHeight() != null ? this.#host.popupHeight() || undefined : 200);
+        const offset = settings.offset ?? { horizontal: 0, vertical: 4 };
+        const popupConnectionPoint = settings.popupConnectionPoint ?? "topleft";
         const restoreFocus = this.#dropdownService.restoreFocus();
         const width =
             settings.width ??
             (this.#host.popupWidth() || this.#hostElementRef.nativeElement.getBoundingClientRect().width);
+        const withPush = settings.withPush ?? false;
+        const withScrollTracking = settings.withScrollTracking ?? false;
 
         popupRef = this.#popupService.create({
             anchor,
-            anchorConnectionPoint: "bottomleft",
+            anchorConnectionPoint,
             animation: {
                 hide: dropdownPopupHideAnimation,
                 show: dropdownPopupShowAnimation
             },
             content,
-            closeOnOutsideClick: true,
-            closeOnScroll: true,
-            hasBackdrop: false,
+            closeOnOutsideClick,
+            closeOnScroll,
+            hasBackdrop,
             height,
             maxHeight,
-            offset: { horizontal: 0, vertical: 4 },
-            popupConnectionPoint: "topleft",
+            offset,
+            popupConnectionPoint,
             restoreFocus,
             width,
-            withPush: false,
-            withScrollTracking: true
+            withPush,
+            withScrollTracking
         });
         this.#dropdownService.popupRef.set(popupRef);
         this.setPopupCloseSubscriptions(popupRef);
