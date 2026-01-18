@@ -7,7 +7,7 @@ import { FormFieldValidationService } from "../services/form-field-validation.se
 @Directive({
     selector: "[monaFormFieldValidation]",
     host: {
-        "[attr.aria-invalid]": "invalid() ? true : undefined"
+        "[attr.aria-invalid]": "invalid() ? 'true' : undefined"
     }
 })
 export class FormFieldValidationDirective {

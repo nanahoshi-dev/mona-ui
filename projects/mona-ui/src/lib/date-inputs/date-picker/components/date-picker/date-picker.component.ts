@@ -28,6 +28,8 @@ import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
+import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
+import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
@@ -59,6 +61,7 @@ import {
     providers: [
         DropdownService,
         CalendarService,
+        FormFieldValidationService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => DatePickerComponent),
@@ -83,7 +86,7 @@ import {
         TextBoxPrefixTemplateDirective,
         ButtonDirective
     ],
-    hostDirectives: [DropdownPopupHandlerDirective],
+    hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
         "[attr.aria-controls]": "popupId",
         "[attr.aria-expanded]": "expanded()",
@@ -97,7 +100,7 @@ export class DatePickerComponent
     implements ControlValueAccessor, DropdownPopupInput, DatePickerVariantInput, DatePopupVariantInput
 {
     readonly #calendarService = inject(CalendarService);
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
@@ -391,7 +394,7 @@ export class DatePickerComponent
         if (!this.#dropdownService.popupRef()) {
             this.#dropdownService.triggerPopupOpen$.next({
                 height: "auto",
-                maxHeight: "fit-content",
+                maxHeight: "auto",
                 width: "auto"
             });
         }
@@ -413,7 +416,10 @@ export class DatePickerComponent
             .subscribe(event => this.handleKeydown(event));
         this.#calendarService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             const keyboardEvent = event.originalEvent;
-            if (keyboardEvent && keyboardEvent.altKey && keyboardEvent.key === "ArrowUp") {
+            if (
+                keyboardEvent &&
+                (keyboardEvent.key === "Escape" || (keyboardEvent.altKey && keyboardEvent.key === "ArrowUp"))
+            ) {
                 keyboardEvent.preventDefault();
                 this.closePopup();
             }

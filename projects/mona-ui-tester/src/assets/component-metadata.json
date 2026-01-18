@@ -3436,6 +3436,18 @@
     "selector": "\"mona-date-picker\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label attribute of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string",
+        "description": "Sets the aria-labelledby attribute of the date picker.",
+        "kind": "input"
+      },
+      {
         "name": "close",
         "type": "PopupCloseEvent",
         "description": "Emits when the popup is about to close. This event is preventable.",
@@ -3457,6 +3469,12 @@
         "name": "disabledDates",
         "type": "Iterable<Date>",
         "description": "Sets the disabled dates of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "firstDay",
+        "type": "FirstDayOfWeek",
+        "description": "Sets the first day of the week.",
         "kind": "input"
       },
       {
@@ -3529,6 +3547,12 @@
         "name": "rounded",
         "type": "DatePickerVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "Sets the visibility of the clear button.",
         "kind": "input"
       },
       {
