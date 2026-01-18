@@ -5,7 +5,6 @@
 /** Buttons */
 export * from "./buttons/button/directives/button.directive";
 export * from "./buttons/button-group/components/button-group/button-group.component";
-export * from "./buttons/button-group/components/button-group-item/button-group-item.component";
 export * from "./buttons/chip/component/chip.component";
 
 export * from "./buttons/drop-down-button/components/dropdown-button/dropdown-button.component";

@@ -1,18 +1,17 @@
-import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     contentChildren,
     DestroyRef,
+    effect,
     inject,
     input,
     model,
-    OnInit,
-    viewChildren
+    untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { firstOrDefault } from "@mirei/ts-collections";
 
 import { twMerge } from "tailwind-merge";
 import { SelectionMode } from "../../../../models/SelectionMode";
@@ -24,33 +23,30 @@ import {
     ButtonGroupVariantProps,
     ButtonGroupVariantsInput
 } from "../../styles/button-group.styles";
-import { ButtonGroupItemComponent } from "../button-group-item/button-group-item.component";
 
 @Component({
     selector: "mona-button-group",
     templateUrl: "./button-group.component.html",
     providers: [ButtonService],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ButtonDirective, NgTemplateOutlet],
     host: {
-        "[class]": "classes()"
+        "[class]": "baseClass()"
     }
 })
-export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
+export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     readonly #buttonService = inject(ButtonService, { self: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #themeService = inject(ThemeService);
-    protected readonly buttons = viewChildren(ButtonDirective);
-    protected readonly classes = computed(() => {
+    protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
-        const userClass = this.userClass();
         const variantClasses = buttonGroupThemeVariants(theme)({ look, rounded, size });
+        const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });
-    protected readonly items = contentChildren(ButtonGroupItemComponent);
+    protected readonly buttons = contentChildren(ButtonDirective);
 
     /**
      * @description Sets the disabled state of the button group.
@@ -79,32 +75,42 @@ export class ButtonGroupComponent implements OnInit, ButtonGroupVariantsInput {
     public readonly selection = model<SelectionMode>("multiple");
     public readonly userClass = input<string>("", { alias: "class" });
 
-    public ngOnInit(): void {
-        this.setSubscriptions();
+    public constructor() {
+        effect(() => {
+            const disabled = this.disabled();
+            untracked(() => this.#buttonService.groupDisabled.set(disabled));
+        });
+        effect(() => {
+            const look = this.look();
+            untracked(() => this.#buttonService.groupLook.set(look));
+        });
+        effect(() => {
+            const rounded = this.rounded();
+            untracked(() => this.#buttonService.groupRounded.set(rounded));
+        });
+        effect(() => {
+            const size = this.size();
+            untracked(() => this.#buttonService.groupSize.set(size));
+        });
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
     }
 
     private setSubscriptions(): void {
         this.#buttonService.buttonClick$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(button => {
             if (this.selection() === "single") {
-                const selectedButton = firstOrDefault(this.buttons(), b => b.selected());
-                if (selectedButton === button) {
-                    button.selected.set(!button.selected());
-                    return;
-                }
+                const isCurrentlySelected = button.selected();
                 this.buttons().forEach(b => {
-                    this.#buttonService.buttonSelect$.next([b, b === button ? !b.selected() : false]);
-                });
-            } else {
-                this.#buttonService.buttonSelect$.next([button, !button.selected()]);
-            }
-        });
-        this.#buttonService.buttonSelected$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(button => {
-            if (this.selection() === "single" && button.selected()) {
-                this.buttons().forEach(b => {
-                    if (b !== button) {
+                    if (b.selected()) {
                         this.#buttonService.buttonSelect$.next([b, false]);
                     }
                 });
+                if (!isCurrentlySelected) {
+                    this.#buttonService.buttonSelect$.next([button, true]);
+                }
+            } else {
+                this.#buttonService.buttonSelect$.next([button, !button.selected()]);
             }
         });
     }

@@ -559,3 +559,231 @@ describe("ButtonDirective", () => {
         });
     });
 });
+
+// =============================================================================
+// ButtonService Integration Tests
+// =============================================================================
+
+import { ButtonService } from "../../services/button.service";
+
+@Component({
+    template: `
+        <button
+            monaButton
+            [disabled]="disabled()"
+            [look]="look()"
+            [size]="size()"
+            [rounded]="rounded()"
+            [selected]="selected()"
+            (selectedChange)="onSelectedChange($event)">
+            Test Button
+        </button>
+    `,
+    imports: [ButtonDirective],
+    providers: [ButtonService]
+})
+class TestButtonWithServiceHostComponent {
+    disabled = signal(false);
+    look = signal<ButtonVariantProps["look"]>("default");
+    size = signal<ButtonVariantProps["size"]>("medium");
+    rounded = signal<ButtonVariantProps["rounded"]>("medium");
+    selected = signal(false);
+
+    onSelectedChange = vi.fn();
+    buttonDirective = viewChild.required(ButtonDirective);
+}
+
+describe("ButtonDirective with ButtonService", () => {
+    let fixture: ComponentFixture<TestButtonWithServiceHostComponent>;
+    let component: TestButtonWithServiceHostComponent;
+    let buttonElement: HTMLButtonElement;
+    let buttonService: ButtonService;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [TestButtonWithServiceHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(TestButtonWithServiceHostComponent);
+        component = fixture.componentInstance;
+        buttonService = fixture.debugElement.injector.get(ButtonService);
+        fixture.detectChanges();
+        buttonElement = fixture.debugElement.query(By.css("button")).nativeElement;
+    });
+
+    // =========================================================================
+    // Button Group Context Detection Tests
+    // =========================================================================
+    describe("button group context", () => {
+        it("should behave as toggleable when ButtonService is available", () => {
+            // When in a button group context, the button should have aria-pressed
+            expect(buttonElement.getAttribute("aria-pressed")).not.toBeNull();
+        });
+
+        it("should inherit group look from ButtonService", () => {
+            buttonService.groupLook.set("warning");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("warning");
+        });
+    });
+
+    // =========================================================================
+    // effectiveLook Computed Tests
+    // =========================================================================
+    describe("effectiveLook", () => {
+        it("should use own look when group look is undefined", () => {
+            component.look.set("primary");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("primary");
+        });
+
+        it("should use group look when set in ButtonService", () => {
+            component.look.set("default");
+            buttonService.groupLook.set("success");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("success");
+        });
+
+        it("should update when group look changes", () => {
+            buttonService.groupLook.set("primary");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("primary");
+
+            buttonService.groupLook.set("error");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("error");
+        });
+    });
+
+    // =========================================================================
+    // effectiveSize Computed Tests
+    // =========================================================================
+    describe("effectiveSize", () => {
+        it("should use own size when group size is undefined", () => {
+            component.size.set("large");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-size")).toBe("large");
+        });
+
+        it("should use group size when set in ButtonService", () => {
+            component.size.set("medium");
+            buttonService.groupSize.set("small");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-size")).toBe("small");
+        });
+    });
+
+    // =========================================================================
+    // effectiveRounded Computed Tests
+    // =========================================================================
+    describe("effectiveRounded", () => {
+        it("should use own rounded when group rounded is undefined", () => {
+            component.rounded.set("full");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("rounded-full")).toBe(true);
+        });
+
+        it("should use group rounded when set in ButtonService", () => {
+            component.rounded.set("medium");
+            buttonService.groupRounded.set("none");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("rounded-none")).toBe(true);
+        });
+    });
+
+    // =========================================================================
+    // effectiveDisabled Computed Tests
+    // =========================================================================
+    describe("effectiveDisabled", () => {
+        it("should be disabled when own disabled is true", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.hasAttribute("disabled")).toBe(true);
+        });
+
+        it("should be disabled when group disabled is true", () => {
+            component.disabled.set(false);
+            buttonService.groupDisabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.hasAttribute("disabled")).toBe(true);
+            expect(buttonElement.getAttribute("aria-disabled")).toBe("true");
+        });
+
+        it("should NOT be disabled when both group and own disabled are false", () => {
+            component.disabled.set(false);
+            buttonService.groupDisabled.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.hasAttribute("disabled")).toBe(false);
+        });
+    });
+
+    // =========================================================================
+    // effectiveToggleable Behavior Tests
+    // =========================================================================
+    describe("effectiveToggleable", () => {
+        it("should behave as toggleable when inside a button group", async () => {
+            component.selected.set(false);
+            await waitForStable(fixture);
+            expect(buttonElement.getAttribute("aria-pressed")).toBe("false");
+        });
+
+        it("should toggle selected via ButtonService on click", async () => {
+            component.selected.set(false);
+            await waitForStable(fixture);
+
+            // When button is clicked in a group context, it should emit to buttonClick$
+            let clickedButton: ButtonDirective | null = null;
+            buttonService.buttonClick$.subscribe(btn => {
+                clickedButton = btn;
+            });
+
+            buttonElement.click();
+            await waitForStable(fixture);
+
+            expect(clickedButton).toBe(component.buttonDirective());
+        });
+
+        it("should NOT toggle when disabled via group", async () => {
+            component.selected.set(false);
+            buttonService.groupDisabled.set(true);
+            await waitForStable(fixture);
+
+            let clickedButton: ButtonDirective | null = null;
+            buttonService.buttonClick$.subscribe(btn => {
+                clickedButton = btn;
+            });
+
+            buttonElement.click();
+            await waitForStable(fixture);
+
+            expect(clickedButton).toBeNull();
+        });
+    });
+
+    // =========================================================================
+    // ButtonService buttonSelect$ Subscription Tests
+    // =========================================================================
+    describe("buttonSelect$ subscription", () => {
+        it("should update selected state when buttonSelect$ emits", async () => {
+            component.selected.set(false);
+            await waitForStable(fixture);
+
+            buttonService.buttonSelect$.next([component.buttonDirective(), true]);
+            await waitForStable(fixture);
+
+            expect(component.buttonDirective().selected()).toBe(true);
+        });
+
+        it("should NOT update selected when buttonSelect$ emits for different button", async () => {
+            component.selected.set(false);
+            await waitForStable(fixture);
+
+            // Create a mock button that isn't our button
+            const mockButton = {} as ButtonDirective;
+            buttonService.buttonSelect$.next([mockButton, true]);
+            await waitForStable(fixture);
+
+            expect(component.buttonDirective().selected()).toBe(false);
+        });
+    });
+});
