@@ -13,6 +13,7 @@ import {
     input,
     model,
     OnInit,
+    output,
     signal,
     TemplateRef,
     untracked
@@ -30,7 +31,9 @@ import { TakeFirstPipe } from "../../../../pipes/take-first.pipe";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
+import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarView } from "../../../models/CalendarView";
+import { CalendarService } from "../../../services/calendar.service";
 import { CalendarDecadeCellTemplateDirective } from "../../directives/calendar-decade-cell-template.directive";
 import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-month-cell-template.directive";
 import { CalendarYearCellTemplateDirective } from "../../directives/calendar-year-cell-template.directive";
@@ -80,6 +83,7 @@ import { compareDates } from "../../utils/compareDates";
     }
 })
 export class CalendarComponent implements OnInit, ControlValueAccessor, CalendarVariantInput {
+    readonly #calendarService = inject(CalendarService, { skipSelf: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #monthDict = computed(() => {
@@ -511,6 +515,14 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         if (this.disabled()) {
             return;
         }
+
+        const preventableEvent = new PreventableEvent("calendarKeydown", event);
+        this.#calendarService.keydown$.next(preventableEvent);
+
+        if (preventableEvent.isDefaultPrevented()) {
+            return;
+        }
+
         const view = this.calendarView();
         const isCtrlOrCmd = event.ctrlKey || event.metaKey;
         const isShift = event.shiftKey;
@@ -608,6 +620,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                     shouldFocusCell = true;
                 }
                 break;
+            case "Escape":
+                event.preventDefault();
+                return;
         }
 
         if (shouldFocusCell) {

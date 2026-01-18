@@ -44,6 +44,7 @@ import { CalendarMonthCellTemplateDirective } from "../../../calendar/directives
 import { CalendarYearCellTemplateDirective } from "../../../calendar/directives/calendar-year-cell-template.directive";
 import { FirstDayOfWeek } from "../../../calendar/models/FirstDayOfWeek";
 import { DateInputPrefixTemplateDirective } from "../../../directives/date-input-prefix-template.directive";
+import { CalendarService } from "../../../services/calendar.service";
 import { datePopupThemeVariants, DatePopupVariantInput } from "../../../styles/date-popup.styles";
 import {
     datePickerBaseThemeVariants,
@@ -57,6 +58,7 @@ import {
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         DropdownService,
+        CalendarService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => DatePickerComponent),
@@ -94,6 +96,7 @@ import {
 export class DatePickerComponent
     implements ControlValueAccessor, DropdownPopupInput, DatePickerVariantInput, DatePopupVariantInput
 {
+    readonly #calendarService = inject(CalendarService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
@@ -408,6 +411,13 @@ export class DatePickerComponent
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => this.handleKeydown(event));
+        this.#calendarService.keydown$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            const keyboardEvent = event.originalEvent;
+            if (keyboardEvent && keyboardEvent.altKey && keyboardEvent.key === "ArrowUp") {
+                keyboardEvent.preventDefault();
+                this.closePopup();
+            }
+        });
     }
 
     private setPopupCloseSubscriptions(): void {

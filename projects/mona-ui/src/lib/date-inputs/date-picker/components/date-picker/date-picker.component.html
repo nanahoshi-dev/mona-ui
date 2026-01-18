@@ -8,10 +8,9 @@
         </ng-template>
     }
     <ng-template monaTextBoxSuffixTemplate>
-        <button monaButton look="ghost" [iconOnly]="true" class="rounded-none"
-                [attr.aria-label]="'Open calendar'" [attr.aria-expanded]="expanded()"
-                [disabled]="disabled() || readonly()"
-                [tabindex]="-1" (click)="onDateInputButtonClick()">
+        <button monaButton look="ghost" [iconOnly]="true" class="rounded-none" [attr.aria-label]="'Open calendar'"
+                [attr.aria-expanded]="expanded()" [disabled]="disabled() || readonly()" [tabindex]="-1"
+                (click)="onDateInputButtonClick()">
             <i class="ri-calendar-line"></i>
         </button>
     </ng-template>
