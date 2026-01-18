@@ -1,47 +1,57 @@
 import {
+    afterNextRender,
+    ApplicationRef,
+    ComponentRef,
     computed,
+    createComponent,
     DestroyRef,
     Directive,
     effect,
     ElementRef,
     inject,
+    Injector,
     input,
     model,
-    OnInit,
+    Renderer2,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ButtonVariantProps, ButtonVariantsInput, buttonThemeVariants } from "../styles/button.styles";
-import { ThemeService } from "../../../theme/services/theme.service";
 import { fromEvent, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
+import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { ButtonService } from "../../services/button.service";
+import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "../styles/button.styles";
 
 @Directive({
     selector: "button[monaButton]",
     host: {
-        "[attr.aria-disabled]": "disabled() ? true : undefined",
-        "[attr.aria-expanded]": "toggleable() ? selected() : undefined",
+        "[attr.aria-busy]": "loading() ? 'true' : undefined",
+        "[attr.aria-disabled]": "disabled() || loading() ? 'true' : undefined",
         "[attr.aria-haspopup]": "ariaHasPopup()",
-        "[attr.aria-pressed]": "toggleable() ? selected() : undefined",
+        "[attr.aria-pressed]": "toggleable() ? (selected() ? 'true' : 'false') : undefined",
         "[attr.data-look]": "look()",
         "[attr.data-size]": "size()",
-        "[attr.disabled]": "disabled() ? '' : undefined",
-        "[attr.role]": "'button'",
-        "[attr.tabindex]": "disabled() ? -1 : tabindex()",
+        "[attr.disabled]": "disabled() || loading() ? '' : undefined",
+        "[attr.tabindex]": "disabled() || loading() ? -1 : tabindex()",
         "[attr.type]": "'button'",
-        "[class]": "classes()",
-        "[class.mona-button]": "true",
-        "[class.mona-selected]": "selected()"
+        "[class]": "baseClass()"
     }
 })
-export class ButtonDirective implements OnInit, ButtonVariantsInput {
+export class ButtonDirective implements ButtonVariantsInput {
+    readonly #appRef = inject(ApplicationRef);
     readonly #buttonService = inject(ButtonService, { optional: true });
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
+    readonly #injector = inject(Injector);
+    readonly #renderer = inject(Renderer2);
     readonly #themeService = inject(ThemeService);
-    protected readonly classes = computed(() => {
+    #loaderComponentRef: ComponentRef<LoadingIndicatorComponent> | null = null;
+
+    protected readonly baseClass = computed(() => {
+        const disabled = this.disabled();
         const iconOnly = this.iconOnly();
+        const loading = this.loading();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
@@ -49,8 +59,20 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         const userClass = this.userClass();
         const theme = this.#themeService.theme();
         const variants = buttonThemeVariants(theme);
-        const variantClasses = variants({ iconOnly, look, rounded, selected, size });
+        const variantClasses = variants({ disabled, iconOnly, loading, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
+    });
+    protected readonly loadingSize = computed(() => {
+        const size = this.size();
+        switch (size) {
+            case "small":
+                return 14;
+            case "large":
+                return 20;
+            case "medium":
+            default:
+                return 16;
+        }
     });
 
     /**
@@ -64,10 +86,16 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
     public readonly disabled = model<boolean>(false);
 
     /**
-     * @description Sets the icon only state of the button.
+     * @description Sets the icon-only state of the button.
      * When set to true, the button will appear as square.
      */
     public readonly iconOnly = input(false);
+
+    /**
+     * @description Sets the loading state of the button.
+     * When set to true, the button will display a loading indicator and be disabled.
+     */
+    public readonly loading = model<boolean>(false);
 
     /**
      * @description Sets the look of the button.
@@ -116,12 +144,54 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         effect(() => {
             const toggleable = this.toggleable();
             if (toggleable) {
-                untracked(() => this.setToggleableEvent());
+                untracked(() => this.#setToggleableEvent());
             }
+        });
+        effect(() => {
+            const loading = this.loading();
+            const loaderSize = this.loadingSize();
+            untracked(() => {
+                if (loading) {
+                    this.#createLoader(loaderSize);
+                } else {
+                    this.#removeLoader();
+                }
+            });
+        });
+        afterNextRender({
+            read: () => this.#setSubscriptions()
         });
     }
 
-    public ngOnInit(): void {
+    #createLoader(size: number): void {
+        if (this.#loaderComponentRef) {
+            return;
+        }
+
+        this.#loaderComponentRef = createComponent(LoadingIndicatorComponent, {
+            environmentInjector: this.#appRef.injector,
+            elementInjector: this.#injector
+        });
+        this.#loaderComponentRef.setInput("size", size);
+        this.#appRef.attachView(this.#loaderComponentRef.hostView);
+
+        const loaderElement = this.#loaderComponentRef.location.nativeElement;
+        this.#renderer.insertBefore(
+            this.#hostElementRef.nativeElement,
+            loaderElement,
+            this.#hostElementRef.nativeElement.firstChild
+        );
+    }
+
+    #removeLoader(): void {
+        if (this.#loaderComponentRef) {
+            this.#appRef.detachView(this.#loaderComponentRef.hostView);
+            this.#loaderComponentRef.destroy();
+            this.#loaderComponentRef = null;
+        }
+    }
+
+    #setSubscriptions(): void {
         this.#buttonService?.buttonSelect$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(result => {
             const [button, selected] = result;
             if (button === this) {
@@ -130,7 +200,7 @@ export class ButtonDirective implements OnInit, ButtonVariantsInput {
         });
     }
 
-    private setToggleableEvent(): void {
+    #setToggleableEvent(): void {
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),

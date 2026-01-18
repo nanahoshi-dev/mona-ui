@@ -762,8 +762,14 @@
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Sets the icon only state of the button.\r\nWhen set to true, the button will appear as square.",
+        "description": "Sets the icon-only state of the button.\nWhen set to true, the button will appear as square.",
         "kind": "input"
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Sets the loading state of the button.\nWhen set to true, the button will display a loading indicator and be disabled.",
+        "kind": "model"
       },
       {
         "name": "look",
@@ -798,7 +804,7 @@
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\r\n\r\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Sets the toggleable state of the button.\n\nIf set to `true`, the button will toggle its selected state on click.",
         "kind": "input"
       },
       {
@@ -2514,13 +2520,19 @@
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Sets the icon only state of the button.\r\nWhen set to true, the button will appear as square.",
+        "description": "Sets the icon-only state of the button.\r\nWhen set to true, the button will appear as square.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Sets the loading state of the button.",
         "kind": "input"
       },
       {

@@ -93,7 +93,7 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
     public readonly ariaLabelledby = input<string>("");
 
     /**
-     * @description Sets the icon only state of the button.
+     * @description Sets the icon-only state of the button.
      * When set to true, the button will appear as square.
      */
     public readonly iconOnly = input(false);
@@ -102,6 +102,11 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
      * @description Sets the disabled state of the button.
      */
     public readonly disabled = input(false);
+
+    /**
+     * @description Sets the loading state of the button.
+     */
+    public readonly loading = input(false);
 
     /**
      * @description Sets the look of the button.

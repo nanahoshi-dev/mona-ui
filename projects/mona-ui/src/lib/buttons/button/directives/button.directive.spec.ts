@@ -1,64 +1,561 @@
-import { Component, viewChild, ViewChild } from "@angular/core";
-import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { Component, signal, viewChild } from "@angular/core";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ButtonGroupComponent } from "../../button-group/components/button-group/button-group.component";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ButtonVariantProps } from "../styles/button.styles";
 import { ButtonDirective } from "./button.directive";
-import { vi } from "vitest";
 
-@Component({
-    template: ` <button
-        monaButton
-        [selected]="selected"
-        [tabindex]="tabIndex"
-        [toggleable]="toggleable"
-        (selectedChange)="selectedChange($event)">
-        TEST BUTTON
-    </button>`,
-    imports: [ButtonDirective]
-})
-class TestButtonDirectiveComponent {
-    public selected: boolean = false;
-    public tabIndex: number = 0;
-    public toggleable: boolean = false;
-
-    public buttonDirective = viewChild.required(ButtonDirective);
-
-    public selectedChange(selected: boolean): void {
-        this.selected = selected;
-    }
-}
+// =============================================================================
+// Test Host Components
+// =============================================================================
 
 @Component({
     template: `
-        <mona-button-group selection="single">
-            <button monaButton [toggleable]="true">A</button>
-            <button monaButton [toggleable]="true">B</button>
-            <button monaButton [toggleable]="true">C</button>
-        </mona-button-group>
+        <button
+            monaButton
+            [disabled]="disabled()"
+            [loading]="loading()"
+            [look]="look()"
+            [size]="size()"
+            [rounded]="rounded()"
+            [iconOnly]="iconOnly()"
+            [selected]="selected()"
+            [tabindex]="tabindex()"
+            [toggleable]="toggleable()"
+            [aria-haspopup]="ariaHasPopup()"
+            [class]="userClass()"
+            (selectedChange)="onSelectedChange($event)">
+            Test Button
+        </button>
     `,
-    imports: [ButtonDirective, ButtonGroupComponent]
+    imports: [ButtonDirective]
 })
-class TestButtonGroupButtonComponent {}
+class TestButtonHostComponent {
+    disabled = signal(false);
+    loading = signal(false);
+    look = signal<ButtonVariantProps["look"]>("default");
+    size = signal<ButtonVariantProps["size"]>("medium");
+    rounded = signal<ButtonVariantProps["rounded"]>("medium");
+    iconOnly = signal(false);
+    selected = signal(false);
+    tabindex = signal<number | string>(0);
+    toggleable = signal(false);
+    ariaHasPopup = signal("false");
+    userClass = signal("");
+
+    onSelectedChange = vi.fn();
+    buttonDirective = viewChild.required(ButtonDirective);
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+async function waitForStable(fixture: ComponentFixture<unknown>): Promise<void> {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+}
+
+// =============================================================================
+// Test Suite
+// =============================================================================
 
 describe("ButtonDirective", () => {
-    let buttonHostComponent: TestButtonDirectiveComponent;
-    let buttonGroupHostComponent: TestButtonGroupButtonComponent;
-    let buttonHostFixture: ComponentFixture<TestButtonDirectiveComponent>;
-    let buttonGroupHostFixture: ComponentFixture<TestButtonGroupButtonComponent>;
+    let fixture: ComponentFixture<TestButtonHostComponent>;
+    let component: TestButtonHostComponent;
+    let buttonElement: HTMLButtonElement;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [TestButtonDirectiveComponent]
-        });
-        buttonHostFixture = TestBed.createComponent(TestButtonDirectiveComponent);
-        buttonGroupHostFixture = TestBed.createComponent(TestButtonGroupButtonComponent);
-        buttonHostComponent = buttonHostFixture.componentInstance;
-        buttonGroupHostComponent = buttonGroupHostFixture.componentInstance;
-        buttonHostFixture.detectChanges();
-        buttonGroupHostFixture.detectChanges();
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [TestButtonHostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(TestButtonHostComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        buttonElement = fixture.debugElement.query(By.css("button")).nativeElement;
     });
 
-    it("should create", () => {
-        expect(buttonHostComponent).toBeTruthy();
+    // =========================================================================
+    // Initialization Tests
+    // =========================================================================
+    describe("initialization", () => {
+        it("should create the directive", () => {
+            expect(component.buttonDirective()).toBeTruthy();
+        });
+
+        it("should set type='button' attribute", () => {
+            expect(buttonElement.getAttribute("type")).toBe("button");
+        });
+
+        it("should apply default variant classes", () => {
+            expect(buttonElement.classList.length).toBeGreaterThan(0);
+            expect(buttonElement.getAttribute("data-look")).toBe("default");
+            expect(buttonElement.getAttribute("data-size")).toBe("medium");
+        });
+    });
+
+    // =========================================================================
+    // Disabled Input Tests
+    // =========================================================================
+    describe("disabled input", () => {
+        it("should NOT set disabled attribute when disabled=false", () => {
+            component.disabled.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.hasAttribute("disabled")).toBe(false);
+        });
+
+        it("should set disabled attribute when disabled=true", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.hasAttribute("disabled")).toBe(true);
+        });
+
+        it("should set aria-disabled when disabled=true", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-disabled")).toBe("true");
+        });
+
+        it("should set tabindex=-1 when disabled=true", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+        });
+
+        it("should NOT set aria-disabled when disabled=false", () => {
+            component.disabled.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-disabled")).toBeNull();
+        });
+    });
+
+    // =========================================================================
+    // Loading Input Tests
+    // =========================================================================
+    describe("loading input", () => {
+        it("should NOT set aria-busy when loading=false", () => {
+            component.loading.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-busy")).toBeNull();
+        });
+
+        it("should set aria-busy='true' when loading=true", () => {
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-busy")).toBe("true");
+        });
+
+        it("should set aria-disabled when loading=true", () => {
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-disabled")).toBe("true");
+        });
+
+        it("should set disabled attribute when loading=true", () => {
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.hasAttribute("disabled")).toBe(true);
+        });
+
+        it("should set tabindex=-1 when loading=true", () => {
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+        });
+
+        it("should create loading indicator element when loading=true", async () => {
+            component.loading.set(true);
+            await waitForStable(fixture);
+            const loader = buttonElement.querySelector("mona-loading-indicator");
+            expect(loader).toBeTruthy();
+        });
+
+        it("should remove loading indicator when loading changes from true to false", async () => {
+            component.loading.set(true);
+            await waitForStable(fixture);
+            expect(buttonElement.querySelector("mona-loading-indicator")).toBeTruthy();
+
+            component.loading.set(false);
+            await waitForStable(fixture);
+            expect(buttonElement.querySelector("mona-loading-indicator")).toBeNull();
+        });
+
+        it("should set loader size=14 for size='small'", async () => {
+            component.size.set("small");
+            component.loading.set(true);
+            await waitForStable(fixture);
+            const loader = buttonElement.querySelector("mona-loading-indicator");
+            expect(loader).toBeTruthy();
+        });
+
+        it("should set loader size=16 for size='medium'", async () => {
+            component.size.set("medium");
+            component.loading.set(true);
+            await waitForStable(fixture);
+            const loader = buttonElement.querySelector("mona-loading-indicator");
+            expect(loader).toBeTruthy();
+        });
+
+        it("should set loader size=20 for size='large'", async () => {
+            component.size.set("large");
+            component.loading.set(true);
+            await waitForStable(fixture);
+            const loader = buttonElement.querySelector("mona-loading-indicator");
+            expect(loader).toBeTruthy();
+        });
+    });
+
+    // =========================================================================
+    // Look Input Tests
+    // =========================================================================
+    describe("look input", () => {
+        it("should set data-look attribute to 'default' by default", () => {
+            expect(buttonElement.getAttribute("data-look")).toBe("default");
+        });
+
+        it("should update data-look when look changes to 'primary'", () => {
+            component.look.set("primary");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("primary");
+        });
+
+        it("should update data-look when look changes to 'success'", () => {
+            component.look.set("success");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("success");
+        });
+
+        it("should update data-look when look changes to 'error'", () => {
+            component.look.set("error");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("error");
+        });
+
+        it("should update data-look when look changes to 'warning'", () => {
+            component.look.set("warning");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("warning");
+        });
+
+        it("should update data-look when look changes to 'outline'", () => {
+            component.look.set("outline");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("outline");
+        });
+
+        it("should update data-look when look changes to 'ghost'", () => {
+            component.look.set("ghost");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("ghost");
+        });
+
+        it("should update data-look when look changes to 'link'", () => {
+            component.look.set("link");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-look")).toBe("link");
+        });
+    });
+
+    // =========================================================================
+    // Size Input Tests
+    // =========================================================================
+    describe("size input", () => {
+        it("should set data-size attribute to 'medium' by default", () => {
+            expect(buttonElement.getAttribute("data-size")).toBe("medium");
+        });
+
+        it("should update data-size when size changes to 'small'", () => {
+            component.size.set("small");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-size")).toBe("small");
+        });
+
+        it("should update data-size when size changes to 'large'", () => {
+            component.size.set("large");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("data-size")).toBe("large");
+        });
+    });
+
+    // =========================================================================
+    // ariaHasPopup Input Tests
+    // =========================================================================
+    describe("ariaHasPopup input", () => {
+        it("should set aria-haspopup='false' by default", () => {
+            expect(buttonElement.getAttribute("aria-haspopup")).toBe("false");
+        });
+
+        it("should set aria-haspopup to provided value", () => {
+            component.ariaHasPopup.set("menu");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-haspopup")).toBe("menu");
+        });
+
+        it("should set aria-haspopup to 'listbox'", () => {
+            component.ariaHasPopup.set("listbox");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-haspopup")).toBe("listbox");
+        });
+
+        it("should set aria-haspopup to 'true'", () => {
+            component.ariaHasPopup.set("true");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-haspopup")).toBe("true");
+        });
+    });
+
+    // =========================================================================
+    // Tabindex Input Tests
+    // =========================================================================
+    describe("tabindex input", () => {
+        it("should set tabindex=0 by default", () => {
+            expect(buttonElement.getAttribute("tabindex")).toBe("0");
+        });
+
+        it("should accept numeric tabindex and set attribute", () => {
+            component.tabindex.set(5);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("5");
+        });
+
+        it("should accept string tabindex and convert to number", () => {
+            component.tabindex.set("3");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("3");
+        });
+
+        it("should override tabindex to -1 when disabled", () => {
+            component.tabindex.set(5);
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+        });
+    });
+
+    // =========================================================================
+    // userClass Input Tests
+    // =========================================================================
+    describe("userClass input", () => {
+        it("should merge user-provided classes with variant classes", () => {
+            component.userClass.set("my-custom-class");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("my-custom-class")).toBe(true);
+        });
+
+        it("should support multiple user classes", () => {
+            component.userClass.set("class-a class-b");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("class-a")).toBe(true);
+            expect(buttonElement.classList.contains("class-b")).toBe(true);
+        });
+    });
+
+    // =========================================================================
+    // Rounded Input Tests
+    // =========================================================================
+    describe("rounded input", () => {
+        it("should apply rounded-md class by default (medium)", () => {
+            expect(buttonElement.classList.contains("rounded-md")).toBe(true);
+        });
+
+        it("should apply rounded-full class when rounded='full'", () => {
+            component.rounded.set("full");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("rounded-full")).toBe(true);
+        });
+
+        it("should apply rounded-lg class when rounded='large'", () => {
+            component.rounded.set("large");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("rounded-lg")).toBe(true);
+        });
+
+        it("should apply rounded-sm class when rounded='small'", () => {
+            component.rounded.set("small");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("rounded-sm")).toBe(true);
+        });
+
+        it("should apply rounded-none class when rounded='none'", () => {
+            component.rounded.set("none");
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("rounded-none")).toBe(true);
+        });
+    });
+
+    // =========================================================================
+    // IconOnly Input Tests
+    // =========================================================================
+    describe("iconOnly input", () => {
+        it("should apply aspect-auto class when iconOnly=false", () => {
+            component.iconOnly.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("aspect-auto")).toBe(true);
+        });
+
+        it("should apply aspect-square class when iconOnly=true", () => {
+            component.iconOnly.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.classList.contains("aspect-square")).toBe(true);
+        });
+    });
+
+    // =========================================================================
+    // Toggleable Behavior Tests
+    // =========================================================================
+    describe("toggleable behavior", () => {
+        it("should NOT set aria-pressed when toggleable=false", () => {
+            component.toggleable.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-pressed")).toBeNull();
+        });
+
+        it("should set aria-pressed='false' when toggleable=true and selected=false", () => {
+            component.toggleable.set(true);
+            component.selected.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-pressed")).toBe("false");
+        });
+
+        it("should set aria-pressed='true' when toggleable=true and selected=true", () => {
+            component.toggleable.set(true);
+            component.selected.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-pressed")).toBe("true");
+        });
+
+        it("should toggle selected on click when toggleable=true", async () => {
+            component.toggleable.set(true);
+            component.selected.set(false);
+            await waitForStable(fixture);
+
+            buttonElement.click();
+            await waitForStable(fixture);
+
+            expect(component.onSelectedChange).toHaveBeenCalledWith(true);
+        });
+
+        it("should toggle from true to false on click when toggleable=true", async () => {
+            component.toggleable.set(true);
+            component.selected.set(true);
+            await waitForStable(fixture);
+
+            buttonElement.click();
+            await waitForStable(fixture);
+
+            expect(component.onSelectedChange).toHaveBeenCalledWith(false);
+        });
+
+        it("should NOT toggle when disabled", async () => {
+            component.toggleable.set(true);
+            component.selected.set(false);
+            component.disabled.set(true);
+            await waitForStable(fixture);
+
+            buttonElement.click();
+            await waitForStable(fixture);
+
+            expect(component.onSelectedChange).not.toHaveBeenCalled();
+        });
+
+        it("should NOT toggle when toggleable=false", async () => {
+            component.toggleable.set(false);
+            component.selected.set(false);
+            await waitForStable(fixture);
+
+            buttonElement.click();
+            await waitForStable(fixture);
+
+            expect(component.onSelectedChange).not.toHaveBeenCalled();
+        });
+    });
+
+    // =========================================================================
+    // Selected Input Tests
+    // =========================================================================
+    describe("selected input", () => {
+        it("should apply selected styles when selected=true", () => {
+            component.selected.set(true);
+            fixture.detectChanges();
+            // Selected buttons get specific background classes
+            expect(buttonElement.classList.toString()).toContain("bg-");
+        });
+    });
+
+    // =========================================================================
+    // Accessibility Tests
+    // =========================================================================
+    describe("accessibility", () => {
+        it("should always have type='button'", () => {
+            expect(buttonElement.getAttribute("type")).toBe("button");
+        });
+
+        it("should have correct aria-busy state when loading", () => {
+            component.loading.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-busy")).toBeNull();
+
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-busy")).toBe("true");
+        });
+
+        it("should have correct aria-disabled state", () => {
+            component.disabled.set(false);
+            component.loading.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-disabled")).toBeNull();
+
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-disabled")).toBe("true");
+
+            component.disabled.set(false);
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-disabled")).toBe("true");
+        });
+
+        it("should have correct aria-pressed state for toggleable buttons", () => {
+            // Non-toggleable should not have aria-pressed
+            component.toggleable.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-pressed")).toBeNull();
+
+            // Toggleable and not selected
+            component.toggleable.set(true);
+            component.selected.set(false);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-pressed")).toBe("false");
+
+            // Toggleable and selected
+            component.selected.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-pressed")).toBe("true");
+        });
+
+        it("should have correct tabindex for keyboard navigation", () => {
+            // Default tabindex
+            expect(buttonElement.getAttribute("tabindex")).toBe("0");
+
+            // Disabled removes from tab order
+            component.disabled.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+
+            // Loading also removes from tab order
+            component.disabled.set(false);
+            component.loading.set(true);
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("tabindex")).toBe("-1");
+        });
+
+        it("should have aria-haspopup for popup triggers", () => {
+            component.ariaHasPopup.set("menu");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("aria-haspopup")).toBe("menu");
+        });
     });
 });

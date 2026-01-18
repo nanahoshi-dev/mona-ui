@@ -36,6 +36,10 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
                 type: "boolean",
                 value: false
             },
+            loading: {
+                type: "boolean",
+                value: false
+            },
             look: {
                 type: "dropdown",
                 value: [
@@ -84,6 +88,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             monaButton
             [disabled]="disabled()"
             [iconOnly]="iconOnly()"
+            [loading]="loading()"
             [look]="look()"
             [rounded]="rounded()"
             [selected]="selected()"
@@ -107,6 +112,7 @@ export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDir
     public readonly ariaLabelledby = input("aria-labelledby");
     public readonly disabled = model(false);
     public readonly iconOnly = input(false);
+    public readonly loading = model(false);
     public readonly look = model<ReturnType<ButtonDirective["look"]>>("default");
     public readonly rounded = input<ReturnType<ButtonDirective["rounded"]>>("medium");
     public readonly selected = model<ReturnType<ButtonDirective["selected"]>>(false);

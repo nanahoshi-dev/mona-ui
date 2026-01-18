@@ -7,14 +7,21 @@ export const buttonVariants = cva(
         outline-none
         focus-visible:outline-none focus-visible:shadow
         transition-colors duration-100 ease-in-out
-        disabled:pointer-events-none disabled:opacity-50
-        disabled:cursor-not-allowed disabled:select-none
     `,
+
     {
         variants: {
+            disabled: {
+                true: "pointer-events-none opacity-50 cursor-not-allowed select-none",
+                false: ""
+            },
             iconOnly: {
                 true: "aspect-square",
                 false: "aspect-auto"
+            },
+            loading: {
+                true: "pointer-events-none",
+                false: ""
             },
             look: {
                 default: `
@@ -185,16 +192,19 @@ export const buttonVariants = cva(
             },
             {
                 iconOnly: true,
+                loading: false,
                 size: "small",
                 class: "w-8 h-8 p-0"
             },
             {
                 iconOnly: true,
+                loading: false,
                 size: "medium",
                 class: "w-9 h-9 p-0"
             },
             {
                 iconOnly: true,
+                loading: false,
                 size: "large",
                 class: "w-10 h-10 p-0"
             }

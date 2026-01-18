@@ -239,6 +239,10 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
                 type: "boolean",
                 value: false
             },
+            loading: {
+                type: "boolean",
+                value: false
+            },
             look: {
                 type: "dropdown",
                 value: [
@@ -307,6 +311,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         <mona-dropdown-button
             [disabled]="disabled()"
             [iconOnly]="iconOnly()"
+            [loading]="loading()"
             [look]="look()"
             [rounded]="rounded()"
             [size]="size()"
@@ -406,8 +411,9 @@ export class DropdownButtonWrapperComponent implements ComponentInputsAsSignal<D
     protected readonly heartIcon = Heart;
     protected readonly menuIcon = Menu;
     protected readonly settingsIcon = Settings;
-    public readonly disabled = input(false);
-    public readonly iconOnly = input(false);
+    public readonly disabled = input<ReturnType<DropdownButtonComponent["disabled"]>>(false);
+    public readonly iconOnly = input<ReturnType<DropdownButtonComponent["iconOnly"]>>(false);
+    public readonly loading = input<ReturnType<DropdownButtonComponent["loading"]>>(false);
     public readonly look = input<ReturnType<DropdownButtonComponent["look"]>>("default");
     public readonly rounded = input<ReturnType<DropdownButtonComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<DropdownButtonComponent["size"]>>("medium");
