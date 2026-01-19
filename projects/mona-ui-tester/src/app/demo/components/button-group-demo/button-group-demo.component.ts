@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
-import { ButtonGroupComponent, ButtonGroupItemComponent } from "mona-ui";
+import { ButtonDirective, ButtonGroupComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -21,9 +21,9 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
                 [look]="look()"
                 [rounded]="rounded()"
                 [size]="size()">
-                <mona-button-group-item>B1</mona-button-group-item>
-                <mona-button-group-item>B2</mona-button-group-item>
-                <mona-button-group-item>B3</mona-button-group-item>
+                <button monaButton>B1</button>
+                <button monaButton>B2</button>
+                <button monaButton>B3</button>
             </mona-button-group>
         `,
         inputs: {
@@ -54,11 +54,11 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
         }
     });
     protected readonly metadata = this.getMetadata("ButtonGroupComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["ButtonGroupItemComponent"]);
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({
-    imports: [ButtonGroupComponent, ButtonGroupItemComponent],
+    imports: [ButtonGroupComponent, ButtonDirective],
     template: `
         <mona-button-group
             [disabled]="disabled()"
@@ -66,9 +66,9 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
             [look]="look()"
             [rounded]="rounded()"
             [size]="size()">
-            <mona-button-group-item>B1</mona-button-group-item>
-            <mona-button-group-item>B2</mona-button-group-item>
-            <mona-button-group-item>B3</mona-button-group-item>
+            <button monaButton>B1</button>
+            <button monaButton>B2</button>
+            <button monaButton>B3</button>
         </mona-button-group>
     `
 })
@@ -79,3 +79,4 @@ export class ButtonGroupWrapperComponent implements ComponentInputsAsSignal<Butt
     public readonly selection = model<ReturnType<ButtonGroupComponent["selection"]>>("single");
     public readonly size = input<ReturnType<ButtonGroupComponent["size"]>>("medium");
 }
+

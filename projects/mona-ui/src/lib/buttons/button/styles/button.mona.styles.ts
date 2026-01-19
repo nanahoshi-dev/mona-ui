@@ -39,7 +39,7 @@ export const buttonVariants = cva(
                 `,
                 success: `
                     bg-success text-success-foreground
-                    hover:bg-success/90 hover:text-success-foreground
+                    hover:bg-success-hover hover:text-success-foreground
                     active:bg-success-active active:text-success-foreground
                     focus-visible:ring-2 focus-visible:ring-success/40
                 `,
@@ -104,9 +104,9 @@ export const buttonVariants = cva(
                 look: "default",
                 selected: true,
                 class: `
-                    bg-primary-selected text-primary-foreground
-                    hover:bg-primary-selected/95 hover:text-primary-foreground
-                    active:bg-primary-selected/100 active:text-primary-foreground
+                    bg-selected text-foreground
+                    hover:bg-selected/95 hover:text-foreground
+                    active:bg-selected/100 active:text-foreground
                 `
             },
             {

@@ -27,13 +27,13 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
     selector: "button[monaButton]",
     host: {
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
-        "[attr.aria-disabled]": "disabled() || loading() ? 'true' : undefined",
+        "[attr.aria-disabled]": "effectiveDisabled() || loading() ? 'true' : undefined",
         "[attr.aria-haspopup]": "ariaHasPopup()",
-        "[attr.aria-pressed]": "toggleable() ? (selected() ? 'true' : 'false') : undefined",
-        "[attr.data-look]": "look()",
-        "[attr.data-size]": "size()",
-        "[attr.disabled]": "disabled() || loading() ? '' : undefined",
-        "[attr.tabindex]": "disabled() || loading() ? -1 : tabindex()",
+        "[attr.aria-pressed]": "effectiveToggleable() ? (selected() ? 'true' : 'false') : undefined",
+        "[attr.data-look]": "effectiveLook()",
+        "[attr.data-size]": "effectiveSize()",
+        "[attr.disabled]": "effectiveDisabled() || loading() ? '' : undefined",
+        "[attr.tabindex]": "effectiveDisabled() || loading() ? -1 : tabindex()",
         "[attr.type]": "'button'",
         "[class]": "baseClass()"
     }
@@ -48,13 +48,20 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #themeService = inject(ThemeService);
     #loaderComponentRef: ComponentRef<LoadingIndicatorComponent> | null = null;
 
+    protected readonly effectiveDisabled = computed(() => this.#buttonService?.groupDisabled() || this.disabled());
+    protected readonly effectiveLook = computed(() => this.#buttonService?.groupLook() ?? this.look());
+    protected readonly effectiveRounded = computed(() => this.#buttonService?.groupRounded() ?? this.rounded());
+    protected readonly effectiveSize = computed(() => this.#buttonService?.groupSize() ?? this.size());
+    protected readonly effectiveToggleable = computed(() => this.isInButtonGroup() || this.toggleable());
+    protected readonly isInButtonGroup = computed(() => !!this.#buttonService);
+
     protected readonly baseClass = computed(() => {
-        const disabled = this.disabled();
+        const disabled = this.effectiveDisabled();
         const iconOnly = this.iconOnly();
         const loading = this.loading();
-        const look = this.look();
-        const rounded = this.rounded();
-        const size = this.size();
+        const look = this.effectiveLook();
+        const rounded = this.effectiveRounded();
+        const size = this.effectiveSize();
         const selected = this.selected();
         const userClass = this.userClass();
         const theme = this.#themeService.theme();
@@ -63,7 +70,7 @@ export class ButtonDirective implements ButtonVariantsInput {
         return twMerge(variantClasses, userClass);
     });
     protected readonly loadingSize = computed(() => {
-        const size = this.size();
+        const size = this.effectiveSize();
         switch (size) {
             case "small":
                 return 14;
@@ -126,7 +133,6 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     /**
      * @description Sets the toggleable state of the button.
-     *
      * If set to `true`, the button will toggle its selected state on click.
      */
     public readonly toggleable = input(false);
@@ -134,15 +140,7 @@ export class ButtonDirective implements ButtonVariantsInput {
 
     public constructor() {
         effect(() => {
-            this.selected();
-            untracked(() => {
-                if (this.#buttonService) {
-                    this.#buttonService.buttonSelected$.next(this);
-                }
-            });
-        });
-        effect(() => {
-            const toggleable = this.toggleable();
+            const toggleable = this.effectiveToggleable();
             if (toggleable) {
                 untracked(() => this.#setToggleableEvent());
             }
@@ -204,10 +202,10 @@ export class ButtonDirective implements ButtonVariantsInput {
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                takeWhile(() => this.toggleable())
+                takeWhile(() => this.effectiveToggleable())
             )
             .subscribe(() => {
-                if (this.disabled()) {
+                if (this.effectiveDisabled()) {
                     return;
                 }
                 if (this.#buttonService) {
