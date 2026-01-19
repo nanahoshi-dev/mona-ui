@@ -77,7 +77,7 @@ export class ChipComponent implements ChipVariantInputs {
         if (explicitTabindex != null) {
             return explicitTabindex;
         }
-        if (this.toggleable() || this.removable() || this.selected() != null) {
+        if (this.toggleable() || this.removable()) {
             return 0;
         }
         return -1;

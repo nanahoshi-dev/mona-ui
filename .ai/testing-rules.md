@@ -8,7 +8,8 @@ Technology Stack:
 
 Framework: Angular 21 (Utilize modern testing patterns compatible with Signal-based inputs/queries if present).
 
-Runner: Vitest. Use vi.fn(), describe, it, expect, and beforeEach.
+Runner: Vitest. Use vi.fn(), describe, it, expect, and beforeEach. Use ng test instead of vitest command.
+Do not use --no-watch flag. Kill the process manually after the tests finish.
 
 Utils: Use ComponentFixture, DebugElement, and By.css for DOM interaction.
 
