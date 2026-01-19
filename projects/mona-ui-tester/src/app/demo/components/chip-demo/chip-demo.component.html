@@ -2,6 +2,7 @@
                     [metadata]="metadata()"
                     (valueChange)="onInputValueChange($event)">
     <ng-container [ngComponentOutlet]="ChipWrapperComponent"
+                  [ngComponentOutletInjector]="featureInjector"
                   [ngComponentOutletInputs]="inputs()"
     ></ng-container>
 </app-demo-container>

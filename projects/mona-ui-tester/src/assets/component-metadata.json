@@ -762,13 +762,13 @@
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Sets the icon-only state of the button.\nWhen set to true, the button will appear as square.",
+        "description": "Sets the icon-only state of the button.\r\nWhen set to true, the button will appear as square.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the button.\nWhen set to true, the button will display a loading indicator and be disabled.",
+        "description": "Sets the loading state of the button.\r\nWhen set to true, the button will display a loading indicator and be disabled.",
         "kind": "model"
       },
       {
@@ -804,7 +804,7 @@
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\n\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Sets the toggleable state of the button.\r\nIf set to `true`, the button will toggle its selected state on click.",
         "kind": "input"
       },
       {
@@ -828,7 +828,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the chip.\r\n\r\nIf the label is set, the chip will display the label instead of the content.",
+        "description": "Sets the label of the chip.\n\nIf the label is set, the chip will display the label instead of the content.",
         "kind": "input"
       },
       {
@@ -840,7 +840,7 @@
       {
         "name": "removable",
         "type": "boolean",
-        "description": "Sets the removable state of the chip.\r\nIf true, the chip will display a remove icon.",
+        "description": "Sets the removable state of the chip.\nIf true, the chip will display a remove icon.",
         "kind": "input"
       },
       {
@@ -856,6 +856,12 @@
         "kind": "input"
       },
       {
+        "name": "selected",
+        "type": "boolean",
+        "description": "Two-way binding for the selected state of the chip.\nWhen set, the chip behaves as a toggle (checkbox role).",
+        "kind": "model"
+      },
+      {
         "name": "size",
         "type": "ChipVariantProps[\"size\"]",
         "description": "Sets the size of the chip.",
@@ -864,13 +870,25 @@
       {
         "name": "tabindex",
         "type": "number | string",
-        "description": "Sets the tabindex of the chip.",
+        "description": "Sets the tabindex of the chip.\nIf not set, will be computed based on interactivity.",
+        "kind": "input"
+      },
+      {
+        "name": "toggleable",
+        "type": "boolean",
+        "description": "Sets the toggleable state of the chip.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
         "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "unknown",
+        "description": "Optional value associated with the chip, useful for selection groups.",
         "kind": "input"
       }
     ]
@@ -2442,7 +2460,7 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
+        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
         "kind": "model"
       },
       {
@@ -2474,30 +2492,6 @@
         "type": "string",
         "description": "",
         "kind": "input"
-      }
-    ]
-  },
-  "ButtonGroupItemComponent": {
-    "name": "ButtonGroupItemComponent",
-    "selector": "\"mona-button-group-item\"",
-    "inputs": [
-      {
-        "name": "click",
-        "type": "MouseEvent",
-        "description": "Emits when the button is clicked.",
-        "kind": "output"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Whether the button is disabled.",
-        "kind": "model"
-      },
-      {
-        "name": "selected",
-        "type": "boolean",
-        "description": "Whether the button is selected.",
-        "kind": "model"
       }
     ]
   },

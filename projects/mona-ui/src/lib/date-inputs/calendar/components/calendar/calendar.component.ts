@@ -83,7 +83,7 @@ import { compareDates } from "../../utils/compareDates";
     }
 })
 export class CalendarComponent implements OnInit, ControlValueAccessor, CalendarVariantInput {
-    readonly #calendarService = inject(CalendarService, { skipSelf: true });
+    readonly #calendarService = inject(CalendarService, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #monthDict = computed(() => {
@@ -517,7 +517,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
 
         const preventableEvent = new PreventableEvent("calendarKeydown", event);
-        this.#calendarService.keydown$.next(preventableEvent);
+        this.#calendarService?.keydown$.next(preventableEvent);
 
         if (preventableEvent.isDefaultPrevented()) {
             return;
@@ -581,6 +581,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                     return;
                 }
                 event.preventDefault();
+                const previousView = this.calendarView();
                 if (isCtrlOrCmd && selection === "multiple") {
                     this.toggleFocusedDateInSelection();
                 } else if (isShift && selection === "multiple") {
@@ -588,7 +589,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 } else {
                     this.selectFocusedItem();
                 }
-                this.#propagateChange?.(this.value());
+                if (previousView === "month" && this.calendarView() === "month") {
+                    this.#propagateChange?.(this.value());
+                }
                 shouldFocusCell = true;
                 break;
             }

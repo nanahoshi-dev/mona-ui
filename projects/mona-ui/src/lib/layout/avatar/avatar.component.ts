@@ -3,10 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, input, Signal } from "@an
 @Component({
     selector: "mona-avatar",
     templateUrl: "./avatar.component.html",
-    styleUrls: ["./avatar.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        class: "mona-avatar",
         "[style]": "avatarStyles()"
     }
 })
@@ -112,7 +110,7 @@ export class AvatarComponent {
      * @description Sets the color of the label text.
      * If an image is provided, this will be ignored.
      */
-    public readonly labelColor = input("var(--mona-text)");
+    public readonly labelColor = input("var(--color-foreground)");
 
     /**
      * @description Sets the font size of the label text.

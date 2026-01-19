@@ -125,7 +125,7 @@ export function generatePrimaryColorPalette(primaryOklchString: string): ColorPa
     });
 
     colorPalette["--color-secondary-selected"] = formatOklch({
-        l: primaryColor.l + 4, // Same LCH as primary-hover
+        l: primaryColor.l + 4,
         c: primaryColor.c,
         h: primaryColor.h,
         a: 0.5

@@ -44,12 +44,6 @@ export class ThemeService {
 
             ...generatePrimaryColorPalette(themeColorMap.flora),
 
-            // "--color-primary": "oklch(39.8% 0.195 277.366)",
-            // "--color-primary-foreground": "oklch(94.3% 0.029 294.588)",
-            // "--color-primary-hover": "oklch(43.8% 0.195 277.366)",
-            // "--color-primary-active": "oklch(35.8% 0.195 277.366)",
-            // "--color-primary-selected": "oklch(48.8% 0.195 277.366)",
-
             "--color-secondary": "oklch(0.27 0 0)",
             "--color-secondary-foreground": "oklch(97.7% 0.001 106.424)",
             "--color-secondary-hover": "oklch(0.29 0 0)",
