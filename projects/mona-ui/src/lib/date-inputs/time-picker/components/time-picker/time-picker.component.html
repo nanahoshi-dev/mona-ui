@@ -1,0 +1,18 @@
+<mona-text-box [disabled]="disabled()" [readonly]="readonly()"
+               [ngModel]="currentDateString()"
+               (ngModelChange)="onDateStringEdit($event)" (inputBlur)="onTimeInputBlur()">
+    <ng-template monaTextBoxSuffixTemplate>
+        <button monaButton look="ghost" [iconOnly]="true" (click)="onTimeInputButtonClick()"
+                [disabled]="disabled()">
+            <i class="ri-time-line"></i>
+        </button>
+    </ng-template>
+</mona-text-box>
+
+<ng-template #timePopupTemplate>
+    <div [class]="pickerPopupClass()">
+        <mona-time-selector [ngModel]="value()" (ngModelChange)="onTimeSelectorValueChange($event)"
+                            [max]="max()" [min]="min()" [readonly]="readonly()" [disabled]="disabled()"
+                            [hourFormat]="hourFormat()" [showSeconds]="showSeconds()"></mona-time-selector>
+    </div>
+</ng-template>

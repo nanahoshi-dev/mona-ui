@@ -238,6 +238,13 @@ export const routes: Routes = [
                     import("./docs/components/text-box-doc/text-box-doc.component").then(m => m.TextBoxDocComponent)
             },
             {
+                path: "time-picker",
+                loadComponent: () =>
+                    import("./docs/components/time-picker-doc/time-picker-doc.component").then(
+                        m => m.TimePickerDocComponent
+                    )
+            },
+            {
                 path: "tooltip",
                 loadComponent: () =>
                     import("./docs/components/tooltip-doc/tooltip-doc.component").then(m => m.TooltipDocComponent)

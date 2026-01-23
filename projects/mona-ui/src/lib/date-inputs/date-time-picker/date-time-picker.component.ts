@@ -30,7 +30,7 @@ import { PopupService } from "../../popup/services/popup.service";
 import { Action } from "../../utils/Action";
 import { CalendarComponent } from "../calendar/components/calendar/calendar.component";
 import { HourFormat } from "../models/HourFormat";
-import { TimeSelectorComponent } from "../time-selector/time-selector.component";
+import { TimeSelectorComponent } from "../time-selector/components/time-selector/time-selector.component";
 
 @Component({
     selector: "mona-date-time-picker",

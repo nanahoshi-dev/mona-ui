@@ -39,6 +39,19 @@ export class DropdownPopupHandlerDirective {
         this.#dropdownService.popupRef()?.close();
     }
 
+    private getMinWidth(minWidth: PopupSettings["minWidth"], width: PopupSettings["width"]): number | string {
+        if (typeof minWidth === "number") {
+            return minWidth;
+        }
+        if (!minWidth || minWidth === "auto") {
+            if (!width || width === "auto") {
+                return this.#hostElementRef.nativeElement.getBoundingClientRect().width;
+            }
+            return width;
+        }
+        return minWidth ?? this.#hostElementRef.nativeElement.getBoundingClientRect().width;
+    }
+
     private openPopup(settings: Partial<PopupSettings>): void {
         let popupRef = this.#dropdownService.popupRef();
         if (popupRef || this.#host.readonly()) {
@@ -60,12 +73,11 @@ export class DropdownPopupHandlerDirective {
         const height = settings.height;
         const maxHeight =
             settings.maxHeight ?? (this.#host.popupHeight() != null ? this.#host.popupHeight() || undefined : 200);
+        const minWidth = this.getMinWidth(settings.minWidth, settings.width);
         const offset = settings.offset ?? { horizontal: 0, vertical: 4 };
         const popupConnectionPoint = settings.popupConnectionPoint ?? "topleft";
         const restoreFocus = this.#dropdownService.restoreFocus();
-        const width =
-            settings.width ??
-            (this.#host.popupWidth() || this.#hostElementRef.nativeElement.getBoundingClientRect().width);
+        const width = settings.width ?? (this.#host.popupWidth() || anchor.getBoundingClientRect().width);
         const withPush = settings.withPush ?? false;
         const withScrollTracking = settings.withScrollTracking ?? false;
 
@@ -82,6 +94,7 @@ export class DropdownPopupHandlerDirective {
             hasBackdrop,
             height,
             maxHeight,
+            minWidth,
             offset,
             popupConnectionPoint,
             restoreFocus,

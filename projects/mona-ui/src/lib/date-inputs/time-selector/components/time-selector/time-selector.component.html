@@ -1,0 +1,62 @@
+<div class="flex bg-accent border-b border-input-border text-xs font-semibold text-accent-foreground uppercase">
+    <div class="flex-1 py-2 text-center">Hr</div>
+    <div class="flex-1 py-2 text-center">Min</div>
+    @if (showSeconds()) {
+        <div class="flex-1 py-2 text-center">Sec</div>
+    }
+</div>
+
+<div [class]="listContainerClass()">
+    <ol [class]="listClass()"
+        [style.padding-top.px]="listPadding()"
+        [style.padding-bottom.px]="listPadding()">
+        @for (h of viewHours()|timeLimiter:'h':navigatedDate():min():max(); track h) {
+            <li monaTimeSelectorItem [selected]="h.viewValue===hour()"
+                [value]="h.value"
+                (click)="onHourChange(h.value)">{{ h.viewValue | number:'2.0' }}
+            </li>
+        }
+    </ol>
+    <ol [class]="listClass()"
+        [style.padding-top.px]="listPadding()"
+        [style.padding-bottom.px]="listPadding()">
+        @for (m of minutes|timeLimiter:'m':navigatedDate():min():max(); track m) {
+            <li monaTimeSelectorItem [selected]="m.value===minute()"
+                [value]="m.value"
+                (click)="onMinuteChange(m.value)">{{ m.viewValue | number:'2.0' }}
+            </li>
+        }
+    </ol>
+    @if (showSeconds()) {
+        <ol [class]="listClass()"
+            [style.padding-top.px]="listPadding()"
+            [style.padding-bottom.px]="listPadding()">
+            @for (s of seconds|timeLimiter:'s':navigatedDate():min():max(); track s) {
+                <li monaTimeSelectorItem [selected]="s.value===second()"
+                    [value]="s.value"
+                    (click)="onSecondChange(s.value)">{{ s.value | number:'2.0' }}
+                </li>
+            }
+        </ol>
+    }
+    @if (hourFormat() === '12') {
+        <ol [class]="listClass()">
+            @if (amMeridiemVisible()) {
+                <li monaTimeSelectorItem [selected]="meridiem()==='AM'"
+                    [value]="'AM'"
+                    (click)="onMeridiemClick('AM')">AM
+                </li>
+            } @else if (pmMeridiemVisible()) {
+                <li monaTimeSelectorItem [selected]="meridiem()==='PM'"
+                    [value]="'PM'"
+                    (click)="onMeridiemClick('PM')">PM
+                </li>
+            }
+        </ol>
+    }
+</div>
+
+<div class="w-full flex items-center justify-between px-1 py-1 border-0 border-t border-input-border bg-accent">
+    <button monaButton look="ghost" size="small">Now</button>
+    <button monaButton look="primary" size="small" (click)="onSetTimeClick()">Set</button>
+</div>

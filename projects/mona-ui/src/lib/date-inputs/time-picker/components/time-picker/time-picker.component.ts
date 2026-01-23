@@ -1,15 +1,17 @@
-import { FocusMonitor } from "@angular/cdk/a11y";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
+    computed,
     DestroyRef,
     effect,
     ElementRef,
     forwardRef,
     inject,
     input,
+    linkedSignal,
     model,
-    OnInit,
+    output,
     Signal,
     signal,
     TemplateRef,
@@ -20,17 +22,22 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { DateTime } from "luxon";
-import { fromEvent, take } from "rxjs";
-import { AnimationState } from "../../animations/models/AnimationState";
-import { PopupAnimationService } from "../../animations/services/popup-animation.service";
-import { ButtonDirective } from "../../buttons/button/directives/button.directive";
-import { DropdownService } from "../../common/dropdown/services/dropdown.service";
-import { TextBoxDirective } from "../../inputs/text-box/directives/text-box.directive";
-import { PopupRef } from "../../popup/models/PopupRef";
-import { PopupService } from "../../popup/services/popup.service";
-import { Action } from "../../utils/Action";
-import { HourFormat } from "../models/HourFormat";
-import { TimeSelectorComponent } from "../time-selector/time-selector.component";
+import { fromEvent } from "rxjs";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
+import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
+import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
+import { dropdownPopupThemeVariants } from "../../../../common/styles/dropdown-popup.styles";
+import { rxTimeout } from "../../../../common/utils/rxTimeout";
+import { DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
+import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
+import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
+import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { Action } from "../../../../utils/Action";
+import { PreventableEvent } from "../../../../utils/PreventableEvent";
+import { HourFormat } from "../../../models/HourFormat";
+import { TimeSelectorComponent } from "../../../time-selector/components/time-selector/time-selector.component";
 
 @Component({
     selector: "mona-time-picker",
@@ -38,47 +45,102 @@ import { TimeSelectorComponent } from "../time-selector/time-selector.component"
     styleUrls: ["./time-picker.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
+        DropdownService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => TimePickerComponent),
             multi: true
+        },
+        {
+            provide: DropdownPopupInputToken,
+            useExisting: forwardRef(() => TimePickerComponent),
+            multi: false
         }
     ],
-    imports: [TextBoxDirective, FormsModule, ButtonDirective, FontAwesomeModule, TimeSelectorComponent],
+    imports: [
+        FormsModule,
+        ButtonDirective,
+        FontAwesomeModule,
+        TimeSelectorComponent,
+        TextBoxComponent,
+        TextBoxSuffixTemplateDirective
+    ],
+    hostDirectives: [DropdownPopupHandlerDirective],
     host: {
-        "[class.mona-dropdown]": "true",
-        "[class.mona-time-picker]": "true",
-        "[class.mona-disabled]": "disabled()",
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
-        "[attr.role]": "'grid'",
-        "[attr.tabindex]": "disabled() ? null : 0"
+        "[attr.role]": "'combobox'",
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "(blur)": "onTimeInputBlur()"
     }
 })
-export class TimePickerComponent implements OnInit, ControlValueAccessor {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #focusMonitor: FocusMonitor = inject(FocusMonitor);
+export class TimePickerComponent implements ControlValueAccessor {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #popupAnimationService: PopupAnimationService = inject(PopupAnimationService);
-    readonly #popupService: PopupService = inject(PopupService);
+    readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | null> | null = null;
+    #propagateTouched: Action | null = null;
 
-    private popupRef: PopupRef | null = null;
-
-    protected readonly currentDateString = signal("");
+    protected readonly currentDateString = linkedSignal(() => {
+        const value = this.value();
+        const format = this.format();
+        if (!value) {
+            return "";
+        }
+        return DateTime.fromJSDate(value).toFormat(format);
+    });
     protected readonly navigatedDate = signal(new Date());
+    protected readonly pickerPopupClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return dropdownPopupThemeVariants(theme)();
+    });
     protected readonly timePopupTemplateRef: Signal<TemplateRef<any>> = viewChild.required("timePopupTemplate");
     protected readonly value = signal<Date | null>(null);
 
-    public disabled = model(false);
-    public format = input(" HH:mm");
-    public hourFormat = input<HourFormat>("24");
-    public max = input<Date | null>(null);
-    public min = input<Date | null>(null);
-    public readonly = input(false);
-    public showSeconds = input(false);
+    /**
+     * @description Emits when the popup is about to close. This event is preventable.
+     */
+    public readonly close = output<PopupCloseEvent>();
+
+    /**
+     * @description Emits after the popup is closed.
+     */
+    public readonly closed = output();
+    public readonly disabled = model(false);
+    public readonly format = input(" HH:mm");
+    public readonly hourFormat = input<HourFormat>("24");
+    public readonly max = input<Date | null>(null);
+    public readonly min = input<Date | null>(null);
+    /**
+     * @description Emits when the popup is about to open. This event is preventable.
+     */
+    public readonly open = output<PreventableEvent>();
+    /**
+     * @description Emits after the popup is opened.
+     */
+    public readonly opened = output();
+    /**
+     * @description Sets the height of the popup element.
+     * @default 200
+     */
+    public readonly popupHeight = input<ListSizeInputType>();
+
+    /**
+     * @description Sets the width of the popup element.
+     * @default null
+     */
+    public readonly popupWidth = input<ListSizeInputType>();
+    public readonly readonly = input(false);
+    public readonly showSeconds = input(false);
 
     public constructor() {
+        afterNextRender({
+            read: () => {
+                this.setDateValues();
+                this.setSubscriptions();
+            }
+        });
         effect(() => {
             this.hourFormat();
             untracked(() => {
@@ -89,19 +151,37 @@ export class TimePickerComponent implements OnInit, ControlValueAccessor {
                 }
             });
         });
+        effect(() => {
+            const popupTemplate = this.timePopupTemplateRef();
+            untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
+        });
     }
 
-    public ngOnInit(): void {
+    public registerOnChange(fn: any): void {
+        this.#propagateChange = fn;
+    }
+
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
+
+    public setDisabledState(isDisabled: boolean): void {
+        this.disabled.set(isDisabled);
+    }
+
+    public writeValue(date: Date | null | undefined): void {
+        this.value.set(date ?? null);
+        this.updateCurrentDateString(date, this.format());
         this.setDateValues();
-        this.setSubscriptions();
     }
 
-    public onDateStringEdit(dateString: string): void {
+    protected onDateStringEdit(dateString: string): void {
         this.currentDateString.set(dateString);
     }
 
-    public onTimeInputBlur(): void {
-        if (this.popupRef) {
+    protected onTimeInputBlur(): void {
+        if (this.#dropdownService.popupRef()) {
+            // this.#dropdownService.popupRef()?.close();
             return;
         }
         let dateTime = this.generateValidDateTime(this.currentDateString());
@@ -120,51 +200,20 @@ export class TimePickerComponent implements OnInit, ControlValueAccessor {
         } else {
             this.setCurrentDate(null);
         }
+        this.#propagateTouched?.();
     }
 
-    public onTimeInputButtonClick(): void {
-        if (!this.timePopupTemplateRef() || this.readonly() || this.popupRef) {
-            return;
-        }
-        this.popupRef = this.#popupService.create({
-            anchor: this.#hostElementRef.nativeElement,
-            content: this.timePopupTemplateRef(),
-            width: this.#hostElementRef.nativeElement.getBoundingClientRect().width,
-            height: 250,
-            popupClass: "mona-time-picker-popup",
-            hasBackdrop: false,
-            closeOnOutsideClick: false,
-            positions: DropdownService.getDefaultPositions()
-        });
-        this.#popupAnimationService.setupDropdownOutsideClickCloseAnimation(this.popupRef);
-        this.#popupAnimationService.animateDropdown(this.popupRef, AnimationState.Show);
-        this.popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.popupRef = null;
-            this.#focusMonitor.focusVia(
-                this.#hostElementRef.nativeElement.querySelector("input") as HTMLElement,
-                "program"
-            );
+    protected onTimeInputButtonClick(): void {
+        this.#dropdownService.triggerPopupOpen$.next({
+            height: this.popupHeight() || "auto",
+            width: this.popupWidth() || "auto"
         });
     }
 
-    public onTimeSelectorValueChange(date: Date | null): void {
+    protected onTimeSelectorValueChange(date: Date | null): void {
         this.setCurrentDate(date);
-    }
-
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {}
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.value.set(date ?? null);
-        this.updateCurrentDateString(date, this.format());
-        this.setDateValues();
+        this.#dropdownService.popupRef()?.close();
+        this.focus();
     }
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
@@ -175,6 +224,16 @@ export class TimePickerComponent implements OnInit, ControlValueAccessor {
             );
         }
         return date1 === date2;
+    }
+
+    private focus(): void {
+        rxTimeout(this.#destroyRef, () => {
+            const input = this.#hostElementRef.nativeElement.querySelector("input");
+            if (input && !this.readonly()) {
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
+        });
     }
 
     /**

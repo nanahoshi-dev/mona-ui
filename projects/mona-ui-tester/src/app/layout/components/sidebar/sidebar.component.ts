@@ -185,6 +185,10 @@ export class SidebarComponent {
                     path: "/textbox"
                 },
                 {
+                    text: "Time Picker",
+                    path: "/time-picker"
+                },
+                {
                     text: "Tooltip",
                     path: "/tooltip"
                 },

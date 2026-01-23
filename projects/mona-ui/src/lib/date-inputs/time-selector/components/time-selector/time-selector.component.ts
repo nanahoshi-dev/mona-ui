@@ -1,6 +1,6 @@
-import { DecimalPipe, NgClass } from "@angular/common";
+import { DecimalPipe } from "@angular/common";
 import {
-    AfterViewInit,
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -9,24 +9,29 @@ import {
     inject,
     input,
     model,
-    OnInit,
-    signal,
-    viewChild
+    signal
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { Enumerable, range, select } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
-import { Action } from "../../utils/Action";
-import { HourFormat } from "../models/HourFormat";
-import { Meridiem } from "../models/Meridiem";
-import { TimeUnit } from "../models/TimeUnit";
-import { TimeLimiterPipe } from "../pipes/time-limiter.pipe";
-import { generateHourSet } from "../utils/generateHourSet";
+import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { ThemeService } from "../../../../theme/services/theme.service";
+import { Action } from "../../../../utils/Action";
+import { HourFormat } from "../../../models/HourFormat";
+import { Meridiem } from "../../../models/Meridiem";
+import { TimeUnit } from "../../../models/TimeUnit";
+import { TimeLimiterPipe } from "../../../pipes/time-limiter.pipe";
+import { generateHourSet } from "../../../utils/generateHourSet";
+import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
+import {
+    timeSelectorBaseThemeVariants,
+    timeSelectorListContainerThemeVariants,
+    timeSelectorListThemeVariants
+} from "../../styles/time-selector.styles";
 
 @Component({
     selector: "mona-time-selector",
     templateUrl: "./time-selector.component.html",
-    styleUrls: ["./time-selector.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
@@ -35,19 +40,26 @@ import { generateHourSet } from "../utils/generateHourSet";
             multi: true
         }
     ],
-    imports: [NgClass, DecimalPipe, TimeLimiterPipe],
+    imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective],
     host: {
-        "[class.mona-time-selector]": "true",
-        "[class.mona-disabled]": "disabled()"
+        "[class]": "baseClass()"
     }
 })
-export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValueAccessor {
+export class TimeSelectorComponent implements ControlValueAccessor {
+    readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #themeService = inject(ThemeService);
+    readonly #value = signal<Date | null>(null);
     #propagateChange: Action<Date | null> | null = null;
-    #value: Date | null = null;
+    #propagateTouched: Action | null = null;
     protected readonly amMeridiemVisible = computed(() => {
         const min = this.min();
         return !(min && min.getHours() >= 12);
+    });
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const disabled = this.disabled();
+        return timeSelectorBaseThemeVariants(theme)({ disabled });
     });
     protected readonly hour = computed(() => {
         const hour = this.navigatedDate().getHours();
@@ -57,11 +69,22 @@ export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValu
         }
         return hour % 12 || 12;
     });
-    protected readonly hoursListElement = viewChild.required<ElementRef<HTMLOListElement>>("hoursListElement");
+    protected readonly listClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return timeSelectorListThemeVariants(theme)();
+    });
+    protected readonly listContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return timeSelectorListContainerThemeVariants(theme)();
+    });
+    protected readonly listPadding = computed(() => {
+        const itemHeight = 36; // TODO: Replace with height based on size
+        const popupHeight = this.#height();
+        return popupHeight / 2 - itemHeight / 2;
+    });
     protected readonly meridiem = signal<Meridiem>("AM");
     protected readonly minute = computed(() => this.navigatedDate().getMinutes());
     protected readonly minutes = select<number, TimeUnit>(range(0, 60), m => ({ value: m, viewValue: m })).toArray();
-    protected readonly minutesListElement = viewChild.required<ElementRef<HTMLOListElement>>("minutesListElement");
     protected readonly navigatedDate = signal(new Date());
     protected readonly pmMeridiemVisible = computed(() => {
         const max = this.max();
@@ -71,49 +94,52 @@ export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValu
     protected readonly seconds = Enumerable.range(0, 60)
         .select<TimeUnit>(s => ({ value: s, viewValue: s }))
         .toArray();
-    protected readonly secondsListElement = viewChild.required<ElementRef<HTMLOListElement>>("secondsListElement");
     protected readonly viewHours = computed(() => {
         const meridiem = this.meridiem();
         const hourFormat = this.hourFormat();
         return generateHourSet(hourFormat, meridiem);
     });
 
-    public disabled = model(false);
-    public hourFormat = input<HourFormat>("24");
-    public max = input<Date | null>(null);
-    public min = input<Date | null>(null);
-    public readonly = input(false);
-    public showSeconds = input(false);
+    public readonly disabled = model(false);
+    public readonly hourFormat = input<HourFormat>("24");
+    public readonly max = input<Date | null>(null);
+    public readonly min = input<Date | null>(null);
+    public readonly readonly = input(false);
+    public readonly showSeconds = input(false);
 
-    public ngAfterViewInit(): void {
-        window.setTimeout(() => {
-            const lists = this.#hostElementRef.nativeElement.querySelectorAll("ol") as NodeListOf<HTMLOListElement>;
-            for (const list of Array.from(lists)) {
-                this.scrollList(list);
+    public constructor() {
+        afterNextRender({
+            read: () => {
+                this.#height.set(this.#hostElementRef.nativeElement.offsetHeight);
+                this.setDateValues();
+                const value = this.#value();
+                if (value) {
+                    this.navigatedDate.set(value);
+                }
             }
-        }, 0);
+        });
     }
 
-    public ngOnInit(): void {
+    public registerOnChange(fn: any): void {
+        this.#propagateChange = fn;
+    }
+
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
+
+    public setDisabledState(isDisabled: boolean): void {
+        this.disabled.set(isDisabled);
+    }
+
+    public writeValue(date: Date | null | undefined): void {
+        this.#value.set(date ?? null);
         this.setDateValues();
-        if (this.#value) {
-            this.navigatedDate.set(this.#value);
-        }
     }
 
     public onHourChange(value: number): void {
         const updatedDate = DateTime.fromJSDate(this.navigatedDate()).set({ hour: value });
         this.navigatedDate.set(updatedDate.toJSDate());
-        const minuteData = this.updateMinuteToFitInMaxAndMin();
-        const secondData = this.updateSecondToFitInMaxAndMin();
-        this.setCurrentDate(this.navigatedDate());
-        this.scrollList(this.hoursListElement().nativeElement, value);
-        if (minuteData) {
-            this.scrollList(this.minutesListElement().nativeElement, minuteData.value);
-        }
-        if (secondData) {
-            this.scrollList(this.secondsListElement().nativeElement, secondData.value);
-        }
     }
 
     public onMeridiemClick(meridiem: "AM" | "PM"): void {
@@ -129,50 +155,19 @@ export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValu
         }
 
         this.meridiem.set(meridiem);
-        const hourData = this.updateHourToFitInMaxAndMin();
-        const minuteData = this.updateMinuteToFitInMaxAndMin();
-        const secondData = this.updateSecondToFitInMaxAndMin();
-        this.setCurrentDate(this.navigatedDate());
-        if (hourData) {
-            this.scrollList(this.hoursListElement().nativeElement, hourData.value);
-        }
-        if (minuteData) {
-            this.scrollList(this.minutesListElement().nativeElement, minuteData.value);
-        }
-        if (secondData) {
-            this.scrollList(this.secondsListElement().nativeElement, secondData.value);
-        }
     }
 
     public onMinuteChange(value: number): void {
         this.navigatedDate.set(DateTime.fromJSDate(this.navigatedDate()).set({ minute: value }).toJSDate());
-        const secondData = this.updateSecondToFitInMaxAndMin();
-        this.setCurrentDate(this.navigatedDate());
-        this.scrollList(this.minutesListElement().nativeElement, value);
-        if (secondData) {
-            this.scrollList(this.secondsListElement().nativeElement, secondData.value);
-        }
     }
 
     public onSecondChange(value: number): void {
         this.navigatedDate.set(DateTime.fromJSDate(this.navigatedDate()).set({ second: value }).toJSDate());
-        this.setCurrentDate(this.navigatedDate());
-        this.scrollList(this.secondsListElement().nativeElement, value);
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void { }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.#value = date ?? null;
-        this.setDateValues();
+    protected onSetTimeClick(): void {
+        this.#value.set(this.navigatedDate());
+        this.#propagateChange?.(this.#value());
     }
 
     private initializeNavigatedDate(date: Date | null): void {
@@ -189,31 +184,13 @@ export class TimeSelectorComponent implements OnInit, AfterViewInit, ControlValu
         }
     }
 
-    private scrollList(list: HTMLOListElement, value?: number): void {
-        if (value == null) {
-            window.setTimeout(() => {
-                const selectedElement = list.querySelector(".mona-selected") as HTMLOListElement;
-                if (selectedElement && selectedElement.scrollIntoView) { // TODO: Temporary test fix, remove after test refactoring
-                    selectedElement.scrollIntoView({ behavior: "auto", block: "center" });
-                }
-            }, 0);
-        } else {
-            window.setTimeout(() => {
-                const element = list.querySelector(`[data-value="${value}"]`) as HTMLOListElement;
-                if (element) {
-                    element.scrollIntoView({ behavior: "auto", block: "center" });
-                }
-            });
-        }
-    }
-
     private setCurrentDate(date: Date | null): void {
-        this.#value = date;
+        this.#value.set(date);
         this.#propagateChange?.(date);
     }
 
     private setDateValues(): void {
-        this.initializeNavigatedDate(this.#value);
+        this.initializeNavigatedDate(this.#value());
         const meridiem = this.navigatedDate().getHours() >= 12 ? "PM" : "AM";
         this.meridiem.set(meridiem);
     }
