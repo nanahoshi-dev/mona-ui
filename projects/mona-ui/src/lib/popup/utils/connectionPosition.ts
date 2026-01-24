@@ -56,7 +56,7 @@ const generateFallbackPositions = (primaryPosition: ConnectionPositionPair): Con
     const { originX, originY, overlayX, overlayY } = primaryPosition;
     const fallbacks: ConnectionPositionPair[] = [];
 
-    // 1. Keep same X, try bottom.
+    // 1. Keep the same X, try bottom.
     if (originY !== "bottom" && overlayY !== "bottom") {
         if (originY === "top") {
             fallbacks.push({ originX, originY: "bottom", overlayX, overlayY: "bottom" });
@@ -73,14 +73,14 @@ const generateFallbackPositions = (primaryPosition: ConnectionPositionPair): Con
         if (originX === "start") {
             fallbacks.push({ originX: "end", originY, overlayX: "end", overlayY });
         } else {
-            //originX is center
+            // originX is center
             if (overlayX === "start") {
                 fallbacks.push({ originX: "center", originY, overlayX: "end", overlayY });
             }
         }
     }
 
-    // 3. Keep X and flip Y to opposite if possible.
+    // 3. Keep X and flip Y to the opposite if possible.
     if (!fallbacks.find(f => f.originX === originX && f.overlayX === overlayX)) {
         if (originY === "top" && overlayY === "top") {
             fallbacks.push({ originX, originY: "bottom", overlayX, overlayY: "bottom" });
@@ -100,7 +100,7 @@ const generateFallbackPositions = (primaryPosition: ConnectionPositionPair): Con
         }
     }
 
-    // 4. Keep Y and flip X to opposite if possible
+    // 4. Keep Y and flip X to the opposite if possible
     if (!fallbacks.find(f => f.originY === originY && f.overlayY === overlayY)) {
         if (originX === "start" && overlayX === "start") {
             fallbacks.push({ originX: "end", originY, overlayX: "end", overlayY });

@@ -199,7 +199,6 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
             this.popupRef.close();
             this.popupRef = null;
         }
-        this.#close$.next();
     }
 
     public ngOnInit(): void {
@@ -251,7 +250,7 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
         const offset = this.offset();
         const popupConnectionPoint = this.precise() ? undefined : this.popupConnectionPoint();
         const width = toCssValue(this.width());
-        return this.#popupService.create({
+        const popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint,
             closeOnScroll,
@@ -263,6 +262,8 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
             restoreFocus: false,
             width
         });
+        popupRef.closeStart.pipe(take(1)).subscribe(() => this.#close$.next());
+        return popupRef;
     }
 
     private getPopupAnchor(event: MouseEvent): PopupAnchor {

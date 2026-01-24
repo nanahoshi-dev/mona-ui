@@ -34,17 +34,22 @@ export class PopupReference implements PopupRefParams {
         /**
          * A delay is added to allow animations to complete before the overlay is disposed of.
          */
-        asyncScheduler.schedule(() => {
-            // TODO: Add an event where close is triggered but animation is not yet complete.
-            this.closed$.next(event);
-            this.closed$.complete();
-            this.positionChanges$.complete();
-            this.overlayRef.dispose();
-        }, delay);
+        if (delay > 0) {
+            asyncScheduler.schedule(() => this.#close(event), delay);
+        } else {
+            this.#close(event);
+        }
     }
 
     public notifyOpen(): void {
         this.opened$.next();
+    }
+
+    #close(event: PopupCloseEvent): void {
+        this.closed$.next(event);
+        this.closed$.complete();
+        this.positionChanges$.complete();
+        this.overlayRef.dispose();
     }
 
     public get beforeClose$(): Observable<PopupCloseEvent> {

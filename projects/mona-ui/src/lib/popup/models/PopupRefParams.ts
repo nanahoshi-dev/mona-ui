@@ -4,7 +4,7 @@ import { ComponentRef } from "@angular/core";
 import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 
 export interface PopupRefParams {
-    close: <R>(result?: R) => void;
+    close: <R>(result?: R, delay?: number) => void;
 
     get beforeClose$(): Observable<PopupCloseEvent>;
 

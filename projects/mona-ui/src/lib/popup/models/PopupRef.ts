@@ -11,8 +11,8 @@ export class PopupRef {
         this.#options = options;
     }
 
-    public close<R>(result?: R): void {
-        this.#options.close(result);
+    public close<R>(result?: R, delay?: number): void {
+        this.#options.close(result, delay);
     }
 
     /**

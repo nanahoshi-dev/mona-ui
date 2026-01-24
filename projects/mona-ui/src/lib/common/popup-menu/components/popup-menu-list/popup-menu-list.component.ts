@@ -268,7 +268,6 @@ export class PopupMenuListComponent implements OnInit {
             return { item: activeItem, hasChild: true };
         }
         return { item: null, hasChild: false };
-        // return this.activeMenuItem(); // Return the currently active item, which should be the one that was just activated
     }
 
     private handleArrowUpKey(): PopupMenuItem | null {
