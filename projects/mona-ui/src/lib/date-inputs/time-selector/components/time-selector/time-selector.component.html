@@ -10,8 +10,8 @@
     <ol [class]="listClass()"
         [style.padding-top.px]="listPadding()"
         [style.padding-bottom.px]="listPadding()">
-        @for (h of viewHours()|timeLimiter:'h':navigatedDate():min():max(); track h) {
-            <li monaTimeSelectorItem [selected]="h.viewValue===hour()"
+        @for (h of viewHours()|timeLimiter:'h':navigatedDate():minDate():maxDate(); track h) {
+            <li monaTimeSelectorItem [size]="size()" [selected]="h.viewValue===hour()"
                 [value]="h.value"
                 (click)="onHourChange(h.value)">{{ h.viewValue | number:'2.0' }}
             </li>
@@ -20,8 +20,8 @@
     <ol [class]="listClass()"
         [style.padding-top.px]="listPadding()"
         [style.padding-bottom.px]="listPadding()">
-        @for (m of minutes|timeLimiter:'m':navigatedDate():min():max(); track m) {
-            <li monaTimeSelectorItem [selected]="m.value===minute()"
+        @for (m of minutes|timeLimiter:'m':navigatedDate():minDate():maxDate(); track m) {
+            <li monaTimeSelectorItem [size]="size()" [selected]="m.value===minute()"
                 [value]="m.value"
                 (click)="onMinuteChange(m.value)">{{ m.viewValue | number:'2.0' }}
             </li>
@@ -31,8 +31,8 @@
         <ol [class]="listClass()"
             [style.padding-top.px]="listPadding()"
             [style.padding-bottom.px]="listPadding()">
-            @for (s of seconds|timeLimiter:'s':navigatedDate():min():max(); track s) {
-                <li monaTimeSelectorItem [selected]="s.value===second()"
+            @for (s of seconds|timeLimiter:'s':navigatedDate():minDate():maxDate(); track s) {
+                <li monaTimeSelectorItem [size]="size()" [selected]="s.value===second()"
                     [value]="s.value"
                     (click)="onSecondChange(s.value)">{{ s.value | number:'2.0' }}
                 </li>
@@ -40,14 +40,17 @@
         </ol>
     }
     @if (hourFormat() === '12') {
-        <ol [class]="listClass()">
+        <ol [class]="listClass()"
+            [style.padding-top.px]="listPadding()"
+            [style.padding-bottom.px]="listPadding()">
             @if (amMeridiemVisible()) {
-                <li monaTimeSelectorItem [selected]="meridiem()==='AM'"
+                <li monaTimeSelectorItem [size]="size()" [selected]="meridiem()==='AM'"
                     [value]="'AM'"
                     (click)="onMeridiemClick('AM')">AM
                 </li>
-            } @else if (pmMeridiemVisible()) {
-                <li monaTimeSelectorItem [selected]="meridiem()==='PM'"
+            }
+            @if (pmMeridiemVisible()) {
+                <li monaTimeSelectorItem [size]="size()" [selected]="meridiem()==='PM'"
                     [value]="'PM'"
                     (click)="onMeridiemClick('PM')">PM
                 </li>

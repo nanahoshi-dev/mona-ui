@@ -50,12 +50,12 @@ type TimeSelectorBaseVariantInput = VariantInputs<TimeSelectorBaseVariantProps>;
 type TimeSelectorListVariantProps = VariantProps<ReturnType<typeof timeSelectorListThemeVariants>>;
 type TimeSelectorListVariantInput = VariantInputs<TimeSelectorListVariantProps>;
 
-type TimeSelectorListItemVariantProps = VariantProps<ReturnType<typeof timeSelectorListItemThemeVariants>>;
-type TimeSelectorListItemVariantInput = VariantInputs<TimeSelectorListItemVariantProps>;
+export type TimeSelectorListItemVariantProps = VariantProps<ReturnType<typeof timeSelectorListItemThemeVariants>>;
+export type TimeSelectorListItemVariantInput = VariantInputs<TimeSelectorListItemVariantProps>;
 
 export type TimeSelectorVariantProps = TimeSelectorBaseVariantProps &
-    TimeSelectorListVariantProps &
-    TimeSelectorListItemVariantProps;
+    Omit<TimeSelectorListVariantProps, "size"> &
+    Omit<TimeSelectorListItemVariantProps, "size">;
 export type TimeSelectorVariantInput = TimeSelectorBaseVariantInput &
-    TimeSelectorListVariantInput &
-    TimeSelectorListItemVariantInput;
+    Omit<TimeSelectorListVariantInput, "size"> &
+    Omit<TimeSelectorListItemVariantInput, "size" | "selected">;

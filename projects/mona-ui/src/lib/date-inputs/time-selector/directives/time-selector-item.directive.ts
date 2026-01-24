@@ -1,7 +1,11 @@
 import { computed, DestroyRef, Directive, effect, ElementRef, inject, input } from "@angular/core";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { ThemeService } from "../../../theme/services/theme.service";
-import { timeSelectorListItemThemeVariants } from "../styles/time-selector.styles";
+import {
+    timeSelectorListItemThemeVariants,
+    TimeSelectorListItemVariantInput,
+    TimeSelectorListItemVariantProps
+} from "../styles/time-selector.styles";
 
 @Directive({
     selector: "li[monaTimeSelectorItem]",
@@ -10,16 +14,18 @@ import { timeSelectorListItemThemeVariants } from "../styles/time-selector.style
         "[class]": "baseClass()"
     }
 })
-export class TimeSelectorItemDirective {
+export class TimeSelectorItemDirective implements TimeSelectorListItemVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #host = inject(ElementRef<HTMLLIElement>);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const selected = this.selected();
-        return timeSelectorListItemThemeVariants(theme)({ selected, size: "medium" });
+        const size = this.size();
+        return timeSelectorListItemThemeVariants(theme)({ selected, size });
     });
     public readonly selected = input.required<boolean>();
+    public readonly size = input.required<TimeSelectorListItemVariantProps["size"]>();
     public readonly value = input.required<number | string>();
 
     public constructor() {

@@ -1,4 +1,4 @@
-import { JsonPipe } from "@angular/common";
+import { DatePipe, JsonPipe } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import {
@@ -26,7 +26,8 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
         SwitchComponent,
         DropDownItemTemplateDirective,
         JsonPipe,
-        DropDownListValueTemplateDirective
+        DropDownListValueTemplateDirective,
+        DatePipe
     ],
     templateUrl: "./api-input-list-item.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush

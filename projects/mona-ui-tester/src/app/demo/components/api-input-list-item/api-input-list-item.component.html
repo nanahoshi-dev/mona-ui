@@ -30,11 +30,19 @@
                                  [showClearButton]="entry().clearable||false"
                                  (ngModelChange)="onValueChange(entry().name, $event)">
                 <ng-template monaDropDownListItemTemplate let-dataItem>
-                    <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                    @if (typeof dataItem.getMonth === 'function') {
+                        <span>{{dataItem | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                    } @else {
+                        <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                    }
                 </ng-template>
                 <ng-template monaDropDownListValueTemplate let-dataItem>
                     @if (dataItem) {
-                        <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                        @if (typeof dataItem.getMonth === 'function') {
+                            <span>{{dataItem | date:'dd/MM/yyyy HH:mm:ss'}}</span>
+                        } @else {
+                            <span>{{typeof dataItem === 'object' ? (dataItem|json) : dataItem}}</span>
+                        }
                     } @else {
                         <span>{{entry().placeholder ?? 'Select...'}}</span>
                     }

@@ -1,5 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { mode } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import { TimePickerComponent } from "mona-ui";
@@ -48,7 +50,7 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 nullable: true,
                 min: 0,
                 max: 500,
-                value: null
+                value: 300
             },
             popupWidth: {
                 type: "number",
@@ -73,24 +75,46 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
 }
 
 @Component({
-    imports: [TimePickerComponent],
+    imports: [TimePickerComponent, ReactiveFormsModule],
     template: `
-        <mona-time-picker
-            [disabled]="disabled()"
-            [format]="format()"
-            [hourFormat]="hourFormat()"
-            [max]="max()"
-            [min]="min()"
-            [popupHeight]="popupHeight()"
-            [popupWidth]="popupWidth()"
-            [readonly]="readonly()"
-            [showSeconds]="showSeconds()"
-            class="w-32">
-        </mona-time-picker>
+        <span>Selected Time: {{ formValueText() }}</span>
+        <form [formGroup]="formGroup">
+            <mona-time-picker
+                [disabled]="disabled()"
+                [formControl]="formGroup.controls.value"
+                [format]="format()"
+                [hourFormat]="hourFormat()"
+                [max]="max()"
+                [min]="min()"
+                [popupHeight]="popupHeight()"
+                [popupWidth]="popupWidth()"
+                [readonly]="readonly()"
+                [showSeconds]="showSeconds()"
+                class="w-32">
+            </mona-time-picker>
+        </form>
     `
 })
 class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerComponent> {
+    readonly #formGroup = new FormGroup({
+        value: new FormControl<Date | null>(null, { nonNullable: false, validators: [] })
+    });
+    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly formGroup = this.#formGroup;
+    protected readonly formValueText = computed(() => {
+        const value = this.#formValue();
+        const format = this.format();
+        const hourMode = this.hourFormat();
+        if (!value) {
+            return "";
+        }
+        const dt = DateTime.fromJSDate(value);
+        if (hourMode === "12") {
+            return dt.toFormat(`${format} a`);
+        }
+        return dt.toFormat(format);
+    });
     public readonly disabled = model<ReturnType<TimePickerComponent["disabled"]>>(false);
     public readonly format = input<ReturnType<TimePickerComponent["format"]>>("HH:mm");
     public readonly hourFormat = input<ReturnType<TimePickerComponent["hourFormat"]>>("24");

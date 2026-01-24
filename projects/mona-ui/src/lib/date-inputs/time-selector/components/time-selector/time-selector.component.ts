@@ -26,7 +26,9 @@ import { TimeSelectorItemDirective } from "../../directives/time-selector-item.d
 import {
     timeSelectorBaseThemeVariants,
     timeSelectorListContainerThemeVariants,
-    timeSelectorListThemeVariants
+    timeSelectorListThemeVariants,
+    TimeSelectorVariantInput,
+    TimeSelectorVariantProps
 } from "../../styles/time-selector.styles";
 
 @Component({
@@ -42,12 +44,17 @@ import {
     ],
     imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective],
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(blur)": "onBlur()"
     }
 })
-export class TimeSelectorComponent implements ControlValueAccessor {
+export class TimeSelectorComponent implements ControlValueAccessor, TimeSelectorVariantInput {
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #itemHeight = computed(() => {
+        const size = this.size();
+        return size === "small" ? 32 : size === "medium" ? 36 : 40;
+    });
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<Date | null>(null);
     #propagateChange: Action<Date | null> | null = null;
@@ -62,7 +69,7 @@ export class TimeSelectorComponent implements ControlValueAccessor {
         return timeSelectorBaseThemeVariants(theme)({ disabled });
     });
     protected readonly hour = computed(() => {
-        const hour = this.navigatedDate().getHours();
+        const hour = this.navigatedDate().hour;
         const hourFormat = this.hourFormat();
         if (hourFormat === "24") {
             return hour;
@@ -78,19 +85,27 @@ export class TimeSelectorComponent implements ControlValueAccessor {
         return timeSelectorListContainerThemeVariants(theme)();
     });
     protected readonly listPadding = computed(() => {
-        const itemHeight = 36; // TODO: Replace with height based on size
+        const itemHeight = this.#itemHeight();
         const popupHeight = this.#height();
         return popupHeight / 2 - itemHeight / 2;
     });
+    protected readonly maxDate = computed(() => {
+        const max = this.max();
+        return max ? DateTime.fromJSDate(max) : null;
+    });
     protected readonly meridiem = signal<Meridiem>("AM");
-    protected readonly minute = computed(() => this.navigatedDate().getMinutes());
+    protected readonly minDate = computed(() => {
+        const min = this.min();
+        return min ? DateTime.fromJSDate(min) : null;
+    });
+    protected readonly minute = computed(() => this.navigatedDate().minute);
     protected readonly minutes = select<number, TimeUnit>(range(0, 60), m => ({ value: m, viewValue: m })).toArray();
-    protected readonly navigatedDate = signal(new Date());
+    protected readonly navigatedDate = signal(DateTime.now());
     protected readonly pmMeridiemVisible = computed(() => {
         const max = this.max();
         return !(max && max.getHours() < 12);
     });
-    protected readonly second = computed(() => this.navigatedDate().getSeconds());
+    protected readonly second = computed(() => this.navigatedDate().second);
     protected readonly seconds = Enumerable.range(0, 60)
         .select<TimeUnit>(s => ({ value: s, viewValue: s }))
         .toArray();
@@ -106,6 +121,7 @@ export class TimeSelectorComponent implements ControlValueAccessor {
     public readonly min = input<Date | null>(null);
     public readonly readonly = input(false);
     public readonly showSeconds = input(false);
+    public readonly size = input<TimeSelectorVariantProps["size"]>("medium");
 
     public constructor() {
         afterNextRender({
@@ -114,7 +130,12 @@ export class TimeSelectorComponent implements ControlValueAccessor {
                 this.setDateValues();
                 const value = this.#value();
                 if (value) {
-                    this.navigatedDate.set(value);
+                    const dt = DateTime.fromJSDate(value);
+                    if (dt.isValid) {
+                        this.navigatedDate.set(dt);
+                    } else {
+                        this.initializeNavigatedDate(value);
+                    }
                 }
             }
         });
@@ -137,36 +158,38 @@ export class TimeSelectorComponent implements ControlValueAccessor {
         this.setDateValues();
     }
 
-    public onHourChange(value: number): void {
-        const updatedDate = DateTime.fromJSDate(this.navigatedDate()).set({ hour: value });
-        this.navigatedDate.set(updatedDate.toJSDate());
+    protected onBlur(): void {
+        this.#propagateTouched?.();
     }
 
-    public onMeridiemClick(meridiem: "AM" | "PM"): void {
+    protected onHourChange(hour: number): void {
+        this.navigatedDate.update(d => d.set({ hour }));
+    }
+
+    protected onMeridiemClick(meridiem: "AM" | "PM"): void {
         if (this.readonly() || this.meridiem() === meridiem) {
             return;
         }
-        const hour = this.navigatedDate().getHours();
+        const hour = this.navigatedDate().hour;
 
         if (meridiem === "PM" && hour < 12) {
-            this.navigatedDate().setHours(hour + 12);
+            this.navigatedDate.update(date => date.set({ hour: hour + 12 }));
         } else if (meridiem === "AM" && hour >= 12) {
-            this.navigatedDate().setHours(hour - 12);
+            this.navigatedDate.update(date => date.set({ hour: hour - 12 }));
         }
-
         this.meridiem.set(meridiem);
     }
 
-    public onMinuteChange(value: number): void {
-        this.navigatedDate.set(DateTime.fromJSDate(this.navigatedDate()).set({ minute: value }).toJSDate());
+    protected onMinuteChange(minute: number): void {
+        this.navigatedDate.update(date => date.set({ minute }));
     }
 
-    public onSecondChange(value: number): void {
-        this.navigatedDate.set(DateTime.fromJSDate(this.navigatedDate()).set({ second: value }).toJSDate());
+    protected onSecondChange(second: number): void {
+        this.navigatedDate.update(date => date.set({ second }));
     }
 
     protected onSetTimeClick(): void {
-        this.#value.set(this.navigatedDate());
+        this.#value.set(this.navigatedDate().toJSDate());
         this.#propagateChange?.(this.#value());
     }
 
@@ -174,67 +197,28 @@ export class TimeSelectorComponent implements ControlValueAccessor {
         const min = this.min();
         const max = this.max();
         if (!date) {
-            this.navigatedDate.set(DateTime.now().toJSDate());
+            this.navigatedDate.set(DateTime.now());
         } else if (min && date < min) {
-            this.navigatedDate.set(min);
+            const minDate = DateTime.fromJSDate(min);
+            if (minDate.isValid) {
+                this.navigatedDate.set(minDate);
+            }
         } else if (max && date > max) {
-            this.navigatedDate.set(max);
+            const maxDate = DateTime.fromJSDate(max);
+            if (maxDate.isValid) {
+                this.navigatedDate.set(maxDate);
+            }
         } else {
-            this.navigatedDate.set(date);
+            const dateToSet = DateTime.fromJSDate(date);
+            if (dateToSet.isValid) {
+                this.navigatedDate.set(dateToSet);
+            }
         }
-    }
-
-    private setCurrentDate(date: Date | null): void {
-        this.#value.set(date);
-        this.#propagateChange?.(date);
     }
 
     private setDateValues(): void {
         this.initializeNavigatedDate(this.#value());
-        const meridiem = this.navigatedDate().getHours() >= 12 ? "PM" : "AM";
+        const meridiem = this.navigatedDate().hour >= 12 ? "PM" : "AM";
         this.meridiem.set(meridiem);
-    }
-
-    private updateHourToFitInMaxAndMin(): TimeUnit | null {
-        const min = this.min();
-        const max = this.max();
-        const timeLimiterPipe = new TimeLimiterPipe();
-        const hours = generateHourSet(this.hourFormat(), this.meridiem());
-        const hourRange = timeLimiterPipe.transform(hours, "h", this.navigatedDate(), min, max);
-        if (!hourRange.select(h => h.value).contains(this.hour())) {
-            const date = new Date(this.navigatedDate());
-            date.setHours(hourRange.first().value);
-            this.navigatedDate.set(date);
-            return hourRange.first();
-        }
-        return null;
-    }
-
-    private updateMinuteToFitInMaxAndMin(): TimeUnit | null {
-        const min = this.min();
-        const max = this.max();
-        const timeLimiterPipe = new TimeLimiterPipe();
-        const minuteRange = timeLimiterPipe.transform(this.minutes, "m", this.navigatedDate(), min, max);
-        if (!minuteRange.select(m => m.value).contains(this.minute())) {
-            const date = new Date(this.navigatedDate());
-            date.setMinutes(minuteRange.first().value);
-            this.navigatedDate.set(date);
-            return minuteRange.first();
-        }
-        return null;
-    }
-
-    private updateSecondToFitInMaxAndMin(): TimeUnit | null {
-        const min = this.min();
-        const max = this.max();
-        const timeLimiterPipe = new TimeLimiterPipe();
-        const secondRange = timeLimiterPipe.transform(this.seconds, "s", this.navigatedDate(), min, max);
-        if (!secondRange.select(s => s.value).contains(this.second())) {
-            const date = new Date(this.navigatedDate());
-            date.setSeconds(secondRange.first().value);
-            this.navigatedDate.set(date);
-            return secondRange.first();
-        }
-        return null;
     }
 }

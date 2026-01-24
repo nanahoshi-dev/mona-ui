@@ -9,6 +9,11 @@ export const timeSelectorBaseVariants = cva(
             disabled: {
                 true: "opacity-50 cursor-not-allowed pointer-events-none",
                 false: ""
+            },
+            size: {
+                small: "text-xs",
+                medium: "text-sm",
+                large: "text-md"
             }
         }
     }
