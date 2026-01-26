@@ -2,6 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { metadata } from "@angular/forms/signals";
 import { mode } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import { TimePickerComponent } from "mona-ui";
@@ -50,7 +51,7 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 nullable: true,
                 min: 0,
                 max: 500,
-                value: 300
+                value: null
             },
             popupWidth: {
                 type: "number",
@@ -62,9 +63,27 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 type: "boolean",
                 value: false
             },
+            required: {
+                type: "boolean",
+                value: false
+            },
+            rounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "medium"
+            },
+            showClearButton: {
+                type: "boolean",
+                value: false
+            },
             showSeconds: {
                 type: "boolean",
                 value: false
+            },
+            size: {
+                type: "dropdown",
+                value: ["small", "medium", "large"],
+                defaultValue: "medium"
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -89,7 +108,11 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
+                [required]="required()"
+                [rounded]="rounded()"
+                [showClearButton]="showClearButton()"
                 [showSeconds]="showSeconds()"
+                [size]="size()"
                 class="w-32">
             </mona-time-picker>
         </form>
@@ -123,5 +146,9 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     public readonly popupHeight = input<ReturnType<TimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<TimePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<TimePickerComponent["readonly"]>>(false);
+    public readonly required = input<ReturnType<TimePickerComponent["required"]>>(false);
+    public readonly rounded = input<ReturnType<TimePickerComponent["rounded"]>>("medium");
+    public readonly showClearButton = input<ReturnType<TimePickerComponent["showClearButton"]>>(false);
     public readonly showSeconds = input<ReturnType<TimePickerComponent["showSeconds"]>>(false);
+    public readonly size = input<ReturnType<TimePickerComponent["size"]>>("medium");
 }

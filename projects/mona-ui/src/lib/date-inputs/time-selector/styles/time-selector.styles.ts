@@ -47,8 +47,8 @@ export const timeSelectorListItemThemeVariants = (theme: ThemeStyle) => {
 type TimeSelectorBaseVariantProps = VariantProps<ReturnType<typeof timeSelectorBaseThemeVariants>>;
 type TimeSelectorBaseVariantInput = VariantInputs<TimeSelectorBaseVariantProps>;
 
-type TimeSelectorListVariantProps = VariantProps<ReturnType<typeof timeSelectorListThemeVariants>>;
-type TimeSelectorListVariantInput = VariantInputs<TimeSelectorListVariantProps>;
+export type TimeSelectorListVariantProps = VariantProps<ReturnType<typeof timeSelectorListThemeVariants>>;
+export type TimeSelectorListVariantInput = VariantInputs<TimeSelectorListVariantProps>;
 
 export type TimeSelectorListItemVariantProps = VariantProps<ReturnType<typeof timeSelectorListItemThemeVariants>>;
 export type TimeSelectorListItemVariantInput = VariantInputs<TimeSelectorListItemVariantProps>;
@@ -57,5 +57,5 @@ export type TimeSelectorVariantProps = TimeSelectorBaseVariantProps &
     Omit<TimeSelectorListVariantProps, "size"> &
     Omit<TimeSelectorListItemVariantProps, "size">;
 export type TimeSelectorVariantInput = TimeSelectorBaseVariantInput &
-    Omit<TimeSelectorListVariantInput, "size"> &
+    Omit<TimeSelectorListVariantInput, "focused" | "size"> &
     Omit<TimeSelectorListItemVariantInput, "size" | "selected">;

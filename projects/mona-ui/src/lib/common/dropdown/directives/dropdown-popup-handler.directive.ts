@@ -39,6 +39,19 @@ export class DropdownPopupHandlerDirective {
         this.#dropdownService.popupRef()?.close();
     }
 
+    private getMaxHeight(maxHeight: PopupSettings["maxHeight"], height: PopupSettings["height"]): number | string {
+        if (typeof maxHeight === "number") {
+            return maxHeight;
+        }
+        if (!maxHeight || maxHeight === "auto") {
+            if (!height || height === "auto") {
+                return 200;
+            }
+            return height;
+        }
+        return maxHeight ?? 200;
+    }
+
     private getMinWidth(minWidth: PopupSettings["minWidth"], width: PopupSettings["width"]): number | string {
         if (typeof minWidth === "number") {
             return minWidth;
@@ -71,8 +84,7 @@ export class DropdownPopupHandlerDirective {
         const closeOnScroll = settings.closeOnScroll ?? true;
         const hasBackdrop = settings.hasBackdrop ?? false;
         const height = settings.height;
-        const maxHeight =
-            settings.maxHeight ?? (this.#host.popupHeight() != null ? this.#host.popupHeight() || undefined : 200);
+        const maxHeight = this.getMaxHeight(settings.maxHeight, settings.height);
         const minWidth = this.getMinWidth(settings.minWidth, settings.width);
         const offset = settings.offset ?? { horizontal: 0, vertical: 4 };
         const popupConnectionPoint = settings.popupConnectionPoint ?? "topleft";

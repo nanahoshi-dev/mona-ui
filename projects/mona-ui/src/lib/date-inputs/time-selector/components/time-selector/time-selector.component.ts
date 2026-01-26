@@ -4,16 +4,21 @@ import {
     ChangeDetectionStrategy,
     Component,
     computed,
+    DestroyRef,
     ElementRef,
     forwardRef,
     inject,
     input,
     model,
-    signal
+    signal,
+    viewChild
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { Enumerable, range, select } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
+import { fromEvent } from "rxjs";
+import { filter } from "rxjs/operators";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
@@ -23,10 +28,11 @@ import { TimeUnit } from "../../../models/TimeUnit";
 import { TimeLimiterPipe } from "../../../pipes/time-limiter.pipe";
 import { generateHourSet } from "../../../utils/generateHourSet";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
+import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
+import { TimeListType } from "../../models/TimeListType";
 import {
     timeSelectorBaseThemeVariants,
     timeSelectorListContainerThemeVariants,
-    timeSelectorListThemeVariants,
     TimeSelectorVariantInput,
     TimeSelectorVariantProps
 } from "../../styles/time-selector.styles";
@@ -42,23 +48,23 @@ import {
             multi: true
         }
     ],
-    imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective],
+    imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
     host: {
+        role: "group",
+        "[attr.aria-label]": "ariaLabel()",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
     }
 })
 export class TimeSelectorComponent implements ControlValueAccessor, TimeSelectorVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #itemHeight = computed(() => {
-        const size = this.size();
-        return size === "small" ? 32 : size === "medium" ? 36 : 40;
-    });
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<Date | null>(null);
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
+
     protected readonly amMeridiemVisible = computed(() => {
         const min = this.min();
         return !(min && min.getHours() >= 12);
@@ -68,6 +74,8 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         const disabled = this.disabled();
         return timeSelectorBaseThemeVariants(theme)({ disabled });
     });
+    protected readonly computedPopupHeight = this.#height.asReadonly();
+    protected readonly focusedList = signal<TimeListType>("hours");
     protected readonly hour = computed(() => {
         const hour = this.navigatedDate().hour;
         const hourFormat = this.hourFormat();
@@ -76,29 +84,23 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         }
         return hour % 12 || 12;
     });
-    protected readonly listClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return timeSelectorListThemeVariants(theme)();
-    });
+    protected readonly hourListRef = viewChild.required<ElementRef<HTMLOListElement>>("hourList");
     protected readonly listContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         return timeSelectorListContainerThemeVariants(theme)();
-    });
-    protected readonly listPadding = computed(() => {
-        const itemHeight = this.#itemHeight();
-        const popupHeight = this.#height();
-        return popupHeight / 2 - itemHeight / 2;
     });
     protected readonly maxDate = computed(() => {
         const max = this.max();
         return max ? DateTime.fromJSDate(max) : null;
     });
     protected readonly meridiem = signal<Meridiem>("AM");
+    protected readonly meridiemListRef = viewChild<ElementRef<HTMLOListElement>>("meridiemList");
     protected readonly minDate = computed(() => {
         const min = this.min();
         return min ? DateTime.fromJSDate(min) : null;
     });
     protected readonly minute = computed(() => this.navigatedDate().minute);
+    protected readonly minuteListRef = viewChild.required<ElementRef<HTMLOListElement>>("minuteList");
     protected readonly minutes = select<number, TimeUnit>(range(0, 60), m => ({ value: m, viewValue: m })).toArray();
     protected readonly navigatedDate = signal(DateTime.now());
     protected readonly pmMeridiemVisible = computed(() => {
@@ -106,6 +108,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         return !(max && max.getHours() < 12);
     });
     protected readonly second = computed(() => this.navigatedDate().second);
+    protected readonly secondListRef = viewChild<ElementRef<HTMLOListElement>>("secondList");
     protected readonly seconds = Enumerable.range(0, 60)
         .select<TimeUnit>(s => ({ value: s, viewValue: s }))
         .toArray();
@@ -115,11 +118,12 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         return generateHourSet(hourFormat, meridiem);
     });
 
+    public readonly ariaLabel = input<string>("Time selector");
     public readonly disabled = model(false);
+    public readonly focusOnMount = input(true);
     public readonly hourFormat = input<HourFormat>("24");
     public readonly max = input<Date | null>(null);
     public readonly min = input<Date | null>(null);
-    public readonly readonly = input(false);
     public readonly showSeconds = input(false);
     public readonly size = input<TimeSelectorVariantProps["size"]>("medium");
 
@@ -136,6 +140,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                     } else {
                         this.initializeNavigatedDate(value);
                     }
+                }
+                this.setupKeyboardNavigation();
+                if (this.focusOnMount()) {
+                    this.focusList(this.focusedList());
                 }
             }
         });
@@ -167,7 +175,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     protected onMeridiemClick(meridiem: "AM" | "PM"): void {
-        if (this.readonly() || this.meridiem() === meridiem) {
+        if (this.meridiem() === meridiem) {
             return;
         }
         const hour = this.navigatedDate().hour;
@@ -184,6 +192,23 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         this.navigatedDate.update(date => date.set({ minute }));
     }
 
+    protected onNowClick(): void {
+        let now = DateTime.now();
+        const min = this.minDate();
+        const max = this.maxDate();
+        if (min && now < min) {
+            if (min.isValid) {
+                now = min;
+            }
+        } else if (max && now > max) {
+            if (max.isValid) {
+                now = max;
+            }
+        }
+        this.navigatedDate.set(now);
+        this.meridiem.set(now.hour >= 12 ? "PM" : "AM");
+    }
+
     protected onSecondChange(second: number): void {
         this.navigatedDate.update(date => date.set({ second }));
     }
@@ -191,6 +216,73 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     protected onSetTimeClick(): void {
         this.#value.set(this.navigatedDate().toJSDate());
         this.#propagateChange?.(this.#value());
+    }
+
+    private getListRef(listType: TimeListType): ElementRef<HTMLOListElement> | undefined {
+        switch (listType) {
+            case "hours":
+                return this.hourListRef();
+            case "minutes":
+                return this.minuteListRef();
+            case "seconds":
+                return this.secondListRef();
+            case "meridiem":
+                return this.meridiemListRef();
+        }
+    }
+
+    private getNextList(current: TimeListType, direction: "left" | "right"): TimeListType {
+        const lists: TimeListType[] = ["hours", "minutes"];
+        if (this.showSeconds()) {
+            lists.push("seconds");
+        }
+        if (this.hourFormat() === "12") {
+            lists.push("meridiem");
+        }
+        const currentIndex = lists.indexOf(current);
+        if (direction === "right") {
+            return lists[(currentIndex + 1) % lists.length];
+        } else {
+            return lists[(currentIndex - 1 + lists.length) % lists.length];
+        }
+    }
+
+    private handleKeydown(event: KeyboardEvent): void {
+        const focusedList = this.focusedList();
+
+        switch (event.key) {
+            case "ArrowUp":
+                event.preventDefault();
+                this.navigateItem(focusedList, -1);
+                break;
+            case "ArrowDown":
+                event.preventDefault();
+                this.navigateItem(focusedList, 1);
+                break;
+            case "ArrowLeft":
+                event.preventDefault();
+                this.focusedList.set(this.getNextList(focusedList, "left"));
+                this.focusList(this.focusedList());
+                break;
+            case "ArrowRight":
+                event.preventDefault();
+                this.focusedList.set(this.getNextList(focusedList, "right"));
+                this.focusList(this.focusedList());
+                break;
+            case "Home":
+                event.preventDefault();
+                this.navigateToEdge(focusedList, "first");
+                break;
+            case "End":
+                event.preventDefault();
+                this.navigateToEdge(focusedList, "last");
+                break;
+        }
+    }
+
+    private focusList(listType: TimeListType): void {
+        const listRef = this.getListRef(listType);
+        listRef?.nativeElement.focus();
     }
 
     private initializeNavigatedDate(date: Date | null): void {
@@ -216,9 +308,76 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         }
     }
 
+    private navigateItem(listType: TimeListType, direction: number): void {
+        switch (listType) {
+            case "hours": {
+                const hours = Array.from(this.viewHours());
+                const currentIndex = hours.findIndex(h => h.viewValue === this.hour());
+                const newIndex = Math.max(0, Math.min(hours.length - 1, currentIndex + direction));
+                if (hours[newIndex]) {
+                    this.onHourChange(hours[newIndex].value);
+                }
+                break;
+            }
+            case "minutes": {
+                const currentMinute = this.minute();
+                const newMinute = Math.max(0, Math.min(59, currentMinute + direction));
+                this.onMinuteChange(newMinute);
+                break;
+            }
+            case "seconds": {
+                const currentSecond = this.second();
+                const newSecond = Math.max(0, Math.min(59, currentSecond + direction));
+                this.onSecondChange(newSecond);
+                break;
+            }
+            case "meridiem": {
+                const current = this.meridiem();
+                if (direction !== 0) {
+                    this.onMeridiemClick(current === "AM" ? "PM" : "AM");
+                }
+                break;
+            }
+        }
+    }
+
+    private navigateToEdge(listType: TimeListType, edge: "first" | "last"): void {
+        switch (listType) {
+            case "hours": {
+                const hours = Array.from(this.viewHours());
+                const target = edge === "first" ? hours[0] : hours[hours.length - 1];
+                if (target) {
+                    this.onHourChange(target.value);
+                }
+                break;
+            }
+            case "minutes": {
+                this.onMinuteChange(edge === "first" ? 0 : 59);
+                break;
+            }
+            case "seconds": {
+                this.onSecondChange(edge === "first" ? 0 : 59);
+                break;
+            }
+            case "meridiem": {
+                this.onMeridiemClick(edge === "first" ? "AM" : "PM");
+                break;
+            }
+        }
+    }
+
     private setDateValues(): void {
         this.initializeNavigatedDate(this.#value());
         const meridiem = this.navigatedDate().hour >= 12 ? "PM" : "AM";
         this.meridiem.set(meridiem);
+    }
+
+    private setupKeyboardNavigation(): void {
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(() => !this.disabled())
+            )
+            .subscribe(event => this.handleKeydown(event));
     }
 }

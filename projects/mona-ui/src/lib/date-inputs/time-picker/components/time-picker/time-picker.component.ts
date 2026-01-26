@@ -28,7 +28,6 @@ import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/direc
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { dropdownPopupThemeVariants } from "../../../../common/styles/dropdown-popup.styles";
-import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
@@ -38,6 +37,11 @@ import { Action } from "../../../../utils/Action";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { HourFormat } from "../../../models/HourFormat";
 import { TimeSelectorComponent } from "../../../time-selector/components/time-selector/time-selector.component";
+import {
+    timePickerBaseThemeVariants,
+    TimePickerVariantInput,
+    TimePickerVariantProps
+} from "../../styles/time-picker.styles";
 
 @Component({
     selector: "mona-time-picker",
@@ -71,20 +75,27 @@ import { TimeSelectorComponent } from "../../../time-selector/components/time-se
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "baseClass()",
         "(blur)": "onTimeInputBlur()"
     }
 })
-export class TimePickerComponent implements ControlValueAccessor {
+export class TimePickerComponent implements ControlValueAccessor, TimePickerVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
+    readonly #timeFormat = computed(() => (this.hourFormat() === "12" ? "hh:mm a" : "HH:mm"));
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
 
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const focused = this.#dropdownService.popupRef() != null;
+        return timePickerBaseThemeVariants(theme)({ focused });
+    });
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
-        const format = this.format();
+        const format = this.#timeFormat();
         if (!value) {
             return "";
         }
@@ -107,19 +118,45 @@ export class TimePickerComponent implements ControlValueAccessor {
      * @description Emits after the popup is closed.
      */
     public readonly closed = output();
+
+    /**
+     * @description Sets the disabled state of the time picker.
+     */
     public readonly disabled = model(false);
-    public readonly format = input(" HH:mm");
+
+    /**
+     * @description Sets the format of the time picker.
+     */
+    public readonly format = input("HH:mm");
+
+    /**
+     * @description Sets the hour format of the time picker.
+     * @default 24
+     */
     public readonly hourFormat = input<HourFormat>("24");
+
+    /**
+     * @description Sets the maximum date of the time picker.
+     * @default null
+     */
     public readonly max = input<Date | null>(null);
+
+    /**
+     * @description Sets the minimum date of the time picker.
+     * @default null
+     */
     public readonly min = input<Date | null>(null);
+
     /**
      * @description Emits when the popup is about to open. This event is preventable.
      */
     public readonly open = output<PreventableEvent>();
+
     /**
      * @description Emits after the popup is opened.
      */
     public readonly opened = output();
+
     /**
      * @description Sets the height of the popup element.
      * @default 200
@@ -131,8 +168,36 @@ export class TimePickerComponent implements ControlValueAccessor {
      * @default null
      */
     public readonly popupWidth = input<ListSizeInputType>();
+
+    /**
+     * @description Sets the readonly state of the time picker.
+     */
     public readonly readonly = input(false);
+
+    /**
+     * @description Sets the required state of the time picker.
+     */
+    public readonly required = input(false);
+
+    /**
+     * @description Sets the border radius of the time picker.
+     */
+    public readonly rounded = input<TimePickerVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Sets the visibility of the clear button.
+     */
+    public readonly showClearButton = input(false);
+
+    /**
+     * @description Sets the visibility of the second selector.
+     */
     public readonly showSeconds = input(false);
+
+    /**
+     * @description Sets the size of the time picker.
+     */
+    public readonly size = input<TimePickerVariantProps["size"]>("medium");
 
     public constructor() {
         afterNextRender({
@@ -140,16 +205,6 @@ export class TimePickerComponent implements ControlValueAccessor {
                 this.setDateValues();
                 this.setSubscriptions();
             }
-        });
-        effect(() => {
-            this.hourFormat();
-            untracked(() => {
-                const value = this.value();
-                if (value) {
-                    const dateString = DateTime.fromJSDate(value).toFormat(this.format());
-                    this.currentDateString.set(dateString);
-                }
-            });
         });
         effect(() => {
             const popupTemplate = this.timePopupTemplateRef();
@@ -171,7 +226,7 @@ export class TimePickerComponent implements ControlValueAccessor {
 
     public writeValue(date: Date | null | undefined): void {
         this.value.set(date ?? null);
-        this.updateCurrentDateString(date, this.format());
+        this.updateCurrentDateString(date, this.#timeFormat());
         this.setDateValues();
     }
 
@@ -181,7 +236,6 @@ export class TimePickerComponent implements ControlValueAccessor {
 
     protected onTimeInputBlur(): void {
         if (this.#dropdownService.popupRef()) {
-            // this.#dropdownService.popupRef()?.close();
             return;
         }
         let dateTime = this.generateValidDateTime(this.currentDateString());
@@ -205,7 +259,7 @@ export class TimePickerComponent implements ControlValueAccessor {
 
     protected onTimeInputButtonClick(): void {
         this.#dropdownService.triggerPopupOpen$.next({
-            height: this.popupHeight() || "auto",
+            height: this.popupHeight() || 300,
             width: this.popupWidth() || "auto"
         });
     }
@@ -219,21 +273,19 @@ export class TimePickerComponent implements ControlValueAccessor {
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
         if (date1 && date2) {
             return (
-                DateTime.fromJSDate(date1).toFormat(this.format()) ===
-                DateTime.fromJSDate(date2).toFormat(this.format())
+                DateTime.fromJSDate(date1).toFormat(this.#timeFormat()) ===
+                DateTime.fromJSDate(date2).toFormat(this.#timeFormat())
             );
         }
         return date1 === date2;
     }
 
     private focus(): void {
-        rxTimeout(this.#destroyRef, () => {
-            const input = this.#hostElementRef.nativeElement.querySelector("input");
-            if (input && !this.readonly()) {
-                input.focus();
-                input.setSelectionRange(input.value.length, input.value.length);
-            }
-        });
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input && !this.readonly()) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
     }
 
     /**
@@ -243,28 +295,17 @@ export class TimePickerComponent implements ControlValueAccessor {
      */
     private generateValidDateTime(dateString: string): DateTime | null {
         const value = this.value();
-        if (!value) {
-            return null;
-        }
-        const valueDate = DateTime.fromJSDate(value);
-        let dateTime = DateTime.fromFormat(dateString, this.format());
+        const valueDate = value ? DateTime.fromJSDate(value) : DateTime.now();
+        let dateTime = DateTime.fromFormat(dateString, this.#timeFormat());
         if (dateTime.isValid) {
-            return dateTime.set({
-                year: valueDate.year,
-                month: valueDate.month,
-                day: valueDate.day
-            });
+            return dateTime.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
         }
         const maxDate = this.max();
         const minDate = this.min();
         const date = minDate ?? maxDate;
         if (date) {
             const newDate = DateTime.fromJSDate(date);
-            dateTime = newDate.set({
-                year: valueDate.year,
-                month: valueDate.month,
-                day: valueDate.day
-            });
+            dateTime = newDate.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
             return dateTime;
         }
         return null;
@@ -277,27 +318,21 @@ export class TimePickerComponent implements ControlValueAccessor {
     }
 
     private setCurrentDateString(date: Date | null): void {
-        this.updateCurrentDateString(date, this.format());
+        this.updateCurrentDateString(date, this.#timeFormat());
     }
 
     private setDateValues(): void {
         const value = this.value();
         this.navigatedDate.set(value ?? DateTime.now().toJSDate());
         if (value) {
-            this.updateCurrentDateString(value, this.format());
+            this.updateCurrentDateString(value, this.#timeFormat());
         }
     }
 
     private setSubscriptions(): void {
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                const input = this.#hostElementRef.nativeElement.querySelector("input");
-                if (input) {
-                    input.focus();
-                    input.setSelectionRange(-1, -1);
-                }
-            });
+            .subscribe(() => this.focus());
     }
 
     private updateTimeIfNotInMinMax(date: Date): Date {

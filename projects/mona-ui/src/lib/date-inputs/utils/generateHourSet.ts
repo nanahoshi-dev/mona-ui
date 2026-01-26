@@ -4,7 +4,6 @@ import { Meridiem } from "../models/Meridiem";
 import { TimeUnit } from "../models/TimeUnit";
 
 export const generateHourSet = (hourFormat: HourFormat, meridiem: Meridiem): ImmutableSet<TimeUnit> => {
-    console.log(hourFormat, meridiem);
     if (hourFormat === "24") {
         return select(range(0, 24), h => ({ value: h, viewValue: h })).toImmutableSet();
     }

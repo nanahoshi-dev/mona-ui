@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const datePickerBaseVariants = cva(
+export const timePickerBaseVariants = cva(
     `
         [&.ng-touched.ng-invalid]:border-error
         [&.ng-touched.ng-invalid]:ring-error/40

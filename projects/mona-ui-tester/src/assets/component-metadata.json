@@ -53,96 +53,6 @@
       }
     ]
   },
-  "TimePickerComponent": {
-    "name": "TimePickerComponent",
-    "selector": "\"mona-time-picker\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "format",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "hourFormat",
-        "type": "HourFormat",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "readonly",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showSeconds",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "TimeSelectorComponent": {
-    "name": "TimeSelectorComponent",
-    "selector": "\"mona-time-selector\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "hourFormat",
-        "type": "HourFormat",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "readonly",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showSeconds",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "DropDownFilterableDirective": {
     "name": "DropDownFilterableDirective",
     "selector": "",
@@ -820,6 +730,18 @@
     "selector": "\"mona-chip\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label for the chip host element.",
+        "kind": "input"
+      },
+      {
+        "name": "contentClick",
+        "type": "void",
+        "description": "Emits when the chip is activated (clicked or keyboard triggered).",
+        "kind": "output"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the chip.",
@@ -828,7 +750,7 @@
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the chip.\n\nIf the label is set, the chip will display the label instead of the content.",
+        "description": "Sets the label of the chip.\r\n\r\nIf the label is set, the chip will display the label instead of the content.",
         "kind": "input"
       },
       {
@@ -840,7 +762,7 @@
       {
         "name": "removable",
         "type": "boolean",
-        "description": "Sets the removable state of the chip.\nIf true, the chip will display a remove icon.",
+        "description": "Sets the removable state of the chip.\r\nIf true, the chip will display a remove icon.",
         "kind": "input"
       },
       {
@@ -858,7 +780,7 @@
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Two-way binding for the selected state of the chip.\nWhen set, the chip behaves as a toggle (checkbox role).",
+        "description": "Sets the selected state of the chip.",
         "kind": "model"
       },
       {
@@ -870,7 +792,7 @@
       {
         "name": "tabindex",
         "type": "number | string",
-        "description": "Sets the tabindex of the chip.\nIf not set, will be computed based on interactivity.",
+        "description": "Sets the tabindex of the chip.",
         "kind": "input"
       },
       {
@@ -888,7 +810,7 @@
       {
         "name": "value",
         "type": "unknown",
-        "description": "Optional value associated with the chip, useful for selection groups.",
+        "description": "Sets the value of the chip. Useful for identification in selection scenarios.",
         "kind": "input"
       }
     ]
@@ -1044,6 +966,54 @@
       {
         "name": "size",
         "type": "CalendarVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "TimeSelectorItemDirective": {
+    "name": "TimeSelectorItemDirective",
+    "selector": "\"li[monaTimeSelectorItem]\"",
+    "inputs": [
+      {
+        "name": "selected",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "TimeSelectorListItemVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "number | string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "TimeSelectorListDirective": {
+    "name": "TimeSelectorListDirective",
+    "selector": "\"ol[monaTimeSelectorList]\"",
+    "inputs": [
+      {
+        "name": "focused",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "TimeSelectorListVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
       }
@@ -2460,7 +2430,7 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
+        "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
         "kind": "model"
       },
       {
@@ -3577,6 +3547,168 @@
         "name": "weekNumber",
         "type": "boolean",
         "description": "Enables the display of week numbers in the calendar.",
+        "kind": "input"
+      }
+    ]
+  },
+  "TimePickerComponent": {
+    "name": "TimePickerComponent",
+    "selector": "\"mona-time-picker\"",
+    "inputs": [
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the time picker.",
+        "kind": "model"
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "description": "Sets the format of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "hourFormat",
+        "type": "HourFormat",
+        "description": "Sets the hour format of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "Date | null",
+        "description": "Sets the maximum date of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "Date | null",
+        "description": "Sets the minimum date of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
+        "kind": "output"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "Sets the height of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "Sets the width of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "TimePickerVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "Sets the visibility of the clear button.",
+        "kind": "input"
+      },
+      {
+        "name": "showSeconds",
+        "type": "boolean",
+        "description": "Sets the visibility of the second selector.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "TimePickerVariantProps[\"size\"]",
+        "description": "Sets the size of the time picker.",
+        "kind": "input"
+      }
+    ]
+  },
+  "TimeSelectorComponent": {
+    "name": "TimeSelectorComponent",
+    "selector": "\"mona-time-selector\"",
+    "inputs": [
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "",
+        "kind": "model"
+      },
+      {
+        "name": "focusOnMount",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "hourFormat",
+        "type": "HourFormat",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "showSeconds",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "TimeSelectorVariantProps[\"size\"]",
+        "description": "",
         "kind": "input"
       }
     ]

@@ -30,11 +30,16 @@ export const timeSelectorListVariants = cva(
         flex-1 overflow-y-auto h-full
         scrollbar-hide scroll-smooth
         snap-y snap-mandatory
-        scrollbar-width:none select-none
+        scrollbar-width:none
+        select-none outline-none
         [&::-webkit-scrollbar]:hidden
     `,
     {
         variants: {
+            focused: {
+                true: "bg-[linear-gradient(to_bottom,transparent,var(--color-secondary),transparent)]",
+                false: ""
+            },
             size: {
                 small: "h-24",
                 medium: "h-32",

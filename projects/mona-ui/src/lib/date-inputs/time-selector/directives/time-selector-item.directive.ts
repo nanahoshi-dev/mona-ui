@@ -10,6 +10,8 @@ import {
 @Directive({
     selector: "li[monaTimeSelectorItem]",
     host: {
+        "role": "option",
+        "[attr.aria-selected]": "selected()",
         "[attr.data-value]": "value()",
         "[class]": "baseClass()"
     }
