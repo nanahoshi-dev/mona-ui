@@ -93,6 +93,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "datetime-picker",
+                loadComponent: () =>
+                    import("./docs/components/datetime-picker-doc/datetime-picker-doc.component").then(
+                        m => m.DateTimePickerDocComponent
+                    )
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/dropdown-button-doc/dropdown-button-doc.component").then(

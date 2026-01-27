@@ -13,7 +13,7 @@ import { FormsModule } from "@angular/forms";
 import { ButtonGroupComponent } from "../../../buttons/button-group/components/button-group/button-group.component";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
-import { DateTimePickerComponent } from "../../../date-inputs/date-time-picker/date-time-picker.component";
+import { DateTimePickerComponent } from "../../../date-inputs/datetime-picker/components/datetime-picker/datetime-picker.component";
 import { TimePickerComponent } from "../../../date-inputs/time-picker/components/time-picker/time-picker.component";
 import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/dropdown-list.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";

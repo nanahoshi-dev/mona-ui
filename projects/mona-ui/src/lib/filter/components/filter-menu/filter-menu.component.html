@@ -30,10 +30,10 @@
         }
 
         @if (dateOptions().type === 'datetime') {
-            <mona-date-time-picker [ngModel]="dateFilterValues()[0]"
+            <mona-datetime-picker [ngModel]="dateFilterValues()[0]"
                                    (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
                                    [format]="dateOptions().format"
-                                   [disabled]="selectedFilterMenuDataItemList()[0]?.value|valuelessOperator"></mona-date-time-picker>
+                                   [disabled]="selectedFilterMenuDataItemList()[0]?.value|valuelessOperator"></mona-datetime-picker>
         }
 
         @if (dateOptions().type === 'time') {
@@ -97,10 +97,10 @@
             }
 
             @if (dateOptions().type === 'datetime') {
-                <mona-date-time-picker [ngModel]="dateFilterValues()[1]"
+                <mona-datetime-picker [ngModel]="dateFilterValues()[1]"
                                        (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
                                        [format]="dateOptions().format"
-                                       [disabled]="selectedFilterMenuDataItemList()[1]?.value|valuelessOperator"></mona-date-time-picker>
+                                       [disabled]="selectedFilterMenuDataItemList()[1]?.value|valuelessOperator"></mona-datetime-picker>
             }
 
             @if (dateOptions().type === 'time') {

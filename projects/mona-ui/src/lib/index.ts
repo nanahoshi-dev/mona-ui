@@ -76,7 +76,7 @@ export * from "./date-inputs/calendar/directives/calendar-month-cell-template.di
 export * from "./date-inputs/calendar/directives/calendar-year-cell-template.directive";
 
 export * from "./date-inputs/date-picker/components/date-picker/date-picker.component";
-export * from "./date-inputs/date-time-picker/date-time-picker.component";
+export * from "./date-inputs/datetime-picker/components/datetime-picker/datetime-picker.component";
 export * from "./date-inputs/time-picker/components/time-picker/time-picker.component";
 
 /** Dropdowns */

@@ -577,7 +577,7 @@ ul.mona-list mona-text-box.filter-box {
 
 !** Date Picker *!
 .mona-date-picker,
-.mona-date-time-picker,
+.mona-datetime-picker,
 .mona-time-picker,
 .mona-time-selector {
     &.mona-disabled {

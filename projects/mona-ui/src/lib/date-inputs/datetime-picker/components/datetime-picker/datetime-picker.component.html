@@ -1,0 +1,40 @@
+<mona-text-box [readonly]="readonly()">
+    <ng-template monaTextBoxSuffixTemplate>
+        <button monaButton look="ghost" [iconOnly]="true" class="rounded-none" (click)="onDateInputButtonClick()"
+                [disabled]="disabled()" [tabindex]="-1">
+            <i class="ri-calendar-line"></i>
+        </button>
+    </ng-template>
+</mona-text-box>
+
+<ng-template #datePopupTemplate>
+    <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68" cdkTrapFocus>
+        <div class="p-2 bg-accent/20 border-b border-gray-200 flex items-center">
+           <mona-button-group selection="single">
+               <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')" class="flex-1">
+                   Date
+               </button>
+               <button monaButton [selected]="activeView() === 'time'" (click)="activeView.set('time')" class="flex-1">
+                   Time
+               </button>
+           </mona-button-group>
+        </div>
+        <div class="h-[295px] overflow-hidden">
+            @if (activeView() === 'date') {
+                <div class="h-full">
+                    <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
+                                   [ngModel]="navigatedDate()"
+                                   (ngModelChange)="onCalendarValueChange($event)"
+                                   class="shadow-none border-none flex-1"></mona-calendar>
+                </div>
+            }
+            @if (activeView() === 'time') {
+                <div class="h-full">
+                    <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
+                                        [max]="timePickerMax()" [min]="timePickerMin()"
+                                        [hourFormat]="hourFormat()" [showSeconds]="showSeconds()"></mona-time-selector>
+                </div>
+            }
+        </div>
+    </div>
+</ng-template>
