@@ -84,7 +84,6 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
-    readonly #timeFormat = computed(() => (this.hourFormat() === "12" ? "hh:mm a" : "HH:mm"));
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
 
@@ -95,7 +94,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     });
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
-        const format = this.#timeFormat();
+        const format = this.format();
         if (!value) {
             return "";
         }
@@ -226,7 +225,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
 
     public writeValue(date: Date | null | undefined): void {
         this.value.set(date ?? null);
-        this.updateCurrentDateString(date, this.#timeFormat());
+        this.updateCurrentDateString(date, this.format());
         this.setDateValues();
     }
 
@@ -273,8 +272,8 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
         if (date1 && date2) {
             return (
-                DateTime.fromJSDate(date1).toFormat(this.#timeFormat()) ===
-                DateTime.fromJSDate(date2).toFormat(this.#timeFormat())
+                DateTime.fromJSDate(date1).toFormat(this.format()) ===
+                DateTime.fromJSDate(date2).toFormat(this.format())
             );
         }
         return date1 === date2;
@@ -296,7 +295,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     private generateValidDateTime(dateString: string): DateTime | null {
         const value = this.value();
         const valueDate = value ? DateTime.fromJSDate(value) : DateTime.now();
-        let dateTime = DateTime.fromFormat(dateString, this.#timeFormat());
+        let dateTime = DateTime.fromFormat(dateString, this.format());
         if (dateTime.isValid) {
             return dateTime.set({ year: valueDate.year, month: valueDate.month, day: valueDate.day });
         }
@@ -318,21 +317,24 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     }
 
     private setCurrentDateString(date: Date | null): void {
-        this.updateCurrentDateString(date, this.#timeFormat());
+        this.updateCurrentDateString(date, this.format());
     }
 
     private setDateValues(): void {
         const value = this.value();
         this.navigatedDate.set(value ?? DateTime.now().toJSDate());
         if (value) {
-            this.updateCurrentDateString(value, this.#timeFormat());
+            this.updateCurrentDateString(value, this.format());
         }
     }
 
     private setSubscriptions(): void {
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => this.focus());
+            .subscribe(() => {
+                this.#dropdownService.popupRef()?.close();
+                this.focus();
+            });
     }
 
     private updateTimeIfNotInMinMax(date: Date): Date {
