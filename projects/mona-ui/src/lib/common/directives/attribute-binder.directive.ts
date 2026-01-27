@@ -20,7 +20,6 @@ export class AttributeBinderDirective {
                     this.#renderer.setAttribute(this.#element.nativeElement, key, attributeValue as string);
                 }
             }
-            console.log(attributes);
         });
     }
 }
