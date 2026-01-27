@@ -1,4 +1,16 @@
 {
+  "AttributeBinderDirective": {
+    "name": "AttributeBinderDirective",
+    "selector": "\"[monaAttributeBinder]\"",
+    "inputs": [
+      {
+        "name": "attributes",
+        "type": "AttributeConfig",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "DateTimePickerComponent": {
     "name": "DateTimePickerComponent",
     "selector": "\"mona-date-time-picker\"",
@@ -1000,7 +1012,7 @@
     "selector": "\"ol[monaTimeSelectorList]\"",
     "inputs": [
       {
-        "name": "focused",
+        "name": "active",
         "type": "boolean",
         "description": "",
         "kind": "input"
@@ -3586,6 +3598,12 @@
         "kind": "input"
       },
       {
+        "name": "hourStep",
+        "type": "number",
+        "description": "Sets the hour step of the time picker.",
+        "kind": "input"
+      },
+      {
         "name": "max",
         "type": "Date | null",
         "description": "Sets the maximum date of the time picker.",
@@ -3595,6 +3613,12 @@
         "name": "min",
         "type": "Date | null",
         "description": "Sets the minimum date of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "minuteStep",
+        "type": "number",
+        "description": "Sets the minute step of the time picker.",
         "kind": "input"
       },
       {
@@ -3637,6 +3661,12 @@
         "name": "rounded",
         "type": "TimePickerVariantProps[\"rounded\"]",
         "description": "Sets the border radius of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "secondStep",
+        "type": "number",
+        "description": "Sets the second step of the time picker.",
         "kind": "input"
       },
       {
@@ -3688,6 +3718,12 @@
         "kind": "input"
       },
       {
+        "name": "hourStep",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "max",
         "type": "Date | null",
         "description": "",
@@ -3696,6 +3732,18 @@
       {
         "name": "min",
         "type": "Date | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "minuteStep",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "secondStep",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
@@ -4777,6 +4825,12 @@
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the text box.",
+        "kind": "input"
+      },
+      {
+        "name": "inputAttributes",
+        "type": "AttributeConfig",
+        "description": "",
         "kind": "input"
       },
       {

@@ -36,6 +36,11 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 value: ["12", "24"],
                 defaultValue: "24"
             },
+            hourStep: {
+                type: "number",
+                value: 1
+            },
+
             max: {
                 type: "dropdown",
                 value: [DateTime.now().plus({ day: 5 }).toJSDate()],
@@ -45,6 +50,10 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 type: "dropdown",
                 value: [DateTime.now().minus({ day: 10 }).toJSDate()],
                 defaultValue: null
+            },
+            minuteStep: {
+                type: "number",
+                value: 1
             },
             popupHeight: {
                 type: "number",
@@ -71,6 +80,10 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
+            },
+            secondStep: {
+                type: "number",
+                value: 1
             },
             showClearButton: {
                 type: "boolean",
@@ -103,13 +116,16 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 [formControl]="formGroup.controls.value"
                 [format]="format()"
                 [hourFormat]="hourFormat()"
+                [hourStep]="hourStep()"
                 [max]="max()"
                 [min]="min()"
+                [minuteStep]="minuteStep()"
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
                 [required]="required()"
                 [rounded]="rounded()"
+                [secondStep]="secondStep()"
                 [showClearButton]="showClearButton()"
                 [showSeconds]="showSeconds()"
                 [size]="size()"
@@ -141,13 +157,16 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     public readonly disabled = model<ReturnType<TimePickerComponent["disabled"]>>(false);
     public readonly format = input<ReturnType<TimePickerComponent["format"]>>("HH:mm");
     public readonly hourFormat = input<ReturnType<TimePickerComponent["hourFormat"]>>("24");
+    public readonly hourStep = input<ReturnType<TimePickerComponent["hourStep"]>>(1);
     public readonly max = input<ReturnType<TimePickerComponent["max"]>>(null);
     public readonly min = input<ReturnType<TimePickerComponent["min"]>>(null);
+    public readonly minuteStep = input<ReturnType<TimePickerComponent["minuteStep"]>>(1);
     public readonly popupHeight = input<ReturnType<TimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<TimePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<TimePickerComponent["readonly"]>>(false);
     public readonly required = input<ReturnType<TimePickerComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<TimePickerComponent["rounded"]>>("medium");
+    public readonly secondStep = input<ReturnType<TimePickerComponent["secondStep"]>>(1);
     public readonly showClearButton = input<ReturnType<TimePickerComponent["showClearButton"]>>(false);
     public readonly showSeconds = input<ReturnType<TimePickerComponent["showSeconds"]>>(false);
     public readonly size = input<ReturnType<TimePickerComponent["size"]>>("medium");

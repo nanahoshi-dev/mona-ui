@@ -4,8 +4,7 @@ import { DateTime } from "luxon";
 import { TimeUnit } from "../models/TimeUnit";
 
 @Pipe({
-    name: "timeLimiter",
-    standalone: true
+    name: "timeLimiter"
 })
 export class TimeLimiterPipe implements PipeTransform {
     public transform(

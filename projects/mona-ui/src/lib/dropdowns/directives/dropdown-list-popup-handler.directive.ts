@@ -35,9 +35,9 @@ export class DropdownListPopupHandlerDirective {
                 this.#popupClosed$
                     .pipe(takeUntilDestroyed(this.#destroyRef))
                     .subscribe(() => this.setPopupCloseSubscriptions());
-                this.#popupOpened$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-                    this.handleScrollOnPopupOpen();
-                });
+                this.#popupOpened$
+                    .pipe(takeUntilDestroyed(this.#destroyRef))
+                    .subscribe(() => this.handleScrollOnPopupOpen());
             }
         });
     }

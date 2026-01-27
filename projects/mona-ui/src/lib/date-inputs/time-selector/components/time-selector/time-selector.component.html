@@ -1,8 +1,8 @@
-<div class="flex bg-accent border-b border-input-border text-xs font-semibold text-accent-foreground uppercase">
-    <div class="flex-1 py-2 text-center">Hr</div>
-    <div class="flex-1 py-2 text-center">Min</div>
+<div [class]="headerClass()">
+    <div>Hr</div>
+    <div>Min</div>
     @if (showSeconds()) {
-        <div class="flex-1 py-2 text-center">Sec</div>
+        <div>Sec</div>
     }
 </div>
 
@@ -10,11 +10,14 @@
     <ol #hourList
         monaTimeSelectorList
         aria-label="Hours"
-        [focused]="focusedList() === 'hours'"
+        [attr.aria-activedescendant]="`${hourListId}${navigatedDate().hour}`"
+        [active]="focusedList() === 'hours'"
+        [id]="hourListId"
         [popupHeight]="computedPopupHeight()"
         [size]="size()">
         @for (h of viewHours()|timeLimiter:'h':navigatedDate():minDate():maxDate(); track h) {
             <li monaTimeSelectorItem [size]="size()" [selected]="h.viewValue===hour()" [value]="h.value"
+                [id]="`${hourListId}${h.value}`"
                 (click)="onHourChange(h.value)">{{ h.viewValue | number:'2.0' }}
             </li>
         }
@@ -22,11 +25,14 @@
     <ol #minuteList
         monaTimeSelectorList
         aria-label="Minutes"
-        [focused]="focusedList() === 'minutes'"
+        [attr.aria-activedescendant]="`${minuteListId}${navigatedDate().minute}`"
+        [active]="focusedList() === 'minutes'"
+        [id]="minuteListId"
         [popupHeight]="computedPopupHeight()"
         [size]="size()">
-        @for (m of minutes|timeLimiter:'m':navigatedDate():minDate():maxDate(); track m) {
+        @for (m of minutes()|timeLimiter:'m':navigatedDate():minDate():maxDate(); track m) {
             <li monaTimeSelectorItem [size]="size()" [selected]="m.value===minute()" [value]="m.value"
+                [id]="`${minuteListId}${m.value}`"
                 (click)="onMinuteChange(m.value)">{{ m.viewValue | number:'2.0' }}
             </li>
         }
@@ -35,11 +41,14 @@
         <ol #secondList
             monaTimeSelectorList
             aria-label="Seconds"
-            [focused]="focusedList() === 'seconds'"
+            [attr.aria-activedescendant]=`${secondListId}${navigatedDate().second}`
+            [active]="focusedList() === 'seconds'"
+            [id]="secondListId"
             [popupHeight]="computedPopupHeight()"
             [size]="size()">
-            @for (s of seconds|timeLimiter:'s':navigatedDate():minDate():maxDate(); track s) {
+            @for (s of seconds()|timeLimiter:'s':navigatedDate():minDate():maxDate(); track s) {
                 <li monaTimeSelectorItem [size]="size()" [selected]="s.value===second()" [value]="s.value"
+                    [id]="`${secondListId}${s.value}`"
                     (click)="onSecondChange(s.value)">{{ s.value | number:'2.0' }}
                 </li>
             }
@@ -49,17 +58,19 @@
         <ol #meridiemList
             monaTimeSelectorList
             aria-label="AM/PM"
-            [focused]="focusedList() === 'meridiem'"
+            [attr.aria-activedescendant]=`${meridiemListId}${meridiem()}`
+            [active]="focusedList() === 'meridiem'"
+            [id]="meridiemListId"
             [popupHeight]="computedPopupHeight()"
             [size]="size()">
             @if (amMeridiemVisible()) {
                 <li monaTimeSelectorItem [size]="size()" [selected]="meridiem()==='AM'" [value]="'AM'"
-                    (click)="onMeridiemClick('AM')">AM
+                    (click)="onMeridiemClick('AM')" [id]="`${meridiemListId}AM`">AM
                 </li>
             }
             @if (pmMeridiemVisible()) {
                 <li monaTimeSelectorItem [size]="size()" [selected]="meridiem()==='PM'" [value]="'PM'"
-                    (click)="onMeridiemClick('PM')">PM
+                    (click)="onMeridiemClick('PM')" [id]="`${meridiemListId}PM`">PM
                 </li>
             }
         </ol>
@@ -67,6 +78,6 @@
 </div>
 
 <div class="w-full flex items-center justify-between px-1 py-1 border-0 border-t border-input-border bg-accent">
-    <button monaButton look="ghost" size="small" (click)="onNowClick()">Now</button>
-    <button monaButton look="primary" size="small" (click)="onSetTimeClick()">Set</button>
+    <button monaButton look="ghost" [size]="size()" (click)="onNowClick()">Now</button>
+    <button monaButton look="primary" [size]="size()" (click)="onSetTimeClick()">Set</button>
 </div>

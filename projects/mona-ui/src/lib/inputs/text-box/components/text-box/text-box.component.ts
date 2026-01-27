@@ -15,6 +15,8 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { LucideAngularModule, X } from "lucide-angular";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { AttributeBinderDirective } from "../../../../common/directives/attribute-binder.directive";
+import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
@@ -33,7 +35,7 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
             multi: true
         }
     ],
-    imports: [NgTemplateOutlet, FormsModule, ButtonDirective, LucideAngularModule],
+    imports: [NgTemplateOutlet, FormsModule, ButtonDirective, LucideAngularModule, AttributeBinderDirective],
     host: {
         "[attr.data-disabled]": "disabled()",
         "[attr.data-readonly]": "readonly()",
@@ -65,6 +67,8 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
      * @description Sets the disabled state of the text box.
      */
     public readonly disabled = input<boolean>(false);
+
+    public readonly inputAttributes = input<AttributeConfig>({});
 
     /**
      * @description Emits an event when the input loses focus.

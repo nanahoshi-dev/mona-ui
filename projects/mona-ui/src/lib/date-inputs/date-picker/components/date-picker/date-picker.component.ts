@@ -341,13 +341,7 @@ export class DatePickerComponent
             popupRef.close();
             return;
         }
-        this.#dropdownService.triggerPopupOpen$.next({
-            height: "auto",
-            maxHeight: "auto",
-            width: "auto",
-            closeOnScroll: false,
-            withScrollTracking: true
-        });
+        this.openPopup();
     }
 
     protected onDateStringEdit(dateString: string): void {
@@ -395,7 +389,9 @@ export class DatePickerComponent
             this.#dropdownService.triggerPopupOpen$.next({
                 height: "auto",
                 maxHeight: "auto",
-                width: "auto"
+                width: "auto",
+                closeOnScroll: false,
+                withScrollTracking: true
             });
         }
     }

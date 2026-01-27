@@ -19,6 +19,15 @@ export const timeSelectorBaseVariants = cva(
     }
 );
 
+export const timeSelectorHeaderVariants = cva(
+    `
+        flex bg-accent text-accent-foreground
+        border-b border-input-border
+        text-xs font-semibold uppercase
+        [&>div]:flex-1 [&>div]:py-2 [&>div]:text-center
+    `
+);
+
 export const timeSelectorListContainerVariants = cva(
     `
         flex flex-row w-full relative overflow-hidden
@@ -33,13 +42,10 @@ export const timeSelectorListVariants = cva(
         scrollbar-width:none
         select-none outline-none
         [&::-webkit-scrollbar]:hidden
+        focus-visible:bg-accent
     `,
     {
         variants: {
-            focused: {
-                true: "bg-[linear-gradient(to_bottom,transparent,var(--color-secondary),transparent)]",
-                false: ""
-            },
             size: {
                 small: "h-24",
                 medium: "h-32",
@@ -61,9 +67,9 @@ export const timeSelectorListItemVariants = cva(
                 false: ""
             },
             size: {
-                small: "h-8",
-                medium: "h-9",
-                large: "h-10"
+                small: "h-6",
+                medium: "h-7",
+                large: "h-8"
             }
         },
         defaultVariants: {

@@ -43,6 +43,9 @@ export class DropdownPopupHandlerDirective {
         if (typeof maxHeight === "number") {
             return maxHeight;
         }
+        if (maxHeight === "auto" && height === "auto") {
+            return "auto";
+        }
         if (!maxHeight || maxHeight === "auto") {
             if (!height || height === "auto") {
                 return 200;

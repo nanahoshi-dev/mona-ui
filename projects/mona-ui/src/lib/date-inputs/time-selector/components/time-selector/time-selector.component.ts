@@ -15,23 +15,23 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { Enumerable, range, select } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { filter } from "rxjs/operators";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { HourFormat } from "../../../models/HourFormat";
 import { Meridiem } from "../../../models/Meridiem";
-import { TimeUnit } from "../../../models/TimeUnit";
 import { TimeLimiterPipe } from "../../../pipes/time-limiter.pipe";
-import { generateHourSet } from "../../../utils/generateHourSet";
+import { generateHourSet, generateMinuteSet, generateSecondSet } from "../../../utils/generateHourSet";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
 import { TimeListType } from "../../models/TimeListType";
 import {
     timeSelectorBaseThemeVariants,
+    timeSelectorHeaderThemeVariants,
     timeSelectorListContainerThemeVariants,
     TimeSelectorVariantInput,
     TimeSelectorVariantProps
@@ -76,6 +76,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     });
     protected readonly computedPopupHeight = this.#height.asReadonly();
     protected readonly focusedList = signal<TimeListType>("hours");
+    protected readonly headerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return timeSelectorHeaderThemeVariants(theme)();
+    });
     protected readonly hour = computed(() => {
         const hour = this.navigatedDate().hour;
         const hourFormat = this.hourFormat();
@@ -84,6 +88,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         }
         return hour % 12 || 12;
     });
+    protected readonly hourListId = createElementControlId();
     protected readonly hourListRef = viewChild.required<ElementRef<HTMLOListElement>>("hourList");
     protected readonly listContainerClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -94,36 +99,41 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         return max ? DateTime.fromJSDate(max) : null;
     });
     protected readonly meridiem = signal<Meridiem>("AM");
+    protected readonly meridiemListId = createElementControlId();
     protected readonly meridiemListRef = viewChild<ElementRef<HTMLOListElement>>("meridiemList");
     protected readonly minDate = computed(() => {
         const min = this.min();
         return min ? DateTime.fromJSDate(min) : null;
     });
     protected readonly minute = computed(() => this.navigatedDate().minute);
+    protected readonly minuteListId = createElementControlId();
     protected readonly minuteListRef = viewChild.required<ElementRef<HTMLOListElement>>("minuteList");
-    protected readonly minutes = select<number, TimeUnit>(range(0, 60), m => ({ value: m, viewValue: m })).toArray();
+    protected readonly minutes = computed(() => generateMinuteSet(this.minuteStep()));
     protected readonly navigatedDate = signal(DateTime.now());
     protected readonly pmMeridiemVisible = computed(() => {
         const max = this.max();
         return !(max && max.getHours() < 12);
     });
     protected readonly second = computed(() => this.navigatedDate().second);
+    protected readonly secondListId = createElementControlId();
     protected readonly secondListRef = viewChild<ElementRef<HTMLOListElement>>("secondList");
-    protected readonly seconds = Enumerable.range(0, 60)
-        .select<TimeUnit>(s => ({ value: s, viewValue: s }))
-        .toArray();
+    protected readonly seconds = computed(() => generateSecondSet(this.secondStep()));
     protected readonly viewHours = computed(() => {
         const meridiem = this.meridiem();
         const hourFormat = this.hourFormat();
-        return generateHourSet(hourFormat, meridiem);
+        const hourStep = this.hourStep();
+        return generateHourSet(hourFormat, meridiem, hourStep);
     });
 
     public readonly ariaLabel = input<string>("Time selector");
     public readonly disabled = model(false);
     public readonly focusOnMount = input(true);
     public readonly hourFormat = input<HourFormat>("24");
+    public readonly hourStep = input(1);
     public readonly max = input<Date | null>(null);
     public readonly min = input<Date | null>(null);
+    public readonly minuteStep = input(1);
+    public readonly secondStep = input(1);
     public readonly showSeconds = input(false);
     public readonly size = input<TimeSelectorVariantProps["size"]>("medium");
 
@@ -214,8 +224,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     protected onSetTimeClick(): void {
-        this.#value.set(this.navigatedDate().toJSDate());
-        this.#propagateChange?.(this.#value());
+        this.updateValue(this.navigatedDate().toJSDate(), true);
     }
 
     private getListRef(listType: TimeListType): ElementRef<HTMLOListElement> | undefined {
@@ -277,11 +286,15 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 event.preventDefault();
                 this.navigateToEdge(focusedList, "last");
                 break;
+            case "Enter":
+                this.updateValue(this.navigatedDate().toJSDate(), true);
+                break;
         }
     }
 
     private focusList(listType: TimeListType): void {
         const listRef = this.getListRef(listType);
+        console.log(listRef);
         listRef?.nativeElement.focus();
     }
 
@@ -379,5 +392,12 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 filter(() => !this.disabled())
             )
             .subscribe(event => this.handleKeydown(event));
+    }
+
+    private updateValue(date: Date | null, notify: boolean): void {
+        this.#value.set(date);
+        if (notify) {
+            this.#propagateChange?.(date);
+        }
     }
 }
