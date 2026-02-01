@@ -67,9 +67,7 @@ async function waitForStable(fixture: ComponentFixture<unknown>): Promise<void> 
 }
 
 function getButtons(fixture: ComponentFixture<unknown>): ButtonDirective[] {
-    return fixture.debugElement
-        .queryAll(By.directive(ButtonDirective))
-        .map(de => de.injector.get(ButtonDirective));
+    return fixture.debugElement.queryAll(By.directive(ButtonDirective)).map(de => de.injector.get(ButtonDirective));
 }
 
 function getButtonElements(fixture: ComponentFixture<unknown>): HTMLButtonElement[] {

@@ -49,6 +49,12 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     protected readonly buttons = contentChildren(ButtonDirective);
 
     /**
+     * @description When set to false, at least one button must remain selected in single selection mode.
+     * Clicking a selected button will not deselect it. Defaults to true (allows empty selection).
+     */
+    public readonly allowEmpty = input<boolean>(true);
+
+    /**
      * @description Sets the disabled state of the button group.
      * If true, all buttons in the group will be disabled.
      */
@@ -73,6 +79,7 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
      * @description Sets the selection mode of the button group.
      */
     public readonly selection = model<SelectionMode>("multiple");
+
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
@@ -98,20 +105,25 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     }
 
     private setSubscriptions(): void {
-        this.#buttonService.buttonClick$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(button => {
-            if (this.selection() === "single") {
-                const isCurrentlySelected = button.selected();
-                this.buttons().forEach(b => {
-                    if (b.selected()) {
-                        this.#buttonService.buttonSelect$.next([b, false]);
+        this.#buttonService.buttonClick$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(([button, wasSelected]) => {
+                if (this.selection() === "single") {
+                    // If allowEmpty is false and button is already selected, do nothing
+                    if (wasSelected && !this.allowEmpty()) {
+                        return;
                     }
-                });
-                if (!isCurrentlySelected) {
-                    this.#buttonService.buttonSelect$.next([button, true]);
+                    this.buttons().forEach(b => {
+                        if (b.selected()) {
+                            this.#buttonService.buttonSelect$.next([b, false]);
+                        }
+                    });
+                    if (!wasSelected) {
+                        this.#buttonService.buttonSelect$.next([button, true]);
+                    }
+                } else {
+                    this.#buttonService.buttonSelect$.next([button, !wasSelected]);
                 }
-            } else {
-                this.#buttonService.buttonSelect$.next([button, !button.selected()]);
-            }
-        });
+            });
     }
 }

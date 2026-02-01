@@ -12,7 +12,6 @@ import {
     model,
     OnInit,
     output,
-    Signal,
     signal,
     TemplateRef,
     untracked,
@@ -34,9 +33,6 @@ import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
-import { TabComponent } from "../../../../layout/tabs/components/tab/tab.component";
-import { TabsComponent } from "../../../../layout/tabs/components/tabs/tabs.component";
-import { TabContentTemplateDirective } from "../../../../layout/tabs/directives/tab-content-template.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -79,10 +75,7 @@ import { ActiveView } from "../../models/ActiveView";
         TextBoxComponent,
         TextBoxSuffixTemplateDirective,
         ButtonGroupComponent,
-        CdkTrapFocus,
-        TabsComponent,
-        TabComponent,
-        TabContentTemplateDirective
+        CdkTrapFocus
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {

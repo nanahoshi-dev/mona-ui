@@ -10,7 +10,7 @@
 <ng-template #datePopupTemplate>
     <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68" cdkTrapFocus>
         <div class="p-2 bg-accent/20 border-b border-gray-200 flex items-center">
-           <mona-button-group selection="single">
+           <mona-button-group selection="single" [allowEmpty]="false" class="w-full">
                <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')" class="flex-1">
                    Date
                </button>
@@ -19,7 +19,7 @@
                </button>
            </mona-button-group>
         </div>
-        <div class="h-[295px] overflow-hidden">
+        <div class="overflow-hidden">
             @if (activeView() === 'date') {
                 <div class="h-full">
                     <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"

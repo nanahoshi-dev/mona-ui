@@ -16,6 +16,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
     protected readonly config = signal<ComponentConfig<ButtonGroupComponent>>({
         code: `
             <mona-button-group
+                [allowEmpty]="allowEmpty()"
                 [disabled]="disabled()"
                 [selection]="selection()"
                 [look]="look()"
@@ -27,6 +28,10 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
             </mona-button-group>
         `,
         inputs: {
+            allowEmpty: {
+                type: "boolean",
+                value: true
+            },
             disabled: {
                 type: "boolean",
                 value: false
@@ -61,6 +66,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
     imports: [ButtonGroupComponent, ButtonDirective],
     template: `
         <mona-button-group
+            [allowEmpty]="allowEmpty()"
             [disabled]="disabled()"
             [selection]="selection()"
             [look]="look()"
@@ -73,10 +79,10 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
     `
 })
 export class ButtonGroupWrapperComponent implements ComponentInputsAsSignal<ButtonGroupComponent> {
-    public readonly disabled = model(false);
+    public readonly allowEmpty = input<ReturnType<ButtonGroupComponent["allowEmpty"]>>(true);
+    public readonly disabled = model<ReturnType<ButtonGroupComponent["disabled"]>>(false);
     public readonly look = input<ReturnType<ButtonGroupComponent["look"]>>("default");
     public readonly rounded = input<ReturnType<ButtonGroupComponent["rounded"]>>("medium");
     public readonly selection = model<ReturnType<ButtonGroupComponent["selection"]>>("single");
     public readonly size = input<ReturnType<ButtonGroupComponent["size"]>>("medium");
 }
-

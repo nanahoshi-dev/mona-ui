@@ -47,6 +47,7 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #renderer = inject(Renderer2);
     readonly #themeService = inject(ThemeService);
     #loaderComponentRef: ComponentRef<LoadingIndicatorComponent> | null = null;
+    #selectedBeforeClick = false;
 
     protected readonly effectiveDisabled = computed(() => this.#buttonService?.groupDisabled() || this.disabled());
     protected readonly effectiveLook = computed(() => this.#buttonService?.groupLook() ?? this.look());
@@ -199,6 +200,12 @@ export class ButtonDirective implements ButtonVariantsInput {
     }
 
     #setToggleableEvent(): void {
+        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "mousedown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                this.#selectedBeforeClick = this.selected();
+            });
+
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
@@ -209,7 +216,7 @@ export class ButtonDirective implements ButtonVariantsInput {
                     return;
                 }
                 if (this.#buttonService) {
-                    this.#buttonService.buttonClick$.next(this);
+                    this.#buttonService.buttonClick$.next([this, this.#selectedBeforeClick]);
                 } else {
                     this.selected.set(!this.selected());
                 }
