@@ -5,7 +5,7 @@ import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styl
 import { compareDates } from "../utils/compareDates";
 
 @Directive({
-    selector: "td[monaMonthDay]",
+    selector: "[monaMonthDay]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-selected]": "selected() ? 'true' : null",
@@ -73,7 +73,6 @@ export class MonthDayDirective {
     public readonly monthBounds = input.required<[Date, Date]>();
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
-    public readonly size = input.required<CalendarVariantProps["size"]>();
     public readonly value = input.required<Date | Date[] | null>();
 
     protected onClick(event: MouseEvent) {

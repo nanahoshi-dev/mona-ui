@@ -71,11 +71,6 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 value: ["single", "multiple", "range"],
                 defaultValue: "single"
             },
-            size: {
-                type: "dropdown",
-                value: ["small", "medium", "large"],
-                defaultValue: "medium"
-            },
             weekNumber: {
                 type: "boolean",
                 value: false
@@ -111,7 +106,6 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 [readonly]="readonly()"
                 [rounded]="rounded()"
                 [selection]="selection()"
-                [size]="size()"
                 [weekNumber]="weekNumber()">
                 @if (featureData && featureData["decadeCellTemplate"].active) {
                     <ng-template monaCalendarDecadeCellTemplate let-year>
@@ -157,6 +151,5 @@ export class CalendarWrapperComponent implements ComponentInputsAsSignal<Calenda
     public readonly readonly = input<ReturnType<CalendarComponent["readonly"]>>(false);
     public readonly rounded = input<ReturnType<CalendarComponent["rounded"]>>("none");
     public readonly selection = input<ReturnType<CalendarComponent["selection"]>>("single");
-    public readonly size = input<ReturnType<CalendarComponent["size"]>>("medium");
     public readonly weekNumber = input<ReturnType<CalendarComponent["weekNumber"]>>(false);
 }

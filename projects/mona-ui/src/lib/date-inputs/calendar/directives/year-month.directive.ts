@@ -4,7 +4,7 @@ import { ThemeService } from "../../../theme/services/theme.service";
 import { CalendarVariantProps, calendarYearViewCellThemeVariants } from "../styles/calendar.styles";
 
 @Directive({
-    selector: "td[monaYearMonth]",
+    selector: "[monaYearMonth]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-selected]": "selected() ? 'true' : null",
@@ -19,8 +19,7 @@ export class YearMonthDirective {
         const theme = this.#themeService.theme();
         const focused = this.focused();
         const rounded = this.rounded();
-        const size = this.size();
-        return calendarYearViewCellThemeVariants(theme)({ focused, rounded, size });
+        return calendarYearViewCellThemeVariants(theme)({ focused, rounded });
     });
 
     protected readonly focused = computed(() => {
@@ -48,5 +47,4 @@ export class YearMonthDirective {
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly selectedDate = input<Date | null>();
-    public readonly size = input.required<CalendarVariantProps["size"]>();
 }

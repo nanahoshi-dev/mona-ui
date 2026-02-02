@@ -1,5 +1,6 @@
 import { CdkTrapFocus } from "@angular/cdk/a11y";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -10,7 +11,6 @@ import {
     inject,
     input,
     model,
-    OnInit,
     output,
     signal,
     TemplateRef,
@@ -85,7 +85,7 @@ import { ActiveView } from "../../models/ActiveView";
         "[attr.tabindex]": "disabled() ? null : 0"
     }
 })
-export class DateTimePickerComponent implements OnInit, ControlValueAccessor, DropdownPopupInput {
+export class DateTimePickerComponent implements ControlValueAccessor, DropdownPopupInput {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef = inject(ElementRef);
@@ -93,6 +93,7 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
     readonly #value = signal<Date | null>(null);
     #popupRef: PopupRef | null = null;
     #propagateChange: Action<Date | null> | null = null;
+    #propagateTouched: Action | null = null;
 
     protected readonly activeView = signal<ActiveView>("date");
     protected readonly currentDateString = signal("");
@@ -188,11 +189,12 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
             const popupTemplate = this.popupTemplate();
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
         });
-    }
-
-    public ngOnInit(): void {
-        this.setDateValues();
-        this.setSubscriptions();
+        afterNextRender({
+            read: () => {
+                this.setDateValues();
+                this.setSubscriptions();
+            }
+        });
     }
 
     protected onActiveViewChange(activeView: ActiveView): void {
@@ -205,6 +207,7 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
             this.setCurrentDate(inRangeDate);
             this.navigatedDate.set(inRangeDate);
         }
+        this.activeView.set("time");
     }
 
     public onDateInputBlur(): void {
@@ -235,9 +238,8 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
 
     public onDateInputButtonClick(): void {
         this.#dropdownService.triggerPopupOpen$.next({
-            width: 320,
-            minHeight: 350,
-            height: 350,
+            width: 266,
+            height: "min-content",
             closeOnScroll: false,
             withScrollTracking: true
         });
@@ -253,6 +255,7 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
             this.setCurrentDate(inRangeDate);
             this.navigatedDate.set(inRangeDate);
         }
+        this.#dropdownService.popupRef()?.close();
     }
 
     public registerOnChange(fn: any): void {
@@ -279,6 +282,14 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
             );
         }
         return date1 === date2;
+    }
+
+    private focus(): void {
+        const input = this.#hostElementRef.nativeElement.querySelector("input");
+        if (input && !this.readonly()) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
     }
 
     private setCurrentDate(date: Date | null): void {
@@ -319,6 +330,18 @@ export class DateTimePickerComponent implements OnInit, ControlValueAccessor, Dr
                     input.setSelectionRange(-1, -1);
                 }
             });
+        this.#dropdownService.popupCloseStart$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.focus();
+        });
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.activeView.set("date");
+            const value = this.#value();
+            if (value) {
+                this.currentDateString.set(DateTime.fromJSDate(value).toFormat(this.format()));
+            } else {
+                this.currentDateString.set("");
+            }
+        });
     }
 
     private updateDateIfNotInRange(date: Date): Date {

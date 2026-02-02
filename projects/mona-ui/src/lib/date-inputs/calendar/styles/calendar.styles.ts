@@ -4,12 +4,13 @@ import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     calendarBaseVariants as monaCalendarBaseVariants,
     calendarDecadeViewCellVariants as monaCalendarDecadeViewCellVariants,
-    calendarDecadeViewTableVariants as monaCalendarDecadeViewTableVariants,
+    calendarDecadeViewGridVariants as monaCalendarDecadeViewGridVariants,
     calendarHeaderVariants as monaCalendarHeaderVariants,
     calendarMonthViewDayVariants as monaCalendarMonthViewDayVariants,
-    calendarMonthViewTableVariants as monaCalendarMonthViewTableVariants,
+    calendarMonthViewGridVariants as monaCalendarMonthViewGridVariants,
+    calendarMonthViewGridHeaderVariants as monaCalendarMonthViewGridHeaderVariants,
     calendarYearViewCellVariants as monaCalendarYearViewCellVariants,
-    calendarYearViewTableVariants as monaCalendarYearViewTableVariants
+    calendarYearViewGridVariants as monaCalendarYearViewGridVariants
 } from "./calendar.mona.styles";
 
 export const calendarBaseThemeVariants = (theme: ThemeStyle) => {
@@ -30,12 +31,12 @@ export const calendarHeaderThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
-export const calendarDecadeViewTableThemeVariants = (theme: ThemeStyle) => {
+export const calendarDecadeViewGridThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return monaCalendarDecadeViewTableVariants;
+            return monaCalendarDecadeViewGridVariants;
         default:
-            return monaCalendarDecadeViewTableVariants;
+            return monaCalendarDecadeViewGridVariants;
     }
 };
 
@@ -57,21 +58,30 @@ export const calendarMonthViewDayThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
-export const calendarMonthViewTableThemeVariants = (theme: ThemeStyle) => {
+export const calendarMonthViewGridThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return monaCalendarMonthViewTableVariants;
+            return monaCalendarMonthViewGridVariants;
         default:
-            return monaCalendarMonthViewTableVariants;
+            return monaCalendarMonthViewGridVariants;
     }
 };
 
-export const calendarYearViewTableThemeVariants = (theme: ThemeStyle) => {
+export const calendarMonthViewGridHeaderThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return monaCalendarYearViewTableVariants;
+            return monaCalendarMonthViewGridHeaderVariants;
         default:
-            return monaCalendarYearViewTableVariants;
+            return monaCalendarMonthViewGridHeaderVariants;
+    }
+};
+
+export const calendarYearViewGridThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaCalendarYearViewGridVariants;
+        default:
+            return monaCalendarYearViewGridVariants;
     }
 };
 
@@ -90,8 +100,8 @@ type CalendarBaseVariantInput = VariantInputs<CalendarBaseVariantProps>;
 type CalendarHeaderVariantProps = VariantProps<ReturnType<typeof calendarHeaderThemeVariants>>;
 type CalendarHeaderVariantInput = VariantInputs<CalendarHeaderVariantProps>;
 
-type CalendarDecadeViewTableVariantProps = VariantProps<ReturnType<typeof calendarDecadeViewTableThemeVariants>>;
-type CalendarDecadeViewTableVariantInput = VariantInputs<CalendarDecadeViewTableVariantProps>;
+type CalendarDecadeViewGridVariantProps = VariantProps<ReturnType<typeof calendarDecadeViewGridThemeVariants>>;
+type CalendarDecadeViewGridVariantInput = VariantInputs<CalendarDecadeViewGridVariantProps>;
 
 type CalendarDecadeViewCellVariantProps = VariantProps<ReturnType<typeof calendarDecadeViewCellThemeVariants>>;
 type CalendarDecadeViewCellVariantInput = VariantInputs<CalendarDecadeViewCellVariantProps>;
@@ -99,28 +109,35 @@ type CalendarDecadeViewCellVariantInput = VariantInputs<CalendarDecadeViewCellVa
 type CalendarMonthViewDayVariantProps = VariantProps<ReturnType<typeof calendarMonthViewDayThemeVariants>>;
 type CalendarMonthViewDayVariantInput = VariantInputs<CalendarMonthViewDayVariantProps>;
 
-type CalendarMonthViewTableVariantProps = VariantProps<ReturnType<typeof calendarMonthViewTableThemeVariants>>;
-type CalendarMonthViewTableVariantInput = VariantInputs<CalendarMonthViewTableVariantProps>;
+type CalendarMonthViewGridVariantProps = VariantProps<ReturnType<typeof calendarMonthViewGridThemeVariants>>;
+type CalendarMonthViewGridVariantInput = VariantInputs<CalendarMonthViewGridVariantProps>;
 
-type CalendarYearViewTableVariantProps = VariantProps<ReturnType<typeof calendarYearViewTableThemeVariants>>;
-type CalendarYearViewTableVariantInput = VariantInputs<CalendarYearViewTableVariantProps>;
+type CalendarMonthViewGridHeaderVariantProps = VariantProps<
+    ReturnType<typeof calendarMonthViewGridHeaderThemeVariants>
+>;
+type CalendarMonthViewGridHeaderVariantInput = VariantInputs<CalendarMonthViewGridHeaderVariantProps>;
+
+type CalendarYearViewGridVariantProps = VariantProps<ReturnType<typeof calendarYearViewGridThemeVariants>>;
+type CalendarYearViewGridVariantInput = VariantInputs<CalendarYearViewGridVariantProps>;
 
 type CalendarYearViewCellVariantProps = VariantProps<ReturnType<typeof calendarYearViewCellThemeVariants>>;
 type CalendarYearViewCellVariantInput = VariantInputs<CalendarYearViewCellVariantProps>;
 
 export type CalendarVariantProps = CalendarBaseVariantProps &
     CalendarHeaderVariantProps &
-    CalendarDecadeViewTableVariantProps &
+    CalendarDecadeViewGridVariantProps &
     CalendarDecadeViewCellVariantProps &
     CalendarMonthViewDayVariantProps &
-    CalendarMonthViewTableVariantProps &
-    CalendarYearViewTableVariantProps &
+    CalendarMonthViewGridVariantProps &
+    CalendarMonthViewGridHeaderVariantProps &
+    CalendarYearViewGridVariantProps &
     CalendarYearViewCellVariantProps;
 export type CalendarVariantInput = CalendarBaseVariantInput &
     CalendarHeaderVariantInput &
-    CalendarDecadeViewTableVariantInput &
+    CalendarDecadeViewGridVariantInput &
     Omit<CalendarDecadeViewCellVariantInput, "focused"> &
     Omit<CalendarMonthViewDayVariantInput, "disabled" | "focused" | "outside" | "selected" | "today"> &
-    CalendarMonthViewTableVariantInput &
-    CalendarYearViewTableVariantInput &
+    CalendarMonthViewGridVariantInput &
+    CalendarMonthViewGridHeaderVariantInput &
+    CalendarYearViewGridVariantInput &
     Omit<CalendarYearViewCellVariantInput, "focused">;

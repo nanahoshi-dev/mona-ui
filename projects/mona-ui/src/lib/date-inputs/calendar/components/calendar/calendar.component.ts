@@ -13,9 +13,7 @@ import {
     input,
     model,
     OnInit,
-    output,
     signal,
-    TemplateRef,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
@@ -23,7 +21,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
-import { bufferCount, distinctUntilChanged, fromEvent, skip, Subject, tap } from "rxjs";
+import { bufferCount, fromEvent, skip, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
@@ -44,12 +42,13 @@ import { CalendarSelection } from "../../models/CalendarSelection";
 import { FirstDayOfWeek } from "../../models/FirstDayOfWeek";
 import {
     calendarBaseThemeVariants,
-    calendarDecadeViewTableThemeVariants,
+    calendarDecadeViewGridThemeVariants,
     calendarHeaderThemeVariants,
-    calendarMonthViewTableThemeVariants,
+    calendarMonthViewGridHeaderThemeVariants,
+    calendarMonthViewGridThemeVariants,
     CalendarVariantInput,
     CalendarVariantProps,
-    calendarYearViewTableThemeVariants
+    calendarYearViewGridThemeVariants
 } from "../../styles/calendar.styles";
 import { compareDates } from "../../utils/compareDates";
 
@@ -159,8 +158,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const disabled = this.disabled();
         const readonly = this.readonly();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        const size = this.size();
-        const variantClass = calendarBaseThemeVariants(theme)({ disabled, readonly, rounded, size });
+        const variantClass = calendarBaseThemeVariants(theme)({ disabled, readonly, rounded });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -169,15 +167,15 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     protected readonly decadeEnd = computed(() => {
         return this.decadeStart() + 9;
     });
+    protected readonly decadeGridClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return calendarDecadeViewGridThemeVariants(theme)();
+    });
     protected readonly decadeStart = computed(() => {
         const navigatedDate = this.navigatedDate();
         const date = DateTime.fromJSDate(navigatedDate);
         const year = date.year;
         return year - (year % 10);
-    });
-    protected readonly decadeTableClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return calendarDecadeViewTableThemeVariants(theme)();
     });
     protected readonly decadeYears = computed(() => {
         const decadeStart = this.decadeStart();
@@ -210,9 +208,13 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             )
             .toImmutableSet();
     });
-    protected readonly monthTableClass = computed(() => {
+    protected readonly monthGridClass = computed(() => {
         const theme = this.#themeService.theme();
-        return calendarMonthViewTableThemeVariants(theme)();
+        return calendarMonthViewGridThemeVariants(theme)();
+    });
+    protected readonly monthGridHeaderClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return calendarMonthViewGridHeaderThemeVariants(theme)();
     });
     protected readonly months = computed(() => {
         const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -296,9 +298,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         return firstDayOfWeek === "monday" ? [...days.slice(1), days[0]] : days;
     });
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
-    protected readonly yearTableClass = computed(() => {
+    protected readonly yearGridClass = computed(() => {
         const theme = this.#themeService.theme();
-        return calendarYearViewTableThemeVariants(theme)();
+        return calendarYearViewGridThemeVariants(theme)();
     });
 
     /**
@@ -345,11 +347,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
      */
     public readonly selection = input<CalendarSelection>("single");
 
-    /**
-     * @description Sets the size of the calendar.
-     * @default "medium"
-     */
-    public readonly size = input<CalendarVariantProps["size"]>("medium");
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -380,6 +377,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 }
             });
         });
+        toObservable(this.calendarView)
+            .pipe(skip(1))
+            .subscribe(() => this.focusActiveCell());
     }
 
     public ngOnInit(): void {
@@ -492,7 +492,16 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     private focusActiveCell(): void {
         rxTimeout(this.#destroyRef, () => {
-            const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>('td[tabindex="0"]');
+            const calendarView = this.calendarView();
+            const selector =
+                calendarView === "year"
+                    ? "[monaYearMonth]"
+                    : calendarView === "decade"
+                      ? "[monaDecadeYear]"
+                      : "[monaMonthDay]";
+            const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>(
+                `${selector}[tabindex="0"]`
+            );
             activeCell?.focus();
         });
     }
@@ -577,7 +586,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             case " ": {
                 const target = event.target as HTMLElement;
                 if (target.tagName === "BUTTON" || target.closest("button")) {
-                    this.focusActiveCell();
                     return;
                 }
                 event.preventDefault();

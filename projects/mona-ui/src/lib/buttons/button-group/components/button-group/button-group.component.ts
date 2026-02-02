@@ -109,7 +109,6 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(([button, wasSelected]) => {
                 if (this.selection() === "single") {
-                    // If allowEmpty is false and button is already selected, do nothing
                     if (wasSelected && !this.allowEmpty()) {
                         return;
                     }

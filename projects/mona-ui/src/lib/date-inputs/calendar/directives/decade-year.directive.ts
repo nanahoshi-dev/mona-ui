@@ -4,7 +4,7 @@ import { ThemeService } from "../../../theme/services/theme.service";
 import { calendarDecadeViewCellThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 
 @Directive({
-    selector: "td[monaDecadeYear]",
+    selector: "[monaDecadeYear]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
         "[attr.aria-selected]": "selected() ? 'true' : null",
@@ -19,8 +19,7 @@ export class DecadeYearDirective {
         const theme = this.#themeService.theme();
         const focused = this.focused();
         const rounded = this.rounded();
-        const size = this.size();
-        return calendarDecadeViewCellThemeVariants(theme)({ focused, rounded, size });
+        return calendarDecadeViewCellThemeVariants(theme)({ focused, rounded });
     });
 
     protected readonly focused = computed(() => {
@@ -43,6 +42,5 @@ export class DecadeYearDirective {
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly selectedDate = input<Date | null>(null);
-    public readonly size = input.required<CalendarVariantProps["size"]>();
     public readonly year = input.required<number>();
 }

@@ -19,7 +19,7 @@
 <ng-template #popupTemplate>
     <div [class]="pickerPopupClass()" [id]="popupId">
         <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()" [rounded]="rounded()"
-                       [size]="size()" [weekNumber]="weekNumber()" [firstDay]="firstDay()" [ngModel]="value()"
+                       [weekNumber]="weekNumber()" [firstDay]="firstDay()" [ngModel]="value()"
                        (ngModelChange)="onCalendarValueChange($event)">
             @if (decadeCellTemplate()) {
                 <ng-template monaCalendarDecadeCellTemplate let-year>

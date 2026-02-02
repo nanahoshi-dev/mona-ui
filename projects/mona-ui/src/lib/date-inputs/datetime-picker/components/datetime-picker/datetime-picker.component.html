@@ -1,4 +1,4 @@
-<mona-text-box [readonly]="readonly()">
+<mona-text-box [readonly]="readonly()" [ngModel]="currentDateString()">
     <ng-template monaTextBoxSuffixTemplate>
         <button monaButton look="ghost" [iconOnly]="true" class="rounded-none" (click)="onDateInputButtonClick()"
                 [disabled]="disabled()" [tabindex]="-1">
@@ -21,7 +21,7 @@
         </div>
         <div class="overflow-hidden">
             @if (activeView() === 'date') {
-                <div class="h-full">
+                <div class="h-full flex items-center justify-center">
                     <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
                                    [ngModel]="navigatedDate()"
                                    (ngModelChange)="onCalendarValueChange($event)"
@@ -29,7 +29,7 @@
                 </div>
             }
             @if (activeView() === 'time') {
-                <div class="h-full">
+                <div class="h-full flex items-center justify-center max-h-64">
                     <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
                                         [max]="timePickerMax()" [min]="timePickerMin()"
                                         [hourFormat]="hourFormat()" [showSeconds]="showSeconds()"></mona-time-selector>

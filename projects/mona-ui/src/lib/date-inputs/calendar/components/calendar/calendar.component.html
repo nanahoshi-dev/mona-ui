@@ -1,28 +1,38 @@
 <div [class]="headerClass()">
-    <button monaButton look="ghost" [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('prev')"
-            [attr.aria-label]="prevButtonLabel()">
-        <lucide-angular [name]="prevMonthIcon"></lucide-angular>
+    <button monaButton look="ghost" [rounded]="rounded()" [size]="'small'" (click)="onTodayButtonClick()"
+            [attr.aria-label]="todayButtonLabel()">
+        <span>Today</span>
     </button>
     @switch (calendarView()) {
         @case ('month') {
-            <button monaButton look="ghost" [rounded]="rounded()" [size]="size()" (click)="onViewChangeClick('year')"
+            <button monaButton look="ghost" [rounded]="rounded()"  (click)="onViewChangeClick('year')"
                     [attr.aria-label]="viewSwitchButtonLabel()">
-                <span class="text-primary" [id]="gridId + '-heading'">{{ navigatedDate()|date:'MMMM yyyy':timezone }}</span>
+                <span class="text-primary font-semibold"
+                      [id]="gridId + '-heading'">{{ navigatedDate()|date:'MMMM yyyy':timezone }}</span>
             </button>
         }
         @case ('year') {
-            <button monaButton look="ghost" [rounded]="rounded()" [size]="size()" (click)="onViewChangeClick('decade')"
+            <button monaButton look="ghost" [rounded]="rounded()"  (click)="onViewChangeClick('decade')"
                     [attr.aria-label]="viewSwitchButtonLabel()">
-                <span class="text-primary" [id]="gridId + '-heading'">{{ navigatedDate()|date:'yyyy':timezone }}</span>
+                <span class="text-primary font-semibold"
+                      [id]="gridId + '-heading'">{{ navigatedDate()|date:'yyyy':timezone }}</span>
             </button>
         }
         @case ('decade') {
-            <button monaButton look="ghost" [rounded]="rounded()" [size]="size()" [attr.aria-label]="viewSwitchButtonLabel()">
-                <span class="text-primary" [id]="gridId + '-heading'">{{ decadeStart() }} - {{ decadeEnd() }}</span>
+            <button monaButton look="ghost" [rounded]="rounded()"
+                    [attr.aria-label]="viewSwitchButtonLabel()">
+                <span class="text-primary font-semibold" [id]="gridId + '-heading'">{{ decadeStart() }}
+                    - {{ decadeEnd() }}</span>
             </button>
         }
     }
-    <button monaButton look="ghost" [rounded]="rounded()" [size]="size()" (click)="onNavigationClick('next')"
+    <button monaButton look="ghost" [rounded]="rounded()" [iconOnly]="true" [size]="'small'"
+            (click)="onNavigationClick('prev')"
+            [attr.aria-label]="prevButtonLabel()">
+        <lucide-angular [name]="prevMonthIcon"></lucide-angular>
+    </button>
+    <button monaButton look="ghost" [rounded]="rounded()" [iconOnly]="true" [size]="'small'"
+            (click)="onNavigationClick('next')"
             [attr.aria-label]="nextButtonLabel()">
         <lucide-angular [name]="nextMonthIcon"></lucide-angular>
     </button>
@@ -31,86 +41,74 @@
 <div aria-live="polite" aria-atomic="true" class="sr-only">{{ ariaLabel() }}</div>
 
 @if (calendarView() === 'month') {
-    <table role="grid" [class]="monthTableClass()" [attr.aria-labelledby]="gridId + '-heading'">
-        <thead>
-            <tr>
-                @if (weekNumber()) {
-                    <th></th>
+    @let columnCount = weekNumber() ? 8 : 7;
+    <div [class]="monthGridHeaderClass()" [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
+        @if (weekNumber()) {
+            <div></div>
+        }
+        @for (day of weekdays(); track day.short) {
+            <div>{{ day.short }}</div>
+        }
+    </div>
+    <div [class]="monthGridClass()"
+         [attr.aria-labelledby]="gridId + '-heading'"
+         [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
+        @for (row of monthDictChunked(); track $index) {
+            @if (weekNumber()) {
+                @let firstEntry = row | monaTakeFirst;
+                @if (firstEntry) {
+                    @let week = firstEntry.key | date: 'w';
+                    <div>{{ week }}</div>
                 }
-                @for (day of weekdays(); track day.short) {
-                    <th [attr.abbr]="day.full">{{ day.short }}</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @for (row of monthDictChunked(); track $index) {
-                <tr>
-                    @if (weekNumber()) {
-                        @let firstEntry = row|monaTakeFirst;
-                        @if (firstEntry) {
-                            @let week = firstEntry.key | date: 'w';
-                            <td [attr.data-week]="week">{{ week }}</td>
-                        }
-                    }
-                    @for (entry of row; track entry.key) {
-                        <td (daySelect)="onDayClick($event.date, $event.event)" monaMonthDay [disabled]="disabled()"
-                            [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
-                            [monthBounds]="[monthBounds().start, monthBounds().end]" [navigatedDate]="navigatedDate()"
-                            [rounded]="rounded()" [size]="size()" [value]="selectedDates()" [entry]="entry">
-                            @if (monthCellTemplate()) {
-                                <ng-container [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
-                                              [ngTemplateOutletContext]="{$implicit: entry.value, date: entry.key }"></ng-container>
-                            } @else {
-                                <span>{{ entry.value }}</span>
-                            }
-                        </td>
-                    }
-                </tr>
             }
-        </tbody>
-    </table>
+            @for (entry of row; track entry.key) {
+                <div (daySelect)="onDayClick($event.date, $event.event)" monaMonthDay [disabled]="disabled()"
+                     [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
+                     [monthBounds]="[monthBounds().start, monthBounds().end]" [navigatedDate]="navigatedDate()"
+                     [rounded]="rounded()" [value]="selectedDates()" [entry]="entry">
+                    @if (monthCellTemplate()) {
+                        <ng-container [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
+                                      [ngTemplateOutletContext]="{$implicit: entry.value, date: entry.key }"></ng-container>
+                    } @else {
+                        <span>{{ entry.value }}</span>
+                    }
+                </div>
+            }
+        }
+    </div>
 } @else if (calendarView() === 'year') {
-    <table role="grid" [class]="yearTableClass()" [attr.aria-labelledby]="gridId + '-heading'">
+    <div [class]="yearGridClass()" [attr.aria-labelledby]="gridId + '-heading'">
         @for (row of months(); track $index) {
-            <tr>
-                @for (monthItem of row; track monthItem) {
-                    <td (click)="onMonthClick(monthItem[0])" monaYearMonth [month]="monthItem[0]"
-                        [navigatedDate]="navigatedDate()"
-                        [rounded]="rounded()" [size]="size()" [selectedDate]="selectedDates()[0]">
-                        @if (yearCellTemplate()) {
-                            <ng-container [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
-                                          [ngTemplateOutletContext]="{$implicit: monthItem[0], text: monthItem[1]}">
-                            </ng-container>
-                        } @else {
-                            <span>{{ monthItem[1] }}</span>
-                        }
-                    </td>
-                }
-            </tr>
+            @for (monthItem of row; track monthItem) {
+                <div (click)="onMonthClick(monthItem[0])" monaYearMonth [month]="monthItem[0]"
+                     [navigatedDate]="navigatedDate()"
+                     [rounded]="rounded()" [selectedDate]="selectedDates()[0]">
+                    @if (yearCellTemplate()) {
+                        <ng-container [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
+                                      [ngTemplateOutletContext]="{$implicit: monthItem[0], text: monthItem[1]}">
+                        </ng-container>
+                    } @else {
+                        <span>{{ monthItem[1] }}</span>
+                    }
+                </div>
+            }
         }
-    </table>
+    </div>
 } @else if (calendarView() === 'decade') {
-    <table role="grid" [class]="decadeTableClass()" [attr.aria-labelledby]="gridId + '-heading'">
+    <div [class]="decadeGridClass()" [attr.aria-labelledby]="gridId + '-heading'">
         @for (row of decadeYears(); track $index) {
-            <tr>
-                @for (year of row; track year) {
-                    <td (click)="onYearClick(year)" monaDecadeYear [navigatedDate]="navigatedDate()"
-                        [rounded]="rounded()"
-                        [size]="size()" [year]="year" [selectedDate]="selectedDates()[0]">
-                        @if (decadeCellTemplate()) {
-                            <ng-container [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
-                                          [ngTemplateOutletContext]="{$implicit: year}">
-                            </ng-container>
-                        } @else {
-                            <span>{{ year }}</span>
-                        }
-                    </td>
-                }
-            </tr>
+            @for (year of row; track year) {
+                <div (click)="onYearClick(year)" monaDecadeYear [navigatedDate]="navigatedDate()"
+                     [rounded]="rounded()" [year]="year" [selectedDate]="selectedDates()[0]">
+                    @if (decadeCellTemplate()) {
+                        <ng-container [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
+                                      [ngTemplateOutletContext]="{$implicit: year}">
+                        </ng-container>
+                    } @else {
+                        <span>{{ year }}</span>
+                    }
+                </div>
+            }
         }
-    </table>
+    </div>
 }
-
-<button monaButton look="ghost" [rounded]="rounded()" [size]="size()" (click)="onTodayButtonClick()"
-        [attr.aria-label]="todayButtonLabel()">Today
-</button>

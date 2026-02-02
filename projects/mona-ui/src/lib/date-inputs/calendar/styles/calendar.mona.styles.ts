@@ -2,12 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const calendarBaseVariants = cva(
     `
-        block p-2 w-80
-        flex flex-col gap-2
+        flex flex-col gap-2 p-2 w-64
         bg-background text-foreground
         border border-input-border
         shadow-sm select-none
-
     `,
     {
         variants: {
@@ -23,11 +21,6 @@ export const calendarBaseVariants = cva(
                 medium: "rounded-md",
                 large: "rounded-lg",
                 full: "rounded-full"
-            },
-            size: {
-                large: "text-lg",
-                medium: "text-md",
-                small: "text-sm"
             }
         }
     }
@@ -45,14 +38,12 @@ export const calendarDecadeViewTableVariants = cva(
 export const calendarHeaderVariants = cva(
     `
         flex items-center justify-center
-        w-full
         [&>button+button]:not-focus:border-s-0
-        [&>button:nth-of-type(1)]:rounded-se-none
-        [&>button:nth-of-type(1)]:rounded-ee-none
         [&>button:nth-of-type(2)]:flex-1
-        [&>button:nth-of-type(2)]:rounded-none
-        [&>button:nth-of-type(3)]:rounded-ss-none
-        [&>button:nth-of-type(3)]:rounded-es-none
+        [&>button:nth-of-type(3)]:rounded-se-none
+        [&>button:nth-of-type(3)]:rounded-ee-none
+        [&>button:nth-of-type(4)]:rounded-ss-none
+        [&>button:nth-of-type(4)]:rounded-es-none
         [&>button]:outline-none
     `
 );
@@ -82,11 +73,6 @@ export const calendarMonthViewDayVariants = cva(
             selected: {
                 true: "bg-primary text-primary-foreground hover:bg-primary-hover"
             },
-            size: {
-                large: "text-lg",
-                medium: "text-md",
-                small: "text-sm"
-            },
             today: {
                 true: "font-bold text-primary"
             }
@@ -104,39 +90,39 @@ export const calendarMonthViewDayVariants = cva(
     }
 );
 
-export const calendarMonthViewTableVariants = cva(
+export const calendarMonthViewGridVariants = cva(
     `
-        w-full border-collapse
-        table-fixed
-        [&_th,_td]:text-center
-        [&_th,_td]:h-8
-        [&_th,_td]:w-8
-        [&_th,_td]:aspect-square
-
-        [&>thead]:pointer-events-none
-        [&>thead_th]:pb-1
-        [&>thead_th]:font-bold
-
-        [&>tbody_td]:py-1
-        [&>tbody_td]:px-0
-        [&>tbody>tr:first>td]:mt-1
-        [&>tbody>tr>td[data-week]]:text-center
-        [&>tbody>tr>td[data-week]]:text-sm
-        [&>tbody>tr>td[data-week]]:text-foreground/70
+        grid gap-0.5
+        justify-center
+        [&>div]:h-full [&>div]:flex
+        [&>div]:items-center [&>div]:justify-center
+        [&>div]:aspect-square
     `
 );
 
-export const calendarYearViewTableVariants = cva(
+export const calendarMonthViewGridHeaderVariants = cva(
     `
-        w-full border-collapse
-        [&_th,_td]:text-center
-        [&_th,_td]:h-12
-        [&_td]:cursor-pointer
+        grid justify-center
+        gap-0.5 font-semibold text-sm
+        [&>div]:h-full [&>div]:flex
+        [&>div]:items-center [&>div]:justify-center
+        [&>div]:aspect-square
+    `
+);
+
+export const calendarYearViewGridVariants = cva(
+    `
+        grid grid-cols-3 gap-0.5
+        justify-center
+        [&>div]:h-full [&>div]:flex
+        [&>div]:items-center [&>div]:justify-center
+        [&>div]:h-12
     `
 );
 
 export const calendarYearViewCellVariants = cva(
     `
+        py-2 cursor-pointer
         hover:bg-hover
         active:bg-active
     `,
@@ -151,18 +137,24 @@ export const calendarYearViewCellVariants = cva(
                 medium: "rounded-md",
                 large: "rounded-lg",
                 full: "rounded-full"
-            },
-            size: {
-                large: "text-lg",
-                medium: "text-md",
-                small: "text-sm"
             }
         }
     }
 );
 
+export const calendarDecadeViewGridVariants = cva(
+    `
+        grid grid-cols-4 gap-0.5
+        justify-center
+        [&>div]:h-full [&>div]:flex
+        [&>div]:items-center [&>div]:justify-center
+        [&>div]:h-12
+    `
+);
+
 export const calendarDecadeViewCellVariants = cva(
     `
+        py-2 cursor-pointer
         hover:bg-hover
         active:bg-active
     `,
@@ -177,11 +169,6 @@ export const calendarDecadeViewCellVariants = cva(
                 medium: "rounded-md",
                 large: "rounded-lg",
                 full: "rounded-full"
-            },
-            size: {
-                large: "text-lg",
-                medium: "text-md",
-                small: "text-sm"
             }
         }
     }

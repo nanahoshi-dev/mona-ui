@@ -25,26 +25,26 @@ export const buttonGroupVariants = cva(
             rounded: {
                 full: `
                     rounded-full
-                    [&>button]:first:rounded-tl-full [&>button]:first:rounded-bl-full
-                    [&>button]:last:rounded-tr-full [&>button]:last:rounded-br-full
+                    [&>button]:first:rounded-ss-full [&>button]:first:rounded-es-full
+                    [&>button]:last:rounded-se-full [&>button]:last:rounded-ee-full
                 `,
                 large: `
                     rounded-lg
-                    [&>button]:first:rounded-tl-lg [&>button]:first:rounded-bl-lg
-                    [&>button]:last:rounded-tr-lg [&>button]:last:rounded-br-lg
+                    [&>button]:first:rounded-ss-lg [&>button]:first:rounded-es-lg
+                    [&>button]:last:rounded-se-lg [&>button]:last:rounded-ee-lg
                 `,
                 medium: `
                     rounded-md
-                    [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md
-                    [&>button]:last:rounded-tr-md [&>button]:last:rounded-br-md
+                    [&>button]:first:rounded-ss-md [&>button]:first:rounded-es-md
+                    [&>button]:last:rounded-se-md [&>button]:last:rounded-ee-md
                 `,
                 none: `
                     rounded-none
                 `,
                 small: `
                     rounded-sm
-                    [&>button]:first:rounded-tl-sm [&>button]:first:rounded-bl-sm
-                    [&>button]:last:rounded-tr-sm [&>button]:last:rounded-br-sm
+                    [&>button]:first:rounded-ss-sm [&>button]:first:rounded-es-sm
+                    [&>button]:last:rounded-se-sm [&>button]:last:rounded-ee-sm
                 `
             },
             size: {
