@@ -1,5 +1,7 @@
 <mona-text-box [readonly]="readonly()"
+               [disabled]="disabled()"
                [ngModel]="currentDateString()"
+               [clearButton]="showClearButton()"
                (ngModelChange)="onDateStringEdit($event)"
                (inputBlur)="onDateInputBlur()">
     <ng-template monaTextBoxSuffixTemplate>
@@ -11,9 +13,11 @@
 </mona-text-box>
 
 <ng-template #datePopupTemplate>
-    <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68" cdkTrapFocus>
+    <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68"
+         aria-label="Date and time picker" role="dialog"
+         cdkTrapFocus>
         <div [class]="headerClass()">
-            <mona-button-group selection="single" [allowEmpty]="false" class="w-full">
+            <mona-button-group selection="single" [allowEmpty]="false" class="w-full" [disabled]="disabled()">
                 <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')">
                     Date
                 </button>
@@ -27,6 +31,7 @@
                 <div class="h-full flex items-center justify-center">
                     <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
                                    [ngModel]="navigatedDate()"
+                                   [disabled]="disabled()"
                                    (ngModelChange)="onCalendarValueChange($event)"
                                    class="shadow-none border-none flex-1"></mona-calendar>
                 </div>
@@ -34,14 +39,15 @@
             @if (activeView() === 'time') {
                 <div class="h-full flex items-center justify-center max-h-64">
                     <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
+                                        [disabled]="disabled()"
                                         [max]="timePickerMax()" [min]="timePickerMin()" [footer]="false"
                                         [hourFormat]="hourFormat()" [showSeconds]="showSeconds()"></mona-time-selector>
                 </div>
             }
         </div>
         <div [class]="footerClass()">
-            <button monaButton look="primary" (click)="onSetDateClick()">Set</button>
-            <button monaButton look="default">Cancel</button>
+            <button monaButton look="primary" [disabled]="disabled()" (click)="onSetDateClick()">Set</button>
+            <button monaButton look="default" [disabled]="disabled()" (click)="onCancelClick()">Cancel</button>
         </div>
     </div>
 </ng-template>

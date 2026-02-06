@@ -91,6 +91,7 @@ import {
         "[attr.aria-controls]": "popupId",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'grid'",
+        "[attr.aria-invalid]": "invalid()",
         "[attr.aria-label]": "ariaLabel() || undefined",
         "[attr.aria-labelledby]": "ariaLabelledBy() || undefined",
         "[class]": "baseClass()"
@@ -102,6 +103,7 @@ export class DatePickerComponent
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
+    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | null> | null = null;
@@ -124,6 +126,7 @@ export class DatePickerComponent
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
+    protected readonly invalid = this.#formFieldValidationService.invalid.asReadonly();
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {

@@ -311,7 +311,6 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
 
     private focusList(listType: TimeListType): void {
         const listRef = this.getListRef(listType);
-        console.log(listRef);
         listRef?.nativeElement.focus();
     }
 

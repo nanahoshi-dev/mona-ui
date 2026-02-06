@@ -55,7 +55,6 @@ import {
 @Component({
     selector: "mona-datetime-picker",
     templateUrl: "./datetime-picker.component.html",
-    styleUrls: ["./datetime-picker.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         CalendarService,
@@ -87,7 +86,9 @@ import {
     host: {
         "[attr.aria-controls]": "popupId",
         "[attr.aria-expanded]": "expanded()",
-        "[attr.role]": "'grid'",
+        "[attr.aria-haspopup]": "'dialog'",
+        "[attr.aria-invalid]": "invalid()",
+        "[attr.role]": "'group'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()"
     }
@@ -95,6 +96,7 @@ import {
 export class DateTimePickerComponent implements ControlValueAccessor, DropdownPopupInput {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
+    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<Date | null>(null);
@@ -126,6 +128,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         const theme = this.#themeService.theme();
         return dateTimePickerHeaderThemeVariants(theme)();
     });
+    protected readonly invalid = this.#formFieldValidationService.invalid.asReadonly();
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -212,6 +215,10 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
     public readonly popupWidth = input<ListSizeInputType>("");
 
     public readonly readonly = input(false);
+    /**
+     * @description Sets the visibility of the clear button.
+     */
+    public readonly showClearButton = input(false);
     public readonly showSeconds = input(false);
     /**
      * @description Sets the size of the date time picker.
@@ -315,6 +322,18 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         this.#value.set(date ?? null);
         this.updateCurrentDateString(date, this.format());
         this.setDateValues();
+    }
+
+    protected onCancelClick(): void {
+        this.navigatedDate.set(this.#value() ?? new Date());
+        this.#dropdownService.popupRef()?.close();
+        this.#propagateChange?.(this.#value());
+    }
+
+    public onClearClick(): void {
+        this.#value.set(null);
+        this.navigatedDate.set(new Date());
+        this.#propagateChange?.(null);
     }
 
     protected onSetDateClick(): void {
