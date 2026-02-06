@@ -13,10 +13,10 @@ import {
     signal,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { DateTime } from "luxon";
-import { fromEvent } from "rxjs";
+import { fromEvent, tap } from "rxjs";
 import { filter } from "rxjs/operators";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -32,6 +32,7 @@ import { TimeListType } from "../../models/TimeListType";
 import {
     timeSelectorBaseThemeVariants,
     timeSelectorHeaderThemeVariants,
+    timeSelectorInfoContainerThemeVariants,
     timeSelectorListContainerThemeVariants,
     TimeSelectorVariantInput,
     TimeSelectorVariantProps
@@ -90,6 +91,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     });
     protected readonly hourListId = createElementControlId();
     protected readonly hourListRef = viewChild.required<ElementRef<HTMLOListElement>>("hourList");
+    protected readonly infoContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return timeSelectorInfoContainerThemeVariants(theme)();
+    });
     protected readonly listContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         return timeSelectorListContainerThemeVariants(theme)();
@@ -110,6 +115,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     protected readonly minuteListRef = viewChild.required<ElementRef<HTMLOListElement>>("minuteList");
     protected readonly minutes = computed(() => generateMinuteSet(this.minuteStep()));
     protected readonly navigatedDate = signal(DateTime.now());
+    protected readonly navigatedDateText = computed(() => {
+        const hourFormat = this.hourFormat();
+        return this.navigatedDate().toLocaleString({ hour: "numeric", minute: "numeric", hour12: hourFormat === "12" });
+    });
     protected readonly pmMeridiemVisible = computed(() => {
         const max = this.max();
         return !(max && max.getHours() < 12);
@@ -128,6 +137,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     public readonly ariaLabel = input<string>("Time selector");
     public readonly disabled = model(false);
     public readonly focusOnMount = input(true);
+    public readonly footer = input(true);
     public readonly hourFormat = input<HourFormat>("24");
     public readonly hourStep = input(1);
     public readonly max = input<Date | null>(null);
@@ -157,6 +167,13 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 }
             }
         });
+        toObservable(this.navigatedDate)
+            .pipe(
+                takeUntilDestroyed(),
+                filter(() => !this.footer()),
+                tap(() => this.updateValue(this.navigatedDate().toJSDate(), true))
+            )
+            .subscribe();
     }
 
     public registerOnChange(fn: any): void {

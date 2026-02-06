@@ -28,6 +28,14 @@ export const timeSelectorHeaderVariants = cva(
     `
 );
 
+export const timeSelectorInfoContainerVariants = cva(
+    `
+        flex items-center justify-between
+        px-2 py-1 border-b border-input-border/40
+        [&>span]:text-xs [&>span]:font-medium [&>span]:select-none
+    `
+);
+
 export const timeSelectorListContainerVariants = cva(
     `
         flex flex-row w-full relative overflow-hidden

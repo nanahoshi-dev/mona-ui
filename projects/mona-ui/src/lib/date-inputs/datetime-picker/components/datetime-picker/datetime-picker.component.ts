@@ -10,6 +10,7 @@ import {
     forwardRef,
     inject,
     input,
+    linkedSignal,
     model,
     output,
     signal,
@@ -34,7 +35,6 @@ import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdow
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
-import { PopupRef } from "../../../../popup/models/PopupRef";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
@@ -45,6 +45,12 @@ import { CalendarService } from "../../../services/calendar.service";
 import { datePopupThemeVariants } from "../../../styles/date-popup.styles";
 import { TimeSelectorComponent } from "../../../time-selector/components/time-selector/time-selector.component";
 import { ActiveView } from "../../models/ActiveView";
+import {
+    dateTimePickerBaseThemeVariants,
+    dateTimePickerFooterThemeVariants,
+    dateTimePickerHeaderThemeVariants,
+    DateTimePickerVariantProps
+} from "../../styles/datetime-picker.styles";
 
 @Component({
     selector: "mona-datetime-picker",
@@ -79,29 +85,52 @@ import { ActiveView } from "../../models/ActiveView";
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
-        "[attr.aria-disabled]": "disabled() ? 'true' : undefined",
-        "[attr.aria-readonly]": "readonly() ? 'true' : undefined",
+        "[attr.aria-controls]": "popupId",
+        "[attr.aria-expanded]": "expanded()",
         "[attr.role]": "'grid'",
-        "[attr.tabindex]": "disabled() ? null : 0"
+        "[attr.tabindex]": "disabled() ? null : 0",
+        "[class]": "baseClass()"
     }
 })
 export class DateTimePickerComponent implements ControlValueAccessor, DropdownPopupInput {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
-    readonly #hostElementRef: ElementRef = inject(ElementRef);
+    readonly #hostElementRef = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #value = signal<Date | null>(null);
-    #popupRef: PopupRef | null = null;
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
 
     protected readonly activeView = signal<ActiveView>("date");
-    protected readonly currentDateString = signal("");
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const focused = this.#dropdownService.popupRef() != null;
+        const variantClass = dateTimePickerBaseThemeVariants(theme)({ focused });
+        const userClass = this.userClass();
+        return twMerge(variantClass, userClass);
+    });
+    protected readonly currentDateString = linkedSignal(() => {
+        const value = this.#value();
+        const format = this.format();
+        if (!value) {
+            return "";
+        }
+        return DateTime.fromJSDate(value).toFormat(format);
+    });
+    protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
+    protected readonly footerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return dateTimePickerFooterThemeVariants(theme)();
+    });
+    protected readonly headerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return dateTimePickerHeaderThemeVariants(theme)();
+    });
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
-        const rounded = "medium"; //this.rounded();
-        const size = "medium"; //this.size(); // TODO: Change these
+        const rounded = this.rounded();
+        const size = this.size();
         const userClass = this.popupClass();
         const variantClass = datePopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
@@ -145,12 +174,12 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      */
     public readonly closed = output();
 
-    public disabled = model(false);
-    public disabledDates = input<Iterable<Date>>([]);
-    public format = input("dd/MM/yyyy HH:mm");
-    public hourFormat = input<HourFormat>("24");
-    public max = input<Date | null>(null);
-    public min = input<Date | null>(null);
+    public readonly disabled = model(false);
+    public readonly disabledDates = input<Iterable<Date>>([]);
+    public readonly format = input("dd/MM/yyyy HH:mm");
+    public readonly hourFormat = input<HourFormat>("24");
+    public readonly max = input<Date | null>(null);
+    public readonly min = input<Date | null>(null);
 
     /**
      * @description Emits when the popup is about to open. This event is preventable.
@@ -160,8 +189,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
     /**
      * @description Emits after the popup is opened.
      */
-
     public readonly opened = output();
+
+    public readonly rounded = input<DateTimePickerVariantProps["rounded"]>("medium");
 
     /**
      * @description Sets the class of the popup element.
@@ -181,8 +211,13 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      */
     public readonly popupWidth = input<ListSizeInputType>("");
 
-    public readonly = input(false);
-    public showSeconds = input(false);
+    public readonly readonly = input(false);
+    public readonly showSeconds = input(false);
+    /**
+     * @description Sets the size of the date time picker.
+     */
+    public readonly size = input<DateTimePickerVariantProps["size"]>("medium");
+    public readonly userClass = input("", { alias: "class" });
 
     public constructor() {
         effect(() => {
@@ -197,43 +232,51 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         });
     }
 
-    protected onActiveViewChange(activeView: ActiveView): void {
-        this.activeView.set(activeView);
-    }
-
     public onCalendarValueChange(date: Date | null): void {
         if (date) {
             const inRangeDate = this.updateDateIfNotInRange(date);
-            this.setCurrentDate(inRangeDate);
             this.navigatedDate.set(inRangeDate);
         }
         this.activeView.set("time");
     }
 
     public onDateInputBlur(): void {
-        if (this.#popupRef) {
+        if (this.#dropdownService.popupRef()) {
+            this.#propagateTouched?.();
             return;
         }
         if (!this.currentDateString() && this.#value()) {
             this.setCurrentDate(null);
+            this.#propagateTouched?.();
             return;
         }
 
         const dateTime = DateTime.fromFormat(this.currentDateString(), this.format());
         if (this.dateStringEquals(this.#value(), dateTime.toJSDate())) {
+            this.#propagateTouched?.();
             return;
         }
         if (dateTime.isValid) {
             const value = this.#value();
+            const minDate = this.min();
+            const maxDate = this.max();
             if (value && DateTime.fromJSDate(value).equals(dateTime)) {
                 return;
             }
-            const inRangeDate = this.updateDateIfNotInRange(dateTime.toJSDate());
-            this.setCurrentDate(inRangeDate);
-            this.navigatedDate.set(inRangeDate);
+            if (minDate && dateTime < DateTime.fromJSDate(minDate)) {
+                this.setCurrentDate(minDate);
+                return;
+            }
+            if (maxDate && dateTime > DateTime.fromJSDate(maxDate)) {
+                this.setCurrentDate(maxDate);
+                return;
+            }
+            this.setCurrentDate(dateTime.toJSDate());
         } else {
-            this.updateCurrentDateString(this.#value(), this.format());
+            this.setCurrentDate(null);
+            this.currentDateString.set("");
         }
+        this.#propagateTouched?.();
     }
 
     public onDateInputButtonClick(): void {
@@ -252,17 +295,17 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
     public onTimeSelectorValueChange(date: Date | null): void {
         if (date) {
             const inRangeDate = this.updateDateIfNotInRange(date);
-            this.setCurrentDate(inRangeDate);
             this.navigatedDate.set(inRangeDate);
         }
-        this.#dropdownService.popupRef()?.close();
     }
 
     public registerOnChange(fn: any): void {
         this.#propagateChange = fn;
     }
 
-    public registerOnTouched(fn: any): void {}
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
 
     public setDisabledState(isDisabled: boolean): void {
         this.disabled.set(isDisabled);
@@ -272,6 +315,12 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         this.#value.set(date ?? null);
         this.updateCurrentDateString(date, this.format());
         this.setDateValues();
+    }
+
+    protected onSetDateClick(): void {
+        this.#value.set(this.navigatedDate());
+        this.#dropdownService.popupRef()?.close();
+        this.#propagateChange?.(this.#value());
     }
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {

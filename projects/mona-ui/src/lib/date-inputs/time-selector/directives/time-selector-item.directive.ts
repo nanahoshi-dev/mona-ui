@@ -1,4 +1,4 @@
-import { computed, DestroyRef, Directive, effect, ElementRef, inject, input } from "@angular/core";
+import { computed, DestroyRef, Directive, effect, ElementRef, inject, input, signal } from "@angular/core";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { ThemeService } from "../../../theme/services/theme.service";
 import {
@@ -10,7 +10,7 @@ import {
 @Directive({
     selector: "li[monaTimeSelectorItem]",
     host: {
-        "role": "option",
+        role: "option",
         "[attr.aria-selected]": "selected()",
         "[attr.data-value]": "value()",
         "[class]": "baseClass()"
@@ -19,6 +19,7 @@ import {
 export class TimeSelectorItemDirective implements TimeSelectorListItemVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #host = inject(ElementRef<HTMLLIElement>);
+    readonly #scrollBehavior = signal<"auto" | "instant">("instant");
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -35,7 +36,10 @@ export class TimeSelectorItemDirective implements TimeSelectorListItemVariantInp
             const selected = this.selected();
             rxTimeout(this.#destroyRef, () => {
                 if (selected) {
-                    this.#host.nativeElement.scrollIntoView({ block: "center", behavior: "auto" });
+                    this.#host.nativeElement.scrollIntoView({ block: "center", behavior: this.#scrollBehavior() });
+                }
+                if (this.#scrollBehavior() === "instant") {
+                    this.#scrollBehavior.set("auto");
                 }
             });
         });

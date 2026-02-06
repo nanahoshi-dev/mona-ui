@@ -31,7 +31,7 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
             },
             format: {
                 type: "string",
-                value: "dd/MM/yyyy"
+                value: "dd/MM/yyyy HH:mm:ss"
             },
             max: {
                 type: "dropdown",
@@ -85,7 +85,8 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     protected readonly formGroup = this.#formGroup;
     protected readonly formValueText = computed(() => {
         const value = this.#formValue();
-        return value ? DateTime.fromJSDate(value).toFormat("dd/MM/yyyy HH:mm:ss") : "";
+        const format = this.format();
+        return value ? DateTime.fromJSDate(value).toFormat(format) : "";
     });
     public readonly disabled = model<ReturnType<DateTimePickerComponent["disabled"]>>(false);
     public readonly disabledDates = input<ReturnType<DateTimePickerComponent["disabledDates"]>>([]);

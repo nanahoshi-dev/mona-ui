@@ -6,6 +6,11 @@
     }
 </div>
 
+<div [class]="infoContainerClass()">
+    <span>{{navigatedDateText()}}</span>
+    <button monaButton look="ghost" [size]="'small'" (click)="onNowClick()">Now</button>
+</div>
+
 <div [class]="listContainerClass()">
     <ol #hourList
         monaTimeSelectorList
@@ -77,7 +82,8 @@
     }
 </div>
 
-<div class="w-full flex items-center justify-between px-1 py-1 border-0 border-t border-input-border bg-accent">
-    <button monaButton look="ghost" [size]="size()" (click)="onNowClick()">Now</button>
-    <button monaButton look="primary" [size]="size()" (click)="onSetTimeClick()">Set</button>
-</div>
+@if (footer()) {
+    <div class="w-full flex items-center justify-between px-1 py-1 border-0 border-t border-input-border bg-accent">
+        <button monaButton look="primary" [size]="size()" (click)="onSetTimeClick()">Set</button>
+    </div>
+}

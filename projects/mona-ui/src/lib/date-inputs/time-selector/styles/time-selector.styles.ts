@@ -4,6 +4,7 @@ import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     timeSelectorBaseVariants as monaTimeSelectorBaseVariants,
     timeSelectorHeaderVariants as monaTimeSelectorHeaderVariants,
+    timeSelectorInfoContainerVariants as monaTimeSelectorInfoContainerVariants,
     timeSelectorListContainerVariants as monaTimeSelectorListContainerVariants,
     timeSelectorListItemVariants as monaTimeSelectorListItemVariants,
     timeSelectorListVariants as monaTimeSelectorListVariants
@@ -24,6 +25,15 @@ export const timeSelectorHeaderThemeVariants = (theme: ThemeStyle) => {
             return monaTimeSelectorHeaderVariants;
         default:
             return monaTimeSelectorHeaderVariants;
+    }
+};
+
+export const timeSelectorInfoContainerThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaTimeSelectorInfoContainerVariants;
+        default:
+            return monaTimeSelectorInfoContainerVariants;
     }
 };
 
@@ -60,6 +70,9 @@ type TimeSelectorBaseVariantInput = VariantInputs<TimeSelectorBaseVariantProps>;
 type TimeSelectorHeaderVariantProps = VariantProps<ReturnType<typeof timeSelectorHeaderThemeVariants>>;
 type TimeSelectorHeaderVariantInput = VariantInputs<TimeSelectorHeaderVariantProps>;
 
+type TimeSelectorInfoContainerVariantProps = VariantProps<ReturnType<typeof timeSelectorInfoContainerThemeVariants>>;
+type TimeSelectorInfoContainerVariantInput = VariantInputs<TimeSelectorInfoContainerVariantProps>;
+
 export type TimeSelectorListVariantProps = VariantProps<ReturnType<typeof timeSelectorListThemeVariants>>;
 export type TimeSelectorListVariantInput = VariantInputs<TimeSelectorListVariantProps>;
 
@@ -68,9 +81,11 @@ export type TimeSelectorListItemVariantInput = VariantInputs<TimeSelectorListIte
 
 export type TimeSelectorVariantProps = TimeSelectorBaseVariantProps &
     TimeSelectorHeaderVariantProps &
+    TimeSelectorInfoContainerVariantProps &
     Omit<TimeSelectorListVariantProps, "size"> &
     Omit<TimeSelectorListItemVariantProps, "size">;
 export type TimeSelectorVariantInput = TimeSelectorBaseVariantInput &
     TimeSelectorHeaderVariantInput &
+    TimeSelectorInfoContainerVariantInput &
     Omit<TimeSelectorListVariantInput, "size"> &
     Omit<TimeSelectorListItemVariantInput, "size" | "selected">;
