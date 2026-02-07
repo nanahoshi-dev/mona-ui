@@ -7,8 +7,10 @@
 </div>
 
 <div [class]="infoContainerClass()">
-    <span>{{navigatedDateText()}}</span>
-    <button monaButton look="ghost" [size]="'small'" (click)="onNowClick()">Now</button>
+    <span>{{ navigatedDateText() }}</span>
+    <button monaButton look="ghost" [size]="'small'" (click)="onNowClick($event)" (keydown.enter)="onNowClick($event)"
+            (keydown.space)="onNowClick($event)">Now
+    </button>
 </div>
 
 <div [class]="listContainerClass()">

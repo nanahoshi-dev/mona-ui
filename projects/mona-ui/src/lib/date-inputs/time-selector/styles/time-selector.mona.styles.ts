@@ -51,6 +51,7 @@ export const timeSelectorListVariants = cva(
         select-none outline-none
         [&::-webkit-scrollbar]:hidden
         focus-visible:bg-accent
+        focus-within:bg-accent
     `,
     {
         variants: {

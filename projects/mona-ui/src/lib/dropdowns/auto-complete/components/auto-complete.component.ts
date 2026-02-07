@@ -162,6 +162,7 @@ export class AutoCompleteComponent<TData = unknown>
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly id = createElementControlId();
     protected readonly inputClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();

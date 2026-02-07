@@ -31,6 +31,7 @@ import { DropdownService } from "../../../../common/dropdown/services/dropdown.s
 import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
+import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
 import { TextBoxPrefixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-prefix-template.directive";
@@ -88,12 +89,7 @@ import {
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
-        "[attr.aria-controls]": "popupId",
-        "[attr.aria-expanded]": "expanded()",
-        "[attr.aria-haspopup]": "'grid'",
-        "[attr.aria-invalid]": "invalid()",
-        "[attr.aria-label]": "ariaLabel() || undefined",
-        "[attr.aria-labelledby]": "ariaLabelledBy() || undefined",
+        "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()"
     }
 })
@@ -105,6 +101,7 @@ export class DatePickerComponent
     readonly #dropdownService = inject(DropdownService);
     readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #id = createElementControlId();
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
@@ -126,9 +123,24 @@ export class DatePickerComponent
     });
     protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
+    protected readonly inputAttributes = computed<AttributeConfig>(() => {
+        const controls = this.popupId;
+        const expanded = this.#dropdownService.popupRef() != null;
+        const hasPopup = "grid";
+        const invalid = this.#formFieldValidationService.invalid();
+        return {
+            "aria-autocomplete": "none",
+            "aria-controls": controls,
+            "aria-expanded": expanded,
+            "aria-haspopup": hasPopup,
+            "aria-invalid": invalid,
+            id: this.#id,
+            role: "combobox"
+        };
+    });
     protected readonly invalid = this.#formFieldValidationService.invalid.asReadonly();
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
-    protected readonly navigatedDate = signal(new Date());
+    protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -267,7 +279,6 @@ export class DatePickerComponent
         });
         afterNextRender({
             read: () => {
-                this.setDateValues();
                 this.setSubscriptions();
                 this.setPopupCloseSubscriptions();
             }
@@ -288,7 +299,6 @@ export class DatePickerComponent
 
     public writeValue(date: Date | null | undefined): void {
         this.value.set(date ?? null);
-        this.setDateValues();
     }
 
     protected onCalendarValueChange(date: Date | null): void {
@@ -403,10 +413,6 @@ export class DatePickerComponent
         const newDate = date ? new Date(date) : null;
         this.value.set(newDate);
         this.#propagateChange?.(date);
-    }
-
-    private setDateValues(): void {
-        this.navigatedDate.set(this.value() ?? DateTime.now().toJSDate());
     }
 
     private setKeyboardSubscriptions(): void {

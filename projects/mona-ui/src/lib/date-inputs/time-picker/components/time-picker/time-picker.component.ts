@@ -51,7 +51,6 @@ import {
 @Component({
     selector: "mona-time-picker",
     templateUrl: "./time-picker.component.html",
-    styleUrls: ["./time-picker.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         DropdownService,
@@ -88,6 +87,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     readonly #dropdownService = inject(DropdownService);
     readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #id = createElementControlId();
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
@@ -117,6 +117,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
             "aria-expanded": expanded,
             "aria-haspopup": hasPopup,
             "aria-invalid": invalid,
+            id: this.#id,
             role: "combobox"
         };
     });

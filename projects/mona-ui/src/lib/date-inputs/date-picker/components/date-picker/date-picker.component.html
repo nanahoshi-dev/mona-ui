@@ -1,5 +1,6 @@
 <mona-text-box (inputBlur)="onDateInputBlur()" (ngModelChange)="onDateStringEdit($event)" [disabled]="disabled()"
                [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly()"
+               [inputAttributes]="inputAttributes()"
                [required]="required()"
                [clearButton]="showClearButton()" [rounded]="rounded()" [size]="size()">
     @if (prefixTemplate()) {

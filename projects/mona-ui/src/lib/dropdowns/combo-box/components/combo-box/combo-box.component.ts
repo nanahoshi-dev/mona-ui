@@ -170,6 +170,7 @@ export class ComboBoxComponent<TData = unknown>
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly id = createElementControlId();
     protected readonly inputClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();

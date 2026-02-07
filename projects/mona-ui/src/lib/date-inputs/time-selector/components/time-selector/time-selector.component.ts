@@ -22,9 +22,11 @@ import { ButtonDirective } from "../../../../buttons/button/directives/button.di
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
+import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { HourFormat } from "../../../models/HourFormat";
 import { Meridiem } from "../../../models/Meridiem";
 import { TimeLimiterPipe } from "../../../pipes/time-limiter.pipe";
+import { TimeSelectorService } from "../../../services/time-selector.service";
 import { generateHourSet, generateMinuteSet, generateSecondSet } from "../../../utils/generateHourSet";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
@@ -62,6 +64,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
+    readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
     readonly #value = signal<Date | null>(null);
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
@@ -219,7 +222,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         this.navigatedDate.update(date => date.set({ minute }));
     }
 
-    protected onNowClick(): void {
+    protected onNowClick(event: Event): void {
         let now = DateTime.now();
         const min = this.minDate();
         const max = this.maxDate();
@@ -232,7 +235,9 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 now = max;
             }
         }
-        this.navigatedDate.set(now);
+        this.navigatedDate.update(date =>
+            date.set({ hour: now.hour, minute: now.minute, second: now.second, millisecond: now.millisecond })
+        );
         this.meridiem.set(now.hour >= 12 ? "PM" : "AM");
     }
 
@@ -274,6 +279,13 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     private handleKeydown(event: KeyboardEvent): void {
+        const preventableEvent = new PreventableEvent("calendarKeydown", event);
+        this.#timeSelectorService?.keydown$.next(preventableEvent);
+
+        if (preventableEvent.isDefaultPrevented()) {
+            return;
+        }
+
         const focusedList = this.focusedList();
 
         switch (event.key) {
@@ -286,11 +298,17 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 this.navigateItem(focusedList, 1);
                 break;
             case "ArrowLeft":
+                if (event.altKey) {
+                    return;
+                }
                 event.preventDefault();
                 this.focusedList.set(this.getNextList(focusedList, "left"));
                 this.focusList(this.focusedList());
                 break;
             case "ArrowRight":
+                if (event.altKey) {
+                    return;
+                }
                 event.preventDefault();
                 this.focusedList.set(this.getNextList(focusedList, "right"));
                 this.focusList(this.focusedList());
@@ -304,6 +322,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 this.navigateToEdge(focusedList, "last");
                 break;
             case "Enter":
+            case " ":
                 this.updateValue(this.navigatedDate().toJSDate(), true);
                 break;
         }

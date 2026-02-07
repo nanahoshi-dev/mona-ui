@@ -22,7 +22,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { DateTime } from "luxon";
-import { fromEvent } from "rxjs";
+import { fromEvent, mergeWith } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonGroupComponent } from "../../../../buttons/button-group/components/button-group/button-group.component";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
@@ -31,6 +31,7 @@ import { DropdownService } from "../../../../common/dropdown/services/dropdown.s
 import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
+import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
@@ -40,8 +41,10 @@ import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarComponent } from "../../../calendar/components/calendar/calendar.component";
+import { FirstDayOfWeek } from "../../../calendar/models/FirstDayOfWeek";
 import { HourFormat } from "../../../models/HourFormat";
 import { CalendarService } from "../../../services/calendar.service";
+import { TimeSelectorService } from "../../../services/time-selector.service";
 import { datePopupThemeVariants } from "../../../styles/date-popup.styles";
 import { TimeSelectorComponent } from "../../../time-selector/components/time-selector/time-selector.component";
 import { ActiveView } from "../../models/ActiveView";
@@ -60,6 +63,7 @@ import {
         CalendarService,
         DropdownService,
         FormFieldValidationService,
+        TimeSelectorService,
         {
             provide: NG_VALUE_ACCESSOR,
             useExisting: forwardRef(() => DateTimePickerComponent),
@@ -84,21 +88,20 @@ import {
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
-        "[attr.aria-controls]": "popupId",
-        "[attr.aria-expanded]": "expanded()",
-        "[attr.aria-haspopup]": "'dialog'",
-        "[attr.aria-invalid]": "invalid()",
-        "[attr.role]": "'group'",
         "[attr.tabindex]": "disabled() ? null : 0",
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(blur)": "onDateInputBlur()"
     }
 })
 export class DateTimePickerComponent implements ControlValueAccessor, DropdownPopupInput {
+    readonly #calendarService = inject(CalendarService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
     readonly #formFieldValidationService = inject(FormFieldValidationService);
-    readonly #hostElementRef = inject(ElementRef);
+    readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #id = createElementControlId();
     readonly #themeService = inject(ThemeService);
+    readonly #timeSelectorService = inject(TimeSelectorService);
     readonly #value = signal<Date | null>(null);
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
@@ -128,8 +131,22 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         const theme = this.#themeService.theme();
         return dateTimePickerHeaderThemeVariants(theme)();
     });
-    protected readonly invalid = this.#formFieldValidationService.invalid.asReadonly();
-    protected readonly navigatedDate = signal(new Date());
+    protected readonly inputAttributes = computed<AttributeConfig>(() => {
+        const controls = this.popupId;
+        const expanded = this.#dropdownService.popupRef() != null;
+        const hasPopup = "dialog";
+        const invalid = this.#formFieldValidationService.invalid();
+        return {
+            "aria-autocomplete": "none",
+            "aria-controls": controls,
+            "aria-expanded": expanded,
+            "aria-haspopup": hasPopup,
+            "aria-invalid": invalid,
+            id: this.#id,
+            role: "group"
+        };
+    });
+    protected readonly navigatedDate = linkedSignal(() => this.#value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -179,10 +196,24 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
 
     public readonly disabled = model(false);
     public readonly disabledDates = input<Iterable<Date>>([]);
+    /**
+     * @description Sets the first day of the week.
+     */
+    public readonly firstDay = input<FirstDayOfWeek>("monday");
     public readonly format = input("dd/MM/yyyy HH:mm");
     public readonly hourFormat = input<HourFormat>("24");
+    /**
+     * @description Sets the hour step of the time picker.
+     * @default 1
+     */
+    public readonly hourStep = input(1);
     public readonly max = input<Date | null>(null);
     public readonly min = input<Date | null>(null);
+    /**
+     * @description Sets the minute step of the time picker.
+     * @default 1
+     */
+    public readonly minuteStep = input(1);
 
     /**
      * @description Emits when the popup is about to open. This event is preventable.
@@ -193,8 +224,6 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      * @description Emits after the popup is opened.
      */
     public readonly opened = output();
-
-    public readonly rounded = input<DateTimePickerVariantProps["rounded"]>("medium");
 
     /**
      * @description Sets the class of the popup element.
@@ -215,6 +244,18 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
     public readonly popupWidth = input<ListSizeInputType>("");
 
     public readonly readonly = input(false);
+
+    /**
+     * @description Sets the required state of the date time picker.
+     */
+    public readonly required = input(false);
+
+    public readonly rounded = input<DateTimePickerVariantProps["rounded"]>("medium");
+    /**
+     * @description Sets the second step of the time picker.
+     * @default 1
+     */
+    public readonly secondStep = input(1);
     /**
      * @description Sets the visibility of the clear button.
      */
@@ -233,8 +274,8 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         });
         afterNextRender({
             read: () => {
-                this.setDateValues();
                 this.setSubscriptions();
+                this.setPopupCloseSubscriptions();
             }
         });
     }
@@ -320,20 +361,13 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
 
     public writeValue(date: Date | null | undefined): void {
         this.#value.set(date ?? null);
-        this.updateCurrentDateString(date, this.format());
-        this.setDateValues();
+        // this.setDateValues();
     }
 
     protected onCancelClick(): void {
         this.navigatedDate.set(this.#value() ?? new Date());
         this.#dropdownService.popupRef()?.close();
         this.#propagateChange?.(this.#value());
-    }
-
-    public onClearClick(): void {
-        this.#value.set(null);
-        this.navigatedDate.set(new Date());
-        this.#propagateChange?.(null);
     }
 
     protected onSetDateClick(): void {
@@ -366,50 +400,116 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         this.#propagateChange?.(date);
     }
 
-    private setDateValues(): void {
-        const value = this.#value();
-        const maxDate = this.max();
-        const minDate = this.min();
-        if (value) {
-            this.navigatedDate.set(DateTime.fromJSDate(value).toJSDate());
-        } else if (minDate) {
-            this.navigatedDate.set(DateTime.fromJSDate(minDate).toJSDate());
-        } else if (maxDate) {
-            if (maxDate.getTime() < DateTime.now().toMillis()) {
-                this.navigatedDate.set(DateTime.fromJSDate(maxDate).toJSDate());
-            } else {
-                this.navigatedDate.set(DateTime.now().toJSDate());
+    private closePopup(): void {
+        this.#dropdownService.popupRef()?.close();
+    }
+
+    private handleKeydown(event: KeyboardEvent): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
+
+        const popupOpen = this.#dropdownService.popupRef() !== null;
+
+        if (event.altKey && event.key === "ArrowDown") {
+            event.preventDefault();
+            this.openPopup();
+            return;
+        }
+        if (event.altKey && event.key === "ArrowUp") {
+            event.preventDefault();
+            console.warn("ArrowUp is not supported yet");
+            this.closePopup();
+            return;
+        }
+        if (event.key === "Escape" && popupOpen) {
+            event.preventDefault();
+            this.onCancelClick();
+            return;
+        }
+        if (event.altKey && event.key === "ArrowRight" && popupOpen) {
+            event.preventDefault();
+            this.activeView.set("time");
+            return;
+        }
+        if (event.altKey && event.key === "ArrowLeft" && popupOpen) {
+            event.preventDefault();
+            this.activeView.set("date");
+            return;
+        }
+        if (event.key === "Enter" && popupOpen) {
+            const target = event.target as HTMLElement;
+            if (target.tagName === "BUTTON" || target.closest("button")) {
+                return;
             }
-        } else {
-            this.navigatedDate.set(DateTime.now().toJSDate());
+            event.preventDefault();
+            if (this.activeView() === "date") {
+                this.activeView.set("time");
+            } else {
+                this.onSetDateClick();
+            }
+            return;
         }
-        if (this.#value()) {
-            this.updateCurrentDateString(this.#value(), this.format());
+    }
+
+    private openPopup(): void {
+        if (!this.#dropdownService.popupRef()) {
+            this.#dropdownService.triggerPopupOpen$.next({
+                width: 266,
+                height: "min-content",
+                closeOnScroll: false,
+                withScrollTracking: true
+            });
         }
+    }
+
+    private setKeyboardSubscriptions(): void {
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => this.handleKeydown(event));
+
+        this.#calendarService.keydown$
+            .pipe(mergeWith(this.#timeSelectorService.keydown$), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(e => {
+                const keyboardEvent = e.originalEvent as KeyboardEvent;
+                if (!keyboardEvent) {
+                    return;
+                }
+                if (keyboardEvent.key === "Escape") {
+                    keyboardEvent.preventDefault();
+                    this.onCancelClick();
+                } else if (keyboardEvent.altKey && keyboardEvent.key === "ArrowUp") {
+                    keyboardEvent.preventDefault();
+                    this.closePopup();
+                } else if (keyboardEvent.altKey && keyboardEvent.key === "ArrowRight" && this.activeView() === "date") {
+                    keyboardEvent.preventDefault();
+                    this.activeView.set("time");
+                } else if (keyboardEvent.altKey && keyboardEvent.key === "ArrowLeft" && this.activeView() === "time") {
+                    keyboardEvent.preventDefault();
+                    this.activeView.set("date");
+                } else if (keyboardEvent.key === "Enter" && this.activeView() === "time") {
+                    const target = keyboardEvent.target as HTMLElement;
+                    if (target.tagName === "BUTTON" || target.closest("button")) {
+                        return;
+                    }
+                    keyboardEvent.preventDefault();
+                    this.onSetDateClick();
+                }
+            });
+    }
+
+    private setPopupCloseSubscriptions(): void {
+        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.focus();
+            this.activeView.set("date");
+        });
     }
 
     private setSubscriptions(): void {
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                const input = this.#hostElementRef.nativeElement.querySelector("input");
-                if (input) {
-                    input.focus();
-                    input.setSelectionRange(-1, -1);
-                }
-            });
-        this.#dropdownService.popupCloseStart$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.focus();
-        });
-        this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.activeView.set("date");
-            const value = this.#value();
-            if (value) {
-                this.currentDateString.set(DateTime.fromJSDate(value).toFormat(this.format()));
-            } else {
-                this.currentDateString.set("");
-            }
-        });
+            .subscribe(() => this.focus());
+        this.setKeyboardSubscriptions();
     }
 
     private updateDateIfNotInRange(date: Date): Date {

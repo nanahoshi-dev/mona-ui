@@ -1,11 +1,14 @@
-<mona-text-box [readonly]="readonly()"
-               [disabled]="disabled()"
-               [ngModel]="currentDateString()"
-               [clearButton]="showClearButton()"
+<mona-text-box (inputBlur)="onDateInputBlur()"
                (ngModelChange)="onDateStringEdit($event)"
-               (inputBlur)="onDateInputBlur()">
+               [clearButton]="showClearButton()"
+               [disabled]="disabled()"
+               [inputAttributes]="inputAttributes()"
+               [ngModel]="currentDateString()"
+               [readonly]="readonly()"
+               [required]="required()">
     <ng-template monaTextBoxSuffixTemplate>
-        <button monaButton look="ghost" [iconOnly]="true" class="rounded-none" (click)="onDateInputButtonClick()"
+        <button monaButton look="ghost" [iconOnly]="true" class="rounded-none"
+                (click)="onDateInputButtonClick()"
                 [disabled]="disabled()" [tabindex]="-1">
             <i class="ri-calendar-line"></i>
         </button>
@@ -30,6 +33,7 @@
             @if (activeView() === 'date') {
                 <div class="h-full flex items-center justify-center">
                     <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
+                                   [firstDay]="firstDay()"
                                    [ngModel]="navigatedDate()"
                                    [disabled]="disabled()"
                                    (ngModelChange)="onCalendarValueChange($event)"
@@ -41,6 +45,7 @@
                     <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
                                         [disabled]="disabled()"
                                         [max]="timePickerMax()" [min]="timePickerMin()" [footer]="false"
+                                        [hourStep]="hourStep()" [minuteStep]="minuteStep()" [secondStep]="secondStep()"
                                         [hourFormat]="hourFormat()" [showSeconds]="showSeconds()"></mona-time-selector>
                 </div>
             }
