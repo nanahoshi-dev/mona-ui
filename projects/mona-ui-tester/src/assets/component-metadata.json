@@ -11,60 +11,6 @@
       }
     ]
   },
-  "DateTimePickerComponent": {
-    "name": "DateTimePickerComponent",
-    "selector": "\"mona-date-time-picker\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "disabledDates",
-        "type": "Iterable<Date>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "format",
-        "type": "string",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "hourFormat",
-        "type": "HourFormat",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "readonly",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "showSeconds",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "DropDownFilterableDirective": {
     "name": "DropDownFilterableDirective",
     "selector": "",
@@ -841,7 +787,7 @@
   },
   "DecadeYearDirective": {
     "name": "DecadeYearDirective",
-    "selector": "\"td[monaDecadeYear]\"",
+    "selector": "\"[monaDecadeYear]\"",
     "inputs": [
       {
         "name": "navigatedDate",
@@ -862,12 +808,6 @@
         "kind": "input"
       },
       {
-        "name": "size",
-        "type": "CalendarVariantProps[\"size\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
         "name": "year",
         "type": "number",
         "description": "",
@@ -877,7 +817,7 @@
   },
   "MonthDayDirective": {
     "name": "MonthDayDirective",
-    "selector": "\"td[monaMonthDay]\"",
+    "selector": "\"[monaMonthDay]\"",
     "inputs": [
       {
         "name": "daySelect",
@@ -934,12 +874,6 @@
         "kind": "input"
       },
       {
-        "name": "size",
-        "type": "CalendarVariantProps[\"size\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
         "name": "value",
         "type": "Date | Date[] | null",
         "description": "",
@@ -949,7 +883,7 @@
   },
   "YearMonthDirective": {
     "name": "YearMonthDirective",
-    "selector": "\"td[monaYearMonth]\"",
+    "selector": "\"[monaYearMonth]\"",
     "inputs": [
       {
         "name": "month",
@@ -972,12 +906,6 @@
       {
         "name": "selectedDate",
         "type": "Date | null",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "CalendarVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
       }
@@ -2440,9 +2368,15 @@
     "selector": "\"mona-button-group\"",
     "inputs": [
       {
+        "name": "allowEmpty",
+        "type": "boolean",
+        "description": "When set to false, at least one button must remain selected in single selection mode.\nClicking a selected button will not deselect it. Defaults to true (allows empty selection).",
+        "kind": "input"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
+        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
         "kind": "model"
       },
       {
@@ -3400,12 +3334,6 @@
         "kind": "input"
       },
       {
-        "name": "size",
-        "type": "CalendarVariantProps[\"size\"]",
-        "description": "Sets the size of the calendar.",
-        "kind": "input"
-      },
-      {
         "name": "userClass",
         "type": "string",
         "description": "",
@@ -3423,18 +3351,6 @@
     "name": "DatePickerComponent",
     "selector": "\"mona-date-picker\"",
     "inputs": [
-      {
-        "name": "ariaLabel",
-        "type": "string",
-        "description": "Sets the aria-label attribute of the date picker.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaLabelledBy",
-        "type": "string",
-        "description": "Sets the aria-labelledby attribute of the date picker.",
-        "kind": "input"
-      },
       {
         "name": "close",
         "type": "PopupCloseEvent",
@@ -3559,6 +3475,156 @@
         "name": "weekNumber",
         "type": "boolean",
         "description": "Enables the display of week numbers in the calendar.",
+        "kind": "input"
+      }
+    ]
+  },
+  "DateTimePickerComponent": {
+    "name": "DateTimePickerComponent",
+    "selector": "\"mona-datetime-picker\"",
+    "inputs": [
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the popup is about to close. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits after the popup is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Sets the disabled state of the date time picker.",
+        "kind": "model"
+      },
+      {
+        "name": "disabledDates",
+        "type": "Iterable<Date>",
+        "description": "Sets the disabled dates of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "firstDay",
+        "type": "FirstDayOfWeek",
+        "description": "Sets the first day of the week.",
+        "kind": "input"
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "description": "Sets the date format of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "hourFormat",
+        "type": "HourFormat",
+        "description": "Sets the hour format of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "hourStep",
+        "type": "number",
+        "description": "Sets the hour step of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "max",
+        "type": "Date | null",
+        "description": "Sets the maximum date of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "min",
+        "type": "Date | null",
+        "description": "Sets the minimum date of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "minuteStep",
+        "type": "number",
+        "description": "Sets the minute step of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "open",
+        "type": "PreventableEvent",
+        "description": "Emits when the popup is about to open. This event is preventable.",
+        "kind": "output"
+      },
+      {
+        "name": "opened",
+        "type": "void",
+        "description": "Emits after the popup is opened.",
+        "kind": "output"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "Sets the class of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupHeight",
+        "type": "ListSizeInputType",
+        "description": "Sets the height of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "popupWidth",
+        "type": "ListSizeInputType",
+        "description": "Sets the width of the popup element.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Sets the readonly state of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets the required state of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "DateTimePickerVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "secondStep",
+        "type": "number",
+        "description": "Sets the second step of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "showClearButton",
+        "type": "boolean",
+        "description": "Sets the visibility of the clear button.",
+        "kind": "input"
+      },
+      {
+        "name": "showSeconds",
+        "type": "boolean",
+        "description": "Sets the visibility of the second selector.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "DateTimePickerVariantProps[\"size\"]",
+        "description": "Sets the size of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -3707,6 +3773,12 @@
       },
       {
         "name": "focusOnMount",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "footer",
         "type": "boolean",
         "description": "",
         "kind": "input"

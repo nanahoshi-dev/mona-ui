@@ -156,18 +156,6 @@ export class DatePickerComponent
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
 
     /**
-     * @description Sets the aria-label attribute of the date picker.
-     * @default ""
-     */
-    public readonly ariaLabel = input("");
-
-    /**
-     * @description Sets the aria-labelledby attribute of the date picker.
-     * @default ""
-     */
-    public readonly ariaLabelledBy = input("");
-
-    /**
      * @description Emits when the popup is about to close. This event is preventable.
      */
     public readonly close = output<PopupCloseEvent>();

@@ -194,21 +194,48 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      */
     public readonly closed = output();
 
+    /**
+     * @description Sets the disabled state of the date time picker.
+     */
     public readonly disabled = model(false);
+
+    /**
+     * @description Sets the disabled dates of the date time picker.
+     */
     public readonly disabledDates = input<Iterable<Date>>([]);
+
     /**
      * @description Sets the first day of the week.
      */
     public readonly firstDay = input<FirstDayOfWeek>("monday");
+
+    /**
+     * @description Sets the date format of the date time picker.
+     */
     public readonly format = input("dd/MM/yyyy HH:mm");
+
+    /**
+     * @description Sets the hour format of the time picker.
+     * @default 24
+     */
     public readonly hourFormat = input<HourFormat>("24");
+
     /**
      * @description Sets the hour step of the time picker.
      * @default 1
      */
     public readonly hourStep = input(1);
+
+    /**
+     * @description Sets the maximum date of the date time picker.
+     */
     public readonly max = input<Date | null>(null);
+
+    /**
+     * @description Sets the minimum date of the date time picker.
+     */
     public readonly min = input<Date | null>(null);
+
     /**
      * @description Sets the minute step of the time picker.
      * @default 1
@@ -243,6 +270,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      */
     public readonly popupWidth = input<ListSizeInputType>("");
 
+    /**
+     * @description Sets the readonly state of the date time picker.
+     */
     public readonly readonly = input(false);
 
     /**
@@ -250,16 +280,25 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      */
     public readonly required = input(false);
 
+    /**
+     * @description Sets the border radius of the date time picker.
+     */
     public readonly rounded = input<DateTimePickerVariantProps["rounded"]>("medium");
+
     /**
      * @description Sets the second step of the time picker.
      * @default 1
      */
     public readonly secondStep = input(1);
+
     /**
      * @description Sets the visibility of the clear button.
      */
     public readonly showClearButton = input(false);
+
+    /**
+     * @description Sets the visibility of the second selector.
+     */
     public readonly showSeconds = input(false);
     /**
      * @description Sets the size of the date time picker.
