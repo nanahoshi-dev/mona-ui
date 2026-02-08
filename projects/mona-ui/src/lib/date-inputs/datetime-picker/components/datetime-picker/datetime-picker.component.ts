@@ -1,9 +1,11 @@
 import { CdkTrapFocus } from "@angular/cdk/a11y";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
+    contentChild,
     DestroyRef,
     effect,
     ElementRef,
@@ -43,6 +45,7 @@ import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
 import { TextBoxComponent } from "../../../../inputs/text-box/components/text-box/text-box.component";
+import { TextBoxPrefixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -50,7 +53,11 @@ import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarComponent } from "../../../calendar/components/calendar/calendar.component";
+import { CalendarDecadeCellTemplateDirective } from "../../../calendar/directives/calendar-decade-cell-template.directive";
+import { CalendarMonthCellTemplateDirective } from "../../../calendar/directives/calendar-month-cell-template.directive";
+import { CalendarYearCellTemplateDirective } from "../../../calendar/directives/calendar-year-cell-template.directive";
 import { FirstDayOfWeek } from "../../../calendar/models/FirstDayOfWeek";
+import { DateInputPrefixTemplateDirective } from "../../../directives/date-input-prefix-template.directive";
 import { HourFormat } from "../../../models/HourFormat";
 import { DateDisabledType } from "../../../models/DateDisabledType";
 import { CalendarService } from "../../../services/calendar.service";
@@ -99,7 +106,12 @@ import {
         TextBoxComponent,
         TextBoxSuffixTemplateDirective,
         ButtonGroupComponent,
-        CdkTrapFocus
+        CdkTrapFocus,
+        CalendarDecadeCellTemplateDirective,
+        CalendarMonthCellTemplateDirective,
+        CalendarYearCellTemplateDirective,
+        NgTemplateOutlet,
+        TextBoxPrefixTemplateDirective
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
@@ -137,6 +149,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         }
         return DateTime.fromJSDate(value).toFormat(format);
     });
+    protected readonly decadeCellTemplate = contentChild(CalendarDecadeCellTemplateDirective);
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -161,6 +174,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
             role: "group"
         };
     });
+    protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.#value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -172,6 +186,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
     });
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("datePopupTemplate");
+    protected readonly prefixTemplate = contentChild(DateInputPrefixTemplateDirective, { read: TemplateRef });
     protected readonly timePickerMax = computed(() => {
         const maxDate = this.max();
         const navigatedDate = this.navigatedDate();
@@ -198,6 +213,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         }
         return null;
     });
+    protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.

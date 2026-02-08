@@ -2,6 +2,11 @@
                [clearButton]="showClearButton()" [disabled]="disabled()" [inputAttributes]="inputAttributes()"
                [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly() || readonlyInput()"
                [required]="required()">
+    @if (prefixTemplate()) {
+        <ng-template monaTextBoxPrefixTemplate>
+            <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
+        </ng-template>
+    }
     <ng-template monaTextBoxSuffixTemplate>
         <button monaButton look="ghost" [iconOnly]="true" class="rounded-none"
                 [attr.aria-label]="'Open date and time picker'" [attr.aria-expanded]="expanded()"
@@ -32,11 +37,30 @@
                     <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()" [firstDay]="firstDay()"
                                    [weekNumber]="weekNumber()" [ngModel]="navigatedDate()" [disabled]="disabled()"
                                    (ngModelChange)="onCalendarValueChange($event)"
-                                   class="shadow-none border-none flex-1"></mona-calendar>
+                                   class="shadow-none border-none flex-1">
+                        @if (decadeCellTemplate()) {
+                            <ng-template monaCalendarDecadeCellTemplate let-year>
+                                <ng-container [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
+                                              [ngTemplateOutletContext]="{$implicit: year}"></ng-container>
+                            </ng-template>
+                        }
+                        @if (monthCellTemplate()) {
+                            <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                                <ng-container [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
+                                              [ngTemplateOutletContext]="{$implicit: day, date}"></ng-container>
+                            </ng-template>
+                        }
+                        @if (yearCellTemplate()) {
+                            <ng-template monaCalendarYearCellTemplate let-year let-text="text">
+                                <ng-container [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
+                                              [ngTemplateOutletContext]="{$implicit: year, text}"></ng-container>
+                            </ng-template>
+                        }
+                    </mona-calendar>
                 </div>
             }
             @if (activeView() === 'time') {
-                <div class="h-full flex items-center justify-center max-h-96" aria-label="Time picker">
+                <div class="h-full flex items-center justify-center max-h-64" aria-label="Time picker">
                     <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
                                         [disabled]="disabled()" [max]="timePickerMax()" [min]="timePickerMin()"
                                         [footer]="false"

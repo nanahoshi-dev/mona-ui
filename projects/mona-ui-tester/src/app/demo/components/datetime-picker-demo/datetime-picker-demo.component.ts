@@ -2,9 +2,22 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { BadgeQuestionMark, BriefcaseBusiness, LucideAngularModule, TentTree } from "lucide-angular";
 import { DateTime } from "luxon";
-import { DateTimePickerComponent } from "mona-ui";
+import {
+    CalendarDecadeCellTemplateDirective,
+    CalendarMonthCellTemplateDirective,
+    CalendarYearCellTemplateDirective,
+    DateInputPrefixTemplateDirective,
+    DateTimePickerComponent,
+    PreventableEvent
+} from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import {
+    calendarDecadeCellTemplateFeatureConfig,
+    calendarMonthCellTemplateFeatureConfig,
+    calendarYearCellTemplateFeatureConfig
+} from "../../utils/dateInputFeatureConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -16,7 +29,29 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimePickerComponent> {
-    readonly #injector = createFeatureInjector({});
+    readonly #injector = createFeatureInjector({
+        decadeCellTemplate: calendarDecadeCellTemplateFeatureConfig(),
+        monthCellTemplate: calendarMonthCellTemplateFeatureConfig(),
+        prefixTemplate: {
+            code: ``,
+            active: false,
+            description: `Enable prefix template for the date time picker .`,
+            name: "Prefix Template"
+        },
+        preventClose: {
+            active: false,
+            code: ``,
+            description: `The "close" event is fired when the popup is about to close.`,
+            name: "Prevent Close"
+        },
+        preventOpen: {
+            active: false,
+            code: ``,
+            description: `The "open" event is fired when the popup is about to open.`,
+            name: "Prevent Open"
+        },
+        yearCellTemplate: calendarYearCellTemplateFeatureConfig()
+    });
     protected readonly DateTimePickerWrapperComponent = DateTimePickerWrapperComponent;
     protected readonly config = signal<ComponentConfig<DateTimePickerComponent>>({
         code: ``,
@@ -130,8 +165,17 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
 }
 
 @Component({
-    imports: [DateTimePickerComponent, ReactiveFormsModule],
+    imports: [
+        DateTimePickerComponent,
+        ReactiveFormsModule,
+        CalendarDecadeCellTemplateDirective,
+        CalendarMonthCellTemplateDirective,
+        CalendarYearCellTemplateDirective,
+        DateInputPrefixTemplateDirective,
+        LucideAngularModule
+    ],
     template: `
+        @let featureData = features();
         <span>Selected Date: {{ formValueText() }}</span>
         <form [formGroup]="formGroup">
             <mona-datetime-picker
@@ -156,7 +200,38 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 [showClearButton]="showClearButton()"
                 [showSeconds]="showSeconds()"
                 [size]="size()"
-                [weekNumber]="weekNumber()"></mona-datetime-picker>
+                [weekNumber]="weekNumber()"
+                (close)="onPopupClose($event)"
+                (open)="onPopupOpen($event)">
+                @if (featureData && featureData["decadeCellTemplate"].active) {
+                    <ng-template monaCalendarDecadeCellTemplate let-year>
+                        <span class="text-violet-700 underline">{{ year }}</span>
+                    </ng-template>
+                }
+                @if (featureData && featureData["monthCellTemplate"].active) {
+                    <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                        <span [class.text-amber-600]="day % 5 === 0" [class.text-indigo-500]="day % 2 !== 0">
+                            {{ day }}
+                        </span>
+                    </ng-template>
+                }
+                @if (featureData && featureData["prefixTemplate"].active) {
+                    <ng-template monaDateInputPrefixTemplate>
+                        <lucide-angular
+                            [name]="prefixIcon()"
+                            [size]="16"
+                            class="h-full aspect-square flex items-center justify-center"></lucide-angular>
+                    </ng-template>
+                }
+                @if (featureData && featureData["yearCellTemplate"].active) {
+                    <ng-template monaCalendarYearCellTemplate let-month let-text="text">
+                        <span
+                            >{{ text }} /
+                            <span class="text-fuchsia-500">{{ month }}</span>
+                        </span>
+                    </ng-template>
+                }
+            </mona-datetime-picker>
         </form>
     `
 })
@@ -171,6 +246,14 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
         const value = this.#formValue();
         const format = this.format();
         return value ? DateTime.fromJSDate(value).toFormat(format) : "";
+    });
+    protected readonly prefixIcon = computed(() => {
+        const value = this.#formValue();
+        if (!value) {
+            return BadgeQuestionMark;
+        }
+        const isWeekend = DateTime.fromJSDate(value).weekday === 6 || DateTime.fromJSDate(value).weekday === 7;
+        return isWeekend ? TentTree : BriefcaseBusiness;
     });
     public readonly disabled = model<ReturnType<DateTimePickerComponent["disabled"]>>(false);
     public readonly disabledDates = input<ReturnType<DateTimePickerComponent["disabledDates"]>>([]);
@@ -193,4 +276,19 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     public readonly showSeconds = input<ReturnType<DateTimePickerComponent["showSeconds"]>>(false);
     public readonly size = input<ReturnType<DateTimePickerComponent["size"]>>("medium");
     public readonly weekNumber = input<ReturnType<DateTimePickerComponent["weekNumber"]>>(false);
+
+    protected onPopupClose(event: PreventableEvent) {
+        const preventClose = this.features()["preventClose"].active;
+        if (preventClose) {
+            event.preventDefault();
+            console.log("Date time picker popup prevented from closing");
+        }
+    }
+    protected onPopupOpen(event: PreventableEvent) {
+        const preventOpen = this.features()["preventOpen"].active;
+        if (preventOpen) {
+            event.preventDefault();
+            console.log("Date time picker popup prevented from opening");
+        }
+    }
 }

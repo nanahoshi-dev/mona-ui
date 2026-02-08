@@ -5,7 +5,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { metadata } from "@angular/forms/signals";
 import { mode } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
-import { TimePickerComponent } from "mona-ui";
+import { PreventableEvent, TimePickerComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -18,7 +18,20 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerComponent> {
-    readonly #injector = createFeatureInjector({});
+    readonly #injector = createFeatureInjector({
+        preventClose: {
+            active: false,
+            code: ``,
+            description: `The "close" event is fired when the popup is about to close.`,
+            name: "Prevent Close"
+        },
+        preventOpen: {
+            active: false,
+            code: ``,
+            description: `The "open" event is fired when the popup is about to open.`,
+            name: "Prevent Open"
+        }
+    });
     protected readonly TimePickerWrapperComponent = TimePickerWrapperComponent;
     protected readonly config = signal<ComponentConfig<TimePickerComponent>>({
         code: ``,
@@ -129,6 +142,8 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 [showClearButton]="showClearButton()"
                 [showSeconds]="showSeconds()"
                 [size]="size()"
+                (close)="onPopupClose($event)"
+                (open)="onPopupOpen($event)"
                 class="w-32">
             </mona-time-picker>
         </form>
@@ -170,4 +185,19 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     public readonly showClearButton = input<ReturnType<TimePickerComponent["showClearButton"]>>(false);
     public readonly showSeconds = input<ReturnType<TimePickerComponent["showSeconds"]>>(false);
     public readonly size = input<ReturnType<TimePickerComponent["size"]>>("medium");
+
+    protected onPopupClose(event: PreventableEvent) {
+        const preventClose = this.features()["preventClose"].active;
+        if (preventClose) {
+            event.preventDefault();
+            console.log("Time picker popup prevented from closing");
+        }
+    }
+    protected onPopupOpen(event: PreventableEvent) {
+        const preventOpen = this.features()["preventOpen"].active;
+        if (preventOpen) {
+            event.preventDefault();
+            console.log("Time picker popup prevented from opening");
+        }
+    }
 }

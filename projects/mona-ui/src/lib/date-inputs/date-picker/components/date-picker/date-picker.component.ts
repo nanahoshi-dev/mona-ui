@@ -122,7 +122,6 @@ export class DatePickerComponent
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<Date | null> | null = null;
     #propagateTouched: Action | null = null;
-
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
