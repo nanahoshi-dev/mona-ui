@@ -7,32 +7,34 @@ import { CalendarVariantProps, calendarYearViewCellThemeVariants } from "../styl
     selector: "[monaYearMonth]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
-        "[attr.aria-selected]": "selected() ? 'true' : null",
         "[attr.aria-current]": "isCurrent() ? 'date' : null",
-        "[class]": "baseClass()"
+        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-selected]": "selected() ? 'true' : null",
+        "[class]": "baseClass()",
+        role: "gridcell"
     }
 })
 export class YearMonthDirective {
     readonly #themeService = inject(ThemeService);
-
+    protected readonly ariaLabel = computed(() => {
+        const monthName = this.monthName();
+        return `${monthName} ${this.navigatedDate().getFullYear()}`;
+    });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const focused = this.focused();
         const rounded = this.rounded();
         return calendarYearViewCellThemeVariants(theme)({ focused, rounded });
     });
-
     protected readonly focused = computed(() => {
         const navigatedMonth = DateTime.fromJSDate(this.navigatedDate()).month;
         return this.month() === navigatedMonth;
     });
-
     protected readonly isCurrent = computed(() => {
         const now = DateTime.now();
         const navDate = DateTime.fromJSDate(this.navigatedDate());
         return this.month() === now.month && navDate.year === now.year;
     });
-
     protected readonly selected = computed(() => {
         const selectedDate = this.selectedDate();
         if (!selectedDate) {
@@ -42,8 +44,8 @@ export class YearMonthDirective {
         const selDate = DateTime.fromJSDate(selectedDate);
         return this.month() === selDate.month && navDate.year === selDate.year;
     });
-
     public readonly month = input.required<number>();
+    public readonly monthName = input.required<string>();
     public readonly navigatedDate = input.required<Date>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly selectedDate = input<Date | null>();

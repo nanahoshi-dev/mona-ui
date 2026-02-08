@@ -27,12 +27,14 @@ import { HourFormat } from "../../../models/HourFormat";
 import { Meridiem } from "../../../models/Meridiem";
 import { TimeLimiterPipe } from "../../../pipes/time-limiter.pipe";
 import { TimeSelectorService } from "../../../services/time-selector.service";
+import { TimePickerVariantProps } from "../../../time-picker/styles/time-picker.styles";
 import { generateHourSet, generateMinuteSet, generateSecondSet } from "../../../utils/generateHourSet";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
 import { TimeListType } from "../../models/TimeListType";
 import {
     timeSelectorBaseThemeVariants,
+    timeSelectorFooterThemeVariants,
     timeSelectorHeaderThemeVariants,
     timeSelectorInfoContainerThemeVariants,
     timeSelectorListContainerThemeVariants,
@@ -80,6 +82,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     });
     protected readonly computedPopupHeight = this.#height.asReadonly();
     protected readonly focusedList = signal<TimeListType>("hours");
+    protected readonly footerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return timeSelectorFooterThemeVariants(theme)();
+    });
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         return timeSelectorHeaderThemeVariants(theme)();
@@ -146,6 +152,7 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     public readonly max = input<Date | null>(null);
     public readonly min = input<Date | null>(null);
     public readonly minuteStep = input(1);
+    public readonly rounded = input<TimePickerVariantProps["rounded"]>("medium");
     public readonly secondStep = input(1);
     public readonly showSeconds = input(false);
     public readonly size = input<TimeSelectorVariantProps["size"]>("medium");

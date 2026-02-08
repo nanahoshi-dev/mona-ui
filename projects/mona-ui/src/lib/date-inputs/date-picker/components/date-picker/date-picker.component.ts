@@ -1,3 +1,4 @@
+import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -85,7 +86,8 @@ import {
         CalendarMonthCellTemplateDirective,
         CalendarYearCellTemplateDirective,
         TextBoxPrefixTemplateDirective,
-        ButtonDirective
+        ButtonDirective,
+        CdkTrapFocus
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
@@ -206,7 +208,7 @@ export class DatePickerComponent
     public readonly opened = output();
 
     /**
-     * @description Placeholder text for the dropdown list when no item is selected.
+     * @description Sets the placeholder of the date picker.
      */
     public readonly placeholder = input("");
 

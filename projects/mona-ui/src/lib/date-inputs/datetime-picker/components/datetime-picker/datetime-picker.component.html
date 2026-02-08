@@ -4,10 +4,14 @@
                [disabled]="disabled()"
                [inputAttributes]="inputAttributes()"
                [ngModel]="currentDateString()"
+               [placeholder]="placeholder()"
                [readonly]="readonly()"
                [required]="required()">
     <ng-template monaTextBoxSuffixTemplate>
         <button monaButton look="ghost" [iconOnly]="true" class="rounded-none"
+                [attr.aria-label]="'Open date and time picker'"
+                [attr.aria-expanded]="expanded()"
+                [attr.aria-controls]="popupId"
                 (click)="onDateInputButtonClick()"
                 [disabled]="disabled()" [tabindex]="-1">
             <i class="ri-calendar-line"></i>
@@ -17,23 +21,24 @@
 
 <ng-template #datePopupTemplate>
     <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68"
-         aria-label="Date and time picker" role="dialog"
+         aria-modal="true" role="dialog"
          cdkTrapFocus>
         <div [class]="headerClass()">
-            <mona-button-group selection="single" [allowEmpty]="false" class="w-full" [disabled]="disabled()">
-                <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')">
+            <mona-button-group selection="single" [allowEmpty]="false" class="w-full" [disabled]="disabled()" role="tablist">
+                <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')" role="tab">
                     Date
                 </button>
-                <button monaButton [selected]="activeView() === 'time'" (click)="activeView.set('time')">
+                <button monaButton [selected]="activeView() === 'time'" (click)="activeView.set('time')" role="tab">
                     Time
                 </button>
             </mona-button-group>
         </div>
         <div class="overflow-hidden">
             @if (activeView() === 'date') {
-                <div class="h-full flex items-center justify-center">
+                <div class="h-full flex items-center justify-center" aria-label="Calendar">
                     <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
                                    [firstDay]="firstDay()"
+                                   [weekNumber]="weekNumber()"
                                    [ngModel]="navigatedDate()"
                                    [disabled]="disabled()"
                                    (ngModelChange)="onCalendarValueChange($event)"
@@ -41,7 +46,7 @@
                 </div>
             }
             @if (activeView() === 'time') {
-                <div class="h-full flex items-center justify-center max-h-64">
+                <div class="h-full flex items-center justify-center max-h-64" aria-label="Time picker">
                     <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
                                         [disabled]="disabled()"
                                         [max]="timePickerMax()" [min]="timePickerMin()" [footer]="false"

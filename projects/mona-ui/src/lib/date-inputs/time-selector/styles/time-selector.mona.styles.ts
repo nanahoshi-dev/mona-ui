@@ -19,6 +19,12 @@ export const timeSelectorBaseVariants = cva(
     }
 );
 
+export const timeSelectorFooterVariants = cva(
+    `
+        w-full flex items-center justify-end px-1 py-1 border-0 border-t border-input-border bg-accent
+    `
+);
+
 export const timeSelectorHeaderVariants = cva(
     `
         flex bg-accent text-accent-foreground

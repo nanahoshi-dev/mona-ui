@@ -81,6 +81,7 @@
         @for (row of months(); track $index) {
             @for (monthItem of row; track monthItem) {
                 <div (click)="onMonthClick(monthItem[0])" monaYearMonth [month]="monthItem[0]"
+                     [monthName]="monthItem[1]"
                      [navigatedDate]="navigatedDate()"
                      [rounded]="rounded()" [selectedDate]="selectedDates()[0]">
                     @if (yearCellTemplate()) {

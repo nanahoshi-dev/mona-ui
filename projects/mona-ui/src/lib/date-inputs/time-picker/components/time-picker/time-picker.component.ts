@@ -24,6 +24,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
@@ -95,7 +96,9 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
-        return timePickerBaseThemeVariants(theme)({ focused });
+        const variantClass = timePickerBaseThemeVariants(theme)({ focused });
+        const userClass = this.userClass();
+        return twMerge(variantClass, userClass);
     });
     protected readonly currentDateString = linkedSignal(() => {
         const value = this.value();
@@ -124,7 +127,11 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dropdownPopupThemeVariants(theme)();
+        const rounded = this.rounded();
+        const size = this.size();
+        const userClass = this.popupClass();
+        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
+        return twMerge(variantClass, userClass);
     });
     protected readonly popupId = createElementControlId();
     protected readonly timePopupTemplateRef: Signal<TemplateRef<any>> = viewChild.required("timePopupTemplate");
@@ -191,6 +198,17 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
     public readonly opened = output();
 
     /**
+     * @description Sets the placeholder of the time picker.
+     */
+    public readonly placeholder = input("");
+
+    /**
+     * @description Sets the class of the popup element.
+     * @default ""
+     */
+    public readonly popupClass = input("");
+
+    /**
      * @description Sets the height of the popup element.
      * @default 200
      */
@@ -237,6 +255,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
      * @description Sets the size of the time picker.
      */
     public readonly size = input<TimePickerVariantProps["size"]>("medium");
+    public readonly userClass = input("", { alias: "class" });
 
     public constructor() {
         afterNextRender({
@@ -394,10 +413,7 @@ export class TimePickerComponent implements ControlValueAccessor, TimePickerVari
         this.setKeyboardNavigation();
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                this.#dropdownService.popupRef()?.close();
-                this.focus();
-            });
+            .subscribe(() => this.focus());
         this.#dropdownService.popupCloseComplete$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => this.focus());

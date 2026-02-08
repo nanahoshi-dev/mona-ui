@@ -8,7 +8,8 @@
 
 <div [class]="infoContainerClass()">
     <span>{{ navigatedDateText() }}</span>
-    <button monaButton look="ghost" [size]="'small'" (click)="onNowClick($event)" (keydown.enter)="onNowClick($event)"
+    <button monaButton look="ghost" [rounded]="rounded()" [size]="'small'" (click)="onNowClick($event)"
+            (keydown.enter)="onNowClick($event)"
             (keydown.space)="onNowClick($event)">Now
     </button>
 </div>
@@ -85,7 +86,7 @@
 </div>
 
 @if (footer()) {
-    <div class="w-full flex items-center justify-between px-1 py-1 border-0 border-t border-input-border bg-accent">
-        <button monaButton look="primary" [size]="size()" (click)="onSetTimeClick()">Set</button>
+    <div [class]="footerClass()">
+        <button monaButton look="primary" [rounded]="rounded()" [size]="size()" (click)="onSetTimeClick()">Set</button>
     </div>
 }

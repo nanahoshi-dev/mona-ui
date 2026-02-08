@@ -3,6 +3,7 @@ import { ThemeStyle } from "../../../theme/models/Theme";
 import { VariantInputs } from "../../../utils/VariantInputs";
 import {
     timeSelectorBaseVariants as monaTimeSelectorBaseVariants,
+    timeSelectorFooterVariants as monaTimeSelectorFooterVariants,
     timeSelectorHeaderVariants as monaTimeSelectorHeaderVariants,
     timeSelectorInfoContainerVariants as monaTimeSelectorInfoContainerVariants,
     timeSelectorListContainerVariants as monaTimeSelectorListContainerVariants,
@@ -16,6 +17,15 @@ export const timeSelectorBaseThemeVariants = (theme: ThemeStyle) => {
             return monaTimeSelectorBaseVariants;
         default:
             return monaTimeSelectorBaseVariants;
+    }
+};
+
+export const timeSelectorFooterThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaTimeSelectorFooterVariants;
+        default:
+            return monaTimeSelectorFooterVariants;
     }
 };
 

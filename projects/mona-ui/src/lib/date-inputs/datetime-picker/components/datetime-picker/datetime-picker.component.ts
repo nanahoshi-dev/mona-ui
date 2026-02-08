@@ -253,6 +253,11 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
     public readonly opened = output();
 
     /**
+     * @description Sets the placeholder of the date time picker.
+     */
+    public readonly placeholder = input("");
+
+    /**
      * @description Sets the class of the popup element.
      * @default ""
      */
@@ -305,6 +310,12 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      */
     public readonly size = input<DateTimePickerVariantProps["size"]>("medium");
     public readonly userClass = input("", { alias: "class" });
+
+    /**
+     * @description Enables the display of week numbers in the calendar.
+     * @default false
+     */
+    public readonly weekNumber = input<boolean>(false);
 
     public constructor() {
         effect(() => {
