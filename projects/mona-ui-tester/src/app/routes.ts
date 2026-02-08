@@ -264,6 +264,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "window",
+                loadComponent: () =>
+                    import("./docs/components/window-doc/window-doc.component").then(m => m.WindowDocComponent)
+            },
+            {
                 path: "popup-menu-internal",
                 loadComponent: () =>
                     import("./docs/components/popup-menu-doc/popup-menu-doc.component").then(

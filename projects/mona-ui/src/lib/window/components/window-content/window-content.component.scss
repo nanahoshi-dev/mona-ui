@@ -1,36 +1,10 @@
-:host {
-    width: 100%;
-    height: 100%;
-}
-
-.mona-window-content-container {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.mona-window-title-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-.mona-window-title-container {
-    flex: 1;
-    padding: 0.25rem 0.5rem;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    cursor: default;
-    user-select: none;
-}
 
 .mona-window-title {
     font-weight: 600;
     color: var(--mona-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .mona-window-title-bar-actions {
@@ -49,14 +23,14 @@
     display: flex;
     background-color: transparent;
     &-north {
-        top: 0;
+        top: -5px;
         left: 0;
         right: 0;
         height: 10px;
         cursor: ns-resize;
     }
     &-south {
-        bottom: 0;
+        bottom: -5px;
         left: 0;
         right: 0;
         height: 10px;
@@ -64,42 +38,42 @@
     }
     &-east {
         top: 0;
-        right: 0;
+        right: -5px;
         bottom: 0;
         width: 10px;
         cursor: ew-resize;
     }
     &-west {
         top: 0;
-        left: 0;
+        left: -5px;
         bottom: 0;
         width: 10px;
         cursor: ew-resize;
     }
     &-northeast {
-        top: 0;
-        right: 0;
+        top: -5px;
+        right: -5px;
         width: 10px;
         height: 10px;
         cursor: nesw-resize;
     }
     &-northwest {
-        top: 0;
-        left: 0;
+        top: -5px;
+        left: -5px;
         width: 10px;
         height: 10px;
         cursor: nwse-resize;
     }
     &-southeast {
-        bottom: 0;
-        right: 0;
+        bottom: -5px;
+        right: -5px;
         width: 10px;
         height: 10px;
         cursor: nwse-resize;
     }
     &-southwest {
-        bottom: 0;
-        left: 0;
+        bottom: -5px;
+        left: -5px;
         width: 10px;
         height: 10px;
         cursor: nesw-resize;

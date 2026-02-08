@@ -5,8 +5,10 @@ import {
     ChangeDetectionStrategy,
     Component,
     ComponentRef,
+    computed,
     createComponent,
     DestroyRef,
+    DOCUMENT,
     ElementRef,
     inject,
     Injector,
@@ -17,17 +19,24 @@ import {
     ViewContainerRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
+import { LucideAngularModule, Maximize, Minimize, Minus, X } from "lucide-angular";
 import { filter, fromEvent } from "rxjs";
 import { AnimationService } from "../../../animations/services/animation.service";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PopupCloseSource } from "../../../popup/models/PopupCloseEvent";
 import { PopupDataInjectionToken } from "../../../popup/models/PopupInjectionToken";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowCloseEvent } from "../../models/WindowCloseEvent";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
+import {
+    windowBaseThemeVariants,
+    windowContentContainerThemeVariants,
+    WindowContentVariantInput,
+    windowTitleBarThemeVariants,
+    windowTitleContainerThemeVariants
+} from "../../styles/window.styles";
 
 @Component({
     selector: "mona-window-content",
@@ -38,24 +47,63 @@ import { WindowInjectorData } from "../../models/WindowInjectorData";
         WindowDragHandlerDirective,
         NgTemplateOutlet,
         ButtonDirective,
-        FontAwesomeModule,
-        WindowResizeHandlerDirective
-    ]
+        WindowResizeHandlerDirective,
+        LucideAngularModule
+    ],
+    host: {
+        "[class]": "baseClass()"
+    }
 })
-export class WindowContentComponent implements OnInit, AfterViewInit {
-    readonly #animationService: AnimationService = inject(AnimationService);
-    readonly #appRef: ApplicationRef = inject(ApplicationRef);
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+export class WindowContentComponent implements OnInit, AfterViewInit, WindowContentVariantInput {
+    readonly #animationService = inject(AnimationService);
+    readonly #appRef = inject(ApplicationRef);
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #injector: Injector = inject(Injector);
-    readonly #viewContainerRef: ViewContainerRef = inject(ViewContainerRef);
-    protected readonly closeIcon = faClose;
+    readonly #injector = inject(Injector);
+
+    readonly #sizeBeforeMaximize = signal({ width: 0, height: 0 });
+    readonly #themeService = inject(ThemeService);
+    readonly #viewContainerRef = inject(ViewContainerRef);
+    readonly #windowHeight = computed(() => {
+        const maximized = this.maximized();
+        return maximized ? window.innerHeight : this.#sizeBeforeMaximize().height;
+    });
+    readonly #windowWidth = computed(() => {
+        const maximized = this.maximized();
+        return maximized ? window.innerWidth : this.#sizeBeforeMaximize().width;
+    });
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.windowData.rounded;
+        return windowBaseThemeVariants(theme)({ rounded });
+    });
+    protected readonly closeIcon = X;
     protected readonly componentAnchor = viewChild.required("componentAnchor", {
         read: ViewContainerRef
     });
     protected readonly componentRef?: ComponentRef<any>;
+    protected readonly contentContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.windowData.rounded;
+        return windowContentContainerThemeVariants(theme)({ rounded });
+    });
     protected readonly contentType = signal<"template" | "component">("template");
-    protected readonly windowData: WindowInjectorData = inject<WindowInjectorData>(PopupDataInjectionToken);
+    protected readonly maximizeIcon = computed(() => {
+        return this.maximized() && !this.minimized() ? Minimize : Maximize;
+    });
+    protected readonly maximized = signal(false);
+    protected readonly minimizeIcon = Minus;
+    protected readonly minimized = signal(false);
+    protected readonly titleBarClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return windowTitleBarThemeVariants(theme)();
+    });
+    protected readonly titleContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return windowTitleContainerThemeVariants(theme)();
+    });
+    protected readonly windowData = inject<WindowInjectorData>(PopupDataInjectionToken);
 
     public constructor() {
         if (this.windowData.content instanceof TemplateRef) {
@@ -89,6 +137,38 @@ export class WindowContentComponent implements OnInit, AfterViewInit {
         this.closeWindow(event);
     }
 
+    protected onMaximizeClick(): void {
+        if (this.minimized()) {
+            this.minimized.set(false);
+            this.windowData.windowReference.resize({
+                width: this.#windowWidth(),
+                height: this.#windowHeight()
+            });
+            return;
+        }
+        if (!this.maximized()) {
+            const width = this.windowData.windowReference.width;
+            const height = this.windowData.windowReference.height;
+            this.#sizeBeforeMaximize.set({ width, height });
+        }
+        this.maximized.update(maximized => !maximized);
+        this.windowData.windowReference.resize({
+            width: this.#windowWidth(),
+            height: this.#windowHeight(),
+            center: true
+        });
+    }
+
+    protected onMinimizeClick(): void {
+        this.minimized.update(minimized => !minimized);
+        if (this.minimized()) {
+            const width = this.windowData.windowReference.width;
+            const height = this.windowData.windowReference.height;
+            this.#sizeBeforeMaximize.set({ width, height });
+            this.windowData.windowReference.resize({ width, height: undefined });
+        }
+    }
+
     private closeWindow(event: Event): void {
         const closeEvent = new WindowCloseEvent({ event, via: PopupCloseSource.CloseButton, originalEvent: event });
         if (this.windowData.preventClose && this.windowData.preventClose(closeEvent)) {
@@ -98,13 +178,13 @@ export class WindowContentComponent implements OnInit, AfterViewInit {
         if (closeEvent.isDefaultPrevented()) {
             return;
         }
-        this.#animationService.scaleOut(this.windowData.windowReference.element);
+        this.#animationService.fadeOut(this.windowData.windowReference.element);
         this.windowData.windowReference.closeWithDelay(100, closeEvent);
     }
 
     private focusElement(): void {
         const element = this.windowData.focusedElement;
-        if (element === undefined) {
+        if (!element) {
             return;
         }
         const windowElement = this.#hostElementRef.nativeElement;
@@ -122,14 +202,12 @@ export class WindowContentComponent implements OnInit, AfterViewInit {
 
     private setSubscriptions(): void {
         if (this.windowData.closeOnEscape) {
-            fromEvent<KeyboardEvent>(document, "keydown")
+            fromEvent<KeyboardEvent>(this.#document, "keydown")
                 .pipe(
                     filter(event => event.key === "Escape"),
                     takeUntilDestroyed(this.#destroyRef)
                 )
-                .subscribe(event => {
-                    this.closeWindow(event);
-                });
+                .subscribe(event => this.closeWindow(event));
         }
     }
 }

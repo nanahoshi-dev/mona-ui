@@ -1,4 +1,15 @@
-import { AfterViewInit, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, NgZone } from "@angular/core";
+import {
+    afterNextRender,
+    AfterViewInit,
+    DestroyRef,
+    Directive,
+    DOCUMENT,
+    ElementRef,
+    inject,
+    input,
+    NgZone,
+    output
+} from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
@@ -7,7 +18,7 @@ import { WindowReference } from "../models/WindowReference";
     selector: "div[monaWindowDragHandler]",
     standalone: true
 })
-export class WindowDragHandlerDirective implements AfterViewInit {
+export class WindowDragHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
@@ -16,8 +27,10 @@ export class WindowDragHandlerDirective implements AfterViewInit {
     public readonly draggable = input(true);
     public readonly windowRef = input.required<WindowReference>();
 
-    public ngAfterViewInit(): void {
-        this.setEvents();
+    public constructor() {
+        afterNextRender({
+            read: () => this.setEvents()
+        });
     }
 
     public onMouseDown(event: MouseEvent) {

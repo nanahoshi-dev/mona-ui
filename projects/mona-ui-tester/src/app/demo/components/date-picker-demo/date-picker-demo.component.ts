@@ -106,6 +106,10 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
                 type: "boolean",
                 value: false
             },
+            readonlyInput: {
+                type: "boolean",
+                value: false
+            },
             required: {
                 type: "boolean",
                 value: false
@@ -164,6 +168,7 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
+                [readonlyInput]="readonlyInput()"
                 [required]="required()"
                 [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
@@ -233,6 +238,7 @@ class DatePickerWrapperComponent implements ComponentInputsAsSignal<DatePickerCo
     public readonly popupHeight = input<ReturnType<DatePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<DatePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<DatePickerComponent["readonly"]>>(false);
+    public readonly readonlyInput = input<ReturnType<DatePickerComponent["readonlyInput"]>>(false);
     public readonly required = input<ReturnType<DatePickerComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<DatePickerComponent["rounded"]>>("none");
     public readonly showClearButton = input<ReturnType<DatePickerComponent["showClearButton"]>>(false);

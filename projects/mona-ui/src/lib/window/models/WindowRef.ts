@@ -57,11 +57,19 @@ export class WindowRef<R = unknown> {
         return this.#options.element;
     }
 
+    public get height(): number {
+        return this.#options.height;
+    }
+
     public get popupRef(): PopupRef {
         return this.#options.popupRef;
     }
 
     public get resize$(): Observable<ResizeEvent> {
         return this.#options.resize$;
+    }
+
+    public get width(): number {
+        return this.#options.width;
     }
 }

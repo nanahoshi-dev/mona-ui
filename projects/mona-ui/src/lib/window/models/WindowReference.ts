@@ -1,13 +1,13 @@
+import { ComponentRef } from "@angular/core";
 import { asapScheduler, map, Observable, Subject } from "rxjs";
+import { PopupCloseSource } from "../../popup/models/PopupCloseEvent";
+import { PopupRef } from "../../popup/models/PopupRef";
 import { MoveEvent } from "./MoveEvent";
 import { ResizeEvent } from "./ResizeEvent";
-import { PopupRef } from "../../popup/models/PopupRef";
 import { WindowCloseEvent } from "./WindowCloseEvent";
-import { PopupCloseSource } from "../../popup/models/PopupCloseEvent";
-import { ComponentRef } from "@angular/core";
 import { WindowRef } from "./WindowRef";
-import { WindowRefParams } from "./WindowRefParams";
 import { WindowReferenceOptions } from "./WindowReferenceOptions";
+import { WindowRefParams } from "./WindowRefParams";
 
 /**
  * @internal - used by WindowService. Do not export.
@@ -43,21 +43,17 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public move(params: { top?: number; left?: number }): void {
-        if (params.top) {
-            this.options.popupRef.overlayRef.overlayElement.style.top = `${params.top}px`;
-        }
-        if (params.left) {
-            this.options.popupRef.overlayRef.overlayElement.style.left = `${params.left}px`;
-        }
+        const top = params.top ? `${params.top}px` : ``;
+        const left = params.left ? `${params.left}px` : ``;
+        this.options.popupRef.overlayRef.overlayElement.style.top = top;
+        this.options.popupRef.overlayRef.overlayElement.style.left = left;
     }
 
     public resize(params: { width?: number; height?: number; center?: boolean }): void {
-        if (params.width) {
-            this.options.popupRef.overlayRef.overlayElement.style.width = `${params.width}px`;
-        }
-        if (params.height) {
-            this.options.popupRef.overlayRef.overlayElement.style.height = `${params.height}px`;
-        }
+        const width = params.width ? `${params.width}px` : ``;
+        const height = params.height ? `${params.height}px` : ``;
+        this.options.popupRef.overlayRef.overlayElement.style.width = width;
+        this.options.popupRef.overlayRef.overlayElement.style.height = height;
         if (params.center) {
             asapScheduler.schedule(() => this.center());
         }
@@ -87,10 +83,6 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         return this.move$$;
     }
 
-    public get element(): HTMLElement {
-        return this.options.popupRef.overlayRef.overlayElement;
-    }
-
     public get dragEnd$(): Observable<void> {
         return this.moveEnd$$;
     }
@@ -99,12 +91,24 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         return this.moveStart$$;
     }
 
+    public get element(): HTMLElement {
+        return this.options.popupRef.overlayRef.overlayElement;
+    }
+
+    public get height(): number {
+        return this.element.offsetHeight;
+    }
+
     public get popupRef(): PopupRef {
         return this.options.popupRef;
     }
 
     public get resize$(): Observable<ResizeEvent> {
         return this.resize$$;
+    }
+
+    public get width(): number {
+        return this.element.offsetWidth;
     }
 
     public get windowRef(): WindowRef<R> {

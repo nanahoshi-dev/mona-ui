@@ -124,6 +124,10 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 type: "boolean",
                 value: false
             },
+            readonlyInput: {
+                type: "boolean",
+                value: false
+            },
             required: {
                 type: "boolean",
                 value: false
@@ -194,6 +198,7 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
+                [readonlyInput]="readonlyInput()"
                 [required]="required()"
                 [rounded]="rounded()"
                 [secondStep]="secondStep()"
@@ -269,6 +274,7 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     public readonly popupHeight = input<ReturnType<DateTimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<DateTimePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<DateTimePickerComponent["readonly"]>>(false);
+    public readonly readonlyInput = input<ReturnType<DateTimePickerComponent["readonlyInput"]>>(false);
     public readonly required = input<ReturnType<DateTimePickerComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<DateTimePickerComponent["rounded"]>>("medium");
     public readonly secondStep = input<ReturnType<DateTimePickerComponent["secondStep"]>>(1);

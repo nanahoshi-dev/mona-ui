@@ -201,6 +201,10 @@ export class SidebarComponent {
                     path: "/tooltip-directive"
                 },
                 {
+                    text: "Window",
+                    path: "/window"
+                },
+                {
                     text: "#PopupMenuInternal",
                     path: "/popup-menu-internal"
                 }

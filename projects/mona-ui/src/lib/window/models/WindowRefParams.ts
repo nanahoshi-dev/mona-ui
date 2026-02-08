@@ -17,15 +17,19 @@ export interface WindowRefParams<R = unknown> {
 
     get component(): ComponentRef<any> | null;
 
-    get element(): HTMLElement;
-
     get drag$(): Observable<MoveEvent>;
 
     get dragEnd$(): Observable<void>;
 
     get dragStart$(): Observable<void>;
 
+    get element(): HTMLElement;
+
+    get height(): number;
+
     get popupRef(): PopupRef;
 
     get resize$(): Observable<ResizeEvent>;
+
+    get width(): number;
 }

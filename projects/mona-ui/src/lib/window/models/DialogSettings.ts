@@ -1,3 +1,4 @@
+import { WindowVariantProps } from "../styles/window.styles";
 import { DialogAction } from "./DialogAction";
 import { DialogType } from "./DialogType";
 import { TemplateRef } from "@angular/core";
@@ -11,6 +12,7 @@ export interface DialogSettings {
     height?: number;
     inputType?: "string" | "number";
     modal?: boolean;
+    rounded?: WindowVariantProps["rounded"]; // TODO: DialogVariantProps maybe?
     text: string;
     title?: string | TemplateRef<any>;
     type?: DialogType;

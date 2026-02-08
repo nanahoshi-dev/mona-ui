@@ -2297,73 +2297,79 @@
       },
       {
         "name": "focusedElement",
-        "type": "HTMLElement | ElementRef<HTMLElement> | string | undefined",
+        "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
         "description": "",
         "kind": "input"
       },
       {
         "name": "height",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "model"
       },
       {
         "name": "left",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "model"
       },
       {
         "name": "maxHeight",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "maxWidth",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "minHeight",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "minWidth",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "modal",
-        "type": "boolean | undefined",
+        "type": "boolean",
         "description": "",
         "kind": "input"
       },
       {
         "name": "resizable",
-        "type": "boolean | undefined",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "WindowVariantProps[\"rounded\"]",
         "description": "",
         "kind": "input"
       },
       {
         "name": "title",
-        "type": "string | undefined",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
       {
         "name": "top",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "model"
       },
       {
         "name": "width",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "model"
       }
@@ -2376,13 +2382,13 @@
       {
         "name": "allowEmpty",
         "type": "boolean",
-        "description": "When set to false, at least one button must remain selected in single selection mode.\nClicking a selected button will not deselect it. Defaults to true (allows empty selection).",
+        "description": "When set to false, at least one button must remain selected in single selection mode.\r\nClicking a selected button will not deselect it. Defaults to true (allows empty selection).",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
+        "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
         "kind": "model"
       },
       {
@@ -3300,7 +3306,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the calendar.\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the calendar.\r\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -3378,7 +3384,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the date picker.\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date picker.\r\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -3516,7 +3522,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the date time picker.\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date time picker.\r\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {

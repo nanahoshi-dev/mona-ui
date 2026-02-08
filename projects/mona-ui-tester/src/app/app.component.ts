@@ -1162,6 +1162,7 @@ export class AppComponent implements OnInit {
             minHeight: 150,
             maxWidth: 1200,
             maxHeight: 768,
+            rounded: "medium",
             title: titleTemplate,
             closeOnEscape: true
             // preventClose: event => {

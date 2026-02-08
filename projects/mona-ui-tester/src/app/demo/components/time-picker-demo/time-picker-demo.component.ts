@@ -85,6 +85,10 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 type: "boolean",
                 value: false
             },
+            readonlyInput: {
+                type: "boolean",
+                value: false
+            },
             required: {
                 type: "boolean",
                 value: false
@@ -136,6 +140,7 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
+                [readonlyInput]="readonlyInput()"
                 [required]="required()"
                 [rounded]="rounded()"
                 [secondStep]="secondStep()"
@@ -179,6 +184,7 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
     public readonly popupHeight = input<ReturnType<TimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<TimePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<TimePickerComponent["readonly"]>>(false);
+    public readonly readonlyInput = input<ReturnType<TimePickerComponent["readonlyInput"]>>(false);
     public readonly required = input<ReturnType<TimePickerComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<TimePickerComponent["rounded"]>>("medium");
     public readonly secondStep = input<ReturnType<TimePickerComponent["secondStep"]>>(1);

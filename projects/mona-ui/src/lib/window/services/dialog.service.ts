@@ -1,4 +1,4 @@
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, signal } from "@angular/core";
 import { Subject, take } from "rxjs";
 import { DialogContentComponent } from "../components/dialog-content/dialog-content.component";
 import { DialogAction } from "../models/DialogAction";
@@ -12,7 +12,7 @@ import { WindowService } from "./window.service";
     providedIn: "root"
 })
 export class DialogService {
-    readonly #windowService: WindowService = inject(WindowService);
+    readonly #windowService = inject(WindowService);
 
     private static getDefaultActions(type: DialogType | undefined): DialogAction[] {
         if (type === "confirm") {
@@ -53,7 +53,8 @@ export class DialogService {
             modal: settings?.modal ?? true,
             title: settings?.title ?? DialogService.getDefaultTitle(settings?.type),
             draggable: true,
-            windowClass: ["mona-dialog-window"]
+            windowClass: ["mona-dialog-window"],
+            rounded: settings?.rounded ?? "medium"
         });
         const dialogHandler: DialogHandler = {
             close: () => {
