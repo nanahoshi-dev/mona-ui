@@ -31,6 +31,7 @@ import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarView } from "../../../models/CalendarView";
+import { DateDisabledType } from "../../../models/DateDisabledType";
 import { CalendarService } from "../../../services/calendar.service";
 import { CalendarDecadeCellTemplateDirective } from "../../directives/calendar-decade-cell-template.directive";
 import { CalendarMonthCellTemplateDirective } from "../../directives/calendar-month-cell-template.directive";
@@ -310,8 +311,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     /**
      * @description Sets the disabled dates of the calendar.
+     * Accepts either an iterable of Date objects or a predicate function.
      */
-    public readonly disabledDates = input<Iterable<Date>>([]);
+    public readonly disabledDates = input<DateDisabledType>();
 
     /**
      * @description Sets the first day of the week.
@@ -502,8 +504,8 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 calendarView === "year"
                     ? "[monaYearMonth]"
                     : calendarView === "decade"
-                      ? "[monaDecadeYear]"
-                      : "[monaMonthDay]";
+                        ? "[monaDecadeYear]"
+                        : "[monaMonthDay]";
             const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>(
                 `${selector}[tabindex="0"]`
             );
@@ -721,11 +723,15 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const disabledDates = this.disabledDates();
         const max = this.max();
         const min = this.min();
-        return (
-            any(disabledDates, d => compareDates(date, d, "==")) ||
-            compareDates(date, max, ">") ||
-            compareDates(date, min, "<")
-        );
+
+        let isDisabledByInput = false;
+        if (typeof disabledDates === "function") {
+            isDisabledByInput = disabledDates(date);
+        } else if (disabledDates) {
+            isDisabledByInput = any(disabledDates, d => compareDates(date, d, "=="));
+        }
+
+        return isDisabledByInput || compareDates(date, max, ">") || compareDates(date, min, "<");
     }
 
     private navigateByDaysOrCells(offset: number, view: CalendarView): void {

@@ -2,6 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { metadata } from "@angular/forms/signals";
 import { DateTime } from "luxon";
 import {
     CalendarComponent,
@@ -39,8 +40,9 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
                 value: false
             },
             disabledDates: {
-                type: "iterable",
-                value: []
+                type: "dropdown",
+                value: [[DateTime.now().minus({ day: 2 }).toJSDate()], (date: Date) => date.getDay() === 0],
+                defaultValue: null
             },
             firstDay: {
                 type: "dropdown",

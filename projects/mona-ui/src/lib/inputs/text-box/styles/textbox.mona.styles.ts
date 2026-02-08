@@ -26,6 +26,8 @@ export const textBoxVariants = cva(
 
         [&.ng-touched.ng-invalid]:border-error
         [&.ng-touched.ng-invalid]:ring-error/40
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {

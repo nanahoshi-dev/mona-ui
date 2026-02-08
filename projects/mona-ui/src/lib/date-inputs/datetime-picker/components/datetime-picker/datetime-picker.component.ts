@@ -19,8 +19,17 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import {
+    AbstractControl,
+    ControlValueAccessor,
+    FormsModule,
+    NG_VALIDATORS,
+    NG_VALUE_ACCESSOR,
+    ValidationErrors,
+    Validator
+} from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { any } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import { fromEvent, mergeWith } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -43,6 +52,7 @@ import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarComponent } from "../../../calendar/components/calendar/calendar.component";
 import { FirstDayOfWeek } from "../../../calendar/models/FirstDayOfWeek";
 import { HourFormat } from "../../../models/HourFormat";
+import { DateDisabledType } from "../../../models/DateDisabledType";
 import { CalendarService } from "../../../services/calendar.service";
 import { TimeSelectorService } from "../../../services/time-selector.service";
 import { datePopupThemeVariants } from "../../../styles/date-popup.styles";
@@ -73,6 +83,11 @@ import {
             provide: DropdownPopupInputToken,
             useExisting: forwardRef(() => DateTimePickerComponent),
             multi: false
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => DateTimePickerComponent),
+            multi: true
         }
     ],
     imports: [
@@ -93,7 +108,7 @@ import {
         "(blur)": "onDateInputBlur()"
     }
 })
-export class DateTimePickerComponent implements ControlValueAccessor, DropdownPopupInput {
+export class DateTimePickerComponent implements ControlValueAccessor, Validator, DropdownPopupInput {
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
@@ -201,8 +216,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
 
     /**
      * @description Sets the disabled dates of the date time picker.
+     * Accepts either an iterable of Date objects or a predicate function.
      */
-    public readonly disabledDates = input<Iterable<Date>>([]);
+    public readonly disabledDates = input<DateDisabledType>();
 
     /**
      * @description Sets the first day of the week.
@@ -267,18 +283,24 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
      * @description Sets the height of the popup element.
      * @default 200
      */
-    public readonly popupHeight = input<ListSizeInputType>("");
+    public readonly popupHeight = input<ListSizeInputType>();
 
     /**
      * @description Sets the width of the popup element.
      * @default null
      */
-    public readonly popupWidth = input<ListSizeInputType>("");
+    public readonly popupWidth = input<ListSizeInputType>();
 
     /**
      * @description Sets the readonly state of the date time picker.
      */
     public readonly readonly = input(false);
+
+    /**
+     * @description When true, the input is readonly but the popup button remains enabled.
+     * @default false
+     */
+    public readonly readonlyInput = input(false);
 
     /**
      * @description Sets the required state of the date time picker.
@@ -330,7 +352,52 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         });
     }
 
-    public onCalendarValueChange(date: Date | null): void {
+    public registerOnChange(fn: any): void {
+        this.#propagateChange = fn;
+    }
+
+    public registerOnTouched(fn: any): void {
+        this.#propagateTouched = fn;
+    }
+
+    public setDisabledState(isDisabled: boolean): void {
+        this.disabled.set(isDisabled);
+    }
+
+    public validate(control: AbstractControl): ValidationErrors | null {
+        const value = control.value as Date | null;
+        if (!value) {
+            return null;
+        }
+
+        const min = this.min();
+        const max = this.max();
+        const disabledDates = this.disabledDates();
+
+        // Min/max are inclusive - only invalid if strictly outside the range
+        if (min && value.getTime() < min.getTime()) {
+            return { minError: { minValue: min, value } };
+        }
+        if (max && value.getTime() > max.getTime()) {
+            return { maxError: { maxValue: max, value } };
+        }
+        if (this.isDateDisabledByInput(value, disabledDates)) {
+            return { disabledDate: true };
+        }
+        return null;
+    }
+
+    public writeValue(date: Date | null | undefined): void {
+        this.#value.set(date ?? null);
+    }
+
+    protected onCancelClick(): void {
+        this.navigatedDate.set(this.#value() ?? new Date());
+        this.#dropdownService.popupRef()?.close();
+        this.#propagateChange?.(this.#value());
+    }
+
+    protected onCalendarValueChange(date: Date | null): void {
         if (date) {
             const inRangeDate = this.updateDateIfNotInRange(date);
             this.navigatedDate.set(inRangeDate);
@@ -338,7 +405,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         this.activeView.set("time");
     }
 
-    public onDateInputBlur(): void {
+    protected onDateInputBlur(): void {
         if (this.#dropdownService.popupRef()) {
             this.#propagateTouched?.();
             return;
@@ -356,17 +423,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         }
         if (dateTime.isValid) {
             const value = this.#value();
-            const minDate = this.min();
-            const maxDate = this.max();
             if (value && DateTime.fromJSDate(value).equals(dateTime)) {
-                return;
-            }
-            if (minDate && dateTime < DateTime.fromJSDate(minDate)) {
-                this.setCurrentDate(minDate);
-                return;
-            }
-            if (maxDate && dateTime > DateTime.fromJSDate(maxDate)) {
-                this.setCurrentDate(maxDate);
                 return;
             }
             this.setCurrentDate(dateTime.toJSDate());
@@ -377,53 +434,37 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
         this.#propagateTouched?.();
     }
 
-    public onDateInputButtonClick(): void {
-        this.#dropdownService.triggerPopupOpen$.next({
-            width: 266,
-            height: "min-content",
-            closeOnScroll: false,
-            withScrollTracking: true
-        });
-    }
-
-    public onDateStringEdit(dateString: string): void {
-        this.currentDateString.set(dateString);
-    }
-
-    public onTimeSelectorValueChange(date: Date | null): void {
-        if (date) {
-            const inRangeDate = this.updateDateIfNotInRange(date);
-            this.navigatedDate.set(inRangeDate);
+    protected onDateInputButtonClick(): void {
+        if (this.#dropdownService.popupRef()) {
+            this.closePopup();
+        } else {
+            this.openPopup();
         }
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.#value.set(date ?? null);
-        // this.setDateValues();
-    }
-
-    protected onCancelClick(): void {
-        this.navigatedDate.set(this.#value() ?? new Date());
-        this.#dropdownService.popupRef()?.close();
-        this.#propagateChange?.(this.#value());
+    protected onDateStringEdit(dateString: string): void {
+        this.currentDateString.set(dateString);
     }
 
     protected onSetDateClick(): void {
         this.#value.set(this.navigatedDate());
         this.#dropdownService.popupRef()?.close();
         this.#propagateChange?.(this.#value());
+    }
+
+    protected onTimeSelectorValueChange(date: Date | null): void {
+        if (date) {
+            const inRangeDate = this.updateDateIfNotInRange(date);
+            this.navigatedDate.set(inRangeDate);
+        }
+    }
+
+    private compareDatesEqual(date1: Date, date2: Date): boolean {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+        );
     }
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
@@ -442,6 +483,15 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
             input.focus();
             input.setSelectionRange(input.value.length, input.value.length);
         }
+    }
+
+    private isDateDisabledByInput(date: Date, disabledDates: DateDisabledType): boolean {
+        if (typeof disabledDates === "function") {
+            return disabledDates(date);
+        } else if (disabledDates) {
+            return any(disabledDates, d => this.compareDatesEqual(date, d));
+        }
+        return false;
     }
 
     private setCurrentDate(date: Date | null): void {
@@ -505,8 +555,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, DropdownPo
     private openPopup(): void {
         if (!this.#dropdownService.popupRef()) {
             this.#dropdownService.triggerPopupOpen$.next({
-                width: 266,
-                height: "min-content",
+                minWidth: this.popupWidth() || this.#hostElementRef.nativeElement.getBoundingClientRect().width,
+                width: this.popupWidth() || "fit-content",
+                height: this.popupHeight() || "fit-content",
                 closeOnScroll: false,
                 withScrollTracking: true
             });

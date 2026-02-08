@@ -1,8 +1,7 @@
 <mona-text-box (inputBlur)="onDateInputBlur()" (ngModelChange)="onDateStringEdit($event)" [disabled]="disabled()"
-               [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly()"
-               [inputAttributes]="inputAttributes()"
-               [required]="required()"
-               [clearButton]="showClearButton()" [rounded]="rounded()" [size]="size()">
+               [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly() || readonlyInput()"
+               [inputAttributes]="inputAttributes()" [required]="required()" [clearButton]="showClearButton()"
+               [rounded]="rounded()" [size]="size()">
     @if (prefixTemplate()) {
         <ng-template monaTextBoxPrefixTemplate>
             <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
@@ -10,10 +9,8 @@
     }
     <ng-template monaTextBoxSuffixTemplate>
         <button monaButton look="ghost" [iconOnly]="true" class="rounded-none" [attr.aria-label]="'Open calendar'"
-                [attr.aria-expanded]="expanded()"
-                [attr.aria-controls]="popupId"
-                [disabled]="disabled() || readonly()" [tabindex]="-1"
-                (click)="onDateInputButtonClick()">
+                [attr.aria-expanded]="expanded()" [attr.aria-controls]="popupId" [disabled]="disabled() || readonly()"
+                [tabindex]="-1" (click)="onDateInputButtonClick()">
             <i class="ri-calendar-line"></i>
         </button>
     </ng-template>

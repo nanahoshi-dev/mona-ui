@@ -19,6 +19,7 @@ import { AttributeBinderDirective } from "../../../../common/directives/attribut
 import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { InputType } from "../../models/InputType";
@@ -39,10 +40,12 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
     host: {
         "[attr.data-disabled]": "disabled()",
         "[attr.data-readonly]": "readonly()",
+        "[attr.data-invalid]": "parentInvalid()",
         "[class]": "classes()"
     }
 })
 export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInput {
+    readonly #formFieldValidationService = inject(FormFieldValidationService, { optional: true });
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<string, any> | null = null;
     #propagateTouch: Action<Event, any> | null = null;
@@ -57,6 +60,7 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     protected readonly clearIcon = X;
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
+    protected readonly parentInvalid = computed(() => this.#formFieldValidationService?.invalid() ?? false);
 
     /**
      * @description Displays a button to clear the input value.

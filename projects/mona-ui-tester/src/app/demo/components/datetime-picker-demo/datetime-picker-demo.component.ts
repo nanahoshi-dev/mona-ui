@@ -65,6 +65,26 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 min: 1,
                 max: 60
             },
+            placeholder: {
+                type: "string",
+                value: "Select a date..."
+            },
+            popupClass: {
+                type: "string",
+                value: ""
+            },
+            popupHeight: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                value: null
+            },
+            popupWidth: {
+                type: "number",
+                nullable: true,
+                min: 0,
+                value: null
+            },
             readonly: {
                 type: "boolean",
                 value: false
@@ -96,6 +116,10 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 type: "dropdown",
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
+            },
+            weekNumber: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -121,13 +145,18 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
                 [minuteStep]="minuteStep()"
                 [max]="max()"
                 [min]="min()"
+                [placeholder]="placeholder()"
+                [popupClass]="popupClass()"
+                [popupHeight]="popupHeight()"
+                [popupWidth]="popupWidth()"
                 [readonly]="readonly()"
                 [required]="required()"
                 [rounded]="rounded()"
                 [secondStep]="secondStep()"
                 [showClearButton]="showClearButton()"
                 [showSeconds]="showSeconds()"
-                [size]="size()"></mona-datetime-picker>
+                [size]="size()"
+                [weekNumber]="weekNumber()"></mona-datetime-picker>
         </form>
     `
 })
@@ -152,6 +181,10 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     public readonly max = input<ReturnType<DateTimePickerComponent["max"]>>(null);
     public readonly min = input<ReturnType<DateTimePickerComponent["min"]>>(null);
     public readonly minuteStep = input<ReturnType<DateTimePickerComponent["minuteStep"]>>(1);
+    public readonly placeholder = input<ReturnType<DateTimePickerComponent["placeholder"]>>("Select a date...");
+    public readonly popupClass = input<ReturnType<DateTimePickerComponent["popupClass"]>>("");
+    public readonly popupHeight = input<ReturnType<DateTimePickerComponent["popupHeight"]>>(null);
+    public readonly popupWidth = input<ReturnType<DateTimePickerComponent["popupWidth"]>>(null);
     public readonly readonly = input<ReturnType<DateTimePickerComponent["readonly"]>>(false);
     public readonly required = input<ReturnType<DateTimePickerComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<DateTimePickerComponent["rounded"]>>("medium");
@@ -159,4 +192,5 @@ class DateTimePickerWrapperComponent implements ComponentInputsAsSignal<DateTime
     public readonly showClearButton = input<ReturnType<DateTimePickerComponent["showClearButton"]>>(false);
     public readonly showSeconds = input<ReturnType<DateTimePickerComponent["showSeconds"]>>(false);
     public readonly size = input<ReturnType<DateTimePickerComponent["size"]>>("medium");
+    public readonly weekNumber = input<ReturnType<DateTimePickerComponent["weekNumber"]>>(false);
 }

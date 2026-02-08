@@ -833,7 +833,7 @@
       },
       {
         "name": "disabledDates",
-        "type": "Iterable<Date>",
+        "type": "DateDisabledType",
         "description": "",
         "kind": "input"
       },
@@ -888,6 +888,12 @@
       {
         "name": "month",
         "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "monthName",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
@@ -3293,8 +3299,8 @@
       },
       {
         "name": "disabledDates",
-        "type": "Iterable<Date>",
-        "description": "Sets the disabled dates of the calendar.",
+        "type": "DateDisabledType",
+        "description": "Sets the disabled dates of the calendar.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -3371,8 +3377,8 @@
       },
       {
         "name": "disabledDates",
-        "type": "Iterable<Date>",
-        "description": "Sets the disabled dates of the date picker.",
+        "type": "DateDisabledType",
+        "description": "Sets the disabled dates of the date picker.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -3414,7 +3420,7 @@
       {
         "name": "placeholder",
         "type": "string",
-        "description": "Placeholder text for the dropdown list when no item is selected.",
+        "description": "Sets the placeholder of the date picker.",
         "kind": "input"
       },
       {
@@ -3439,6 +3445,12 @@
         "name": "readonly",
         "type": "boolean",
         "description": "Sets the readonly state of the date picker.",
+        "kind": "input"
+      },
+      {
+        "name": "readonlyInput",
+        "type": "boolean",
+        "description": "When true, the input is readonly but the calendar button remains enabled.",
         "kind": "input"
       },
       {
@@ -3503,8 +3515,8 @@
       },
       {
         "name": "disabledDates",
-        "type": "Iterable<Date>",
-        "description": "Sets the disabled dates of the date time picker.",
+        "type": "DateDisabledType",
+        "description": "Sets the disabled dates of the date time picker.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -3562,6 +3574,12 @@
         "kind": "output"
       },
       {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Sets the placeholder of the date time picker.",
+        "kind": "input"
+      },
+      {
         "name": "popupClass",
         "type": "string",
         "description": "Sets the class of the popup element.",
@@ -3583,6 +3601,12 @@
         "name": "readonly",
         "type": "boolean",
         "description": "Sets the readonly state of the date time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "readonlyInput",
+        "type": "boolean",
+        "description": "When true, the input is readonly but the popup button remains enabled.",
         "kind": "input"
       },
       {
@@ -3625,6 +3649,12 @@
         "name": "userClass",
         "type": "string",
         "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "weekNumber",
+        "type": "boolean",
+        "description": "Enables the display of week numbers in the calendar.",
         "kind": "input"
       }
     ]
@@ -3700,6 +3730,18 @@
         "kind": "output"
       },
       {
+        "name": "placeholder",
+        "type": "string",
+        "description": "Sets the placeholder of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "popupClass",
+        "type": "string",
+        "description": "Sets the class of the popup element.",
+        "kind": "input"
+      },
+      {
         "name": "popupHeight",
         "type": "ListSizeInputType",
         "description": "Sets the height of the popup element.",
@@ -3715,6 +3757,12 @@
         "name": "readonly",
         "type": "boolean",
         "description": "Sets the readonly state of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "readonlyInput",
+        "type": "boolean",
+        "description": "When true, the input is readonly but the popup button remains enabled.",
         "kind": "input"
       },
       {
@@ -3751,6 +3799,12 @@
         "name": "size",
         "type": "TimePickerVariantProps[\"size\"]",
         "description": "Sets the size of the time picker.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -3810,6 +3864,12 @@
       {
         "name": "minuteStep",
         "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "TimePickerVariantProps[\"rounded\"]",
         "description": "",
         "kind": "input"
       },

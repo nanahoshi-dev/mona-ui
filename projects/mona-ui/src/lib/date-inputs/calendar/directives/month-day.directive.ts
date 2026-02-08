@@ -1,6 +1,7 @@
 import { computed, Directive, inject, input, output } from "@angular/core";
 import { any, exactly, KeyValuePair } from "@mirei/ts-collections";
 import { ThemeService } from "../../../theme/services/theme.service";
+import { DateDisabledType } from "../../models/DateDisabledType";
 import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 import { compareDates } from "../utils/compareDates";
 
@@ -33,9 +34,17 @@ export class MonthDayDirective {
         const disabledDates = this.disabledDates();
         const max = this.max();
         const min = this.min();
+
+        let isDisabledByInput = false;
+        if (typeof disabledDates === "function") {
+            isDisabledByInput = disabledDates(entry.key);
+        } else if (disabledDates) {
+            isDisabledByInput = any(disabledDates, d => compareDates(entry.key, d, "=="));
+        }
+
         return (
             disabled ||
-            any(disabledDates, d => compareDates(entry.key, d, "==")) ||
+            isDisabledByInput ||
             compareDates(entry.key, max, ">") ||
             compareDates(entry.key, min, "<")
         );
@@ -66,7 +75,7 @@ export class MonthDayDirective {
     });
     public readonly daySelect = output<{ date: Date; event: MouseEvent }>();
     public readonly disabled = input.required<boolean>();
-    public readonly disabledDates = input.required<Iterable<Date>>();
+    public readonly disabledDates = input.required<DateDisabledType>();
     public readonly entry = input.required<KeyValuePair<Date, number>>();
     public readonly max = input.required<Date | null | undefined>();
     public readonly min = input.required<Date | null | undefined>();

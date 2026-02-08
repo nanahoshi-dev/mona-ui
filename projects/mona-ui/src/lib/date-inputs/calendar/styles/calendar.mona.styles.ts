@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const calendarBaseVariants = cva(
     `
-        flex flex-col gap-2 p-2 w-64
+        flex flex-col gap-2 p-2
         bg-background text-foreground
         border border-input-border
         shadow-sm select-none

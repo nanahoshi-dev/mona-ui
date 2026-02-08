@@ -21,8 +21,17 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import {
+    AbstractControl,
+    ControlValueAccessor,
+    FormsModule,
+    NG_VALIDATORS,
+    NG_VALUE_ACCESSOR,
+    ValidationErrors,
+    Validator
+} from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { any } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -48,6 +57,7 @@ import { CalendarMonthCellTemplateDirective } from "../../../calendar/directives
 import { CalendarYearCellTemplateDirective } from "../../../calendar/directives/calendar-year-cell-template.directive";
 import { FirstDayOfWeek } from "../../../calendar/models/FirstDayOfWeek";
 import { DateInputPrefixTemplateDirective } from "../../../directives/date-input-prefix-template.directive";
+import { DateDisabledType } from "../../../models/DateDisabledType";
 import { CalendarService } from "../../../services/calendar.service";
 import { datePopupThemeVariants, DatePopupVariantInput } from "../../../styles/date-popup.styles";
 import {
@@ -73,6 +83,11 @@ import {
             provide: DropdownPopupInputToken,
             useExisting: forwardRef(() => DatePickerComponent),
             multi: false
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => DatePickerComponent),
+            multi: true
         }
     ],
     imports: [
@@ -96,7 +111,7 @@ import {
     }
 })
 export class DatePickerComponent
-    implements ControlValueAccessor, DropdownPopupInput, DatePickerVariantInput, DatePopupVariantInput
+    implements ControlValueAccessor, Validator, DropdownPopupInput, DatePickerVariantInput, DatePopupVariantInput
 {
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef = inject(DestroyRef);
@@ -174,8 +189,9 @@ export class DatePickerComponent
 
     /**
      * @description Sets the disabled dates of the date picker.
+     * Accepts either an iterable of Date objects or a predicate function.
      */
-    public readonly disabledDates = input<Iterable<Date>>([]);
+    public readonly disabledDates = input<DateDisabledType>();
 
     /**
      * @description Sets the first day of the week.
@@ -236,6 +252,12 @@ export class DatePickerComponent
     public readonly readonly = input(false);
 
     /**
+     * @description When true, the input is readonly but the calendar button remains enabled.
+     * @default false
+     */
+    public readonly readonlyInput = input(false);
+
+    /**
      * @description Sets the required state of the date picker.
      */
     public readonly required = input(false);
@@ -287,6 +309,29 @@ export class DatePickerComponent
         this.disabled.set(isDisabled);
     }
 
+    public validate(control: AbstractControl): ValidationErrors | null {
+        const value = control.value as Date | null;
+        if (!value) {
+            return null;
+        }
+
+        const min = this.min();
+        const max = this.max();
+        const disabledDates = this.disabledDates();
+
+        // Compare at day level only - min/max are inclusive
+        if (min && !this.compareDatesEqual(value, min) && value < min) {
+            return { minError: { minValue: min, value } };
+        }
+        if (max && !this.compareDatesEqual(value, max) && value > max) {
+            return { maxError: { maxValue: max, value } };
+        }
+        if (this.isDateDisabledByInput(value, disabledDates)) {
+            return { disabledDate: true };
+        }
+        return null;
+    }
+
     public writeValue(date: Date | null | undefined): void {
         this.value.set(date ?? null);
     }
@@ -314,17 +359,7 @@ export class DatePickerComponent
         }
         if (dateTime.isValid) {
             const value = this.value();
-            const minDate = this.min();
-            const maxDate = this.max();
             if (value && DateTime.fromJSDate(value).equals(dateTime)) {
-                return;
-            }
-            if (minDate && dateTime.startOf("day") < DateTime.fromJSDate(minDate).startOf("day")) {
-                this.setCurrentDate(minDate);
-                return;
-            }
-            if (maxDate && dateTime.startOf("day") > DateTime.fromJSDate(maxDate).startOf("day")) {
-                this.setCurrentDate(maxDate);
                 return;
             }
             this.setCurrentDate(dateTime.toJSDate());
@@ -353,6 +388,14 @@ export class DatePickerComponent
 
     private closePopup(): void {
         this.#dropdownService.popupRef()?.close();
+    }
+
+    private compareDatesEqual(date1: Date, date2: Date): boolean {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+        );
     }
 
     private dateStringEquals(date1: Date | null, date2: Date | null): boolean {
@@ -387,12 +430,21 @@ export class DatePickerComponent
         }
     }
 
+    private isDateDisabledByInput(date: Date, disabledDates: DateDisabledType): boolean {
+        if (typeof disabledDates === "function") {
+            return disabledDates(date);
+        } else if (disabledDates) {
+            return any(disabledDates, d => this.compareDatesEqual(date, d));
+        }
+        return false;
+    }
+
     private openPopup(): void {
         if (!this.#dropdownService.popupRef()) {
             this.#dropdownService.triggerPopupOpen$.next({
-                height: "auto",
+                height: this.popupHeight() || "auto",
                 maxHeight: "auto",
-                width: "auto",
+                width: this.popupWidth() || "auto",
                 closeOnScroll: false,
                 withScrollTracking: true
             });

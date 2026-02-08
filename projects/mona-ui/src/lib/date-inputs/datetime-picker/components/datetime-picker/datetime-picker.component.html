@@ -1,30 +1,23 @@
-<mona-text-box (inputBlur)="onDateInputBlur()"
-               (ngModelChange)="onDateStringEdit($event)"
-               [clearButton]="showClearButton()"
-               [disabled]="disabled()"
-               [inputAttributes]="inputAttributes()"
-               [ngModel]="currentDateString()"
-               [placeholder]="placeholder()"
-               [readonly]="readonly()"
+<mona-text-box (inputBlur)="onDateInputBlur()" (ngModelChange)="onDateStringEdit($event)"
+               [clearButton]="showClearButton()" [disabled]="disabled()" [inputAttributes]="inputAttributes()"
+               [ngModel]="currentDateString()" [placeholder]="placeholder()" [readonly]="readonly() || readonlyInput()"
                [required]="required()">
     <ng-template monaTextBoxSuffixTemplate>
         <button monaButton look="ghost" [iconOnly]="true" class="rounded-none"
-                [attr.aria-label]="'Open date and time picker'"
-                [attr.aria-expanded]="expanded()"
-                [attr.aria-controls]="popupId"
-                (click)="onDateInputButtonClick()"
-                [disabled]="disabled()" [tabindex]="-1">
+                [attr.aria-label]="'Open date and time picker'" [attr.aria-expanded]="expanded()"
+                [attr.aria-controls]="popupId" (click)="onDateInputButtonClick()" [disabled]="disabled()"
+                [tabindex]="-1">
             <i class="ri-calendar-line"></i>
         </button>
     </ng-template>
 </mona-text-box>
 
 <ng-template #datePopupTemplate>
-    <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68"
-         aria-modal="true" role="dialog"
+    <div [class]="pickerPopupClass()" [id]="popupId" class="flex flex-col h-68" aria-modal="true" role="dialog"
          cdkTrapFocus>
         <div [class]="headerClass()">
-            <mona-button-group selection="single" [allowEmpty]="false" class="w-full" [disabled]="disabled()" role="tablist">
+            <mona-button-group selection="single" [allowEmpty]="false" class="w-full" [disabled]="disabled()"
+                               role="tablist">
                 <button monaButton [selected]="activeView() === 'date'" (click)="activeView.set('date')" role="tab">
                     Date
                 </button>
@@ -36,20 +29,17 @@
         <div class="overflow-hidden">
             @if (activeView() === 'date') {
                 <div class="h-full flex items-center justify-center" aria-label="Calendar">
-                    <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()"
-                                   [firstDay]="firstDay()"
-                                   [weekNumber]="weekNumber()"
-                                   [ngModel]="navigatedDate()"
-                                   [disabled]="disabled()"
+                    <mona-calendar [disabledDates]="disabledDates()" [min]="min()" [max]="max()" [firstDay]="firstDay()"
+                                   [weekNumber]="weekNumber()" [ngModel]="navigatedDate()" [disabled]="disabled()"
                                    (ngModelChange)="onCalendarValueChange($event)"
                                    class="shadow-none border-none flex-1"></mona-calendar>
                 </div>
             }
             @if (activeView() === 'time') {
-                <div class="h-full flex items-center justify-center max-h-64" aria-label="Time picker">
+                <div class="h-full flex items-center justify-center max-h-96" aria-label="Time picker">
                     <mona-time-selector [ngModel]="navigatedDate()" (ngModelChange)="onTimeSelectorValueChange($event)"
-                                        [disabled]="disabled()"
-                                        [max]="timePickerMax()" [min]="timePickerMin()" [footer]="false"
+                                        [disabled]="disabled()" [max]="timePickerMax()" [min]="timePickerMin()"
+                                        [footer]="false"
                                         [hourStep]="hourStep()" [minuteStep]="minuteStep()" [secondStep]="secondStep()"
                                         [hourFormat]="hourFormat()" [showSeconds]="showSeconds()"></mona-time-selector>
                 </div>
