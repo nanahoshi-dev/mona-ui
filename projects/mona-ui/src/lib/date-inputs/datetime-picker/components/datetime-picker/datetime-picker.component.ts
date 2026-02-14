@@ -619,6 +619,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.focus();
             this.activeView.set("date");
+            this.navigatedDate.set(this.#value() ?? new Date());
         });
     }
 
