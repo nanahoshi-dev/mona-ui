@@ -66,7 +66,7 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
 
-    readonly #sizeBeforeMaximize = signal({ width: 0, height: 0 });
+    readonly #sizeBeforeMaximize = signal({ width: 0, height: 0, top: 0, left: 0 });
     readonly #sizeBeforeMinimize = signal(0);
     readonly #themeService = inject(ThemeService);
     readonly #viewContainerRef = inject(ViewContainerRef);
@@ -102,7 +102,8 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
     });
     protected readonly titleBarClass = computed(() => {
         const theme = this.#themeService.theme();
-        return windowTitleBarThemeVariants(theme)();
+        const rounded = this.windowData.rounded;
+        return windowTitleBarThemeVariants(theme)({ rounded });
     });
     protected readonly titleClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -152,7 +153,7 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
             this.windowData.windowReference.resize({
                 width: this.maximized() ? window.innerWidth : this.#sizeBeforeMaximize().width,
                 height: this.maximized() ? window.innerHeight : this.#sizeBeforeMaximize().height,
-                center: !this.maximized()
+                center: false
             });
             return;
         }
@@ -160,20 +161,26 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
             this.maximized.set(false);
             this.windowData.windowReference.resize({
                 width: this.#sizeBeforeMaximize().width,
-                height: this.#sizeBeforeMaximize().height,
-                center: true
+                height: this.#sizeBeforeMaximize().height
+            });
+            this.windowData.windowReference.move({
+                top: this.#sizeBeforeMaximize().top,
+                left: this.#sizeBeforeMaximize().left
             });
         } else {
+            const element = this.windowData.windowReference.element;
             this.#sizeBeforeMaximize.set({
                 width: this.windowData.windowReference.width,
-                height: this.windowData.windowReference.height
+                height: this.windowData.windowReference.height,
+                top: element.offsetTop,
+                left: element.offsetLeft
             });
             this.maximized.set(true);
             this.windowData.windowReference.resize({
                 width: window.innerWidth,
-                height: window.innerHeight,
-                center: true
+                height: window.innerHeight
             });
+            this.windowData.windowReference.move({ top: 0, left: 0 });
         }
     }
 

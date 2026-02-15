@@ -13,12 +13,12 @@ export class WindowRef<R = unknown> {
         this.#options = options;
     }
 
-    public close(result?: R): void {
-        this.#options.close(result);
-    }
-
     public center(): void {
         this.#options.center();
+    }
+
+    public close(result?: R): void {
+        this.#options.close(result);
     }
 
     public move(params: { top?: number; left?: number }): void {

@@ -78,7 +78,17 @@ export const windowTitleBarVariants = cva(
         px-2 py-1 text-sm overflow-hidden
         border-b border-border
         bg-secondary
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-ss-none rounded-se-none",
+                small: "rounded-ss-sm rounded-se-sm",
+                medium: "rounded-ss-md rounded-se-md",
+                large: "rounded-ss-lg rounded-se-lg"
+            }
+        }
+    }
 );
 
 export const windowTitleContainerVariants = cva(

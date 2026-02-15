@@ -19,7 +19,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     public readonly moveStart$$: Subject<void> = new Subject<void>();
     public readonly resize$$: Subject<ResizeEvent> = new Subject<ResizeEvent>();
 
-    public constructor(private readonly options: WindowReferenceOptions) {}
+    public constructor(private readonly options: WindowReferenceOptions) { }
 
     public center(): void {
         const width = this.options.popupRef.overlayRef.overlayElement.getBoundingClientRect().width;
@@ -43,8 +43,8 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public move(params: { top?: number; left?: number }): void {
-        const top = params.top ? `${params.top}px` : ``;
-        const left = params.left ? `${params.left}px` : ``;
+        const top = params.top != null ? `${params.top}px` : ``;
+        const left = params.left != null ? `${params.left}px` : ``;
         this.options.popupRef.overlayRef.overlayElement.style.top = top;
         this.options.popupRef.overlayRef.overlayElement.style.left = left;
     }
