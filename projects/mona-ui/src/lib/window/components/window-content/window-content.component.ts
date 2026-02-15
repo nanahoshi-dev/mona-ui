@@ -67,16 +67,9 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
     readonly #injector = inject(Injector);
 
     readonly #sizeBeforeMaximize = signal({ width: 0, height: 0 });
+    readonly #sizeBeforeMinimize = signal(0);
     readonly #themeService = inject(ThemeService);
     readonly #viewContainerRef = inject(ViewContainerRef);
-    readonly #windowHeight = computed(() => {
-        const maximized = this.maximized();
-        return maximized ? window.innerHeight : this.#sizeBeforeMaximize().height;
-    });
-    readonly #windowWidth = computed(() => {
-        const maximized = this.maximized();
-        return maximized ? window.innerWidth : this.#sizeBeforeMaximize().width;
-    });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.windowData.rounded;
@@ -157,31 +150,47 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
         if (this.minimized()) {
             this.minimized.set(false);
             this.windowData.windowReference.resize({
-                width: this.#windowWidth(),
-                height: this.#windowHeight()
+                width: this.maximized() ? window.innerWidth : this.#sizeBeforeMaximize().width,
+                height: this.maximized() ? window.innerHeight : this.#sizeBeforeMaximize().height,
+                center: !this.maximized()
             });
             return;
         }
-        if (!this.maximized()) {
-            const width = this.windowData.windowReference.width;
-            const height = this.windowData.windowReference.height;
-            this.#sizeBeforeMaximize.set({ width, height });
+        if (this.maximized()) {
+            this.maximized.set(false);
+            this.windowData.windowReference.resize({
+                width: this.#sizeBeforeMaximize().width,
+                height: this.#sizeBeforeMaximize().height,
+                center: true
+            });
+        } else {
+            this.#sizeBeforeMaximize.set({
+                width: this.windowData.windowReference.width,
+                height: this.windowData.windowReference.height
+            });
+            this.maximized.set(true);
+            this.windowData.windowReference.resize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+                center: true
+            });
         }
-        this.maximized.update(maximized => !maximized);
-        this.windowData.windowReference.resize({
-            width: this.#windowWidth(),
-            height: this.#windowHeight(),
-            center: true
-        });
     }
 
     protected onMinimizeClick(): void {
-        this.minimized.update(minimized => !minimized);
         if (this.minimized()) {
-            const width = this.windowData.windowReference.width;
-            const height = this.windowData.windowReference.height;
-            this.#sizeBeforeMaximize.set({ width, height });
-            this.windowData.windowReference.resize({ width, height: undefined });
+            this.minimized.set(false);
+            this.windowData.windowReference.resize({
+                width: this.windowData.windowReference.width,
+                height: this.#sizeBeforeMinimize()
+            });
+        } else {
+            this.#sizeBeforeMinimize.set(this.windowData.windowReference.height);
+            this.minimized.set(true);
+            this.windowData.windowReference.resize({
+                width: this.windowData.windowReference.width,
+                height: undefined
+            });
         }
     }
 
