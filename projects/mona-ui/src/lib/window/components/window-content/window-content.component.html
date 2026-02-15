@@ -7,10 +7,10 @@
             @if (windowData.titleTemplate) {
                 <ng-container [ngTemplateOutlet]="windowData.titleTemplate"></ng-container>
             } @else {
-                <span class="mona-window-title">{{ windowData.title ?? '' }}</span>
+                <span [class]="titleClass()">{{ windowData.title ?? '' }}</span>
             }
         </div>
-        <div class="mona-window-title-bar-actions">
+        <div [class]="titleBarActionClass()">
             @let maximizeTitle = maximized() || minimized() ? "Restore" : "Maximize";
             @if (!minimized()) {
                 <button monaButton look="ghost" size="small" [iconOnly]="true"
@@ -32,7 +32,7 @@
         </div>
     </div>
     @if (!minimized()) {
-        <div class="mona-window-content">
+        <div [class]="contentClass()">
             @switch (contentType()) {
                 @case ("template") {
                     <ng-container [ngTemplateOutlet]="$any(windowData.content)"></ng-container>
@@ -52,34 +52,34 @@
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="north"
-             class="mona-window-resizer mona-window-resizer-north"></div>
+             [class]="'north'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="south"
-             class="mona-window-resizer mona-window-resizer-south"></div>
+             [class]="'south'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="east"
-             class="mona-window-resizer mona-window-resizer-east"></div>
+             [class]="'east'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="west"
-             class="mona-window-resizer mona-window-resizer-west"></div>
+             [class]="'west'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="northeast"
-             class="mona-window-resizer mona-window-resizer-northeast"></div>
+             [class]="'northeast'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="northwest"
-             class="mona-window-resizer mona-window-resizer-northwest"></div>
+             [class]="'northwest'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="southeast"
-             class="mona-window-resizer mona-window-resizer-southeast"></div>
+             [class]="'southeast'|monaResizePosition"></div>
         <div monaWindowResizeHandler [minWidth]="windowData.minWidth" [minHeight]="windowData.minHeight"
              [maxWidth]="windowData.maxWidth" [maxHeight]="windowData.maxHeight"
              [windowRef]="windowData.windowReference" direction="southwest"
-             class="mona-window-resizer mona-window-resizer-southwest"></div>
+             [class]="'southwest'|monaResizePosition"></div>
     }
 </div>

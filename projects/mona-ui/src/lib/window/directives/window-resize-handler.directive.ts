@@ -5,8 +5,7 @@ import { WindowReference } from "../models/WindowReference";
 import { WindowResizeHandlerDirection } from "../models/WindowResizeHandlerDirection";
 
 @Directive({
-    selector: "div[monaWindowResizeHandler]",
-    standalone: true
+    selector: "div[monaWindowResizeHandler]"
 })
 export class WindowResizeHandlerDirective implements AfterViewInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);

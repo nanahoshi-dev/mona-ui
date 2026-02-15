@@ -30,25 +30,29 @@ import { WindowDragHandlerDirective } from "../../directives/window-drag-handler
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowCloseEvent } from "../../models/WindowCloseEvent";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
+import { ResizePositionPipe } from "../../pipes/resize-position.pipe";
 import {
     windowBaseThemeVariants,
     windowContentContainerThemeVariants,
+    windowContentThemeVariants,
     WindowContentVariantInput,
+    windowTitleBarActionThemeVariants,
     windowTitleBarThemeVariants,
-    windowTitleContainerThemeVariants
+    windowTitleContainerThemeVariants,
+    windowTitleThemeVariants
 } from "../../styles/window.styles";
 
 @Component({
     selector: "mona-window-content",
     templateUrl: "./window-content.component.html",
-    styleUrls: ["./window-content.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         WindowDragHandlerDirective,
         NgTemplateOutlet,
         ButtonDirective,
         WindowResizeHandlerDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        ResizePositionPipe
     ],
     host: {
         "[class]": "baseClass()"
@@ -83,6 +87,10 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
         read: ViewContainerRef
     });
     protected readonly componentRef?: ComponentRef<any>;
+    protected readonly contentClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return windowContentThemeVariants(theme)();
+    });
     protected readonly contentContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.windowData.rounded;
@@ -95,9 +103,17 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
     protected readonly maximized = signal(false);
     protected readonly minimizeIcon = Minus;
     protected readonly minimized = signal(false);
+    protected readonly titleBarActionClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return windowTitleBarActionThemeVariants(theme)();
+    });
     protected readonly titleBarClass = computed(() => {
         const theme = this.#themeService.theme();
         return windowTitleBarThemeVariants(theme)();
+    });
+    protected readonly titleClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return windowTitleThemeVariants(theme)();
     });
     protected readonly titleContainerClass = computed(() => {
         const theme = this.#themeService.theme();
