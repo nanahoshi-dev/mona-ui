@@ -11,7 +11,10 @@ import {
     ExpansionPanelComponent,
     ExpansionPanelTitleTemplateDirective,
     NumericTextBoxComponent,
-    SwitchComponent
+    SwitchComponent,
+    TabComponent,
+    TabContentTemplateDirective,
+    TabsComponent
 } from "mona-ui";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
@@ -35,7 +38,10 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         DropDownListValueTemplateDirective,
         DropDownItemTemplateDirective,
         ExpansionPanelComponent,
-        ExpansionPanelTitleTemplateDirective
+        ExpansionPanelTitleTemplateDirective,
+        TabsComponent,
+        TabComponent,
+        TabContentTemplateDirective
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush

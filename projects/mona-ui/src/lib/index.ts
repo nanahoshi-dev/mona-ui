@@ -352,6 +352,8 @@ export * from "./window/services/dialog.service";
 export { WindowRef } from "./window/models/WindowRef";
 export * from "./window/models/WindowSettings";
 export * from "./window/services/window.service";
+export * from "./window/directives/window-action-template.directive";
+export * from "./window/directives/window-content-template.directive";
 export * from "./window/directives/window-footer-template.directive";
 export * from "./window/directives/window-title-template.directive";
 export * from "./window/components/window/window.component";

@@ -3,6 +3,8 @@ import { WindowSettings } from "../models/WindowSettings";
 
 export const createWindowInjectorData = (settings: Partial<WindowSettings>): WindowInjectorData => {
     return {
+        actionTemplate: settings.actionTemplate,
+        closable: settings.closable ?? true,
         closeOnEscape: settings.closeOnEscape ?? false,
         content: settings.content,
         draggable: settings.draggable ?? false,
@@ -10,11 +12,14 @@ export const createWindowInjectorData = (settings: Partial<WindowSettings>): Win
         footerTemplate: settings.footerTemplate,
         height: settings.height,
         left: settings.left,
+        look: settings.look ?? "default",
         maxHeight: settings.maxHeight ?? window.innerHeight,
         maxWidth: settings.maxWidth ?? window.innerWidth,
+        maximizable: settings.maximizable ?? true,
         minHeight: settings.minHeight ?? 50,
         minWidth: settings.minWidth ?? 50,
-        windowReference: null as any,
+        minimizable: settings.minimizable ?? true,
+        windowReference: null as never,
         rounded: settings.rounded ?? "medium",
         preventClose: settings.preventClose,
         resizable: settings.resizable ?? false,

@@ -29,10 +29,6 @@ export class WindowRef<R = unknown> {
         this.#options.resize(params);
     }
 
-    public get beforeClose$(): Observable<WindowCloseEvent> {
-        return this.#options.beforeClose$;
-    }
-
     public get close$(): Observable<WindowCloseEvent> {
         return this.#options.close$;
     }

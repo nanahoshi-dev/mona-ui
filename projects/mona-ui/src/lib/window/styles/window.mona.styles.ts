@@ -77,10 +77,13 @@ export const windowTitleBarVariants = cva(
         flex items-center justify-start
         px-2 py-1 text-sm overflow-hidden
         border-b border-border
-        bg-secondary
     `,
     {
         variants: {
+            look: {
+                default: "bg-secondary text-foreground",
+                primary: "bg-primary text-primary-foreground"
+            },
             rounded: {
                 none: "rounded-ss-none rounded-se-none",
                 small: "rounded-ss-sm rounded-se-sm",
@@ -101,7 +104,15 @@ export const windowTitleContainerVariants = cva(
 
 export const windowTitleVariants = cva(
     `
-        font-semibold text-foreground
+        font-semibold
         overflow-hidden text-ellipsis whitespace-nowrap
-    `
+    `,
+    {
+        variants: {
+            look: {
+                default: "text-foreground",
+                primary: "text-primary-foreground"
+            }
+        }
+    }
 );

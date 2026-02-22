@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const calendarBaseVariants = cva(
     `
-        flex flex-col gap-2 p-2
+        flex flex-col gap-2 p-2 min-w-64
         bg-background text-foreground
         border border-input-border
         shadow-sm select-none
@@ -24,15 +24,6 @@ export const calendarBaseVariants = cva(
             }
         }
     }
-);
-
-export const calendarDecadeViewTableVariants = cva(
-    `
-        w-full border-collapse
-        [&_th,_td]:text-center
-        [&_th,_td]:h-12
-        [&_td]:cursor-pointer
-    `
 );
 
 export const calendarHeaderVariants = cva(

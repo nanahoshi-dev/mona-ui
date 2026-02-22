@@ -1,5 +1,5 @@
 import { DOCUMENT, forwardRef, inject, Injectable } from "@angular/core";
-import { asapScheduler } from "rxjs";
+import { asapScheduler, take } from "rxjs";
 import { PopupCloseEvent } from "../../popup/models/PopupCloseEvent";
 import { PopupService } from "../../popup/services/popup.service";
 import { WindowContentComponent } from "../components/window-content/window-content.component";
@@ -21,33 +21,26 @@ export class WindowService {
     public open(settings: WindowSettings): WindowRef {
         const injectorData = createWindowInjectorData(settings);
         const windowReferenceHolder: { windowReference: WindowReference } = {
-            windowReference: null as any
+            windowReference: null as never
         };
         const windowReferenceOptions: WindowReferenceOptions = {
-            popupRef: null as any
+            popupRef: null as never
         };
         windowReferenceHolder.windowReference = new WindowReference(windowReferenceOptions);
         injectorData.windowReference = windowReferenceHolder.windowReference;
         windowReferenceOptions.popupRef = this.#popupService.create({
             anchor: this.#document.body,
-            content: WindowContentComponent,
-            closeOnBackdropClick: false,
-            closeOnEscape: false, // handled by window component
-            closeOnOutsideClick: false,
-            hasBackdrop: settings.modal,
             backdropClass: settings.modal
                 ? ["fixed", "inset-0", "bg-background/50", "transition-opacity", "z-40", "backdrop-blur-xs"]
                 : "transparent",
-            positionStrategy: "global",
+            closeOnBackdropClick: false,
+            closeOnEscape: settings.closeOnEscape ?? true,
+            closeOnOutsideClick: false,
+            content: WindowContentComponent,
             data: injectorData,
-            width: settings.width,
+            hasBackdrop: settings.modal,
             height: settings.height || "fit-content",
-            providers: [
-                {
-                    provide: WindowRef,
-                    useFactory: forwardRef(() => windowReferenceHolder.windowReference.windowRef)
-                }
-            ],
+            positionStrategy: "global",
             preventClose: (event: PopupCloseEvent) => {
                 if (settings.preventClose) {
                     const windowCloseEvent = new WindowCloseEvent({
@@ -59,7 +52,14 @@ export class WindowService {
                     return settings.preventClose(windowCloseEvent);
                 }
                 return false;
-            }
+            },
+            providers: [
+                {
+                    provide: WindowRef,
+                    useFactory: forwardRef(() => windowReferenceHolder.windowReference.windowRef)
+                }
+            ],
+            width: settings.width
         });
         asapScheduler.schedule(() => {
             const element = windowReferenceOptions.popupRef.overlayRef.overlayElement;

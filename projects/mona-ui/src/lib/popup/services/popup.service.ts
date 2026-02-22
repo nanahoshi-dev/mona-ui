@@ -413,6 +413,7 @@ export class PopupService {
                     originalEvent: event,
                     via: PopupCloseSource.Escape
                 });
+                popupReference.beforeClosed$.next(closeEvent);
 
                 if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
                     return;

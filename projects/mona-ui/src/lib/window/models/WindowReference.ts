@@ -1,4 +1,4 @@
-import { ComponentRef } from "@angular/core";
+import { ComponentRef, inject } from "@angular/core";
 import { asapScheduler, map, Observable, Subject } from "rxjs";
 import { PopupCloseSource } from "../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../popup/models/PopupRef";
@@ -13,13 +13,12 @@ import { WindowRefParams } from "./WindowRefParams";
  * @internal - used by WindowService. Do not export.
  */
 export class WindowReference<R = unknown> implements WindowRefParams<R> {
-    public readonly beforeClose$$ = new Subject<WindowCloseEvent>();
     public readonly move$$: Subject<MoveEvent> = new Subject<MoveEvent>();
     public readonly moveEnd$$: Subject<void> = new Subject<void>();
     public readonly moveStart$$: Subject<void> = new Subject<void>();
     public readonly resize$$: Subject<ResizeEvent> = new Subject<ResizeEvent>();
 
-    public constructor(private readonly options: WindowReferenceOptions) { }
+    public constructor(private readonly options: WindowReferenceOptions) {}
 
     public center(): void {
         const width = this.options.popupRef.overlayRef.overlayElement.getBoundingClientRect().width;
@@ -59,10 +58,6 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
         }
     }
 
-    public get beforeClose$(): Observable<WindowCloseEvent> {
-        return this.beforeClose$$.asObservable();
-    }
-
     public get close$(): Observable<WindowCloseEvent> {
         return this.options.popupRef.closed.pipe(
             map(event => {
@@ -75,7 +70,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public get component(): ComponentRef<any> | null {
-        // Type of component is ComponentRef<WindowContentComponent>. It is set as any to avoid circular dependency.
+        // The type of component is ComponentRef<WindowContentComponent>. It is set as any to avoid circular dependency.
         return (this.popupRef.component as ComponentRef<any>).instance.componentRef ?? null;
     }
 

@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    AfterViewInit,
+    afterNextRender,
     ApplicationRef,
     ChangeDetectionStrategy,
     Component,
@@ -12,7 +12,6 @@ import {
     ElementRef,
     inject,
     Injector,
-    OnInit,
     signal,
     TemplateRef,
     viewChild,
@@ -20,7 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideAngularModule, Maximize, Minimize, Minus, X } from "lucide-angular";
-import { filter, fromEvent } from "rxjs";
+import { filter, fromEvent, map, take, tap } from "rxjs";
 import { AnimationService } from "../../../animations/services/animation.service";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PopupCloseSource } from "../../../popup/models/PopupCloseEvent";
@@ -58,7 +57,7 @@ import {
         "[class]": "baseClass()"
     }
 })
-export class WindowContentComponent implements OnInit, AfterViewInit, WindowContentVariantInput {
+export class WindowContentComponent implements WindowContentVariantInput {
     readonly #animationService = inject(AnimationService);
     readonly #appRef = inject(ApplicationRef);
     readonly #destroyRef = inject(DestroyRef);
@@ -102,12 +101,14 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
     });
     protected readonly titleBarClass = computed(() => {
         const theme = this.#themeService.theme();
+        const look = this.windowData.look;
         const rounded = this.windowData.rounded;
-        return windowTitleBarThemeVariants(theme)({ rounded });
+        return windowTitleBarThemeVariants(theme)({ look, rounded });
     });
     protected readonly titleClass = computed(() => {
         const theme = this.#themeService.theme();
-        return windowTitleThemeVariants(theme)();
+        const look = this.windowData.look;
+        return windowTitleThemeVariants(theme)({ look });
     });
     protected readonly titleContainerClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -125,22 +126,12 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
                 elementInjector: this.#injector
             });
         }
-    }
-
-    public ngAfterViewInit(): void {
-        if (this.contentType() === "component" && this.componentAnchor() && this.componentRef) {
-            const index = this.#viewContainerRef.indexOf(this.componentRef.hostView);
-            if (index !== -1) {
-                this.#viewContainerRef.detach(index);
+        afterNextRender({
+            read: () => {
+                this.#createView();
+                this.focusElement();
             }
-            this.componentAnchor().insert(this.componentRef.hostView, 0);
-            this.componentRef.changeDetectorRef.detectChanges();
-        }
-        this.focusElement();
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
+        });
     }
 
     public onCloseClick(event: MouseEvent): void {
@@ -206,12 +197,7 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
         if (this.windowData.preventClose && this.windowData.preventClose(closeEvent)) {
             return;
         }
-        this.windowData.windowReference.beforeClose$$.next(closeEvent);
-        if (closeEvent.isDefaultPrevented()) {
-            return;
-        }
-        this.#animationService.fadeOut(this.windowData.windowReference.element);
-        this.windowData.windowReference.closeWithDelay(100, closeEvent);
+        this.windowData.windowReference.close(closeEvent);
     }
 
     private focusElement(): void {
@@ -232,14 +218,14 @@ export class WindowContentComponent implements OnInit, AfterViewInit, WindowCont
         }
     }
 
-    private setSubscriptions(): void {
-        if (this.windowData.closeOnEscape) {
-            fromEvent<KeyboardEvent>(this.#document, "keydown")
-                .pipe(
-                    filter(event => event.key === "Escape"),
-                    takeUntilDestroyed(this.#destroyRef)
-                )
-                .subscribe(event => this.closeWindow(event));
+    #createView(): void {
+        if (this.contentType() === "component" && this.componentAnchor() && this.componentRef) {
+            const index = this.#viewContainerRef.indexOf(this.componentRef.hostView);
+            if (index !== -1) {
+                this.#viewContainerRef.detach(index);
+            }
+            this.componentAnchor().insert(this.componentRef.hostView, 0);
+            this.componentRef.changeDetectorRef.detectChanges();
         }
     }
 }

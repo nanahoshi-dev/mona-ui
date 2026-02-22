@@ -11,24 +11,33 @@
             }
         </div>
         <div [class]="titleBarActionClass()">
+            @if (windowData.actionTemplate) {
+                <ng-container [ngTemplateOutlet]="windowData.actionTemplate"
+                              [ngTemplateOutletContext]="{ $implicit: windowData.windowReference.windowRef }">
+                </ng-container>
+            }
             @let maximizeTitle = maximized() || minimized() ? "Restore" : "Maximize";
-            @if (!minimized()) {
+            @if (windowData.minimizable && !minimized()) {
                 <button monaButton look="ghost" size="small" [iconOnly]="true"
                         [rounded]="windowData.rounded" [title]="'Minimize'"
                         (click)="onMinimizeClick()">
                     <lucide-angular [name]="minimizeIcon" [size]="16"></lucide-angular>
                 </button>
             }
-            <button monaButton look="ghost" size="small" [iconOnly]="true"
-                    [rounded]="windowData.rounded" [title]="maximizeTitle"
-                    (click)="onMaximizeClick()">
-                <lucide-angular [name]="maximizeIcon()" [size]="16"></lucide-angular>
-            </button>
-            <button monaButton look="ghost" size="small" [iconOnly]="true"
-                    [rounded]="windowData.rounded" title="Close"
-                    (click)="onCloseClick($event)">
-                <lucide-angular [name]="closeIcon" [size]="16"></lucide-angular>
-            </button>
+            @if (windowData.maximizable) {
+                <button monaButton look="ghost" size="small" [iconOnly]="true"
+                        [rounded]="windowData.rounded" [title]="maximizeTitle"
+                        (click)="onMaximizeClick()">
+                    <lucide-angular [name]="maximizeIcon()" [size]="16"></lucide-angular>
+                </button>
+            }
+            @if (windowData.closable) {
+                <button monaButton look="ghost" size="small" [iconOnly]="true"
+                        [rounded]="windowData.rounded" title="Close"
+                        (click)="onCloseClick($event)">
+                    <lucide-angular [name]="closeIcon" [size]="16"></lucide-angular>
+                </button>
+            }
         </div>
     </div>
     @if (!minimized()) {

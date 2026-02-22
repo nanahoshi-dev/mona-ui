@@ -117,10 +117,10 @@ export type WindowVariantProps = WindowBaseVariantProps &
     WindowTitleVariantProps;
 export type WindowVariantInput = WindowBaseVariantInput &
     WindowContentContainerVariantInput &
-    WindowResizerVariantInput &
+    Omit<WindowResizerVariantInput, "position"> &
     WindowTitleBarVariantInput &
     WindowTitleContainerVariantInput &
     WindowTitleBarActionVariantInput &
     WindowTitleVariantInput;
 
-export type WindowContentVariantInput = Omit<WindowVariantInput, "position" | "rounded">;
+export type WindowContentVariantInput = Omit<WindowVariantInput, "look" | "position" | "rounded">;
