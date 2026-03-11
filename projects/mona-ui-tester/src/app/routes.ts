@@ -100,6 +100,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "dialog",
+                loadComponent: () =>
+                    import("./docs/components/dialog-doc/dialog-doc.component").then(m => m.DialogDocComponent)
+            },
+            {
                 path: "dropdown-button",
                 loadComponent: () =>
                     import("./docs/components/dropdown-button-doc/dropdown-button-doc.component").then(

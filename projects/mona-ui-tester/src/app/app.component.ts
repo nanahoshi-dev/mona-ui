@@ -1218,8 +1218,8 @@ export class AppComponent implements OnInit {
         const dialogRef = this.dialogService.show({
             text: "Enter title: ",
             title: "Dialog",
-            type: "input",
-            inputType: "string"
+            type: "info"
+            // inputType: "string"
         });
         dialogRef.result.pipe(take(1)).subscribe({
             next: result => {

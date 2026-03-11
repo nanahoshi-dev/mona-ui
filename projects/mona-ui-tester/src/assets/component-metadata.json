@@ -2267,6 +2267,120 @@
       }
     ]
   },
+  "DialogComponent": {
+    "name": "DialogComponent",
+    "selector": "\"mona-dialog\"",
+    "inputs": [
+      {
+        "name": "closable",
+        "type": "boolean",
+        "description": "Sets the visibility of the close button in the dialog header.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "closeOnEscape",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "description": "Sets the description of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "focusedElement",
+        "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
+        "description": "Sets the element that should receive focus when the dialog is opened.",
+        "kind": "input"
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "description": "Sets the height of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "left",
+        "type": "number",
+        "description": "Sets the left position of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "maxHeight",
+        "type": "number",
+        "description": "Sets the maximum height of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "maxWidth",
+        "type": "number",
+        "description": "Sets the maximum width of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "minHeight",
+        "type": "number",
+        "description": "Sets the minimum height of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "minWidth",
+        "type": "number",
+        "description": "Sets the minimum width of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "modal",
+        "type": "boolean",
+        "description": "Sets whether the dialog should have an overlay behind it.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "DialogVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "description": "Sets the text of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "top",
+        "type": "number",
+        "description": "Sets the top position of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "type",
+        "type": "DialogVariantProps[\"type\"] | null",
+        "description": "Sets the type of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "description": "Sets the width of the dialog.",
+        "kind": "input"
+      }
+    ]
+  },
   "WindowComponent": {
     "name": "WindowComponent",
     "selector": "\"mona-window\"",

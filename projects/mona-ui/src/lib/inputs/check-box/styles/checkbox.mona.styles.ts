@@ -40,7 +40,7 @@ export const checkmarkVariants = cva(
 export const checkboxContainerLabelVariants = cva(
     `
         w-full h-full
-        inline-flex items-center justify-center gap-2
+        inline-flex items-center gap-2
         relative
 
         select-none

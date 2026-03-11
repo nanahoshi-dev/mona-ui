@@ -480,6 +480,7 @@ export class PopupService {
                     originalEvent: event,
                     via: PopupCloseSource.MouseLeave
                 });
+                popupReference.beforeClosed$.next(closeEvent);
 
                 if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
                     return;
@@ -507,6 +508,7 @@ export class PopupService {
                     originalEvent: event,
                     via: PopupCloseSource.OutsideClick
                 });
+                popupReference.beforeClosed$.next(closeEvent);
 
                 if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
                     return;
@@ -551,6 +553,7 @@ export class PopupService {
                 originalEvent: originalEvent ?? new Event("scroll"),
                 via: PopupCloseSource.Scroll
             });
+            popupReference.beforeClosed$.next(closeEvent);
 
             if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
                 return;

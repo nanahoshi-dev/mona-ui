@@ -5,6 +5,7 @@ import { LucideAngularModule, User } from "lucide-angular";
 import {
     ButtonDirective,
     DropdownListComponent,
+    PopupCloseEvent,
     SwitchComponent,
     TextBoxComponent,
     WindowActionTemplateDirective,
@@ -13,8 +14,6 @@ import {
     WindowFooterTemplateDirective,
     WindowTitleTemplateDirective
 } from "mona-ui";
-import { PopupCloseSource } from "mona-ui/popup/models/PopupCloseEvent";
-import { WindowCloseEvent } from "mona-ui/window/models/WindowCloseEvent";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -282,7 +281,7 @@ class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent>
     public readonly top = model<ReturnType<WindowComponent["top"]>>();
     public readonly width = model<ReturnType<WindowComponent["width"]>>();
 
-    protected onWindowClose(event: WindowCloseEvent): void {
+    protected onWindowClose(event: PopupCloseEvent): void {
         // if (event.via === PopupCloseSource.Escape) {
         //     event.preventDefault();
         //     return;

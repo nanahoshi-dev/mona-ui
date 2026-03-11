@@ -12,8 +12,6 @@ export const checkboxInputThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaCheckboxVariants;
-        case "shadcn":
-            return monaCheckboxVariants;
         default:
             return monaCheckboxVariants;
     }
@@ -22,8 +20,6 @@ export const checkboxInputThemeVariants = (theme: ThemeStyle) => {
 export const checkmarkThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return monaCheckmarkVariants;
-        case "shadcn":
             return monaCheckmarkVariants;
         default:
             return monaCheckmarkVariants;
@@ -34,8 +30,6 @@ export const checkboxContainerLabelThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaCheckboxContainerLabelVariants;
-        case "shadcn":
-            return monaCheckboxContainerLabelVariants;
         default:
             return monaCheckboxContainerLabelVariants;
     }
@@ -44,8 +38,6 @@ export const checkboxContainerLabelThemeVariants = (theme: ThemeStyle) => {
 export const checkboxDirectiveThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
-            return monaCheckboxDirectiveVariants;
-        case "shadcn":
             return monaCheckboxDirectiveVariants;
         default:
             return monaCheckboxDirectiveVariants;

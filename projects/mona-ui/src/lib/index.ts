@@ -306,6 +306,7 @@ export * from "./pager/components/pager/pager.component";
 
 /** Popup */
 export { PopupRef } from "./popup/models/PopupRef";
+export { PopupCloseEvent } from "./popup/models/PopupCloseEvent";
 export * from "./popup/models/PopupSettings";
 export * from "./popup/services/popup.service";
 export * from "./popup/components/popup/popup.component";
@@ -343,20 +344,28 @@ export * from "./tree-view/directives/tree-view-selectable.directive";
 export * from "./tree-view/directives/tree-view-node-template.directive";
 
 /** Window */
-export * from "./window/models/DialogAction";
-export * from "./window/models/DialogRef";
-export * from "./window/models/DialogResult";
-export * from "./window/models/DialogSettings";
-export * from "./window/models/DialogType";
-export * from "./window/services/dialog.service";
-export { WindowRef } from "./window/models/WindowRef";
-export * from "./window/models/WindowSettings";
-export * from "./window/services/window.service";
-export * from "./window/directives/window-action-template.directive";
-export * from "./window/directives/window-content-template.directive";
-export * from "./window/directives/window-footer-template.directive";
-export * from "./window/directives/window-title-template.directive";
-export * from "./window/components/window/window.component";
+export * from "./dialogs/dialog/models/DialogAction";
+export * from "./dialogs/dialog/models/DialogRef";
+export * from "./dialogs/dialog/models/DialogResult";
+export * from "./dialogs/dialog/models/DialogSettings";
+export * from "./dialogs/dialog/services/dialog.service";
+export { WindowRef } from "./dialogs/window/models/WindowRef";
+export * from "./dialogs/window/models/WindowSettings";
+export * from "./dialogs/window/services/window.service";
+
+export * from "./dialogs/dialog/directives/dialog-content-template.directive";
+export * from "./dialogs/dialog/directives/dialog-footer-template.directive";
+export * from "./dialogs/dialog/directives/dialog-title-template.directive";
+
+export * from "./dialogs/window/directives/window-action-template.directive";
+export * from "./dialogs/window/directives/window-content-template.directive";
+export * from "./dialogs/window/directives/window-footer-template.directive";
+export * from "./dialogs/window/directives/window-title-template.directive";
+export * from "./dialogs/dialog/directives/dialog-title-template.directive";
+export * from "./dialogs/dialog/directives/dialog-content-template.directive";
+export * from "./dialogs/dialog/directives/dialog-footer-template.directive";
+export * from "./dialogs/window/components/window/window.component";
+export * from "./dialogs/dialog/components/dialog/dialog.component";
 
 /** Pipes */
 export * from "./pipes/slice.pipe";

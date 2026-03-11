@@ -1,0 +1,66 @@
+@let dialogIcon = icon();
+
+<div [class]="contentContainerClass()">
+    @if (dialogIcon) {
+        <div [class]="iconContainerClass()">
+            <div>
+                <span></span>
+                <lucide-icon [name]="dialogIcon.icon" [size]="24" [style.color]="dialogIcon.color"></lucide-icon>
+            </div>
+        </div>
+    }
+    <div [class]="bodyClass()">
+        <div [class]="headerClass()">
+            <div [class]="titleContainerClass()">
+                @if (dialogData.titleTemplate) {
+                    <ng-container [ngTemplateOutlet]="dialogData.titleTemplate"></ng-container>
+                } @else {
+                    <h2 [class]="titleClass()">{{ dialogData.title }}</h2>
+                }
+            </div>
+            @if (dialogData.closable) {
+                <div [class]="closeButtonContainerClass()">
+                    <button monaButton look="ghost" size="small" [iconOnly]="true" (click)="onCloseClick()">
+                        <lucide-angular [name]="closeIcon" [size]="16"></lucide-angular>
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div>
+            @if (dialogData.descriptionTemplate) {
+                <ng-container [ngTemplateOutlet]="dialogData.descriptionTemplate"></ng-container>
+            } @else if (dialogData.description) {
+                <p [class]="descriptionClass()">{{ dialogData.description }}</p>
+            }
+        </div>
+
+        <div [class]="contentClass()">
+            @if (dialogData.content) {
+                <ng-container [ngTemplateOutlet]="dialogData.content"></ng-container>
+            } @else if (dialogData.text) {
+                <p class="select-none pl-2">{{ dialogData.text }}</p>
+            }
+        </div>
+    </div>
+</div>
+
+@if (dialogData.footerTemplate || (dialogData.actions | monaAny)) {
+    @if (dialogData.footerTemplate) {
+        <ng-container [ngTemplateOutlet]="dialogData.footerTemplate"></ng-container>
+    } @else {
+        <div [class]="footerClass()">
+            @for (action of dialogData.actions; track action.text) {
+                <button
+                    monaButton
+                    [class]="$any(action.cssClass)"
+                    [iconOnly]="action.iconOnly || false"
+                    [look]="action.look"
+                    [rounded]="action.rounded || dialogData.rounded"
+                    (click)="onActionClick(action)">
+                    {{ action.text }}
+                </button>
+            }
+        </div>
+    }
+}

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/c
 import { take } from "rxjs";
 import { ButtonGroupComponent } from "../../../buttons/button-group/components/button-group/button-group.component";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
-import { DialogService } from "../../../window/services/dialog.service";
+import { DialogService } from "../../../dialogs/dialog/services/dialog.service";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
@@ -28,12 +28,12 @@ export class EditorLinkComponent {
         const link = this.#editorService.editor.getAttributes("link")["href"] ?? "";
         const dialogRef = this.#dialogService.show({
             title: "Insert Link",
-            type: "input",
-            inputType: "string",
-            text: "Enter the URL",
-            value: link
+            type: "info",
+            // inputType: "string",
+            text: "Enter the URL"
+            // value: link
         });
-        dialogRef.result.pipe(take(1)).subscribe(result => this.setLink(result.value as string));
+        // dialogRef.result.pipe(take(1)).subscribe(result => this.setLink(result.value as string));
     }
 
     public onUnlinkClick(): void {

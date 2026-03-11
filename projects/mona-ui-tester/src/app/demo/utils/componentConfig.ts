@@ -35,6 +35,7 @@ export type ComponentConfigType =
     | "number"
     | "boolean"
     | "dropdown"
+    | "customDropdown"
     | "color"
     | "event"
     | "iterable"
@@ -57,7 +58,18 @@ export type ComponentConfigInputType<TComponent> = {
         | {
               type: Extract<ComponentConfigType, "dropdown">;
               value: Array<NonNullable<ComponentInputs<TComponent>[key]>>;
-              defaultValue: ComponentInputs<TComponent>[key];
+              textField?: string; // Optional, only for dropdown inputs
+              valueField?: string; // Optional, only for dropdown inputs
+              defaultValue: ComponentInputs<TComponent>[key] | string;
+              placeholder?: string; // Optional, only for dropdown inputs
+              clearable?: boolean;
+          }
+        | {
+              type: Extract<ComponentConfigType, "customDropdown">;
+              value: Iterable<unknown>;
+              textField: string; // Optional, only for custom dropdown inputs
+              valueField: string; // Optional, only for custom dropdown inputs
+              defaultValue: unknown;
               placeholder?: string; // Optional, only for dropdown inputs
               clearable?: boolean;
           }
@@ -124,7 +136,9 @@ export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     note?: string;
     nullable?: boolean; // From the input structure
     placeholder?: string; // Optional, only for dropdown inputs
+    textField?: string; // Optional, only for custom dropdown inputs
     value?: TValue; // Runtime JS type of the value
+    valueField?: string; // Optional, only for custom dropdown inputs
     valueType: "string" | "number" | "boolean" | "array" | "object" | "symbol" | "bigint" | "function" | "undefined";
 };
 
@@ -171,16 +185,27 @@ export function createComponentInputConfigArray<TComponent>(
             const runtimeValueType = getRuntimeValueType(configItem.value);
             processedArray.push({
                 alias: configItem.alias,
-                clearable: configItem.type === "dropdown" ? configItem.clearable : undefined,
+                clearable:
+                    configItem.type === "dropdown" || configItem.type === "customDropdown"
+                        ? configItem.clearable
+                        : undefined,
                 configType: configItem.type,
-                defaultValue: configItem.type === "dropdown" ? configItem.defaultValue : undefined,
+                defaultValue:
+                    configItem.type === "dropdown" || configItem.type === "customDropdown"
+                        ? configItem.defaultValue
+                        : undefined,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
                 note: configItem.note,
                 nullable: configItem.type === "number" ? (configItem.nullable ?? false) : undefined,
                 name: String(key),
-                placeholder: configItem.type === "dropdown" ? configItem.placeholder : undefined,
+                placeholder:
+                    configItem.type === "dropdown" || configItem.type === "customDropdown"
+                        ? configItem.placeholder
+                        : undefined,
+                textField: configItem.type === "customDropdown" ? configItem.textField : undefined,
                 value: configItem.value,
+                valueField: configItem.type === "customDropdown" ? configItem.valueField : undefined,
                 valueType: runtimeValueType
             });
         }
@@ -248,7 +273,7 @@ export function extractConfigValues<TComponent>(
                 if (configItem.type === "iterable") {
                     valueToAssign = configItem.value;
                 } else if (Array.isArray(configItem.value) && configItem.value.length > 0) {
-                    if (configItem.type === "dropdown") {
+                    if (configItem.type === "dropdown" || configItem.type === "customDropdown") {
                         valueToAssign = configItem.defaultValue;
                     } else {
                         valueToAssign = configItem.value[0];

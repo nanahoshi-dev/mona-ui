@@ -89,6 +89,10 @@ export class SidebarComponent {
                     path: "/datetime-picker"
                 },
                 {
+                    text: "Dialog",
+                    path: "/dialog"
+                },
+                {
                     text: "Dropdown Button",
                     path: "/dropdown-button"
                 },
