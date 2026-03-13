@@ -1,7 +1,7 @@
 import { WindowInjectorData } from "../models/WindowInjectorData";
 import { WindowSettings } from "../models/WindowSettings";
 
-export const createWindowInjectorData = (settings: Partial<WindowSettings>): WindowInjectorData => {
+export const createWindowInjectorData = (settings: Partial<WindowSettings>): Omit<WindowInjectorData, "windowReference"> => {
     return {
         actionTemplate: settings.actionTemplate,
         closable: settings.closable ?? true,
@@ -19,7 +19,7 @@ export const createWindowInjectorData = (settings: Partial<WindowSettings>): Win
         minHeight: settings.minHeight ?? 50,
         minWidth: settings.minWidth ?? 50,
         minimizable: settings.minimizable ?? true,
-        windowReference: null as never,
+        modal: settings.modal,
         rounded: settings.rounded ?? "medium",
         preventClose: settings.preventClose,
         resizable: settings.resizable ?? false,
@@ -27,5 +27,5 @@ export const createWindowInjectorData = (settings: Partial<WindowSettings>): Win
         titleTemplate: typeof settings.title === "string" ? undefined : settings.title,
         top: settings.top,
         width: settings.width
-    } as WindowInjectorData;
+    };
 };

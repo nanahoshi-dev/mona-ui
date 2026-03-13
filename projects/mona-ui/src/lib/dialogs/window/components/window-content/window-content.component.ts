@@ -1,3 +1,4 @@
+import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
@@ -21,6 +22,7 @@ import { ButtonDirective } from "../../../../buttons/button/directives/button.di
 import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/PopupCloseEvent";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
@@ -49,8 +51,12 @@ import {
         ResizePositionPipe
     ],
     host: {
-        "[class]": "baseClass()"
-    }
+        "[class]": "baseClass()",
+        "[attr.aria-labelledby]": "headerId",
+        "[attr.aria-modal]": "windowData.modal ?? false",
+        role: "dialog"
+    },
+    hostDirectives: [CdkTrapFocus]
 })
 export class WindowContentComponent implements WindowContentVariantInput {
     readonly #appRef = inject(ApplicationRef);
@@ -71,7 +77,7 @@ export class WindowContentComponent implements WindowContentVariantInput {
     protected readonly componentAnchor = viewChild.required("componentAnchor", {
         read: ViewContainerRef
     });
-    protected readonly componentRef?: ComponentRef<any>;
+    protected readonly componentRef?: ComponentRef<unknown>;
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
         return windowContentThemeVariants(theme)();
@@ -81,7 +87,12 @@ export class WindowContentComponent implements WindowContentVariantInput {
         const rounded = this.windowData.rounded;
         return windowContentContainerThemeVariants(theme)({ rounded });
     });
+    protected readonly contentTemplate = computed(() => {
+        const content = this.windowData.content;
+        return content instanceof TemplateRef ? content : null;
+    });
     protected readonly contentType = signal<"template" | "component">("template");
+    protected readonly headerId = createElementControlId();
     protected readonly maximizeIcon = computed(() => {
         return this.maximized() && !this.minimized() ? Minimize : Maximize;
     });
@@ -112,7 +123,7 @@ export class WindowContentComponent implements WindowContentVariantInput {
     public constructor() {
         if (this.windowData.content instanceof TemplateRef) {
             this.contentType.set("template");
-        } else {
+        } else if (this.windowData.content) {
             this.contentType.set("component");
             this.componentRef = createComponent(this.windowData.content, {
                 environmentInjector: this.#appRef.injector,

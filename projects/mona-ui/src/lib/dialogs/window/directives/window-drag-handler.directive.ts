@@ -1,6 +1,5 @@
 import {
     afterNextRender,
-    AfterViewInit,
     DestroyRef,
     Directive,
     DOCUMENT,
@@ -16,8 +15,7 @@ import { WindowReference } from "../models/WindowReference";
 import { DefaultMaxWindowHeight, DefaultMaxWindowWidth } from "../utils/defaults";
 
 @Directive({
-    selector: "div[monaWindowDragHandler]",
-    standalone: true
+    selector: "div[monaWindowDragHandler]"
 })
 export class WindowDragHandlerDirective {
     readonly #destroyRef = inject(DestroyRef);
@@ -39,7 +37,7 @@ export class WindowDragHandlerDirective {
             return;
         }
 
-        const element = this.#hostElementRef.nativeElement.parentElement?.parentElement?.parentElement as HTMLElement;
+        const element = this.windowRef().element;
         const initialX = event.clientX;
         const initialY = event.clientY;
         const initialTop = element.getBoundingClientRect().top;

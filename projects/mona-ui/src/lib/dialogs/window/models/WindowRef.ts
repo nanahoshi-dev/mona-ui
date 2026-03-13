@@ -37,7 +37,7 @@ export class WindowRef<R = unknown> implements WindowRefParams<R> {
         return this.#options.closed$;
     }
 
-    public get component(): ComponentRef<any> | null {
+    public get component(): ComponentRef<unknown> | null {
         return this.#options.component;
     }
 

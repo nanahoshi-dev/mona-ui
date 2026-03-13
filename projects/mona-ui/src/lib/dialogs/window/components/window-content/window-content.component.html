@@ -9,7 +9,7 @@
             @if (windowData.titleTemplate) {
                 <ng-container [ngTemplateOutlet]="windowData.titleTemplate"></ng-container>
             } @else {
-                <span [class]="titleClass()">{{ windowData.title ?? "" }}</span>
+                <span [id]="headerId" [class]="titleClass()">{{ windowData.title ?? "" }}</span>
             }
         </div>
         <div [class]="titleBarActionClass()">
@@ -25,12 +25,14 @@
                     monaButton
                     look="ghost"
                     size="small"
+                    type="button"
                     [iconOnly]="true"
                     [rounded]="windowData.rounded"
                     [title]="'Minimize'"
+                    aria-label="Minimize"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onMinimizeClick()">
-                    <lucide-angular [name]="minimizeIcon" [size]="16"></lucide-angular>
+                    <lucide-angular [name]="minimizeIcon" [size]="16" aria-hidden="true"></lucide-angular>
                 </button>
             }
             @if (windowData.maximizable) {
@@ -38,12 +40,14 @@
                     monaButton
                     look="ghost"
                     size="small"
+                    type="button"
                     [iconOnly]="true"
                     [rounded]="windowData.rounded"
                     [title]="maximizeTitle"
+                    [attr.aria-label]="maximizeTitle"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onMaximizeClick()">
-                    <lucide-angular [name]="maximizeIcon()" [size]="16"></lucide-angular>
+                    <lucide-angular [name]="maximizeIcon()" [size]="16" aria-hidden="true"></lucide-angular>
                 </button>
             }
             @if (windowData.closable) {
@@ -51,12 +55,14 @@
                     monaButton
                     look="ghost"
                     size="small"
+                    type="button"
                     [iconOnly]="true"
                     [rounded]="windowData.rounded"
                     title="Close"
+                    aria-label="Close window"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onCloseClick($event)">
-                    <lucide-angular [name]="closeIcon" [size]="16"></lucide-angular>
+                    <lucide-angular [name]="closeIcon" [size]="16" aria-hidden="true"></lucide-angular>
                 </button>
             }
         </div>
@@ -65,7 +71,7 @@
         <div [class]="contentClass()">
             @switch (contentType()) {
                 @case ("template") {
-                    <ng-container [ngTemplateOutlet]="$any(windowData.content)"></ng-container>
+                    <ng-container [ngTemplateOutlet]="contentTemplate()!"></ng-container>
                 }
                 @case ("component") {
                     <ng-container #componentAnchor></ng-container>

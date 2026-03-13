@@ -1,12 +1,11 @@
-import { DOCUMENT, forwardRef, inject, Injectable } from "@angular/core";
-import { asapScheduler } from "rxjs";
+import { afterNextRender, DOCUMENT, forwardRef, inject, Injectable, Injector } from "@angular/core";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { PopupService } from "../../../popup/services/popup.service";
 import { setWindowStyles } from "../../utils/setWindowStyles";
 import { WindowContentComponent } from "../components/window-content/window-content.component";
+import { WindowInjectorData } from "../models/WindowInjectorData";
 import { WindowRef } from "../models/WindowRef";
 import { WindowReference } from "../models/WindowReference";
-import { WindowReferenceOptions } from "../models/WindowReferenceOptions";
 import { WindowSettings } from "../models/WindowSettings";
 import { createWindowInjectorData } from "../utils/createWindowInjectorData";
 
@@ -15,19 +14,13 @@ import { createWindowInjectorData } from "../utils/createWindowInjectorData";
 })
 export class WindowService {
     readonly #document = inject(DOCUMENT);
+    readonly #injector = inject(Injector);
     readonly #popupService = inject(PopupService);
 
     public open(settings: WindowSettings): WindowRef {
-        const injectorData = createWindowInjectorData(settings);
-        const windowReferenceHolder: { windowReference: WindowReference } = {
-            windowReference: null as never
-        };
-        const windowReferenceOptions: WindowReferenceOptions = {
-            popupRef: null as never
-        };
-        windowReferenceHolder.windowReference = new WindowReference(windowReferenceOptions, this.#document);
-        injectorData.windowReference = windowReferenceHolder.windowReference;
-        windowReferenceOptions.popupRef = this.#popupService.create({
+        const windowReference = new WindowReference({}, this.#document);
+        const injectorData: WindowInjectorData = { ...createWindowInjectorData(settings), windowReference };
+        const popupRef = this.#popupService.create({
             anchor: this.#document.body,
             backdropClass: settings.modal
                 ? ["fixed", "inset-0", "bg-background/50", "transition-opacity", "z-40", "backdrop-blur-xs"]
@@ -53,15 +46,19 @@ export class WindowService {
             providers: [
                 {
                     provide: WindowRef,
-                    useFactory: forwardRef(() => windowReferenceHolder.windowReference.windowRef)
+                    useFactory: forwardRef(() => windowReference.windowRef)
                 }
             ],
             width: settings.width
         });
-        asapScheduler.schedule(() => {
-            const element = windowReferenceOptions.popupRef.overlayRef.overlayElement;
-            setWindowStyles(element, settings);
-        });
-        return windowReferenceHolder.windowReference.windowRef;
+        windowReference.initializePopupRef(popupRef);
+
+        afterNextRender({
+            read: () => {
+                const element = popupRef.overlayRef.overlayElement;
+                setWindowStyles(element, settings);
+            }
+        }, { injector: this.#injector });
+        return windowReference.windowRef;
     }
 }

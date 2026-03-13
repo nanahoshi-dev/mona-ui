@@ -13,6 +13,7 @@ import { WindowRefParams } from "./WindowRefParams";
  * @internal - used by WindowService. Do not export.
  */
 export class WindowReference<R = unknown> implements WindowRefParams<R> {
+    readonly #windowRef: WindowRef<R>;
     public readonly move$$: Subject<MoveEvent> = new Subject<MoveEvent>();
     public readonly moveEnd$$: Subject<void> = new Subject<void>();
     public readonly moveStart$$: Subject<void> = new Subject<void>();
@@ -21,15 +22,18 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     public constructor(
         private readonly options: WindowReferenceOptions,
         private readonly document: Document
-    ) {}
+    ) {
+        this.#windowRef = new WindowRef<R>(this);
+    }
 
     public center(): void {
-        const width = this.options.popupRef.overlayRef.overlayElement.getBoundingClientRect().width;
-        const height = this.options.popupRef.overlayRef.overlayElement.getBoundingClientRect().height;
+        const element = this.#popupRefOrThrow.overlayRef.overlayElement;
+        const width = element.getBoundingClientRect().width;
+        const height = element.getBoundingClientRect().height;
         const left = (this.document.defaultView?.innerWidth || DefaultMaxWindowWidth - width) / 2;
         const top = (this.document.defaultView?.innerHeight || DefaultMaxWindowHeight - height) / 2;
-        this.options.popupRef.overlayRef.overlayElement.style.left = `${left}px`;
-        this.options.popupRef.overlayRef.overlayElement.style.top = `${top}px`;
+        element.style.left = `${left}px`;
+        element.style.top = `${top}px`;
     }
 
     public close(result?: R): void {
@@ -37,41 +41,47 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
             result instanceof PopupCloseEvent
                 ? result
                 : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
-        this.options.popupRef.close(event);
+        this.#popupRefOrThrow.close(event);
     }
 
     public closeWithDelay(delay: number, result?: R): void {
         asapScheduler.schedule(() => this.close(result), delay);
     }
 
+    public initializePopupRef(popupRef: PopupRef): void {
+        this.options.popupRef = popupRef;
+    }
+
     public move(params: { top?: number; left?: number }): void {
+        const element = this.#popupRefOrThrow.overlayRef.overlayElement;
         const top = params.top != null ? `${params.top}px` : ``;
         const left = params.left != null ? `${params.left}px` : ``;
-        this.options.popupRef.overlayRef.overlayElement.style.top = top;
-        this.options.popupRef.overlayRef.overlayElement.style.left = left;
+        element.style.top = top;
+        element.style.left = left;
     }
 
     public resize(params: { width?: number; height?: number; center?: boolean }): void {
+        const element = this.#popupRefOrThrow.overlayRef.overlayElement;
         const width = params.width ? `${params.width}px` : ``;
         const height = params.height ? `${params.height}px` : ``;
-        this.options.popupRef.overlayRef.overlayElement.style.width = width;
-        this.options.popupRef.overlayRef.overlayElement.style.height = height;
+        element.style.width = width;
+        element.style.height = height;
         if (params.center) {
             asapScheduler.schedule(() => this.center());
         }
     }
 
     public get close$(): Observable<PopupCloseEvent<R>> {
-        return this.options.popupRef.beforeClose.pipe(map(event => event as PopupCloseEvent<R>));
+        return this.#popupRefOrThrow.beforeClose.pipe(map(event => event as PopupCloseEvent<R>));
     }
 
     public get closed$(): Observable<void> {
-        return this.options.popupRef.closed.pipe(map(() => undefined));
+        return this.#popupRefOrThrow.closed.pipe(map(() => undefined));
     }
 
-    public get component(): ComponentRef<any> | null {
-        // The type of component is ComponentRef<WindowContentComponent>. It is set as any to avoid circular dependency.
-        return (this.popupRef.component as ComponentRef<any>).instance.componentRef ?? null;
+    public get component(): ComponentRef<unknown> | null {
+        // The type of component is ComponentRef<WindowContentComponent>. It is set as unknown to avoid circular dependency.
+        return (this.popupRef.component as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance.componentRef ?? null;
     }
 
     public get drag$(): Observable<MoveEvent> {
@@ -87,7 +97,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public get element(): HTMLElement {
-        return this.options.popupRef.overlayRef.overlayElement;
+        return this.#popupRefOrThrow.overlayRef.overlayElement;
     }
 
     public get height(): number {
@@ -95,7 +105,7 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public get popupRef(): PopupRef {
-        return this.options.popupRef;
+        return this.#popupRefOrThrow;
     }
 
     public get resize$(): Observable<ResizeEvent> {
@@ -107,6 +117,13 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     }
 
     public get windowRef(): WindowRef<R> {
-        return new WindowRef<R>(this);
+        return this.#windowRef;
+    }
+
+    get #popupRefOrThrow(): PopupRef {
+        if (!this.options.popupRef) {
+            throw new Error("WindowReference: popupRef has not been initialized.");
+        }
+        return this.options.popupRef;
     }
 }

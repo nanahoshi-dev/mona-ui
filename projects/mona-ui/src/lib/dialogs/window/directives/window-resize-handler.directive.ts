@@ -1,4 +1,4 @@
-import { AfterViewInit, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, NgZone } from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, NgZone } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
@@ -13,7 +13,7 @@ import {
 @Directive({
     selector: "div[monaWindowResizeHandler]"
 })
-export class WindowResizeHandlerDirective implements AfterViewInit {
+export class WindowResizeHandlerDirective {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
@@ -26,8 +26,10 @@ export class WindowResizeHandlerDirective implements AfterViewInit {
     public minWidth = input<number>();
     public windowRef = input.required<WindowReference>();
 
-    public ngAfterViewInit(): void {
-        this.setEvents();
+    public constructor() {
+        afterNextRender({
+            read: () => this.setEvents()
+        });
     }
 
     public onMouseDown(event: MouseEvent) {

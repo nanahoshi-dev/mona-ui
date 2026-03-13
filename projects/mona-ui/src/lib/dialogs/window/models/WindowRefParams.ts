@@ -9,11 +9,11 @@ export interface WindowRefParams<R = unknown> {
     close: (result?: R) => void;
     center: () => void;
     move: (params: { top?: number; left?: number }) => void;
-    resize: (params: { width?: number; hight?: number; center?: boolean }) => void;
+    resize: (params: { width?: number; height?: number; center?: boolean }) => void;
 
     get close$(): Observable<PopupCloseEvent<R>>;
     get closed$(): Observable<void>;
-    get component(): ComponentRef<any> | null;
+    get component(): ComponentRef<unknown> | null;
     get drag$(): Observable<MoveEvent>;
     get dragEnd$(): Observable<void>;
     get dragStart$(): Observable<void>;
