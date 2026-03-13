@@ -192,7 +192,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                 (close)="onWindowClose($event)"
                 #windowComponent>
                 <ng-template monaWindowContentTemplate>
-                    <div class="w-lg h-full flex flex-col">
+                    <div class="w-full h-full flex flex-col">
                         <div class="flex flex-col flex-1 items-start p-2 gap-2 w-full">
                             <div class="flex items-center w-full">
                                 <div class="flex items-center w-1/4 text-sm font-semibold">Name</div>

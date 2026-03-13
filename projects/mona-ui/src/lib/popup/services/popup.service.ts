@@ -645,7 +645,7 @@ export class PopupService {
         event: PopupCloseEvent
     ): boolean {
         if (!preventClose) {
-            return false;
+            return event.isDefaultPrevented();
         }
         return preventClose(event) || event.isDefaultPrevented();
     }

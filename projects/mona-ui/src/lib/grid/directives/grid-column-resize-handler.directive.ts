@@ -14,8 +14,7 @@ import { fromEvent } from "rxjs";
 import { Column } from "../models/Column";
 
 @Directive({
-    selector: "[monaGridColumnResizeHandler]",
-    standalone: true
+    selector: "[monaGridColumnResizeHandler]"
 })
 export class GridColumnResizeHandlerDirective implements AfterViewInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
@@ -51,7 +50,7 @@ export class GridColumnResizeHandlerDirective implements AfterViewInit {
         const onMouseMove = (event: MouseEvent) => {
             const deltaX = event.clientX - initialX;
             const minWidth = this.column().minWidth();
-            const maxWidth = this.column().maxWidth() ?? window.innerWidth;
+            const maxWidth = this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? 1000; //TODO: Change 1000 to a constant
 
             if (initialWidth + deltaX < minWidth) {
                 return;

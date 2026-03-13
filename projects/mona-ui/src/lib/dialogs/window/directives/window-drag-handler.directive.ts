@@ -13,6 +13,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { WindowReference } from "../models/WindowReference";
+import { DefaultMaxWindowHeight, DefaultMaxWindowWidth } from "../utils/defaults";
 
 @Directive({
     selector: "div[monaWindowDragHandler]",
@@ -43,6 +44,8 @@ export class WindowDragHandlerDirective {
         const initialY = event.clientY;
         const initialTop = element.getBoundingClientRect().top;
         const initialLeft = element.getBoundingClientRect().left;
+        const innerWidth = this.#document.defaultView?.innerWidth || DefaultMaxWindowWidth;
+        const innerHeight = this.#document.defaultView?.innerHeight || DefaultMaxWindowHeight;
         let dragInitiated = false;
 
         const onMouseMove = (event: MouseEvent) => {
@@ -50,12 +53,7 @@ export class WindowDragHandlerDirective {
                 dragInitiated = true;
                 this.windowRef().moveStart$$.next();
             }
-            if (
-                event.clientX < 0 ||
-                event.clientX > window.innerWidth ||
-                event.clientY < 0 ||
-                event.clientY > window.innerHeight
-            ) {
+            if (event.clientX < 0 || event.clientX > innerWidth || event.clientY < 0 || event.clientY > innerHeight) {
                 return;
             }
             const deltaX = event.clientX - initialX;

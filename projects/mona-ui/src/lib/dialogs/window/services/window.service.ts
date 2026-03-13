@@ -25,7 +25,7 @@ export class WindowService {
         const windowReferenceOptions: WindowReferenceOptions = {
             popupRef: null as never
         };
-        windowReferenceHolder.windowReference = new WindowReference(windowReferenceOptions);
+        windowReferenceHolder.windowReference = new WindowReference(windowReferenceOptions, this.#document);
         injectorData.windowReference = windowReferenceHolder.windowReference;
         windowReferenceOptions.popupRef = this.#popupService.create({
             anchor: this.#document.body,

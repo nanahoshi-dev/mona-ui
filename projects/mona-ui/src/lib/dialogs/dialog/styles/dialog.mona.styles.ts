@@ -139,5 +139,3 @@ export const dialogFooterVariants = cva(
         }
     }
 );
-
-const rand = window.crypto.getRandomValues(new Uint32Array(1))[0];

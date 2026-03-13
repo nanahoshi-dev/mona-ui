@@ -14,6 +14,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take, takeUntil } from "rxjs";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { DialogContentTemplateDirective } from "../../directives/dialog-content-template.directive";
+import { DialogDescriptionTemplateDirective } from "../../directives/dialog-description-template.directive";
 import { DialogFooterTemplateDirective } from "../../directives/dialog-footer-template.directive";
 import { DialogTitleTemplateDirective } from "../../directives/dialog-title-template.directive";
 import { ActionsLayout } from "../../models/ActionsLayout";
@@ -36,12 +37,12 @@ export class DialogComponent implements DialogVariantInput {
     #dialogRef?: DialogRef;
 
     private readonly contentTemplate = contentChild(DialogContentTemplateDirective, { read: TemplateRef });
+    private readonly descriptionTemplate = contentChild(DialogDescriptionTemplateDirective, { read: TemplateRef });
     private readonly footerTemplate = contentChild(DialogFooterTemplateDirective, { read: TemplateRef });
     private readonly titleTemplate = contentChild(DialogTitleTemplateDirective, { read: TemplateRef });
 
     /**
      * @description Emits when the user clicks on an action button.
-     * Do not emit if the action is created using `mona-dialog-actions` component.
      */
     public readonly action = output<DialogAction>();
 
@@ -64,7 +65,7 @@ export class DialogComponent implements DialogVariantInput {
 
     /**
      * @description Emits when the user clicks on the close button or presses the escape key.
-     * This event is preentable.
+     * This event is preventable.
      */
     public readonly close = output<PopupCloseEvent>();
 
@@ -170,6 +171,7 @@ export class DialogComponent implements DialogVariantInput {
             closeOnEscape: this.closeOnEscape(),
             content: this.contentTemplate(),
             description: this.description(),
+            descriptionTemplate: this.descriptionTemplate(),
             focusedElement: this.focusedElement(),
             footerTemplate: this.footerTemplate(),
             height: this.height(),

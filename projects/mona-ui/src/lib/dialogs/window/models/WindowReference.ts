@@ -2,6 +2,7 @@ import { ComponentRef } from "@angular/core";
 import { asapScheduler, map, Observable, Subject } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../popup/models/PopupRef";
+import { DefaultMaxWindowHeight, DefaultMaxWindowWidth } from "../utils/defaults";
 import { MoveEvent } from "./MoveEvent";
 import { ResizeEvent } from "./ResizeEvent";
 import { WindowRef } from "./WindowRef";
@@ -17,13 +18,16 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
     public readonly moveStart$$: Subject<void> = new Subject<void>();
     public readonly resize$$: Subject<ResizeEvent> = new Subject<ResizeEvent>();
 
-    public constructor(private readonly options: WindowReferenceOptions) {}
+    public constructor(
+        private readonly options: WindowReferenceOptions,
+        private readonly document: Document
+    ) {}
 
     public center(): void {
         const width = this.options.popupRef.overlayRef.overlayElement.getBoundingClientRect().width;
         const height = this.options.popupRef.overlayRef.overlayElement.getBoundingClientRect().height;
-        const left = (window.innerWidth - width) / 2;
-        const top = (window.innerHeight - height) / 2;
+        const left = (this.document.defaultView?.innerWidth || DefaultMaxWindowWidth - width) / 2;
+        const top = (this.document.defaultView?.innerHeight || DefaultMaxWindowHeight - height) / 2;
         this.options.popupRef.overlayRef.overlayElement.style.left = `${left}px`;
         this.options.popupRef.overlayRef.overlayElement.style.top = `${top}px`;
     }

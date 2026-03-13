@@ -26,12 +26,23 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> {
     readonly #actions = [
         {
-            text: "Set 1",
+            text: "Save/Delete/Cancel",
             value: [
                 { look: "primary", text: "Save" },
                 { look: "error", text: "Delete" },
                 { look: "default", text: "Cancel" }
             ] as DialogAction[]
+        },
+        {
+            text: "Cancel/Confirm",
+            value: [
+                { look: "default", text: "Cancel" },
+                { look: "primary", text: "Confirm" }
+            ] as DialogAction[]
+        },
+        {
+            text: "No Action",
+            value: []
         }
     ];
     readonly #injector = createFeatureInjector({

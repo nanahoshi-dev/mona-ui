@@ -3,6 +3,9 @@ import { isIterable } from "rxjs/internal/util/isIterable";
 import { WindowSettings } from "../window/models/WindowSettings";
 
 export const setWindowStyles = (element: HTMLElement, settings: Partial<WindowSettings>): void => {
+    if (!element) {
+        return;
+    }
     const classes = isIterable(settings.windowClass) ? [...settings.windowClass] : [settings.windowClass];
     compact(classes).forEach(className => element.classList.add(className));
     const minWidth = settings.minWidth ? `${settings.minWidth}px` : "";

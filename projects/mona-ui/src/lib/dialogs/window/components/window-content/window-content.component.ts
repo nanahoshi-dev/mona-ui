@@ -7,7 +7,6 @@ import {
     ComponentRef,
     computed,
     createComponent,
-    DestroyRef,
     DOCUMENT,
     ElementRef,
     inject,
@@ -18,7 +17,6 @@ import {
     ViewContainerRef
 } from "@angular/core";
 import { LucideAngularModule, Maximize, Minimize, Minus, X } from "lucide-angular";
-import { AnimationService } from "../../../../animations/services/animation.service";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/PopupCloseEvent";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
@@ -55,9 +53,7 @@ import {
     }
 })
 export class WindowContentComponent implements WindowContentVariantInput {
-    readonly #animationService = inject(AnimationService);
     readonly #appRef = inject(ApplicationRef);
-    readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
@@ -136,11 +132,13 @@ export class WindowContentComponent implements WindowContentVariantInput {
     }
 
     protected onMaximizeClick(): void {
+        const innerWidth = this.#document.defaultView?.innerWidth;
+        const innerHeight = this.#document.defaultView?.innerHeight;
         if (this.minimized()) {
             this.minimized.set(false);
             this.windowData.windowReference.resize({
-                width: this.maximized() ? window.innerWidth : this.#sizeBeforeMaximize().width,
-                height: this.maximized() ? window.innerHeight : this.#sizeBeforeMaximize().height,
+                width: this.maximized() ? innerWidth : this.#sizeBeforeMaximize().width,
+                height: this.maximized() ? innerHeight : this.#sizeBeforeMaximize().height,
                 center: false
             });
             return;
@@ -165,8 +163,8 @@ export class WindowContentComponent implements WindowContentVariantInput {
             });
             this.maximized.set(true);
             this.windowData.windowReference.resize({
-                width: window.innerWidth,
-                height: window.innerHeight
+                width: innerWidth,
+                height: innerHeight
             });
             this.windowData.windowReference.move({ top: 0, left: 0 });
         }

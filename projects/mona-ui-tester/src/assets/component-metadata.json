@@ -551,66 +551,6 @@
       }
     ]
   },
-  "WindowDragHandlerDirective": {
-    "name": "WindowDragHandlerDirective",
-    "selector": "\"div[monaWindowDragHandler]\"",
-    "inputs": [
-      {
-        "name": "draggable",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "windowRef",
-        "type": "WindowReference",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "WindowResizeHandlerDirective": {
-    "name": "WindowResizeHandlerDirective",
-    "selector": "\"div[monaWindowResizeHandler]\"",
-    "inputs": [
-      {
-        "name": "direction",
-        "type": "WindowResizeHandlerDirection",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "maxHeight",
-        "type": "number | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "maxWidth",
-        "type": "number | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "minHeight",
-        "type": "number | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "minWidth",
-        "type": "number | undefined",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "windowRef",
-        "type": "WindowReference",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "ButtonDirective": {
     "name": "ButtonDirective",
     "selector": "\"button[monaButton]\"",
@@ -960,6 +900,66 @@
       {
         "name": "size",
         "type": "TimeSelectorListVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "WindowDragHandlerDirective": {
+    "name": "WindowDragHandlerDirective",
+    "selector": "\"div[monaWindowDragHandler]\"",
+    "inputs": [
+      {
+        "name": "draggable",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "windowRef",
+        "type": "WindowReference",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "WindowResizeHandlerDirective": {
+    "name": "WindowResizeHandlerDirective",
+    "selector": "\"div[monaWindowResizeHandler]\"",
+    "inputs": [
+      {
+        "name": "direction",
+        "type": "WindowResizeHandlerDirection",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "maxHeight",
+        "type": "number | undefined",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "maxWidth",
+        "type": "number | undefined",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "minHeight",
+        "type": "number | undefined",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "minWidth",
+        "type": "number | undefined",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "windowRef",
+        "type": "WindowReference",
         "description": "",
         "kind": "input"
       }
@@ -2264,258 +2264,6 @@
         "type": "string | Selector<T, string>",
         "description": "The text field for the tree.\r\n\r\nIt can be either of the following:\r\n- A string representing the property name of the text.\r\n- A function that returns the text of a node.",
         "kind": "input"
-      }
-    ]
-  },
-  "DialogComponent": {
-    "name": "DialogComponent",
-    "selector": "\"mona-dialog\"",
-    "inputs": [
-      {
-        "name": "closable",
-        "type": "boolean",
-        "description": "Sets the visibility of the close button in the dialog header.",
-        "kind": "input"
-      },
-      {
-        "name": "close",
-        "type": "void",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "closeOnEscape",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "description",
-        "type": "string",
-        "description": "Sets the description of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "focusedElement",
-        "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
-        "description": "Sets the element that should receive focus when the dialog is opened.",
-        "kind": "input"
-      },
-      {
-        "name": "height",
-        "type": "number",
-        "description": "Sets the height of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "left",
-        "type": "number",
-        "description": "Sets the left position of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "maxHeight",
-        "type": "number",
-        "description": "Sets the maximum height of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "maxWidth",
-        "type": "number",
-        "description": "Sets the maximum width of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "minHeight",
-        "type": "number",
-        "description": "Sets the minimum height of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "minWidth",
-        "type": "number",
-        "description": "Sets the minimum width of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "modal",
-        "type": "boolean",
-        "description": "Sets whether the dialog should have an overlay behind it.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "DialogVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "text",
-        "type": "string",
-        "description": "Sets the text of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "title",
-        "type": "string",
-        "description": "Sets the title of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "top",
-        "type": "number",
-        "description": "Sets the top position of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "type",
-        "type": "DialogVariantProps[\"type\"] | null",
-        "description": "Sets the type of the dialog.",
-        "kind": "input"
-      },
-      {
-        "name": "width",
-        "type": "number",
-        "description": "Sets the width of the dialog.",
-        "kind": "input"
-      }
-    ]
-  },
-  "WindowComponent": {
-    "name": "WindowComponent",
-    "selector": "\"mona-window\"",
-    "inputs": [
-      {
-        "name": "closable",
-        "type": "boolean",
-        "description": "Sets the visibility of the close button in the window header.",
-        "kind": "input"
-      },
-      {
-        "name": "close",
-        "type": "WindowCloseEvent",
-        "description": "Emits when the window is about to be closed.",
-        "kind": "output"
-      },
-      {
-        "name": "closeOnEscape",
-        "type": "boolean",
-        "description": "Sets whether the window should close when the escape key is pressed.",
-        "kind": "input"
-      },
-      {
-        "name": "dragEnd",
-        "type": "void",
-        "description": "Emits when the window dragging ends.",
-        "kind": "output"
-      },
-      {
-        "name": "dragStart",
-        "type": "void",
-        "description": "Emits when the window dragging starts.",
-        "kind": "output"
-      },
-      {
-        "name": "draggable",
-        "type": "boolean",
-        "description": "Sets whether the window can be dragged by the user.",
-        "kind": "input"
-      },
-      {
-        "name": "focusedElement",
-        "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
-        "description": "Sets the element that should receive focus when the window is opened.\nAccepts an element reference or a query selector string.",
-        "kind": "input"
-      },
-      {
-        "name": "height",
-        "type": "number",
-        "description": "Sets the height of the window.",
-        "kind": "model"
-      },
-      {
-        "name": "left",
-        "type": "number",
-        "description": "Sets the left position of the window.",
-        "kind": "model"
-      },
-      {
-        "name": "look",
-        "type": "WindowVariantProps[\"look\"]",
-        "description": "Sets the look of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "maxHeight",
-        "type": "number",
-        "description": "Sets the maximum height of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "maxWidth",
-        "type": "number",
-        "description": "Sets the maximum width of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "maximizable",
-        "type": "boolean",
-        "description": "Sets whether the user can maximize the window.",
-        "kind": "input"
-      },
-      {
-        "name": "minHeight",
-        "type": "number",
-        "description": "Sets the minimum height of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "minWidth",
-        "type": "number",
-        "description": "Sets the minimum width of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "minimizable",
-        "type": "boolean",
-        "description": "Sets whether the user can minimize the window.",
-        "kind": "input"
-      },
-      {
-        "name": "modal",
-        "type": "boolean",
-        "description": "Sets whether the window should have an overlay behind it.",
-        "kind": "input"
-      },
-      {
-        "name": "resizable",
-        "type": "boolean",
-        "description": "Sets whether the user can resize the window.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "WindowVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "title",
-        "type": "string",
-        "description": "Sets the title of the window.",
-        "kind": "input"
-      },
-      {
-        "name": "top",
-        "type": "number",
-        "description": "Sets the top position of the window.",
-        "kind": "model"
-      },
-      {
-        "name": "width",
-        "type": "number",
-        "description": "Sets the width of the window.",
-        "kind": "model"
       }
     ]
   },
@@ -4040,6 +3788,282 @@
         "type": "TimeSelectorVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
+      }
+    ]
+  },
+  "DialogComponent": {
+    "name": "DialogComponent",
+    "selector": "\"mona-dialog\"",
+    "inputs": [
+      {
+        "name": "action",
+        "type": "DialogAction",
+        "description": "Emits when the user clicks on an action button.\nDo not emit if the action is created using `mona-dialog-actions` component.",
+        "kind": "output"
+      },
+      {
+        "name": "actions",
+        "type": "Iterable<DialogAction>",
+        "description": "Sets the actions of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "actionsLayout",
+        "type": "ActionsLayout",
+        "description": "Sets the layout of the actions in the dialog footer.",
+        "kind": "input"
+      },
+      {
+        "name": "closable",
+        "type": "boolean",
+        "description": "Sets the visibility of the close button in the dialog header.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the user clicks on the close button or presses the escape key.\nThis event is preentable.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emits when the dialog is closed.",
+        "kind": "output"
+      },
+      {
+        "name": "closeOnEscape",
+        "type": "boolean",
+        "description": "Sets whether the dialog should close when the escape key is pressed.",
+        "kind": "input"
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "description": "Sets the description of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "focusedElement",
+        "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
+        "description": "Sets the element that should receive focus when the dialog is opened.",
+        "kind": "input"
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "description": "Sets the height of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "left",
+        "type": "number",
+        "description": "Sets the left position of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "maxHeight",
+        "type": "number",
+        "description": "Sets the maximum height of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "maxWidth",
+        "type": "number",
+        "description": "Sets the maximum width of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "minHeight",
+        "type": "number",
+        "description": "Sets the minimum height of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "minWidth",
+        "type": "number",
+        "description": "Sets the minimum width of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "modal",
+        "type": "boolean",
+        "description": "Sets whether the dialog should have an overlay behind it.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "DialogVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "description": "Sets the text of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "top",
+        "type": "number",
+        "description": "Sets the top position of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "type",
+        "type": "DialogVariantProps[\"type\"] | null",
+        "description": "Sets the type of the dialog.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "description": "Sets the width of the dialog.",
+        "kind": "input"
+      }
+    ]
+  },
+  "WindowComponent": {
+    "name": "WindowComponent",
+    "selector": "\"mona-window\"",
+    "inputs": [
+      {
+        "name": "closable",
+        "type": "boolean",
+        "description": "Sets the visibility of the close button in the window header.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emits when the window is about to be closed.",
+        "kind": "output"
+      },
+      {
+        "name": "closeOnEscape",
+        "type": "boolean",
+        "description": "Sets whether the window should close when the escape key is pressed.",
+        "kind": "input"
+      },
+      {
+        "name": "dragEnd",
+        "type": "void",
+        "description": "Emits when the window dragging ends.",
+        "kind": "output"
+      },
+      {
+        "name": "dragStart",
+        "type": "void",
+        "description": "Emits when the window dragging starts.",
+        "kind": "output"
+      },
+      {
+        "name": "draggable",
+        "type": "boolean",
+        "description": "Sets whether the window can be dragged by the user.",
+        "kind": "input"
+      },
+      {
+        "name": "focusedElement",
+        "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
+        "description": "Sets the element that should receive focus when the window is opened.\nAccepts an element reference or a query selector string.",
+        "kind": "input"
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "description": "Sets the height of the window.",
+        "kind": "model"
+      },
+      {
+        "name": "left",
+        "type": "number",
+        "description": "Sets the left position of the window.",
+        "kind": "model"
+      },
+      {
+        "name": "look",
+        "type": "WindowVariantProps[\"look\"]",
+        "description": "Sets the look of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "maxHeight",
+        "type": "number",
+        "description": "Sets the maximum height of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "maxWidth",
+        "type": "number",
+        "description": "Sets the maximum width of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "maximizable",
+        "type": "boolean",
+        "description": "Sets whether the user can maximize the window.",
+        "kind": "input"
+      },
+      {
+        "name": "minHeight",
+        "type": "number",
+        "description": "Sets the minimum height of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "minWidth",
+        "type": "number",
+        "description": "Sets the minimum width of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "minimizable",
+        "type": "boolean",
+        "description": "Sets whether the user can minimize the window.",
+        "kind": "input"
+      },
+      {
+        "name": "modal",
+        "type": "boolean",
+        "description": "Sets whether the window should have an overlay behind it.",
+        "kind": "input"
+      },
+      {
+        "name": "resizable",
+        "type": "boolean",
+        "description": "Sets whether the user can resize the window.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "WindowVariantProps[\"rounded\"]",
+        "description": "Sets the border radius of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Sets the title of the window.",
+        "kind": "input"
+      },
+      {
+        "name": "top",
+        "type": "number",
+        "description": "Sets the top position of the window.",
+        "kind": "model"
+      },
+      {
+        "name": "width",
+        "type": "number",
+        "description": "Sets the width of the window.",
+        "kind": "model"
       }
     ]
   },

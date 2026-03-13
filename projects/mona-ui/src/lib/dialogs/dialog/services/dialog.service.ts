@@ -1,11 +1,9 @@
-import { DOCUMENT, forwardRef, inject, Injectable } from "@angular/core";
-import { asapScheduler, asyncScheduler } from "rxjs";
+import { afterNextRender, DOCUMENT, forwardRef, inject, Injectable, Injector } from "@angular/core";
 import { PopupService } from "../../../popup/services/popup.service";
 import { setWindowStyles } from "../../utils/setWindowStyles";
 import { DialogContentComponent } from "../components/dialog-content/dialog-content.component";
 import { DialogRef } from "../models/DialogRef";
 import { DialogReference } from "../models/DialogReference";
-import { DialogReferenceOptions } from "../models/DialogReferenceOptions";
 import { DialogSettings } from "../models/DialogSettings";
 import { createDialogInjectorData } from "../utils/createDialogInjectorData";
 
@@ -14,15 +12,14 @@ import { createDialogInjectorData } from "../utils/createDialogInjectorData";
 })
 export class DialogService {
     readonly #document = inject(DOCUMENT);
+    readonly #injector = inject(Injector);
     readonly #popupService = inject(PopupService);
 
     public show(settings: DialogSettings): DialogRef {
         const injectorData = createDialogInjectorData(settings);
-        const dialogReferenceHolder: { dialogReference: DialogReference } = { dialogReference: null as never };
-        const dialogReferenceOptions: DialogReferenceOptions = { popupRef: null as never };
-        dialogReferenceHolder.dialogReference = new DialogReference(dialogReferenceOptions);
-        injectorData.dialogReference = dialogReferenceHolder.dialogReference;
-        dialogReferenceOptions.popupRef = this.#popupService.create({
+        const dialogReference = new DialogReference({});
+        injectorData.dialogReference = dialogReference;
+        const popupRef = this.#popupService.create({
             anchor: this.#document.body,
             backdropClass: settings.modal
                 ? ["fixed", "inset-0", "bg-background/50", "transition-opacity", "z-40", "backdrop-blur-xs"]
@@ -40,15 +37,19 @@ export class DialogService {
             minWidth: settings.minWidth,
             positionStrategy: "global",
             providers: [
-                { provide: DialogRef, useFactory: forwardRef(() => dialogReferenceHolder.dialogReference.dialogRef) }
+                { provide: DialogRef, useFactory: forwardRef(() => dialogReference.dialogRef) }
             ],
             width: settings.width
         });
+        dialogReference.initializePopupRef(popupRef);
 
-        asyncScheduler.schedule(() => {
-            const element = dialogReferenceOptions.popupRef.overlayRef.overlayElement;
-            setWindowStyles(element, settings);
-        });
-        return dialogReferenceHolder.dialogReference.dialogRef;
+        afterNextRender({
+            read: () => {
+                const element = popupRef.overlayRef.overlayElement;
+                setWindowStyles(element, settings);
+            }
+        }, { injector: this.#injector });
+        return dialogReference.dialogRef;
     }
 }
+

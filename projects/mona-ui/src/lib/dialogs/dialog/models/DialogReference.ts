@@ -9,34 +9,44 @@ import { DialogResult } from "./DialogResult";
 
 export class DialogReference<R = unknown> implements DialogRefParams<R> {
     public readonly dialogResult$ = new Subject<DialogResult>();
-    public constructor(private readonly options: DialogReferenceOptions) {}
+    readonly #dialogRef: DialogRef<R>;
+    public constructor(private readonly options: DialogReferenceOptions) {
+        this.#dialogRef = new DialogRef<R>(this);
+    }
 
     public close(result?: R): void {
         const event =
             result instanceof PopupCloseEvent
                 ? result
                 : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
-        this.options.popupRef.close(event);
+        this.#popupRefOrThrow.close(event);
+    }
+
+    public initializePopupRef(popupRef: PopupRef): void {
+        this.options.popupRef = popupRef;
     }
 
     public get close$(): Observable<PopupCloseEvent<R>> {
-        return this.options.popupRef.beforeClose.pipe(map(event => event as PopupCloseEvent<R>));
+        return this.#popupRefOrThrow.beforeClose.pipe(map(event => event as PopupCloseEvent<R>));
     }
 
     public get closed$(): Observable<void> {
-        return this.options.popupRef.closed.pipe(map(() => undefined));
+        return this.#popupRefOrThrow.closed.pipe(map(() => undefined));
     }
 
-    public get component(): ComponentRef<any> | null {
-        return (this.popupRef.component as ComponentRef<any>).instance.componentRef ?? null;
+    public get component(): ComponentRef<unknown> | null {
+        return (
+            (this.#popupRefOrThrow.component as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance
+                .componentRef ?? null
+        );
     }
 
     public get dialogRef(): DialogRef<R> {
-        return new DialogRef<R>(this);
+        return this.#dialogRef;
     }
 
     public get element(): HTMLElement {
-        return this.options.popupRef.overlayRef.overlayElement;
+        return this.#popupRefOrThrow.overlayRef.overlayElement;
     }
 
     public get height(): number {
@@ -44,6 +54,13 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     }
 
     public get popupRef(): PopupRef {
+        return this.#popupRefOrThrow;
+    }
+
+    get #popupRefOrThrow(): PopupRef {
+        if (!this.options.popupRef) {
+            throw new Error("DialogReference: popupRef has not been initialized.");
+        }
         return this.options.popupRef;
     }
 

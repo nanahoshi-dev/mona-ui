@@ -23,7 +23,7 @@ export class DialogRef<R = unknown> implements DialogRefParams<R> {
         return this.#options.closed$;
     }
 
-    public get component(): ComponentRef<any> | null {
+    public get component(): ComponentRef<unknown> | null {
         return this.#options.component;
     }
 

@@ -8,11 +8,11 @@ export interface DialogSettings {
     actionsLayout?: ActionsLayout;
     closable?: boolean;
     closeOnEscape?: boolean;
-    content?: TemplateRef<any>;
+    content?: TemplateRef<unknown>;
     description?: string;
-    descriptionTemplate?: TemplateRef<any>;
+    descriptionTemplate?: TemplateRef<unknown>;
     focusedElement?: HTMLElement | ElementRef<HTMLElement> | string | null;
-    footerTemplate?: TemplateRef<any>;
+    footerTemplate?: TemplateRef<unknown>;
     height?: number;
     left?: number;
     maxHeight?: number;
@@ -23,7 +23,7 @@ export interface DialogSettings {
     rounded?: DialogVariantProps["rounded"];
     text?: string;
     title?: string;
-    titleTemplate?: TemplateRef<any>;
+    titleTemplate?: TemplateRef<unknown>;
     top?: number;
     type?: DialogVariantProps["type"];
     width?: number;

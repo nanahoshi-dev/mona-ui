@@ -17,10 +17,6 @@ export interface DialogInjectorData {
     footerTemplate?: TemplateRef<unknown>;
     height?: number;
     left?: number;
-    maxHeight: number;
-    maxWidth: number;
-    minHeight: number;
-    minWidth: number;
     modal?: boolean;
     rounded: DialogVariantProps["rounded"];
     text?: string;

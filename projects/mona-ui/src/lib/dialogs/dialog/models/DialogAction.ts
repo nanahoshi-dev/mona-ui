@@ -1,7 +1,7 @@
 import { ButtonVariantProps } from "../../../buttons/button/styles/button.styles";
 
 export interface DialogAction<T = unknown> {
-    cssClass?: string | Iterable<string> | Record<string, boolean>;
+    cssClass?: string;
     data?: T;
     iconOnly?: boolean;
     look?: ButtonVariantProps["look"];

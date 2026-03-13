@@ -1,6 +1,6 @@
+import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import {
     BadgeInfo,
     BadgeQuestionMark,
@@ -15,6 +15,7 @@ import { ButtonDirective } from "../../../../buttons/button/directives/button.di
 import { AnyPipe } from "../../../../pipes/any.pipe";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import { DialogAction } from "../../models/DialogAction";
 import { DialogInjectorData } from "../../models/DialogInjectorData";
 import {
@@ -36,11 +37,15 @@ type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; 
 
 @Component({
     templateUrl: "./dialog-content.component.html",
-    imports: [LucideAngularModule, FormsModule, ButtonDirective, NgTemplateOutlet, AnyPipe],
+    imports: [LucideAngularModule, ButtonDirective, NgTemplateOutlet, AnyPipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class]": "baseClass()"
-    }
+        "[class]": "baseClass()",
+        "[attr.aria-describedby]": "descriptionId",
+        "[attr.aria-labelledby]": "headerId",
+        "[attr.role]": "role()"
+    },
+    hostDirectives: [CdkTrapFocus]
 })
 export class DialogContentComponent {
     readonly #iconMap: IconMap = {
@@ -78,6 +83,7 @@ export class DialogContentComponent {
         const theme = this.#themeService.theme();
         return dialogDescriptionThemeVariants(theme)();
     });
+    protected readonly descriptionId = createElementControlId();
     protected readonly dialogData = inject<DialogInjectorData>(PopupDataInjectionToken);
     protected readonly footerClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -89,6 +95,7 @@ export class DialogContentComponent {
         const theme = this.#themeService.theme();
         return dialogHeaderThemeVariants(theme)();
     });
+    protected readonly headerId = createElementControlId();
     protected readonly icon = computed(() => {
         const { type } = this.dialogData;
         return type ? this.#iconMap[type] : undefined;
@@ -97,6 +104,10 @@ export class DialogContentComponent {
         const theme = this.#themeService.theme();
         const type = this.dialogData.type;
         return dialogIconContainerThemeVariants(theme)({ type });
+    });
+    protected readonly role = computed(() => {
+        const type = this.dialogData.type;
+        return type === "confirm" || type === "error" || type === "warning" ? "alertdialog" : "dialog";
     });
     protected readonly titleClass = computed(() => {
         const theme = this.#themeService.theme();
