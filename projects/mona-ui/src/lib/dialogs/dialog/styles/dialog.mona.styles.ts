@@ -25,20 +25,20 @@ export const dialogBaseVariants = cva(
 
 export const dialogContentContainerVariants = cva(
     `
-        flex flex-row gap-2 flex-1
+        flex flex-row gap-1 flex-1
     `
 );
 
 export const dialogBodyVariants = cva(
     `
-        flex flex-col gap-2 pb-4
-        w-full h-full
+        flex flex-col gap-0 pb-2
+        w-full h-full pr-4
     `,
     {
         variants: {
             hasIcon: {
                 true: "",
-                false: "pl-4"
+                false: "pl-5"
             }
         }
     }
@@ -47,30 +47,31 @@ export const dialogBodyVariants = cva(
 export const dialogHeaderVariants = cva(
     `
         flex flex-row gap-2
-        p-4 pb-0 pl-0 select-none
+        pt-4 select-none
     `
 );
 
 export const dialogIconContainerVariants = cva(
     `
         flex items-start justify-center pt-8 pr-4 pl-6
-        [&>div]:rounded-full [&>div]:w-fit [&>div]:h-fit [&>div]:p-1.5 [&>div]:border
-        [&>div]:relative
-        [&>div>span]:absolute [&>div>span]:flex [&>div>span]:rounded-full
-        [&>div>span]:-top-3 [&>div>span]:-right-3 [&>div>span]:-bottom-3 [&>div>span]:-left-3
-        [&>div>span]:border [&>div>span]:min-w-full [&>div>span]:min-h-full
+    `
+);
+
+export const dialogIconVariants = cva(
+    `
+        rounded-full w-fit h-fit p-1.5 border relative
+        [&>span]:absolute [&>span]:flex [&>span]:rounded-full
+        [&>span]:-top-3 [&>span]:-right-3 [&>span]:-bottom-3 [&>span]:-left-3
+        [&>span]:border [&>span]:min-w-full [&>span]:min-h-full
     `,
     {
         variants: {
             type: {
-                confirm:
-                    "[&>div]:border-success/10 [&>div]:bg-success/10 [&>div>span]:border-success/5 [&>div>span]:bg-success/5",
-                error: "[&>div]:border-error/10 [&>div]:bg-error/10 [&>div>span]:border-error/5 [&>div>span]:bg-error/5",
-                warning:
-                    "[&>div]:border-warning/10 [&>div]:bg-warning/10 [&>div>span]:border-warning/5 [&>div>span]:bg-warning/5",
-                info: "[&>div]:border-info/10 [&>div]:bg-info/10 [&>div>span]:border-info/5 [&>div>span]:bg-info/5",
-                success:
-                    "[&>div]:border-success/10 [&>div]:bg-success/10 [&>div>span]:border-success/5 [&>div>span]:bg-success/5"
+                confirm: "border-success/10 bg-success/10 [&>span]:border-success/5 [&>span]:bg-success/5",
+                error: "border-error/10 bg-error/10 [&>span]:border-error/5 [&>span]:bg-error/5",
+                warning: "border-warning/10 bg-warning/10 [&>span]:border-warning/5 [&>span]:bg-warning/5",
+                info: "border-info/10 bg-info/10 [&>span]:border-info/5 [&>span]:bg-info/5",
+                success: "border-success/10 bg-success/10 [&>span]:border-success/5 [&>span]:bg-success/5"
             }
         },
         defaultVariants: {
@@ -81,8 +82,7 @@ export const dialogIconContainerVariants = cva(
 
 export const dialogTitleContainerVariants = cva(
     `
-        flex flex-1 items-center justify-start select-none
-        pl-2
+        flex flex-1 items-center justify-start select-none p-1
     `
 );
 
@@ -101,14 +101,13 @@ export const dialogTitleVariants = cva(
 export const dialogDescriptionVariants = cva(
     `
         text-sm text-muted-foreground
-        pr-4 pl-2 select-none
+        select-none
     `
 );
 
 export const dialogContentVariants = cva(
     `
-        flex-1 overflow-auto
-        pr-4
+        flex-1 overflow-auto p-1
     `
 );
 

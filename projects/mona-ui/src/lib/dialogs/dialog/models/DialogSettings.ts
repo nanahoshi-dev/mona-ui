@@ -14,6 +14,7 @@ export interface DialogSettings {
     focusedElement?: HTMLElement | ElementRef<HTMLElement> | string | null;
     footerTemplate?: TemplateRef<unknown>;
     height?: number;
+    iconTemplate?: TemplateRef<unknown>;
     left?: number;
     maxHeight?: number;
     maxWidth?: number;

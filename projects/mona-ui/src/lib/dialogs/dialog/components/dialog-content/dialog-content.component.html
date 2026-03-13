@@ -3,10 +3,14 @@
 <div [class]="contentContainerClass()">
     @if (dialogIcon) {
         <div [class]="iconContainerClass()">
-            <div>
-                <span aria-hidden="true"></span>
-                <lucide-icon [name]="dialogIcon.icon" [size]="24" [style.color]="dialogIcon.color"></lucide-icon>
-            </div>
+            @if (dialogData.iconTemplate) {
+                <ng-container [ngTemplateOutlet]="dialogData.iconTemplate"></ng-container>
+            } @else {
+                <div [class]="iconClass()">
+                    <span aria-hidden="true"></span>
+                    <lucide-icon [name]="dialogIcon.icon" [size]="24" [style.color]="dialogIcon.color"></lucide-icon>
+                </div>
+            }
         </div>
     }
     <div [class]="bodyClass()">
@@ -33,7 +37,8 @@
             }
         </div>
 
-        <div [id]="dialogData.descriptionTemplate ? descriptionId : undefined">
+        @let descriptionTemplateId = dialogData.descriptionTemplate ? descriptionId : undefined;
+        <div class="p-1" [attr.id]="descriptionTemplateId">
             @if (dialogData.descriptionTemplate) {
                 <ng-container [ngTemplateOutlet]="dialogData.descriptionTemplate"></ng-container>
             } @else if (dialogData.description) {
@@ -45,7 +50,7 @@
             @if (dialogData.content) {
                 <ng-container [ngTemplateOutlet]="dialogData.content"></ng-container>
             } @else if (dialogData.text) {
-                <p class="select-none pl-2">{{ dialogData.text }}</p>
+                <p class="select-none">{{ dialogData.text }}</p>
             }
         </div>
     </div>

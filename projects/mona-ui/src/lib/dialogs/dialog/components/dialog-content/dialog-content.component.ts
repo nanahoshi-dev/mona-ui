@@ -28,6 +28,7 @@ import {
     dialogFooterThemeVariants,
     dialogHeaderThemeVariants,
     dialogIconContainerThemeVariants,
+    dialogIconThemeVariants,
     dialogTitleContainerThemeVariants,
     dialogTitleThemeVariants,
     DialogVariantProps
@@ -100,10 +101,14 @@ export class DialogContentComponent {
         const { type } = this.dialogData;
         return type ? this.#iconMap[type] : undefined;
     });
-    protected readonly iconContainerClass = computed(() => {
+    protected readonly iconClass = computed(() => {
         const theme = this.#themeService.theme();
         const type = this.dialogData.type;
-        return dialogIconContainerThemeVariants(theme)({ type });
+        return dialogIconThemeVariants(theme)({ type });
+    });
+    protected readonly iconContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return dialogIconContainerThemeVariants(theme)();
     });
     protected readonly role = computed(() => {
         const type = this.dialogData.type;

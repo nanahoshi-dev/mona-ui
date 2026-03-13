@@ -16,6 +16,7 @@ import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { DialogContentTemplateDirective } from "../../directives/dialog-content-template.directive";
 import { DialogDescriptionTemplateDirective } from "../../directives/dialog-description-template.directive";
 import { DialogFooterTemplateDirective } from "../../directives/dialog-footer-template.directive";
+import { DialogIconTemplateDirective } from "../../directives/dialog-icon-template.directive";
 import { DialogTitleTemplateDirective } from "../../directives/dialog-title-template.directive";
 import { ActionsLayout } from "../../models/ActionsLayout";
 import { DialogAction } from "../../models/DialogAction";
@@ -39,6 +40,7 @@ export class DialogComponent implements DialogVariantInput {
     private readonly contentTemplate = contentChild(DialogContentTemplateDirective, { read: TemplateRef });
     private readonly descriptionTemplate = contentChild(DialogDescriptionTemplateDirective, { read: TemplateRef });
     private readonly footerTemplate = contentChild(DialogFooterTemplateDirective, { read: TemplateRef });
+    private readonly iconTemplate = contentChild(DialogIconTemplateDirective, { read: TemplateRef });
     private readonly titleTemplate = contentChild(DialogTitleTemplateDirective, { read: TemplateRef });
 
     /**
@@ -53,9 +55,9 @@ export class DialogComponent implements DialogVariantInput {
 
     /**
      * @description Sets the layout of the actions in the dialog footer.
-     * @default "stretched"
+     * @default "end"
      */
-    public readonly actionsLayout = input<ActionsLayout>("stretched");
+    public readonly actionsLayout = input<ActionsLayout>("end");
 
     /**
      * @description Sets the visibility of the close button in the dialog header.
@@ -175,6 +177,7 @@ export class DialogComponent implements DialogVariantInput {
             focusedElement: this.focusedElement(),
             footerTemplate: this.footerTemplate(),
             height: this.height(),
+            iconTemplate: this.iconTemplate(),
             left: this.left(),
             maxHeight: this.maxHeight(),
             maxWidth: this.maxWidth(),

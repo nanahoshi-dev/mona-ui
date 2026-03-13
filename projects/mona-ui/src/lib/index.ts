@@ -354,6 +354,7 @@ export * from "./dialogs/window/models/WindowSettings";
 export * from "./dialogs/window/services/window.service";
 
 export * from "./dialogs/dialog/directives/dialog-content-template.directive";
+export * from "./dialogs/dialog/directives/dialog-description-template.directive";
 export * from "./dialogs/dialog/directives/dialog-footer-template.directive";
 export * from "./dialogs/dialog/directives/dialog-title-template.directive";
 

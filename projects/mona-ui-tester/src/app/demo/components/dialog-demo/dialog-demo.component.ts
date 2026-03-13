@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal, TemplateRef, viewChild } from "@angular/core";
+import { FileXCorner, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
     CheckBoxComponent,
@@ -9,8 +10,12 @@ import {
     DialogAction,
     PopupCloseEvent,
     DialogService,
-    DialogRef
+    DialogRef,
+    DialogDescriptionTemplateDirective,
+    DialogContentTemplateDirective,
+    TextBoxComponent
 } from "mona-ui";
+import { DialogIconTemplateDirective } from "mona-ui/dialogs/dialog/directives/dialog-icon-template.directive";
 import { take } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -52,6 +57,12 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
             name: "Content Template",
             description: "Customize the content of the dialog."
         },
+        descriptionTemplate: {
+            code: ``,
+            active: false,
+            name: "Description Template",
+            description: "Customize the description of the dialog."
+        },
         dynamicDialogContentTemplate: {
             code: ``,
             active: false,
@@ -63,6 +74,12 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
             active: false,
             name: "Footer Template",
             description: "Customize the footer of the dialog."
+        },
+        iconTemplate: {
+            code: ``,
+            active: false,
+            name: "Icon Template",
+            description: "Customize the icon of the dialog."
         },
         titleTemplate: {
             code: ``,
@@ -83,7 +100,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
             actionsLayout: {
                 type: "dropdown",
                 value: ["start", "center", "end", "stretched"],
-                defaultValue: "stretched"
+                defaultValue: "end"
             },
             closable: {
                 type: "boolean",
@@ -175,7 +192,12 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
         ButtonDirective,
         DialogTitleTemplateDirective,
         DialogFooterTemplateDirective,
-        CheckBoxComponent
+        CheckBoxComponent,
+        DialogDescriptionTemplateDirective,
+        LucideAngularModule,
+        DialogIconTemplateDirective,
+        DialogContentTemplateDirective,
+        TextBoxComponent
     ],
     template: `
         @let featureData = features();
@@ -205,7 +227,19 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                 [top]="top()"
                 [type]="type()"
                 [width]="width()">
-                @if (featureData["contentTemplate"].active) {}
+                @if (featureData["contentTemplate"].active) {
+                    <ng-template monaDialogContentTemplate>
+                        <div class="flex flex-col gap-2">
+                            <mona-text-box [placeholder]="'Enter your email...'" type="email"></mona-text-box>
+                            <mona-text-box [placeholder]="'Enter your password...'" type="password"></mona-text-box>
+                        </div>
+                    </ng-template>
+                }
+                @if (featureData["descriptionTemplate"].active) {
+                    <ng-template monaDialogDescriptionTemplate>
+                        <p class="text-sm text-rose-500">{{ description() }}</p>
+                    </ng-template>
+                }
                 @if (featureData["footerTemplate"].active) {
                     <ng-template monaDialogFooterTemplate>
                         <div class="flex gap-2 flex-row items-center pl-6 pr-4 py-2">
@@ -213,6 +247,11 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                             <button monaButton look="primary" (click)="dialogVisible.set(false)">OK</button>
                             <button monaButton (click)="dialogVisible.set(false)">Cancel</button>
                         </div>
+                    </ng-template>
+                }
+                @if (featureData["iconTemplate"].active) {
+                    <ng-template monaDialogIconTemplate>
+                        <lucide-icon [name]="fileDeleteIcon" [size]="32"></lucide-icon>
                     </ng-template>
                 }
                 @if (featureData["titleTemplate"].active) {
@@ -238,9 +277,10 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
     private readonly dynamicDialogContent = viewChild<TemplateRef<unknown>>("dynamicDialogContentTemplate");
     protected readonly dialogVisible = signal(false);
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly fileDeleteIcon = FileXCorner;
     protected dynamicDialogRef: DialogRef | null = null;
     public readonly actions = input<ReturnType<DialogComponent["actions"]>>([]);
-    public readonly actionsLayout = input<ReturnType<DialogComponent["actionsLayout"]>>("stretched");
+    public readonly actionsLayout = input<ReturnType<DialogComponent["actionsLayout"]>>("end");
     public readonly closable = input<ReturnType<DialogComponent["closable"]>>(true);
     public readonly closeOnEscape = input<ReturnType<DialogComponent["closeOnEscape"]>>(true);
     public readonly description = input<ReturnType<DialogComponent["description"]>>("");

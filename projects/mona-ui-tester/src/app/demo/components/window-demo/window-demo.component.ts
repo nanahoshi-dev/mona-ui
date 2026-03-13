@@ -1,5 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    inject,
+    input,
+    model,
+    signal,
+    TemplateRef,
+    viewChild
+} from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideAngularModule, User } from "lucide-angular";
 import {
@@ -12,6 +21,8 @@ import {
     WindowComponent,
     WindowContentTemplateDirective,
     WindowFooterTemplateDirective,
+    WindowRef,
+    WindowService,
     WindowTitleTemplateDirective
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -168,6 +179,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
     template: `
         @let featureData = features();
         <button monaButton look="primary" (click)="windowVisible.set(true)">Open</button>
+        <button monaButton (click)="openWindow()">Open via Window Service</button>
         @if (windowVisible()) {
             <mona-window
                 [closable]="closable()"
@@ -251,16 +263,24 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                 }
             </mona-window>
         }
+
+        <ng-template #dynamicWindowContentTemplate>
+            <div class="flex flex-col gap-2 items-center p-4">
+                <p>Dynamic content goes here</p>
+                <button monaButton look="error" (click)="dynamicWindowRef?.close()">Close Window</button>
+            </div>
+        </ng-template>
     `,
-    host: {
-        class: "flex-row! gap-0!"
-    }
+    host: {}
 })
 class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent> {
+    readonly #windowService = inject(WindowService);
+    private readonly dynamicWindowContent = viewChild<TemplateRef<unknown>>("dynamicWindowContentTemplate");
     protected readonly advancedMode = signal(false);
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly userIcon = User;
     protected readonly windowVisible = signal(false);
+    protected dynamicWindowRef: WindowRef | null = null;
     public readonly closable = input<ReturnType<WindowComponent["closable"]>>(true);
     public readonly closeOnEscape = input<ReturnType<WindowComponent["closeOnEscape"]>>(true);
     public readonly draggable = input<ReturnType<WindowComponent["draggable"]>>(true);
@@ -287,5 +307,29 @@ class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent>
         //     return;
         // }
         this.windowVisible.set(false);
+    }
+
+    protected openWindow(): void {
+        this.dynamicWindowRef = this.#windowService.open({
+            closable: this.closable(),
+            closeOnEscape: this.closeOnEscape(),
+            content: this.dynamicWindowContent(),
+            focusedElement: this.focusedElement(),
+            height: this.height(),
+            left: this.left(),
+            maxHeight: this.maxHeight(),
+            maxWidth: this.maxWidth(),
+            minHeight: this.minHeight(),
+            minWidth: this.minWidth(),
+            modal: this.modal(),
+            rounded: this.rounded(),
+            title: `${this.title()} - Dynamic`,
+            top: this.top(),
+            width: this.width()
+        });
+        // this.dynamicWindowRef.c.pipe(take(1)).subscribe(result => {
+        //     console.log("Dialog result:", result);
+        //     this.dynamicWindowRef?.close();
+        // });
     }
 }

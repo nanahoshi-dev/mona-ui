@@ -16,6 +16,7 @@ export interface DialogInjectorData {
     focusedElement?: HTMLElement | ElementRef<HTMLElement> | string | null;
     footerTemplate?: TemplateRef<unknown>;
     height?: number;
+    iconTemplate?: TemplateRef<unknown>;
     left?: number;
     modal?: boolean;
     rounded: DialogVariantProps["rounded"];

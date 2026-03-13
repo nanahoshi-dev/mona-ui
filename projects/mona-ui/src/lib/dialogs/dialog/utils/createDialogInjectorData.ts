@@ -6,7 +6,7 @@ import { DialogVariantProps } from "../styles/dialog.styles";
 export const createDialogInjectorData = (settings: Partial<DialogSettings>): DialogInjectorData => {
     return {
         actions: settings.actions ?? getDefaultActions(settings.type),
-        actionsLayout: settings.actionsLayout ?? "stretched",
+        actionsLayout: settings.actionsLayout ?? "end",
         closable: settings.closable ?? true,
         closeOnEscape: settings.closeOnEscape ?? true,
         content: settings.content,
@@ -16,6 +16,7 @@ export const createDialogInjectorData = (settings: Partial<DialogSettings>): Dia
         focusedElement: settings.focusedElement ?? null,
         footerTemplate: settings.footerTemplate,
         height: settings.height,
+        iconTemplate: settings.iconTemplate,
         left: settings.left,
         modal: settings.modal ?? true,
         rounded: settings.rounded ?? "medium",

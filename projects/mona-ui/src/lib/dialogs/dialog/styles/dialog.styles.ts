@@ -11,6 +11,7 @@ import {
     dialogFooterVariants as monaDialogFooterVariants,
     dialogHeaderVariants as monaDialogHeaderVariants,
     dialogIconContainerVariants as monaDialogIconContainerVariants,
+    dialogIconVariants as monaDialogIconVariants,
     dialogTitleContainerVariants as monaDialogTitleContainerVariants,
     dialogTitleVariants as monaDialogTitleVariants
 } from "./dialog.mona.styles";
@@ -21,6 +22,15 @@ export const dialogBaseThemeVariants = (theme: ThemeStyle) => {
             return monaDialogBaseVariants;
         default:
             return monaDialogBaseVariants;
+    }
+};
+
+export const dialogIconThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaDialogIconVariants;
+        default:
+            return monaDialogIconVariants;
     }
 };
 
@@ -120,5 +130,8 @@ type DialogBaseVariantInput = VariantInputs<DialogBaseVariantProps>;
 type DialogIconContainerVariantProps = VariantProps<ReturnType<typeof dialogIconContainerThemeVariants>>;
 type DialogIconContainerVariantInput = VariantInputs<DialogIconContainerVariantProps>;
 
-export type DialogVariantProps = DialogBaseVariantProps & DialogIconContainerVariantProps;
-export type DialogVariantInput = DialogBaseVariantInput & DialogIconContainerVariantInput;
+export type DialogIconVariantProps = VariantProps<ReturnType<typeof dialogIconThemeVariants>>;
+type DialogIconVariantInput = VariantInputs<DialogIconVariantProps>;
+
+export type DialogVariantProps = DialogBaseVariantProps & DialogIconContainerVariantProps & DialogIconVariantProps;
+export type DialogVariantInput = DialogBaseVariantInput & DialogIconContainerVariantInput & DialogIconVariantInput;
