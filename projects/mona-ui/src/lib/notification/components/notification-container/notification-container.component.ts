@@ -15,7 +15,7 @@ import { NotificationComponent } from "../notification/notification.component";
     }
 })
 export class NotificationContainerComponent {
-    protected readonly positionClass: Signal<string> = computed(() => {
+    protected readonly positionClass = computed(() => {
         return this.position() as string;
     });
     public readonly notificationDataList = signal<NotificationData[]>([]);

@@ -18,6 +18,14 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import("./docs/components/avatar-doc/avatar-doc.component").then(m => m.AvatarDocComponent)
             },
+
+            {
+                path: "breadcrumb",
+                loadComponent: () =>
+                    import("./docs/components/breadcrumb-doc/breadcrumb-doc.component").then(
+                        m => m.BreadcrumbDocComponent
+                    )
+            },
             {
                 path: "button",
                 loadComponent: () =>

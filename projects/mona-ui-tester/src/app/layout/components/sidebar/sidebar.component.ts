@@ -37,6 +37,10 @@ export class SidebarComponent {
                     path: "/avatar"
                 },
                 {
+                    text: "Breadcrumb",
+                    path: "/breadcrumb"
+                },
+                {
                     text: "Button",
                     path: "/button"
                 },

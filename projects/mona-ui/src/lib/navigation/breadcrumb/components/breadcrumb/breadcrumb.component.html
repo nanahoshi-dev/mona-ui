@@ -1,23 +1,21 @@
-<ol class="mona-breadcrumb-list">
-    @for (item of items(); track item) {
-        <li class="mona-breadcrumb-item" [title]="item.title"
-            [ngClass]="{'mona-disabled': item.disabled}" (click)="onItemClick(item)">
-
-            @if (itemTemplate()) {
-                <ng-container [ngTemplateOutlet]="itemTemplate()??null"
-                              [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
-            } @else {
-                <span class="mona-breadcrumb-item-text">{{ item.text }}</span>
-            }
+<ol [class]="listClass()">
+    @for (item of itemComponents(); track $index) {
+        <li
+            monaBreadcrumbItem
+            [active]="item === activeItem()"
+            [disabled]="item.disabled()"
+            (click)="onItemClick(item)">
+            <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
         </li>
 
-        @if ($index < items().length - 1) {
-            <li class="mona-breadcrumb-separator">
+        @if ($index < itemCount() - 1) {
+            <li monaBreadcrumbItem class="mona-breadcrumb-separator">
                 @if (separatorTemplate()) {
-                    <ng-container [ngTemplateOutlet]="separatorTemplate()??null"
-                                  [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="separatorTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: $index }"></ng-container>
                 } @else {
-                    <fa-icon [icon]="separator"></fa-icon>
+                    <lucide-icon [name]="separatorIcon" [size]="18"></lucide-icon>
                 }
             </li>
         }

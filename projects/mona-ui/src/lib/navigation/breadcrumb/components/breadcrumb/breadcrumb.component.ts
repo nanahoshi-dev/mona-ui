@@ -1,39 +1,53 @@
-import { NgClass, NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, contentChild, input, output, Signal, TemplateRef } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    contentChild,
+    contentChildren,
+    inject,
+    input,
+    output,
+    signal,
+    TemplateRef
+} from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { count, index } from "@mirei/ts-collections";
+import { ChevronRight, LucideAngularModule } from "lucide-angular";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { BreadcrumbItemTemplateDirective } from "../../directives/breadcrumb-item-template.directive";
+import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
 import { BreadcrumbItem } from "../../models/BreadcrumbItem";
-import { BreadcrumbItemTemplateContext } from "../../models/BreadcrumbItemTemplateContext";
+import { breadcrumbListThemeVariants } from "../../styles/breadcrumb.styles";
+import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.component";
 
 @Component({
     selector: "mona-breadcrumb",
     templateUrl: "./breadcrumb.component.html",
-    styleUrls: ["./breadcrumb.component.scss"],
-    imports: [NgClass, NgTemplateOutlet, FontAwesomeModule],
+    imports: [NgTemplateOutlet, FontAwesomeModule, LucideAngularModule, BreadcrumbItemDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {
-        class: "mona-breadcrumb"
-    }
+    host: {}
 })
 export class BreadcrumbComponent {
-    protected readonly itemTemplate: Signal<TemplateRef<BreadcrumbItemTemplateContext> | undefined> = contentChild(
-        BreadcrumbItemTemplateDirective,
-        { read: TemplateRef }
-    );
-    protected readonly separator = faChevronRight;
-    protected readonly separatorTemplate: Signal<TemplateRef<BreadcrumbItemTemplateContext> | undefined> = contentChild(
-        BreadcrumbSeparatorTemplateDirective,
-        { read: TemplateRef }
-    );
-
-    public readonly itemClick = output<BreadcrumbItem>();
-    public items = input([], {
-        transform: (value: Iterable<BreadcrumbItem>) => Array.from(value)
+    readonly #themeService = inject(ThemeService);
+    protected readonly activeItem = signal<BreadcrumbItemComponent | null>(null);
+    protected readonly itemComponents = contentChildren(BreadcrumbItemComponent);
+    protected readonly itemCount = computed(() => count(this.itemComponents()));
+    protected readonly itemTemplate = contentChild(BreadcrumbItemTemplateDirective, { read: TemplateRef });
+    protected readonly listClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return breadcrumbListThemeVariants(theme)();
+    });
+    protected readonly separatorIcon = ChevronRight;
+    protected readonly separatorTemplate = contentChild(BreadcrumbSeparatorTemplateDirective, {
+        read: TemplateRef
     });
 
-    public onItemClick(item: BreadcrumbItem): void {
-        this.itemClick.emit(item);
+    public readonly itemClick = output<BreadcrumbItem>();
+    public readonly items = input<Iterable<BreadcrumbItem>>([]);
+
+    public onItemClick(item: BreadcrumbItemComponent): void {
+        this.activeItem.set(item);
     }
 }
