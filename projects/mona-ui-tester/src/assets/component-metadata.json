@@ -935,25 +935,25 @@
       },
       {
         "name": "maxHeight",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "maxWidth",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "minHeight",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
       {
         "name": "minWidth",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
@@ -1855,6 +1855,30 @@
         "name": "width",
         "type": "string | number",
         "description": "Sets the width of the list view.",
+        "kind": "input"
+      }
+    ]
+  },
+  "BreadcrumbItemDirective": {
+    "name": "BreadcrumbItemDirective",
+    "selector": "\"span[monaBreadcrumbItem]\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "listDisabled",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -3798,7 +3822,7 @@
       {
         "name": "action",
         "type": "DialogAction",
-        "description": "Emits when the user clicks on an action button.\nDo not emit if the action is created using `mona-dialog-actions` component.",
+        "description": "Emits when the user clicks on an action button.",
         "kind": "output"
       },
       {
@@ -3822,7 +3846,7 @@
       {
         "name": "close",
         "type": "PopupCloseEvent",
-        "description": "Emits when the user clicks on the close button or presses the escape key.\nThis event is preentable.",
+        "description": "Emits when the user clicks on the close button or presses the escape key.\r\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -3972,7 +3996,7 @@
       {
         "name": "focusedElement",
         "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
-        "description": "Sets the element that should receive focus when the window is opened.\nAccepts an element reference or a query selector string.",
+        "description": "Sets the element that should receive focus when the window is opened.\r\nAccepts an element reference or a query selector string.",
         "kind": "input"
       },
       {
@@ -6004,16 +6028,40 @@
     "selector": "\"mona-breadcrumb\"",
     "inputs": [
       {
-        "name": "itemClick",
-        "type": "BreadcrumbItem",
-        "description": "",
-        "kind": "output"
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the aria-label for the breadcrumb navigation landmark.",
+        "kind": "input"
       },
       {
-        "name": "items",
-        "type": "Iterable<BreadcrumbItem<any>>",
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Whether the entire breadcrumb component is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
+      }
+    ]
+  },
+  "BreadcrumbItemComponent": {
+    "name": "BreadcrumbItemComponent",
+    "selector": "\"mona-breadcrumb-item\"",
+    "inputs": [
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Whether the breadcrumb item is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "itemClick",
+        "type": "void",
+        "description": "Event emitted when the breadcrumb item is clicked.",
+        "kind": "output"
       }
     ]
   },

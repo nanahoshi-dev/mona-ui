@@ -1,4 +1,8 @@
-<app-demo-container [config]="config()" [metadata]="metadata()" (valueChange)="onInputValueChange($event)">
+<app-demo-container
+    [config]="config()"
+    [metadata]="metadata()"
+    [subComponentMetadata]="subComponentsMetadata()"
+    (valueChange)="onInputValueChange($event)">
     <ng-container
         [ngComponentOutlet]="BreadcrumbWrapperComponent"
         [ngComponentOutletInjector]="featureInjector"

@@ -286,7 +286,6 @@ export * from "./menus/contextmenu/directives/context-menu-text-template.directi
 /** Navigation */
 
 /** Breadcrumb */
-export * from "./navigation/breadcrumb/models/BreadcrumbItem";
 export * from "./navigation/breadcrumb/directives/breadcrumb-separator-template.directive";
 export * from "./navigation/breadcrumb/components/breadcrumb-item/breadcrumb-item.component";
 export * from "./navigation/breadcrumb/components/breadcrumb/breadcrumb.component";

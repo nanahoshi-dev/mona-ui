@@ -1,13 +1,19 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import {
     ChevronsRight,
     CircleCheck,
     CreditCard,
+    Download,
+    File,
+    HardDrive,
     LucideAngularModule,
     LucideIconData,
+    Music,
     ShoppingCart,
-    Truck
+    Slash,
+    Truck,
+    User
 } from "lucide-angular";
 import { BreadcrumbComponent, BreadcrumbItemComponent, BreadcrumbSeparatorTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -29,6 +35,16 @@ interface BreadcrumbDemoItem {
 })
 export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbComponent> {
     readonly #injector = createFeatureInjector({
+        dataSet: {
+            code: ``,
+            hasCode: false,
+            active: false,
+            description: `Sets a predefined data set for the breadcrumb.`,
+            name: "Data Set",
+            type: "dropdown",
+            dropdownDataSource: ["Shopping", "File Tree"],
+            dropdownValue: "Shopping"
+        },
         separatorTemplate: {
             code: ``,
             active: false,
@@ -36,40 +52,26 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
             description: "Use a custom icon for the breadcrumb separator."
         }
     });
-    readonly #itemSets = [
-        {
-            text: "Shopping",
-            value: [
-                { text: "Cart", title: "Cart", icon: ShoppingCart },
-                { text: "Billing", title: "Billing", icon: CreditCard },
-                { text: "Shipping", title: "Shipping", icon: Truck },
-                { text: "Complete", title: "Complete", icon: CircleCheck }
-            ] as BreadcrumbDemoItem[]
-        }
-    ];
     protected readonly BreadcrumbWrapperComponent = BreadcrumbWrapperComponent;
     protected readonly config = signal<ComponentConfig<BreadcrumbComponent>>({
         inputs: {
-            items: {
-                type: "customDropdown",
-                textField: "text",
-                valueField: "value",
-                value: this.#itemSets,
-                defaultValue: this.#itemSets[0].value
+            disabled: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("BreadcrumbComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["BreadcrumbItemComponent"]);
 }
 
 @Component({
     imports: [BreadcrumbComponent, BreadcrumbSeparatorTemplateDirective, LucideAngularModule, BreadcrumbItemComponent],
     template: `
         @let featureData = features();
-        <mona-breadcrumb>
+        <mona-breadcrumb [disabled]="disabled()">
             @for (item of items(); track $index) {
                 <mona-breadcrumb-item [disabled]="$index === 3" (itemClick)="onItemClick(item)">
                     <div class="flex flex-row gap-2 items-center">
@@ -80,16 +82,42 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
             }
             @if (featureData["separatorTemplate"].active) {
                 <ng-template monaBreadcrumbSeparatorTemplate>
-                    <lucide-icon [img]="separatorIcon" [size]="16"></lucide-icon>
+                    <lucide-icon [img]="separatorIcon()" [size]="16"></lucide-icon>
                 </ng-template>
             }
         </mona-breadcrumb>
     `
 })
 class BreadcrumbWrapperComponent implements ComponentInputsAsSignal<BreadcrumbComponent> {
+    readonly #itemSets = [
+        {
+            text: "Shopping",
+            value: [
+                { text: "Cart", title: "Cart", icon: ShoppingCart },
+                { text: "Billing", title: "Billing", icon: CreditCard },
+                { text: "Shipping", title: "Shipping", icon: Truck },
+                { text: "Complete", title: "Complete", icon: CircleCheck }
+            ] as BreadcrumbDemoItem[]
+        },
+        {
+            text: "File Tree",
+            value: [
+                { text: "C", title: "C", icon: HardDrive },
+                { text: "User", title: "User", icon: User },
+                { text: "Downloads", title: "Downloads", icon: Download }
+            ] as BreadcrumbDemoItem[]
+        }
+    ];
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly separatorIcon = ChevronsRight;
-    public readonly items = input<Iterable<BreadcrumbDemoItem>>([]);
+    protected readonly items = computed(() => {
+        const dataSet = this.features()["dataSet"].dropdownValue;
+        return this.#itemSets.find(itemSet => itemSet.text === dataSet)?.value ?? [];
+    });
+    protected readonly separatorIcon = computed(() => {
+        const dataSet = this.features()["dataSet"].dropdownValue;
+        return dataSet === "Shopping" ? ChevronsRight : Slash;
+    });
+    public readonly disabled = input<ReturnType<BreadcrumbComponent["disabled"]>>(false);
 
     protected onItemClick(item: BreadcrumbDemoItem) {
         console.log(`Item clicked: ${item.text}`);

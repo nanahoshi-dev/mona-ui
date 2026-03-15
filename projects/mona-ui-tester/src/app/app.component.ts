@@ -29,7 +29,6 @@ import { Enumerable, ImmutableList, ImmutableSet, List } from "@mirei/ts-collect
 import { Check, LucideAngularModule } from "lucide-angular";
 import { DateTime } from "luxon";
 import {
-    BreadcrumbItem,
     CellEditEvent,
     CompositeFilterDescriptor,
     DialogService,

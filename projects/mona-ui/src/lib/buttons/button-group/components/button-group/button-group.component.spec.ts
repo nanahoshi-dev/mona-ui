@@ -665,7 +665,7 @@ describe("ButtonGroupComponent", () => {
                 await waitForStable(fixture);
 
                 let clickedButton: ButtonDirective | null = null;
-                buttonService.buttonClick$.subscribe(btn => {
+                buttonService.buttonClick$.subscribe(([btn]) => {
                     clickedButton = btn;
                 });
 

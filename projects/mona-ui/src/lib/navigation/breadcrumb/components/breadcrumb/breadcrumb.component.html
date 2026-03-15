@@ -1,11 +1,27 @@
 <ol [class]="listClass()">
     @for (item of itemComponents(); track $index) {
-        <li monaBreadcrumbItem [disabled]="item.disabled()" (click)="onItemClick(item)">
-            <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+        <li>
+            @if ($last) {
+                <span aria-current="page" [class]="currentItemClass()">
+                    <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                </span>
+            } @else {
+                <span
+                    monaBreadcrumbItem
+                    role="link"
+                    [disabled]="disabled() || item.disabled()"
+                    [listDisabled]="disabled()"
+                    [tabindex]="disabled() || item.disabled() ? -1 : 0"
+                    (click)="onItemClick(item)"
+                    (keydown.enter)="onItemClick(item)"
+                    (keydown.space)="$event.preventDefault(); onItemClick(item)">
+                    <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
+                </span>
+            }
         </li>
 
-        @if ($index < itemCount() - 1) {
-            <li monaBreadcrumbItem>
+        @if (!$last) {
+            <li aria-hidden="true" role="presentation">
                 @if (separatorTemplate()) {
                     <ng-container
                         [ngTemplateOutlet]="separatorTemplate()"

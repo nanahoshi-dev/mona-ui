@@ -1,8 +1,13 @@
-import { BreadcrumbItemDirective } from './breadcrumb-item.directive';
+import { TestBed } from "@angular/core/testing";
+import { describe, beforeEach, it } from "vitest";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
 
-describe('BreadcrumbItemDirective', () => {
-  it('should create an instance', () => {
-    const directive = new BreadcrumbItemDirective();
-    expect(directive).toBeTruthy();
-  });
+describe("BreadcrumbItemDirective", () => {
+    beforeEach(() => TestBed.configureTestingModule({ providers: [ThemeService] }));
+
+    it("should create an instance", () => {
+        const directive = TestBed.runInInjectionContext(() => new BreadcrumbItemDirective());
+        expect(directive).toBeTruthy();
+    });
 });

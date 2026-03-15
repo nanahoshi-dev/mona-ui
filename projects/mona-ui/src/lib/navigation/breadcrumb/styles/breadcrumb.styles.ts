@@ -2,6 +2,7 @@ import { VariantProps } from "class-variance-authority";
 import { ThemeStyle } from "../../../theme/models/Theme";
 import { VariantInputs } from "../../../utils/VariantInputs";
 import {
+    breadcrumbCurrentItemVariants as monaBreadcrumbCurrentItemVariants,
     breadcrumbListVariants as monaBreadcrumbListVariants,
     breadcrumbListItemVariants as monaBreadcrumbListItemVariants
 } from "./breadcrumb.mona.styles";
@@ -24,6 +25,15 @@ export const breadcrumbListItemThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
+export const breadcrumbCurrentItemThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaBreadcrumbCurrentItemVariants;
+        default:
+            return monaBreadcrumbCurrentItemVariants;
+    }
+};
+
 type BreadcrumbListVariantProps = VariantProps<ReturnType<typeof breadcrumbListThemeVariants>>;
 type BreadcrumbListVariantInput = VariantInputs<BreadcrumbListVariantProps>;
 
@@ -31,4 +41,4 @@ export type BreadcrumbListItemVariantProps = VariantProps<ReturnType<typeof brea
 export type BreadcrumbListItemVariantInput = VariantInputs<BreadcrumbListItemVariantProps>;
 
 export type BreadcrumbVariantProps = BreadcrumbListVariantProps & BreadcrumbListItemVariantProps;
-export type BreadcrumbVariantInput = BreadcrumbListVariantInput & BreadcrumbListItemVariantInput;
+export type BreadcrumbVariantInput = BreadcrumbListVariantInput & Omit<BreadcrumbListItemVariantInput, "listDisabled">;

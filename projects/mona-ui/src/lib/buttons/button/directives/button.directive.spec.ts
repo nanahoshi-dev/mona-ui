@@ -733,7 +733,7 @@ describe("ButtonDirective with ButtonService", () => {
 
             // When button is clicked in a group context, it should emit to buttonClick$
             let clickedButton: ButtonDirective | null = null;
-            buttonService.buttonClick$.subscribe(btn => {
+            buttonService.buttonClick$.subscribe(([btn]) => {
                 clickedButton = btn;
             });
 
@@ -749,7 +749,7 @@ describe("ButtonDirective with ButtonService", () => {
             await waitForStable(fixture);
 
             let clickedButton: ButtonDirective | null = null;
-            buttonService.buttonClick$.subscribe(btn => {
+            buttonService.buttonClick$.subscribe(([btn]) => {
                 clickedButton = btn;
             });
 
