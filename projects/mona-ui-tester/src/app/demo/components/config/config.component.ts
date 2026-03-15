@@ -14,7 +14,8 @@ import {
     SwitchComponent,
     TabComponent,
     TabContentTemplateDirective,
-    TabsComponent
+    TabsComponent,
+    TextBoxComponent
 } from "mona-ui";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
@@ -41,7 +42,8 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         ExpansionPanelTitleTemplateDirective,
         TabsComponent,
         TabComponent,
-        TabContentTemplateDirective
+        TabContentTemplateDirective,
+        TextBoxComponent
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush

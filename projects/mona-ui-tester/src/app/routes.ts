@@ -166,6 +166,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "notification",
+                loadComponent: () =>
+                    import("./docs/components/notification-doc/notification-doc.component").then(
+                        m => m.NotificationDocComponent
+                    )
+            },
+            {
                 path: "numeric-textbox",
                 loadComponent: () =>
                     import("./docs/components/numeric-textbox-doc/numeric-textbox-doc.component").then(

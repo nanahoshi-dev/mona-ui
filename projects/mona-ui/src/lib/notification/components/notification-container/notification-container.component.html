@@ -1,3 +1,7 @@
-@for (notificationData of notificationDataList(); track $index) {
-    <mona-notification [data]="notificationData"></mona-notification>
+@for (notificationData of notificationDataList(); track notificationData.options.id) {
+    <mona-notification
+        [data]="notificationData"
+        [animate.enter]="enterAnimClass()"
+        [animate.leave]="leaveAnimClass()">
+    </mona-notification>
 }

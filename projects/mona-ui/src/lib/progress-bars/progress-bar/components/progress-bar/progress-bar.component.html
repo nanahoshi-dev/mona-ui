@@ -1,36 +1,42 @@
-<div [class]="trackClasses()"
-     [style.background-color]="trackColor()"
-     [attr.data-prev]="true"
-     [attr.data-left]="labelPosition()==='start'"
-     [attr.data-right]="labelPosition()==='end'"
-     [attr.data-indeterminate]="indeterminate()"
-     [attr.data-value]="progress()"
-     [style.clip-path]="prevTrackClipPath()">
+<div
+    [class]="trackClasses()"
+    [style.background-color]="trackColor()"
+    [attr.data-prev]="true"
+    [attr.data-left]="labelPosition() === 'start'"
+    [attr.data-right]="labelPosition() === 'end'"
+    [attr.data-indeterminate]="indeterminate()"
+    [attr.data-value]="progress()"
+    [style.clip-path]="prevTrackClipPath()">
     @if (indeterminate()) {
         <div [class]="indeterminateClasses()" class="indeterminate"></div>
     } @else if (labelVisible()) {
         @if (labelTemplate()) {
-            <ng-container [ngTemplateOutlet]="labelTemplate()?.templateRef"
-                          [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
+            <ng-container
+                [ngTemplateOutlet]="labelTemplate()?.templateRef"
+                [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
             </ng-container>
         } @else {
-            <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number:'1.0-2' }}</span>
+            <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number: "1.0-2" }}</span>
         }
     }
 </div>
 
 @if (!indeterminate()) {
-    <div [class]="trackClasses()"
-         [attr.data-next]="true"
-         [attr.data-left]="labelPosition()==='start'"
-         [attr.data-right]="labelPosition()==='end'"
-         [style.clip-path]="nextTrackClipPath()">
-        @if (labelTemplate()) {
-            <ng-container [ngTemplateOutlet]="labelTemplate()?.templateRef"
-                          [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
-            </ng-container>
-        } @else {
-            <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number:'1.0-2' }}</span>
+    <div
+        [class]="trackClasses()"
+        [attr.data-next]="true"
+        [attr.data-left]="labelPosition() === 'start'"
+        [attr.data-right]="labelPosition() === 'end'"
+        [style.clip-path]="nextTrackClipPath()">
+        @if (labelVisible()) {
+            @if (labelTemplate()) {
+                <ng-container
+                    [ngTemplateOutlet]="labelTemplate()?.templateRef"
+                    [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
+                </ng-container>
+            } @else {
+                <span [class]="labelClasses()" [style]="labelStyles()">{{ progress() | number: "1.0-2" }}</span>
+            }
         }
     </div>
 }

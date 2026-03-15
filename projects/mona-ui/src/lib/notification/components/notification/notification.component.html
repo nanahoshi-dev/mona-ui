@@ -1,40 +1,67 @@
-@if (data().visible()) {
-    <div class="mona-notification-wrapper" @notificationSlide @notificationFade>
-        <div class="mona-notification-inner">
-            <div class="mona-notification-line mona-notification-line-{{type()}}"></div>
-            <div class="mona-notification-icon mona-notification-icon-{{type()}}">
+@let width = typeof data().options.width === "string" ? data().options.width : `${data().options.width}px`;
+@let height = typeof data().options.height === "string" ? data().options.height : `${data().options.height}px`;
+
+<div [class]="baseClass()" [style.width]="width" [style.height]="height" role="alert" aria-live="assertive">
+    @if (contentTemplate() || contentComponent()) {
+        @if (contentTemplate()) {
+            <ng-container [ngTemplateOutlet]="contentTemplate()"></ng-container>
+        } @else if (contentComponent()) {
+            <ng-container #contentHost></ng-container>
+        }
+    } @else {
+        <div [class]="bodyClass()">
+            <div [class]="iconClass()" aria-hidden="true">
                 @switch (type()) {
-                    @case ('error') {
-                        <fa-icon [icon]="errorIcon"></fa-icon>
+                    @case ("error") {
+                        <lucide-icon [img]="errorIcon" aria-hidden="true"></lucide-icon>
                     }
-                    @case ('info') {
-                        <fa-icon [icon]="infoIcon"></fa-icon>
+                    @case ("info") {
+                        <lucide-icon [img]="infoIcon" aria-hidden="true"></lucide-icon>
                     }
-                    @case ('success') {
-                        <fa-icon [icon]="successIcon"></fa-icon>
+                    @case ("success") {
+                        <lucide-icon [img]="successIcon" aria-hidden="true"></lucide-icon>
                     }
-                    @case ('warning') {
-                        <fa-icon [icon]="warningIcon"></fa-icon>
+                    @case ("warning") {
+                        <lucide-icon [img]="warningIcon" aria-hidden="true"></lucide-icon>
                     }
                 }
             </div>
-            <div class="mona-notification-content-wrapper">
-                <div class="mona-notification-header">{{ data().options.title }}</div>
-                <div class="mona-notification-content">
-                    @if (data().options.text && !data().options.textTemplate) {
-                        <span class="mona-notification-text"
-                              title="{{data().options.text}}">{{ data().options.text }}</span>
-                    } @else if (data().options.textTemplate) {
-                        <ng-container [ngTemplateOutlet]="data().options.textTemplate??null"></ng-container>
+            <div class="flex flex-col flex-1">
+                <div [class]="headerClass()">{{ data().options.title }}</div>
+                <div [class]="contentClass()">
+                    @if (isStringContent()) {
+                        <span [class]="textClass()" title="{{ data().options.content }}">{{
+                            data().options.content
+                        }}</span>
                     }
                 </div>
             </div>
-            <div class="mona-notification-actions">
-                <fa-icon [icon]="closeIcon" [ngStyle]="{'color': progressColor()}" (click)="close()"></fa-icon>
+        </div>
+        @if (data().options.progressBar) {
+            <div class="w-full h-1">
+                <mona-progress-bar
+                    [value]="progressValue()"
+                    [color]="progressColor()"
+                    [labelVisible]="false"
+                    rounded="none"
+                    class="h-full"></mona-progress-bar>
             </div>
+        }
+    }
+    @if (data().options.closable) {
+        <div [class]="actionClass()">
+            <button
+                monaButton
+                size="small"
+                look="link"
+                rounded="none"
+                [iconOnly]="true"
+                [title]="data().options.closeTitle || 'Close'"
+                [attr.aria-label]="data().options.closeTitle || 'Close'"
+                (click)="close()"
+                class="w-4 h-4 p-2">
+                <lucide-icon [img]="closeIcon" [size]="14" aria-hidden="true"></lucide-icon>
+            </button>
         </div>
-        <div class="mona-notification-progress">
-            <mona-progress-bar [value]="progressValue()" [color]="progressColor()"></mona-progress-bar>
-        </div>
-    </div>
-}
+    }
+</div>

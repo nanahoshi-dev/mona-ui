@@ -83,6 +83,20 @@ export class FeatureConfigHandler {
                         }
                     }
                 };
+            } else if (type === "string") {
+                updatedData = {
+                    ...currentData,
+                    [parentProperty]: {
+                        ...currentData[parentProperty],
+                        subFeatures: {
+                            ...currentData[parentProperty].subFeatures,
+                            [subProperty]: {
+                                ...currentData[parentProperty].subFeatures![subProperty],
+                                stringValue: value
+                            }
+                        }
+                    }
+                };
             } else {
                 updatedData = {
                     ...currentData,

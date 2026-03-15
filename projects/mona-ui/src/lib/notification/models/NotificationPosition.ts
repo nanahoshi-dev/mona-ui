@@ -1,1 +1,1 @@
-export type NotificationPosition = "bottomleft" | "bottomright" | "topleft" | "topright";
+export type NotificationPosition = "bottom" | "bottomleft" | "bottomright" | "top" | "topleft" | "topright";

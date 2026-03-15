@@ -1,11 +1,10 @@
-import { Subject } from "rxjs";
 import { ComponentRef, WritableSignal } from "@angular/core";
-import { NotificationComponent } from "../components/notification/notification.component";
+import { Subject } from "rxjs";
 import { NotificationOptions } from "./NotificationOptions";
 
 export interface NotificationData {
-    componentDestroy$: Subject<string>;
-    componentRef?: ComponentRef<NotificationComponent>;
-    options: NotificationOptions;
-    visible: WritableSignal<boolean>;
+    readonly afterHide$: Subject<void>;
+    readonly componentDestroy$: Subject<string>;
+    readonly contentComponentRef: WritableSignal<ComponentRef<unknown> | null>;
+    readonly options: NotificationOptions;
 }

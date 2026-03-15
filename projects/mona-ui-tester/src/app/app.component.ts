@@ -1216,15 +1216,6 @@ export class AppComponent implements OnInit {
         });
     }
 
-    public showNotification(): void {
-        this.notificationService.show({
-            text: "Hello World!",
-            title: "Notification",
-            type: "error",
-            duration: 5000
-        });
-    }
-
     public updateTreeData(): void {
         this.treeData = [
             ...this.treeData,

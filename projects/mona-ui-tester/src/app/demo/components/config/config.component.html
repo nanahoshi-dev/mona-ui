@@ -4,26 +4,36 @@
     <div class="flex-1 w-full">
         <mona-tabs
             class="[&>div]:border-none [&>div]:shadow-none [&>mona-tab-list]:rounded-none [&>mona-tab-list]:w-full [&>mona-tab-list]:border-b [&>mona-tab-list]:border-b-border">
-            <mona-tab title="Inputs">
-                <ng-template monaTabContentTemplate>
-                    <ul class="bg-demo-background/10 divide-y divide-border select-none">
-                        @for (entry of inputProperties(); track $index) {
-                            <li class="flex flex-col gap-2 py-2">
-                                <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
-                                                         (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
-                            </li>
-                        }
-                    </ul>
-                </ng-template>
-            </mona-tab>
+            @if (inputProperties().length > 0) {
+                <mona-tab title="Inputs">
+                    <ng-template monaTabContentTemplate>
+                        <ul class="bg-demo-background/10 divide-y divide-border select-none">
+                            @for (entry of inputProperties(); track $index) {
+                                <li class="flex flex-col gap-2 py-2">
+                                    <app-api-input-list-item
+                                        [entry]="entry"
+                                        [metadata]="metadata()"
+                                        (valueChange)="
+                                            onValueChange($event.property, $event.value)
+                                        "></app-api-input-list-item>
+                                </li>
+                            }
+                        </ul>
+                    </ng-template>
+                </mona-tab>
+            }
             @if (outputProperties().length > 0) {
                 <mona-tab title="Outputs">
                     <ng-template monaTabContentTemplate>
                         <ul class="bg-demo-background/10 divide-y divide-border select-none">
                             @for (entry of outputProperties(); track $index) {
                                 <li class="flex flex-col gap-2 py-2">
-                                    <app-api-input-list-item [entry]="entry" [metadata]="metadata()"
-                                                             (valueChange)="onValueChange($event.property, $event.value)"></app-api-input-list-item>
+                                    <app-api-input-list-item
+                                        [entry]="entry"
+                                        [metadata]="metadata()"
+                                        (valueChange)="
+                                            onValueChange($event.property, $event.value)
+                                        "></app-api-input-list-item>
                                 </li>
                             }
                         </ul>
@@ -34,8 +44,12 @@
                 <mona-tab title="Features">
                     <ng-template monaTabContentTemplate>
                         <ul class="bg-demo-background/10 divide-y divide-border select-none">
-                            <ng-container [ngTemplateOutlet]="featureListTemplate"
-                                          [ngTemplateOutletContext]="{$implicit: templateProperties(), level: 0}"></ng-container>
+                            <ng-container
+                                [ngTemplateOutlet]="featureListTemplate"
+                                [ngTemplateOutletContext]="{
+                                    $implicit: templateProperties(),
+                                    level: 0
+                                }"></ng-container>
                         </ul>
                     </ng-template>
                 </mona-tab>
@@ -54,21 +68,32 @@
                                         </ng-template>
                                         <ul class="group">
                                             @for (property of subComponentEntry[1].inputs; track $index) {
-                                                <li class="flex flex-col gap-2 py-2 border-b border-border group-last:last:border-b-0">
+                                                <li
+                                                    class="flex flex-col gap-2 py-2 border-b border-border group-last:last:border-b-0">
                                                     <div class="flex flex-col px-2 text-sm gap-2">
                                                         <div class="flex gap-1 items-center flex-wrap">
                                                             <div class="font-semibold mr-4">{{ property.name }}</div>
                                                             <div
                                                                 class="px-2 py-px flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
-                                                                {{ subComponentEntry[1].inputs|inputProperty:property.name:'type' }}
+                                                                {{
+                                                                    subComponentEntry[1].inputs
+                                                                        | inputProperty: property.name : "type"
+                                                                }}
                                                             </div>
                                                             <div
                                                                 class="px-2 py-px flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
-                                                                {{ subComponentEntry[1].inputs|inputProperty:property.name:"kind" }}
+                                                                {{
+                                                                    subComponentEntry[1].inputs
+                                                                        | inputProperty: property.name : "kind"
+                                                                }}
                                                             </div>
                                                         </div>
-                                                        <div class="font-light text-gray-500 whitespace-pre-line text-sm/4">
-                                                            {{ subComponentEntry[1].inputs|inputProperty:property.name:"description" }}
+                                                        <div
+                                                            class="font-light text-gray-500 whitespace-pre-line text-sm/4">
+                                                            {{
+                                                                subComponentEntry[1].inputs
+                                                                    | inputProperty: property.name : "description"
+                                                            }}
                                                         </div>
                                                     </div>
                                                 </li>
@@ -95,36 +120,50 @@
                 </div>
                 <div class="flex items-center justify-center px-2 gap-2">
                     @if (entry[1].hasCode !== false) {
-                        <button monaButton size="small" look="ghost"
-                                (click)="entry[1].codeVisible = !entry[1].codeVisible">
+                        <button
+                            monaButton
+                            size="small"
+                            look="ghost"
+                            (click)="entry[1].codeVisible = !entry[1].codeVisible">
                             <lucide-angular [name]="codeIcon" [size]="16"></lucide-angular>
                         </button>
                     }
                     @if (entry[1].type === "boolean" || !entry[1].type) {
-                        <mona-switch [ngModel]="entry[1].active"
-                                     size="small"
-                                     (ngModelChange)="parentKey ? handler!.updateSubFeature('boolean', parentKey, entry[0], $event) : handler!.updateProperty('boolean',entry[0], $event)"></mona-switch>
+                        <mona-switch
+                            [ngModel]="entry[1].active"
+                            size="small"
+                            (ngModelChange)="
+                                parentKey
+                                    ? handler!.updateSubFeature('boolean', parentKey, entry[0], $event)
+                                    : handler!.updateProperty('boolean', entry[0], $event)
+                            "></mona-switch>
                     } @else if (entry[1].type === "number") {
                         <mona-numeric-text-box
                             [ngModel]="entry[1].numericValue"
-                            (ngModelChange)="parentKey ? handler!.updateSubFeature('number', parentKey, entry[0], $event) : handler!.updateProperty('number',entry[0], $event)"
+                            (ngModelChange)="
+                                parentKey
+                                    ? handler!.updateSubFeature('number', parentKey, entry[0], $event)
+                                    : handler!.updateProperty('number', entry[0], $event)
+                            "
                             [min]="entry[1].numericMin ?? null"
                             [max]="entry[1].numericMax ?? null"
                             [nullable]="entry[1].numericNullable ?? false"
                             [size]="'small'"
-                            class="w-37.5"
-                        ></mona-numeric-text-box>
+                            class="w-37.5"></mona-numeric-text-box>
                     } @else if (entry[1].type === "dropdown") {
                         <mona-drop-down-list
                             [data]="entry[1].dropdownDataSource"
                             [ngModel]="entry[1].dropdownValue"
                             [placeholder]="entry[1].placeholder ?? ''"
-                            (ngModelChange)="parentKey ? handler!.updateSubFeature('dropdown', parentKey, entry[0], $event) : handler!.updateProperty('dropdown',entry[0], $event)"
+                            (ngModelChange)="
+                                parentKey
+                                    ? handler!.updateSubFeature('dropdown', parentKey, entry[0], $event)
+                                    : handler!.updateProperty('dropdown', entry[0], $event)
+                            "
                             [textField]="entry[1].dropdownTextField"
                             [valueField]="entry[1].dropdownValueField"
                             [size]="'small'"
-                            class="w-37.5"
-                        >
+                            class="w-37.5">
                             <ng-template monaDropDownListValueTemplate let-dataItem>
                                 @if (entry[1].dropdownTextField) {
                                     <span>{{ dataItem[entry[1].dropdownTextField] }}</span>
@@ -152,21 +191,35 @@
                                 }
                             </ng-template>
                         </mona-drop-down-list>
+                    } @else if (entry[1].type === "string") {
+                        <mona-text-box
+                            [ngModel]="entry[1].stringValue"
+                            (ngModelChange)="
+                                parentKey
+                                    ? handler!.updateSubFeature('string', parentKey, entry[0], $event)
+                                    : handler!.updateProperty('string', entry[0], $event)
+                            "
+                            [size]="'small'"
+                            class="w-37.5"></mona-text-box>
                     }
                 </div>
             </div>
             @if (entry[1].codeVisible) {
                 <div class="px-2">
-                    <app-code-viewer [code]="entry[1].code"
-                                     language="html"></app-code-viewer>
+                    <app-code-viewer [code]="entry[1].code" language="html"></app-code-viewer>
                 </div>
             }
         </li>
         @if (entry[1].subFeatures && entry[1].active) {
             @let subFeatureEntries = Object.entries(entry[1].subFeatures);
             @if (subFeatureEntries.length > 0) {
-                <ng-container [ngTemplateOutlet]="featureListTemplate"
-                              [ngTemplateOutletContext]="{$implicit: subFeatureEntries, parentKey: entry[0], level: level + 1}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="featureListTemplate"
+                    [ngTemplateOutletContext]="{
+                        $implicit: subFeatureEntries,
+                        parentKey: entry[0],
+                        level: level + 1
+                    }"></ng-container>
             }
         }
     }

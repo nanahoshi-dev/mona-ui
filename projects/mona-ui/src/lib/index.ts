@@ -291,6 +291,10 @@ export * from "./navigation/breadcrumb/components/breadcrumb-item/breadcrumb-ite
 export * from "./navigation/breadcrumb/components/breadcrumb/breadcrumb.component";
 
 /** Notification */
+export * from "./notification/models/NotificationOptions";
+export * from "./notification/models/NotificationPosition";
+export * from "./notification/models/NotificationRef";
+export * from "./notification/models/NotificationType";
 export * from "./notification/services/notification.service";
 export * from "./notification/components/notification/notification.component";
 

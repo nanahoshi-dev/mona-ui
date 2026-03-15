@@ -1,97 +1,24 @@
-.mona-notification-wrapper {
-    width: 350px;
-    min-height: 80px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 0.5rem;
-    background-color: var(--mona-background);
-    border: 1px solid var(--mona-border-color);
-    color: var(--mona-text);
-    box-shadow: var(--mona-popup-shadow);
+@keyframes notification-slide-in-top {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-.mona-notification-inner {
-    display: flex;
-    flex: 1;
-    padding: 0.5rem;
+@keyframes notification-slide-in-bottom {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-.mona-notification-line {
-    width: 2px;
-    display: flex;
-    &-success {
-        background-color: var(--mona-success);
-    }
-    &-info {
-        background-color: var(--mona-info);
-    }
-    &-warning {
-        background-color: var(--mona-warning);
-    }
-    &-error {
-        background-color: var(--mona-error);
-    }
+@keyframes notification-slide-out-top {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-10px); }
 }
 
-.mona-notification-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
-    &-success {
-        color: var(--mona-success);
-    }
-    &-info {
-        color: var(--mona-info);
-    }
-    &-warning {
-        color: var(--mona-warning);
-    }
-    &-error {
-        color: var(--mona-error);
-    }
+@keyframes notification-slide-out-bottom {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(10px); }
 }
 
-.mona-notification-actions {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    & fa-icon {
-        cursor: pointer;
-        margin-top: -0.25rem;
-    }
-}
-
-.mona-notification-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-
-.mona-notification-header {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    flex: 1;
-    align-items: center;
-    font-size: 0.875rem;
-    font-weight: 600;
-    user-select: none;
-}
-
-.mona-notification-content {
-    display: flex;
-    width: 100%;
-    flex: 1;
-    align-items: center;
-}
-
-.mona-notification-text {
-    color: var(--mona-text);
-}
-
-.mona-notification-progress {
-    width: 100%;
-    height: 1px;
-}
+:host.notification-enter-top    { animation: notification-slide-in-top    300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+:host.notification-enter-bottom { animation: notification-slide-in-bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+:host.notification-leave-top    { animation: notification-slide-out-top   300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+:host.notification-leave-bottom { animation: notification-slide-out-bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }

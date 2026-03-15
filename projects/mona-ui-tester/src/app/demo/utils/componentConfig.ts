@@ -110,8 +110,9 @@ export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     numericMin?: number; // Only for number type
     numericNullable?: boolean; // Only for number type
     numericValue?: number; // Only for number type
+    stringValue?: string; // Only for string type
     subFeatures?: ComponentConfigFeatureItem;
-    type?: "boolean" | "dropdown" | "number"; // Defaults to boolean
+    type?: "boolean" | "dropdown" | "number" | "string"; // Defaults to boolean
 }
 
 export interface ComponentConfigFeatureItem {

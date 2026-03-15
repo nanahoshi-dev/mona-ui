@@ -133,6 +133,10 @@ export class SidebarComponent {
                     path: "/multi-select"
                 },
                 {
+                    text: "Notification",
+                    path: "/notification"
+                },
+                {
                     text: "Numeric Text Box",
                     path: "/numeric-textbox"
                 },
