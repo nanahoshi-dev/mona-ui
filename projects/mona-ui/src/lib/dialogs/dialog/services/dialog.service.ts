@@ -29,6 +29,7 @@ export class DialogService {
             closeOnOutsideClick: false,
             content: DialogContentComponent,
             data: injectorData,
+
             hasBackdrop: settings.modal ?? true,
             height: settings.height ?? "fit-content",
             maxHeight: settings.maxHeight,
@@ -36,20 +37,20 @@ export class DialogService {
             minHeight: settings.minHeight,
             minWidth: settings.minWidth,
             positionStrategy: "global",
-            providers: [
-                { provide: DialogRef, useFactory: forwardRef(() => dialogReference.dialogRef) }
-            ],
+            providers: [{ provide: DialogRef, useFactory: forwardRef(() => dialogReference.dialogRef) }],
             width: settings.width
         });
         dialogReference.initializePopupRef(popupRef);
 
-        afterNextRender({
-            read: () => {
-                const element = popupRef.overlayRef.overlayElement;
-                setWindowStyles(element, settings);
-            }
-        }, { injector: this.#injector });
+        afterNextRender(
+            {
+                read: () => {
+                    const element = popupRef.overlayRef.overlayElement;
+                    setWindowStyles(element, settings);
+                }
+            },
+            { injector: this.#injector }
+        );
         return dialogReference.dialogRef;
     }
 }
-

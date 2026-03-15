@@ -12,10 +12,8 @@ export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const active = this.active();
         const disabled = this.disabled();
-        return breadcrumbListItemThemeVariants(theme)({ active, disabled });
+        return breadcrumbListItemThemeVariants(theme)({ disabled });
     });
-    public readonly active = input(false);
     public readonly disabled = input(false);
 }

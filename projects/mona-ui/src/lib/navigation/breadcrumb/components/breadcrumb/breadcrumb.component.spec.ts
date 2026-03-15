@@ -1,16 +1,23 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { By } from "@angular/platform-browser";
-import { BreadcrumbItem } from "../../models/BreadcrumbItem";
+import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.component";
 
 import { BreadcrumbComponent } from "./breadcrumb.component";
 
 @Component({
-    template: ` <mona-breadcrumb [items]="items" (itemClick)="onItemClick($event)"></mona-breadcrumb> `,
-    imports: [BreadcrumbComponent]
+    template: `
+        <mona-breadcrumb>
+            @for (item of items(); track $index) {
+                <mona-breadcrumb-item (itemClick)="onItemClick(item)">
+                    <span [title]="item.title">{{ item.text }}</span>
+                </mona-breadcrumb-item>
+            }
+        </mona-breadcrumb>
+    `,
+    imports: [BreadcrumbComponent, BreadcrumbItemComponent]
 })
 class TestHostComponent {
-    public items: BreadcrumbItem[] = [
+    public readonly items = signal([
         {
             text: "Home",
             title: "Home"
@@ -23,9 +30,9 @@ class TestHostComponent {
             text: "Product 1",
             title: "First product"
         }
-    ];
+    ]);
 
-    public onItemClick(item: BreadcrumbItem): void {
+    public onItemClick(item: unknown): void {
         console.log(item);
     }
 }
@@ -51,9 +58,4 @@ describe("BreadcrumbComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
-
-
-
-
-
 });

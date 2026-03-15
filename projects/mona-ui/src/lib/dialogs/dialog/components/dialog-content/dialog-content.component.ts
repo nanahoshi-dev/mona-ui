@@ -1,6 +1,6 @@
 import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
+import { afterNextRender, ChangeDetectionStrategy, Component, computed, ElementRef, inject } from "@angular/core";
 import {
     BadgeInfo,
     BadgeQuestionMark,
@@ -16,6 +16,7 @@ import { AnyPipe } from "../../../../pipes/any.pipe";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { createElementControlId } from "../../../../utils/createElementControlId";
+import { focusElement } from "../../../utils/focusElement";
 import { DialogAction } from "../../models/DialogAction";
 import { DialogInjectorData } from "../../models/DialogInjectorData";
 import {
@@ -49,6 +50,7 @@ type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; 
     hostDirectives: [CdkTrapFocus]
 })
 export class DialogContentComponent {
+    readonly #hostElementRef = inject(ElementRef);
     readonly #iconMap: IconMap = {
         confirm: { color: "var(--color-success)", icon: BadgeQuestionMark },
         error: { color: "var(--color-error)", icon: OctagonX },
@@ -123,6 +125,14 @@ export class DialogContentComponent {
         return dialogTitleContainerThemeVariants(theme)();
     });
 
+    public constructor() {
+        afterNextRender({
+            read: () => {
+                this.focusElement();
+            }
+        });
+    }
+
     public onActionClick(action: DialogAction): void {
         this.dialogData.dialogReference.dialogResult$.next({
             action,
@@ -134,5 +144,14 @@ export class DialogContentComponent {
         this.dialogData.dialogReference.dialogResult$.next({
             viaClose: true
         });
+    }
+
+    private focusElement(): void {
+        const element = this.dialogData.focusedElement;
+        if (!element) {
+            return;
+        }
+        const dialogElement = this.#hostElementRef.nativeElement;
+        focusElement(dialogElement, element);
     }
 }

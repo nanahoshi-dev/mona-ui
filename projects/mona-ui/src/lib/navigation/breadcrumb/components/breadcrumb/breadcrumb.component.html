@@ -1,15 +1,11 @@
 <ol [class]="listClass()">
     @for (item of itemComponents(); track $index) {
-        <li
-            monaBreadcrumbItem
-            [active]="item === activeItem()"
-            [disabled]="item.disabled()"
-            (click)="onItemClick(item)">
+        <li monaBreadcrumbItem [disabled]="item.disabled()" (click)="onItemClick(item)">
             <ng-container [ngTemplateOutlet]="item.templateRef()"></ng-container>
         </li>
 
         @if ($index < itemCount() - 1) {
-            <li monaBreadcrumbItem class="mona-breadcrumb-separator">
+            <li monaBreadcrumbItem>
                 @if (separatorTemplate()) {
                     <ng-container
                         [ngTemplateOutlet]="separatorTemplate()"

@@ -6,19 +6,14 @@ import {
     contentChild,
     contentChildren,
     inject,
-    input,
-    output,
-    signal,
     TemplateRef
 } from "@angular/core";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { count, index } from "@mirei/ts-collections";
+import { count } from "@mirei/ts-collections";
 import { ChevronRight, LucideAngularModule } from "lucide-angular";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { BreadcrumbItemTemplateDirective } from "../../directives/breadcrumb-item-template.directive";
 import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
-import { BreadcrumbItem } from "../../models/BreadcrumbItem";
 import { breadcrumbListThemeVariants } from "../../styles/breadcrumb.styles";
 import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.component";
 
@@ -31,10 +26,8 @@ import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.comp
 })
 export class BreadcrumbComponent {
     readonly #themeService = inject(ThemeService);
-    protected readonly activeItem = signal<BreadcrumbItemComponent | null>(null);
     protected readonly itemComponents = contentChildren(BreadcrumbItemComponent);
     protected readonly itemCount = computed(() => count(this.itemComponents()));
-    protected readonly itemTemplate = contentChild(BreadcrumbItemTemplateDirective, { read: TemplateRef });
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
         return breadcrumbListThemeVariants(theme)();
@@ -44,10 +37,7 @@ export class BreadcrumbComponent {
         read: TemplateRef
     });
 
-    public readonly itemClick = output<BreadcrumbItem>();
-    public readonly items = input<Iterable<BreadcrumbItem>>([]);
-
     public onItemClick(item: BreadcrumbItemComponent): void {
-        this.activeItem.set(item);
+        item.itemClick.emit();
     }
 }

@@ -1,17 +1,25 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { ChevronsRight, LucideAngularModule, Slash } from "lucide-angular";
 import {
-    BreadcrumbComponent,
-    BreadcrumbItem,
-    BreadcrumbItemComponent,
-    BreadcrumbItemTemplateDirective,
-    BreadcrumbSeparatorTemplateDirective
-} from "mona-ui";
+    ChevronsRight,
+    CircleCheck,
+    CreditCard,
+    LucideAngularModule,
+    LucideIconData,
+    ShoppingCart,
+    Truck
+} from "lucide-angular";
+import { BreadcrumbComponent, BreadcrumbItemComponent, BreadcrumbSeparatorTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+interface BreadcrumbDemoItem {
+    icon: LucideIconData;
+    text: string;
+    title: string;
+}
 
 @Component({
     selector: "app-breadcrumb-demo",
@@ -21,12 +29,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbComponent> {
     readonly #injector = createFeatureInjector({
-        itemTemplate: {
-            code: ``,
-            active: false,
-            name: "Item Template",
-            description: "Use a custom template for the breadcrumb items."
-        },
         separatorTemplate: {
             code: ``,
             active: false,
@@ -38,11 +40,11 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
         {
             text: "Shopping",
             value: [
-                { text: "Cart", title: "Cart" },
-                { text: "Billing", title: "Billing" },
-                { text: "Shipping", title: "Shipping" },
-                { text: "Payment", title: "Payment" }
-            ] as BreadcrumbItem[]
+                { text: "Cart", title: "Cart", icon: ShoppingCart },
+                { text: "Billing", title: "Billing", icon: CreditCard },
+                { text: "Shipping", title: "Shipping", icon: Truck },
+                { text: "Complete", title: "Complete", icon: CircleCheck }
+            ] as BreadcrumbDemoItem[]
         }
     ];
     protected readonly BreadcrumbWrapperComponent = BreadcrumbWrapperComponent;
@@ -64,24 +66,17 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
 }
 
 @Component({
-    imports: [
-        BreadcrumbComponent,
-        BreadcrumbItemTemplateDirective,
-        BreadcrumbSeparatorTemplateDirective,
-        LucideAngularModule,
-        BreadcrumbItemComponent
-    ],
+    imports: [BreadcrumbComponent, BreadcrumbSeparatorTemplateDirective, LucideAngularModule, BreadcrumbItemComponent],
     template: `
         @let featureData = features();
         <mona-breadcrumb>
             @for (item of items(); track $index) {
-                <mona-breadcrumb-item [disabled]="$index === 2">{{ item.text }}</mona-breadcrumb-item>
-            }
-
-            @if (featureData["itemTemplate"].active) {
-                <ng-template monaBreadcrumbItemTemplate let-item>
-                    <span class="text-violet-600 font-medium">{{ item.text }}</span>
-                </ng-template>
+                <mona-breadcrumb-item [disabled]="$index === 3" (itemClick)="onItemClick(item)">
+                    <div class="flex flex-row gap-2 items-center">
+                        <lucide-icon [img]="item.icon" [size]="16"></lucide-icon>
+                        <span [title]="item.title">{{ item.text }}</span>
+                    </div>
+                </mona-breadcrumb-item>
             }
             @if (featureData["separatorTemplate"].active) {
                 <ng-template monaBreadcrumbSeparatorTemplate>
@@ -94,5 +89,9 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
 class BreadcrumbWrapperComponent implements ComponentInputsAsSignal<BreadcrumbComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly separatorIcon = ChevronsRight;
-    public readonly items = input<Iterable<BreadcrumbItem>>([]);
+    public readonly items = input<Iterable<BreadcrumbDemoItem>>([]);
+
+    protected onItemClick(item: BreadcrumbDemoItem) {
+        console.log(`Item clicked: ${item.text}`);
+    }
 }

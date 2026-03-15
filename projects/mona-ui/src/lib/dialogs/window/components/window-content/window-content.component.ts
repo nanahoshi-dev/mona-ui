@@ -23,6 +23,7 @@ import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/Popu
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { createElementControlId } from "../../../../utils/createElementControlId";
+import { focusElement } from "../../../utils/focusElement";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
@@ -212,16 +213,7 @@ export class WindowContentComponent implements WindowContentVariantInput {
             return;
         }
         const windowElement = this.#hostElementRef.nativeElement;
-        if (element instanceof ElementRef) {
-            element.nativeElement.focus();
-        } else if (element instanceof HTMLElement) {
-            element.focus();
-        } else {
-            const elements = windowElement.querySelectorAll(element);
-            if (elements.length > 0) {
-                (elements[0] as HTMLElement).focus();
-            }
-        }
+        focusElement(windowElement, element);
     }
 
     #createView(): void {

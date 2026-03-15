@@ -17,10 +17,6 @@ export const breadcrumbListItemVariants = cva(
     `,
     {
         variants: {
-            active: {
-                true: "font-semibold",
-                false: ""
-            },
             disabled: {
                 true: "cursor-not-allowed pointer-events-none opacity-50",
                 false: ""

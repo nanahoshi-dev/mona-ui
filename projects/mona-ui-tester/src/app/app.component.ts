@@ -93,13 +93,6 @@ export class AppComponent implements OnInit {
     public readonly starIcon: IconDefinition = faStar;
     public readonly sunIcon: IconDefinition = faSun;
     public autoCompleteValue: string = "Yakizakana";
-    public breadcrumbItems: BreadcrumbItem[] = [
-        { text: "Home", title: "Home" },
-        { text: "Products", title: "Products" },
-        { text: "Fruits", title: "Fruits" },
-        { text: "Quince", title: "Quince" }
-    ];
-    public breadcrumbViewItems: BreadcrumbItem[] = this.breadcrumbItems;
     public buttonGroupButtonSelected: boolean = true;
     public calendarDisabledDates: WritableSignal<Date[]> = signal([]);
     public calendarMaxValue: WritableSignal<Date | null> = signal(null); // new Date(2022, 6, 15);
@@ -786,11 +779,6 @@ export class AppComponent implements OnInit {
     public onAutoCompleteValueChange(value: string): void {
         this.autoCompleteValue = value;
         console.log("AutoComplete value changed: ", value);
-    }
-
-    public onBreadcrumbItemClick(item: BreadcrumbItem): void {
-        const index = this.breadcrumbViewItems.indexOf(item);
-        this.breadcrumbViewItems = this.breadcrumbViewItems.slice(0, index + 1);
     }
 
     public onButtonSelectedChange(selected: boolean): void {

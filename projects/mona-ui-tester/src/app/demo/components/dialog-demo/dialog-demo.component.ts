@@ -13,7 +13,8 @@ import {
     DialogRef,
     DialogDescriptionTemplateDirective,
     DialogContentTemplateDirective,
-    TextBoxComponent
+    TextBoxComponent,
+    TextBoxDirective
 } from "mona-ui";
 import { DialogIconTemplateDirective } from "mona-ui/dialogs/dialog/directives/dialog-icon-template.directive";
 import { take } from "rxjs";
@@ -197,7 +198,8 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
         LucideAngularModule,
         DialogIconTemplateDirective,
         DialogContentTemplateDirective,
-        TextBoxComponent
+        TextBoxComponent,
+        TextBoxDirective
     ],
     template: `
         @let featureData = features();
@@ -231,7 +233,11 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                     <ng-template monaDialogContentTemplate>
                         <div class="flex flex-col gap-2">
                             <mona-text-box [placeholder]="'Enter your email...'" type="email"></mona-text-box>
-                            <mona-text-box [placeholder]="'Enter your password...'" type="password"></mona-text-box>
+                            <input
+                                type="password"
+                                placeholder="Enter your password..."
+                                class="dialog-password"
+                                monaTextBox />
                         </div>
                     </ng-template>
                 }
