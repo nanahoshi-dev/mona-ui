@@ -7,7 +7,7 @@ import { NotificationData } from "../models/NotificationData";
 import { NotificationOptions } from "../models/NotificationOptions";
 import { NotificationPosition } from "../models/NotificationPosition";
 import { NotificationRef } from "../models/NotificationRef";
-import { NotificationType } from "../models/NotificationType";
+import { getDefaultTitle } from "../utils/getDefaultTitle";
 
 @Injectable({
     providedIn: "root"
@@ -32,24 +32,19 @@ export class NotificationService {
         this.initialize();
     }
 
-    private static getDefaultTitle(type: NotificationType): string {
-        switch (type) {
-            case "info":
-                return "Info";
-            case "success":
-                return "Success";
-            case "warning":
-                return "Warning";
-            case "error":
-                return "Error";
-        }
-    }
-
-    public close(id: string): void {
+    public hide(id: string): void {
         const notificationData = this.getNotificationDataById(id);
         if (notificationData) {
             notificationData.componentDestroy$.next(id);
         }
+    }
+
+    public hideAll(): void {
+        this.notificationContainerMap.forEach(container => {
+            container.notifications.forEach(notification => {
+                this.hide(notification.options.id as string);
+            });
+        });
     }
 
     public show(options: NotificationOptions): NotificationRef {
@@ -63,7 +58,7 @@ export class NotificationService {
             options.type = "info";
         }
         if (!options.title) {
-            options.title = NotificationService.getDefaultTitle(options.type);
+            options.title = getDefaultTitle(options.type);
         }
         const containerData: NotificationContainerData | undefined = this.notificationContainerMap.get(
             options.position
@@ -75,7 +70,7 @@ export class NotificationService {
                 get content() {
                     return existing.contentComponentRef();
                 },
-                hide: () => this.close(options.id as string)
+                hide: () => this.hide(options.id as string)
             };
         }
         if (this.notificationContainerSubscriptions[options.position as NotificationPosition]) {
@@ -132,7 +127,7 @@ export class NotificationService {
             get content() {
                 return notificationData.contentComponentRef();
             },
-            hide: () => this.close(options.id as string)
+            hide: () => this.hide(options.id as string)
         };
     }
 
@@ -193,9 +188,7 @@ export class NotificationService {
         }
         container.notifications.delete(id);
         if (container.componentRef) {
-            container.componentRef.instance.notificationDataList.set(
-                Array.from(container.notifications.values())
-            );
+            container.componentRef.instance.notificationDataList.set(Array.from(container.notifications.values()));
         }
         if (container.notifications.size === 0) {
             container.subscription?.unsubscribe();

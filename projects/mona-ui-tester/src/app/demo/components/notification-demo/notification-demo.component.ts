@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, signal, TemplateRef, viewChild } from "@angular/core";
-import { ButtonDirective, NotificationService, TextBoxComponent } from "mona-ui";
+import { ButtonDirective, NotificationRef, NotificationService, TextBoxComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -125,6 +125,7 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
     imports: [ButtonDirective],
     template: `
         <button monaButton (click)="showNotification()">Show Notification</button>
+        <button monaButton look="error" (click)="hideAll()">Hide All Notifications</button>
         <ng-template #contentTemplate>
             <div class="p-4">Custom Notification Content</div>
         </ng-template>
@@ -138,6 +139,7 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
     readonly #notificationService = inject(NotificationService);
     private readonly contentTemplate = viewChild.required<TemplateRef<unknown>>("contentTemplate");
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected notificationRef: NotificationRef | null = null;
     public showNotification() {
         const contentType = this.#config()["content"].dropdownValue;
         const content =
@@ -146,7 +148,7 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
                 : contentType === "template"
                   ? this.contentTemplate()
                   : TextBoxComponent; //TODO: Create a simple test component
-        const notificationRef = this.#notificationService.show({
+        this.notificationRef = this.#notificationService.show({
             closable: this.#config()["closable"].active,
             closeTitle: this.#config()["closeTitle"].stringValue,
             content,
@@ -158,5 +160,9 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
             type: this.#config()["type"].dropdownValue,
             width: this.#config()["width"].numericValue
         });
+    }
+
+    protected hideAll(): void {
+        this.#notificationService.hideAll();
     }
 }
