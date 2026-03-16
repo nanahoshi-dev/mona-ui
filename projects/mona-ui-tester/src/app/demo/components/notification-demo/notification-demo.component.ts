@@ -1,6 +1,15 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, signal, TemplateRef, viewChild } from "@angular/core";
-import { ButtonDirective, NotificationRef, NotificationService, TextBoxComponent } from "mona-ui";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    signal,
+    TemplateRef,
+    viewChild,
+    ViewContainerRef
+} from "@angular/core";
+import { ButtonDirective, NotificationRef, NotificationService, PlaceholderComponent, TextBoxComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -20,6 +29,15 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
             name: "Notification Options",
             description: "Configure the notification component.",
             subFeatures: {
+                appendTo: {
+                    type: "dropdown",
+                    code: ``,
+                    active: false,
+                    name: "Append To",
+                    description: "The target element to append the notification to.",
+                    dropdownDataSource: ["body", "scopedContainer"],
+                    dropdownValue: "body"
+                },
                 closable: {
                     type: "boolean",
                     code: ``,
@@ -122,10 +140,13 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
 }
 
 @Component({
-    imports: [ButtonDirective],
+    imports: [ButtonDirective, PlaceholderComponent],
     template: `
         <button monaButton (click)="showNotification()">Show Notification</button>
         <button monaButton look="error" (click)="hideAll()">Hide All Notifications</button>
+        <div #scopedContainer class="h-40 w-80 mt-4 p-1 relative overflow-hidden" style="border: 2px dashed #888;">
+            <mona-placeholder>appendTo target</mona-placeholder>
+        </div>
         <ng-template #contentTemplate>
             <div class="p-4">Custom Notification Content</div>
         </ng-template>
@@ -138,8 +159,10 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
     });
     readonly #notificationService = inject(NotificationService);
     private readonly contentTemplate = viewChild.required<TemplateRef<unknown>>("contentTemplate");
+    private readonly scopedContainer = viewChild.required("scopedContainer", { read: ViewContainerRef });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected notificationRef: NotificationRef | null = null;
+
     public showNotification() {
         const contentType = this.#config()["content"].dropdownValue;
         const content =
@@ -148,7 +171,9 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
                 : contentType === "template"
                   ? this.contentTemplate()
                   : TextBoxComponent; //TODO: Create a simple test component
+        const appendTo = this.#config()["appendTo"].dropdownValue === "body" ? undefined : this.scopedContainer();
         this.notificationRef = this.#notificationService.show({
+            appendTo,
             closable: this.#config()["closable"].active,
             closeTitle: this.#config()["closeTitle"].stringValue,
             content,
@@ -159,6 +184,17 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
             title: this.#config()["title"].stringValue,
             type: this.#config()["type"].dropdownValue,
             width: this.#config()["width"].numericValue
+        });
+    }
+
+    protected showScopedNotification(): void {
+        this.#notificationService.show({
+            appendTo: this.scopedContainer(),
+            content: "This notification is scoped to the dashed container.",
+            duration: 3000,
+            position: "topright",
+            title: "Scoped",
+            type: "info"
         });
     }
 

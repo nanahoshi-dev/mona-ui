@@ -1,8 +1,9 @@
-import { TemplateRef, Type } from "@angular/core";
+import { TemplateRef, Type, ViewContainerRef } from "@angular/core";
 import { NotificationPosition } from "./NotificationPosition";
 import { NotificationType } from "./NotificationType";
 
 export interface NotificationOptions {
+    appendTo?: ViewContainerRef;
     closable?: boolean;
     closeTitle?: string;
     content: string | TemplateRef<unknown> | Type<unknown>;
