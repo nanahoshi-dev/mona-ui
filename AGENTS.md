@@ -20,6 +20,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
 - Use `NgOptimizedImage` for all static images.
     - `NgOptimizedImage` does not work for inline base64 images.
+- Use `animate.enter` and `animate.leave` for animations. Do NOT use @angular/animations, since it is being deprecated.
 
 ## Accessibility Requirements
 - It MUST pass all AXE checks.

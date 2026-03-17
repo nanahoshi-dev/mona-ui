@@ -19,7 +19,8 @@ export class NotificationContainerComponent {
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const position = this.position();
-        return notificationContainerBaseThemeVariants(theme)({ position });
+        const positionType = this.positionType();
+        return notificationContainerBaseThemeVariants(theme)({ position, positionType });
     });
     protected readonly enterAnimClass = computed(() =>
         this.position().startsWith("bottom") ? "notification-enter-bottom" : "notification-enter-top"
@@ -29,4 +30,5 @@ export class NotificationContainerComponent {
     );
     public readonly notificationDataList = signal<NotificationData[]>([]);
     public readonly position = signal<NotificationPosition>("topright");
+    public readonly positionType = signal<"fixed" | "absolute">("fixed");
 }

@@ -5,10 +5,7 @@ import { cva } from "class-variance-authority";
 //---------------------------------
 
 export const notificationContainerBaseVariants = cva(
-    `
-        absolute p-2 z-40000
-        overflow-hidden
-    `,
+    `p-2 z-40000 overflow-hidden`,
     {
         variants: {
             position: {
@@ -18,7 +15,14 @@ export const notificationContainerBaseVariants = cva(
                 top: "top-0 left-1/2 -translate-x-1/2",
                 topleft: "top-0 left-0",
                 topright: "top-0 right-0"
+            },
+            positionType: {
+                fixed: "fixed",
+                absolute: "absolute"
             }
+        },
+        defaultVariants: {
+            positionType: "fixed"
         }
     }
 );

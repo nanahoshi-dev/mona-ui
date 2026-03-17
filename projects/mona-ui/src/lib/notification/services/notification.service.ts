@@ -1,4 +1,13 @@
-import { ApplicationRef, ComponentRef, createComponent, DOCUMENT, inject, Injectable, signal, ViewContainerRef } from "@angular/core";
+import {
+    ApplicationRef,
+    ComponentRef,
+    createComponent,
+    DOCUMENT,
+    inject,
+    Injectable,
+    signal,
+    ViewContainerRef
+} from "@angular/core";
 import { Subject, Subscription, take } from "rxjs";
 import { v4 } from "uuid";
 import { NotificationContainerComponent } from "../components/notification-container/notification-container.component";
@@ -80,12 +89,15 @@ export class NotificationService {
         }
     }
 
-    private createContainerComponent(appendTo?: ViewContainerRef): Subject<ComponentRef<NotificationContainerComponent>> {
+    private createContainerComponent(
+        appendTo?: ViewContainerRef
+    ): Subject<ComponentRef<NotificationContainerComponent>> {
         const containerSubject = new Subject<ComponentRef<NotificationContainerComponent>>();
         const notificationContainerComponent = createComponent(NotificationContainerComponent, {
             environmentInjector: this.#appRef.injector
         });
         const host = appendTo ? appendTo.element.nativeElement : this.#document.body;
+        notificationContainerComponent.instance.positionType.set(appendTo ? "absolute" : "fixed");
         host.appendChild(notificationContainerComponent.location.nativeElement);
         this.#appRef.attachView(notificationContainerComponent.hostView);
         notificationContainerComponent.changeDetectorRef.detectChanges();
@@ -135,14 +147,20 @@ export class NotificationService {
     private createNotificationContainer(options: NotificationOptions): NotificationRef {
         const position = options.position as NotificationPosition;
         const ref = this.createNotification(options);
-        this.notificationContainerSubscriptions[position] = this.createContainerComponent(options.appendTo).subscribe(ncr => {
-            ncr.instance.position.set(options.position as NotificationPosition);
-            const notificationContainerData = this.notificationContainerMap.get(position) as NotificationContainerData;
-            notificationContainerData.componentRef = ncr;
-            notificationContainerData.appendTo = options.appendTo;
-            notificationContainerData.subscription = this.notificationContainerSubscriptions[position] as Subscription;
-            ncr.instance.notificationDataList.set(Array.from(notificationContainerData.notifications.values()));
-        });
+        this.notificationContainerSubscriptions[position] = this.createContainerComponent(options.appendTo).subscribe(
+            ncr => {
+                ncr.instance.position.set(options.position as NotificationPosition);
+                const notificationContainerData = this.notificationContainerMap.get(
+                    position
+                ) as NotificationContainerData;
+                notificationContainerData.componentRef = ncr;
+                notificationContainerData.appendTo = options.appendTo;
+                notificationContainerData.subscription = this.notificationContainerSubscriptions[
+                    position
+                ] as Subscription;
+                ncr.instance.notificationDataList.set(Array.from(notificationContainerData.notifications.values()));
+            }
+        );
         return ref;
     }
 
