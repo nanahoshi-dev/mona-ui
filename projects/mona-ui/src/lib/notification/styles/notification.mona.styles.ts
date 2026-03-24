@@ -5,7 +5,7 @@ import { cva } from "class-variance-authority";
 //---------------------------------
 
 export const notificationContainerBaseVariants = cva(
-    `p-2 z-40000 overflow-hidden`,
+    `p-2 z-40000`,
     {
         variants: {
             position: {

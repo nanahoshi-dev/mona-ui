@@ -30,6 +30,7 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
     protected readonly config = signal<ComponentConfig<ProgressBarComponent>>({
         code: `
             <mona-progress-bar
+                [animate]="animate()"
                 [color]="color()"
                 [disabled]="disabled()"
                 [indeterminate]="indeterminate()"
@@ -46,6 +47,10 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
             </mona-progress-bar>
         `,
         inputs: {
+            animate: {
+                type: "boolean",
+                value: true
+            },
             color: {
                 type: "color",
                 value: ""
@@ -104,6 +109,7 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
     template: `
         @let featureData = features();
         <mona-progress-bar
+            [animate]="animate()"
             [color]="color()"
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
@@ -128,6 +134,7 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
 })
 class ProgressBarWrapperComponent implements ComponentInputsAsSignal<ProgressBarComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly animate = input<ReturnType<ProgressBarComponent["animate"]>>(true);
     public readonly color = input<ReturnType<ProgressBarComponent["color"]>>(``);
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);

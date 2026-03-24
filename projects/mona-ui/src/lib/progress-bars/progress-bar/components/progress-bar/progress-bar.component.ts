@@ -87,9 +87,16 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     protected readonly trackClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return progressBarTrackThemeVariants(theme)({ rounded });
+        const classes = progressBarTrackThemeVariants(theme)({ rounded });
+        return this.animate() ? classes : twMerge(classes, "data-[next='true']:transition-none");
     });
     protected readonly trackColor = this.#color;
+
+    /**
+     * @description Whether to animate the progress bar track transition.
+     * @default true
+     */
+    public readonly animate = input(true);
 
     /**
      * @description The color of the progress bar.
