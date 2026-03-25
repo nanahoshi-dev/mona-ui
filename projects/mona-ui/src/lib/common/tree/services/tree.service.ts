@@ -49,7 +49,7 @@ import { NodeDragStartEvent } from "../models/NodeDragStartEvent";
 import { NodeDropEvent } from "../models/NodeDropEvent";
 import { NodeItem } from "../models/NodeItem";
 import { NodeSelectEvent } from "../models/NodeSelectEvent";
-import { SelectableOptions } from "../models/SelectableOptions";
+import { TreeSelectableOptions } from "../models/TreeSelectableOptions";
 import { TreeNode } from "../models/TreeNode";
 import { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
 import { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
@@ -138,7 +138,7 @@ export class TreeService<T> {
     public readonly nodeSet = signal(ImmutableSet.create<TreeNode<T>>());
     public readonly nodeTemplate = signal<TemplateRef<any> | null>(null);
     public readonly selectBy = signal<NodeKeySelector<T>>(null);
-    public readonly selectableOptions = signal<SelectableOptions>({
+    public readonly selectableOptions = signal<TreeSelectableOptions>({
         childrenOnly: false,
         enabled: false,
         mode: "single",
@@ -579,7 +579,7 @@ export class TreeService<T> {
         this.selectBy.set(selector);
     }
 
-    public setSelectableOptions(options: Partial<SelectableOptions>): void {
+    public setSelectableOptions(options: Partial<TreeSelectableOptions>): void {
         this.selectableOptions.update(o => ({ ...o, ...options }));
     }
 

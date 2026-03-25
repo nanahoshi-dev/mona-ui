@@ -464,7 +464,6 @@ export class AppComponent implements OnInit {
             ]
         }
     ];
-    public treeDataRandom: TreeNodeDataItem[] = this.generateRandomTreeData(250);
     public treeFilter: WritableSignal<string> = signal("Apple");
 
     public treeFlatData = [
@@ -1322,38 +1321,5 @@ export class AppComponent implements OnInit {
         }
 
         return generatedData;
-    }
-
-    private generateRandomTreeData(nodeCount: number): TreeNodeDataItem[] {
-        function generateNode(idPrefix: string, remainingNodes: number): [any, number] {
-            const node: TreeNodeDataItem = {
-                text: Math.random().toString(36).substring(7),
-                id: idPrefix,
-                items: []
-            };
-
-            if (remainingNodes > 0) {
-                const childCount = Math.min(Math.floor(Math.random() * remainingNodes), remainingNodes);
-                for (let i = 0; i < childCount; i++) {
-                    const [childNode, newRemainingNodes] = generateNode(`${idPrefix}-${i + 1}`, remainingNodes - 1);
-                    node.items.push(childNode);
-                    remainingNodes = newRemainingNodes;
-                }
-            }
-
-            return [node, remainingNodes];
-        }
-
-        const trees: TreeNodeDataItem[] = [];
-        let remainingNodes = nodeCount;
-        let rootId = 1;
-        while (remainingNodes > 0) {
-            const [tree, newRemainingNodes] = generateNode(rootId.toString(), remainingNodes - 1);
-            trees.push(tree);
-            remainingNodes = newRemainingNodes;
-            rootId++;
-        }
-
-        return trees;
     }
 }

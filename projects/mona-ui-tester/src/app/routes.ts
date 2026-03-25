@@ -284,6 +284,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "tree-view",
+                loadComponent: () =>
+                    import("./docs/components/tree-view-doc/tree-view-doc.component").then(m => m.TreeViewDocComponent)
+            },
+            {
                 path: "window",
                 loadComponent: () =>
                     import("./docs/components/window-doc/window-doc.component").then(m => m.WindowDocComponent)

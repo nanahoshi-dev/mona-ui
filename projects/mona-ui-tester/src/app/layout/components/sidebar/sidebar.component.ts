@@ -213,6 +213,10 @@ export class SidebarComponent {
                     path: "/tooltip-directive"
                 },
                 {
+                    text: "Tree View",
+                    path: "/tree-view"
+                },
+                {
                     text: "Window",
                     path: "/window"
                 },

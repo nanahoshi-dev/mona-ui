@@ -548,7 +548,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
     });
     protected readonly scrollBottomItemCount = signal(20);
     protected readonly selectedKeys = signal<number[]>([]);
-    protected readonly selection = computed<Partial<SelectableOptions>>(() => {
+    protected readonly selection = computed<SelectableOptions>(() => {
         const features = this.features();
         const subFeatures = features["selection"]?.subFeatures || {};
         const mode = subFeatures["mode"].dropdownValue;

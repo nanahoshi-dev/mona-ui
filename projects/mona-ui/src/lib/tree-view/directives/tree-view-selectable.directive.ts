@@ -4,7 +4,7 @@ import { sequenceEqual } from "@mirei/ts-collections";
 import { distinctUntilChanged, pairwise } from "rxjs";
 import { NodeItem } from "../../common/tree/models/NodeItem";
 import { NodeSelectEvent } from "../../common/tree/models/NodeSelectEvent";
-import { SelectableOptions } from "../../common/tree/models/SelectableOptions";
+import { TreeSelectableOptions } from "../../common/tree/models/TreeSelectableOptions";
 import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
@@ -13,7 +13,7 @@ import { TreeService } from "../../common/tree/services/tree.service";
     standalone: true
 })
 export class TreeViewSelectableDirective<T, K = T> implements OnInit {
-    readonly #defaultOptions: SelectableOptions = {
+    readonly #defaultOptions: TreeSelectableOptions = {
         childrenOnly: false,
         enabled: true,
         mode: "single",
@@ -28,7 +28,7 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
 
     public selectBy = input<NodeKeySelector<T, K> | undefined>("");
     public selectedKeys = input<Iterable<K>>([]);
-    public options = input<Partial<SelectableOptions> | "">("", {
+    public options = input<Partial<TreeSelectableOptions> | "">("", {
         alias: "monaTreeViewSelectable"
     });
 

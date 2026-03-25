@@ -34,7 +34,6 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
     selector: "mona-tree",
     imports: [SubTreeComponent, TreeDropHintComponent, AsyncPipe],
     templateUrl: "./tree.component.html",
-    styleUrl: "./tree.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [trigger("nodeExpandParent", [transition(":enter", [])])],
     host: {

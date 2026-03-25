@@ -57,6 +57,7 @@ export * from "./common/popup-menu/directives/popup-menu-shortcut-template.direc
 export * from "./common/popup-menu/directives/popup-menu-text-template.directive";
 
 export * from "./common/tree/models/DisableOptions";
+export * from "./common/tree/models/ExpandableOptions";
 export * from "./common/tree/models/NodeCheckEvent";
 export * from "./common/tree/models/NodeClickEvent";
 export { NodeDragEvent } from "./common/tree/models/NodeDragEvent";
@@ -65,7 +66,8 @@ export * from "./common/tree/models/NodeDragStartEvent";
 export * from "./common/tree/models/NodeDropEvent";
 export * from "./common/tree/models/NodeItem";
 export * from "./common/tree/models/NodeSelectEvent";
-export * from "./common/tree/models/SelectableOptions";
+export * from "./common/tree/models/TreeSelectableOptions";
+export * from "./common/tree/models/TreeSelectors";
 
 /** Date Inputs */
 export * from "./date-inputs/directives/date-input-prefix-template.directive";

@@ -49,14 +49,12 @@ export class TreeViewComponent<T> implements OnInit {
 
     /**
      * @description Whether to animate the tree.
-     *
      * If true, the tree will animate when expanding or collapsing nodes.
      */
     public animate = input<boolean>(true);
 
     /**
      * @description The children selector for the tree.
-     *
      * It can be either of the following:
      * - A string representing the property name of the children.
      * - A function that returns the children of a node.
@@ -71,29 +69,24 @@ export class TreeViewComponent<T> implements OnInit {
 
     /**
      * @description The predicate to determine if a node has children.
-     *
      * Required if the children selector is set to a function that returns an observable.
      */
     public hasChildren = input<Predicate<T> | null>(null);
 
     /**
      * @description The field that represents the unique identifier of a node.
-     *
      * This is required if the data structure is set to `flat`.
      */
     public idField = input<string>("");
 
     /**
      * @description The data structure of the tree.
-     *
      * It can be either of the following:
      * - `flat`: The tree is a flat list of nodes.
      * - `hierarchical`: The tree is a hierarchical structure.
-     *
      * If the data structure is set to `flat`, the following fields are required:
      * - idField
      * - parentIdField
-     *
      * If the data structure is set to `hierarchical`, the following fields are required:
      * - children
      * - hasChildren
@@ -101,14 +94,13 @@ export class TreeViewComponent<T> implements OnInit {
     public mode = input<DataStructure>("hierarchical");
 
     /**
-     * The field that represents the parent identifier of a node.
+     * @description The field that represents the parent identifier of a node.
      * This is required if the data structure is set to `flat`.
      */
     public parentIdField = input<string>("");
 
     /**
      * @description The text field for the tree.
-     *
      * It can be either of the following:
      * - A string representing the property name of the text.
      * - A function that returns the text of a node.

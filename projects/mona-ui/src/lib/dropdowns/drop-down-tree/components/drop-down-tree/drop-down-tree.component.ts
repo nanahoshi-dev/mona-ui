@@ -30,7 +30,7 @@ import { FilterInputComponent } from "../../../../common/filter-input/components
 import { FilterChangeEvent } from "../../../../common/filter-input/models/FilterChangeEvent";
 import { TreeComponent } from "../../../../common/tree/components/tree/tree.component";
 import { TreeNodeTemplateDirective } from "../../../../common/tree/directives/tree-node-template.directive";
-import { SelectableOptions } from "../../../../common/tree/models/SelectableOptions";
+import { TreeSelectableOptions } from "../../../../common/tree/models/TreeSelectableOptions";
 import { TreeNode } from "../../../../common/tree/models/TreeNode";
 import { TreeService } from "../../../../common/tree/services/tree.service";
 import { PlaceholderComponent } from "../../../../layout/placeholder/components/placeholder/placeholder.component";
@@ -104,7 +104,7 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
         return twMerge(dropdownPopupVariants());
     });
     protected readonly popupTemplate: Signal<TemplateRef<any>> = viewChild.required("popupTemplate");
-    protected readonly selectableOptions: SelectableOptions = {
+    protected readonly selectableOptions: TreeSelectableOptions = {
         enabled: true,
         mode: "single",
         toggleable: false,

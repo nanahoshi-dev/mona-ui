@@ -1,15 +1,4 @@
-import {
-    afterNextRender,
-    DestroyRef,
-    Directive,
-    effect,
-    EventEmitter,
-    inject,
-    input,
-    OnInit,
-    output,
-    untracked
-} from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ListKeySelector } from "../../common/list/models/ListSelectors";
 import { SelectableOptions } from "../../common/list/models/SelectableOptions";
