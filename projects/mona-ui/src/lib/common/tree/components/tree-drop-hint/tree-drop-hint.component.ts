@@ -1,25 +1,31 @@
 import { Component, computed, effect, ElementRef, inject, Signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
+import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
 import { TreeService } from "../../services/tree.service";
+import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "../../styles/tree.styles";
 
 @Component({
     selector: "mona-tree-drop-hint",
-    imports: [],
     templateUrl: "./tree-drop-hint.component.html",
-    styleUrl: "./tree-drop-hint.component.scss",
     host: {
-        "[class.mona-tree-drop-hint]": "true"
+        "[class]": "baseClass()"
     }
 })
 export class TreeDropHintComponent<T> {
     readonly #dropPositionChange: Signal<DropPositionChangeEvent<T> | null> = toSignal(
-        this.treeService.dropPositionChange$,
+        inject(TreeService).dropPositionChange$,
         {
             initialValue: null
         }
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return treeDropHintBaseThemeVariants(theme)();
+    });
     protected readonly dropHintStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
         const dropPositionData = this.#dropPositionChange();
         if (!dropPositionData) {
@@ -54,8 +60,14 @@ export class TreeDropHintComponent<T> {
             return { display: "none" };
         }
     });
+    protected readonly iconClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const icon = "ri-arrow-right-s-fill";
+        const variantClass = treeDropHintIconThemeVariants(theme)();
+        return twMerge(icon, variantClass);
+    });
 
-    public constructor(private readonly treeService: TreeService<T>) {
+    public constructor() {
         effect(() => {
             const styles = this.dropHintStyles();
             Object.assign(this.#hostElementRef.nativeElement.style, styles);

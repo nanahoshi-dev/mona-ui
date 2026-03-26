@@ -5,9 +5,11 @@ import {
     ExpandableOptions,
     TreeSelectableOptions,
     TreeViewComponent,
+    TreeViewDragAndDropDirective,
     TreeViewExpandableDirective,
     TreeViewSelectableDirective
 } from "mona-ui";
+import { DraggableOptions } from "mona-ui/common/tree/models/DraggableOptions";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -32,6 +34,12 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         x => x.items
     ];
     readonly #injector = createFeatureInjector({
+        dragAndDrop: {
+            code: ``,
+            name: "Drag and Drop",
+            description: `Drag and drop feature configuration for the tree view demo.`,
+            active: true
+        },
         expandable: {
             code: ``,
             name: "Expandable Tree View",
@@ -42,7 +50,30 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             code: ``,
             name: "Selectable Tree View",
             description: `Selectable feature configuration for the tree view demo.`,
-            active: true
+            active: true,
+            subFeatures: {
+                childrenOnly: {
+                    code: ``,
+                    name: "Children Only",
+                    description: `Only select leaf nodes in the tree view.`,
+                    active: false
+                },
+                mode: {
+                    code: ``,
+                    name: "Mode",
+                    description: `Selection mode for the tree view.`,
+                    active: true,
+                    type: "dropdown",
+                    dropdownDataSource: ["single", "multiple"],
+                    dropdownValue: "single"
+                },
+                toggleable: {
+                    code: ``,
+                    name: "Toggleable",
+                    description: `Whether the node selection is toggleable.`,
+                    active: true
+                }
+            }
         }
     });
     readonly #treeData = generateFileTreeData();
@@ -93,7 +124,12 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
 }
 
 @Component({
-    imports: [TreeViewComponent, TreeViewExpandableDirective, TreeViewSelectableDirective],
+    imports: [
+        TreeViewComponent,
+        TreeViewExpandableDirective,
+        TreeViewSelectableDirective,
+        TreeViewDragAndDropDirective
+    ],
     template: `
         <mona-tree-view
             [animate]="animate()"
@@ -104,6 +140,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             [mode]="mode()"
             [parentIdField]="parentIdField()"
             [textField]="textField()"
+            [monaTreeViewDragAndDrop]="dragDrop()"
             [monaTreeViewExpandable]="expandable()"
             [monaTreeViewSelectable]="selectable()">
         </mona-tree-view>
@@ -113,6 +150,13 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     }
 })
 class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewComponent<TreeNodeDataItem>> {
+    protected readonly dragDrop = computed(() => {
+        const features = this.features();
+        const dragDropSettings: DraggableOptions = {
+            enabled: features["dragAndDrop"].active
+        };
+        return dragDropSettings;
+    });
     protected readonly expandable = computed(() => {
         const features = this.features();
         const expandableSettings: ExpandableOptions = { enabled: features["expandable"].active };
@@ -121,10 +165,12 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly selectable = computed(() => {
         const features = this.features();
+        const subFeatures = features["selectable"].subFeatures || {};
         const selectableSettings: TreeSelectableOptions = {
             enabled: features["selectable"].active,
-            mode: "single",
-            childrenOnly: true
+            mode: subFeatures["mode"]?.dropdownValue || "single",
+            childrenOnly: subFeatures["childrenOnly"]?.active || false,
+            toggleable: subFeatures["toggleable"]?.active || false
         };
         return selectableSettings;
     });

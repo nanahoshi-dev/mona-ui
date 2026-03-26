@@ -4,6 +4,7 @@ import { AsyncPipe } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChild,
     DestroyRef,
     effect,
@@ -18,6 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { asapScheduler, fromEvent, takeWhile, tap } from "rxjs";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeClickEvent } from "../../models/NodeClickEvent";
@@ -27,6 +29,7 @@ import { NodeDropEvent } from "../../models/NodeDropEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
+import { treeBaseThemeVariants } from "../../styles/tree.styles";
 import { SubTreeComponent } from "../sub-tree/sub-tree.component";
 import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.component";
 
@@ -37,7 +40,7 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [trigger("nodeExpandParent", [transition(":enter", [])])],
     host: {
-        "[class.mona-tree]": "true",
+        "[class]": "baseClass()",
         "[attr.role]": "'tree'",
         "[attr.tabindex]": "0"
     }
@@ -46,19 +49,24 @@ export class TreeComponent<T> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #focusMonitor: FocusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
 
-    protected readonly nodeCheck = output<NodeCheckEvent<T>>();
-    protected readonly nodeClick = output<NodeClickEvent<T>>();
-    protected readonly nodeDrag = output<NodeDragEvent<T>>();
-    protected readonly nodeDragEnd = output<NodeDragStartEvent<T>>();
-    protected readonly nodeDragStart = output<NodeDragStartEvent<T>>();
-    protected readonly nodeDrop = output<NodeDropEvent<T>>();
-    protected readonly nodeSelect = output<NodeSelectEvent<T>>();
-    protected readonly treeService: TreeService<T> = inject(TreeService);
-    protected readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return treeBaseThemeVariants(theme)();
+    });
 
-    public data = input<Iterable<T>>();
+    public readonly nodeCheck = output<NodeCheckEvent<T>>();
+    public readonly nodeClick = output<NodeClickEvent<T>>();
+    public readonly nodeDrag = output<NodeDragEvent<T>>();
+    public readonly nodeDragEnd = output<NodeDragStartEvent<T>>();
+    public readonly nodeDragStart = output<NodeDragStartEvent<T>>();
+    public readonly nodeDrop = output<NodeDropEvent<T>>();
+    public readonly nodeSelect = output<NodeSelectEvent<T>>();
+    public readonly treeService: TreeService<T> = inject(TreeService);
+    public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
+    public readonly data = input<Iterable<T>>();
 
     public constructor() {
         effect(() => {

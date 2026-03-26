@@ -28,7 +28,6 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
     selector: "mona-tree-view",
     imports: [FilterInputComponent, TreeComponent, TreeNodeTemplateDirective, NgTemplateOutlet],
     templateUrl: "./tree-view.component.html",
-    styleUrl: "./tree-view.component.scss",
     providers: [TreeService],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {

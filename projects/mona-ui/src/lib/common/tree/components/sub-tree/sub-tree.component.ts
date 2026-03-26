@@ -9,17 +9,25 @@ import {
     CdkDropList
 } from "@angular/cdk/drag-drop";
 import { AsyncPipe } from "@angular/common";
-import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { take } from "rxjs";
 import { CheckBoxComponent } from "../../../../inputs/check-box/components/check-box/check-box.component";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";
 import { NodeDropEvent } from "../../models/NodeDropEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
+import {
+    subTreeListItemThemeVariants,
+    subTreeListThemeVariants,
+    treeNodeContainerThemeVariants,
+    treeNodeDraggingThemeVariants,
+    treeNodeExpanderThemeVariants
+} from "../../styles/tree.styles";
 import { TreeNodeComponent } from "../tree-node/tree-node.component";
 
 @Component({
@@ -27,7 +35,6 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [TreeNodeComponent, FormsModule, CdkDropList, CdkDrag, CdkDragPreview, AsyncPipe, CheckBoxComponent],
     templateUrl: "./sub-tree.component.html",
-    styleUrl: "./sub-tree.component.scss",
     animations: [
         trigger("nodeExpand", [
             transition(":enter", [
@@ -40,13 +47,33 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 })
 export class SubTreeComponent<T> {
     readonly #document = inject(DOCUMENT);
+    readonly #themeService = inject(ThemeService);
+    protected readonly listClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return subTreeListThemeVariants(theme)();
+    });
+    protected readonly listItemClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return subTreeListItemThemeVariants(theme)();
+    });
+    protected readonly nodeContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return treeNodeContainerThemeVariants(theme)();
+    });
+    protected readonly nodeDraggingClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return treeNodeDraggingThemeVariants(theme)();
+    });
+    protected readonly nodeExpanderClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return treeNodeExpanderThemeVariants(theme)();
+    });
     protected readonly treeService: TreeService<T> = inject(TreeService);
-
-    public depth = input.required<number>();
-    public nodes = input.required<ImmutableSet<TreeNode<T>>, Iterable<TreeNode<T>>>({
+    public readonly depth = input.required<number>();
+    public readonly nodes = input.required<ImmutableSet<TreeNode<T>>, Iterable<TreeNode<T>>>({
         transform: value => ImmutableSet.create(value)
     });
-    public parent = input.required<TreeNode<T> | null>();
+    public readonly parent = input.required<TreeNode<T> | null>();
 
     public onExpandStateChange(node: TreeNode<T>): void {
         const expanded = this.treeService.isExpanded(node);

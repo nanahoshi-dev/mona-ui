@@ -1,8 +1,8 @@
-<ul class="mona-sub-tree"
-    cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="onNodeDrop($event)">
+<ul [class]="listClass()" cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="onNodeDrop($event)">
     @for (node of nodes(); track node.uid) {
         <li
             [attr.data-uid]="node.uid"
+            [class]="listItemClass()"
             [tabindex]="0"
             (focus)="treeService.navigatedNode.set(node)"
             cdkDrag
@@ -11,11 +11,12 @@
             (cdkDragStarted)="onNodeDragStart($event)"
             (cdkDragEnded)="onNodeDragEnd($event)"
             (cdkDragMoved)="onNodeDragMove($event, node)">
-            <div class="mona-tree-node-container">
+            <div [class]="nodeContainerClass()">
                 @if (treeService.expandableOptions().enabled && nodeComponent.expandable()) {
-                    <div class="mona-tree-node-expander"
-                         [class.mona-disabled]="nodeComponent.disabled()"
-                         (click)="onExpandStateChange(node)">
+                    <div
+                        [class]="nodeExpanderClass()"
+                        [class.mona-disabled]="nodeComponent.disabled()"
+                        (click)="onExpandStateChange(node)">
                         @if (!node.loading()) {
                             @if (nodeComponent.expanded()) {
                                 <i class="ri-arrow-down-s-fill"></i>
@@ -28,48 +29,47 @@
                     </div>
                 }
                 @if (nodeComponent.checkable()) {
-                    <mona-check-box [disabled]="nodeComponent.disabled()"
-                                    [indeterminate]="nodeComponent.indeterminate()"
-                                    [ngModel]="nodeComponent.checked()"
-                                    (click)="nodeComponent.checkboxClick$.next($event)"
-                                    (ngModelChange)="nodeComponent.checkboxCheck$.next($event)"></mona-check-box>
+                    <mona-check-box
+                        [disabled]="nodeComponent.disabled()"
+                        [indeterminate]="nodeComponent.indeterminate()"
+                        [ngModel]="nodeComponent.checked()"
+                        (click)="nodeComponent.checkboxClick$.next($event)"
+                        (ngModelChange)="nodeComponent.checkboxCheck$.next($event)"></mona-check-box>
                 }
                 <mona-tree-node [node]="node" [depth]="depth()" #nodeComponent></mona-tree-node>
             </div>
             @if (node.children().length > 0 && nodeComponent.expanded()) {
-                <div class="mona-sub-tree-container"
-                     [@nodeExpand]="nodeComponent.expanded()"
-                     [@.disabled]="!treeService.animationEnabled() || treeService.filterText().length !== 0">
-                    <mona-sub-tree [nodes]="node.children()" [depth]="depth()+1" [parent]="node"></mona-sub-tree>
+                <div
+                    [@nodeExpand]="nodeComponent.expanded()"
+                    [@.disabled]="!treeService.animationEnabled() || treeService.filterText().length !== 0">
+                    <mona-sub-tree [nodes]="node.children()" [depth]="depth() + 1" [parent]="node"></mona-sub-tree>
                 </div>
             }
             @if (!nodeComponent.disabled()) {
-                <ng-template cdkDragPreview [data]="node">
-                    <div class="mona-tree-node-dragging">
-                        <span>
-                            @if ((treeService.dropPositionChange$|async)?.position === 'before') {
-                                @if ((treeService.nodeDrag$|async)?.dropAllowed) {
-                                    <i class="ri-arrow-up-line"></i>
-                                } @else {
-                                    <i class="ri-prohibited-2-line"></i>
-                                }
-                            } @else if ((treeService.dropPositionChange$|async)?.position === 'after') {
-                                @if ((treeService.nodeDrag$|async)?.dropAllowed) {
-                                    <i class="ri-arrow-down-line"></i>
-                                } @else {
-                                    <i class="ri-prohibited-2-line"></i>
-                                }
-                            } @else if ((treeService.dropPositionChange$|async)?.position === 'inside') {
-                                <i class="ri-add-line"></i>
+                <div *cdkDragPreview [class]="nodeDraggingClass()">
+                    <span>
+                        @if ((treeService.dropPositionChange$ | async)?.position === "before") {
+                            @if ((treeService.nodeDrag$ | async)?.dropAllowed) {
+                                <i class="ri-arrow-up-line"></i>
                             } @else {
                                 <i class="ri-prohibited-2-line"></i>
                             }
-                        </span>
-                        <span>{{nodeComponent.nodeText()}}</span>
-                    </div>
-                </ng-template>
+                        } @else if ((treeService.dropPositionChange$ | async)?.position === "after") {
+                            @if ((treeService.nodeDrag$ | async)?.dropAllowed) {
+                                <i class="ri-arrow-down-line"></i>
+                            } @else {
+                                <i class="ri-prohibited-2-line"></i>
+                            }
+                        } @else if ((treeService.dropPositionChange$ | async)?.position === "inside") {
+                            <i class="ri-add-line"></i>
+                        } @else {
+                            <i class="ri-prohibited-2-line"></i>
+                        }
+                    </span>
+                    <span>{{ nodeComponent.nodeText() }}</span>
+                </div>
             } @else {
-                <ng-template cdkDragPreview></ng-template>
+                <div *cdkDragPreview [class]="nodeDraggingClass()"></div>
             }
         </li>
     }

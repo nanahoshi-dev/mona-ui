@@ -2,23 +2,32 @@ import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { map, Subject } from "rxjs";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeClickEvent } from "../../models/NodeClickEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
+import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
 
 @Component({
     selector: "mona-tree-node",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet],
-    templateUrl: "./tree-node.component.html",
-    styleUrl: "./tree-node.component.scss"
+    templateUrl: "./tree-node.component.html"
 })
 export class TreeNodeComponent<T> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dragging = toSignal(this.treeService.dragging$, {
         initialValue: false
+    });
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const disabled = this.disabled();
+        const highlighted = this.navigated();
+        const selected = this.selected();
+        return treeNodeBaseThemeVariants(theme)({ disabled, highlighted, selected });
     });
     public readonly checkable = computed(() => {
         const node = this.node();
