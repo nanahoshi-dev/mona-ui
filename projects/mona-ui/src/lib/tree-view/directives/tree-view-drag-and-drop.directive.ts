@@ -7,7 +7,8 @@ import { NodeDropEvent } from "../../common/tree/models/NodeDropEvent";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewDragAndDrop]"
+    selector: "mona-tree-view[monaTreeViewDragAndDrop]",
+    exportAs: "monaTreeViewDragAndDrop"
 })
 export class TreeViewDragAndDropDirective<T> implements OnInit {
     readonly #defaultOptions: DraggableOptions = {

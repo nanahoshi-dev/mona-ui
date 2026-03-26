@@ -4,7 +4,8 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewDisable]"
+    selector: "mona-tree-view[monaTreeViewDisable]",
+    exportAs: "monaTreeViewDisable"
 })
 export class TreeViewDisableDirective<T, K = T> {
     readonly #defaultOptions: DisableOptions = {

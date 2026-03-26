@@ -23,10 +23,10 @@ import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentC
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+import { EventViewerComponent } from "../event-viewer/event-viewer.component";
 
 interface TreeNodeDataItem {
     id: string;
-    icon: LucideIconData;
     text: string;
     items: TreeNodeDataItem[];
     disabled?: boolean;
@@ -231,7 +231,8 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         TreeViewDisableDirective,
         TreeViewFilterableDirective,
         TreeViewNodeTemplateDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        EventViewerComponent
     ],
     template: `
         @let featureData = features();
@@ -253,21 +254,41 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             [disabledKeys]="disabledKeys()"
             [monaTreeViewDragAndDrop]="dragDrop()"
             [monaTreeViewExpandable]="expandable()"
+            [expandBy]="'id'"
+            [expandedKeys]="expandedKeys()"
+            (expandedKeysChange)="expandedKeys.set($event)"
             [monaTreeViewFilterable]="filterable()"
             [monaTreeViewSelectable]="selectable()"
             [selectBy]="'id'"
             [selectedKeys]="selectedKeys()"
             (selectedKeysChange)="selectedKeys.set($event)"
-            (selectionChange)="onSelectionChange($event)">
+            (selectionChange)="onSelectionChange($event)"
+            #checkableDir="monaTreeViewCheckable"
+            #dragDropDir="monaTreeViewDragAndDrop"
+            #expandableDir="monaTreeViewExpandable"
+            #filterableDir="monaTreeViewFilterable"
+            #selectableDir="monaTreeViewSelectable"
+            #treeView>
             @if (featureData["nodeTemplate"].active) {
                 <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
                     <div class="flex items-center gap-2">
-                        <lucide-icon [img]="dataItem.icon" [size]="14"></lucide-icon>
+                        @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
+                        <lucide-icon [img]="icon" [size]="14"></lucide-icon>
                         <span>{{ dataItem.text }}</span>
                     </div>
                 </ng-template>
             }
         </mona-tree-view>
+        <hr />
+        <app-event-viewer
+            [instances]="[
+                treeView,
+                checkableDir,
+                dragDropDir,
+                expandableDir,
+                filterableDir,
+                selectableDir
+            ]"></app-event-viewer>
     `,
     host: {
         class: "w-full flex items-start!"
@@ -310,6 +331,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         const expandableSettings: ExpandableOptions = { enabled: features["expandable"].active ?? false };
         return expandableSettings;
     });
+    protected readonly expandedKeys = signal<string[]>([]);
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly filterable = computed(() => {
         const features = this.features();
@@ -352,6 +374,10 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     protected onSelectionChange(nodeItem: NodeItem<TreeNodeDataItem>) {
         console.log(nodeItem);
     }
+
+    protected readonly TreeViewComponent = TreeViewComponent;
+    protected readonly FileIcon = FileIcon;
+    protected readonly FolderIcon = FolderIcon;
 }
 
 function generateFileTreeData(): TreeNodeDataItem[] {
@@ -359,46 +385,40 @@ function generateFileTreeData(): TreeNodeDataItem[] {
         {
             id: "1",
             text: "src",
-            icon: FolderIcon,
             items: [
                 {
                     id: "1-1",
                     text: "components",
-                    icon: FolderIcon,
                     items: [
-                        { id: "1-1-1", icon: FileIcon, text: "Button.ts", items: [] },
-                        { id: "1-1-2", icon: FileIcon, text: "Card.ts", items: [] }
+                        { id: "1-1-1", text: "Button.ts", items: [] },
+                        { id: "1-1-2", text: "Card.ts", items: [] }
                     ]
                 },
                 {
                     id: "1-2",
                     text: "utils",
-                    icon: FolderIcon,
-                    items: [{ id: "1-2-1", icon: FileIcon, text: "formatters.ts", items: [] }]
+                    items: [{ id: "1-2-1", text: "formatters.ts", items: [] }]
                 },
-                { id: "1-3", icon: FileIcon, text: "App.ts", items: [] },
-                { id: "1-4", icon: FileIcon, text: "index.ts", items: [] }
+                { id: "1-3", text: "App.ts", items: [] },
+                { id: "1-4", text: "index.ts", items: [] }
             ]
         },
         {
             id: "2",
             text: "public",
-            icon: FolderIcon,
             items: [
-                { id: "2-1", icon: FileIcon, text: "favicon.ico", items: [] },
-                { id: "2-2", icon: FileIcon, text: "logo.png", items: [] }
+                { id: "2-1", text: "favicon.ico", items: [] },
+                { id: "2-2", text: "logo.png", items: [] }
             ]
         },
         {
             id: "3",
             text: "package.json",
-            icon: FileIcon,
             items: []
         },
         {
             id: "4",
             text: "tsconfig.json",
-            icon: FileIcon,
             items: []
         }
     ];

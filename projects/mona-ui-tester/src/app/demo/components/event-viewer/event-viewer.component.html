@@ -1,0 +1,15 @@
+<div class="flex flex-row bg-background-dark border-b border-b-border px-2 py-1 select-none">
+    <div class="flex flex-1 items-center font-medium text-sm">Event Log</div>
+    <div class="flex items-center">
+        <button monaButton look="ghost" size="small" (click)="clearEventLog()">Clear</button>
+    </div>
+</div>
+<ol class="flex flex-col flex-1 overflow-auto w-full divide-y divide-border">
+    @for (event of eventLog(); track event) {
+        <li class="flex flex-row gap-2 text-sm odd:bg-accent divide-x divide-border">
+            <span class="w-8 inline-flex items-center justify-center">{{ $count - $index }}</span>
+            <span class="flex items-center font-medium w-2/8 px-2 py-1">{{ event.name }}</span>
+            <code class="w-6/8 px-2 py-1">{{ event.value }}</code>
+        </li>
+    }
+</ol>

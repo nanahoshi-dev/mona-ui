@@ -8,7 +8,8 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewCheckable]"
+    selector: "mona-tree-view[monaTreeViewCheckable]",
+    exportAs: "monaTreeViewCheckable"
 })
 export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     readonly #defaultOptions: CheckableOptions = {

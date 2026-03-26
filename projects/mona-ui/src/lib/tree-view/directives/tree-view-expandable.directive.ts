@@ -4,7 +4,8 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewExpandable]"
+    selector: "mona-tree-view[monaTreeViewExpandable]",
+    exportAs: "monaTreeViewExpandable"
 })
 export class TreeViewExpandableDirective<T, K = T> implements OnInit {
     readonly #defaultOptions: ExpandableOptions = {

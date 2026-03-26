@@ -4,7 +4,8 @@ import { FilterableOptions } from "../../common/models/FilterableOptions";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewFilterable]"
+    selector: "mona-tree-view[monaTreeViewFilterable]",
+    exportAs: "monaTreeViewFilterable"
 })
 export class TreeViewFilterableDirective<T> implements OnInit {
     readonly #defaultOptions: FilterableOptions = {

@@ -9,7 +9,8 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewSelectable]"
+    selector: "mona-tree-view[monaTreeViewSelectable]",
+    exportAs: "monaTreeViewSelectable"
 })
 export class TreeViewSelectableDirective<T, K = T> implements OnInit {
     readonly #defaultOptions: TreeSelectableOptions = {
