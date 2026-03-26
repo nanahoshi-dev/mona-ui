@@ -481,7 +481,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
                 <mona-menu-separator></mona-menu-separator>
                 <mona-menu-item label="Close"></mona-menu-item>
             </mona-menu>
-            <mona-menu [text]="'Edit'" [disabled]="featureData['disableMenu'].active">
+            <mona-menu [text]="'Edit'" [disabled]="featureData['disableMenu'].active ?? false">
                 <mona-menu-item label="Undo"></mona-menu-item>
                 <mona-menu-item label="Redo"></mona-menu-item>
                 <mona-menu-separator></mona-menu-separator>

@@ -116,7 +116,8 @@ export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
 }
 
 export interface ComponentConfigFeatureItem {
-    [key: string]: ComponentConfigFeatureItemOptions;
+    [key: string]: Omit<ComponentConfigFeatureItemOptions, "active"> &
+        Partial<Pick<ComponentConfigFeatureItemOptions, "active">>;
 }
 
 export type ComponentConfig<TComponent> = {

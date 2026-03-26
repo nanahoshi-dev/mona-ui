@@ -69,7 +69,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 groupBy: {
                     code: ``,
                     hasCode: false,
-                    active: false,
                     description: "Sets the field to group items by",
                     name: "Group By",
                     type: "dropdown",
@@ -80,13 +79,11 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                     code: ``,
                     active: false,
                     description: "Enables custom header template for group headers",
-                    name: "Group Header Template",
-                    type: "boolean"
+                    name: "Group Header Template"
                 },
                 headerOrder: {
                     code: ``,
                     hasCode: false,
-                    active: false,
                     description: "Sets the order of group headers",
                     name: "Header Order",
                     type: "dropdown",
@@ -96,7 +93,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 orderBy: {
                     code: ``,
                     hasCode: false,
-                    active: false,
                     description: "Sets the field to order groups by",
                     name: "Order By",
                     type: "dropdown",
@@ -106,7 +102,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 orderByDirection: {
                     code: ``,
                     hasCode: false,
-                    active: false,
                     description: "Sets the order direction for groups",
                     name: "Order By Direction",
                     type: "dropdown",
@@ -573,7 +568,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};
         const options: VirtualScrollOptions = {
-            enabled: features["virtualization"].active,
+            enabled: features["virtualization"].active ?? false,
             height: subFeatures["itemHeight"].numericValue as number
         };
         return options;

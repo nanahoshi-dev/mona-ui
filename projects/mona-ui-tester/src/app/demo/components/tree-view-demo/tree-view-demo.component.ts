@@ -1,17 +1,24 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from "@angular/core";
+import { FileIcon, FolderIcon, LucideAngularModule, LucideIconData } from "lucide-angular";
 import {
+    CheckableOptions,
     ChildrenSelector,
+    DisableOptions,
+    DraggableOptions,
     ExpandableOptions,
+    FilterableOptions,
+    NodeItem,
     TreeSelectableOptions,
     TreeViewCheckableDirective,
     TreeViewComponent,
+    TreeViewDisableDirective,
     TreeViewDragAndDropDirective,
     TreeViewExpandableDirective,
+    TreeViewFilterableDirective,
+    TreeViewNodeTemplateDirective,
     TreeViewSelectableDirective
 } from "mona-ui";
-import { CheckableOptions } from "mona-ui/common/tree/models/CheckableOptions";
-import { DraggableOptions } from "mona-ui/common/tree/models/DraggableOptions";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -19,6 +26,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 
 interface TreeNodeDataItem {
     id: string;
+    icon: LucideIconData;
     text: string;
     items: TreeNodeDataItem[];
     disabled?: boolean;
@@ -40,7 +48,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             code: ``,
             name: "Checkbox",
             description: `Checkbox feature configuration for the tree view demo.`,
-            active: true,
+            active: false,
             subFeatures: {
                 checkChildren: {
                     code: ``,
@@ -70,10 +78,23 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                     code: ``,
                     name: "Mode",
                     description: `Selection mode for the tree view.`,
-                    active: true,
                     type: "dropdown",
                     dropdownDataSource: ["single", "multiple"],
                     dropdownValue: "single"
+                }
+            }
+        },
+        disable: {
+            code: ``,
+            name: "Disable",
+            description: `Disable feature configuration for the tree view demo.`,
+            active: false,
+            subFeatures: {
+                disableChildren: {
+                    code: ``,
+                    name: "Disable Children",
+                    description: `Whether to disable children when a parent node is disabled.`,
+                    active: false
                 }
             }
         },
@@ -81,7 +102,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             code: ``,
             name: "Drag and Drop",
             description: `Drag and drop feature configuration for the tree view demo.`,
-            active: true
+            active: false
         },
         expandable: {
             code: ``,
@@ -89,11 +110,45 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             description: `Expandable feature configuration for the tree view demo.`,
             active: true
         },
+        filterable: {
+            code: ``,
+            name: "Filterable Tree View",
+            description: `Filterable feature configuration for the tree view demo.`,
+            subFeatures: {
+                caseSensitive: {
+                    code: ``,
+                    name: "Case Sensitive",
+                    description: `Enable case sensitive filtering in the tree view.`,
+                    active: false
+                },
+                debounce: {
+                    code: ``,
+                    name: "Debounce",
+                    description: `Debounce time for filter input in milliseconds.`,
+                    type: "number",
+                    numericMin: 0,
+                    numericNullable: true
+                },
+                operator: {
+                    code: ``,
+                    name: "Operator",
+                    description: `Filter operator for the tree view.`,
+                    type: "dropdown",
+                    dropdownDataSource: ["contains", "startsWith", "endsWith"],
+                    dropdownValue: "contains"
+                }
+            }
+        },
+        nodeTemplate: {
+            code: ``,
+            name: "Node Template",
+            description: `Template for rendering tree nodes.`,
+            active: false
+        },
         selectable: {
             code: ``,
             name: "Selectable Tree View",
             description: `Selectable feature configuration for the tree view demo.`,
-            active: true,
             subFeatures: {
                 childrenOnly: {
                     code: ``,
@@ -172,9 +227,14 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         TreeViewExpandableDirective,
         TreeViewSelectableDirective,
         TreeViewDragAndDropDirective,
-        TreeViewCheckableDirective
+        TreeViewCheckableDirective,
+        TreeViewDisableDirective,
+        TreeViewFilterableDirective,
+        TreeViewNodeTemplateDirective,
+        LucideAngularModule
     ],
     template: `
+        @let featureData = features();
         <mona-tree-view
             [animate]="animate()"
             [children]="children()"
@@ -188,9 +248,25 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             [checkBy]="'id'"
             [checkedKeys]="checkedKeys()"
             (checkedKeysChange)="checkedKeys.set($event)"
+            [monaTreeViewDisable]="disable()"
+            [disableBy]="'id'"
+            [disabledKeys]="disabledKeys()"
             [monaTreeViewDragAndDrop]="dragDrop()"
             [monaTreeViewExpandable]="expandable()"
-            [monaTreeViewSelectable]="selectable()">
+            [monaTreeViewFilterable]="filterable()"
+            [monaTreeViewSelectable]="selectable()"
+            [selectBy]="'id'"
+            [selectedKeys]="selectedKeys()"
+            (selectedKeysChange)="selectedKeys.set($event)"
+            (selectionChange)="onSelectionChange($event)">
+            @if (featureData["nodeTemplate"].active) {
+                <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
+                    <div class="flex items-center gap-2">
+                        <lucide-icon [img]="dataItem.icon" [size]="14"></lucide-icon>
+                        <span>{{ dataItem.text }}</span>
+                    </div>
+                </ng-template>
+            }
         </mona-tree-view>
     `,
     host: {
@@ -211,31 +287,53 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         };
         return selectableSettings;
     });
-    protected readonly checkedKeys = signal([]);
+    protected readonly checkedKeys = signal(["1"]);
+    protected readonly disable = computed(() => {
+        const features = this.features();
+        const subFeatures = features["disable"].subFeatures || {};
+        const disableSettings: DisableOptions = {
+            enabled: features["disable"].active ?? false,
+            disableChildren: subFeatures["disableChildren"]?.active ?? true
+        };
+        return disableSettings;
+    });
+    protected readonly disabledKeys = signal(["2"]);
     protected readonly dragDrop = computed(() => {
         const features = this.features();
         const dragDropSettings: DraggableOptions = {
-            enabled: features["dragAndDrop"].active
+            enabled: features["dragAndDrop"].active ?? false
         };
         return dragDropSettings;
     });
     protected readonly expandable = computed(() => {
         const features = this.features();
-        const expandableSettings: ExpandableOptions = { enabled: features["expandable"].active };
+        const expandableSettings: ExpandableOptions = { enabled: features["expandable"].active ?? false };
         return expandableSettings;
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filterable = computed(() => {
+        const features = this.features();
+        const subFeatures = features["filterable"].subFeatures || {};
+        const filterableSettings: FilterableOptions = {
+            caseSensitive: subFeatures["caseSensitive"].active ?? false,
+            enabled: features["filterable"].active ?? false,
+            debounce: subFeatures["debounce"].numericValue ?? 0,
+            operator: subFeatures["operator"].dropdownValue ?? "contains"
+        };
+        return filterableSettings;
+    });
     protected readonly selectable = computed(() => {
         const features = this.features();
         const subFeatures = features["selectable"].subFeatures || {};
         const selectableSettings: TreeSelectableOptions = {
-            enabled: features["selectable"].active,
+            enabled: features["selectable"].active ?? false,
             mode: subFeatures["mode"]?.dropdownValue ?? "single",
             childrenOnly: subFeatures["childrenOnly"]?.active ?? false,
             toggleable: subFeatures["toggleable"]?.active ?? false
         };
         return selectableSettings;
     });
+    protected readonly selectedKeys = signal<string[]>([]);
     public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
@@ -250,6 +348,10 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
             console.log(this.checkedKeys());
         });
     }
+
+    protected onSelectionChange(nodeItem: NodeItem<TreeNodeDataItem>) {
+        console.log(nodeItem);
+    }
 }
 
 function generateFileTreeData(): TreeNodeDataItem[] {
@@ -257,74 +359,47 @@ function generateFileTreeData(): TreeNodeDataItem[] {
         {
             id: "1",
             text: "src",
+            icon: FolderIcon,
             items: [
                 {
                     id: "1-1",
                     text: "components",
+                    icon: FolderIcon,
                     items: [
-                        { id: "1-1-1", text: "Button.ts", items: [] },
-                        { id: "1-1-2", text: "Card.ts", items: [] }
+                        { id: "1-1-1", icon: FileIcon, text: "Button.ts", items: [] },
+                        { id: "1-1-2", icon: FileIcon, text: "Card.ts", items: [] }
                     ]
                 },
                 {
                     id: "1-2",
                     text: "utils",
-                    items: [{ id: "1-2-1", text: "formatters.ts", items: [] }]
+                    icon: FolderIcon,
+                    items: [{ id: "1-2-1", icon: FileIcon, text: "formatters.ts", items: [] }]
                 },
-                { id: "1-3", text: "App.ts", items: [] },
-                { id: "1-4", text: "index.ts", items: [] }
+                { id: "1-3", icon: FileIcon, text: "App.ts", items: [] },
+                { id: "1-4", icon: FileIcon, text: "index.ts", items: [] }
             ]
         },
         {
             id: "2",
             text: "public",
+            icon: FolderIcon,
             items: [
-                { id: "2-1", text: "favicon.ico", items: [] },
-                { id: "2-2", text: "logo.png", items: [] }
+                { id: "2-1", icon: FileIcon, text: "favicon.ico", items: [] },
+                { id: "2-2", icon: FileIcon, text: "logo.png", items: [] }
             ]
         },
         {
             id: "3",
             text: "package.json",
+            icon: FileIcon,
             items: []
         },
         {
             id: "4",
             text: "tsconfig.json",
+            icon: FileIcon,
             items: []
         }
     ];
-}
-
-function generateRandomTreeData(nodeCount: number): TreeNodeDataItem[] {
-    function generateNode(idPrefix: string, remainingNodes: number): [any, number] {
-        const node: TreeNodeDataItem = {
-            text: Math.random().toString(36).substring(7),
-            id: idPrefix,
-            items: []
-        };
-
-        if (remainingNodes > 0) {
-            const childCount = Math.min(Math.floor(Math.random() * remainingNodes), remainingNodes);
-            for (let i = 0; i < childCount; i++) {
-                const [childNode, newRemainingNodes] = generateNode(`${idPrefix}-${i + 1}`, remainingNodes - 1);
-                node.items.push(childNode);
-                remainingNodes = newRemainingNodes;
-            }
-        }
-
-        return [node, remainingNodes];
-    }
-
-    const trees: TreeNodeDataItem[] = [];
-    let remainingNodes = nodeCount;
-    let rootId = 1;
-    while (remainingNodes > 0) {
-        const [tree, newRemainingNodes] = generateNode(rootId.toString(), remainingNodes - 1);
-        trees.push(tree);
-        remainingNodes = newRemainingNodes;
-        rootId++;
-    }
-
-    return trees;
 }

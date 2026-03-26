@@ -158,12 +158,12 @@ class SplitterWrapperComponent implements ComponentInputsAsSignal<SplitterCompon
     protected readonly collapsed = computed(() => {
         const features = this.features();
         const subFeatures = features["collapsible"]?.subFeatures || {};
-        return subFeatures["collapsed"]?.active;
+        return subFeatures["collapsed"]?.active ?? false;
     });
     protected readonly collapsible = computed(() => {
         const features = this.features();
         const subFeatures = features["collapsible"]?.subFeatures || {};
-        return subFeatures["collapsible"]?.active;
+        return subFeatures["collapsible"]?.active ?? false;
     });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly maxSize = computed(() => {
@@ -178,7 +178,7 @@ class SplitterWrapperComponent implements ComponentInputsAsSignal<SplitterCompon
     });
     protected readonly resizable = computed(() => {
         const features = this.features();
-        return features["resizable"]?.active;
+        return features["resizable"]?.active ?? false;
     });
     protected readonly sizeList = computed(() => {
         const features = this.features();

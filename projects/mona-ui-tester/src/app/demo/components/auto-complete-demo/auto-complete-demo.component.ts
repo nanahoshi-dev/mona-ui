@@ -298,9 +298,9 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         const features = this.features();
         const subFeatures = features["filtering"]?.subFeatures || {};
         const filteringOptions: FilterableOptions = {
-            caseSensitive: subFeatures["caseSensitive"].active,
+            caseSensitive: subFeatures["caseSensitive"].active ?? false,
             debounce: subFeatures["debounce"].numericValue ?? 0,
-            enabled: features["filtering"].active,
+            enabled: features["filtering"].active ?? false,
             operator: subFeatures["operator"].dropdownValue
         };
         return filteringOptions;

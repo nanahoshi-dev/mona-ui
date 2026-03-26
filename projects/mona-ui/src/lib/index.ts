@@ -56,7 +56,9 @@ export * from "./common/popup-menu/directives/popup-menu-icon-template.directive
 export * from "./common/popup-menu/directives/popup-menu-shortcut-template.directive";
 export * from "./common/popup-menu/directives/popup-menu-text-template.directive";
 
+export * from "./common/tree/models/CheckableOptions";
 export * from "./common/tree/models/DisableOptions";
+export * from "./common/tree/models/DraggableOptions";
 export * from "./common/tree/models/ExpandableOptions";
 export * from "./common/tree/models/NodeCheckEvent";
 export * from "./common/tree/models/NodeClickEvent";
