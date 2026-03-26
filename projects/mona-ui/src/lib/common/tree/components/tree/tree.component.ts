@@ -46,8 +46,8 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
     }
 })
 export class TreeComponent<T> implements OnInit {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #focusMonitor: FocusMonitor = inject(FocusMonitor);
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);

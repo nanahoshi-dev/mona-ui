@@ -4,8 +4,7 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewDisable]",
-    standalone: true
+    selector: "mona-tree-view[monaTreeViewDisable]"
 })
 export class TreeViewDisableDirective<T, K = T> {
     readonly #defaultOptions: DisableOptions = {
@@ -13,10 +12,9 @@ export class TreeViewDisableDirective<T, K = T> {
         enabled: true
     };
     readonly #treeService: TreeService<T> = inject(TreeService);
-
-    public disableBy = input<NodeKeySelector<T, K> | undefined>("");
-    public disabledKeys = input<Iterable<K>>([]);
-    public options = input<Partial<DisableOptions> | "">("", {
+    public readonly disableBy = input<NodeKeySelector<T, K> | undefined>("");
+    public readonly disabledKeys = input<Iterable<K>>([]);
+    public readonly options = input<Partial<DisableOptions> | "">("", {
         alias: "monaTreeViewDisable"
     });
 

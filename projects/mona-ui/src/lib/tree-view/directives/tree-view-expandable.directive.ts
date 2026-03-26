@@ -4,20 +4,17 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewExpandable]",
-    standalone: true
+    selector: "mona-tree-view[monaTreeViewExpandable]"
 })
 export class TreeViewExpandableDirective<T, K = T> implements OnInit {
     readonly #defaultOptions: ExpandableOptions = {
         enabled: true
     };
     readonly #treeService: TreeService<T> = inject(TreeService);
-
+    public readonly expandBy = input<NodeKeySelector<T, K> | undefined>("");
+    public readonly expandedKeys = input<Iterable<K>>([]);
     public readonly expandedKeysChange = output<Array<K>>();
-
-    public expandBy = input<NodeKeySelector<T, K> | undefined>("");
-    public expandedKeys = input<Iterable<K>>([]);
-    public options = input<Partial<ExpandableOptions> | "">("", {
+    public readonly options = input<Partial<ExpandableOptions> | "">("", {
         alias: "monaTreeViewExpandable"
     });
 

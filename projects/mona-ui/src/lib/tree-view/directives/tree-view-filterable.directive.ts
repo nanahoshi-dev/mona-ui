@@ -4,8 +4,7 @@ import { FilterableOptions } from "../../common/models/FilterableOptions";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewFilterable]",
-    standalone: true
+    selector: "mona-tree-view[monaTreeViewFilterable]"
 })
 export class TreeViewFilterableDirective<T> implements OnInit {
     readonly #defaultOptions: FilterableOptions = {
@@ -15,12 +14,10 @@ export class TreeViewFilterableDirective<T> implements OnInit {
         debounce: 0
     };
     readonly #treeService: TreeService<T> = inject(TreeService);
-
+    public readonly filter = input<string>("");
     public readonly filterChange = output<FilterChangeEvent>();
-
-    public filter = input<string>("");
-    public filterPlaceholder = input<string>("");
-    public options = input<Partial<FilterableOptions> | "">("", {
+    public readonly filterPlaceholder = input<string>("");
+    public readonly options = input<Partial<FilterableOptions> | "">("", {
         alias: "monaTreeViewFilterable"
     });
 

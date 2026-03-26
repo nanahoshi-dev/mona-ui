@@ -7,21 +7,18 @@ import { NodeDropEvent } from "../../common/tree/models/NodeDropEvent";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewDragAndDrop]",
-    standalone: true
+    selector: "mona-tree-view[monaTreeViewDragAndDrop]"
 })
 export class TreeViewDragAndDropDirective<T> implements OnInit {
     readonly #defaultOptions: DraggableOptions = {
         enabled: true
     };
     readonly #treeService: TreeService<T> = inject(TreeService);
-
     public readonly nodeDrag = output<NodeDragEvent<T>>();
     public readonly nodeDragEnd = output<NodeDragEndEvent<T>>();
     public readonly nodeDragStart = output<NodeDragStartEvent<T>>();
     public readonly nodeDrop = output<NodeDropEvent<T>>();
-
-    public options = input<Partial<DraggableOptions> | "">("", {
+    public readonly options = input<Partial<DraggableOptions> | "">("", {
         alias: "monaTreeViewDragAndDrop"
     });
 

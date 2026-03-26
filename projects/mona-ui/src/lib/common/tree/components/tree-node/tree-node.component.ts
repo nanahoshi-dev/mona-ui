@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
-import { map, Subject } from "rxjs";
+import { map, Subject, tap } from "rxjs";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeClickEvent } from "../../models/NodeClickEvent";
@@ -17,7 +17,7 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
     templateUrl: "./tree-node.component.html"
 })
 export class TreeNodeComponent<T> implements OnInit {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #dragging = toSignal(this.treeService.dragging$, {
         initialValue: false
     });
@@ -163,6 +163,7 @@ export class TreeNodeComponent<T> implements OnInit {
         this.checkboxClick$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
+                tap(e => e.preventDefault()), // TODO: Check if this interferes with the nodeClick event
                 map(event => {
                     const node = this.node() as TreeNode<T>;
                     const nodeCheckEvent = new NodeCheckEvent(node, event);

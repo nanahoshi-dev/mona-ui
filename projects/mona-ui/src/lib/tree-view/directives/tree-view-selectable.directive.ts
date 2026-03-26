@@ -18,16 +18,14 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
         mode: "single",
         toggleable: false
     };
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
-
     public readonly nodeSelect = output<NodeSelectEvent<T>>();
+    public readonly selectBy = input<NodeKeySelector<T, K> | undefined>("");
+    public readonly selectedKeys = input<Iterable<K>>([]);
     public readonly selectedKeysChange = output<Array<K>>();
     public readonly selectionChange = output<NodeItem<T>>();
-
-    public selectBy = input<NodeKeySelector<T, K> | undefined>("");
-    public selectedKeys = input<Iterable<K>>([]);
-    public options = input<Partial<TreeSelectableOptions> | "">("", {
+    public readonly options = input<Partial<TreeSelectableOptions> | "">("", {
         alias: "monaTreeViewSelectable"
     });
 

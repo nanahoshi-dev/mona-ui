@@ -8,8 +8,7 @@ import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
 @Directive({
-    selector: "mona-tree-view[monaTreeViewCheckable]",
-    standalone: true
+    selector: "mona-tree-view[monaTreeViewCheckable]"
 })
 export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     readonly #defaultOptions: CheckableOptions = {
@@ -18,15 +17,13 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
         enabled: true,
         mode: "multiple"
     };
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
-
+    public readonly checkBy = input<NodeKeySelector<T, K> | undefined>("");
+    public readonly checkedKeys = input<Iterable<K>>([]);
     public readonly checkedKeysChange = output<Array<K>>();
     public readonly nodeCheck = output<NodeCheckEvent<T>>();
-
-    public checkBy = input<NodeKeySelector<T, K> | undefined>("");
-    public checkedKeys = input<Iterable<K>>([]);
-    public options = input<Partial<CheckableOptions> | "">("", {
+    public readonly options = input<Partial<CheckableOptions> | "">("", {
         alias: "monaTreeViewCheckable"
     });
 

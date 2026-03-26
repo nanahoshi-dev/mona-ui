@@ -1,14 +1,16 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from "@angular/core";
 import {
     ChildrenSelector,
     ExpandableOptions,
     TreeSelectableOptions,
+    TreeViewCheckableDirective,
     TreeViewComponent,
     TreeViewDragAndDropDirective,
     TreeViewExpandableDirective,
     TreeViewSelectableDirective
 } from "mona-ui";
+import { CheckableOptions } from "mona-ui/common/tree/models/CheckableOptions";
 import { DraggableOptions } from "mona-ui/common/tree/models/DraggableOptions";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -34,6 +36,47 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         x => x.items
     ];
     readonly #injector = createFeatureInjector({
+        checkable: {
+            code: ``,
+            name: "Checkbox",
+            description: `Checkbox feature configuration for the tree view demo.`,
+            active: true,
+            subFeatures: {
+                checkChildren: {
+                    code: ``,
+                    name: "Check Children",
+                    description: `Whether the child nodes are selected when a parent node is selected.`,
+                    active: false
+                },
+                checkDisabledChildren: {
+                    code: ``,
+                    name: "Check Disabled Children",
+                    description: `Whether the disabled child nodes are selected when a parent node is selected.`,
+                    active: false
+                },
+                checkParents: {
+                    code: ``,
+                    name: "Check Parents",
+                    description: `Whether the parent nodes are selected when a child node is selected.`,
+                    active: false
+                },
+                childrenOnly: {
+                    code: ``,
+                    name: "Children Only",
+                    description: `Whether to display checkboxes for leaf nodes only.`,
+                    active: false
+                },
+                mode: {
+                    code: ``,
+                    name: "Mode",
+                    description: `Selection mode for the tree view.`,
+                    active: true,
+                    type: "dropdown",
+                    dropdownDataSource: ["single", "multiple"],
+                    dropdownValue: "single"
+                }
+            }
+        },
         dragAndDrop: {
             code: ``,
             name: "Drag and Drop",
@@ -128,7 +171,8 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         TreeViewComponent,
         TreeViewExpandableDirective,
         TreeViewSelectableDirective,
-        TreeViewDragAndDropDirective
+        TreeViewDragAndDropDirective,
+        TreeViewCheckableDirective
     ],
     template: `
         <mona-tree-view
@@ -140,6 +184,10 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             [mode]="mode()"
             [parentIdField]="parentIdField()"
             [textField]="textField()"
+            [monaTreeViewCheckable]="checkable()"
+            [checkBy]="'id'"
+            [checkedKeys]="checkedKeys()"
+            (checkedKeysChange)="checkedKeys.set($event)"
             [monaTreeViewDragAndDrop]="dragDrop()"
             [monaTreeViewExpandable]="expandable()"
             [monaTreeViewSelectable]="selectable()">
@@ -150,6 +198,20 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     }
 })
 class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewComponent<TreeNodeDataItem>> {
+    protected readonly checkable = computed(() => {
+        const features = this.features();
+        const subFeatures = features["checkable"].subFeatures || {};
+        const selectableSettings: CheckableOptions = {
+            enabled: features["checkable"].active,
+            mode: subFeatures["mode"]?.dropdownValue ?? "single",
+            checkChildren: subFeatures["checkChildren"]?.active ?? true,
+            checkDisabledChildren: subFeatures["checkDisabledChildren"]?.active ?? false,
+            checkParents: subFeatures["checkParents"]?.active ?? true,
+            childrenOnly: subFeatures["childrenOnly"]?.active ?? false
+        };
+        return selectableSettings;
+    });
+    protected readonly checkedKeys = signal([]);
     protected readonly dragDrop = computed(() => {
         const features = this.features();
         const dragDropSettings: DraggableOptions = {
@@ -168,9 +230,9 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         const subFeatures = features["selectable"].subFeatures || {};
         const selectableSettings: TreeSelectableOptions = {
             enabled: features["selectable"].active,
-            mode: subFeatures["mode"]?.dropdownValue || "single",
-            childrenOnly: subFeatures["childrenOnly"]?.active || false,
-            toggleable: subFeatures["toggleable"]?.active || false
+            mode: subFeatures["mode"]?.dropdownValue ?? "single",
+            childrenOnly: subFeatures["childrenOnly"]?.active ?? false,
+            toggleable: subFeatures["toggleable"]?.active ?? false
         };
         return selectableSettings;
     });
@@ -182,6 +244,12 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     public readonly mode = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["mode"]>>("hierarchical");
     public readonly parentIdField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["parentIdField"]>>("");
     public readonly textField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["textField"]>>("");
+
+    public constructor() {
+        effect(() => {
+            console.log(this.checkedKeys());
+        });
+    }
 }
 
 function generateFileTreeData(): TreeNodeDataItem[] {
