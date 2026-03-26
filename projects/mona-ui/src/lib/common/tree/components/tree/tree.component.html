@@ -3,6 +3,6 @@
     [parent]="null"
     [depth]="0"
     [@.disabled]="treeService.animationTemporarilyDisabled()"></mona-sub-tree>
-@if ((treeService.dragging$ | async) && (treeService.nodeDrag$ | async)?.dropAllowed) {
+@if (treeService.dragging() && treeService.dropAllowed()) {
     <mona-tree-drop-hint></mona-tree-drop-hint>
 }

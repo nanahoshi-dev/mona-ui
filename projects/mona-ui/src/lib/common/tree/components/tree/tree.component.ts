@@ -1,6 +1,5 @@
 import { transition, trigger } from "@angular/animations";
 import { FocusMonitor } from "@angular/cdk/a11y";
-import { AsyncPipe } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
@@ -18,7 +17,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { asapScheduler, fromEvent, takeWhile, tap } from "rxjs";
+import { asapScheduler, fromEvent, switchMap, takeWhile } from "rxjs";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
@@ -35,14 +34,16 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
 
 @Component({
     selector: "mona-tree",
-    imports: [SubTreeComponent, TreeDropHintComponent, AsyncPipe],
+    imports: [SubTreeComponent, TreeDropHintComponent],
     templateUrl: "./tree.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     animations: [trigger("nodeExpandParent", [transition(":enter", [])])],
     host: {
         "[class]": "baseClass()",
         "[attr.role]": "'tree'",
-        "[attr.tabindex]": "0"
+        "[attr.tabindex]": "0",
+        "[attr.aria-label]": "ariaLabel() || null",
+        "[attr.aria-multiselectable]": "treeService.selectableOptions().mode === 'multiple' || null"
     }
 })
 export class TreeComponent<T> implements OnInit {
@@ -57,6 +58,7 @@ export class TreeComponent<T> implements OnInit {
         return treeBaseThemeVariants(theme)();
     });
 
+    public readonly ariaLabel = input<string>("");
     public readonly nodeCheck = output<NodeCheckEvent<T>>();
     public readonly nodeClick = output<NodeClickEvent<T>>();
     public readonly nodeDrag = output<NodeDragEvent<T>>();
@@ -89,41 +91,32 @@ export class TreeComponent<T> implements OnInit {
         this.setSubscriptions();
     }
 
-    private handleMouseMove(): void {
-        this.#zone.runOutsideAngular(() => {
-            fromEvent<MouseEvent>(document, "mousemove")
-                .pipe(
-                    takeUntilDestroyed(this.#destroyRef),
-                    takeWhile(() => this.treeService.dragging())
-                )
-                .subscribe(event => {
-                    if (this.isMouseOutsideTree(event)) {
-                        this.treeService.dropPositionChange$.next({
-                            targetNode: null,
-                            position: "outside"
-                        });
-                        return;
-                    }
-                    const element = event.target as HTMLElement;
-                    const closest = element.closest("li");
-                    if (!closest) {
-                        return;
-                    }
-                    const nodeUid = closest?.getAttribute("data-uid");
-                    if (!nodeUid) {
-                        return;
-                    }
-                    const node = this.treeService.getNodeByUid(nodeUid);
-                    if (!node) {
-                        return;
-                    }
-                    const nodeElement = closest.querySelector("mona-tree-node");
-                    if (!nodeElement) {
-                        return;
-                    }
-                    this.notifyDropPositionChange(event, nodeElement, node);
-                });
-        });
+    private handleMouseMoveWhileDragging(event: MouseEvent): void {
+        if (this.isMouseOutsideTree(event)) {
+            this.treeService.dropPositionChange$.next({
+                targetNode: null,
+                position: "outside"
+            });
+            return;
+        }
+        const element = event.target as HTMLElement;
+        const closest = element.closest("li");
+        if (!closest) {
+            return;
+        }
+        const nodeUid = closest.getAttribute("data-uid");
+        if (!nodeUid) {
+            return;
+        }
+        const node = this.treeService.getNodeByUid(nodeUid);
+        if (!node) {
+            return;
+        }
+        const nodeElement = closest.querySelector("mona-tree-node");
+        if (!nodeElement) {
+            return;
+        }
+        this.notifyDropPositionChange(event, nodeElement, node);
     }
 
     private isMouseOutsideTree(event: MouseEvent): boolean {
@@ -172,10 +165,7 @@ export class TreeComponent<T> implements OnInit {
 
     private setKeydownSubscription(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
-            .pipe(
-                tap(e => e.preventDefault()),
-                takeUntilDestroyed(this.#destroyRef)
-            )
+            .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 const navigatedNode = this.treeService.navigatedNode();
                 if (event.key === "ArrowUp") {
@@ -228,10 +218,11 @@ export class TreeComponent<T> implements OnInit {
                     const nodeSelectEvent = new NodeSelectEvent(navigatedNode, event);
                     this.treeService.nodeSelect$.next(nodeSelectEvent);
                     if (!nodeSelectEvent.isDefaultPrevented()) {
-                        this.treeService.setNodeSelect(navigatedNode, !this.treeService.isSelected(navigatedNode));
+                        const newSelected = !this.treeService.isSelected(navigatedNode);
+                        this.treeService.setNodeSelect(navigatedNode, newSelected);
                         this.treeService.nodeSelectChange$.next({
                             node: navigatedNode,
-                            selected: this.treeService.isSelected(navigatedNode)
+                            selected: newSelected
                         });
                         this.treeService.notifySelectionChange(navigatedNode);
                     }
@@ -258,11 +249,17 @@ export class TreeComponent<T> implements OnInit {
     }
 
     private setNodeDragHandlerSubscription(): void {
-        this.treeService.dragging$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(dragging => {
-            if (!dragging) {
-                return;
-            }
-            this.handleMouseMove();
+        this.#zone.runOutsideAngular(() => {
+            this.treeService.dragging$
+                .pipe(
+                    takeUntilDestroyed(this.#destroyRef),
+                    switchMap(dragging =>
+                        dragging
+                            ? fromEvent<MouseEvent>(document, "mousemove").pipe(takeWhile(() => this.treeService.dragging()))
+                            : []
+                    )
+                )
+                .subscribe(event => this.handleMouseMoveWhileDragging(event));
         });
     }
 

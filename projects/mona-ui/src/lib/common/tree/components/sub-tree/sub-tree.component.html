@@ -1,9 +1,15 @@
-<ul [class]="listClass()" cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="onNodeDrop($event)">
+<ul [class]="listClass()" [attr.role]="parent() ? 'group' : null" cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="onNodeDrop($event)">
     @for (node of nodes(); track node.uid) {
         <li
             [attr.data-uid]="node.uid"
             [class]="listItemClass()"
-            [tabindex]="0"
+            [tabindex]="-1"
+            role="treeitem"
+            [attr.aria-level]="depth() + 1"
+            [attr.aria-expanded]="nodeComponent.expandable() ? nodeComponent.expanded() : null"
+            [attr.aria-selected]="treeService.selectableOptions().enabled ? nodeComponent.selected() : null"
+            [attr.aria-disabled]="nodeComponent.disabled() ? true : null"
+            [attr.aria-checked]="nodeComponent.checkable() ? (nodeComponent.indeterminate() ? 'mixed' : nodeComponent.checked()) : null"
             (focus)="treeService.navigatedNode.set(node)"
             cdkDrag
             [cdkDragData]="node"
@@ -14,6 +20,7 @@
             <div [class]="nodeContainerClass()">
                 @if (treeService.expandableOptions().enabled && nodeComponent.expandable()) {
                     <div
+                        aria-hidden="true"
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
                         (click)="onExpandStateChange(node)">
@@ -30,6 +37,7 @@
                 }
                 @if (nodeComponent.checkable()) {
                     <mona-check-box
+                        aria-hidden="true"
                         [disabled]="nodeComponent.disabled()"
                         [indeterminate]="nodeComponent.indeterminate()"
                         [ngModel]="nodeComponent.checked()"
@@ -48,22 +56,27 @@
             @if (!nodeComponent.disabled()) {
                 <div *cdkDragPreview [class]="nodeDraggingClass()">
                     <span>
-                        @if ((treeService.dropPositionChange$ | async)?.position === "before") {
-                            @if ((treeService.nodeDrag$ | async)?.dropAllowed) {
-                                <i class="ri-arrow-up-line"></i>
-                            } @else {
+                        @switch (treeService.dropPositionSignal()?.position) {
+                            @case ("before") {
+                                @if (treeService.dropAllowed()) {
+                                    <i class="ri-arrow-up-line"></i>
+                                } @else {
+                                    <i class="ri-prohibited-2-line"></i>
+                                }
+                            }
+                            @case ("after") {
+                                @if (treeService.dropAllowed()) {
+                                    <i class="ri-arrow-down-line"></i>
+                                } @else {
+                                    <i class="ri-prohibited-2-line"></i>
+                                }
+                            }
+                            @case ("inside") {
+                                <i class="ri-add-line"></i>
+                            }
+                            @default {
                                 <i class="ri-prohibited-2-line"></i>
                             }
-                        } @else if ((treeService.dropPositionChange$ | async)?.position === "after") {
-                            @if ((treeService.nodeDrag$ | async)?.dropAllowed) {
-                                <i class="ri-arrow-down-line"></i>
-                            } @else {
-                                <i class="ri-prohibited-2-line"></i>
-                            }
-                        } @else if ((treeService.dropPositionChange$ | async)?.position === "inside") {
-                            <i class="ri-add-line"></i>
-                        } @else {
-                            <i class="ri-prohibited-2-line"></i>
                         }
                     </span>
                     <span>{{ nodeComponent.nodeText() }}</span>

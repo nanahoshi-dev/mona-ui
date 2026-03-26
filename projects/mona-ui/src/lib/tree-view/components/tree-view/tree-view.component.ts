@@ -48,6 +48,12 @@ export class TreeViewComponent<T> implements OnInit {
     public readonly animate = input<boolean>(true);
 
     /**
+     * @description The accessible label for the tree.
+     * Should describe the purpose of the tree to screen reader users.
+     */
+    public readonly ariaLabel = input<string>("");
+
+    /**
      * @description The children selector for the tree.
      * It can be either of the following:
      * - A string representing the property name of the children.

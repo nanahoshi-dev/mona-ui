@@ -49,6 +49,5 @@ export class TreeViewExpandableDirective<T, K = T> implements OnInit {
 
     public ngOnInit(): void {
         this.#treeService.expandedKeysChange = this.expandedKeysChange;
-        this.#treeService.setNodeExpandSubscription();
     }
 }

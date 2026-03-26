@@ -31,6 +31,7 @@ import {
     pairwise,
     ReplaySubject,
     Subject,
+    switchMap,
     take
 } from "rxjs";
 import { FilterChangeEvent } from "../../filter-input/models/FilterChangeEvent";
@@ -101,7 +102,11 @@ export class TreeService<T> {
     public readonly draggableOptions = signal<DraggableOptions>({ enabled: false });
     public readonly dragging = signal(false);
     public readonly dragging$ = toObservable(this.dragging);
+    public readonly dropAllowed = signal(false);
     public readonly dropPositionChange$ = new BehaviorSubject<DropPositionChangeEvent<T> | null>(null);
+    public readonly dropPositionSignal = toSignal(this.dropPositionChange$, {
+        initialValue: null as DropPositionChangeEvent<T> | null
+    });
     public readonly expandBy = signal<NodeKeySelector<T>>(null);
     public readonly expandableOptions = signal<ExpandableOptions>({ enabled: false });
     public readonly expandedKeys = computed(() => {
@@ -121,7 +126,9 @@ export class TreeService<T> {
     public readonly filter$ = new ReplaySubject<string>(1);
     public readonly filterPlaceholder = signal("");
     public readonly filterText = toSignal(
-        this.filter$.pipe(debounceTime(this.filterableOptions().debounce), distinctUntilChanged()),
+        toObservable(this.filterableOptions).pipe(
+            switchMap(opts => this.filter$.pipe(debounceTime(opts.debounce), distinctUntilChanged()))
+        ),
         { initialValue: "" }
     );
     public readonly navigatedNode = signal<TreeNode<T> | null>(null);
@@ -192,6 +199,7 @@ export class TreeService<T> {
                 this.#filteredExpandedKeys.set(expandedKeys);
             });
         });
+        this.setNodeExpandSubscription();
     }
 
     public static flatten<T>(nodes: Iterable<TreeNode<T>>): List<TreeNode<T>> {
@@ -406,6 +414,7 @@ export class TreeService<T> {
         this.#nodeDictionary().forEach(n => {
             n.value.checked.set(checkedKeysSet.contains(n.value));
         });
+        this.#checkedKeys.set(ImmutableSet.create(keys));
     }
 
     public setData(data: Iterable<T>): void {
@@ -628,7 +637,7 @@ export class TreeService<T> {
         return disableBy(node.data);
     }
 
-    public setNodeExpandSubscription(): void {
+    private setNodeExpandSubscription(): void {
         this.expandedKeys$.pipe(pairwise(), takeUntilDestroyed(this.#destroyRef)).subscribe(([oldKeys, keys]) => {
             const orderedOldKeys = oldKeys.orderBy(k => k);
             const orderedKeys = keys.orderBy(k => k);
@@ -644,17 +653,31 @@ export class TreeService<T> {
     private createFlatNodes(data: Iterable<T>, parentId: string | null): ImmutableSet<TreeNode<T>> {
         const flatIdField = this.#flatIdField();
         const flatParentIdField = this.#flatParentIdField();
-        const nodes = new List<TreeNode<T>>();
+        const childrenByParentId = new Map<string | null, T[]>();
+
         for (const item of data) {
             const dataItem = item as any;
-            if (dataItem[flatParentIdField] === parentId) {
+            const pid = dataItem[flatParentIdField] ?? null;
+            if (!childrenByParentId.has(pid)) {
+                childrenByParentId.set(pid, []);
+            }
+            childrenByParentId.get(pid)!.push(item);
+        }
+
+        const buildNodes = (pid: string | null, parent: TreeNode<T> | null): ImmutableSet<TreeNode<T>> => {
+            const items = childrenByParentId.get(pid) ?? [];
+            const nodes = new List<TreeNode<T>>();
+            for (const item of items) {
+                const dataItem = item as any;
                 const node = new TreeNode(item);
-                node.children.set(this.createFlatNodes(data, dataItem[flatIdField]));
-                node.children().forEach(n => (n.parent = node));
+                node.parent = parent;
+                node.children.set(buildNodes(dataItem[flatIdField], node));
                 nodes.add(node);
             }
-        }
-        return nodes.toImmutableSet();
+            return nodes.toImmutableSet();
+        };
+
+        return buildNodes(parentId, null);
     }
 
     private createHierarchicalNodes(

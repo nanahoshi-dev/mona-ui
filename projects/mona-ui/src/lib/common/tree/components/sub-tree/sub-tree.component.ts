@@ -8,11 +8,10 @@ import {
     CdkDragStart,
     CdkDropList
 } from "@angular/cdk/drag-drop";
-import { AsyncPipe } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
-import { take } from "rxjs";
+import { asapScheduler, take } from "rxjs";
 import { CheckBoxComponent } from "../../../../inputs/check-box/components/check-box/check-box.component";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
@@ -33,7 +32,7 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 @Component({
     selector: "mona-sub-tree",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [TreeNodeComponent, FormsModule, CdkDropList, CdkDrag, CdkDragPreview, AsyncPipe, CheckBoxComponent],
+    imports: [TreeNodeComponent, FormsModule, CdkDropList, CdkDrag, CdkDragPreview, CheckBoxComponent],
     templateUrl: "./sub-tree.component.html",
     animations: [
         trigger("nodeExpand", [
@@ -48,6 +47,7 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 export class SubTreeComponent<T> {
     readonly #document = inject(DOCUMENT);
     readonly #themeService = inject(ThemeService);
+    readonly #zone = inject(NgZone);
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
         return subTreeListThemeVariants(theme)();
@@ -90,6 +90,7 @@ export class SubTreeComponent<T> {
         if (nodeDragEndEvent.isDefaultPrevented()) {
             return;
         }
+        this.treeService.dropAllowed.set(false);
         this.treeService.dragging.set(false);
     }
 
@@ -113,6 +114,7 @@ export class SubTreeComponent<T> {
                 e.targetNode !== node &&
                 !e.targetNode.isDescendantOf(node);
             const internalNodeDragEvent = new InternalNodeDragEvent(nodeDragEvent, dropAllowed);
+            this.treeService.dropAllowed.set(dropAllowed);
             this.treeService.nodeDrag$.next(internalNodeDragEvent);
         });
     }
@@ -155,7 +157,7 @@ export class SubTreeComponent<T> {
             }
             this.treeService.dropPositionChange$.next(null);
             this.focusNode(sourceNode);
-            window.setTimeout(() => this.treeService.animationTemporarilyDisabled.set(false));
+            this.#zone.runOutsideAngular(() => asapScheduler.schedule(() => this.treeService.animationTemporarilyDisabled.set(false)));
         });
     }
 

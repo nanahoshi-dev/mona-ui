@@ -18,10 +18,11 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
 })
 export class TreeNodeComponent<T> implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #themeService = inject(ThemeService);
+    protected readonly treeService = inject(TreeService<T>);
     readonly #dragging = toSignal(this.treeService.dragging$, {
         initialValue: false
     });
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
@@ -109,8 +110,6 @@ export class TreeNodeComponent<T> implements OnInit {
     public depth = input(0);
     public node = input<TreeNode<T> | null>(null);
 
-    public constructor(protected readonly treeService: TreeService<T>) {}
-
     public ngOnInit(): void {
         this.setSubscriptions();
     }
@@ -136,8 +135,9 @@ export class TreeNodeComponent<T> implements OnInit {
         if (nodeSelectEvent.isDefaultPrevented()) {
             return;
         }
-        this.treeService.setNodeSelect(node, !this.selected());
-        this.treeService.nodeSelectChange$.next({ node, selected: !this.selected() });
+        const newSelected = !this.selected();
+        this.treeService.setNodeSelect(node, newSelected);
+        this.treeService.nodeSelectChange$.next({ node, selected: newSelected });
         this.treeService.notifySelectionChange(node);
     }
 
