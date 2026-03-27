@@ -286,7 +286,7 @@ export class TreeService<T> {
 
     public isIndeterminate(node: TreeNode<T>): boolean {
         const checkableOptions = this.checkableOptions();
-        if (!checkableOptions.enabled || !checkableOptions.checkParents) {
+        if (!checkableOptions.enabled || !checkableOptions.checkParents || checkableOptions.mode === "single") {
             return false;
         }
         if (node.children().isEmpty()) {
@@ -523,7 +523,7 @@ export class TreeService<T> {
         }
         node.checked.set(checked);
 
-        if (checkChildren) {
+        if (mode !== "single" && checkChildren) {
             const childNodes = this.getChildNodes(node);
             childNodes.forEach(n => {
                 if (checkDisabledChildren || !this.isDisabled(n)) {
@@ -537,7 +537,7 @@ export class TreeService<T> {
                 }
             });
         }
-        if (checkParents && !childrenOnly) {
+        if (mode !== "single" && checkParents && !childrenOnly) {
             const parentNodes = this.getParentNodes(node);
             parentNodes.forEach(n => {
                 const childNodes = n.children();
