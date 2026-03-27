@@ -70,6 +70,7 @@ export * from "./common/tree/models/NodeItem";
 export * from "./common/tree/models/NodeSelectEvent";
 export * from "./common/tree/models/TreeSelectableOptions";
 export * from "./common/tree/models/TreeSelectors";
+export * from "./common/tree/utils/moveTreeNode";
 
 /** Date Inputs */
 export * from "./date-inputs/directives/date-input-prefix-template.directive";

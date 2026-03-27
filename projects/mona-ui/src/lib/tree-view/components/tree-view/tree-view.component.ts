@@ -142,12 +142,12 @@ export class TreeViewComponent<T> implements OnInit {
     private setDataStructureFields(): void {
         effect(() => {
             const mode = this.mode();
+            this.setGenericDataStructureFields(mode);
             if (mode === "flat") {
                 this.setFlatDataStructureFields();
             } else if (mode === "hierarchical") {
                 this.setHierarchicalDataStructureFields();
             }
-            this.setGenericDataStructureFields(mode);
         });
     }
 

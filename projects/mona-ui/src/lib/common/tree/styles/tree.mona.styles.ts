@@ -53,7 +53,19 @@ export const treeNodeBaseVariants = cva(
                 true: "bg-primary text-primary-foreground",
                 false: ""
             }
-        }
+        },
+        compoundVariants: [
+            {
+                disabled: false,
+                selected: false,
+                class: "hover:bg-hover active:bg-active"
+            },
+            {
+                disabled: false,
+                selected: true,
+                class: "hover:bg-primary-hover"
+            }
+        ]
     }
 );
 

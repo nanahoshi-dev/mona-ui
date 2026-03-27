@@ -1,4 +1,9 @@
-<ul [class]="listClass()" [attr.role]="parent() ? 'group' : null" cdkDropList [cdkDropListSortingDisabled]="true" (cdkDropListDropped)="onNodeDrop($event)">
+<ul
+    [class]="listClass()"
+    [attr.role]="parent() ? 'group' : null"
+    cdkDropList
+    [cdkDropListSortingDisabled]="true"
+    (cdkDropListDropped)="onNodeDrop($event)">
     @for (node of nodes(); track node.uid) {
         <li
             [attr.data-uid]="node.uid"
@@ -9,7 +14,9 @@
             [attr.aria-expanded]="nodeComponent.expandable() ? nodeComponent.expanded() : null"
             [attr.aria-selected]="treeService.selectableOptions().enabled ? nodeComponent.selected() : null"
             [attr.aria-disabled]="nodeComponent.disabled() ? true : null"
-            [attr.aria-checked]="nodeComponent.checkable() ? (nodeComponent.indeterminate() ? 'mixed' : nodeComponent.checked()) : null"
+            [attr.aria-checked]="
+                nodeComponent.checkable() ? (nodeComponent.indeterminate() ? 'mixed' : nodeComponent.checked()) : null
+            "
             (focus)="treeService.navigatedNode.set(node)"
             cdkDrag
             [cdkDragData]="node"

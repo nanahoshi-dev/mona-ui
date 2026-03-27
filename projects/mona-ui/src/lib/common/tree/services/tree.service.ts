@@ -696,6 +696,7 @@ export class TreeService<T> {
             let node: TreeNode<T>;
             if (existingNode) {
                 node = existingNode.value;
+                node.parent = parent;
             } else {
                 node = new TreeNode(dataItem);
                 node.parent = parent;

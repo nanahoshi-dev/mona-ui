@@ -1,5 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from "@angular/core";
+import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    linkedSignal,
+    signal
+} from "@angular/core";
 import { FileIcon, FolderIcon, LucideAngularModule, LucideIconData } from "lucide-angular";
 import {
     CheckableOptions,
@@ -8,6 +17,8 @@ import {
     DraggableOptions,
     ExpandableOptions,
     FilterableOptions,
+    moveTreeNode,
+    NodeDropEvent,
     NodeItem,
     TreeSelectableOptions,
     TreeViewCheckableDirective,
@@ -239,7 +250,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         <mona-tree-view
             [animate]="animate()"
             [children]="children()"
-            [data]="data()"
+            [data]="treeData()"
             [hasChildren]="hasChildren()"
             [idField]="idField()"
             [mode]="mode()"
@@ -253,6 +264,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             [disableBy]="'id'"
             [disabledKeys]="disabledKeys()"
             [monaTreeViewDragAndDrop]="dragDrop()"
+            (nodeDrop)="onNodeDrop($event)"
             [monaTreeViewExpandable]="expandable()"
             [expandBy]="'id'"
             [expandedKeys]="expandedKeys()"
@@ -356,6 +368,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         return selectableSettings;
     });
     protected readonly selectedKeys = signal<string[]>([]);
+    protected readonly treeData = linkedSignal(() => this.data());
     public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
@@ -369,6 +382,11 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         effect(() => {
             console.log(this.checkedKeys());
         });
+    }
+
+    public onNodeDrop(event: NodeDropEvent<TreeNodeDataItem>): void {
+        const updatedData = moveTreeNode(this.treeData(), event, "id", "items");
+        this.treeData.set(updatedData);
     }
 
     protected onSelectionChange(nodeItem: NodeItem<TreeNodeDataItem>) {
