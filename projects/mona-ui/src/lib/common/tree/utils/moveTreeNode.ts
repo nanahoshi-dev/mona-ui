@@ -14,40 +14,35 @@ export function moveTreeNode<T extends Record<string, any>>(
     idKey: keyof T,
     childrenKey: keyof T
 ): T[] {
-    // Clone the root array to avoid directly mutating the top-level reference
     const updatedTree = [...treeData];
-
     const draggedId = event.nodeItem.data[idKey];
     const targetId = event.targetNodeItem.data[idKey];
     const position = event.position;
-
     let draggedNode: T | null = null;
 
-    // Phase 1: Find and extract the dragged node from its current position
     function extractNode(nodes: T[]): boolean {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i][idKey] === draggedId) {
-                // Remove the node from the array and store it
                 draggedNode = nodes.splice(i, 1)[0];
                 return true;
             }
 
             const children = nodes[i][childrenKey] as T[] | undefined;
             if (children && Array.isArray(children)) {
-                if (extractNode(children)) return true;
+                if (extractNode(children)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    // Phase 2: Find the target node and insert the dragged node relative to it
     function insertNode(nodes: T[]): boolean {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i][idKey] === targetId) {
                 if (position === "inside") {
-                    // Initialize the children array if it doesn't exist
                     if (!nodes[i][childrenKey]) {
-                        (nodes[i][childrenKey] as any) = [];
+                        nodes[i][childrenKey] = [] as T[keyof T];
                     }
                     const children = nodes[i][childrenKey] as T[];
                     children.push(draggedNode!);
@@ -61,19 +56,17 @@ export function moveTreeNode<T extends Record<string, any>>(
 
             const children = nodes[i][childrenKey] as T[] | undefined;
             if (children && Array.isArray(children)) {
-                if (insertNode(children)) return true;
+                if (insertNode(children)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    // Execute the extraction
     extractNode(updatedTree);
-
-    // If we successfully found and extracted the node, insert it at the target
     if (draggedNode) {
         insertNode(updatedTree);
     }
-
     return updatedTree;
 }

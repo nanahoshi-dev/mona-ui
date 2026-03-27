@@ -130,6 +130,9 @@ export class TreeNodeComponent<T> implements OnInit {
         if (nodeClickEvent.isDefaultPrevented()) {
             return;
         }
+        if (!this.treeService.selectableOptions().enabled) {
+            return;
+        }
         const nodeSelectEvent = new NodeSelectEvent(node, event);
         this.treeService.nodeSelect$.next(nodeSelectEvent);
         if (nodeSelectEvent.isDefaultPrevented()) {

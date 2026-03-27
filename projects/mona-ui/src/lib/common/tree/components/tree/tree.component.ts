@@ -215,6 +215,9 @@ export class TreeComponent<T> implements OnInit {
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {
                         return;
                     }
+                    if (!this.treeService.selectableOptions().enabled) {
+                        return;
+                    }
                     const nodeSelectEvent = new NodeSelectEvent(navigatedNode, event);
                     this.treeService.nodeSelect$.next(nodeSelectEvent);
                     if (!nodeSelectEvent.isDefaultPrevented()) {
