@@ -291,7 +291,6 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 </ng-template>
             }
         </mona-tree-view>
-        <hr />
         <app-event-viewer
             [instances]="[
                 treeView,

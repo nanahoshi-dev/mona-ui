@@ -359,11 +359,21 @@ export class TreeService<T> {
         this.updateNodeIndices();
     }
 
-    public navigate(direction: "next" | "previous"): TreeNode<T> | null {
+    public navigate(direction: "next" | "previous" | "first" | "last"): TreeNode<T> | null {
         const navigableNodes = this.#navigableNodes();
         const navigatedNode = this.navigatedNode();
         if (navigableNodes.isEmpty()) {
             return null;
+        }
+        if (direction === "first") {
+            const first = navigableNodes.first();
+            this.navigatedNode.set(first);
+            return first;
+        }
+        if (direction === "last") {
+            const last = navigableNodes.last();
+            this.navigatedNode.set(last);
+            return last;
         }
         const firstNode = navigableNodes.first();
         if (navigatedNode === null) {
@@ -503,7 +513,9 @@ export class TreeService<T> {
                 .where(n => n !== node)
                 .forEach(n => n.checked.set(false));
             checkedKeys.clear();
-            checkedKeys.add(key);
+            if (checked) {
+                checkedKeys.add(key);
+            }
         } else if (checked) {
             checkedKeys.add(key);
         } else {

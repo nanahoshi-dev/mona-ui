@@ -52,6 +52,7 @@ export class TreeComponent<T> implements OnInit {
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
+    #lastNavigatedNode: TreeNode<T> | null = null;
 
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -71,6 +72,14 @@ export class TreeComponent<T> implements OnInit {
     public readonly data = input<Iterable<T>>();
 
     public constructor() {
+        effect(() => {
+            const node = this.treeService.navigatedNode();
+            untracked(() => {
+                if (node !== null) {
+                    this.#lastNavigatedNode = node;
+                }
+            });
+        });
         effect(() => {
             const nodeTemplate = this.nodeTemplate() ?? null;
             untracked(() => {
@@ -155,6 +164,15 @@ export class TreeComponent<T> implements OnInit {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(origin => {
                 if (origin) {
+                    asapScheduler.schedule(() => {
+                        if (this.treeService.navigatedNode() === null) {
+                            if (this.#lastNavigatedNode !== null) {
+                                this.treeService.navigatedNode.set(this.#lastNavigatedNode);
+                            } else {
+                                this.treeService.navigate("next");
+                            }
+                        }
+                    });
                     return;
                 }
                 asapScheduler.schedule(() => {
@@ -210,6 +228,12 @@ export class TreeComponent<T> implements OnInit {
                             checked: newCheckState
                         });
                     }
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    this.treeService.navigate("first");
+                } else if (event.key === "End") {
+                    event.preventDefault();
+                    this.treeService.navigate("last");
                 } else if (event.key === "Enter") {
                     event.preventDefault();
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {

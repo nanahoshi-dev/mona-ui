@@ -75,6 +75,11 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
     public readonly disabled = input(false);
 
     /**
+     * @description Sets the tab index of the checkbox.
+     */
+    public readonly tabIndex = input(0);
+
+    /**
      * @description Sets the indeterminate state of the checkbox.
      */
     public readonly indeterminate = input(false);

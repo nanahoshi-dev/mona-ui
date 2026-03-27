@@ -3,14 +3,14 @@ import { ImmutableList } from "@mirei/ts-collections";
 import { ButtonDirective } from "mona-ui";
 
 interface OutputEventItem {
-    name: string;
-    emitter: OutputEmitterRef<any>;
-    source: string;
+    readonly name: string;
+    readonly emitter: OutputEmitterRef<any>;
+    readonly source: string;
 }
 
 interface EventLogItem {
-    name: string;
-    value: string;
+    readonly name: string;
+    readonly value: string;
 }
 
 @Component({

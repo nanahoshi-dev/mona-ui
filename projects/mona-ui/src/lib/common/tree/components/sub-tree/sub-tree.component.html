@@ -45,6 +45,7 @@
                 @if (nodeComponent.checkable()) {
                     <mona-check-box
                         aria-hidden="true"
+                        [tabIndex]="-1"
                         [disabled]="nodeComponent.disabled()"
                         [indeterminate]="nodeComponent.indeterminate()"
                         [ngModel]="nodeComponent.checked()"

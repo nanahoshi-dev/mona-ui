@@ -12,7 +12,7 @@
            (ngModelChange)="onCheckedChange($event)" #checkBox/>
 
     <span [class]="checkMarkClasses()"
-          [tabindex]="disabled() ? -1 : 0"
+          [tabindex]="disabled() ? -1 : tabIndex()"
           [attr.role]="'checkbox'"
           [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
           [attr.aria-disabled]="disabled()"
