@@ -218,6 +218,9 @@ export class TreeComponent<T> implements OnInit {
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {
                         return;
                     }
+                    if (!this.treeService.isCheckable(navigatedNode)) {
+                        return;
+                    }
                     const nodeCheckEvent = new NodeCheckEvent(navigatedNode, event);
                     this.treeService.nodeCheck$.next(nodeCheckEvent);
                     if (!nodeCheckEvent.isDefaultPrevented()) {
