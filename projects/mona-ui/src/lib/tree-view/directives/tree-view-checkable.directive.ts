@@ -57,8 +57,6 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     }
 
     public ngOnInit(): void {
-        this.#treeService.checkedKeysChange = this.checkedKeysChange;
-        this.#treeService.nodeCheck = this.nodeCheck;
         this.setNodeCheckSubscription();
     }
 
@@ -71,9 +69,10 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
                 if (sequenceEqual(orderedOldKeys, orderedKeys)) {
                     return;
                 }
-                if (this.#treeService.checkedKeysChange) {
-                    this.#treeService.checkedKeysChange.emit(keys.toArray());
-                }
+                this.checkedKeysChange.emit(keys.toArray());
             });
+        this.#treeService.nodeCheck$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            this.nodeCheck.emit(event);
+        });
     }
 }

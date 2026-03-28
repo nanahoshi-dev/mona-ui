@@ -1,6 +1,7 @@
 import { transition, trigger } from "@angular/animations";
 import { FocusMonitor } from "@angular/cdk/a11y";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -11,8 +12,6 @@ import {
     inject,
     input,
     NgZone,
-    OnInit,
-    output,
     TemplateRef,
     untracked
 } from "@angular/core";
@@ -21,10 +20,6 @@ import { asapScheduler, fromEvent, switchMap, takeWhile } from "rxjs";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
-import { NodeClickEvent } from "../../models/NodeClickEvent";
-import { NodeDragEvent } from "../../models/NodeDragEvent";
-import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";
-import { NodeDropEvent } from "../../models/NodeDropEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
@@ -46,27 +41,18 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
         "[attr.aria-multiselectable]": "treeService.selectableOptions().mode === 'multiple' || null"
     }
 })
-export class TreeComponent<T> implements OnInit {
+export class TreeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
-
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         return treeBaseThemeVariants(theme)();
     });
-
     public readonly ariaLabel = input<string>("");
-    public readonly nodeCheck = output<NodeCheckEvent<T>>();
-    public readonly nodeClick = output<NodeClickEvent<T>>();
-    public readonly nodeDrag = output<NodeDragEvent<T>>();
-    public readonly nodeDragEnd = output<NodeDragStartEvent<T>>();
-    public readonly nodeDragStart = output<NodeDragStartEvent<T>>();
-    public readonly nodeDrop = output<NodeDropEvent<T>>();
-    public readonly nodeSelect = output<NodeSelectEvent<T>>();
     public readonly treeService: TreeService<T> = inject(TreeService);
     public readonly nodeTemplate = contentChild(TreeNodeTemplateDirective, { read: TemplateRef });
     public readonly data = input<Iterable<T>>();
@@ -94,10 +80,9 @@ export class TreeComponent<T> implements OnInit {
                 }
             });
         });
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
     }
 
     private handleMouseMoveWhileDragging(event: MouseEvent): void {
@@ -264,24 +249,6 @@ export class TreeComponent<T> implements OnInit {
             });
     }
 
-    private setNodeCheckSubscription(): void {
-        this.treeService.nodeCheck$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeCheck.emit(event));
-    }
-
-    private setNodeClickSubscription(): void {
-        this.treeService.nodeClick$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeClick.emit(event));
-    }
-
-    private setNodeDragEndSubscription(): void {
-        this.treeService.nodeDragEnd$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeDragEnd.emit(event));
-    }
-
     private setNodeDragHandlerSubscription(): void {
         this.#zone.runOutsideAngular(() => {
             this.treeService.dragging$
@@ -289,7 +256,9 @@ export class TreeComponent<T> implements OnInit {
                     takeUntilDestroyed(this.#destroyRef),
                     switchMap(dragging =>
                         dragging
-                            ? fromEvent<MouseEvent>(document, "mousemove").pipe(takeWhile(() => this.treeService.dragging()))
+                            ? fromEvent<MouseEvent>(document, "mousemove").pipe(
+                                  takeWhile(() => this.treeService.dragging())
+                              )
                             : []
                     )
                 )
@@ -297,40 +266,9 @@ export class TreeComponent<T> implements OnInit {
         });
     }
 
-    private setNodeDragStartSubscription(): void {
-        this.treeService.nodeDragStart$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeDragStart.emit(event));
-    }
-
-    private setNodeDragSubscription(): void {
-        this.treeService.nodeDrag$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeDrag.emit(event.dragEvent));
-    }
-
-    private setNodeDropSubscription(): void {
-        this.treeService.nodeDrop$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeDrop.emit(event));
-    }
-
-    private setNodeSelectSubscription(): void {
-        this.treeService.nodeSelect$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => this.nodeSelect.emit(event));
-    }
-
     private setSubscriptions(): void {
         this.setFocusSubscription();
         this.setKeydownSubscription();
-        this.setNodeCheckSubscription();
-        this.setNodeClickSubscription();
-        this.setNodeDragEndSubscription();
         this.setNodeDragHandlerSubscription();
-        this.setNodeDragStartSubscription();
-        this.setNodeDragSubscription();
-        this.setNodeDropSubscription();
-        this.setNodeSelectSubscription();
     }
 }

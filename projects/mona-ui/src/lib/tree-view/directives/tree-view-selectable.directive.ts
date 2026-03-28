@@ -55,12 +55,13 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
     }
 
     public ngOnInit(): void {
-        this.#treeService.selectionChange = this.selectionChange;
-        this.#treeService.nodeSelect = this.nodeSelect;
         this.setNodeSelectSubscription();
     }
 
     private setNodeSelectSubscription(): void {
+        this.#treeService.nodeSelect$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            this.nodeSelect.emit(event);
+        });
         this.#treeService.selectedKeys$
             .pipe(pairwise(), takeUntilDestroyed(this.#destroyRef))
             .subscribe(([oldKeys, keys]) => {
@@ -71,12 +72,8 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
                 }
                 this.selectedKeysChange.emit(keys.toArray());
             });
-        this.#treeService.selectionChange$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(nodeItem => {
-                if (this.#treeService.selectionChange) {
-                    this.#treeService.selectionChange.emit(nodeItem);
-                }
-            });
+        this.#treeService.selectionChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(nodeItem => {
+            this.selectionChange.emit(nodeItem);
+        });
     }
 }

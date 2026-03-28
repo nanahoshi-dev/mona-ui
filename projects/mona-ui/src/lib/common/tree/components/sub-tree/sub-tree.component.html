@@ -31,14 +31,12 @@
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
                         (click)="onExpandStateChange(node)">
-                        @if (!node.loading()) {
-                            @if (nodeComponent.expanded()) {
-                                <i class="ri-arrow-down-s-fill"></i>
-                            } @else {
-                                <i class="ri-arrow-right-s-fill"></i>
-                            }
-                        } @else {
+                        @if (node.loading()) {
                             <i class="ri-loader-2-line mona-rotate-anim"></i>
+                        } @else if (nodeComponent.expanded()) {
+                            <i class="ri-arrow-down-s-fill"></i>
+                        } @else {
+                            <i class="ri-arrow-right-s-fill"></i>
                         }
                     </div>
                 }

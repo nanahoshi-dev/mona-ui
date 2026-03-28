@@ -1,16 +1,18 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     contentChild,
+    DestroyRef,
     effect,
     inject,
     input,
-    OnInit,
     output,
     TemplateRef,
     untracked
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Predicate, Selector } from "@mirei/ts-collections";
 import { FilterInputComponent } from "../../../common/filter-input/components/filter-input/filter-input.component";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
@@ -18,6 +20,7 @@ import { TreeComponent } from "../../../common/tree/components/tree/tree.compone
 import { TreeNodeTemplateDirective } from "../../../common/tree/directives/tree-node-template.directive";
 import { DataStructure } from "../../../common/tree/models/DataStructure";
 import { NodeClickEvent } from "../../../common/tree/models/NodeClickEvent";
+import { NodeMoveEvent } from "../../../common/tree/models/NodeMoveEvent";
 import { TreeNode } from "../../../common/tree/models/TreeNode";
 import { ChildrenSelector } from "../../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../../common/tree/services/tree.service";
@@ -34,7 +37,9 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
         class: "mona-tree-view"
     }
 })
-export class TreeViewComponent<T> implements OnInit {
+export class TreeViewComponent<T> {
+    readonly #destroyRef = inject(DestroyRef);
+
     protected readonly nodeTemplate = contentChild<
         TreeViewNodeTemplateDirective,
         TemplateRef<TreeViewNodeTemplateContext<T>>
@@ -115,16 +120,29 @@ export class TreeViewComponent<T> implements OnInit {
     public constructor() {
         this.setDataStructureFields();
         this.setAnimationEffect();
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
     }
 
-    public ngOnInit(): void {
-        this.treeService.nodeClick = this.nodeClick;
+    public addNode(data: NodeMoveEvent<T>): void {
+        const node = this.treeService.getNodeByUid(data.sourceItem.uid);
+        if (!node) {
+            return;
+        }
+        const targetNode = this.treeService.getNodeByUid(data.targetItem.uid);
+        if (!targetNode) {
+            return;
+        }
+        this.treeService.moveNode(node, targetNode, data.position);
+    }
+
+    public removeNode(data: NodeMoveEvent<T>): void {
+        console.log("Removing node", data);
     }
 
     protected onFilterChange(event: FilterChangeEvent): void {
-        if (this.treeService.filterChange) {
-            this.treeService.filterChange.emit(event);
-        }
+        this.treeService.filterChange$.next(event);
         if (!event.isDefaultPrevented()) {
             this.treeService.filter$.next(event.filter);
         }
@@ -176,6 +194,12 @@ export class TreeViewComponent<T> implements OnInit {
         untracked(() => {
             this.treeService.setChildrenSelector(childrenSelector);
             this.treeService.setHasChildrenPredicate(hasChildren);
+        });
+    }
+
+    private setSubscriptions(): void {
+        this.treeService.nodeClick$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            this.nodeClick.emit(event);
         });
     }
 }

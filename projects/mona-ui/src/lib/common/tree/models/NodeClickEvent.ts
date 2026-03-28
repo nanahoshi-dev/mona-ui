@@ -12,7 +12,8 @@ export class NodeClickEvent<T> extends PreventableEvent {
     public get nodeItem(): NodeItem<T> {
         return {
             data: this.#node.data,
-            hasChildren: this.#node.children().length > 0
+            hasChildren: this.#node.children().length > 0,
+            uid: this.#node.uid
         };
     }
 }

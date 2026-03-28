@@ -7,9 +7,8 @@ export class TreeNode<T> {
     public readonly checked = signal(false);
     public readonly children = signal(ImmutableSet.create<TreeNode<T>>());
     public readonly data: T;
-    public readonly loaded = signal(false);
     public readonly loading = signal(false);
-    public readonly uid: string = v4();
+    public readonly uid = v4();
     public index: string = "";
     public parent: TreeNode<T> | null = null;
 
@@ -39,7 +38,8 @@ export class TreeNode<T> {
     public get nodeItem(): NodeItem<T> {
         return {
             data: this.data,
-            hasChildren: this.children().length > 0
+            hasChildren: this.children().length > 0,
+            uid: this.uid
         };
     }
 }

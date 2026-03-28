@@ -1,4 +1,15 @@
-import { Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import {
+    afterNextRender,
+    DestroyRef,
+    Directive,
+    effect,
+    inject,
+    input,
+    OnInit,
+    output,
+    untracked
+} from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
 import { FilterableOptions } from "../../../common/models/FilterableOptions";
 import { TreeService } from "../../../common/tree/services/tree.service";
@@ -7,13 +18,14 @@ import { TreeService } from "../../../common/tree/services/tree.service";
     selector: "mona-drop-down-tree[monaDropDownTreeFilterable]",
     standalone: true
 })
-export class DropDownTreeFilterableDirective<T> implements OnInit {
+export class DropDownTreeFilterableDirective<T> {
     readonly #defaultOptions: FilterableOptions = {
         enabled: true,
         operator: "contains",
         caseSensitive: false,
         debounce: 0
     };
+    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     public readonly filterChange = output<FilterChangeEvent>();
@@ -46,9 +58,14 @@ export class DropDownTreeFilterableDirective<T> implements OnInit {
                 }
             });
         });
+        afterNextRender({
+            read: () => this.setSubscription()
+        });
     }
 
-    public ngOnInit(): void {
-        this.#treeService.filterChange = this.filterChange;
+    private setSubscription() {
+        this.#treeService.filterChange$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            this.filterChange.emit(event);
+        });
     }
 }

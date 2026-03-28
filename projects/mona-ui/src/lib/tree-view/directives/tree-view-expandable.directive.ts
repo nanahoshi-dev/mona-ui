@@ -1,4 +1,7 @@
-import { Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { sequenceEqual } from "@mirei/ts-collections";
+import { pairwise } from "rxjs";
 import { ExpandableOptions } from "../../common/tree/models/ExpandableOptions";
 import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
@@ -7,10 +10,11 @@ import { TreeService } from "../../common/tree/services/tree.service";
     selector: "mona-tree-view[monaTreeViewExpandable]",
     exportAs: "monaTreeViewExpandable"
 })
-export class TreeViewExpandableDirective<T, K = T> implements OnInit {
+export class TreeViewExpandableDirective<T, K = T> {
     readonly #defaultOptions: ExpandableOptions = {
         enabled: true
     };
+    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
     public readonly expandBy = input<NodeKeySelector<T, K> | undefined>("");
     public readonly expandedKeys = input<Iterable<K>>([]);
@@ -45,9 +49,21 @@ export class TreeViewExpandableDirective<T, K = T> implements OnInit {
                 }
             });
         });
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
     }
 
-    public ngOnInit(): void {
-        this.#treeService.expandedKeysChange = this.expandedKeysChange;
+    public setSubscriptions(): void {
+        this.#treeService.expandedKeys$
+            .pipe(pairwise(), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(([oldKeys, keys]) => {
+                const orderedOldKeys = oldKeys.orderBy(k => k);
+                const orderedKeys = keys.orderBy(k => k);
+                if (sequenceEqual(orderedOldKeys, orderedKeys)) {
+                    return;
+                }
+                this.expandedKeysChange.emit(keys.toArray());
+            });
     }
 }

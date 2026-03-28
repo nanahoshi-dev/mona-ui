@@ -18,6 +18,7 @@ import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";
 import { NodeDropEvent } from "../../models/NodeDropEvent";
+import { NodeMoveEvent, NodeMoveEventSansTree } from "../../models/NodeMoveEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
 import {
@@ -68,7 +69,7 @@ export class SubTreeComponent<T> {
         const theme = this.#themeService.theme();
         return treeNodeExpanderThemeVariants(theme)();
     });
-    protected readonly treeService: TreeService<T> = inject(TreeService);
+    protected readonly treeService = inject(TreeService);
     public readonly depth = input.required<number>();
     public readonly nodes = input.required<ImmutableSet<TreeNode<T>>, Iterable<TreeNode<T>>>({
         transform: value => ImmutableSet.create(value)
@@ -77,7 +78,7 @@ export class SubTreeComponent<T> {
 
     public onExpandStateChange(node: TreeNode<T>): void {
         const expanded = this.treeService.isExpanded(node);
-        if (!node.loaded() && !expanded) {
+        if (!expanded) {
             this.treeService.loadNodeChildren(node);
         }
         this.treeService.setNodeExpand(node, !expanded);
@@ -155,9 +156,18 @@ export class SubTreeComponent<T> {
                 this.treeService.animationTemporarilyDisabled.set(false);
                 return;
             }
+            const moveEvent: NodeMoveEventSansTree<T> = {
+                sourceItem: sourceNode.nodeItem,
+                targetItem: targetNode.nodeItem,
+                position: e.position
+            };
+            this.treeService.nodeRemove$.next(moveEvent);
+            this.treeService.nodeAdd$.next(moveEvent);
             this.treeService.dropPositionChange$.next(null);
             this.focusNode(sourceNode);
-            this.#zone.runOutsideAngular(() => asapScheduler.schedule(() => this.treeService.animationTemporarilyDisabled.set(false)));
+            this.#zone.runOutsideAngular(() =>
+                asapScheduler.schedule(() => this.treeService.animationTemporarilyDisabled.set(false))
+            );
         });
     }
 

@@ -1,5 +1,8 @@
-import { Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
-import { Selector } from "@mirei/ts-collections";
+import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { readonly } from "@angular/forms/signals";
+import { Selector, sequenceEqual } from "@mirei/ts-collections";
+import { pairwise } from "rxjs";
 import { ExpandableOptions } from "../../../common/tree/models/ExpandableOptions";
 import { TreeService } from "../../../common/tree/services/tree.service";
 
@@ -11,6 +14,7 @@ export class DropDownTreeExpandableDirective<T> implements OnInit {
     readonly #defaultOptions: ExpandableOptions = {
         enabled: true
     };
+    readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     public readonly expandedKeysChange = output<unknown[]>();
@@ -46,6 +50,15 @@ export class DropDownTreeExpandableDirective<T> implements OnInit {
     }
 
     public ngOnInit(): void {
-        this.#treeService.expandedKeysChange = this.expandedKeysChange;
+        this.#treeService.expandedKeys$
+            .pipe(pairwise(), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(([oldKeys, keys]) => {
+                const orderedOldKeys = oldKeys.orderBy(k => k);
+                const orderedKeys = keys.orderBy(k => k);
+                if (sequenceEqual(orderedOldKeys, orderedKeys)) {
+                    return;
+                }
+                this.expandedKeysChange.emit(keys.toArray());
+            });
     }
 }

@@ -7,19 +7,22 @@ import {
     inject,
     input,
     linkedSignal,
-    signal
+    signal,
+    untracked,
+    viewChild
 } from "@angular/core";
 import { FileIcon, FolderIcon, LucideAngularModule } from "lucide-angular";
 import {
     CheckableOptions,
-    ChildrenSelector,
     DisableOptions,
     DraggableOptions,
     ExpandableOptions,
     FilterableOptions,
     moveTreeNode,
+    NodeDragEvent,
     NodeDropEvent,
     NodeItem,
+    NodeMoveEvent,
     TreeSelectableOptions,
     TreeViewCheckableDirective,
     TreeViewComponent,
@@ -30,6 +33,7 @@ import {
     TreeViewNodeTemplateDirective,
     TreeViewSelectableDirective
 } from "mona-ui";
+import { asapScheduler, of, switchMap, timer } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -50,9 +54,15 @@ interface TreeNodeDataItem {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewComponent<TreeNodeDataItem>> {
-    readonly #childrenSelectors: NonNullable<ChildrenSelector<TreeNodeDataItem> | undefined>[] = [
-        "items",
-        x => x.items
+    readonly #childFetch$ = (x: TreeNodeDataItem) =>
+        timer(Math.floor(Math.random() * (1200 - 200)) + 200).pipe(switchMap(() => of(x.items)));
+    readonly #childrenSelectors = [
+        { text: "items", value: "items" },
+        { text: "items selector", value: (x: TreeNodeDataItem) => x.items },
+        {
+            text: "observable",
+            value: this.#childFetch$
+        }
     ];
     readonly #injector = createFeatureInjector({
         checkable: {
@@ -193,9 +203,11 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 value: true
             },
             children: {
-                type: "dropdown",
+                type: "customDropdown",
                 value: this.#childrenSelectors,
-                defaultValue: this.#childrenSelectors[0]
+                textField: "text",
+                valueField: "value",
+                defaultValue: this.#childrenSelectors[0].value
             },
             data: {
                 type: "iterable",
@@ -228,7 +240,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TreeViewComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
+    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["TreeViewCheckableDirective"]);
     protected readonly TreeViewWrapperComponent = TreeViewWrapperComponent;
 }
 
@@ -247,65 +259,71 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     ],
     template: `
         @let featureData = features();
-        <mona-tree-view
-            [animate]="animate()"
-            [children]="children()"
-            [data]="treeData()"
-            [hasChildren]="hasChildren()"
-            [idField]="idField()"
-            [mode]="mode()"
-            [parentIdField]="parentIdField()"
-            [textField]="textField()"
-            [monaTreeViewCheckable]="checkable()"
-            [checkBy]="'id'"
-            [checkedKeys]="checkedKeys()"
-            (checkedKeysChange)="checkedKeys.set($event)"
-            [monaTreeViewDisable]="disable()"
-            [disableBy]="'id'"
-            [disabledKeys]="disabledKeys()"
-            [monaTreeViewDragAndDrop]="dragDrop()"
-            (nodeDrop)="onNodeDrop($event)"
-            [monaTreeViewExpandable]="expandable()"
-            [expandBy]="'id'"
-            [expandedKeys]="expandedKeys()"
-            (expandedKeysChange)="expandedKeys.set($event)"
-            [monaTreeViewFilterable]="filterable()"
-            [monaTreeViewSelectable]="selectable()"
-            [selectBy]="'id'"
-            [selectedKeys]="selectedKeys()"
-            (selectedKeysChange)="selectedKeys.set($event)"
-            (selectionChange)="onSelectionChange($event)"
-            #checkableDir="monaTreeViewCheckable"
-            #dragDropDir="monaTreeViewDragAndDrop"
-            #expandableDir="monaTreeViewExpandable"
-            #filterableDir="monaTreeViewFilterable"
-            #selectableDir="monaTreeViewSelectable"
-            #treeView>
-            @if (featureData["nodeTemplate"].active) {
-                <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
-                    <div class="flex items-center gap-2">
-                        @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
-                        <lucide-icon [img]="icon" [size]="14"></lucide-icon>
-                        <span>{{ dataItem.text }}</span>
-                    </div>
-                </ng-template>
-            }
-        </mona-tree-view>
-        <app-event-viewer
-            [instances]="[
-                treeView,
-                checkableDir,
-                dragDropDir,
-                expandableDir,
-                filterableDir,
-                selectableDir
-            ]"></app-event-viewer>
+        @if (treeVisible()) {
+            <mona-tree-view
+                [animate]="animate()"
+                [children]="children()"
+                [data]="treeData()"
+                [hasChildren]="hasChildren()"
+                [idField]="idField()"
+                [mode]="mode()"
+                [parentIdField]="parentIdField()"
+                [textField]="textField()"
+                [monaTreeViewCheckable]="checkable()"
+                [checkBy]="'id'"
+                [checkedKeys]="checkedKeys()"
+                (checkedKeysChange)="checkedKeys.set($event)"
+                [monaTreeViewDisable]="disable()"
+                [disableBy]="'id'"
+                [disabledKeys]="disabledKeys()"
+                [monaTreeViewDragAndDrop]="dragDrop()"
+                (nodeAdd)="onNodeAdd($event)"
+                (nodeDrag)="onNodeDrag($event)"
+                (nodeDrop)="onNodeDrop($event)"
+                (nodeRemove)="onNodeRemove($event)"
+                [monaTreeViewExpandable]="expandable()"
+                [expandBy]="'id'"
+                [expandedKeys]="expandedKeys()"
+                (expandedKeysChange)="expandedKeys.set($event)"
+                [monaTreeViewFilterable]="filterable()"
+                [monaTreeViewSelectable]="selectable()"
+                [selectBy]="'id'"
+                [selectedKeys]="selectedKeys()"
+                (selectedKeysChange)="selectedKeys.set($event)"
+                (selectionChange)="onSelectionChange($event)"
+                #checkableDir="monaTreeViewCheckable"
+                #dragDropDir="monaTreeViewDragAndDrop"
+                #expandableDir="monaTreeViewExpandable"
+                #filterableDir="monaTreeViewFilterable"
+                #selectableDir="monaTreeViewSelectable"
+                #treeView>
+                @if (featureData["nodeTemplate"].active) {
+                    <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
+                        <div class="flex items-center gap-2">
+                            @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
+                            <lucide-icon [img]="icon" [size]="14"></lucide-icon>
+                            <span>{{ dataItem.text }}</span>
+                        </div>
+                    </ng-template>
+                }
+            </mona-tree-view>
+            <app-event-viewer
+                [instances]="[
+                    treeView,
+                    checkableDir,
+                    dragDropDir,
+                    expandableDir,
+                    filterableDir,
+                    selectableDir
+                ]"></app-event-viewer>
+        }
     `,
     host: {
         class: "w-full flex items-start!"
     }
 })
 class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewComponent<TreeNodeDataItem>> {
+    private readonly treeView = viewChild.required(TreeViewComponent);
     protected readonly checkable = computed(() => {
         const features = this.features();
         const subFeatures = features["checkable"].subFeatures || {};
@@ -319,7 +337,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         };
         return selectableSettings;
     });
-    protected readonly checkedKeys = signal(["1"]);
+    protected readonly checkedKeys = signal([]);
     protected readonly disable = computed(() => {
         const features = this.features();
         const subFeatures = features["disable"].subFeatures || {};
@@ -329,7 +347,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         };
         return disableSettings;
     });
-    protected readonly disabledKeys = signal(["2"]);
+    protected readonly disabledKeys = signal([]);
     protected readonly dragDrop = computed(() => {
         const features = this.features();
         const dragDropSettings: DraggableOptions = {
@@ -368,6 +386,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     });
     protected readonly selectedKeys = signal<string[]>([]);
     protected readonly treeData = linkedSignal(() => this.data());
+    protected readonly treeVisible = signal(true);
     public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
@@ -379,13 +398,29 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
 
     public constructor() {
         effect(() => {
-            console.log(this.checkedKeys());
+            this.children();
+            untracked(() => {
+                this.treeVisible.set(false);
+                asapScheduler.schedule(() => this.treeVisible.set(true), 0);
+            });
         });
     }
 
-    public onNodeDrop(event: NodeDropEvent<TreeNodeDataItem>): void {
-        const updatedData = moveTreeNode(this.treeData(), event, "id", "items");
-        this.treeData.set(updatedData);
+    protected onNodeAdd(event: NodeMoveEvent<TreeNodeDataItem>): void {
+        event.targetTree.addNode(event);
+    }
+
+    protected onNodeDrag(event: NodeDragEvent<TreeNodeDataItem>): void {
+        console.log(event);
+    }
+
+    protected onNodeDrop(event: NodeDropEvent<TreeNodeDataItem>): void {
+        // const updatedData = moveTreeNode(this.treeData(), event, "id", "items");
+        // this.treeData.set(updatedData);
+    }
+
+    protected onNodeRemove(event: NodeMoveEvent<TreeNodeDataItem>): void {
+        event.sourceTree.removeNode(event);
     }
 
     protected onSelectionChange(nodeItem: NodeItem<TreeNodeDataItem>) {

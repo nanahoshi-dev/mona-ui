@@ -3,15 +3,15 @@
         <div class="flex gap-1 items-center flex-wrap">
             <div class="font-semibold mr-4">{{ entry().alias ?? entry().name }}</div>
             <div
-                class="px-2 py-0.25 flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
+                class="px-2 py-px flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
                 {{ metadata().inputs | inputProperty: entry().name : "type" }}
             </div>
             <div
-                class="px-2 py-0.25 flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
+                class="px-2 py-px flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
                 {{ metadata().inputs | inputProperty: entry().name : "kind" }}
             </div>
         </div>
-        <div class="font-light text-gray-500 whitespace-pre-line">
+        <div class="font-light text-gray-500 whitespace-pre-line text-sm/3">
             <span [innerHTML]="metadata().inputs | inputProperty: entry().name : 'description'"></span>
             @if (entry().note) {
                 <div class="mt-1">
