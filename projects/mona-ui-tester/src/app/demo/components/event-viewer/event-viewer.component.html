@@ -8,7 +8,9 @@
     @for (event of eventLog(); track event) {
         <li class="flex flex-row gap-2 text-sm odd:bg-accent divide-x divide-border">
             <span class="w-8 inline-flex items-center justify-center">{{ $count - $index }}</span>
-            <span class="flex items-center font-medium w-2/8 px-2 py-1">{{ event.name }}</span>
+            <span class="flex items-center font-medium w-2/8 px-2 py-1"
+                >{{ event.name }} {{ event.prevented ? "(Prevented)" : "" }}</span
+            >
             <code class="w-6/8 px-2 py-1">{{ event.value }}</code>
         </li>
     }

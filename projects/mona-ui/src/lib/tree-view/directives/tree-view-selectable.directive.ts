@@ -1,7 +1,7 @@
 import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { sequenceEqual } from "@mirei/ts-collections";
-import { distinctUntilChanged, pairwise } from "rxjs";
+import { pairwise } from "rxjs";
 import { NodeItem } from "../../common/tree/models/NodeItem";
 import { NodeSelectEvent } from "../../common/tree/models/NodeSelectEvent";
 import { TreeSelectableOptions } from "../../common/tree/models/TreeSelectableOptions";
@@ -72,10 +72,7 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
                 this.selectedKeysChange.emit(keys.toArray());
             });
         this.#treeService.selectionChange$
-            .pipe(
-                distinctUntilChanged((n1, n2) => n1.data === n2.data),
-                takeUntilDestroyed(this.#destroyRef)
-            )
+            .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(nodeItem => {
                 if (this.#treeService.selectionChange) {
                     this.#treeService.selectionChange.emit(nodeItem);

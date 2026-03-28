@@ -239,7 +239,11 @@ export class TreeComponent<T> implements OnInit {
                     if (!navigatedNode || this.treeService.isDisabled(navigatedNode)) {
                         return;
                     }
-                    if (!this.treeService.selectableOptions().enabled) {
+                    const selectableOptions = this.treeService.selectableOptions();
+                    if (!selectableOptions.enabled) {
+                        return;
+                    }
+                    if (selectableOptions.childrenOnly && this.treeService.hasChildren(navigatedNode)) {
                         return;
                     }
                     const nodeSelectEvent = new NodeSelectEvent(navigatedNode, event);

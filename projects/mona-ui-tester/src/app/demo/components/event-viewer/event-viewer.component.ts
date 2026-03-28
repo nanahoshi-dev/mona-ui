@@ -1,6 +1,6 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, input, OutputEmitterRef, signal } from "@angular/core";
 import { ImmutableList } from "@mirei/ts-collections";
-import { ButtonDirective } from "mona-ui";
+import { ButtonDirective, PreventableEvent } from "mona-ui";
 
 interface OutputEventItem {
     readonly name: string;
@@ -10,6 +10,7 @@ interface OutputEventItem {
 
 interface EventLogItem {
     readonly name: string;
+    readonly prevented: boolean;
     readonly value: string;
 }
 
@@ -67,8 +68,9 @@ export class EventViewerComponent<T> {
         outputs.forEach(output =>
             output.emitter.subscribe((event: unknown) => {
                 const name = output.name;
+                const prevented = event instanceof PreventableEvent && event.isDefaultPrevented();
                 const value = JSON.stringify(event, getSafeReplacer(), 2);
-                this.eventLog.update(log => log.addAt({ name, value }, 0));
+                this.eventLog.update(log => log.addAt({ name, value, prevented }, 0));
             })
         );
     }
