@@ -32,7 +32,7 @@ import {
 @Component({
     selector: "mona-notification",
     templateUrl: "./notification.component.html",
-    styleUrl: "./notification.component.scss",
+    styleUrl: "./notification.component.css",
     imports: [NgTemplateOutlet, ProgressBarComponent, LucideAngularModule, ButtonDirective],
     changeDetection: ChangeDetectionStrategy.OnPush
 })

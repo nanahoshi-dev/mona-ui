@@ -9,7 +9,7 @@ import {
     linkedSignal,
     signal
 } from "@angular/core";
-import { FileIcon, FolderIcon, LucideAngularModule, LucideIconData } from "lucide-angular";
+import { FileIcon, FolderIcon, LucideAngularModule } from "lucide-angular";
 import {
     CheckableOptions,
     ChildrenSelector,
