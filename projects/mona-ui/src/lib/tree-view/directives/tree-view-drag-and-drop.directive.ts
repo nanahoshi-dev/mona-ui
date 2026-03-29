@@ -5,7 +5,6 @@ import { NodeDragEndEvent } from "../../common/tree/models/NodeDragEndEvent";
 import { NodeDragEvent } from "../../common/tree/models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../common/tree/models/NodeDragStartEvent";
 import { NodeDropEvent } from "../../common/tree/models/NodeDropEvent";
-import { NodeMoveEvent } from "../../common/tree/models/NodeMoveEvent";
 import { TreeService } from "../../common/tree/services/tree.service";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 
@@ -19,13 +18,11 @@ export class TreeViewDragAndDropDirective<T> {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
-    readonly #treeView = inject(TreeViewComponent);
-    public readonly nodeAdd = output<NodeMoveEvent<T>>();
+    readonly #treeView = inject(TreeViewComponent<T>);
     public readonly nodeDrag = output<NodeDragEvent<T>>();
     public readonly nodeDragEnd = output<NodeDragEndEvent<T>>();
     public readonly nodeDragStart = output<NodeDragStartEvent<T>>();
     public readonly nodeDrop = output<NodeDropEvent<T>>();
-    public readonly nodeRemove = output<NodeMoveEvent<T>>();
     public readonly options = input<Partial<DraggableOptions> | "">("", {
         alias: "monaTreeViewDragAndDrop"
     });
@@ -51,14 +48,6 @@ export class TreeViewDragAndDropDirective<T> {
     }
 
     public setSubscriptions(): void {
-        this.#treeService.nodeAdd$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
-            const event: NodeMoveEvent<T> = { ...e, sourceTree: this.#treeView, targetTree: this.#treeView };
-            this.nodeAdd.emit(event);
-        });
-        this.#treeService.nodeRemove$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
-            const event: NodeMoveEvent<T> = { ...e, sourceTree: this.#treeView, targetTree: this.#treeView };
-            this.nodeRemove.emit(event);
-        });
         this.#treeService.nodeDrag$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
             this.nodeDrag.emit(e.dragEvent);
         });
@@ -69,7 +58,15 @@ export class TreeViewDragAndDropDirective<T> {
             this.nodeDragStart.emit(e);
         });
         this.#treeService.nodeDrop$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
-            this.nodeDrop.emit(e);
+            const event = new NodeDropEvent({
+                event: e.event,
+                position: e.position,
+                sourceNode: e.sourceNode,
+                sourceTree: this.#treeView,
+                targetNode: e.targetNode,
+                targetTree: this.#treeView
+            });
+            this.nodeDrop.emit(event);
         });
     }
 }

@@ -17,8 +17,7 @@ import { ThemeService } from "../../../../theme/services/theme.service";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";
-import { NodeDropEvent } from "../../models/NodeDropEvent";
-import { NodeMoveEvent, NodeMoveEventSansTree } from "../../models/NodeMoveEvent";
+import { NodeDropEventSansTree } from "../../models/NodeDropEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
 import {
@@ -150,19 +149,17 @@ export class SubTreeComponent<T> {
                 return;
             }
             this.treeService.animationTemporarilyDisabled.set(true);
-            const nodeDropEvent = new NodeDropEvent(sourceNode, targetNode, e.position, event.event);
+            const nodeDropEvent = new NodeDropEventSansTree({
+                event: event.event,
+                sourceNode,
+                targetNode,
+                position: e.position
+            });
             this.treeService.nodeDrop$.next(nodeDropEvent);
             if (nodeDropEvent.isDefaultPrevented()) {
                 this.treeService.animationTemporarilyDisabled.set(false);
                 return;
             }
-            const moveEvent: NodeMoveEventSansTree<T> = {
-                sourceItem: sourceNode.nodeItem,
-                targetItem: targetNode.nodeItem,
-                position: e.position
-            };
-            this.treeService.nodeRemove$.next(moveEvent);
-            this.treeService.nodeAdd$.next(moveEvent);
             this.treeService.dropPositionChange$.next(null);
             this.focusNode(sourceNode);
             this.#zone.runOutsideAngular(() =>

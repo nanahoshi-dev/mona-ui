@@ -19,8 +19,9 @@ import { FilterChangeEvent } from "../../../common/filter-input/models/FilterCha
 import { TreeComponent } from "../../../common/tree/components/tree/tree.component";
 import { TreeNodeTemplateDirective } from "../../../common/tree/directives/tree-node-template.directive";
 import { DataStructure } from "../../../common/tree/models/DataStructure";
+import { DropPosition } from "../../../common/tree/models/DropPositionChangeEvent";
 import { NodeClickEvent } from "../../../common/tree/models/NodeClickEvent";
-import { NodeMoveEvent } from "../../../common/tree/models/NodeMoveEvent";
+import { NodeItem } from "../../../common/tree/models/NodeItem";
 import { TreeNode } from "../../../common/tree/models/TreeNode";
 import { ChildrenSelector } from "../../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../../common/tree/services/tree.service";
@@ -125,20 +126,16 @@ export class TreeViewComponent<T> {
         });
     }
 
-    public addNode(data: NodeMoveEvent<T>): void {
-        const node = this.treeService.getNodeByUid(data.sourceItem.uid);
-        if (!node) {
+    public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): void {
+        const sourceNode = this.treeService.getNodeByUid(source.uid);
+        if (!sourceNode) {
             return;
         }
-        const targetNode = this.treeService.getNodeByUid(data.targetItem.uid);
+        const targetNode = this.treeService.getNodeByUid(target.uid);
         if (!targetNode) {
             return;
         }
-        this.treeService.moveNode(node, targetNode, data.position);
-    }
-
-    public removeNode(data: NodeMoveEvent<T>): void {
-        console.log("Removing node", data);
+        this.treeService.moveNode(sourceNode, targetNode, position);
     }
 
     protected onFilterChange(event: FilterChangeEvent): void {

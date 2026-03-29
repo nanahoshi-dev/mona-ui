@@ -67,7 +67,6 @@ export * from "./common/tree/models/NodeDragEndEvent";
 export * from "./common/tree/models/NodeDragStartEvent";
 export * from "./common/tree/models/NodeDropEvent";
 export * from "./common/tree/models/NodeItem";
-export * from "./common/tree/models/NodeMoveEvent";
 export * from "./common/tree/models/NodeSelectEvent";
 export * from "./common/tree/models/TreeSelectableOptions";
 export * from "./common/tree/models/TreeSelectors";

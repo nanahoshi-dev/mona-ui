@@ -16,7 +16,7 @@ export function moveTreeNode<T extends Record<string, any>>(
 ): T[] {
     const updatedTree = [...treeData];
     const draggedId = event.nodeItem.data[idKey];
-    const targetId = event.targetNodeItem.data[idKey];
+    const targetId = event.targetNode.data[idKey];
     const position = event.position;
     let draggedNode: T | null = null;
 

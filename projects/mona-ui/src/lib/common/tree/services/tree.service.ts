@@ -36,9 +36,8 @@ import { NodeClickEvent } from "../models/NodeClickEvent";
 import { NodeDragEndEvent } from "../models/NodeDragEndEvent";
 import { InternalNodeDragEvent } from "../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../models/NodeDragStartEvent";
-import { NodeDropEvent } from "../models/NodeDropEvent";
+import { NodeDropEventSansTree } from "../models/NodeDropEvent";
 import { NodeItem } from "../models/NodeItem";
-import { NodeMoveEvent, NodeMoveEventSansTree } from "../models/NodeMoveEvent";
 import { NodeSelectEvent } from "../models/NodeSelectEvent";
 import { TreeNode } from "../models/TreeNode";
 import { TreeNodeCheckEvent } from "../models/TreeNodeCheckEvent";
@@ -122,16 +121,14 @@ export class TreeService<T> {
         { initialValue: "" }
     );
     public readonly navigatedNode = signal<TreeNode<T> | null>(null);
-    public readonly nodeAdd$ = new Subject<NodeMoveEventSansTree<T>>();
     public readonly nodeCheck$ = new Subject<NodeCheckEvent<T>>();
     public readonly nodeCheckChange$ = new Subject<TreeNodeCheckEvent<T>>();
     public readonly nodeClick$ = new Subject<NodeClickEvent<T>>();
     public readonly nodeDrag$ = new Subject<InternalNodeDragEvent<T>>();
     public readonly nodeDragEnd$ = new Subject<NodeDragEndEvent<T>>();
     public readonly nodeDragStart$ = new Subject<NodeDragStartEvent<T>>();
-    public readonly nodeDrop$ = new Subject<NodeDropEvent<T>>();
+    public readonly nodeDrop$ = new Subject<NodeDropEventSansTree<T>>();
     public readonly nodeExpand$ = new Subject<TreeNodeExpandEvent<T>>();
-    public readonly nodeRemove$ = new Subject<NodeMoveEventSansTree<T>>();
     public readonly nodeSelect$ = new Subject<NodeSelectEvent<T>>();
     public readonly nodeSelectChange$ = new Subject<TreeNodeSelectEvent<T>>();
     public readonly nodeSet = signal(ImmutableSet.create<TreeNode<T>>());

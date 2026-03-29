@@ -22,7 +22,6 @@ import {
     NodeDragEvent,
     NodeDropEvent,
     NodeItem,
-    NodeMoveEvent,
     TreeSelectableOptions,
     TreeViewCheckableDirective,
     TreeViewComponent,
@@ -47,6 +46,17 @@ interface TreeNodeDataItem {
     disabled?: boolean;
 }
 
+const childSelectors = [
+    { text: "items", value: "items" },
+    { text: "items selector", value: (x: TreeNodeDataItem) => x.items },
+    {
+        text: "observable",
+        value: (x: TreeNodeDataItem) =>
+            timer(Math.floor(Math.random() * (1200 - 200)) + 200).pipe(switchMap(() => of(x.items)))
+    }
+];
+let treeData = generateFileTreeData();
+
 @Component({
     selector: "app-tree-view-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
@@ -54,16 +64,6 @@ interface TreeNodeDataItem {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewComponent<TreeNodeDataItem>> {
-    readonly #childFetch$ = (x: TreeNodeDataItem) =>
-        timer(Math.floor(Math.random() * (1200 - 200)) + 200).pipe(switchMap(() => of(x.items)));
-    readonly #childrenSelectors = [
-        { text: "items", value: "items" },
-        { text: "items selector", value: (x: TreeNodeDataItem) => x.items },
-        {
-            text: "observable",
-            value: this.#childFetch$
-        }
-    ];
     readonly #injector = createFeatureInjector({
         checkable: {
             code: ``,
@@ -195,7 +195,6 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             }
         }
     });
-    readonly #treeData = generateFileTreeData();
     protected readonly config = signal<ComponentConfig<TreeViewComponent<TreeNodeDataItem>>>({
         inputs: {
             animate: {
@@ -204,14 +203,14 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             },
             children: {
                 type: "customDropdown",
-                value: this.#childrenSelectors,
+                value: childSelectors,
                 textField: "text",
                 valueField: "value",
-                defaultValue: this.#childrenSelectors[0].value
+                defaultValue: childSelectors[0].value
             },
             data: {
                 type: "iterable",
-                value: this.#treeData
+                value: treeData
             },
             hasChildren: {
                 type: "dropdown",
@@ -277,10 +276,8 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 [disableBy]="'id'"
                 [disabledKeys]="disabledKeys()"
                 [monaTreeViewDragAndDrop]="dragDrop()"
-                (nodeAdd)="onNodeAdd($event)"
                 (nodeDrag)="onNodeDrag($event)"
                 (nodeDrop)="onNodeDrop($event)"
-                (nodeRemove)="onNodeRemove($event)"
                 [monaTreeViewExpandable]="expandable()"
                 [expandBy]="'id'"
                 [expandedKeys]="expandedKeys()"
@@ -307,6 +304,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                     </ng-template>
                 }
             </mona-tree-view>
+
             <app-event-viewer
                 [instances]="[
                     treeView,
@@ -406,21 +404,19 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         });
     }
 
-    protected onNodeAdd(event: NodeMoveEvent<TreeNodeDataItem>): void {
-        event.targetTree.addNode(event);
-    }
-
     protected onNodeDrag(event: NodeDragEvent<TreeNodeDataItem>): void {
-        console.log(event);
+        // console.log(event);
     }
 
     protected onNodeDrop(event: NodeDropEvent<TreeNodeDataItem>): void {
-        // const updatedData = moveTreeNode(this.treeData(), event, "id", "items");
-        // this.treeData.set(updatedData);
-    }
-
-    protected onNodeRemove(event: NodeMoveEvent<TreeNodeDataItem>): void {
-        event.sourceTree.removeNode(event);
+        const children = this.children();
+        if (children === childSelectors[2].value) {
+            treeData = moveTreeNode(treeData, event, "id", "items");
+            event.targetTree.moveNode(event.sourceNode, event.targetNode, event.position);
+        } else {
+            treeData = moveTreeNode(treeData, event, "id", "items");
+            this.treeData.set(treeData);
+        }
     }
 
     protected onSelectionChange(nodeItem: NodeItem<TreeNodeDataItem>) {
@@ -432,44 +428,44 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     protected readonly FolderIcon = FolderIcon;
 }
 
-function generateFileTreeData(): TreeNodeDataItem[] {
+function generateFileTreeData(idPrefix: string = ""): TreeNodeDataItem[] {
     return [
         {
-            id: "1",
+            id: `${idPrefix}1`,
             text: "src",
             items: [
                 {
-                    id: "1-1",
+                    id: `${idPrefix}1-1`,
                     text: "components",
                     items: [
-                        { id: "1-1-1", text: "Button.ts", items: [] },
-                        { id: "1-1-2", text: "Card.ts", items: [] }
+                        { id: `${idPrefix}1-1-1`, text: "Button.ts", items: [] },
+                        { id: `${idPrefix}1-1-2`, text: "Card.ts", items: [] }
                     ]
                 },
                 {
-                    id: "1-2",
+                    id: `${idPrefix}1-2`,
                     text: "utils",
-                    items: [{ id: "1-2-1", text: "formatters.ts", items: [] }]
+                    items: [{ id: `${idPrefix}1-2-1`, text: "formatters.ts", items: [] }]
                 },
-                { id: "1-3", text: "App.ts", items: [] },
-                { id: "1-4", text: "index.ts", items: [] }
+                { id: `${idPrefix}1-3`, text: "App.ts", items: [] },
+                { id: `${idPrefix}1-4`, text: "index.ts", items: [] }
             ]
         },
         {
-            id: "2",
+            id: `${idPrefix}2`,
             text: "public",
             items: [
-                { id: "2-1", text: "favicon.ico", items: [] },
-                { id: "2-2", text: "logo.png", items: [] }
+                { id: `${idPrefix}2-1`, text: "favicon.ico", items: [] },
+                { id: `${idPrefix}2-2`, text: "logo.png", items: [] }
             ]
         },
         {
-            id: "3",
+            id: `${idPrefix}3`,
             text: "package.json",
             items: []
         },
         {
-            id: "4",
+            id: `${idPrefix}4`,
             text: "tsconfig.json",
             items: []
         }
