@@ -194,6 +194,19 @@ export class TreeService<T> {
         this.filter$.next("");
     }
 
+    public detachNode(node: TreeNode<T>): void {
+        if (node.parent) {
+            node.parent.children.update(list => {
+                const parent = node.parent as TreeNode<T>;
+                return list.clear().addAll(parent.children().where(n => n !== node));
+            });
+            node.parent = null;
+        } else {
+            this.nodeSet.update(nodes => nodes.remove(node));
+        }
+        this.updateNodeIndices();
+    }
+
     public getNodeByUid(uid: string): TreeNode<T> | null {
         const nodeDictionary = this.#nodeDictionary();
         return nodeDictionary.get(uid) ?? null;
@@ -219,6 +232,29 @@ export class TreeService<T> {
             return hasChildrenPredicate(node.data);
         }
         return !node.children().isEmpty();
+    }
+
+    public insertNodeAtIndex(node: TreeNode<T>, parentUid: string | null, index: number): void {
+        if (parentUid !== null) {
+            const parent = this.getNodeByUid(parentUid);
+            if (!parent || node.isDescendantOf(parent)) {
+                return;
+            }
+            parent.children.update(set => {
+                const tempList = set.toList();
+                tempList.addAt(node, index);
+                return tempList.toImmutableSet();
+            });
+            node.parent = parent;
+        } else {
+            this.nodeSet.update(nodes => {
+                const tempList = nodes.toList();
+                tempList.addAt(node, index);
+                return tempList.toImmutableSet();
+            });
+            node.parent = null;
+        }
+        this.updateNodeIndices();
     }
 
     public isCheckable(node: TreeNode<T>): boolean {
@@ -868,7 +904,10 @@ export class TreeService<T> {
             }
             sourceNode.parent = targetNode.parent;
         } else {
-            const index = this.nodeSet().toList().indexOf(targetNode);
+            const index = this.nodeSet()
+                .where(n => n !== sourceNode)
+                .toList()
+                .indexOf(targetNode);
             if (index === -1) {
                 return;
             }
@@ -877,9 +916,6 @@ export class TreeService<T> {
                 newNodes.addAt(sourceNode, index + 1);
                 return newNodes.toImmutableSet();
             });
-            if (!sourceNode.parent) {
-                this.nodeSet.update(nodes => nodes.remove(sourceNode));
-            }
             sourceNode.parent = null;
         }
     }
@@ -906,7 +942,10 @@ export class TreeService<T> {
             }
             sourceNode.parent = targetNode.parent;
         } else {
-            const index = this.nodeSet().toList().indexOf(targetNode);
+            const index = this.nodeSet()
+                .where(n => n !== sourceNode)
+                .toList()
+                .indexOf(targetNode);
             if (index === -1) {
                 return;
             }
@@ -915,9 +954,6 @@ export class TreeService<T> {
                 newNodes.addAt(sourceNode, index);
                 return newNodes.toImmutableSet();
             });
-            if (!sourceNode.parent) {
-                this.nodeSet.update(nodes => nodes.remove(sourceNode));
-            }
             sourceNode.parent = null;
         }
     }

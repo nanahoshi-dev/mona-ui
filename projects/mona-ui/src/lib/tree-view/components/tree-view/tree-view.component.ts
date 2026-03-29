@@ -27,16 +27,14 @@ import { ChildrenSelector } from "../../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../../common/tree/services/tree.service";
 import { TreeViewNodeTemplateDirective } from "../../directives/tree-view-node-template.directive";
 import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateContext";
+import { NodeMoveSnapshot } from "../../../common/tree/models/NodeMoveSnapshot";
 
 @Component({
     selector: "mona-tree-view",
     imports: [FilterInputComponent, TreeComponent, TreeNodeTemplateDirective, NgTemplateOutlet],
     templateUrl: "./tree-view.component.html",
     providers: [TreeService],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    host: {
-        class: "mona-tree-view"
-    }
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TreeViewComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
@@ -119,23 +117,80 @@ export class TreeViewComponent<T> {
     public readonly textField = input<string | Selector<T, string>>("");
 
     public constructor() {
-        this.setDataStructureFields();
-        this.setAnimationEffect();
+        effect(() => {
+            const mode = this.mode();
+            this.#setGenericDataStructureFields(mode);
+            if (mode === "flat") {
+                this.#setFlatDataStructureFields();
+            } else if (mode === "hierarchical") {
+                this.#setHierarchicalDataStructureFields();
+            }
+        });
+        effect(() => {
+            const animate = this.animate();
+            untracked(() => {
+                this.treeService.setAnimationEnabled(animate);
+            });
+        });
         afterNextRender({
-            read: () => this.setSubscriptions()
+            read: () => this.#setSubscriptions()
         });
     }
 
-    public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): void {
-        const sourceNode = this.treeService.getNodeByUid(source.uid);
+    public moveNode(
+        source: NodeItem<T>,
+        target: NodeItem<T>,
+        position: DropPosition,
+        sourceTree: TreeViewComponent<T> = this,
+        targetTree: TreeViewComponent<T> = this
+    ): NodeMoveSnapshot<T> | null {
+        if (position === "outside") {
+            return null;
+        }
+        const sourceNode = sourceTree.treeService.getNodeByUid(source.uid);
+        if (!sourceNode) {
+            return null;
+        }
+        const targetNode = targetTree.treeService.getNodeByUid(target.uid);
+        if (!targetNode) {
+            return null;
+        }
+        const originalParentUid = sourceNode.parent?.uid ?? null;
+        const originalIndex =
+            sourceNode.parent !== null
+                ? sourceNode.parent.children().toList().indexOf(sourceNode)
+                : sourceTree.treeService.nodeSet().toList().indexOf(sourceNode);
+        if (sourceTree === targetTree) {
+            this.treeService.moveNode(sourceNode, targetNode, position);
+        } else {
+            const targetParentUid = position === "inside" ? targetNode.uid : (targetNode.parent?.uid ?? null);
+            const targetIndex = this.#computeTargetIndex(targetNode, position, targetTree);
+            sourceTree.treeService.detachNode(sourceNode);
+            targetTree.treeService.insertNodeAtIndex(sourceNode, targetParentUid, targetIndex);
+        }
+        return { originalParentUid, originalIndex, sourceNodeUid: sourceNode.uid, sourceTree, targetTree };
+    }
+
+    public undoMoveNode(snapshot: NodeMoveSnapshot<T>): void {
+        const sourceNode = snapshot.targetTree.treeService.getNodeByUid(snapshot.sourceNodeUid);
         if (!sourceNode) {
             return;
         }
-        const targetNode = this.treeService.getNodeByUid(target.uid);
-        if (!targetNode) {
-            return;
+        if (snapshot.sourceTree === snapshot.targetTree) {
+            snapshot.sourceTree.treeService.detachNode(sourceNode);
+            snapshot.sourceTree.treeService.insertNodeAtIndex(
+                sourceNode,
+                snapshot.originalParentUid,
+                snapshot.originalIndex
+            );
+        } else {
+            snapshot.targetTree.treeService.detachNode(sourceNode);
+            snapshot.sourceTree.treeService.insertNodeAtIndex(
+                sourceNode,
+                snapshot.originalParentUid,
+                snapshot.originalIndex
+            );
         }
-        this.treeService.moveNode(sourceNode, targetNode, position);
     }
 
     protected onFilterChange(event: FilterChangeEvent): void {
@@ -145,28 +200,19 @@ export class TreeViewComponent<T> {
         }
     }
 
-    private setAnimationEffect(): void {
-        effect(() => {
-            const animate = this.animate();
-            untracked(() => {
-                this.treeService.setAnimationEnabled(animate);
-            });
-        });
+    #computeTargetIndex(targetNode: TreeNode<T>, position: DropPosition, targetTree: TreeViewComponent<T>): number {
+        if (position === "inside") {
+            return targetNode.children().length;
+        }
+        const siblings =
+            targetNode.parent !== null
+                ? targetNode.parent.children().toList()
+                : targetTree.treeService.nodeSet().toList();
+        const idx = siblings.indexOf(targetNode);
+        return position === "after" ? idx + 1 : idx;
     }
 
-    private setDataStructureFields(): void {
-        effect(() => {
-            const mode = this.mode();
-            this.setGenericDataStructureFields(mode);
-            if (mode === "flat") {
-                this.setFlatDataStructureFields();
-            } else if (mode === "hierarchical") {
-                this.setHierarchicalDataStructureFields();
-            }
-        });
-    }
-
-    private setFlatDataStructureFields(): void {
+    #setFlatDataStructureFields(): void {
         const idField = this.idField();
         const parentIdField = this.parentIdField();
         untracked(() => {
@@ -175,7 +221,7 @@ export class TreeViewComponent<T> {
         });
     }
 
-    private setGenericDataStructureFields(mode: DataStructure): void {
+    #setGenericDataStructureFields(mode: DataStructure): void {
         const textField = this.textField();
         const data = this.data();
         untracked(() => {
@@ -185,7 +231,7 @@ export class TreeViewComponent<T> {
         });
     }
 
-    private setHierarchicalDataStructureFields(): void {
+    #setHierarchicalDataStructureFields(): void {
         const childrenSelector = this.children();
         const hasChildren = this.hasChildren() as Predicate<TreeNode<T>>;
         untracked(() => {
@@ -194,7 +240,7 @@ export class TreeViewComponent<T> {
         });
     }
 
-    private setSubscriptions(): void {
+    #setSubscriptions(): void {
         this.treeService.nodeClick$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             this.nodeClick.emit(event);
         });
