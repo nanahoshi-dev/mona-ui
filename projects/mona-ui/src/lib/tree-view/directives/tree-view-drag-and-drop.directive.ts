@@ -62,9 +62,8 @@ export class TreeViewDragAndDropDirective<T> {
                 event: e.event,
                 position: e.position,
                 sourceNode: e.sourceNode,
-                sourceTree: this.#treeView,
                 targetNode: e.targetNode,
-                targetTree: this.#treeView
+                treeView: this.#treeView
             });
             this.nodeDrop.emit(event);
         });

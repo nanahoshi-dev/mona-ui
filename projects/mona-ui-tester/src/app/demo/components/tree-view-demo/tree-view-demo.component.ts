@@ -412,7 +412,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         const children = this.children();
         if (children === childSelectors[2].value) {
             treeData = moveTreeNode(treeData, event, "id", "items");
-            event.targetTree.moveNode(event.sourceNode, event.targetNode, event.position);
+            event.treeView.moveNode(event.sourceNode, event.targetNode, event.position);
         } else {
             treeData = moveTreeNode(treeData, event, "id", "items");
             this.treeData.set(treeData);

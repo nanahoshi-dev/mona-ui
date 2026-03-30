@@ -19,16 +19,12 @@ export class NodeDropEvent<T> extends NodeEvent<T> {
         return this.#params.sourceNode.nodeItem;
     }
 
-    public get sourceTree(): TreeViewComponent<T> {
-        return this.#params.sourceTree;
-    }
-
     public get targetNode(): NodeItem<T> {
         return this.#params.targetNode.nodeItem;
     }
 
-    public get targetTree(): TreeViewComponent<T> {
-        return this.#params.targetTree;
+    public get treeView(): TreeViewComponent<T> {
+        return this.#params.treeView;
     }
 }
 
@@ -60,9 +56,8 @@ export interface NodeDropEventArgs<T> {
     event: MouseEvent | TouchEvent;
     position: DropPosition;
     sourceNode: TreeNode<T>;
-    sourceTree: TreeViewComponent<T>;
     targetNode: TreeNode<T>;
-    targetTree: TreeViewComponent<T>;
+    treeView: TreeViewComponent<T>;
 }
 
-export type NodeDropEventArgsSansTree<T> = Omit<NodeDropEventArgs<T>, "sourceTree" | "targetTree">;
+export type NodeDropEventArgsSansTree<T> = Omit<NodeDropEventArgs<T>, "treeView">;
