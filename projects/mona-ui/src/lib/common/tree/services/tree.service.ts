@@ -362,6 +362,7 @@ export class TreeService<T> {
     }
 
     public moveNode(sourceNode: TreeNode<T>, targetNode: TreeNode<T>, position: DropPosition): void {
+        const oldParent = sourceNode.parent;
         switch (position) {
             case "inside":
                 this.moveNodeInside(sourceNode, targetNode);
@@ -374,6 +375,7 @@ export class TreeService<T> {
                 break;
         }
         this.updateNodeIndices();
+        this.recalculateCheckedAncestors(oldParent, sourceNode.parent);
     }
 
     public navigate(direction: "next" | "previous" | "first" | "last"): TreeNode<T> | null {
@@ -451,6 +453,7 @@ export class TreeService<T> {
         this.#data.set(ImmutableSet.create(data));
         this.nodeSet.set(this.createNodes(data));
         this.updateNodeIndices();
+        this.applyCheckedKeysToNodes();
     }
 
     public setDataStructure(structure: DataStructure): void {
@@ -669,6 +672,45 @@ export class TreeService<T> {
         return disableBy(node.data);
     }
 
+    private applyCheckedKeysToNodes(): void {
+        const checkableOptions = this.checkableOptions();
+        const checkedKeys = this.#checkedKeys();
+        if (checkedKeys.isEmpty()) {
+            return;
+        }
+        this.#nodeDictionary().forEach(entry => {
+            const node = entry.value;
+            const key = this.getCheckKey(node);
+            node.checked.set(checkedKeys.contains(key));
+        });
+        if (checkableOptions.enabled && checkableOptions.checkParents && checkableOptions.mode !== "single") {
+            const allNodes = TreeService.flatten(this.nodeSet());
+            const updatedCheckedKeys = this.#checkedKeys().toEnumerableSet();
+            let changed = false;
+            allNodes.reverse().forEach(node => {
+                const childNodes = node.children();
+                if (!childNodes.isEmpty()) {
+                    const allChildrenChecked = childNodes.all(c => c.checked());
+                    const key = this.getCheckKey(node);
+                    if (allChildrenChecked !== node.checked()) {
+                        node.checked.set(allChildrenChecked);
+                        changed = true;
+                    }
+                    if (allChildrenChecked && !updatedCheckedKeys.contains(key)) {
+                        updatedCheckedKeys.add(key);
+                        changed = true;
+                    } else if (!allChildrenChecked && updatedCheckedKeys.contains(key)) {
+                        updatedCheckedKeys.remove(key);
+                        changed = true;
+                    }
+                }
+            });
+            if (changed) {
+                this.#checkedKeys.set(updatedCheckedKeys.toImmutableSet());
+            }
+        }
+    }
+
     private createFlatNodes(data: Iterable<T>, parentId: string | null): ImmutableSet<TreeNode<T>> {
         const flatIdField = this.#flatIdField();
         const flatParentIdField = this.#flatParentIdField();
@@ -868,8 +910,8 @@ export class TreeService<T> {
     }
 
     private loadCheckedKeysForChildren(node: TreeNode<T>, childNodes: Iterable<TreeNode<T>>): void {
+        const checkedKeys = this.#checkedKeys();
         if (node.checked() && this.checkableOptions().checkChildren) {
-            const checkedKeys = this.#checkedKeys();
             const checkDisabledChildren = this.checkableOptions().checkDisabledChildren;
             const childKeys = new EnumerableSet();
             forEach(childNodes, n => {
@@ -880,6 +922,13 @@ export class TreeService<T> {
                 }
             });
             this.#checkedKeys.set(checkedKeys.addAll(childKeys));
+        } else {
+            forEach(childNodes, n => {
+                const childKey = this.getCheckKey(n);
+                if (checkedKeys.contains(childKey)) {
+                    n.checked.set(true);
+                }
+            });
         }
     }
 
@@ -1004,6 +1053,48 @@ export class TreeService<T> {
         } else {
             this.navigatedNode.set(previousNode);
             return previousNode;
+        }
+    }
+
+    private recalculateCheckedAncestors(oldParent: TreeNode<T> | null, newParent: TreeNode<T> | null): void {
+        const checkableOptions = this.checkableOptions();
+        if (!checkableOptions.enabled || !checkableOptions.checkParents || checkableOptions.mode === "single") {
+            return;
+        }
+        const checkedKeys = this.#checkedKeys().toEnumerableSet();
+        let changed = false;
+
+        const recalculateNodeChain = (start: TreeNode<T> | null): void => {
+            let current = start;
+            while (current !== null) {
+                const childNodes = current.children();
+                if (childNodes.isEmpty()) {
+                    current = current.parent;
+                    continue;
+                }
+                const allChecked = childNodes.all(c => c.checked());
+                const key = this.getCheckKey(current);
+                if (allChecked !== current.checked()) {
+                    current.checked.set(allChecked);
+                    changed = true;
+                }
+                if (allChecked && !checkedKeys.contains(key)) {
+                    checkedKeys.add(key);
+                    changed = true;
+                } else if (!allChecked && checkedKeys.contains(key)) {
+                    checkedKeys.remove(key);
+                    changed = true;
+                }
+                current = current.parent;
+            }
+        };
+
+        recalculateNodeChain(oldParent);
+        if (newParent !== oldParent) {
+            recalculateNodeChain(newParent);
+        }
+        if (changed) {
+            this.#checkedKeys.set(checkedKeys.toImmutableSet());
         }
     }
 
