@@ -22,12 +22,12 @@ import { DataStructure } from "../../../common/tree/models/DataStructure";
 import { DropPosition } from "../../../common/tree/models/DropPositionChangeEvent";
 import { NodeClickEvent } from "../../../common/tree/models/NodeClickEvent";
 import { NodeItem } from "../../../common/tree/models/NodeItem";
+import { NodeMoveSnapshot } from "../../../common/tree/models/NodeMoveSnapshot";
 import { TreeNode } from "../../../common/tree/models/TreeNode";
 import { ChildrenSelector } from "../../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../../common/tree/services/tree.service";
 import { TreeViewNodeTemplateDirective } from "../../directives/tree-view-node-template.directive";
 import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateContext";
-import { NodeMoveSnapshot } from "../../../common/tree/models/NodeMoveSnapshot";
 
 @Component({
     selector: "mona-tree-view",
@@ -119,12 +119,12 @@ export class TreeViewComponent<T> {
     public constructor() {
         effect(() => {
             const mode = this.mode();
-            this.#setGenericDataStructureFields(mode);
             if (mode === "flat") {
                 this.#setFlatDataStructureFields();
             } else if (mode === "hierarchical") {
                 this.#setHierarchicalDataStructureFields();
             }
+            this.#setGenericDataStructureFields(mode);
         });
         effect(() => {
             const animate = this.animate();
@@ -137,21 +137,15 @@ export class TreeViewComponent<T> {
         });
     }
 
-    public moveNode(
-        source: NodeItem<T>,
-        target: NodeItem<T>,
-        position: DropPosition,
-        sourceTree: TreeViewComponent<T> = this,
-        targetTree: TreeViewComponent<T> = this
-    ): NodeMoveSnapshot<T> | null {
+    public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot<T> | null {
         if (position === "outside") {
             return null;
         }
-        const sourceNode = sourceTree.treeService.getNodeByUid(source.uid);
+        const sourceNode = this.treeService.getNodeByUid(source.uid);
         if (!sourceNode) {
             return null;
         }
-        const targetNode = targetTree.treeService.getNodeByUid(target.uid);
+        const targetNode = this.treeService.getNodeByUid(target.uid);
         if (!targetNode) {
             return null;
         }
@@ -159,37 +153,22 @@ export class TreeViewComponent<T> {
         const originalIndex =
             sourceNode.parent !== null
                 ? sourceNode.parent.children().toList().indexOf(sourceNode)
-                : sourceTree.treeService.nodeSet().toList().indexOf(sourceNode);
-        if (sourceTree === targetTree) {
-            this.treeService.moveNode(sourceNode, targetNode, position);
-        } else {
-            const targetParentUid = position === "inside" ? targetNode.uid : (targetNode.parent?.uid ?? null);
-            const targetIndex = this.#computeTargetIndex(targetNode, position, targetTree);
-            sourceTree.treeService.detachNode(sourceNode);
-            targetTree.treeService.insertNodeAtIndex(sourceNode, targetParentUid, targetIndex);
-        }
-        return { originalParentUid, originalIndex, sourceNodeUid: sourceNode.uid, sourceTree, targetTree };
+                : this.treeService.nodeSet().toList().indexOf(sourceNode);
+        this.treeService.moveNode(sourceNode, targetNode, position);
+        return { originalParentUid, originalIndex, sourceNodeUid: sourceNode.uid };
     }
 
     public undoMoveNode(snapshot: NodeMoveSnapshot<T>): void {
-        const sourceNode = snapshot.targetTree.treeService.getNodeByUid(snapshot.sourceNodeUid);
+        const sourceNode = this.treeService.getNodeByUid(snapshot.sourceNodeUid);
         if (!sourceNode) {
             return;
         }
-        if (snapshot.sourceTree === snapshot.targetTree) {
-            snapshot.sourceTree.treeService.detachNode(sourceNode);
-            snapshot.sourceTree.treeService.insertNodeAtIndex(
-                sourceNode,
-                snapshot.originalParentUid,
-                snapshot.originalIndex
-            );
+        if (snapshot.originalParentUid === null) {
+            this.treeService.detachNode(sourceNode);
+            this.treeService.insertNodeAtIndex(sourceNode, null, snapshot.originalIndex);
         } else {
-            snapshot.targetTree.treeService.detachNode(sourceNode);
-            snapshot.sourceTree.treeService.insertNodeAtIndex(
-                sourceNode,
-                snapshot.originalParentUid,
-                snapshot.originalIndex
-            );
+            this.treeService.detachNode(sourceNode);
+            this.treeService.insertNodeAtIndex(sourceNode, snapshot.originalParentUid, snapshot.originalIndex);
         }
     }
 
@@ -198,18 +177,6 @@ export class TreeViewComponent<T> {
         if (!event.isDefaultPrevented()) {
             this.treeService.filter$.next(event.filter);
         }
-    }
-
-    #computeTargetIndex(targetNode: TreeNode<T>, position: DropPosition, targetTree: TreeViewComponent<T>): number {
-        if (position === "inside") {
-            return targetNode.children().length;
-        }
-        const siblings =
-            targetNode.parent !== null
-                ? targetNode.parent.children().toList()
-                : targetTree.treeService.nodeSet().toList();
-        const idx = siblings.indexOf(targetNode);
-        return position === "after" ? idx + 1 : idx;
     }
 
     #setFlatDataStructureFields(): void {

@@ -8,8 +8,7 @@ import {
     input,
     linkedSignal,
     signal,
-    untracked,
-    viewChild
+    untracked
 } from "@angular/core";
 import { FileIcon, FolderIcon, LucideAngularModule } from "lucide-angular";
 import {
@@ -18,8 +17,8 @@ import {
     DraggableOptions,
     ExpandableOptions,
     FilterableOptions,
+    moveFlatTreeNode,
     moveTreeNode,
-    NodeDragEvent,
     NodeDropEvent,
     NodeItem,
     TreeSelectableOptions,
@@ -46,6 +45,14 @@ interface TreeNodeDataItem {
     disabled?: boolean;
 }
 
+interface FlatTreeNodeDataItem {
+    id: string;
+    text: string;
+    parentId: string | null;
+    disabled?: boolean;
+    type?: "category" | "product";
+}
+
 const childSelectors = [
     { text: "items", value: "items" },
     { text: "items selector", value: (x: TreeNodeDataItem) => x.items },
@@ -55,7 +62,11 @@ const childSelectors = [
             timer(Math.floor(Math.random() * (1200 - 200)) + 200).pipe(switchMap(() => of(x.items)))
     }
 ];
+
+const hasChildrenPredicates = [(x: TreeNodeDataItem) => x.items.length > 0];
+
 let treeData = generateFileTreeData();
+let flatTreeData = generateCatalogData();
 
 @Component({
     selector: "app-tree-view-demo",
@@ -214,8 +225,9 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             },
             hasChildren: {
                 type: "dropdown",
-                value: [x => x.items.length > 0],
-                defaultValue: undefined
+                value: hasChildrenPredicates,
+                defaultValue: hasChildrenPredicates[0],
+                disabled: true
             },
             idField: {
                 type: "string",
@@ -228,7 +240,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             },
             parentIdField: {
                 type: "string",
-                value: ""
+                value: "parentId"
             },
             textField: {
                 type: "string",
@@ -262,7 +274,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
             <mona-tree-view
                 [animate]="animate()"
                 [children]="children()"
-                [data]="treeData()"
+                [data]="$any(treeData())"
                 [hasChildren]="hasChildren()"
                 [idField]="idField()"
                 [mode]="mode()"
@@ -276,7 +288,6 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 [disableBy]="'id'"
                 [disabledKeys]="disabledKeys()"
                 [monaTreeViewDragAndDrop]="dragDrop()"
-                (nodeDrag)="onNodeDrag($event)"
                 (nodeDrop)="onNodeDrop($event)"
                 [monaTreeViewExpandable]="expandable()"
                 [expandBy]="'id'"
@@ -321,7 +332,6 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     }
 })
 class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewComponent<TreeNodeDataItem>> {
-    private readonly treeView = viewChild.required(TreeViewComponent);
     protected readonly checkable = computed(() => {
         const features = this.features();
         const subFeatures = features["checkable"].subFeatures || {};
@@ -383,16 +393,22 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         return selectableSettings;
     });
     protected readonly selectedKeys = signal<string[]>([]);
-    protected readonly treeData = linkedSignal(() => this.data());
+    protected readonly treeData = linkedSignal(() => {
+        const mode = this.mode();
+        if (mode === "flat") {
+            return flatTreeData;
+        }
+        return treeData;
+    });
     protected readonly treeVisible = signal(true);
     public readonly animate = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["animate"]>>(true);
     public readonly children = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["children"]>>(x => x.items);
     public readonly data = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["data"]>>([]);
     public readonly hasChildren = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["hasChildren"]>>(null);
-    public readonly idField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["idField"]>>("");
+    public readonly idField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["idField"]>>("id");
     public readonly mode = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["mode"]>>("hierarchical");
-    public readonly parentIdField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["parentIdField"]>>("");
-    public readonly textField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["textField"]>>("");
+    public readonly parentIdField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["parentIdField"]>>("parentId");
+    public readonly textField = input<ReturnType<TreeViewComponent<TreeNodeDataItem>["textField"]>>("text");
 
     public constructor() {
         effect(() => {
@@ -404,18 +420,22 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         });
     }
 
-    protected onNodeDrag(event: NodeDragEvent<TreeNodeDataItem>): void {
-        // console.log(event);
-    }
-
-    protected onNodeDrop(event: NodeDropEvent<TreeNodeDataItem>): void {
-        const children = this.children();
-        if (children === childSelectors[2].value) {
-            treeData = moveTreeNode(treeData, event, "id", "items");
-            event.treeView.moveNode(event.sourceNode, event.targetNode, event.position);
+    protected onNodeDrop(event: NodeDropEvent<TreeNodeDataItem> | NodeDropEvent<FlatTreeNodeDataItem>): void {
+        if (this.mode() === "hierarchical") {
+            const dropEvent = event as NodeDropEvent<TreeNodeDataItem>;
+            const children = this.children();
+            if (children === childSelectors[2].value) {
+                treeData = moveTreeNode(treeData, dropEvent, "id", "items");
+                event.treeView.moveNode(dropEvent.sourceNode as any, event.targetNode as any, event.position);
+                this.treeData.set(treeData);
+            } else {
+                treeData = moveTreeNode(treeData, dropEvent, "id", "items");
+                this.treeData.set(treeData);
+            }
         } else {
-            treeData = moveTreeNode(treeData, event, "id", "items");
-            this.treeData.set(treeData);
+            const dropEvent = event as NodeDropEvent<FlatTreeNodeDataItem>;
+            flatTreeData = moveFlatTreeNode(flatTreeData, dropEvent, "id", "parentId");
+            this.treeData.set(flatTreeData);
         }
     }
 
@@ -469,5 +489,26 @@ function generateFileTreeData(idPrefix: string = ""): TreeNodeDataItem[] {
             text: "tsconfig.json",
             items: []
         }
+    ];
+}
+
+function generateCatalogData(idPrefix: string = ""): FlatTreeNodeDataItem[] {
+    return [
+        { id: `${idPrefix}elec`, text: "Electronics", parentId: null, type: "category" },
+        { id: `${idPrefix}elec-1`, text: "Smartphones", parentId: `${idPrefix}elec`, type: "category" },
+        { id: `${idPrefix}elec-1-1`, text: "Model X Pro", parentId: `${idPrefix}elec-1`, type: "product" },
+        { id: `${idPrefix}elec-2`, text: "Laptops", parentId: `${idPrefix}elec`, type: "category" },
+        { id: `${idPrefix}elec-2-1`, text: "Ultrabook 13", parentId: `${idPrefix}elec-2`, type: "product" },
+        { id: `${idPrefix}home`, text: "Home & Garden", parentId: null, type: "category" },
+        { id: `${idPrefix}home-1`, text: "Kitchen Appliances", parentId: `${idPrefix}home`, type: "category" },
+        { id: `${idPrefix}home-1-1`, text: "Burr Coffee Grinder", parentId: `${idPrefix}home-1`, type: "product" },
+        {
+            id: `${idPrefix}home-2`,
+            text: "Outdoor Furniture",
+            parentId: `${idPrefix}home`,
+            type: "category",
+            disabled: true
+        },
+        { id: `${idPrefix}auto`, text: "Automotive", parentId: null, type: "category" }
     ];
 }

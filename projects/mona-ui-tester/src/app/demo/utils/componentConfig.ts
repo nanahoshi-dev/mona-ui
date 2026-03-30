@@ -43,7 +43,7 @@ export type ComponentConfigType =
     | "object";
 
 export type ComponentConfigInputType<TComponent> = {
-    [key in keyof ComponentInputs<TComponent>]: { alias?: string; note?: string } & (
+    [key in keyof ComponentInputs<TComponent>]: { alias?: string; disabled?: boolean; note?: string } & (
         | {
               type: Extract<ComponentConfigType, "string" | "boolean" | "color">;
               value: NonNullable<ComponentInputs<TComponent>[key]>;
@@ -132,6 +132,7 @@ export type ProcessedConfigItem<TValue = any, TDefault = any> = {
     configType: ComponentConfigType;
     clearable?: boolean; // Only for dropdown inputs
     defaultValue?: TDefault;
+    disabled?: boolean;
     max?: number | null; // Optional, only for number inputs
     min?: number | null; // Optional, only for number inputs
     name: string;
@@ -196,6 +197,7 @@ export function createComponentInputConfigArray<TComponent>(
                     configItem.type === "dropdown" || configItem.type === "customDropdown"
                         ? configItem.defaultValue
                         : undefined,
+                disabled: configItem.disabled ?? false,
                 max: configItem.type === "number" ? (configItem.max ?? null) : undefined,
                 min: configItem.type === "number" ? (configItem.min ?? null) : undefined,
                 note: configItem.note,
@@ -236,6 +238,7 @@ export function createComponentOutputConfigArray<TComponent>(
             }
             processedArray.push({
                 configType: "event",
+                disabled: false,
                 name: String(key),
                 valueType: "function"
             });

@@ -25,6 +25,7 @@
         @if (entry().configType === "dropdown") {
             <mona-drop-down-list
                 [data]="entry().value"
+                [disabled]="entry().disabled ?? false"
                 [ngModel]="entry().defaultValue"
                 [placeholder]="entry().placeholder ?? 'Select...'"
                 [style.width.px]="150"
@@ -41,9 +42,11 @@
                 <ng-template monaDropDownListValueTemplate let-dataItem>
                     @if (dataItem) {
                         @if (dataItem && typeof dataItem.getMonth === "function") {
-                            <span>{{ dataItem | date: "dd/MM/yyyy HH:mm:ss" }}</span>
+                            <span class="truncate">{{ dataItem | date: "dd/MM/yyyy HH:mm:ss" }}</span>
                         } @else {
-                            <span>{{ typeof dataItem === "object" ? (dataItem | json) : dataItem }}</span>
+                            <span class="truncate">{{
+                                typeof dataItem === "object" ? (dataItem | json) : dataItem
+                            }}</span>
                         }
                     } @else {
                         <span>{{ entry().placeholder ?? "Select..." }}</span>
@@ -55,6 +58,7 @@
             @let valueField = entry().valueField;
             <mona-drop-down-list
                 [data]="entry().value"
+                [disabled]="entry().disabled ?? false"
                 [ngModel]="entry().defaultValue"
                 [placeholder]="entry().placeholder ?? 'Select...'"
                 [style.width.px]="150"
@@ -70,21 +74,23 @@
                 </ng-template>
                 <ng-template monaDropDownListValueTemplate let-dataItem>
                     @if (dataItem && textField) {
-                        <span>{{ dataItem[textField] }}</span>
+                        <span class="truncate">{{ dataItem[textField] }}</span>
                     } @else {
-                        <span>{{ entry().placeholder ?? "Select..." }}</span>
+                        <span class="truncate">{{ entry().placeholder ?? "Select..." }}</span>
                     }
                 </ng-template>
             </mona-drop-down-list>
         } @else if (entry().configType === "color") {
             <mona-color-picker
                 size="small"
+                [disabled]="entry().disabled ?? false"
                 [ngModel]="entry().value"
                 (ngModelChange)="onValueChange(entry().name, $event)"></mona-color-picker>
         } @else {
             @switch (entry().configType) {
                 @case ("string") {
                     <mona-text-box
+                        [disabled]="entry().disabled ?? false"
                         [ngModel]="entry().value"
                         [style.width.px]="150"
                         size="small"
@@ -92,6 +98,7 @@
                 }
                 @case ("number") {
                     <mona-numeric-text-box
+                        [disabled]="entry().disabled ?? false"
                         [ngModel]="entry().value"
                         [style.width.px]="150"
                         size="small"
@@ -102,6 +109,7 @@
                 }
                 @case ("boolean") {
                     <mona-switch
+                        [disabled]="entry().disabled ?? false"
                         [ngModel]="entry().value"
                         size="small"
                         (ngModelChange)="onValueChange(entry().name, $event)"></mona-switch>

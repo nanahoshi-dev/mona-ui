@@ -92,9 +92,7 @@ export class TreeService<T> {
     public readonly dragging$ = toObservable(this.dragging);
     public readonly dropAllowed = signal(false);
     public readonly dropPositionChange$ = new BehaviorSubject<DropPositionChangeEvent<T> | null>(null);
-    public readonly dropPositionSignal = toSignal(this.dropPositionChange$, {
-        initialValue: null as DropPositionChangeEvent<T> | null
-    });
+    public readonly dropPositionSignal = toSignal(this.dropPositionChange$, { initialValue: null });
     public readonly expandBy = signal<NodeKeySelector<T>>(null);
     public readonly expandableOptions = signal<ExpandableOptions>({ enabled: false });
     public readonly expandedKeys = computed(() => {
@@ -417,6 +415,9 @@ export class TreeService<T> {
     }
 
     public setChildrenSelector(selector: string | Selector<T, Iterable<T> | Observable<Iterable<T>>>): void {
+        if (this.children() === selector) {
+            return;
+        }
         this.children.set(selector);
         this.nodeSet.set(this.createNodes(this.#data()));
         this.updateNodeIndices();
@@ -745,7 +746,8 @@ export class TreeService<T> {
     }
 
     private createNodeDictionary(nodes: Iterable<TreeNode<T>>): ImmutableDictionary<string, TreeNode<T>> {
-        return TreeService.flatten(nodes).toImmutableDictionary(
+        const flattenedNodes = TreeService.flatten(nodes);
+        return flattenedNodes.toImmutableDictionary(
             n => n.uid,
             n => n
         );
