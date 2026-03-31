@@ -69,6 +69,9 @@ export class SubTreeComponent<T> {
         return treeNodeExpanderThemeVariants(theme)();
     });
     protected readonly treeService = inject(TreeService);
+    protected readonly visibleNodes = computed(() => {
+        return this.nodes().where(n => this.treeService.isVisible(n)).toImmutableSet();
+    });
     public readonly depth = input.required<number>();
     public readonly nodes = input.required<ImmutableSet<TreeNode<T>>, Iterable<TreeNode<T>>>({
         transform: value => ImmutableSet.create(value)

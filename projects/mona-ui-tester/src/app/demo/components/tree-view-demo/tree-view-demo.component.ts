@@ -10,7 +10,17 @@ import {
     signal,
     untracked
 } from "@angular/core";
-import { FileIcon, FolderIcon, LucideAngularModule } from "lucide-angular";
+import {
+    CableIcon,
+    CookingPotIcon,
+    FileIcon,
+    FolderIcon,
+    HouseHeartIcon,
+    LaptopIcon,
+    LucideAngularModule,
+    LucideIconData,
+    SmartphoneIcon
+} from "lucide-angular";
 import {
     CheckableOptions,
     DisableOptions,
@@ -51,6 +61,7 @@ interface FlatTreeNodeDataItem {
     parentId: string | null;
     disabled?: boolean;
     type?: "category" | "product";
+    icon?: LucideIconData;
 }
 
 const childSelectors = [
@@ -308,9 +319,16 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 @if (featureData["nodeTemplate"].active) {
                     <ng-template monaTreeViewNodeTemplate let-dataItem let-element="element">
                         <div class="flex items-center gap-2">
-                            @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
-                            <lucide-icon [img]="icon" [size]="14"></lucide-icon>
-                            <span>{{ dataItem.text }}</span>
+                            @if (mode() === "hierarchical") {
+                                @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
+                                <lucide-icon [img]="icon" [size]="14"></lucide-icon>
+                                <span>{{ dataItem.text }}</span>
+                            } @else {
+                                @if (dataItem.icon) {
+                                    <lucide-icon [img]="dataItem.icon" [size]="14"></lucide-icon>
+                                }
+                                <span>{{ dataItem.text }}</span>
+                            }
                         </div>
                     </ng-template>
                 }
@@ -345,7 +363,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         };
         return selectableSettings;
     });
-    protected readonly checkedKeys = signal([]);
+    protected readonly checkedKeys = signal<string[]>([]);
     protected readonly disable = computed(() => {
         const features = this.features();
         const subFeatures = features["disable"].subFeatures || {};
@@ -355,7 +373,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         };
         return disableSettings;
     });
-    protected readonly disabledKeys = signal([]);
+    protected readonly disabledKeys = signal<string[]>([]);
     protected readonly dragDrop = computed(() => {
         const features = this.features();
         const dragDropSettings: DraggableOptions = {
@@ -417,6 +435,14 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
                 this.treeVisible.set(false);
                 asapScheduler.schedule(() => this.treeVisible.set(true), 0);
             });
+        });
+        effect(() => {
+            const disableSettings = this.disable();
+            const mode = this.mode();
+            const disabledKeys = mode === "flat" ? ["auto", "home-1"] : ["2-1"];
+            if (disableSettings.enabled) {
+                this.disabledKeys.set(disabledKeys);
+            }
         });
     }
 
@@ -494,13 +520,25 @@ function generateFileTreeData(idPrefix: string = ""): TreeNodeDataItem[] {
 
 function generateCatalogData(idPrefix: string = ""): FlatTreeNodeDataItem[] {
     return [
-        { id: `${idPrefix}elec`, text: "Electronics", parentId: null, type: "category" },
-        { id: `${idPrefix}elec-1`, text: "Smartphones", parentId: `${idPrefix}elec`, type: "category" },
+        { id: `${idPrefix}elec`, text: "Electronics", parentId: null, type: "category", icon: CableIcon },
+        {
+            id: `${idPrefix}elec-1`,
+            text: "Smartphones",
+            parentId: `${idPrefix}elec`,
+            type: "category",
+            icon: SmartphoneIcon
+        },
         { id: `${idPrefix}elec-1-1`, text: "Model X Pro", parentId: `${idPrefix}elec-1`, type: "product" },
-        { id: `${idPrefix}elec-2`, text: "Laptops", parentId: `${idPrefix}elec`, type: "category" },
+        { id: `${idPrefix}elec-2`, text: "Laptops", parentId: `${idPrefix}elec`, type: "category", icon: LaptopIcon },
         { id: `${idPrefix}elec-2-1`, text: "Ultrabook 13", parentId: `${idPrefix}elec-2`, type: "product" },
-        { id: `${idPrefix}home`, text: "Home & Garden", parentId: null, type: "category" },
-        { id: `${idPrefix}home-1`, text: "Kitchen Appliances", parentId: `${idPrefix}home`, type: "category" },
+        { id: `${idPrefix}home`, text: "Home & Garden", parentId: null, type: "category", icon: HouseHeartIcon },
+        {
+            id: `${idPrefix}home-1`,
+            text: "Kitchen Appliances",
+            parentId: `${idPrefix}home`,
+            type: "category",
+            icon: CookingPotIcon
+        },
         { id: `${idPrefix}home-1-1`, text: "Burr Coffee Grinder", parentId: `${idPrefix}home-1`, type: "product" },
         {
             id: `${idPrefix}home-2`,

@@ -4,7 +4,7 @@
     cdkDropList
     [cdkDropListSortingDisabled]="true"
     (cdkDropListDropped)="onNodeDrop($event)">
-    @for (node of nodes(); track node.uid) {
+    @for (node of visibleNodes(); track node.uid) {
         <li
             [attr.data-uid]="node.uid"
             [class]="listItemClass()"

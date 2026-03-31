@@ -1,7 +1,6 @@
 import { computed, effect, Injectable, signal, TemplateRef, untracked } from "@angular/core";
 import { toObservable, toSignal } from "@angular/core/rxjs-interop";
 import {
-    aggregate,
     contains,
     EnumerableSet,
     forEach,
@@ -55,10 +54,16 @@ export class TreeService<T> {
     readonly #flatParentIdField = signal("");
     readonly #hasChildrenPredicate = signal<Predicate<any> | null>(null);
     readonly #navigableNodes = computed(() => {
-        const flattenedNodes = TreeService.flatten(this.viewNodeSet());
-        return flattenedNodes
-            .where(n => n.parent === null || !this.isAnyParentCollapsed(n))
-            .select(n => n)
+        const visibleUids = this.#visibleUids();
+        const allFlatNodes = TreeService.flatten(this.nodeSet());
+        if (visibleUids === null) {
+            return allFlatNodes
+                .where(n => n.parent === null || !this.isAnyParentCollapsed(n))
+                .orderBy(n => n.index)
+                .toImmutableSet();
+        }
+        return allFlatNodes
+            .where(n => visibleUids.has(n.uid) && (n.parent === null || !this.isAnyParentCollapsed(n)))
             .orderBy(n => n.index)
             .toImmutableSet();
     });
@@ -68,6 +73,14 @@ export class TreeService<T> {
     });
     readonly #structure = signal<DataStructure>("hierarchical");
     readonly #unfilteredExpandedKeys = signal(ImmutableSet.create<any>());
+    readonly #visibleUids = computed<Set<string> | null>(() => {
+        const filterText = this.filterText();
+        if (!filterText) {
+            return null;
+        }
+        const nodeSet = this.nodeSet();
+        return untracked(() => this.computeVisibleUids(nodeSet, filterText));
+    });
     public readonly animationTemporarilyDisabled = signal(false);
     public readonly animationEnabled = signal(true);
     public readonly checkBy = signal<NodeKeySelector<T>>(null);
@@ -157,19 +170,24 @@ export class TreeService<T> {
     public readonly selectionChange$ = new Subject<NodeItem<T>>();
     public readonly textField = signal<string | Selector<T, string>>("");
     public readonly viewNodeSet = computed(() => {
-        if (this.filterText()) {
-            return this.filterTree(this.nodeSet(), this.filterText());
+        const visibleUids = this.#visibleUids();
+        if (visibleUids === null) {
+            return this.nodeSet();
         }
-        return this.nodeSet();
+        return this.nodeSet()
+            .where(n => visibleUids.has(n.uid))
+            .toImmutableSet();
     });
 
     public constructor() {
         effect(() => {
-            const viewNodes = this.viewNodeSet();
+            const visibleUids = this.#visibleUids();
             untracked(() => {
-                const flattenedNodes = TreeService.flatten(viewNodes);
-                const expandedKeys = flattenedNodes
-                    .where(n => !n.children().isEmpty())
+                if (visibleUids === null) {
+                    return;
+                }
+                const expandedKeys = TreeService.flatten(this.nodeSet())
+                    .where(n => visibleUids.has(n.uid) && !n.children().isEmpty())
                     .select(n => this.getExpandKey(n))
                     .toImmutableSet();
                 this.#filteredExpandedKeys.set(expandedKeys);
@@ -331,6 +349,14 @@ export class TreeService<T> {
         return this.filterText() !== "";
     }
 
+    public isVisible(node: TreeNode<T>): boolean {
+        const visibleUids = this.#visibleUids();
+        if (visibleUids === null) {
+            return true;
+        }
+        return visibleUids.has(node.uid);
+    }
+
     public loadNodeChildren(node: TreeNode<T>): void {
         const childrenSelector = this.children();
         if (typeof childrenSelector !== "function") {
@@ -490,13 +516,12 @@ export class TreeService<T> {
     }
 
     public setExpandedKeys(keys: Iterable<any>): void {
-        const expandedKeys = this.expandedKeys().orderBy(k => k);
+        const unfilteredKeys = this.#unfilteredExpandedKeys().orderBy(k => k);
         const orderedKeys = from(keys).orderBy(k => k);
-        if (sequenceEqual(expandedKeys, orderedKeys)) {
+        if (sequenceEqual(unfilteredKeys, orderedKeys)) {
             return;
         }
         this.#unfilteredExpandedKeys.set(ImmutableSet.create(keys));
-        this.#filteredExpandedKeys.set(ImmutableSet.create(keys));
     }
 
     public setFilterableOptions(options: Partial<FilterableOptions>): void {
@@ -711,6 +736,20 @@ export class TreeService<T> {
         }
     }
 
+    private computeVisibleUids(nodes: Iterable<TreeNode<T>>, filterText: string): Set<string> {
+        const visible = new Set<string>();
+        for (const node of nodes) {
+            const childVisible = this.computeVisibleUids(node.children(), filterText);
+            for (const uid of childVisible) {
+                visible.add(uid);
+            }
+            if (childVisible.size > 0 || this.isFiltered(this.getNodeText(node), filterText)) {
+                visible.add(node.uid);
+            }
+        }
+        return visible;
+    }
+
     private createFlatNodes(data: Iterable<T>, parentId: string | null): ImmutableSet<TreeNode<T>> {
         const flatIdField = this.#flatIdField();
         const flatParentIdField = this.#flatParentIdField();
@@ -802,30 +841,6 @@ export class TreeService<T> {
         }
         const nodeDictionary = this.#nodeDictionary();
         return this.createHierarchicalNodes(data, null, nodeDictionary) ?? ImmutableSet.create();
-    }
-
-    private filterTree(nodes: Iterable<TreeNode<T>>, filterText: string): ImmutableSet<TreeNode<T>> {
-        const nodeList = untracked(() => {
-            return aggregate(
-                nodes,
-                (result, node) => {
-                    const nodeText = this.getNodeText(node);
-                    if (this.isFiltered(nodeText, filterText)) {
-                        result.add(node);
-                    } else if (!node.children().isEmpty()) {
-                        const newNodes = this.filterTree(node.children(), filterText);
-                        if (!newNodes.isEmpty()) {
-                            const clonedNode = node.clone();
-                            clonedNode.children.update(set => set.clear().addAll(newNodes));
-                            result.add(clonedNode);
-                        }
-                    }
-                    return result;
-                },
-                new List<TreeNode<T>>()
-            );
-        });
-        return nodeList.toImmutableSet();
     }
 
     private getExpandKey(node: TreeNode<T>): any {
