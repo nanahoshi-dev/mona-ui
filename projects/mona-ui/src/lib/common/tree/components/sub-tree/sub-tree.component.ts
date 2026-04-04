@@ -98,14 +98,6 @@ export class SubTreeComponent<T> {
     }
 
     public onNodeDragMove(event: CdkDragMove<TreeNode<T>>, node: TreeNode<T>): void {
-        if (event.event) {
-            const draggedElement = event.source.element.nativeElement.nextSibling;
-            if (draggedElement) {
-                const element = draggedElement as HTMLElement;
-                element.style.top = `${10}px`;
-                element.style.left = `${10}px`;
-            }
-        }
         this.treeService.dropPositionChange$.pipe(take(1)).subscribe(e => {
             if (e == null) {
                 return;

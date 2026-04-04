@@ -1,5 +1,5 @@
-import { TreeViewComponent } from "../../../tree-view/components/tree-view/tree-view.component";
 import { DropPosition } from "./DropPositionChangeEvent";
+import { ITreeView } from "./ITreeView";
 import { NodeEvent } from "./NodeEvent";
 import { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
@@ -23,7 +23,7 @@ export class NodeDropEvent<T> extends NodeEvent<T> {
         return this.#params.targetNode.nodeItem;
     }
 
-    public get treeView(): TreeViewComponent<T> {
+    public get treeView(): ITreeView<T> {
         return this.#params.treeView;
     }
 }
@@ -57,7 +57,7 @@ export interface NodeDropEventArgs<T> {
     position: DropPosition;
     sourceNode: TreeNode<T>;
     targetNode: TreeNode<T>;
-    treeView: TreeViewComponent<T>;
+    treeView: ITreeView<T>;
 }
 
 export type NodeDropEventArgsSansTree<T> = Omit<NodeDropEventArgs<T>, "treeView">;

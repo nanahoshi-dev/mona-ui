@@ -65,10 +65,9 @@ interface FlatTreeNodeDataItem {
 }
 
 const childSelectors = [
-    { text: "items", value: "items" },
-    { text: "items selector", value: (x: TreeNodeDataItem) => x.items },
+    { text: "Local Data", value: "items" },
     {
-        text: "observable",
+        text: "Remote Data",
         value: (x: TreeNodeDataItem) =>
             timer(Math.floor(Math.random() * (1200 - 200)) + 200).pipe(switchMap(() => of(x.items)))
     }
@@ -439,7 +438,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         effect(() => {
             const disableSettings = this.disable();
             const mode = this.mode();
-            const disabledKeys = mode === "flat" ? ["auto", "home-1"] : ["2-1"];
+            const disabledKeys = mode === "flat" ? ["auto", "home-1"] : ["2"];
             if (disableSettings.enabled) {
                 this.disabledKeys.set(disabledKeys);
             }
@@ -450,9 +449,10 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
         if (this.mode() === "hierarchical") {
             const dropEvent = event as NodeDropEvent<TreeNodeDataItem>;
             const children = this.children();
-            if (children === childSelectors[2].value) {
+            if (children === childSelectors[1].value) {
                 treeData = moveTreeNode(treeData, dropEvent, "id", "items");
-                event.treeView.moveNode(dropEvent.sourceNode as any, event.targetNode as any, event.position);
+                // cast to never for demo purposes, normal usage should not need it
+                event.treeView.moveNode(dropEvent.sourceNode as never, event.targetNode as never, event.position);
                 this.treeData.set(treeData);
             } else {
                 treeData = moveTreeNode(treeData, dropEvent, "id", "items");

@@ -11,6 +11,8 @@
             [tabindex]="-1"
             role="treeitem"
             [attr.aria-level]="depth() + 1"
+            [attr.aria-setsize]="visibleNodes().length"
+            [attr.aria-posinset]="$index + 1"
             [attr.aria-expanded]="nodeComponent.expandable() ? nodeComponent.expanded() : null"
             [attr.aria-selected]="treeService.selectableOptions().enabled ? nodeComponent.selected() : null"
             [attr.aria-disabled]="nodeComponent.disabled() ? true : null"
@@ -26,10 +28,12 @@
             (cdkDragMoved)="onNodeDragMove($event, node)">
             <div [class]="nodeContainerClass()">
                 @if (treeService.expandableOptions().enabled && nodeComponent.expandable()) {
-                    <div
-                        aria-hidden="true"
+                    <button
+                        type="button"
+                        tabindex="-1"
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
+                        [attr.aria-label]="(nodeComponent.expanded() ? 'Collapse' : 'Expand') + ' ' + nodeComponent.nodeText()"
                         (click)="onExpandStateChange(node)">
                         @if (node.loading()) {
                             <i class="ri-loader-2-line mona-rotate-anim"></i>
@@ -38,7 +42,7 @@
                         } @else {
                             <i class="ri-arrow-right-s-fill"></i>
                         }
-                    </div>
+                    </button>
                 }
                 @if (nodeComponent.checkable()) {
                     <mona-check-box

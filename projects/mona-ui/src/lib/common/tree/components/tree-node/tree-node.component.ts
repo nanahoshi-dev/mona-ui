@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { filter, map, Subject, tap } from "rxjs";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -16,7 +16,7 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
     imports: [NgTemplateOutlet],
     templateUrl: "./tree-node.component.html"
 })
-export class TreeNodeComponent<T> implements OnInit {
+export class TreeNodeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #themeService = inject(ThemeService);
     protected readonly treeService = inject(TreeService<T>);
@@ -110,8 +110,8 @@ export class TreeNodeComponent<T> implements OnInit {
     public depth = input(0);
     public node = input<TreeNode<T> | null>(null);
 
-    public ngOnInit(): void {
-        this.setSubscriptions();
+    public constructor() {
+        this.setCheckboxClickSubscription();
     }
 
     public onNodeClick(event: MouseEvent): void {
@@ -171,7 +171,7 @@ export class TreeNodeComponent<T> implements OnInit {
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 filter(() => this.checkable() && !this.disabled()),
-                tap(e => e.preventDefault()), // TODO: Check if this interferes with the nodeClick event
+                tap(e => { e.preventDefault(); e.stopPropagation(); }),
                 map(event => {
                     const node = this.node() as TreeNode<T>;
                     const nodeCheckEvent = new NodeCheckEvent(node, event);
@@ -191,7 +191,4 @@ export class TreeNodeComponent<T> implements OnInit {
             });
     }
 
-    private setSubscriptions(): void {
-        this.setCheckboxClickSubscription();
-    }
 }

@@ -1,4 +1,4 @@
-export interface NodeMoveSnapshot<T> {
+export interface NodeMoveSnapshot {
     readonly originalIndex: number;
     readonly originalParentUid: string | null;
     readonly sourceNodeUid: string;

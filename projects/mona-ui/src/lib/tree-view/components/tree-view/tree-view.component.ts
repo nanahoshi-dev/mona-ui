@@ -20,10 +20,10 @@ import { TreeComponent } from "../../../common/tree/components/tree/tree.compone
 import { TreeNodeTemplateDirective } from "../../../common/tree/directives/tree-node-template.directive";
 import { DataStructure } from "../../../common/tree/models/DataStructure";
 import { DropPosition } from "../../../common/tree/models/DropPositionChangeEvent";
+import { ITreeView } from "../../../common/tree/models/ITreeView";
 import { NodeClickEvent } from "../../../common/tree/models/NodeClickEvent";
 import { NodeItem } from "../../../common/tree/models/NodeItem";
 import { NodeMoveSnapshot } from "../../../common/tree/models/NodeMoveSnapshot";
-import { TreeNode } from "../../../common/tree/models/TreeNode";
 import { ChildrenSelector } from "../../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../../common/tree/services/tree.service";
 import { TreeViewNodeTemplateDirective } from "../../directives/tree-view-node-template.directive";
@@ -36,7 +36,7 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
     providers: [TreeService],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TreeViewComponent<T> {
+export class TreeViewComponent<T> implements ITreeView<T> {
     readonly #destroyRef = inject(DestroyRef);
 
     protected readonly nodeTemplate = contentChild<
@@ -137,7 +137,7 @@ export class TreeViewComponent<T> {
         });
     }
 
-    public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot<T> | null {
+    public moveNode(source: NodeItem<T>, target: NodeItem<T>, position: DropPosition): NodeMoveSnapshot | null {
         if (position === "outside") {
             return null;
         }
@@ -158,7 +158,7 @@ export class TreeViewComponent<T> {
         return { originalParentUid, originalIndex, sourceNodeUid: sourceNode.uid };
     }
 
-    public undoMoveNode(snapshot: NodeMoveSnapshot<T>): void {
+    public undoMoveNode(snapshot: NodeMoveSnapshot): void {
         const sourceNode = this.treeService.getNodeByUid(snapshot.sourceNodeUid);
         if (!sourceNode) {
             return;
@@ -200,7 +200,7 @@ export class TreeViewComponent<T> {
 
     #setHierarchicalDataStructureFields(): void {
         const childrenSelector = this.children();
-        const hasChildren = this.hasChildren() as Predicate<TreeNode<T>>;
+        const hasChildren = this.hasChildren();
         untracked(() => {
             this.treeService.setChildrenSelector(childrenSelector);
             this.treeService.setHasChildrenPredicate(hasChildren);

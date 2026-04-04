@@ -536,7 +536,7 @@ export class TreeService<T> {
         this.#flatParentIdField.set(field);
     }
 
-    public setHasChildrenPredicate(predicate: Predicate<any>): void {
+    public setHasChildrenPredicate(predicate: Predicate<any> | null): void {
         this.#hasChildrenPredicate.set(predicate);
     }
 
@@ -807,18 +807,12 @@ export class TreeService<T> {
                 if (subNodes) {
                     const childNodes = this.createHierarchicalNodes(subNodes, node, nodeDict);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
-                    if (node.parent) {
-                        node.parent.children.update(list => list.add(node));
-                    }
                 }
             } else {
                 const result = children(dataItem);
                 if (!(result instanceof Observable)) {
                     const childNodes = this.createHierarchicalNodes(result, node, nodeDict);
                     node.children.update(list => list.clear().addAll(childNodes ?? []));
-                    if (node.parent) {
-                        node.parent.children.update(list => list.add(node));
-                    }
                 }
             }
             nodes.add(node);
