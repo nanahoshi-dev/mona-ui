@@ -20,10 +20,35 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
+
+    /**
+     * @description The key selector used to determine the node's check state.
+     */
     public readonly checkBy = input<NodeKeySelector<T, K> | undefined>("");
+
+    /**
+     * @description The keys of the nodes that are checked.
+     */
     public readonly checkedKeys = input<Iterable<K>>([]);
+
+    /**
+     * @description Emitted when the checked keys change.
+     */
     public readonly checkedKeysChange = output<Array<K>>();
+
+    /**
+     * @description A predicate function that determines whether a node has a checkbox.
+     */
+    public readonly hasCheckbox = input<((data: T, uid: string) => boolean) | null>(null);
+
+    /**
+     * @description Emitted when a node is checked or unchecked.
+     */
     public readonly nodeCheck = output<NodeCheckEvent<T>>();
+
+    /**
+     * @description Options for the checkable behavior.
+     */
     public readonly options = input<Partial<CheckableOptions> | "">("", {
         alias: "monaTreeViewCheckable"
     });
@@ -52,6 +77,12 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
                         ...options
                     });
                 }
+            });
+        });
+        effect(() => {
+            const hasCheckbox = this.hasCheckbox();
+            untracked(() => {
+                this.#treeService.setHasCheckboxPredicate(hasCheckbox);
             });
         });
     }

@@ -98,6 +98,16 @@ export class TreeViewComponent<T> implements ITreeView<T> {
     public readonly mode = input<DataStructure>("hierarchical");
 
     /**
+     * @description Emits when the tree-view loses focus.
+     */
+    public readonly blur = output<FocusEvent>();
+
+    /**
+     * @description Emits when the tree-view gains focus.
+     */
+    public readonly focus = output<FocusEvent>();
+
+    /**
      * @description The node click event emitter.
      */
     public readonly nodeClick = output<NodeClickEvent<T>>();
@@ -211,5 +221,7 @@ export class TreeViewComponent<T> implements ITreeView<T> {
         this.treeService.nodeClick$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             this.nodeClick.emit(event);
         });
+        this.treeService.focus$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => this.focus.emit(e));
+        this.treeService.blur$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => this.blur.emit(e));
     }
 }

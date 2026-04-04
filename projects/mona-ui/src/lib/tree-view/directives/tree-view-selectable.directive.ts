@@ -21,11 +21,35 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
+
+    /**
+     * @description Emitted when a node is selected or deselected.
+     */
     public readonly nodeSelect = output<NodeSelectEvent<T>>();
+
+    /**
+     * @description The key selector used to determine the node's select state.'
+     */
     public readonly selectBy = input<NodeKeySelector<T, K> | undefined>("");
+
+    /**
+     * @description The keys of the nodes that are selected.
+     */
     public readonly selectedKeys = input<Iterable<K>>([]);
+
+    /**
+     * @description Emitted when the selected keys change.
+     */
     public readonly selectedKeysChange = output<Array<K>>();
+
+    /**
+     * @description Emitted when the selection changes.
+     */
     public readonly selectionChange = output<NodeItem<T>>();
+
+    /**
+     * @description Options for the selectable behavior.
+     */
     public readonly options = input<Partial<TreeSelectableOptions> | "">("", {
         alias: "monaTreeViewSelectable"
     });

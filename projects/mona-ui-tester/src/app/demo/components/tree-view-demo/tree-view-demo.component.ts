@@ -75,6 +75,11 @@ const childSelectors = [
 
 const hasChildrenPredicates = [(x: TreeNodeDataItem) => x.items.length > 0];
 
+const hasCheckboxPredicates = [
+    (x: TreeNodeDataItem | FlatTreeNodeDataItem) => true,
+    (x: TreeNodeDataItem | FlatTreeNodeDataItem) => x.text.endsWith("s")
+];
+
 let treeData = generateFileTreeData();
 let flatTreeData = generateCatalogData();
 
@@ -115,6 +120,14 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                     name: "Children Only",
                     description: `Whether to display checkboxes for leaf nodes only.`,
                     active: false
+                },
+                hasCheckbox: {
+                    code: ``,
+                    name: "Has Checkbox",
+                    description: `Whether to display checkboxes for nodes.`,
+                    type: "dropdown",
+                    dropdownDataSource: hasCheckboxPredicates,
+                    dropdownValue: hasCheckboxPredicates[0]
                 },
                 mode: {
                     code: ``,
@@ -294,6 +307,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 [checkBy]="'id'"
                 [checkedKeys]="checkedKeys()"
                 (checkedKeysChange)="checkedKeys.set($event)"
+                [hasCheckbox]="hasCheckbox()"
                 [monaTreeViewDisable]="disable()"
                 [disableBy]="'id'"
                 [disabledKeys]="disabledKeys()"
@@ -397,6 +411,11 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
             operator: subFeatures["operator"].dropdownValue ?? "contains"
         };
         return filterableSettings;
+    });
+    protected readonly hasCheckbox = computed(() => {
+        const features = this.features();
+        const subFeatures = features["checkable"].subFeatures || {};
+        return subFeatures["hasCheckbox"]?.dropdownValue ?? null;
     });
     protected readonly selectable = computed(() => {
         const features = this.features();

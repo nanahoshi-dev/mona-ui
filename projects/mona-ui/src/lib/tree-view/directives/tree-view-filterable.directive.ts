@@ -17,9 +17,25 @@ export class TreeViewFilterableDirective<T> {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
+
+    /**
+     * @description The filter value.
+     */
     public readonly filter = input<string>("");
+
+    /**
+     * @description Emitted when the filter value changes.
+     */
     public readonly filterChange = output<FilterChangeEvent>();
+
+    /**
+     * @description The placeholder text for the filter input.
+     */
     public readonly filterPlaceholder = input<string>("");
+
+    /**
+     * @description Options for the filterable behavior.
+     */
     public readonly options = input<Partial<FilterableOptions> | "">("", {
         alias: "monaTreeViewFilterable"
     });

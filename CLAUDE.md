@@ -8,6 +8,8 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Prefer EcmaScript private fields (not methods) over TypeScript private properties (not methods)
 - Utilize Immutable data structures and enumerable functions from https://phrolovia.github.io/ts-collections/.
 - Abide by the ESLint rules in `.eslint.config.mjs` strictly.
+- Abide by the member ordering rules in `.esling.config.mjs` strictly.
+- Use `import type` for types only imports.
 
 ## Angular Best Practices
 - Always use standalone components over NgModules

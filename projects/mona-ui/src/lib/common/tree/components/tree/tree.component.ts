@@ -16,7 +16,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { asapScheduler, fromEvent, switchMap, takeWhile } from "rxjs";
+import { asapScheduler, filter, fromEvent, switchMap, takeWhile } from "rxjs";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
@@ -164,6 +164,18 @@ export class TreeComponent<T> {
                     this.treeService.navigatedNode.set(null);
                 });
             });
+        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusin")
+            .pipe(
+                filter(e => !this.#hostElementRef.nativeElement.contains(e.relatedTarget as Node)),
+                takeUntilDestroyed(this.#destroyRef)
+            )
+            .subscribe(e => this.treeService.focus$.next(e));
+        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
+            .pipe(
+                filter(e => !this.#hostElementRef.nativeElement.contains(e.relatedTarget as Node)),
+                takeUntilDestroyed(this.#destroyRef)
+            )
+            .subscribe(e => this.treeService.blur$.next(e));
     }
 
     private setKeydownSubscription(): void {

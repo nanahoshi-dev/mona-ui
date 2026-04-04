@@ -358,33 +358,39 @@
     "selector": "\"mona-tree-view[monaTreeViewCheckable]\"",
     "inputs": [
       {
-        "name": "checkedKeysChange",
-        "type": "Array<K>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeCheck",
-        "type": "NodeCheckEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "checkBy",
         "type": "NodeKeySelector<T, K> | undefined",
-        "description": "",
+        "description": "The key selector used to determine the node's check state.",
         "kind": "input"
       },
       {
         "name": "checkedKeys",
         "type": "Iterable<K>",
-        "description": "",
+        "description": "The keys of the nodes that are checked.",
         "kind": "input"
+      },
+      {
+        "name": "checkedKeysChange",
+        "type": "Array<K>",
+        "description": "Emitted when the checked keys change.",
+        "kind": "output"
+      },
+      {
+        "name": "hasCheckbox",
+        "type": "((data: T, uid: string) => boolean) | null",
+        "description": "A predicate function that determines whether a node has a checkbox.",
+        "kind": "input"
+      },
+      {
+        "name": "nodeCheck",
+        "type": "NodeCheckEvent<T>",
+        "description": "Emitted when a node is checked or unchecked.",
+        "kind": "output"
       },
       {
         "name": "options",
         "type": "Partial<CheckableOptions> | \"\"",
-        "description": "",
+        "description": "Options for the checkable behavior.",
         "kind": "input"
       }
     ]
@@ -396,19 +402,19 @@
       {
         "name": "disableBy",
         "type": "NodeKeySelector<T, K> | undefined",
-        "description": "",
+        "description": "The key selector used to determine the node's disable state.'",
         "kind": "input"
       },
       {
         "name": "disabledKeys",
         "type": "Iterable<K>",
-        "description": "",
+        "description": "The keys of the nodes that are disabled.",
         "kind": "input"
       },
       {
         "name": "options",
         "type": "Partial<DisableOptions> | \"\"",
-        "description": "",
+        "description": "Options for the disable behavior.",
         "kind": "input"
       }
     ]
@@ -420,31 +426,31 @@
       {
         "name": "nodeDrag",
         "type": "NodeDragEvent<T>",
-        "description": "",
+        "description": "Emitted while a node is being dragged.",
         "kind": "output"
       },
       {
         "name": "nodeDragEnd",
         "type": "NodeDragEndEvent<T>",
-        "description": "",
+        "description": "Emitted when a node drag ends.",
         "kind": "output"
       },
       {
         "name": "nodeDragStart",
         "type": "NodeDragStartEvent<T>",
-        "description": "",
+        "description": "Emitted when a node drag starts.",
         "kind": "output"
       },
       {
         "name": "nodeDrop",
         "type": "NodeDropEvent<T>",
-        "description": "",
+        "description": "Emitted when a node is dropped.",
         "kind": "output"
       },
       {
         "name": "options",
         "type": "Partial<DraggableOptions> | \"\"",
-        "description": "",
+        "description": "Options for the draggable behavior.",
         "kind": "input"
       }
     ]
@@ -454,8 +460,14 @@
     "selector": "\"mona-tree-view[monaTreeViewExpandable]\"",
     "inputs": [
       {
-        "name": "expandedKeysChange",
-        "type": "Array<K>",
+        "name": "collapse",
+        "type": "NodeItem<T>",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "expand",
+        "type": "NodeItem<T>",
         "description": "",
         "kind": "output"
       },
@@ -472,6 +484,12 @@
         "kind": "input"
       },
       {
+        "name": "expandedKeysChange",
+        "type": "Array<K>",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "options",
         "type": "Partial<ExpandableOptions> | \"\"",
         "description": "",
@@ -484,27 +502,27 @@
     "selector": "\"mona-tree-view[monaTreeViewFilterable]\"",
     "inputs": [
       {
-        "name": "filterChange",
-        "type": "FilterChangeEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "filter",
         "type": "string",
-        "description": "",
+        "description": "The filter value.",
         "kind": "input"
+      },
+      {
+        "name": "filterChange",
+        "type": "FilterChangeEvent",
+        "description": "Emitted when the filter value changes.",
+        "kind": "output"
       },
       {
         "name": "filterPlaceholder",
         "type": "string",
-        "description": "",
+        "description": "The placeholder text for the filter input.",
         "kind": "input"
       },
       {
         "name": "options",
         "type": "Partial<FilterableOptions> | \"\"",
-        "description": "",
+        "description": "Options for the filterable behavior.",
         "kind": "input"
       }
     ]
@@ -516,37 +534,37 @@
       {
         "name": "nodeSelect",
         "type": "NodeSelectEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "selectedKeysChange",
-        "type": "Array<K>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "selectionChange",
-        "type": "NodeItem<T>",
-        "description": "",
+        "description": "Emitted when a node is selected or deselected.",
         "kind": "output"
       },
       {
         "name": "selectBy",
         "type": "NodeKeySelector<T, K> | undefined",
-        "description": "",
+        "description": "The key selector used to determine the node's select state.'",
         "kind": "input"
       },
       {
         "name": "selectedKeys",
         "type": "Iterable<K>",
-        "description": "",
+        "description": "The keys of the nodes that are selected.",
         "kind": "input"
       },
       {
+        "name": "selectedKeysChange",
+        "type": "Array<K>",
+        "description": "Emitted when the selected keys change.",
+        "kind": "output"
+      },
+      {
+        "name": "selectionChange",
+        "type": "NodeItem<T>",
+        "description": "Emitted when the selection changes.",
+        "kind": "output"
+      },
+      {
         "name": "options",
-        "type": "Partial<SelectableOptions> | \"\"",
-        "description": "",
+        "type": "Partial<TreeSelectableOptions> | \"\"",
+        "description": "Options for the selectable behavior.",
         "kind": "input"
       }
     ]
@@ -2236,21 +2254,21 @@
     "selector": "\"mona-tree-view\"",
     "inputs": [
       {
-        "name": "nodeClick",
-        "type": "NodeClickEvent<T>",
-        "description": "The node click event emitter.",
-        "kind": "output"
-      },
-      {
         "name": "animate",
         "type": "boolean",
-        "description": "Whether to animate the tree.\r\nIf true, the tree will animate when expanding or collapsing nodes.",
+        "description": "Whether to animate the tree.\nIf true, the tree will animate when expanding or collapsing nodes.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "The accessible label for the tree.\nShould describe the purpose of the tree to screen reader users.",
         "kind": "input"
       },
       {
         "name": "children",
         "type": "ChildrenSelector<T>",
-        "description": "The children selector for the tree.\r\nIt can be either of the following:\r\n- A string representing the property name of the children.\r\n- A function that returns the children of a node.\r\n- A function that returns an observable that emits the children of a node.",
+        "description": "The children selector for the tree.\nIt can be either of the following:\n- A string representing the property name of the children.\n- A function that returns the children of a node.\n- A function that returns an observable that emits the children of a node.",
         "kind": "input"
       },
       {
@@ -2262,31 +2280,49 @@
       {
         "name": "hasChildren",
         "type": "Predicate<T> | null",
-        "description": "The predicate to determine if a node has children.\r\nRequired if the children selector is set to a function that returns an observable.",
+        "description": "The predicate to determine if a node has children.\nRequired if the children selector is set to a function that returns an observable.",
         "kind": "input"
       },
       {
         "name": "idField",
         "type": "string",
-        "description": "The field that represents the unique identifier of a node.\r\nThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the unique identifier of a node.\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "DataStructure",
-        "description": "The data structure of the tree.\r\nIt can be either of the following:\r\n- `flat`: The tree is a flat list of nodes.\r\n- `hierarchical`: The tree is a hierarchical structure.\r\nIf the data structure is set to `flat`, the following fields are required:\r\n- idField\r\n- parentIdField\r\nIf the data structure is set to `hierarchical`, the following fields are required:\r\n- children\r\n- hasChildren",
+        "description": "The data structure of the tree.\nIt can be either of the following:\n- `flat`: The tree is a flat list of nodes.\n- `hierarchical`: The tree is a hierarchical structure.\nIf the data structure is set to `flat`, the following fields are required:\n- idField\n- parentIdField\nIf the data structure is set to `hierarchical`, the following fields are required:\n- children\n- hasChildren",
         "kind": "input"
+      },
+      {
+        "name": "blur",
+        "type": "FocusEvent",
+        "description": "Emits when the tree-view loses focus.",
+        "kind": "output"
+      },
+      {
+        "name": "focus",
+        "type": "FocusEvent",
+        "description": "Emits when the tree-view gains focus.",
+        "kind": "output"
+      },
+      {
+        "name": "nodeClick",
+        "type": "NodeClickEvent<T>",
+        "description": "The node click event emitter.",
+        "kind": "output"
       },
       {
         "name": "parentIdField",
         "type": "string",
-        "description": "The field that represents the parent identifier of a node.\r\nThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the parent identifier of a node.\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "string | Selector<T, string>",
-        "description": "The text field for the tree.\r\nIt can be either of the following:\r\n- A string representing the property name of the text.\r\n- A function that returns the text of a node.",
+        "description": "The text field for the tree.\nIt can be either of the following:\n- A string representing the property name of the text.\n- A function that returns the text of a node.",
         "kind": "input"
       }
     ]
@@ -3142,46 +3178,10 @@
     "selector": "\"mona-tree\"",
     "inputs": [
       {
-        "name": "nodeCheck",
-        "type": "NodeCheckEvent<T>",
+        "name": "ariaLabel",
+        "type": "string",
         "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeClick",
-        "type": "NodeClickEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeDrag",
-        "type": "NodeDragEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeDragEnd",
-        "type": "NodeDragStartEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeDragStart",
-        "type": "NodeDragStartEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeDrop",
-        "type": "NodeDropEvent<T>",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "nodeSelect",
-        "type": "NodeSelectEvent<T>",
-        "description": "",
-        "kind": "output"
+        "kind": "input"
       },
       {
         "name": "data",
@@ -4585,6 +4585,12 @@
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the checkbox.",
+        "kind": "input"
+      },
+      {
+        "name": "tabIndex",
+        "type": "number",
+        "description": "Sets the tab index of the checkbox.",
         "kind": "input"
       },
       {

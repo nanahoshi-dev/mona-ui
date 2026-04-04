@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { sequenceEqual } from "@mirei/ts-collections";
 import { pairwise } from "rxjs";
 import { ExpandableOptions } from "../../common/tree/models/ExpandableOptions";
+import { NodeItem } from "../../common/tree/models/NodeItem";
 import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
 import { TreeService } from "../../common/tree/services/tree.service";
 
@@ -16,6 +17,8 @@ export class TreeViewExpandableDirective<T, K = T> {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
+    public readonly collapse = output<NodeItem<T>>();
+    public readonly expand = output<NodeItem<T>>();
     public readonly expandBy = input<NodeKeySelector<T, K> | undefined>("");
     public readonly expandedKeys = input<Iterable<K>>([]);
     public readonly expandedKeysChange = output<Array<K>>();
@@ -64,6 +67,15 @@ export class TreeViewExpandableDirective<T, K = T> {
                     return;
                 }
                 this.expandedKeysChange.emit(keys.toArray());
+            });
+        this.#treeService.nodeExpand$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => {
+                if (event.expanded) {
+                    this.expand.emit(event.node.nodeItem);
+                } else {
+                    this.collapse.emit(event.node.nodeItem);
+                }
             });
     }
 }

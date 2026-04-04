@@ -52,6 +52,7 @@ export class TreeService<T> {
     readonly #filteredExpandedKeys = signal(ImmutableSet.create<any>());
     readonly #flatIdField = signal("");
     readonly #flatParentIdField = signal("");
+    readonly #hasCheckboxPredicate = signal<((data: T, uid: string) => boolean) | null>(null);
     readonly #hasChildrenPredicate = signal<Predicate<any> | null>(null);
     readonly #navigableNodes = computed(() => {
         const visibleUids = this.#visibleUids();
@@ -83,6 +84,7 @@ export class TreeService<T> {
     });
     public readonly animationTemporarilyDisabled = signal(false);
     public readonly animationEnabled = signal(true);
+    public readonly blur$ = new Subject<FocusEvent>();
     public readonly checkBy = signal<NodeKeySelector<T>>(null);
     public readonly checkableOptions = signal<CheckableOptions>({
         checkChildren: true,
@@ -131,6 +133,7 @@ export class TreeService<T> {
         ),
         { initialValue: "" }
     );
+    public readonly focus$ = new Subject<FocusEvent>();
     public readonly navigatedNode = signal<TreeNode<T> | null>(null);
     public readonly nodeCheck$ = new Subject<NodeCheckEvent<T>>();
     public readonly nodeCheckChange$ = new Subject<TreeNodeCheckEvent<T>>();
@@ -278,6 +281,10 @@ export class TreeService<T> {
         if (!checkableOptions.enabled) {
             return false;
         }
+        const hasCheckbox = this.#hasCheckboxPredicate();
+        if (hasCheckbox !== null && !hasCheckbox(node.data, node.uid)) {
+            return false;
+        }
         return !(checkableOptions.childrenOnly && !node.children().isEmpty());
     }
 
@@ -321,12 +328,15 @@ export class TreeService<T> {
         if (node.children().isEmpty()) {
             return false;
         }
-        const childNodes = node.children();
-        const checkedNodes = childNodes.where(n => this.isChecked(n));
-        const indeterminateNodes = childNodes.where(n => this.isIndeterminate(n));
-        const checkedCount = checkedNodes.count();
-        const indeterminateCount = indeterminateNodes.count();
-        const childCount = childNodes.size();
+        const hasCheckbox = this.#hasCheckboxPredicate();
+        const childNodes =
+            hasCheckbox !== null ? node.children().where(n => hasCheckbox(n.data, n.uid)) : node.children();
+        if (childNodes.none()) {
+            return false;
+        }
+        const checkedCount = childNodes.where(n => this.isChecked(n)).count();
+        const indeterminateCount = childNodes.where(n => this.isIndeterminate(n)).count();
+        const childCount = childNodes.count();
         return (checkedCount > 0 && checkedCount < childCount) || indeterminateCount > 0;
     }
 
@@ -536,6 +546,10 @@ export class TreeService<T> {
         this.#flatParentIdField.set(field);
     }
 
+    public setHasCheckboxPredicate(fn: ((data: T, uid: string) => boolean) | null): void {
+        this.#hasCheckboxPredicate.set(fn);
+    }
+
     public setHasChildrenPredicate(predicate: Predicate<any> | null): void {
         this.#hasChildrenPredicate.set(predicate);
     }
@@ -572,8 +586,12 @@ export class TreeService<T> {
         node.checked.set(checked);
 
         if (mode !== "single" && checkChildren) {
+            const hasCheckbox = this.#hasCheckboxPredicate();
             const childNodes = this.getChildNodes(node);
             childNodes.forEach(n => {
+                if (hasCheckbox !== null && !hasCheckbox(n.data, n.uid)) {
+                    return;
+                }
                 if (checkDisabledChildren || !this.isDisabled(n)) {
                     const childKey = this.getCheckKey(n);
                     if (checked) {
@@ -586,12 +604,12 @@ export class TreeService<T> {
             });
         }
         if (mode !== "single" && checkParents && !childrenOnly) {
+            const hasCheckbox = this.#hasCheckboxPredicate();
             const parentNodes = this.getParentNodes(node);
             parentNodes.forEach(n => {
-                const childNodes = n.children();
-                const allChecked = childNodes.all(c => {
-                    return c.checked();
-                });
+                const siblings =
+                    hasCheckbox !== null ? n.children().where(c => hasCheckbox(c.data, c.uid)) : n.children();
+                const allChecked = siblings.all(c => c.checked());
                 const parentKey = this.getCheckKey(n);
                 if (allChecked) {
                     checkedKeys.add(parentKey);
