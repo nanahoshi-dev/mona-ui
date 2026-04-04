@@ -7,7 +7,7 @@ import { ListService } from "../../common/list/services/list.service";
     selector: `
         mona-auto-complete[monaDropDownGroupable],
         mona-combo-box[monaDropDownGroupable],
-        mona-drop-down-list[monaDropDownGroupable],
+        mona-dropdown-list[monaDropDownGroupable],
         mona-multi-select[monaDropDownGroupable],
     `
 })

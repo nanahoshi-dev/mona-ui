@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/drop-down-list/dropdown-list.component";
+import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
 import { EditorService } from "../../services/editor.service";
 
 @Component({

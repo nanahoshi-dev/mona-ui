@@ -2256,19 +2256,19 @@
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Whether to animate the tree.\nIf true, the tree will animate when expanding or collapsing nodes.",
+        "description": "Whether to animate the tree.\r\nIf true, the tree will animate when expanding or collapsing nodes.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "The accessible label for the tree.\nShould describe the purpose of the tree to screen reader users.",
+        "description": "The accessible label for the tree.\r\nShould describe the purpose of the tree to screen reader users.",
         "kind": "input"
       },
       {
         "name": "children",
         "type": "ChildrenSelector<T>",
-        "description": "The children selector for the tree.\nIt can be either of the following:\n- A string representing the property name of the children.\n- A function that returns the children of a node.\n- A function that returns an observable that emits the children of a node.",
+        "description": "The children selector for the tree.\r\nIt can be either of the following:\r\n- A string representing the property name of the children.\r\n- A function that returns the children of a node.\r\n- A function that returns an observable that emits the children of a node.",
         "kind": "input"
       },
       {
@@ -2280,19 +2280,19 @@
       {
         "name": "hasChildren",
         "type": "Predicate<T> | null",
-        "description": "The predicate to determine if a node has children.\nRequired if the children selector is set to a function that returns an observable.",
+        "description": "The predicate to determine if a node has children.\r\nRequired if the children selector is set to a function that returns an observable.",
         "kind": "input"
       },
       {
         "name": "idField",
         "type": "string",
-        "description": "The field that represents the unique identifier of a node.\nThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the unique identifier of a node.\r\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "DataStructure",
-        "description": "The data structure of the tree.\nIt can be either of the following:\n- `flat`: The tree is a flat list of nodes.\n- `hierarchical`: The tree is a hierarchical structure.\nIf the data structure is set to `flat`, the following fields are required:\n- idField\n- parentIdField\nIf the data structure is set to `hierarchical`, the following fields are required:\n- children\n- hasChildren",
+        "description": "The data structure of the tree.\r\nIt can be either of the following:\r\n- `flat`: The tree is a flat list of nodes.\r\n- `hierarchical`: The tree is a hierarchical structure.\r\nIf the data structure is set to `flat`, the following fields are required:\r\n- idField\r\n- parentIdField\r\nIf the data structure is set to `hierarchical`, the following fields are required:\r\n- children\r\n- hasChildren",
         "kind": "input"
       },
       {
@@ -2316,13 +2316,13 @@
       {
         "name": "parentIdField",
         "type": "string",
-        "description": "The field that represents the parent identifier of a node.\nThis is required if the data structure is set to `flat`.",
+        "description": "The field that represents the parent identifier of a node.\r\nThis is required if the data structure is set to `flat`.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "string | Selector<T, string>",
-        "description": "The text field for the tree.\nIt can be either of the following:\n- A string representing the property name of the text.\n- A function that returns the text of a node.",
+        "description": "The text field for the tree.\r\nIt can be either of the following:\r\n- A string representing the property name of the text.\r\n- A function that returns the text of a node.",
         "kind": "input"
       }
     ]
@@ -4249,7 +4249,7 @@
   },
   "DropdownListComponent": {
     "name": "DropdownListComponent",
-    "selector": "\"mona-drop-down-list\"",
+    "selector": "\"mona-dropdown-list\"",
     "inputs": [
       {
         "name": "ariaLabel",

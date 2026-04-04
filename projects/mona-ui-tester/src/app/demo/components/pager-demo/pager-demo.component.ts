@@ -133,7 +133,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             code: `
                 <mona-pager>
                     <ng-template monaPagerPageSizeTemplate let-pageSizeValues>
-                        <mona-drop-down-list [data]="pageSizeValues" [ngModel]="pageSizeValue()"
+                        <mona-dropdown-list [data]="pageSizeValues" [ngModel]="pageSizeValue()"
                                              (ngModelChange)="pageSizeValue.set($event)" class="w-28">
                             <ng-template monaDropDownListValueTemplate let-dataItem>
                                 <span class="px-2 text-blue-400">{{ dataItem }}</span>
@@ -141,7 +141,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                             <ng-template monaDropDownListItemTemplate let-dataItem>
                                 <span class="px-2">{{ dataItem }} / page</span>
                             </ng-template>
-                        </mona-drop-down-list>
+                        </mona-dropdown-list>
                     </ng-template>
                 </mona-pager>
             `,
@@ -234,7 +234,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                     </button>
                 </ng-template>
                 <ng-template monaPagerPageSizeTemplate let-pageSizeValues>
-                    <mona-drop-down-list [data]="pageSizeValues" [ngModel]="pageSizeValue()"
+                    <mona-dropdown-list [data]="pageSizeValues" [ngModel]="pageSizeValue()"
                                          (ngModelChange)="pageSizeValue.set($event)" class="w-28">
                         <ng-template monaDropDownListValueTemplate let-dataItem>
                             <span class="px-2 text-blue-400">{{ dataItem }}</span>
@@ -242,7 +242,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                         <ng-template monaDropDownListItemTemplate let-dataItem>
                             <span class="px-2">{{ dataItem }} / page</span>
                         </ng-template>
-                    </mona-drop-down-list>
+                    </mona-dropdown-list>
                 </ng-template>
                 <ng-template monaPagerNavigationButtonsTemplate type="previous" let-disabled="disabled"
                              let-pageSize="pageSize" let-totalPages="totalPages">
@@ -441,7 +441,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 }
                 @if (featureData["pageSizeTemplate"].active) {
                     <ng-template monaPagerPageSizeTemplate let-pageSizeValues>
-                        <mona-drop-down-list
+                        <mona-dropdown-list
                             [data]="pageSizeValues"
                             [ngModel]="pageSizeValue()"
                             (ngModelChange)="pageSizeValue.set($event)"
@@ -452,7 +452,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                             <ng-template monaDropDownListItemTemplate let-dataItem>
                                 <span class="px-2">{{ dataItem }} / page</span>
                             </ng-template>
-                        </mona-drop-down-list>
+                        </mona-dropdown-list>
                     </ng-template>
                 }
                 @if (featureData["previousPageButtonTemplate"].active) {

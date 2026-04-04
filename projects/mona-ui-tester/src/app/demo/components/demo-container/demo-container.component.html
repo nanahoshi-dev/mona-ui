@@ -4,24 +4,31 @@
             <button monaButton look="ghost" (click)="onCodeToggle()">
                 <lucide-angular [name]="Code" [size]="20"></lucide-angular>
             </button>
-            <mona-drop-down-list [data]="['ltr', 'rtl']" size="small" [ngModel]="direction()"
-                                 (ngModelChange)="onDirectionChange($event)">
+            <mona-dropdown-list
+                [data]="['ltr', 'rtl']"
+                size="small"
+                [ngModel]="direction()"
+                (ngModelChange)="onDirectionChange($event)">
                 <ng-template monaDropDownListItemTemplate let-dataItem>
                     <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>
                 </ng-template>
                 <ng-template monaDropDownListValueTemplate let-dataItem>
                     <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>
                 </ng-template>
-            </mona-drop-down-list>
-            <mona-color-picker [ngModel]="customColor()" (ngModelChange)="customColor.set($event)"
-                               size="small"></mona-color-picker>
-            <mona-drop-down-list [data]="themeDropdownData()" [ngModel]="selectedTheme()"
-                                 size="small"
-                                 (ngModelChange)="onThemeChange($event)">
+            </mona-dropdown-list>
+            <mona-color-picker
+                [ngModel]="customColor()"
+                (ngModelChange)="customColor.set($event)"
+                size="small"></mona-color-picker>
+            <mona-dropdown-list
+                [data]="themeDropdownData()"
+                [ngModel]="selectedTheme()"
+                size="small"
+                (ngModelChange)="onThemeChange($event)">
                 <ng-template monaDropDownListValueTemplate let-dataItem>
                     <span [style.text-transform]="'capitalize'">{{ dataItem }}</span>
                 </ng-template>
-            </mona-drop-down-list>
+            </mona-dropdown-list>
         </div>
         <div
             class="flex flex-1 items-center justify-center p-8 pb-20 [&_ng-component]:w-full [&_ng-component]:flex [&_ng-component]:flex-col [&_ng-component]:items-center [&_ng-component]:justify-center [&_ng-component]:gap-4">
@@ -30,12 +37,14 @@
     </div>
     @if (codeVisible()) {
         <div class="overflow-hidden p-2 border-b border-b-border" @slideDown>
-            <app-code-viewer [code]="config().code||''" language="html"></app-code-viewer>
+            <app-code-viewer [code]="config().code || ''" language="html"></app-code-viewer>
         </div>
     }
     <div>
-        <app-config [config]="config()" [metadata]="metadata()"
-                    [subComponentMetadata]="subComponentMetadata()"
-                    (valueChange)="valueChange.emit($event)"></app-config>
+        <app-config
+            [config]="config()"
+            [metadata]="metadata()"
+            [subComponentMetadata]="subComponentMetadata()"
+            (valueChange)="valueChange.emit($event)"></app-config>
     </div>
 </div>

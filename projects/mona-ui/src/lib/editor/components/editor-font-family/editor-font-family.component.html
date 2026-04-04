@@ -1,6 +1,9 @@
-<mona-drop-down-list [data]="editorService.fonts()" [ngModel]="selectedFontFamily()"
-                     (ngModelChange)="onFontFamilyChange($event)" title="Select font family">
+<mona-dropdown-list
+    [data]="editorService.fonts()"
+    [ngModel]="selectedFontFamily()"
+    (ngModelChange)="onFontFamilyChange($event)"
+    title="Select font family">
     <ng-template monaDropDownListItemTemplate let-font>
         <span [style.font-family]="font">{{ font }}</span>
     </ng-template>
-</mona-drop-down-list>
+</mona-dropdown-list>

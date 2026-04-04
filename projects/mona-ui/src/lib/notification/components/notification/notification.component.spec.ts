@@ -19,8 +19,11 @@ describe("NotificationComponent", () => {
         component = fixture.componentInstance;
         notificationData = {
             componentDestroy$: new Subject<string>(),
-            options: {},
-            visible: signal(true)
+            options: {
+                content: "Notification test"
+            },
+            afterHide$: new Subject(),
+            contentComponentRef: signal(null)
         };
         fixture.componentRef.setInput("data", notificationData);
         fixture.detectChanges();

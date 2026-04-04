@@ -5,7 +5,7 @@ import { ListService } from "../../common/list/services/list.service";
 @Directive({
     selector: `
         mona-auto-complete[monaDropDownVirtualScroll],
-        mona-drop-down-list[monaDropDownVirtualScroll],
+        mona-dropdown-list[monaDropDownVirtualScroll],
         mona-combo-box[monaDropDownVirtualScroll],
         mona-multi-select[monaDropDownVirtualScroll]
     `,

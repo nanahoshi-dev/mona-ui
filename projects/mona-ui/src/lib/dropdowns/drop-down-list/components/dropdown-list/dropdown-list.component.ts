@@ -69,7 +69,7 @@ import {
 } from "../../styles/dropdown-list.styles";
 
 @Component({
-    selector: "mona-drop-down-list",
+    selector: "mona-dropdown-list",
     templateUrl: "./dropdown-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],

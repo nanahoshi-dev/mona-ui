@@ -33,9 +33,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
-                        "setupFiles": [
-                            "./test-setup.ts"
-                        ]
+                        "setupFiles": ["./test-setup.ts"]
                     }
                 }
             }
@@ -59,28 +57,19 @@
                             "base": "dist/mona-ui-tester"
                         },
                         "index": "projects/mona-ui-tester/src/index.html",
-                        "polyfills": [
-                            "projects/mona-ui-tester/src/polyfills.ts"
-                        ],
+                        "polyfills": ["projects/mona-ui-tester/src/polyfills.ts"],
                         "tsConfig": "projects/mona-ui-tester/tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
-                        "assets": [
-                            "projects/mona-ui-tester/src/favicon.ico",
-                            "projects/mona-ui-tester/src/assets"
-                        ],
+                        "assets": ["projects/mona-ui-tester/src/favicon.ico", "projects/mona-ui-tester/src/assets"],
                         "stylePreprocessorOptions": {
-                            "includePaths": [
-                                ""
-                            ]
+                            "includePaths": [""]
                         },
                         "styles": [
                             "node_modules/@fortawesome/fontawesome-free/css/all.css",
                             "node_modules/highlight.js/styles/nord.min.css",
                             "projects/mona-ui-tester/src/styles.css"
                         ],
-                        "scripts": [
-                            "node_modules/@fortawesome/fontawesome-free/js/all.js"
-                        ],
+                        "scripts": ["node_modules/@fortawesome/fontawesome-free/js/all.js"],
                         "browser": "projects/mona-ui-tester/src/main.ts"
                     },
                     "configurations": {
@@ -135,9 +124,7 @@
                 "test": {
                     "builder": "@angular/build:unit-test",
                     "options": {
-                        "setupFiles": [
-                            "./test-setup.ts"
-                        ]
+                        "setupFiles": ["./test-setup.ts"]
                     }
                 }
             }

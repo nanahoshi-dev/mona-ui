@@ -221,16 +221,16 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                             <div class="flex items-center w-full">
                                 <div class="flex items-center w-1/4 text-sm font-semibold">Gender</div>
                                 <div class="flex items-center w-3/4">
-                                    <mona-drop-down-list [data]="['Male', 'Female']" class="w-32"></mona-drop-down-list>
+                                    <mona-dropdown-list [data]="['Male', 'Female']" class="w-32"></mona-dropdown-list>
                                 </div>
                             </div>
                             @if (advancedMode()) {
                                 <div class="flex items-center w-full">
                                     <div class="flex items-center w-1/4 text-sm font-semibold">Age</div>
                                     <div class="flex items-center w-3/4">
-                                        <mona-drop-down-list
+                                        <mona-dropdown-list
                                             [data]="['18-24', '25-34', '35-44', '45-54', '55-64', '65+']"
-                                            class="w-32"></mona-drop-down-list>
+                                            class="w-32"></mona-dropdown-list>
                                     </div>
                                 </div>
                             }

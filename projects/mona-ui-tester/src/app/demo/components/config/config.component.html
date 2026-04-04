@@ -151,7 +151,7 @@
                             [size]="'small'"
                             class="w-37.5"></mona-numeric-text-box>
                     } @else if (entry[1].type === "dropdown") {
-                        <mona-drop-down-list
+                        <mona-dropdown-list
                             [data]="entry[1].dropdownDataSource"
                             [ngModel]="entry[1].dropdownValue"
                             [placeholder]="entry[1].placeholder ?? ''"
@@ -190,7 +190,7 @@
                                     }
                                 }
                             </ng-template>
-                        </mona-drop-down-list>
+                        </mona-dropdown-list>
                     } @else if (entry[1].type === "string") {
                         <mona-text-box
                             [ngModel]="entry[1].stringValue"

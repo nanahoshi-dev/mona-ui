@@ -108,7 +108,7 @@ export * from "./dropdowns/combo-box/components/combo-box/combo-box.component";
 
 /* Drop Down List */
 export * from "./dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
-export * from "./dropdowns/drop-down-list/components/drop-down-list/dropdown-list.component";
+export * from "./dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
 
 /* Drop Down Tree */
 export * from "./dropdowns/drop-down-tree/directives/drop-down-tree-disable.directive";

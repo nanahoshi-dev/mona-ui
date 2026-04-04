@@ -23,7 +23,7 @@
     </div>
     <div class="flex px-2 items-center justify-end flex-1">
         @if (entry().configType === "dropdown") {
-            <mona-drop-down-list
+            <mona-dropdown-list
                 [data]="entry().value"
                 [disabled]="entry().disabled ?? false"
                 [ngModel]="entry().defaultValue"
@@ -52,11 +52,11 @@
                         <span>{{ entry().placeholder ?? "Select..." }}</span>
                     }
                 </ng-template>
-            </mona-drop-down-list>
+            </mona-dropdown-list>
         } @else if (entry().configType === "customDropdown") {
             @let textField = entry().textField;
             @let valueField = entry().valueField;
-            <mona-drop-down-list
+            <mona-dropdown-list
                 [data]="entry().value"
                 [disabled]="entry().disabled ?? false"
                 [ngModel]="entry().defaultValue"
@@ -79,7 +79,7 @@
                         <span class="truncate">{{ entry().placeholder ?? "Select..." }}</span>
                     }
                 </ng-template>
-            </mona-drop-down-list>
+            </mona-dropdown-list>
         } @else if (entry().configType === "color") {
             <mona-color-picker
                 size="small"

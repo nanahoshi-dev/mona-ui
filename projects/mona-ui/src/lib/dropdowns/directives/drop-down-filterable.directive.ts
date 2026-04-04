@@ -17,7 +17,7 @@ import { FilterableOptions } from "../../common/models/FilterableOptions";
 @Directive({
     selector: `
         mona-auto-complete[monaDropDownFilterable],
-        mona-drop-down-list[monaDropDownFilterable],
+        mona-dropdown-list[monaDropDownFilterable],
         mona-combo-box[monaDropDownFilterable],
         mona-multi-select[monaDropDownFilterable]
     `,

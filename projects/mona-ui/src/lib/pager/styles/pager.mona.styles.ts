@@ -11,8 +11,8 @@ export const pagerBaseVariants = cva(
         [&_mona-numeric-text-box_input]:text-center
         [&_mona-numeric-text-box_input]:bg-input-background
 
-        [&_mona-drop-down-list]:mx-1
-        [&_mona-drop-down-list]:my-0
+        [&_mona-dropdown-list]:mx-1
+        [&_mona-dropdown-list]:my-0
     `,
     {
         variants: {

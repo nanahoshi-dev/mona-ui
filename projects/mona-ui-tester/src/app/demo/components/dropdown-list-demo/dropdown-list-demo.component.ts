@@ -194,7 +194,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
         <form [formGroup]="formGroup">
-            <mona-drop-down-list
+            <mona-dropdown-list
                 [data]="dropdownData()"
                 [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
@@ -274,7 +274,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                         }
                     </ng-template>
                 }
-            </mona-drop-down-list>
+            </mona-dropdown-list>
         </form>
     `
 })
