@@ -1,20 +1,14 @@
-import { StepperIndicatorDirective } from "./stepper-indicator.directive";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component } from "@angular/core";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { beforeEach, describe, expect, it } from "vitest";
 import { StepperComponent } from "../components/stepper/stepper.component";
 
 @Component({
-    template: `
-        <mona-stepper [steps]="steps"></mona-stepper>
-    `,
+    template: ` <mona-stepper [steps]="steps"></mona-stepper> `,
     imports: [StepperComponent]
 })
 class TestHostComponent {
-    public steps: any[] = [
-        { label: "Step 1" },
-        { label: "Step 2" },
-        { label: "Step 3" }
-    ];
+    public steps = [{ label: "Step 1" }, { label: "Step 2" }, { label: "Step 3" }];
 }
 
 describe("StepperIndicatorDirective", () => {

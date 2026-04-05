@@ -1,35 +1,58 @@
-<ol [class]="listClass()">
+<ol [class]="listClass()" role="tablist" [attr.aria-orientation]="orientation()">
     @for (step of viewSteps(); track $index) {
-        @let active = step|activeStep:activeStep();
+        @let active = isStepActive(step);
         @let focused = step.index === highlightedStep();
         @let options = step.options;
         @let index = step.index;
-        @let currentIndex = activeStep().index;
-        <li [class]="listItemClass()" [style]="trackItemStyles()" (click)="onStepClick(step)">
+        @let currentIndex = activeStep()?.index ?? -1;
+        <li [class]="listItemClass()" [style]="trackItemStyles()" role="presentation">
             @if (stepTemplate()) {
-                <ng-container [ngTemplateOutlet]="stepTemplate()"
-                              [ngTemplateOutletContext]="{$implicit: options, index, active, currentIndex}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="stepTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: options, index, active, currentIndex }"></ng-container>
             } @else {
-                <span monaStepperIndicator [rounded]="rounded()" [active]="active" [focused]="focused"
-                      (focus)="onIndicatorFocus(step)"
-                      [attr.tabindex]="focused ? 0 : -1">
+                <span
+                    monaStepperIndicator
+                    [rounded]="rounded()"
+                    [active]="active"
+                    [focused]="focused"
+                    role="tab"
+                    [attr.aria-selected]="step.index === activeStep()?.index"
+                    [attr.aria-label]="options.label"
+                    (focus)="onIndicatorFocus(step)"
+                    (click)="onStepClick(step)"
+                    [attr.tabindex]="focused ? 0 : -1">
                     @if (indicatorTemplate()) {
-                        <ng-container [ngTemplateOutlet]="indicatorTemplate()"
-                                      [ngTemplateOutletContext]="{$implicit: options, index, active, currentIndex}"></ng-container>
+                        <ng-container
+                            [ngTemplateOutlet]="indicatorTemplate()"
+                            [ngTemplateOutletContext]="{
+                                $implicit: options,
+                                index,
+                                active,
+                                currentIndex
+                            }"></ng-container>
                     } @else {
-                        {{ step.index }}
+                        {{ step.index + 1 }}
                     }
                 </span>
             }
             @if (labelTemplate()) {
-                <ng-container [ngTemplateOutlet]="labelTemplate()"
-                              [ngTemplateOutletContext]="{$implicit: options, index, active, currentIndex}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="labelTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: options, index, active, currentIndex }"></ng-container>
             } @else {
-                <span>{{ options.label }}</span>
+                <span aria-hidden="true">{{ options.label }}</span>
             }
         </li>
     }
 </ol>
-<div [class]="trackClass()" [style]="trackStyles()">
+<div
+    [class]="trackClass()"
+    [style]="trackStyles()"
+    role="progressbar"
+    [attr.aria-valuenow]="step()"
+    [attr.aria-valuemin]="0"
+    [attr.aria-valuemax]="progressMax()"
+    aria-label="Step progress">
     <div [class]="trackLineClass()" [style]="trackInnerStyles()"></div>
 </div>

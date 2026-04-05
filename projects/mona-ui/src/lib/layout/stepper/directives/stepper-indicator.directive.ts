@@ -1,4 +1,4 @@
-import { computed, Directive, effect, ElementRef, inject, input } from "@angular/core";
+import { afterRenderEffect, computed, Directive, ElementRef, inject, input } from "@angular/core";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../styles/stepper.styles";
 
@@ -23,10 +23,11 @@ export class StepperIndicatorDirective {
     public readonly rounded = input.required<StepperVariantProps["rounded"]>();
 
     public constructor() {
-        effect(() => {
-            const focused = this.focused();
-            if (focused) {
-                this.#host.nativeElement.focus();
+        afterRenderEffect({
+            read: () => {
+                if (this.focused()) {
+                    this.#host.nativeElement.focus();
+                }
             }
         });
     }

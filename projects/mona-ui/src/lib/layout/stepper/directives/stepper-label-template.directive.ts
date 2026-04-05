@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaStepperLabelTemplate]",
-    standalone: true
+    selector: "ng-template[monaStepperLabelTemplate]"
 })
 export class StepperLabelTemplateDirective {}

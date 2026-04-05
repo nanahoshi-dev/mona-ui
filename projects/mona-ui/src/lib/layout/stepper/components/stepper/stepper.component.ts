@@ -5,6 +5,7 @@ import {
     Component,
     computed,
     contentChild,
+    DestroyRef,
     effect,
     ElementRef,
     inject,
@@ -14,17 +15,16 @@ import {
     Signal,
     TemplateRef
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { select } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
-import { v4 } from "uuid";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperIndicatorDirective } from "../../directives/stepper-indicator.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";
 import { StepperStepTemplateDirective } from "../../directives/stepper-step-template.directive";
-import { StepItem, StepOptions } from "../../models/Step";
-import { StepperTemplateContext } from "../../models/StepperTemplateContext";
-import { ActiveStepPipe } from "../../pipes/active-step.pipe";
+import type { StepItem, StepOptions } from "../../models/Step";
+import type { StepperTemplateContext } from "../../models/StepperTemplateContext";
 import {
     stepperBaseThemeVariants,
     stepperStepListItemThemeVariants,
@@ -39,13 +39,16 @@ import {
     selector: "mona-stepper",
     templateUrl: "./stepper.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgTemplateOutlet, StepperIndicatorDirective, ActiveStepPipe],
+    imports: [NgTemplateOutlet, StepperIndicatorDirective],
     host: {
+        role: "group",
+        "aria-label": "Progress",
         "[class]": "baseClass()",
         "[style]": "hostStyles()"
     }
 })
 export class StepperComponent implements StepperVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     readonly #trackItemSize = computed(() => {
@@ -54,11 +57,17 @@ export class StepperComponent implements StepperVariantInput {
     });
     readonly #trackLength = computed(() => {
         const step = this.activeStep();
-        return step ? `${(100 / (this.viewSteps().length - 1)) * step.index}%` : "0%";
+        const stepCount = this.viewSteps().length;
+        return step && stepCount > 1 ? `${(100 / (stepCount - 1)) * step.index}%` : "0%";
     });
     protected readonly activeStep = computed(() => {
+        const steps = this.viewSteps();
+        if (steps.length === 0) {
+            return undefined;
+        }
         const step = this.step();
-        return this.viewSteps().elementAt(step);
+        const clampedIndex = Math.min(Math.max(step, 0), steps.length - 1);
+        return steps.elementAt(clampedIndex);
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -90,20 +99,21 @@ export class StepperComponent implements StepperVariantInput {
         const orientation = this.orientation();
         return stepperStepListItemThemeVariants(theme)({ orientation });
     });
+    protected readonly progressMax = computed(() => Math.max(this.viewSteps().length - 1, 0));
     protected readonly stepTemplate = contentChild(StepperStepTemplateDirective, {
         read: TemplateRef
     }) as Signal<TemplateRef<StepperTemplateContext> | undefined>;
+    protected readonly trackClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const orientation = this.orientation();
+        return stepperTrackThemeVariants(theme)({ orientation });
+    });
     protected readonly trackInnerStyles = computed(() => {
         const orientation = this.orientation();
         const length = this.#trackLength();
         return {
             [orientation === "horizontal" ? "width" : "height"]: length
         };
-    });
-    protected readonly trackClass = computed(() => {
-        const theme = this.#themeService.theme();
-        const orientation = this.orientation();
-        return stepperTrackThemeVariants(theme)({ orientation });
     });
     protected readonly trackItemStyles = computed(() => {
         const orientation = this.orientation();
@@ -129,8 +139,7 @@ export class StepperComponent implements StepperVariantInput {
         const steps = this.steps();
         return select<StepOptions, StepItem>(steps, (step, index) => ({
             options: step,
-            index,
-            uid: v4()
+            index
         })).toImmutableSet();
     });
 
@@ -176,17 +185,31 @@ export class StepperComponent implements StepperVariantInput {
         });
     }
 
-    protected onStepClick(step: StepItem): void {
-        this.setActiveStep(step);
+    protected isStepActive(step: StepItem): boolean {
+        const active = this.activeStep();
+        return active != null && step.index <= active.index;
     }
 
     protected onIndicatorFocus(step: StepItem): void {
         this.setHighlightedStep(step.index);
     }
 
+    protected onStepClick(step: StepItem): void {
+        this.setActiveStep(step);
+    }
+
     private moveHighlight(offset: number): void {
         const current = this.highlightedStep();
-        this.setHighlightedStep(current + offset);
+        const linear = this.linear();
+        const activeStep = this.activeStep();
+        if (linear && activeStep) {
+            const target = current + offset;
+            const minIndex = Math.max(activeStep.index - 1, 0);
+            const maxIndex = Math.min(activeStep.index + 1, this.viewSteps().length - 1);
+            this.setHighlightedStep(Math.min(Math.max(target, minIndex), maxIndex));
+        } else {
+            this.setHighlightedStep(current + offset);
+        }
     }
 
     private setActiveStep(step: StepItem): void {
@@ -210,30 +233,32 @@ export class StepperComponent implements StepperVariantInput {
     }
 
     private setKeyboardEvents(): void {
-        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown").subscribe(event => {
-            const orientation = this.orientation();
-            const previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
-            const nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
-            if (event.key === previousKey) {
-                event.preventDefault();
-                this.moveHighlight(-1);
-            } else if (event.key === nextKey) {
-                event.preventDefault();
-                this.moveHighlight(1);
-            } else if (event.key === "Home") {
-                event.preventDefault();
-                this.setHighlightedStep(0);
-            } else if (event.key === "End") {
-                event.preventDefault();
-                this.setHighlightedStep(this.viewSteps().length - 1);
-            } else if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                const highlightedStep = this.highlightedStep();
-                const step = this.viewSteps().elementAt(highlightedStep);
-                if (step) {
-                    this.setActiveStep(step);
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => {
+                const orientation = this.orientation();
+                const previousKey = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+                const nextKey = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+                if (event.key === previousKey) {
+                    event.preventDefault();
+                    this.moveHighlight(-1);
+                } else if (event.key === nextKey) {
+                    event.preventDefault();
+                    this.moveHighlight(1);
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    this.setHighlightedStep(0);
+                } else if (event.key === "End") {
+                    event.preventDefault();
+                    this.setHighlightedStep(this.viewSteps().length - 1);
+                } else if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    const highlightedStep = this.highlightedStep();
+                    const step = this.viewSteps().elementAt(highlightedStep);
+                    if (step) {
+                        this.setActiveStep(step);
+                    }
                 }
-            }
-        });
+            });
     }
 }

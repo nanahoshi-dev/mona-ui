@@ -1,19 +1,9 @@
-import { signal, WritableSignal } from "@angular/core";
-
-export interface StepOptions<T = any> {
+export interface StepOptions<T = unknown> {
     data?: T;
     label: string;
 }
 
-export class Step<T = any> {
-    public active: WritableSignal<boolean> = signal(false);
-    public index: number = 0;
-
-    public constructor(public readonly options: StepOptions<T>) {}
-}
-
-export interface StepItem<T = any> {
-    options: StepOptions<T>;
-    index: number;
-    uid: string;
+export interface StepItem<T = unknown> {
+    readonly index: number;
+    readonly options: StepOptions<T>;
 }

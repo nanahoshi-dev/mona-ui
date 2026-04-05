@@ -1,6 +1,6 @@
-import { StepOptions } from "./Step";
+import type { StepOptions } from "./Step";
 
-export interface StepperTemplateContext<T = any> {
+export interface StepperTemplateContext<T = unknown> {
     $implicit: StepOptions<T>;
     active: boolean;
     currentIndex: number;
