@@ -2,7 +2,7 @@
      [attr.data-orientation]="orientation()"
      [style.height]="orientation()==='horizontal' ? trackSize():undefined"
      [style.width]="orientation()==='vertical' ? trackSize():undefined"
-     [style.background]="trackBackground()">
+     [style]="trackBackgroundStyle()">
     <div [class]="selectionClasses()"
          [attr.data-orientation]="orientation()"
          [attr.data-dragging]="dragging()"
@@ -10,7 +10,7 @@
          [style.right.%]="orientation()==='horizontal' ? (100 - selectionRight()):undefined"
          [style.bottom.%]="orientation()==='vertical' ? selectionLeft():undefined"
          [style.top.%]="orientation()==='vertical' ? (100 - selectionRight()):undefined"
-         [style.background]="selectionBackground()"
+         [style]="selectionBackgroundStyle()"
     ></div>
 </div>
 @if (showTicks()) {
@@ -53,13 +53,13 @@
      [style]="primaryHandleStyle()"
      [style.left.%]="orientation()==='horizontal' ? primaryHandlePosition() : undefined"
      [style.bottom.%]="orientation()==='vertical' ? primaryHandlePosition() : undefined"
-     [attr.tabindex]="disabled()?-1:0"
+     [attr.tabindex]="effectiveDisabled()?-1:0"
      [attr.role]="'slider'"
      [attr.aria-valuemin]="min()"
      [attr.aria-valuemax]="max()"
      [attr.aria-valuenow]="handleValues()[0]"
      [attr.aria-orientation]="orientation()"
-     [attr.aria-disabled]="disabled()"
+     [attr.aria-disabled]="effectiveDisabled() || null"
      [attr.aria-label]="ranged() ? 'Minimum value' : 'Slider value'"
      #sliderHandle>
     @if (handleTemplate()) {
@@ -75,13 +75,13 @@
          [style]="secondaryHandleStyle()"
          [style.left.%]="orientation()==='horizontal' ? secondaryHandlePosition() : undefined"
          [style.bottom.%]="orientation()==='vertical' ? secondaryHandlePosition() : undefined"
-         [attr.tabindex]="disabled()?-1:0"
+         [attr.tabindex]="effectiveDisabled()?-1:0"
          [attr.role]="'slider'"
          [attr.aria-valuemin]="min()"
          [attr.aria-valuemax]="max()"
          [attr.aria-valuenow]="handleValues()[1]"
          [attr.aria-orientation]="orientation()"
-         [attr.aria-disabled]="disabled()"
+         [attr.aria-disabled]="effectiveDisabled() || null"
          [attr.aria-label]="'Maximum value'"
          #secondarySliderHandle>
         @if (handleTemplate()) {

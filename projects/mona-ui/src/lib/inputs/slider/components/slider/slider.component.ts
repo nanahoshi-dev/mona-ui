@@ -62,13 +62,14 @@ import { valueToPosition } from "../../utils/valueToPosition";
     host: {
         "[class]": "baseClasses()",
         "[class.mona-slider]": "true",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "effectiveDisabled()",
         "[attr.data-orientation]": "orientation()",
         "(focus)": "onFocus()"
     }
 })
 export class SliderComponent implements ControlValueAccessor, SliderVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #disabledState = signal(false);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     #propagateChange: Action<number | [number, number]> | null = null;
     #propagateTouched: Action | null = null;
@@ -79,6 +80,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         return sliderBaseThemeVariants(theme)();
     });
     protected readonly dragging = signal(false);
+    protected readonly effectiveDisabled = computed(() => this.disabled() || this.#disabledState());
     protected readonly handlePositions = signal<[number, number]>([0, 0]);
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
@@ -181,6 +183,20 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     });
     protected readonly selectionLeft = computed(() => this.rangeSelection().left);
     protected readonly selectionRight = computed(() => this.rangeSelection().right);
+    protected readonly selectionBackgroundStyle = computed<Partial<CSSStyleDeclaration>>(() => {
+        const bg = this.selectionBackground();
+        if (!bg) {
+            return {};
+        }
+        return typeof bg === "string" ? { background: bg } : bg;
+    });
+    protected readonly trackBackgroundStyle = computed<Partial<CSSStyleDeclaration>>(() => {
+        const bg = this.trackBackground();
+        if (!bg) {
+            return {};
+        }
+        return typeof bg === "string" ? { background: bg } : bg;
+    });
     protected readonly sliderHandle: Signal<ElementRef<HTMLDivElement>> = viewChild.required("sliderHandle");
     protected readonly sliderHandleClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -359,10 +375,14 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         this.#propagateTouched = fn;
     }
 
+    public setDisabledState(isDisabled: boolean): void {
+        this.#disabledState.set(isDisabled);
+    }
+
     public writeValue(obj: number | [number, number]): void {
         if (obj != null) {
             if (this.ranged()) {
-                if (Array.isArray(obj) && obj.length === 2) {
+                if (Array.isArray(obj) && obj.length === 2 && !isNaN(obj[0]) && !isNaN(obj[1])) {
                     const [minVal, maxVal] = obj;
                     const clampedMin = Math.max(this.min(), Math.min(minVal, this.max()));
                     const clampedMax = Math.max(this.min(), Math.min(maxVal, this.max()));
@@ -379,8 +399,8 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
                         this.secondaryHandleOnTop.set(true);
                     }
                 }
-            } else {
-                const value = Math.max(this.min(), Math.min(obj as number, this.max()));
+            } else if (typeof obj === "number" && !isNaN(obj)) {
+                const value = Math.max(this.min(), Math.min(obj, this.max()));
                 const position = valueToPosition(value, this.min(), this.max());
                 // In non-ranged mode, only use the first position, second is unused
                 this.handleValues.set([value, value]);
@@ -390,7 +410,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
     }
 
     protected onFocus(): void {
-        if (!this.disabled()) {
+        if (!this.effectiveDisabled()) {
             this.sliderHandle().nativeElement.focus();
         }
     }
@@ -564,7 +584,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 tap(() => this.dragging.set(false)),
-                filter(() => !this.disabled())
+                filter(() => !this.effectiveDisabled())
             )
             .subscribe((event: MouseEvent) => {
                 const isSecondary = this.getClosestHandle(event);
@@ -617,7 +637,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         fromEvent<KeyboardEvent>(this.sliderHandle().nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.disabled()),
+                filter(() => !this.effectiveDisabled()),
                 filter(event =>
                     ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(
                         event.key
@@ -650,7 +670,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             fromEvent<KeyboardEvent>(secondaryHandle.nativeElement, "keydown")
                 .pipe(
                     takeUntilDestroyed(this.#destroyRef),
-                    filter(() => !this.disabled()),
+                    filter(() => !this.effectiveDisabled()),
                     filter(event =>
                         [
                             "ArrowLeft",
@@ -682,7 +702,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
         fromEvent<MouseEvent>(this.sliderHandle().nativeElement, "mousedown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.disabled()),
+                filter(() => !this.effectiveDisabled()),
                 tap(() => this.dragging.set(true)),
                 switchMap(() =>
                     mouseMove$.pipe(
@@ -698,7 +718,7 @@ export class SliderComponent implements ControlValueAccessor, SliderVariantInput
             fromEvent<MouseEvent>(secondaryHandle.nativeElement, "mousedown")
                 .pipe(
                     takeUntilDestroyed(this.#destroyRef),
-                    filter(() => !this.disabled()),
+                    filter(() => !this.effectiveDisabled()),
                     tap(() => this.dragging.set(true)),
                     switchMap(() =>
                         mouseMove$.pipe(
