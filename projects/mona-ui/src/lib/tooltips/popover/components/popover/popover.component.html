@@ -4,9 +4,9 @@
             @if (title() || titleTemplateRef()) {
                 <div [class]="headerClasses()">
                     @if (titleTemplateRef()) {
-                        <ng-container [ngTemplateOutlet]="titleTemplateRef()??null"></ng-container>
+                        <ng-container [ngTemplateOutlet]="titleTemplateRef()"></ng-container>
                     } @else {
-                        <span>{{title()}}</span>
+                        <span>{{ title() }}</span>
                     }
                 </div>
             }
@@ -15,7 +15,7 @@
             </div>
             @if (footerTemplateRef()) {
                 <div class="mona-popover-footer">
-                    <ng-container [ngTemplateOutlet]="footerTemplateRef()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="footerTemplateRef()"></ng-container>
                 </div>
             }
         </div>

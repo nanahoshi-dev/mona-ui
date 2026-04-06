@@ -113,6 +113,10 @@ export class SidebarComponent {
                     path: "/fieldset"
                 },
                 {
+                    text: "Grid",
+                    path: "/grid"
+                },
+                {
                     text: "Input",
                     path: "/input"
                 },

@@ -139,6 +139,11 @@ export const routes: Routes = [
                     import("./docs/components/fieldset-doc/fieldset-doc.component").then(m => m.FieldsetDocComponent)
             },
             {
+                path: "grid",
+                loadComponent: () =>
+                    import("./docs/components/grid-doc/grid-doc.component").then(m => m.GridDocComponent)
+            },
+            {
                 path: "input",
                 loadComponent: () =>
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)

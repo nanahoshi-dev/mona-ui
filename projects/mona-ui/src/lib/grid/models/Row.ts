@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from "@angular/core";
+import { signal } from "@angular/core";
 import { Dictionary } from "@mirei/ts-collections";
 import { FormGroup } from "@angular/forms";
 import { v4 } from "uuid";
@@ -19,12 +19,5 @@ export class Row {
 
     public setEditForm(key: string, form: FormGroup): void {
         this.#editFromDictionary.put(key, form);
-    }
-}
-
-export class VirtualGroupRow {
-    public readonly text: string;
-    public constructor(text: string) {
-        this.text = text;
     }
 }

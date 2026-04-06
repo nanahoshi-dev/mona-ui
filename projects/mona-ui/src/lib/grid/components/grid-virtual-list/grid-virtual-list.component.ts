@@ -24,10 +24,18 @@ import { ButtonDirective } from "../../../buttons/button/directives/button.direc
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { ContainsPipe } from "../../../pipes/contains.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { GridCellDirective } from "../../directives/grid-cell.directive";
+import { GridRowDirective } from "../../directives/grid-row.directive";
 import { Column } from "../../models/Column";
 import { VirtualGridGroup, VirtualGridRow } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";
+import {
+    gridGroupRowThemeVariants,
+    gridListBaseThemeVariants,
+    gridListTableThemeVariants
+} from "../../styles/grid.styles";
 import { cellComparer } from "../../utilities/GridUtils";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 
@@ -43,27 +51,44 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         SlicePipe,
         ContainsPipe,
         NgTemplateOutlet,
-        ContextMenuComponent
+        ContextMenuComponent,
+        GridRowDirective,
+        GridCellDirective
     ],
     templateUrl: "./grid-virtual-list.component.html",
-    styleUrl: "./grid-virtual-list.component.scss",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        "[class]": "baseClass()"
+    }
 })
 export class GridVirtualListComponent implements OnInit, AfterViewInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #groupColumns$ = toObservable(inject(GridService).groupColumns);
     readonly #injector = inject(Injector);
+    readonly #themeService = inject(ThemeService);
     readonly #virtualGridRows = computed(() => {
         const data = this.data();
         const columns = this.gridService.groupColumns();
         const rows = this.flattenGroups(this.createGridGroup(data, columns), 0, null);
         return rows.toImmutableSet();
     });
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridListBaseThemeVariants(theme)({ virtual: true });
+    });
     protected readonly collapseIcon = faChevronDown;
     protected readonly collapsedGroups = signal<ImmutableSet<string>>(ImmutableSet.create());
     protected readonly expandIcon = faChevronRight;
     protected readonly gridService = inject(GridService);
+    protected readonly groupRowClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridGroupRowThemeVariants(theme)();
+    });
+    protected readonly tableClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridListTableThemeVariants(theme)();
+    });
     protected readonly groupedGridRows = computed(() => {
         const collapsedGroups = this.collapsedGroups();
         const rows = this.#virtualGridRows();

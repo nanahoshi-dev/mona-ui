@@ -1,66 +1,89 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
+    computed,
     DestroyRef,
     effect,
     ElementRef,
     inject,
     input,
-    OnInit,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { Dictionary, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
+import { Dictionary, ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
 import { fromEvent, mergeWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { ElementAtPipe } from "../../../pipes/element-at.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { GridCellDirective } from "../../directives/grid-cell.directive";
+import { GridRowDirective } from "../../directives/grid-row.directive";
 import { Column } from "../../models/Column";
 import { GridGroup } from "../../models/GridGroup";
 import { Row } from "../../models/Row";
 import { GridGroupPipe } from "../../pipes/grid-group.pipe";
 import { GridService } from "../../services/grid.service";
+import {
+    gridGroupRowThemeVariants,
+    gridListBaseThemeVariants,
+    gridListTableThemeVariants,
+    GridListVariantInput
+} from "../../styles/grid.styles";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 
 @Component({
     selector: "mona-grid-list",
     templateUrl: "./grid-list.component.html",
-    styleUrls: ["./grid-list.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         GridCellComponent,
         ButtonDirective,
         FontAwesomeModule,
         NgTemplateOutlet,
-        SlicePipe,
         GridGroupPipe,
         ElementAtPipe,
-        ContextMenuComponent
+        ContextMenuComponent,
+        GridRowDirective,
+        GridCellDirective,
+        SlicePipe
     ],
     host: {
-        class: "mona-grid-list"
+        "[class]": "baseClass()"
     }
 })
-export class GridListComponent implements OnInit {
+export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridListBaseThemeVariants(theme)({ virtual: false });
+    });
     protected readonly collapseIcon = faChevronDown;
     protected readonly expandIcon = faChevronRight;
     protected readonly gridService = inject(GridService);
+    protected readonly groupRowClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridGroupRowThemeVariants(theme)();
+    });
+    protected readonly tableClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridListTableThemeVariants(theme)();
+    });
 
-    public columns = input<ImmutableList<Column>>(ImmutableList.create());
-    public data = input<ImmutableSet<Row>>(ImmutableSet.create());
+    public readonly columns = input<ImmutableList<Column>>(ImmutableList.create());
+    public readonly data = input<ImmutableSet<Row>>(ImmutableSet.create());
 
     public constructor() {
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
         effect(() => untracked(() => this.synchronizeHorizontalScroll()));
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
     }
 
     public onGridRowClick(event: MouseEvent, row: Row): void {
@@ -124,4 +147,6 @@ export class GridListComponent implements OnInit {
                 headerElement.scrollLeft = gridElement.scrollLeft;
             });
     }
+
+    protected readonly span = span;
 }

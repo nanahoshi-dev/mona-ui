@@ -1,8 +1,9 @@
 import { A11yModule, FocusMonitor, FocusOrigin } from "@angular/cdk/a11y";
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
+    computed,
     DestroyRef,
     DOCUMENT,
     ElementRef,
@@ -13,11 +14,17 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import {
+    gridCellBaseThemeVariants,
+    gridCellContainerThemeVariants,
+    gridCellTextThemeVariants
+} from "mona-ui/grid/styles/grid.styles";
 import { asyncScheduler, filter, fromEvent, map, Subject, take, takeUntil, tap, timer } from "rxjs";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
 import { CheckBoxComponent } from "../../../inputs/check-box/components/check-box/check-box.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { TooltipComponent } from "../../../tooltips/tooltip/components/tooltip/tooltip.component";
 import { CellEditEvent } from "../../models/CellEditEvent";
 import { Column } from "../../models/Column";
@@ -27,11 +34,9 @@ import { GridService } from "../../services/grid.service";
 @Component({
     selector: "mona-grid-cell",
     templateUrl: "./grid-cell.component.html",
-    styleUrls: ["./grid-cell.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         A11yModule,
-        NgClass,
         NgTemplateOutlet,
         FormsModule,
         ReactiveFormsModule,
@@ -40,14 +45,32 @@ import { GridService } from "../../services/grid.service";
         DatePickerComponent,
         TooltipComponent,
         CheckBoxComponent
-    ]
+    ],
+    host: {
+        "[class]": "baseClass()"
+    }
 })
 export class GridCellComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #themeService = inject(ThemeService);
     #focused = false;
+
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridCellBaseThemeVariants(theme)();
+    });
+    protected readonly cellContainerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const editing = this.editing();
+        return gridCellContainerThemeVariants(theme)({ editing });
+    });
+    protected readonly cellTextClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridCellTextThemeVariants(theme)();
+    });
     protected readonly editing = signal(false);
     protected readonly gridService = inject(GridService);
     protected editForm!: FormGroup;
@@ -238,7 +261,7 @@ export class GridCellComponent implements OnInit {
                 }
                 if (this.column().dataType() !== "date") {
                     if (this.editing()) {
-                        this.editing.set(false);
+                        // this.editing.set(false);
                         this.updateCellValue();
                     }
                 } else {

@@ -142,7 +142,7 @@ export class GridService {
         const fontFamily = documentBodyStyle.getPropertyValue("font-family");
         const fontSize = documentBodyStyle.getPropertyValue("font-size");
         const titleElement = element.querySelector(".mona-grid-column-title");
-        const actionsElement = element.querySelector(".mona-grid-column-actions");
+        const actionsElement = element.querySelector("[data-column-actions]");
         const actionsWidth = actionsElement ? actionsElement.clientWidth : 0;
         const leftRightPadding = titleElement
             ? parseInt(window.getComputedStyle(titleElement).paddingLeft, 10) +

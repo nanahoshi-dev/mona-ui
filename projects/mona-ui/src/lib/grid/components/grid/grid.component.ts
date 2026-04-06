@@ -32,17 +32,16 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { swap } from "@mirei/ts-collections";
 import { asyncScheduler, filter, observeOn, take, tap } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
 import { PlaceholderComponent } from "../../../layout/placeholder/components/placeholder/placeholder.component";
-import { ContextMenuItemComponent } from "../../../menus/contextmenu/components/contextmenu-item/context-menu-item.component";
-import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
-import { MenuItemIconTemplateDirective } from "../../../menus/directives/menu-item-icon-template.directive";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
 import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
 import { CompositeFilterDescriptor } from "../../../query/filter/FilterDescriptor";
 import { SortDescriptor, SortDirection } from "../../../query/sort/SortDescriptor";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
 import { GridDetailTemplateDirective } from "../../directives/grid-detail-template.directive";
 import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
@@ -52,15 +51,36 @@ import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { SortableOptions } from "../../models/SortableOptions";
 import { GridService } from "../../services/grid.service";
+import {
+    gridBaseThemeVariants,
+    gridColumnActionsThemeVariants,
+    gridColumnResizerThemeVariants,
+    gridGroupPanelPlaceholderThemeVariants,
+    gridGroupPanelThemeVariants,
+    gridHeaderTableCellThemeVariants,
+    gridHeaderTableColumnTitleThemeVariants,
+    gridHeaderTableColumnWrapThemeVariants,
+    gridHeaderTableRowThemeVariants,
+    gridHeaderTableThemeVariants,
+    gridHeaderThemeVariants,
+    gridListTableCellThemeVariants,
+    gridNoDataThemeVariants,
+    GridVariantInput,
+    GridVariantProps
+} from "../../styles/grid.styles";
 import { GridColumnComponent } from "../grid-column/grid-column.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
+import {
+    PopupMenuComponent,
+    PopupMenuItemComponent,
+    PopupMenuTextTemplateDirective
+} from "projects/mona-ui/src/public-api";
 
 @Component({
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
-    styleUrls: ["./grid.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [GridService],
     imports: [
@@ -76,33 +96,86 @@ import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list
         PagerComponent,
         GridVirtualListComponent,
         CdkDragPlaceholder,
-        MenuItemIconTemplateDirective,
         PlaceholderComponent,
-        ContextMenuComponent,
-        ContextMenuItemComponent
+        PopupMenuComponent,
+        PopupMenuItemComponent,
+        PopupMenuTextTemplateDirective
     ],
     host: {
-        class: "mona-grid",
+        "[class]": "baseClass()",
         "[attr.data-uid]": "uid"
     }
 })
-export class GridComponent<T> implements OnInit {
+export class GridComponent<T> implements OnInit, GridVariantInput {
     readonly #cdr = inject(ChangeDetectorRef);
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const rounded = this.rounded();
+        const variantClass = gridBaseThemeVariants(theme)({ rounded });
+        const userClass = this.userClass();
+        return twMerge(variantClass, userClass);
+    });
+    protected readonly columnActionsClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridColumnActionsThemeVariants(theme)();
+    });
+    protected readonly columnResizerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridColumnResizerThemeVariants(theme)();
+    });
     protected readonly columns = contentChildren(GridColumnComponent);
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
     protected readonly gridService = inject(GridService);
     protected readonly gridWidthSet = signal(false);
     protected readonly groupColumnList = viewChild<CdkDropList>("groupColumnList");
+    protected readonly groupPanelPlaceholderClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridGroupPanelPlaceholderThemeVariants(theme)();
+    });
+    protected readonly groupPanelClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridGroupPanelThemeVariants(theme)();
+    });
     protected readonly groupPanelPlaceholderVisible = signal(true);
     protected readonly groupable = computed(() => this.gridService.groupableOptions().enabled);
     protected readonly groupingInProgress = signal(false);
+    protected readonly headerClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridHeaderThemeVariants(theme)();
+    });
     protected readonly headerMargin = "0 15px 0 0";
+    protected readonly headerTableClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridHeaderTableThemeVariants(theme)();
+    });
+    protected readonly headerTableCellClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridHeaderTableCellThemeVariants(theme)();
+    });
+    protected readonly headerTableColumnTitleClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridHeaderTableColumnTitleThemeVariants(theme)();
+    });
+    protected readonly headerTableColumnWrapClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridHeaderTableColumnWrapThemeVariants(theme)();
+    });
+    protected readonly headerTableRowClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridHeaderTableRowThemeVariants(theme)();
+    });
+    protected readonly noDataClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridNoDataThemeVariants(theme)();
+    });
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
     protected readonly resizing = signal(false);
+   
     protected readonly uid = v4();
     protected columnDragging = false;
     protected dragColumn?: Column;
@@ -132,7 +205,7 @@ export class GridComponent<T> implements OnInit {
     /**
      * The number of items to be displayed on a page.
      */
-    public pageSize = input<number | undefined>(undefined);
+    public pageSize = input<number>();
 
     /**
      * The page sizes that the user can select from.
@@ -167,6 +240,8 @@ export class GridComponent<T> implements OnInit {
      */
     public responsivePager = input(true);
 
+    public readonly rounded = input<GridVariantProps["rounded"]>("medium");
+
     /**
      * Initial sort configuration to be applied to the grid when it is loaded.
      */
@@ -176,6 +251,8 @@ export class GridComponent<T> implements OnInit {
      * Whether the grid is sortable.
      */
     public sortable = input<boolean | SortableOptions>(false);
+
+    public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
         this.setFilterEffect();

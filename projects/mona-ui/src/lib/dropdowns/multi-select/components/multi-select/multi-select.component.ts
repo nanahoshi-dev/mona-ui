@@ -206,14 +206,12 @@ export class MultiSelectComponent<TData = unknown>
     });
     protected readonly valueTextMap = computed(() => {
         const tagCount = this.visibleTagCount();
-        const x = this.selectedListItems()
+        return this.selectedListItems()
             .take(tagCount)
             .toImmutableDictionary(
                 i => i,
                 i => this.#listService.getItemText(i)
             );
-        console.log("x", x.toArray(), tagCount);
-        return x;
     });
     protected readonly visibleTagCount = computed(() => {
         const tagCount = this.tagCount();

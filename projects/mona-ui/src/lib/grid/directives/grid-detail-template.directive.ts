@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaGridDetailTemplate]",
-    standalone: true
+    selector: "ng-template[monaGridDetailTemplate]"
 })
 export class GridDetailTemplateDirective {}
