@@ -132,9 +132,9 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
     public onToggleDetailClick(event: MouseEvent, row: VirtualGridRow | Row): void {
         event.stopPropagation();
         if (row instanceof Row) {
-            row.detailVisible.update(v => !v);
+            this.gridService.setRowExpanded(row, !this.gridService.isRowExpanded(row));
         } else if (row.type === "row") {
-            row.row.detailVisible.update(v => !v);
+            this.gridService.setRowExpanded(row.row, !this.gridService.isRowExpanded(row.row));
         }
     }
 

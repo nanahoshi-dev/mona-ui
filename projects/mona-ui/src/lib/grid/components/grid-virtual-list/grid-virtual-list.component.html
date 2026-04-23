@@ -11,8 +11,8 @@
                         monaGridRow
                         [index]="$index"
                         [row]="row"
-                        [selected]="row.selected()"
                         (click)="onGridRowClick($event, row)"
+                        #gridRow="monaGridRow"
                         #rowElement>
                         @if (gridService.masterDetailTemplate()) {
                             <td>
@@ -27,7 +27,7 @@
                                         size="small"
                                         class="w-8.5"
                                         (click)="onToggleDetailClick($event, row)">
-                                        @if (row.detailVisible()) {
+                                        @if (gridRow.expanded()) {
                                             <i class="ri-subtract-line"></i>
                                         } @else {
                                             <i class="ri-add-line"></i>
@@ -56,10 +56,8 @@
                             </ng-container>
                         }
                     </tr>
-                    @if (row.detailVisible()) {
-                        <tr
-                            class="border-b border-b-border"
-                            [style.width.px]="gridService.masterDetailRowWidth()">
+                    @if (gridRow.expanded()) {
+                        <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
                             <td>
                                 <ng-container
                                     [ngTemplateOutlet]="gridService.masterDetailTemplate()"
@@ -108,7 +106,7 @@
                             monaGridRow
                             [index]="$index"
                             [row]="rowItem.row"
-                            [selected]="rowItem.row.selected()"
+                            #gridRow="monaGridRow"
                             #rowElement>
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : rowItem.level + 1; track $index) {
                                 <td
@@ -127,7 +125,7 @@
                                             size="small"
                                             class="w-8.5"
                                             (click)="onToggleDetailClick($event, rowItem)">
-                                            @if (rowItem.row.detailVisible()) {
+                                            @if (gridRow.expanded()) {
                                                 <i class="ri-subtract-line"></i>
                                             } @else {
                                                 <i class="ri-add-line"></i>
@@ -156,10 +154,8 @@
                                 </ng-container>
                             }
                         </tr>
-                        @if (rowItem.row.detailVisible()) {
-                            <tr
-                                class="border-b border-b-border"
-                                [style.width.px]="gridService.masterDetailRowWidth()">
+                        @if (gridRow.expanded()) {
+                            <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
                                 <td>
                                     <ng-container
                                         [ngTemplateOutlet]="gridService.masterDetailTemplate()"

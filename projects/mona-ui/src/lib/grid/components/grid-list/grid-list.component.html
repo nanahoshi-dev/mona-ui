@@ -7,13 +7,13 @@
                     monaGridRow
                     [index]="$index"
                     [row]="row"
-                    [selected]="row.selected()"
+                    #gridRow="monaGridRow"
                     #rowElement>
                     @if (gridService.masterDetailTemplate()) {
                         <td [style.width.px]="gridService.detailColumnWidth">
                             <span class="mona-grid-detail-toggle-wrapper">
                                 <button monaButton look="ghost" (click)="onToggleDetailClick($event, row)">
-                                    @if (row.detailVisible()) {
+                                    @if (gridRow.expanded()) {
                                         <i class="ri-subtract-line"></i>
                                     } @else {
                                         <i class="ri-add-line"></i>
@@ -38,7 +38,7 @@
                         </ng-container>
                     }
                 </tr>
-                @if (row.detailVisible()) {
+                @if (gridRow.expanded()) {
                     <tr [style.width.px]="gridService.masterDetailRowWidth()">
                         <td
                             [style.min-width.px]="gridService.masterDetailEmptyCellWidth()"
@@ -103,7 +103,7 @@
                                     monaGridRow
                                     [index]="$index"
                                     [row]="row"
-                                    [selected]="row.selected()"
+                                    #gridRow="monaGridRow"
                                     #rowElement>
                                     @for (_ of gridService.groupColumns(); track $index) {
                                         <td
@@ -125,7 +125,7 @@
                                                     size="small"
                                                     class="w-8.5"
                                                     (click)="onToggleDetailClick($event, row)">
-                                                    @if (row.detailVisible()) {
+                                                    @if (gridRow.expanded()) {
                                                         <i class="ri-subtract-line"></i>
                                                     } @else {
                                                         <i class="ri-add-line"></i>
@@ -153,7 +153,7 @@
                                         </ng-container>
                                     }
                                 </tr>
-                                @if (row.detailVisible()) {
+                                @if (gridRow.expanded()) {
                                     <tr [style.width.px]="gridService.masterDetailRowWidth()">
                                         <td
                                             [style.min-width.px]="gridService.masterDetailEmptyCellWidth()"

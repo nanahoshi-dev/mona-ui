@@ -112,7 +112,8 @@ export class GridListComponent implements GridListVariantInput {
 
     public onToggleDetailClick(event: MouseEvent, row: Row): void {
         event.stopPropagation();
-        row.detailVisible.update(v => !v);
+        const expanded = this.gridService.isRowExpanded(row);
+        this.gridService.setRowExpanded(row, !expanded);
     }
 
     private setSubscriptions(): void {

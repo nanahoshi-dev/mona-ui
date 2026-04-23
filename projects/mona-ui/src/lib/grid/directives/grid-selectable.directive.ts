@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { orderBy, select, sequenceEqual } from "@mirei/ts-collections";
 import { pairwise, startWith } from "rxjs";
@@ -9,16 +9,15 @@ import { GridService } from "../services/grid.service";
     selector: "mona-grid[monaGridSelectable]",
     standalone: true
 })
-export class GridSelectableDirective implements OnInit {
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
-    readonly #gridService: GridService = inject(GridService);
-
-    public readonly selectedKeysChange = output<unknown[]>();
-    public options = input<SelectableOptions | "" | undefined>(undefined, {
+export class GridSelectableDirective {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #gridService = inject(GridService);
+    public readonly options = input<SelectableOptions | "">("", {
         alias: "monaGridSelectable"
     });
-    public selectBy = input<string>("");
-    public selectedKeys = input<Iterable<unknown>>([]);
+    public readonly selectBy = input<string>("");
+    public readonly selectedKeys = input<Iterable<unknown>>([]);
+    public readonly selectedKeysChange = output<unknown[]>();
 
     public constructor() {
         effect(() => {
@@ -52,11 +51,9 @@ export class GridSelectableDirective implements OnInit {
                 this.#gridService.loadSelectedKeys(selectedKeys);
             });
         });
-    }
-
-    public ngOnInit(): void {
-        this.#gridService.selectedKeysChange = this.selectedKeysChange;
-        this.setSubscriptions();
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
     }
 
     private setSubscriptions(): void {
@@ -72,7 +69,7 @@ export class GridSelectableDirective implements OnInit {
                     this.#gridService.selectBy() ? r.data[this.#gridService.selectBy()] : r.data
                 );
                 this.#gridService.selectedKeys.update(set => set.clear().addAll(selectedKeys));
-                this.#gridService.selectedKeysChange.emit(selectedKeys.toArray());
+                this.selectedKeysChange.emit(selectedKeys.toArray());
             });
     }
 }

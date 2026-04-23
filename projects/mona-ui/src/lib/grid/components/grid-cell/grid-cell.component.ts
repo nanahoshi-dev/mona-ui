@@ -79,8 +79,8 @@ export class GridCellComponent implements OnInit {
     public row = input.required<Row>();
 
     public ngOnInit(): void {
-        this.initializeForm();
-        this.setSubscriptions();
+        // this.initializeForm();
+        // this.setSubscriptions();
     }
 
     public onFocusChange(origin: FocusOrigin): void {
@@ -272,14 +272,14 @@ export class GridCellComponent implements OnInit {
     }
 
     private initializeForm(): void {
-        const form = this.row().getEditForm(this.column().field());
-        if (form) {
-            this.editForm = form;
-        } else {
-            this.editForm = new FormGroup({});
-            this.editForm.addControl(this.column().field(), new FormControl(this.row().data[this.column().field()]));
-            this.row().setEditForm(this.column().field(), this.editForm);
-        }
+        // const form = this.row().getEditForm(this.column().field());
+        // if (form) {
+        //     this.editForm = form;
+        // } else {
+        //     this.editForm = new FormGroup({});
+        //     this.editForm.addControl(this.column().field(), new FormControl(this.row().data[this.column().field()]));
+        //     this.row().setEditForm(this.column().field(), this.editForm);
+        // }
     }
 
     private notifyCellEdit(): CellEditEvent {

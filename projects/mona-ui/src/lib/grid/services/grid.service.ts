@@ -29,6 +29,7 @@ export class GridService {
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 34;
+    public readonly expandedKeys = signal(ImmutableSet.create());
     public readonly filterLoad$ = new Subject<void>();
     public readonly groupColumnWidth = 34;
     public readonly groupColumns = signal<ImmutableSet<Column>>(ImmutableSet.create());
@@ -58,9 +59,15 @@ export class GridService {
     public readonly pageState: PageState = { page: signal(1), skip: signal(0), take: signal(10) };
     public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
     public readonly selectBy = signal("");
-    public readonly selectedKeys = signal<ImmutableSet<unknown>>(ImmutableSet.create());
+    public readonly selectedKeys = signal(ImmutableSet.create());
     public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
-    public readonly selectedRows = signal<ImmutableSet<Row>>(ImmutableSet.create());
+    public readonly selectedRows = computed(() => {
+        const selectedKeys = this.selectedKeys();
+        return selectedKeys
+            .select(key => this.rows().firstOrDefault(r => this.getRowSelectionKey(r) === key))
+            .where(i => i != null)
+            .toImmutableSet();
+    });
     public readonly selectedRowsChange$ = new Subject<Iterable<Row>>();
     public readonly sortLoad$ = new Subject<void>();
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
@@ -122,10 +129,7 @@ export class GridService {
     };
 
     public deselectAllRows(): void {
-        if (this.selectedRows().length !== 0) {
-            this.selectedRows().forEach(r => r.selected.set(false));
-        }
-        this.selectedRows.update(set => set.clear());
+        this.selectedKeys.update(set => set.clear());
     }
 
     public findTextWidthOfColumn(column: Column, element: HTMLTableCellElement): number {
@@ -164,8 +168,7 @@ export class GridService {
         if (!this.selectedRows().contains(row)) {
             this.selectRow(row);
         } else if (event.ctrlKey || event.metaKey) {
-            row.selected.set(false);
-            this.selectedRows.update(set => set.remove(row));
+            this.selectedKeys.update(set => set.remove(this.getRowSelectionKey(row)));
         }
     }
 
@@ -182,12 +185,20 @@ export class GridService {
     }
 
     public handleSingleSelection(event: MouseEvent, row: Row): void {
-        if (row.selected() && (event.ctrlKey || event.metaKey)) {
+        if (this.isRowSelected(row) && (event.ctrlKey || event.metaKey)) {
             this.deselectAllRows();
         } else {
             this.deselectAllRows();
             this.selectRow(row);
         }
+    }
+
+    public isRowExpanded(row: Row): boolean {
+        return this.expandedKeys().contains(this.getRowSelectionKey(row));
+    }
+
+    public isRowSelected(row: Row): boolean {
+        return this.selectedRows().contains(row);
     }
 
     public isSelectableGrid(): boolean {
@@ -244,18 +255,6 @@ export class GridService {
 
     public loadSelectedKeys(selectedKeys: Iterable<unknown>): void {
         this.selectedKeys.update(set => set.clear().addAll(selectedKeys));
-        const selectedRowList: Row[] = [];
-        for (const row of this.rows()) {
-            const fieldData = this.selectBy() ? row.data[this.selectBy()] : row.data;
-            if (fieldData == null) {
-                continue;
-            }
-            row.selected.set(this.selectedKeys().contains(fieldData));
-            if (row.selected()) {
-                selectedRowList.push(row);
-            }
-        }
-        this.selectedRows.update(set => set.clear().addAll(selectedRowList));
         this.selectedKeysLoad$.next(this.selectedKeys());
     }
 
@@ -281,8 +280,8 @@ export class GridService {
     }
 
     public selectRow(row: Row): void {
-        row.selected.set(true);
-        this.selectedRows.update(set => set.add(row));
+        const key = this.getRowSelectionKey(row);
+        this.selectedKeys.update(set => set.add(key));
     }
 
     public setEditableOptions(options: EditableOptions): void {
@@ -291,6 +290,11 @@ export class GridService {
 
     public setGroupableOptions(options: Partial<GroupableOptions>): void {
         this.groupableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setRowExpanded(row: Row, expanded: boolean): void {
+        const key = this.getRowSelectionKey(row);
+        this.expandedKeys.update(set => (expanded ? set.add(key) : set.remove(key)));
     }
 
     public setRows(value: Iterable<any>): void {
@@ -322,5 +326,17 @@ export class GridService {
             }
         }
         return longestValue;
+    }
+
+    private getRowSelectionKey(row: Row): unknown {
+        return this.getRowDataItemSelectionKey(row.data);
+    }
+
+    private getRowDataItemSelectionKey(data: Record<PropertyKey, unknown>): unknown {
+        const selectBy = this.selectBy();
+        if (!selectBy) {
+            return data;
+        }
+        return data[selectBy];
     }
 }
