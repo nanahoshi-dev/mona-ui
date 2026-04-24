@@ -2,7 +2,7 @@ import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, 
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { orderBy, select, sequenceEqual } from "@mirei/ts-collections";
 import { pairwise, startWith } from "rxjs";
-import { SelectableOptions } from "../models/SelectableOptions";
+import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -12,7 +12,7 @@ import { GridService } from "../services/grid.service";
 export class GridSelectableDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
-    public readonly options = input<SelectableOptions | "">("", {
+    public readonly options = input<GridSelectableOptions | "">("", {
         alias: "monaGridSelectable"
     });
     public readonly selectBy = input<string>("");
@@ -57,19 +57,13 @@ export class GridSelectableDirective {
     }
 
     private setSubscriptions(): void {
-        this.#gridService.selectedRowsChange$
-            .pipe(startWith(this.#gridService.selectedRows()), pairwise(), takeUntilDestroyed(this.#destroyRef))
-            .subscribe(([oldRows, newRows]) => {
-                const oldRowUidList = select(oldRows, r => r.uid).orderBy(u => u);
-                const newRowUidList = select(newRows, r => r.uid).orderBy(u => u);
-                if (oldRowUidList.sequenceEqual(newRowUidList)) {
+        this.#gridService.selectedKeysChange$
+            .pipe(startWith(this.#gridService.selectedKeys()), pairwise(), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(([oldKeys, newKeys]) => {
+                if (oldKeys.order().sequenceEqual(newKeys.order())) {
                     return;
                 }
-                const selectedKeys = select(newRows, r =>
-                    this.#gridService.selectBy() ? r.data[this.#gridService.selectBy()] : r.data
-                );
-                this.#gridService.selectedKeys.update(set => set.clear().addAll(selectedKeys));
-                this.selectedKeysChange.emit(selectedKeys.toArray());
+                this.selectedKeysChange.emit(newKeys.toArray());
             });
     }
 }

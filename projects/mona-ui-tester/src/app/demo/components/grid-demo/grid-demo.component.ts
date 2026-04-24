@@ -8,7 +8,9 @@ import {
     GridEditableDirective,
     GridGroupableDirective,
     GridSelectableDirective,
-    GridVirtualScrollDirective
+    GridSelectableOptions,
+    GridVirtualScrollDirective,
+    VirtualScrollOptions
 } from "mona-ui";
 import { v4 } from "uuid";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -33,6 +35,39 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             numericNullable: false,
             numericMin: 0,
             numericMax: 1000000
+        },
+        selection: {
+            code: ``,
+            name: "Row Selection",
+            description: "Enable row selection",
+            active: false,
+            subFeatures: {
+                mode: {
+                    code: ``,
+                    active: false,
+                    description: "Selection mode for row selection",
+                    name: "Mode",
+                    type: "dropdown",
+                    dropdownDataSource: ["single", "multiple"] as const,
+                    dropdownValue: "single"
+                }
+            }
+        },
+        virtualization: {
+            code: ``,
+            active: false,
+            description: `Enable virtualization for the grid to improve performance with large datasets.`,
+            name: "Virtualization",
+            subFeatures: {
+                rowHeight: {
+                    code: ``,
+                    active: false,
+                    description: `Height of each row in pixels.`,
+                    name: "Row Height",
+                    type: "number",
+                    numericValue: 32
+                }
+            }
         }
     });
     protected readonly config = signal<ComponentConfig<GridComponent<unknown>>>({
@@ -109,8 +144,9 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         GridEditableDirective
     ],
     template: `
+        @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
         <mona-grid
-            [data]="gridData()"
+            [data]="effectiveGridData"
             [filter]="filter()"
             [filterable]="filterable()"
             [pageSize]="pageSize()"
@@ -123,9 +159,9 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [sort]="sort()"
             [sortable]="sortable()"
             [monaGridEditable]="{ enabled: true }"
-            [monaGridVirtualScroll]="{ enabled: true, height: 32 }"
+            [monaGridVirtualScroll]="virtualization()"
             [monaGridGroupable]="{ enabled: true }"
-            [monaGridSelectable]="{ enabled: false, mode: 'single' }"
+            [monaGridSelectable]="selection()"
             class="w-full h-96">
             @for (column of columns; track column.field) {
                 <mona-grid-column
@@ -142,24 +178,39 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
 class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unknown>> {
     protected readonly columns: Array<{ field: string; title: string; filterType: DataType }> = [
         { field: "OrderID", title: "Order ID", filterType: "number" },
-        { field: "CustomerID", title: "Customer ID", filterType: "string" },
-        { field: "EmployeeID", title: "Employee ID", filterType: "number" },
+        { field: "ShipName", title: "Ship Name", filterType: "string" },
+        { field: "Freight", title: "Freight", filterType: "number" },
+        { field: "ShipCity", title: "Ship City", filterType: "string" },
+        { field: "ShipCountry", title: "Ship Country", filterType: "string" },
+        { field: "ShipRegion", title: "Ship Region", filterType: "string" },
+        { field: "ShipVia", title: "Ship Via", filterType: "number" },
+        { field: "ShipPostalCode", title: "Ship Postal Code", filterType: "string" },
+        { field: "ShipAddress", title: "Ship Address", filterType: "string" },
         { field: "OrderDate", title: "Order Date", filterType: "date" },
         { field: "RequiredDate", title: "Required Date", filterType: "date" },
         { field: "ShippedDate", title: "Shipped Date", filterType: "date" },
-        { field: "ShipVia", title: "Ship Via", filterType: "number" },
-        { field: "Freight", title: "Freight", filterType: "number" },
-        { field: "ShipName", title: "Ship Name", filterType: "string" },
-        { field: "ShipAddress", title: "Ship Address", filterType: "string" },
-        { field: "ShipCity", title: "Ship City", filterType: "string" },
-        { field: "ShipRegion", title: "Ship Region", filterType: "string" },
-        { field: "ShipPostalCode", title: "Ship Postal Code", filterType: "string" },
-        { field: "ShipCountry", title: "Ship Country", filterType: "string" }
+        { field: "CustomerID", title: "Customer ID", filterType: "string" },
+        { field: "EmployeeID", title: "Employee ID", filterType: "number" }
     ];
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly gridData = computed(() => {
-        const count = this.features()["dataCount"].numericValue ?? 1000;
-        return generateRandomGridData(count);
+    protected readonly selection = computed(() => {
+        const features = this.features();
+        const subFeatures = features["selection"].subFeatures || {};
+        const selectableOptions: GridSelectableOptions = {
+            enabled: features["selection"].active ?? false,
+            mode: subFeatures["mode"].dropdownValue ?? "single"
+        };
+        return selectableOptions;
+    });
+    protected readonly gridData = signal(generateRandomGridData(1000));
+    protected readonly virtualGridData = signal(generateRandomGridData(100000));
+    protected readonly virtualization = computed(() => {
+        const features = this.features();
+        const subFeatures = features["virtualization"].subFeatures || {};
+        const height = subFeatures["rowHeight"].numericValue ?? 32;
+        const enabled = features["virtualization"].active ?? false;
+        const virtualization: VirtualScrollOptions = { enabled, height };
+        return virtualization;
     });
     public readonly data = input<ReturnType<GridComponent<unknown>["data"]>>([]);
     public readonly filter = model<ReturnType<GridComponent<unknown>["filter"]>>([]);
@@ -253,19 +304,19 @@ function generateRandomGridData(count: number) {
 
         generatedData.push({
             OrderID: orderNumber++,
-            CustomerID: v4(),
-            EmployeeID: Math.floor(Math.random() * 10),
+            ShipName: shipNames[randomShipNameIndex],
+            Freight: Math.floor(Math.random() * 100),
+            ShipCity: cities[randomCityIndex],
+            ShipCountry: countries[randomCountryIndex],
+            ShipRegion: "",
+            ShipVia: Math.random() > 0.5, //Math.floor(Math.random() * 4),
+            ShipPostalCode: "0000" + Math.floor(Math.random() * 100),
+            ShipAddress: "Random Street, " + Math.floor(Math.random() * 100),
             OrderDate: new Date(),
             RequiredDate: new Date(now.setDate(now.getDate() + Math.random() * 30)),
             ShippedDate: new Date(now.setDate(now.getDate() + Math.random() * 30)),
-            ShipVia: Math.random() > 0.5, //Math.floor(Math.random() * 4),
-            Freight: Math.floor(Math.random() * 100),
-            ShipName: shipNames[randomShipNameIndex],
-            ShipAddress: "Random Street, " + Math.floor(Math.random() * 100),
-            ShipCity: cities[randomCityIndex],
-            ShipRegion: "",
-            ShipPostalCode: "0000" + Math.floor(Math.random() * 100),
-            ShipCountry: countries[randomCountryIndex]
+            CustomerID: v4(),
+            EmployeeID: Math.floor(Math.random() * 10)
         });
     }
 

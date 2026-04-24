@@ -22,7 +22,7 @@ export class GridGroupPipe implements PipeTransform {
 
     private createGridGroup(group: IGroup<unknown, Row>, column: Column, page: number): GridGroup {
         const rows = group.source.toArray();
-        const groupKey = this.getGroupKey(column.field(), rows);
+        const groupKey = this.getGroupKey(column.field(), rows[0]);
         const collapsed = this.#gridService.gridGroupExpandState.get(groupKey)?.get(page) ?? false;
         return {
             column,
@@ -31,7 +31,7 @@ export class GridGroupPipe implements PipeTransform {
         };
     }
 
-    private getGroupKey(field: string, rows: Row[]): string {
-        return `${field}-${rows[0].data[field]}`;
+    private getGroupKey(field: string, firstRow: Row): string {
+        return `${field}-${firstRow.data[field]}`;
     }
 }

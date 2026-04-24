@@ -28,9 +28,9 @@
                                         class="w-8.5"
                                         (click)="onToggleDetailClick($event, row)">
                                         @if (gridRow.expanded()) {
-                                            <i class="ri-subtract-line"></i>
+                                            <lucide-icon [name]="detailCollapseIcon" [size]="16"></lucide-icon>
                                         } @else {
-                                            <i class="ri-add-line"></i>
+                                            <lucide-icon [name]="detailExpandIcon" [size]="16"></lucide-icon>
                                         }
                                     </button>
                                 </span>
@@ -126,9 +126,9 @@
                                             class="w-8.5"
                                             (click)="onToggleDetailClick($event, rowItem)">
                                             @if (gridRow.expanded()) {
-                                                <i class="ri-subtract-line"></i>
+                                                <lucide-icon [name]="detailCollapseIcon" [size]="16"></lucide-icon>
                                             } @else {
-                                                <i class="ri-add-line"></i>
+                                                <lucide-icon [name]="detailExpandIcon" [size]="16"></lucide-icon>
                                             }
                                         </button>
                                     </span>

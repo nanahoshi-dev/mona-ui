@@ -1,4 +1,5 @@
 import { computed, DOCUMENT, inject, Injectable, OutputEmitterRef, signal, TemplateRef } from "@angular/core";
+import { toObservable } from "@angular/core/rxjs-interop";
 import { any, Dictionary, from, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
 import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
@@ -11,11 +12,12 @@ import { Column } from "../models/Column";
 import { ColumnFilterState } from "../models/ColumnFilterState";
 import { ColumnSortState } from "../models/ColumnSortState";
 import { EditableOptions } from "../models/EditableOptions";
+import { GridKeySelector } from "../models/GridKeySelector";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { GroupDescriptor } from "../models/GroupDescriptor";
 import { PageState } from "../models/PageState";
 import { Row } from "../models/Row";
-import { SelectableOptions } from "../models/SelectableOptions";
+import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 
 @Injectable()
@@ -58,8 +60,9 @@ export class GridService {
     public readonly masterDetailTemplate = signal<TemplateRef<any> | null>(null);
     public readonly pageState: PageState = { page: signal(1), skip: signal(0), take: signal(10) };
     public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
-    public readonly selectBy = signal("");
+    public readonly selectBy = signal<GridKeySelector<unknown>>("");
     public readonly selectedKeys = signal(ImmutableSet.create());
+    public readonly selectedKeysChange$ = toObservable(this.selectedKeys);
     public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
     public readonly selectedRows = computed(() => {
         const selectedKeys = this.selectedKeys();
@@ -116,7 +119,7 @@ export class GridService {
     public editableOptions: EditableOptions = { enabled: false };
     public gridHeaderElement = signal<HTMLDivElement | null>(null);
     public gridGroupExpandState = new Dictionary<string, Dictionary<number, boolean>>();
-    public selectableOptions: SelectableOptions = {
+    public selectableOptions: GridSelectableOptions = {
         enabled: false,
         mode: "single"
     };
@@ -301,7 +304,7 @@ export class GridService {
         this.rows.set(ImmutableSet.create(from(value).select(r => new Row(r))));
     }
 
-    public setSelectableOptions(options: SelectableOptions): void {
+    public setSelectableOptions(options: GridSelectableOptions): void {
         this.selectableOptions = { ...this.selectableOptions, ...options };
     }
 
@@ -337,6 +340,9 @@ export class GridService {
         if (!selectBy) {
             return data;
         }
-        return data[selectBy];
+        if (typeof selectBy === "string") {
+            return data[selectBy];
+        }
+        return selectBy(data);
     }
 }

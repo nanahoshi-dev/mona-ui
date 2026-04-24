@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Dictionary, ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
+import { ChevronDownIcon, ChevronRightIcon, LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
 import { fromEvent, mergeWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
@@ -50,7 +51,8 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         ContextMenuComponent,
         GridRowDirective,
         GridCellDirective,
-        SlicePipe
+        SlicePipe,
+        LucideAngularModule
     ],
     host: {
         "[class]": "baseClass()"
@@ -64,9 +66,11 @@ export class GridListComponent implements GridListVariantInput {
         const theme = this.#themeService.theme();
         return gridListBaseThemeVariants(theme)({ virtual: false });
     });
-    protected readonly collapseIcon = faChevronDown;
-    protected readonly expandIcon = faChevronRight;
+    protected readonly detailCollapseIcon = MinusIcon;
+    protected readonly detailExpandIcon = PlusIcon;
     protected readonly gridService = inject(GridService);
+    protected readonly groupCollapseIcon = ChevronDownIcon;
+    protected readonly groupExpandIcon = ChevronRightIcon;
     protected readonly groupRowClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridGroupRowThemeVariants(theme)();

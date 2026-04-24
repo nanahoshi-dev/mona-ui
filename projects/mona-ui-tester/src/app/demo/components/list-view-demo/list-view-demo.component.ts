@@ -25,7 +25,7 @@ import {
     ListViewVirtualScrollDirective,
     NavigableOptions,
     type PagerSettings,
-    type SelectableOptions,
+    type GridSelectableOptions,
     SlicePipe,
     VirtualScrollOptions
 } from "mona-ui";
@@ -543,7 +543,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
     });
     protected readonly scrollBottomItemCount = signal(20);
     protected readonly selectedKeys = signal<number[]>([]);
-    protected readonly selection = computed<SelectableOptions>(() => {
+    protected readonly selection = computed<GridSelectableOptions>(() => {
         const features = this.features();
         const subFeatures = features["selection"]?.subFeatures || {};
         const mode = subFeatures["mode"].dropdownValue;

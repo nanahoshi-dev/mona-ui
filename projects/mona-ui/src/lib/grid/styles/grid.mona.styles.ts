@@ -50,6 +50,15 @@ export const gridColumnActionsVariants = cva(`
     text-xs [&_i]:text-xs
 `);
 
+export const gridColumnDragPreviewVariants = cva(
+    `
+        flex items-center justify-center
+        bg-background! text-foreground!
+        border! border-border! rounded-md
+        shadow-sm! px-2! py-0.5!
+    `
+);
+
 export const gridColumnDropHintVariants = cva(`
     absolute flex w-px h-full bg-primary z-1 top-0 bottom-0
 `);
@@ -119,14 +128,14 @@ export const gridHeaderTableColumnTitleVariants = cva(
 
 export const gridListBaseVariants = cva(
     `
-        w-full h-full overflow-x-auto overflow-y-scroll
+        w-full h-full
         border-t border-t-border
     `,
     {
         variants: {
             virtual: {
-                true: "overflow-y-hidden",
-                false: ""
+                true: "overflow-x-hidden overflow-y-hidden",
+                false: "overflow-x-auto overflow-y-scroll"
             }
         }
     }

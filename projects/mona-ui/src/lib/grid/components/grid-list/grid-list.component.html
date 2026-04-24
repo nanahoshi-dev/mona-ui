@@ -10,13 +10,22 @@
                     #gridRow="monaGridRow"
                     #rowElement>
                     @if (gridService.masterDetailTemplate()) {
-                        <td [style.width.px]="gridService.detailColumnWidth">
-                            <span class="mona-grid-detail-toggle-wrapper">
-                                <button monaButton look="ghost" (click)="onToggleDetailClick($event, row)">
+                        <td>
+                            <span
+                                [style.width.px]="gridService.detailColumnWidth"
+                                class="inline-block border-r border-r-border">
+                                <button
+                                    monaButton
+                                    look="ghost"
+                                    rounded="none"
+                                    [iconOnly]="true"
+                                    size="small"
+                                    class="w-8.5"
+                                    (click)="onToggleDetailClick($event, row)">
                                     @if (gridRow.expanded()) {
-                                        <i class="ri-subtract-line"></i>
+                                        <lucide-icon [name]="detailCollapseIcon" [size]="16"></lucide-icon>
                                     } @else {
-                                        <i class="ri-add-line"></i>
+                                        <lucide-icon [name]="detailExpandIcon" [size]="16"></lucide-icon>
                                     }
                                 </button>
                             </span>
@@ -39,10 +48,7 @@
                     }
                 </tr>
                 @if (gridRow.expanded()) {
-                    <tr [style.width.px]="gridService.masterDetailRowWidth()">
-                        <td
-                            [style.min-width.px]="gridService.masterDetailEmptyCellWidth()"
-                            [style.max-width.px]="gridService.masterDetailEmptyCellWidth()"></td>
+                    <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
                         <td>
                             <ng-container
                                 [ngTemplateOutlet]="gridService.masterDetailTemplate()"
@@ -73,9 +79,9 @@
                                             class="w-8.5"
                                             (click)="onGroupExpandChange(subGroup)">
                                             @if (subGroup.collapsed) {
-                                                <fa-icon [icon]="expandIcon"></fa-icon>
+                                                <lucide-icon [name]="groupExpandIcon" [size]="16"></lucide-icon>
                                             } @else {
-                                                <fa-icon [icon]="collapseIcon"></fa-icon>
+                                                <lucide-icon [name]="groupCollapseIcon" [size]="16"></lucide-icon>
                                             }
                                         </button>
                                     </span>
@@ -126,9 +132,13 @@
                                                     class="w-8.5"
                                                     (click)="onToggleDetailClick($event, row)">
                                                     @if (gridRow.expanded()) {
-                                                        <i class="ri-subtract-line"></i>
+                                                        <lucide-icon
+                                                            [name]="detailCollapseIcon"
+                                                            [size]="16"></lucide-icon>
                                                     } @else {
-                                                        <i class="ri-add-line"></i>
+                                                        <lucide-icon
+                                                            [name]="detailExpandIcon"
+                                                            [size]="16"></lucide-icon>
                                                     }
                                                 </button>
                                             </span>

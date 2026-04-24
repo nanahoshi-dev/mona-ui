@@ -138,7 +138,7 @@ export * from "./filter/components/filter-menu/filter-menu.component";
 /** Grid */
 export * from "./query/sort/SortDescriptor";
 export * from "./grid/models/CellEditEvent";
-export { SelectableOptions } from "./grid/models/SelectableOptions";
+export { GridSelectableOptions } from "./grid/models/GridSelectableOptions";
 export * from "./grid/models/GroupDescriptor";
 export * from "./grid/models/SortableOptions";
 export * from "./grid/directives/grid-cell-template.directive";

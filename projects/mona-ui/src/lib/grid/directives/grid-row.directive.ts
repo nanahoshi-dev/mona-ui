@@ -5,7 +5,7 @@ import { GridService } from "../services/grid.service";
 import { gridListTableRowThemeVariants } from "../styles/grid.styles";
 
 @Directive({
-    selector: "[monaGridRow]",
+    selector: "tr[monaGridRow]",
     host: {
         "[class]": "baseClass()",
         "[attr.data-ruid]": "row().uid",

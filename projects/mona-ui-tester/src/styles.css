@@ -1,8 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap");
-@import url("https://use.typekit.net/zop2fdb.css"); /* You can add global styles to this file, and also import other style files */
+@import url("https://use.typekit.net/zop2fdb.css");
+/* You can add global styles to this file, and also import other style files */
 @import "@angular/cdk/overlay-prebuilt.css";
 @import "remixicon/fonts/remixicon.css";
 @import "tailwindcss";
+
 @source "./projects/mona-ui/";
 @source "./projects/mona-ui-tester/";
 
@@ -98,25 +100,25 @@
     --mona-border-radius: 0;
 }
 
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-track {
-    background: var(--color-scrollbar-track);
-}
-::-webkit-scrollbar-thumb {
-    background-color: var(--color-scrollbar-thumb);
-    &:hover {
-        background-color: var(--color-scrollbar-thumb-hover);
-    }
-    &:active {
-        background-color: var(--color-scrollbar-thumb-active);
-    }
-}
-::-webkit-scrollbar-corner {
-    background: var(--color-scrollbar-corner);
-}
+/*::-webkit-scrollbar {*/
+/*    width: 8px;*/
+/*    height: 8px;*/
+/*}*/
+/*::-webkit-scrollbar-track {*/
+/*    background: var(--color-scrollbar-track);*/
+/*}*/
+/*::-webkit-scrollbar-thumb {*/
+/*    background-color: var(--color-scrollbar-thumb);*/
+/*    &:hover {*/
+/*        background-color: var(--color-scrollbar-thumb-hover);*/
+/*    }*/
+/*    &:active {*/
+/*        background-color: var(--color-scrollbar-thumb-active);*/
+/*    }*/
+/*}*/
+/*::-webkit-scrollbar-corner {*/
+/*    background: var(--color-scrollbar-corner);*/
+/*}*/
 
 html,
 body {
@@ -128,13 +130,12 @@ body {
 }
 
 body {
-    font-family:
-        "proxima-nova",
-        "Geist",
-        Helvetica Neue,
-        Helvetica,
-        Arial,
-        sans-serif !important;
+    font-family: "proxima-nova",
+    "Geist",
+    Helvetica Neue,
+    Helvetica,
+    Arial,
+    sans-serif !important;
     background-color: var(--page-background);
     color: var(--color-foreground);
 }

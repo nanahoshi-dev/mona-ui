@@ -19,6 +19,7 @@ import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { EnumerableSet, from, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
+import { LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
 import { fromEvent, pairwise, startWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
@@ -53,7 +54,8 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         NgTemplateOutlet,
         ContextMenuComponent,
         GridRowDirective,
-        GridCellDirective
+        GridCellDirective,
+        LucideAngularModule
     ],
     templateUrl: "./grid-virtual-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +81,8 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
     });
     protected readonly collapseIcon = faChevronDown;
     protected readonly collapsedGroups = signal<ImmutableSet<string>>(ImmutableSet.create());
+    protected readonly detailCollapseIcon = MinusIcon;
+    protected readonly detailExpandIcon = PlusIcon;
     protected readonly expandIcon = faChevronRight;
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {
@@ -235,11 +239,18 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
             if (firstKey == null) {
                 return;
             }
+            const selectBy = this.gridService.selectBy();
             if (this.gridService.groupColumns().any()) {
                 const viewData = this.groupedGridRows();
-                const selectedRow = viewData.firstOrDefault(
-                    r => r.type === "row" && r.row.data[this.gridService.selectBy()] === firstKey
-                );
+                const selectedRow = viewData.firstOrDefault(r => {
+                    if (r.type !== "row" || selectBy == null) {
+                        return false;
+                    }
+                    if (typeof selectBy === "string") {
+                        return r.row.data[selectBy] === firstKey;
+                    }
+                    return selectBy(r.row.data) === firstKey;
+                });
                 if (selectedRow != null) {
                     const index = viewData.indexOf(selectedRow);
                     window.setTimeout(() => {
@@ -248,7 +259,15 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
                 }
             } else {
                 const viewData = this.data().toImmutableList();
-                const selectedRow = viewData.firstOrDefault(r => r.data[this.gridService.selectBy()] === firstKey);
+                const selectedRow = viewData.firstOrDefault(r => {
+                    if (selectBy == null) {
+                        return false;
+                    }
+                    if (typeof selectBy === "string") {
+                        return r.data[selectBy] === firstKey;
+                    }
+                    return selectBy(r.data) === firstKey;
+                });
                 if (selectedRow != null) {
                     const index = viewData.indexOf(selectedRow);
                     window.setTimeout(() => {
@@ -304,8 +323,6 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
         const scrollableElement = gridElement.querySelector(".cdk-virtual-scroll-viewport") as HTMLElement;
         fromEvent(scrollableElement, "scroll")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                headerElement.scrollLeft = scrollableElement.scrollLeft;
-            });
+            .subscribe(() => (headerElement.scrollLeft = scrollableElement.scrollLeft));
     }
 }

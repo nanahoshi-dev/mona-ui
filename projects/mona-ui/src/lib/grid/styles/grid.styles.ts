@@ -7,6 +7,7 @@ import {
     gridCellContainerVariants as monaGridCellContainerVariants,
     gridCellTextVariants as monaGridCellTextVariants,
     gridColumnActionsVariants as monaGridColumnActionsVariants,
+    gridColumnDragPreviewVariants as monaGridColumnDragPreviewVariants,
     gridColumnDropHintVariants as monaGridColumnDropHintVariants,
     gridColumnResizerVariants as monaGridColumnResizerVariants,
     gridGroupPanelPlaceholderVariants as monaGridGroupPanelPlaceholderVariants,
@@ -67,6 +68,15 @@ export const gridColumnActionsThemeVariants = (theme: ThemeStyle) => {
             return monaGridColumnActionsVariants;
         default:
             return monaGridColumnActionsVariants;
+    }
+};
+
+export const gridColumnDragPreviewThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridColumnDragPreviewVariants;
+        default:
+            return monaGridColumnDragPreviewVariants;
     }
 };
 
