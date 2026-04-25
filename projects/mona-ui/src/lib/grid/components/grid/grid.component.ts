@@ -54,6 +54,8 @@ import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
     gridColumnActionsThemeVariants,
+    gridColumnDragPreviewThemeVariants,
+    gridColumnDropHintThemeVariants,
     gridColumnResizerThemeVariants,
     gridGroupPanelPlaceholderThemeVariants,
     gridGroupPanelThemeVariants,
@@ -123,11 +125,22 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         const theme = this.#themeService.theme();
         return gridColumnActionsThemeVariants(theme)();
     });
+    protected readonly columnDragPreviewClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridColumnDragPreviewThemeVariants(theme)();
+    });
+    protected readonly columnDragging = signal(false);
+    protected readonly columnDropHintClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridColumnDropHintThemeVariants(theme)();
+    });
     protected readonly columnResizerClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridColumnResizerThemeVariants(theme)();
     });
     protected readonly columns = contentChildren(GridColumnComponent);
+    protected readonly dragColumn = signal<Column | null>(null);
+    protected readonly dropColumn = signal<Column | null>(null);
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
     protected readonly gridService = inject(GridService);
@@ -175,11 +188,7 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
     });
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
     protected readonly resizing = signal(false);
-   
     protected readonly uid = v4();
-    protected columnDragging = false;
-    protected dragColumn?: Column;
-    protected dropColumn?: Column;
     protected gridColumns: Column[] = [];
 
     /**
@@ -287,35 +296,42 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         if (this.resizing()) {
             return;
         }
-        this.columnDragging = true;
-        this.dragColumn = event.source.data;
+        this.columnDragging.set(true);
+        this.dragColumn.set(event.source.data);
     }
 
     public onColumnDrop(event: CdkDragDrop<Column>): void {
-        if (!this.dropColumn || !this.dragColumn || !this.columnDragging || this.resizing() || !this.reorderable()) {
+        const dragColumn = this.dragColumn();
+        const dropColumn = this.dropColumn();
+        if (!dropColumn || !dragColumn || !this.columnDragging() || this.resizing() || !this.reorderable()) {
+            this.clearDragState();
             return;
         }
-        const dropColumnIndex = this.gridService
-            .columns()
-            .indexOf(this.dropColumn, c => c.field() === this.dropColumn?.field());
+        const dropColumnIndex = this.gridService.columns().indexOf(dropColumn, c => c.field() === dropColumn?.field());
+        const dragColumnIndex = this.gridService.columns().indexOf(dragColumn, c => c.field() === dragColumn?.field());
+        if (dropColumnIndex === dragColumnIndex + 1) {
+            this.clearDragState();
+            return;
+        }
         this.gridService.columns.update(columns => {
             const list = columns.toList();
-            list.remove(this.dragColumn as Column);
-            list.addAt(this.dragColumn as Column, dropColumnIndex);
+            list.remove(dragColumn);
+            const index = dropColumnIndex > dragColumnIndex ? dropColumnIndex - 1 : dropColumnIndex;
+            list.addAt(dragColumn, index);
             list.forEach((c, i) => c.index.set(i));
             return list.toImmutableList();
         });
-        this.columnDragging = false;
-        this.dragColumn = undefined;
-        this.dropColumn = undefined;
+        this.clearDragState();
     }
 
     public onColumnDropForGrouping(event: CdkDragDrop<Column, void, Column>): void {
         if (!this.groupable()) {
+            this.clearDragState();
             return;
         }
         const column = event.item.data;
         if (this.gridService.groupColumns().contains(column)) {
+            this.clearDragState();
             return;
         }
 
@@ -324,12 +340,7 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         this.gridService.appliedGroupSorts.update(dict =>
             dict.put(column.field(), { sort: { field: column.field(), dir: "asc" } })
         );
-
-        this.columnDragging = false;
-        this.dragColumn = undefined;
-        this.dropColumn = undefined;
-        this.groupingInProgress.set(false);
-        this.#cdr.detectChanges();
+        this.clearDragState();
     }
 
     public onColumnFilter(column: Column, state: ColumnFilterState): void {
@@ -353,10 +364,10 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
     }
 
     public onColumnMouseEnter(event: MouseEvent, column: Column): void {
-        if (!this.columnDragging || this.resizing()) {
+        if (!this.columnDragging() || this.resizing()) {
             return;
         }
-        this.dropColumn = column;
+        this.dropColumn.set(column);
     }
 
     public onColumnResizeStart(): void {
@@ -481,6 +492,13 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
                     col.sortIndex.set(fx + 1);
                 }
             });
+    }
+
+    private clearDragState(): void {
+        this.dragColumn.set(null);
+        this.dropColumn.set(null);
+        this.columnDragging.set(false);
+        this.groupingInProgress.set(false);
     }
 
     private getTableColumnHeaderCellList(): HTMLTableCellElement[] {

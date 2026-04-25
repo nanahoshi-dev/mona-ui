@@ -102,15 +102,10 @@
                                     }
                                 </div>
                             </div>
-                            @if (dropColumn === column && dragColumn && reorderable() && !groupingInProgress()) {
-                                <span
-                                    class="mona-grid-column-drop-hint"
-                                    [ngStyle]="{
-                                        right: dragColumn.index() < dropColumn.index() ? '-1px' : null,
-                                        left: dragColumn.index() > dropColumn.index() ? '-1px' : null
-                                    }"></span>
+                            @if (dropColumn() === column && dragColumn() && reorderable() && !groupingInProgress()) {
+                                <span [class]="columnDropHintClass()"> </span>
                             }
-                            @if (resizable() && !columnDragging) {
+                            @if (resizable() && !columnDragging()) {
                                 <div
                                     monaGridColumnResizeHandler
                                     [column]="column"
@@ -120,8 +115,8 @@
                                     (resizeEnd)="resizing.set(false)"></div>
                             }
                             <ng-template cdkDragPreview>
-                                <div class="mona-grid-column-drag-preview">
-                                    <span class="mona-grid-column-title">{{ column.title() }}</span>
+                                <div [class]="columnDragPreviewClass()">
+                                    <span>{{ column.title() }}</span>
                                 </div>
                             </ng-template>
                             <ng-template cdkDragPlaceholder>
@@ -132,6 +127,25 @@
                                 }
                             </ng-template>
                         </th>
+                        @if (columnDragging() && dragColumn() === column) {
+                            <th
+                                [class]="headerTableCellClass()"
+                                [style.min-width.px]="column.minWidth()"
+                                [style.width.px]="column.calculatedWidth()">
+                                <div [class]="headerTableColumnWrapClass()">
+                                    @if (column.titleTemplate()) {
+                                        <ng-container [ngTemplateOutlet]="column.titleTemplate()"></ng-container>
+                                    } @else {
+                                        <span
+                                            [class]="headerTableColumnTitleClass()"
+                                            (click)="onColumnSort(column)"
+                                            [title]="column.title()"
+                                            >{{ column.title() }}</span
+                                        >
+                                    }
+                                </div>
+                            </th>
+                        }
                     }
                 </tr>
             </thead>
