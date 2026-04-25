@@ -1,6 +1,6 @@
 import { computed, DOCUMENT, inject, Injectable, OutputEmitterRef, signal, TemplateRef } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
-import { any, Dictionary, from, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
+import { any, Dictionary, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
 import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
 import { PopupMenuItem } from "../../common/popup-menu/models/PopupMenuItem";
@@ -35,15 +35,6 @@ export class GridService {
     public readonly filterLoad$ = new Subject<void>();
     public readonly groupColumnWidth = 34;
     public readonly groupColumns = signal<ImmutableSet<Column>>(ImmutableSet.create());
-    public readonly groupHeaderRowWidth = computed(() => {
-        const groupColumns = this.groupColumns();
-        const columns = this.columns();
-        const groupColumnWidth = this.groupColumnWidth;
-        const groupColumnCount = groupColumns.size();
-        const detailRowOffset = this.masterDetailTemplate() ? this.detailColumnWidth : 0;
-        const columnListWidth = columns.aggregate((acc, c) => acc + (c.calculatedWidth() ?? c.width() ?? 0), 0);
-        return groupColumnWidth * groupColumnCount + columnListWidth + detailRowOffset;
-    });
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false });
     public readonly isInEditMode = signal(false);
     public readonly masterDetailRowWidth = computed(() => {
@@ -72,7 +63,6 @@ export class GridService {
             .toImmutableSet();
     });
     public readonly selectedRowsChange$ = new Subject<Iterable<Row>>();
-    public readonly sortLoad$ = new Subject<void>();
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
     public readonly virtualGridMinBuffer = signal(0);
     public readonly viewPageRows = computed(() => {
@@ -279,7 +269,6 @@ export class GridService {
                 p => p.value
             )
         );
-        this.sortLoad$.next();
     }
 
     public selectRow(row: Row): void {
@@ -301,14 +290,14 @@ export class GridService {
     }
 
     public setRows(value: Iterable<any>): void {
-        this.rows.set(ImmutableSet.create(from(value).select(r => new Row(r))));
+        this.rows.set(ImmutableSet.create(select(value, r => new Row(r))));
     }
 
     public setSelectableOptions(options: GridSelectableOptions): void {
         this.selectableOptions = { ...this.selectableOptions, ...options };
     }
 
-    public setSortableOptions(options: SortableOptions): void {
+    public setSortableOptions(options: Partial<SortableOptions>): void {
         this.sortableOptions = { ...this.sortableOptions, ...options };
     }
 

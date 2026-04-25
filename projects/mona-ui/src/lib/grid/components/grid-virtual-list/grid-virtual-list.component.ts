@@ -18,8 +18,9 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { EnumerableSet, from, ImmutableList, ImmutableSet } from "@mirei/ts-collections";
+import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
+import { DateTime } from "luxon";
 import { fromEvent, pairwise, startWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
@@ -37,7 +38,6 @@ import {
     gridListBaseThemeVariants,
     gridListTableThemeVariants
 } from "../../styles/grid.styles";
-import { cellComparer } from "../../utilities/GridUtils";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 
 @Component({
@@ -73,7 +73,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
         const data = this.data();
         const columns = this.gridService.groupColumns();
         const rows = this.flattenGroups(this.createGridGroup(data, columns), 0, null);
-        return rows.toImmutableSet();
+        return ImmutableList.create(rows);
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -143,52 +143,48 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
     }
 
     private createGridGroup(rows: Iterable<Row>, columns: Iterable<Column>): VirtualGridGroup[] {
-        const columnEnumerable = from(columns);
-        const rowsEnumerable = from(rows);
-
-        if (!columnEnumerable.any()) {
+        const columnArray = [...columns];
+        if (columnArray.length === 0) {
             return [];
         }
 
-        if (columnEnumerable.count() === 1) {
-            const column = columnEnumerable.first();
-            const grouped = rowsEnumerable.groupBy(row => row.data[column.field()], cellComparer(column));
-            return grouped
-                .select<VirtualGridGroup>(g => {
-                    const rows = g.source.toArray();
-                    return {
-                        column,
-                        key: this.getGroupKey(column.field(), rows),
-                        rows,
-                        title: rows[0].data[column.field()]
-                    } as VirtualGridGroup;
-                })
-                .toArray();
+        const column = columnArray[0];
+        const field = column.field();
+        const isDate = column.dataType() === "date";
+        const groupMap = new Map<unknown, Row[]>();
+        const keyOrder: unknown[] = [];
+
+        for (const row of rows) {
+            const rawValue = row.data[field] as unknown;
+            const mapKey =
+                isDate && rawValue instanceof Date
+                    ? DateTime.fromJSDate(rawValue).toFormat("yyyy-M-d-H-m-s")
+                    : rawValue;
+            if (!groupMap.has(mapKey)) {
+                groupMap.set(mapKey, []);
+                keyOrder.push(mapKey);
+            }
+            groupMap.get(mapKey)!.push(row);
         }
 
-        const firstColumn = columnEnumerable.first();
-        const remainingColumns = columnEnumerable.skip(1);
-        const grouped = rowsEnumerable.groupBy(row => row.data[firstColumn.field()], cellComparer(firstColumn));
-        return grouped
-            .select<VirtualGridGroup>(g => {
-                const rows = g.source.toArray();
-                const groupedRows = this.createGridGroup(g.source, remainingColumns);
-                return {
-                    column: firstColumn,
-                    key: this.getGroupKey(firstColumn.field(), rows),
-                    rows: groupedRows,
-                    title: rows[0].data[firstColumn.field()]
-                } as VirtualGridGroup;
-            })
-            .toArray();
+        const remainingColumns = columnArray.slice(1);
+        return keyOrder.map(mapKey => {
+            const groupRows = groupMap.get(mapKey)!;
+            return {
+                column,
+                key: this.getGroupKey(field, groupRows),
+                rows: remainingColumns.length > 0 ? this.createGridGroup(groupRows, remainingColumns) : groupRows,
+                title: groupRows[0].data[field]
+            } as VirtualGridGroup;
+        });
     }
 
     private flattenGroups(
         groups: VirtualGridGroup[],
         level: number,
         parentHeader: VirtualGridRow | null
-    ): EnumerableSet<VirtualGridRow> {
-        const result = new EnumerableSet<VirtualGridRow>();
+    ): VirtualGridRow[] {
+        const result: VirtualGridRow[] = [];
         for (const group of groups) {
             if (group.rows.length === 0) {
                 continue;
@@ -205,24 +201,28 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
                 groupId,
                 parentList
             };
-            result.add(headerRow);
+            result.push(headerRow);
             if (group.rows[0] instanceof Row) {
                 const parentList = [...headerRow.parentList, headerRow].filter(p => p != null) as VirtualGridRow[];
                 const groupId = this.getNestedGroupKey(parentList, group.key);
-                const rows = group.rows.map<VirtualGridRow>(row => ({
-                    type: "row",
-                    row: row as Row,
-                    column: group.column,
-                    level,
-                    groupId,
-                    parentList
-                }));
-                result.addAll(rows);
+                for (const row of group.rows) {
+                    result.push({
+                        type: "row",
+                        row: row as Row,
+                        column: group.column,
+                        level,
+                        groupId,
+                        parentList
+                    });
+                }
             } else {
-                result.addAll(this.flattenGroups(group.rows as VirtualGridGroup[], level + 1, headerRow));
+                const nested = this.flattenGroups(group.rows as VirtualGridGroup[], level + 1, headerRow);
+                for (const row of nested) {
+                    result.push(row);
+                }
             }
         }
-        return new EnumerableSet<VirtualGridRow>(result);
+        return result;
     }
 
     private getGroupKey(field: string, rows: Row[]): string {
@@ -294,22 +294,20 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
          * This is a workaround to force the virtual scroll to update the rendered range
          * When the data changes, the view is not rendered correctly. It is empty until the user scrolls,
          * which triggers the update of the rendered range.
-         * We manually trigger the update so that grid is rendered when the grouping changes.
+         * We manually trigger the update so that the grid is rendered when the grouping changes.
          * @see @angular/components issue #21793 on GitHub
          */
-        this.#groupColumns$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(columns => {
-            const reRender = (): void => {
-                const renderedRange = this.viewport().getRenderedRange();
-                this.viewport().setRenderedRange({
-                    start: renderedRange.start,
-                    end: renderedRange.end + 1
-                });
-            };
-            if (columns.any()) {
-                reRender();
-            } else {
-                afterNextRender(() => reRender(), { injector: this.#injector });
-            }
+        this.#groupColumns$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            afterNextRender(
+                () => {
+                    const renderedRange = this.viewport().getRenderedRange();
+                    this.viewport().setRenderedRange({
+                        start: renderedRange.start,
+                        end: renderedRange.end + 1
+                    });
+                },
+                { injector: this.#injector }
+            );
         });
         this.setSelectedKeysLoadSubscription();
     }

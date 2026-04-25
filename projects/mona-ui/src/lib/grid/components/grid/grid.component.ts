@@ -2,7 +2,6 @@ import {
     CdkDrag,
     CdkDragDrop,
     CdkDragEnter,
-    CdkDragExit,
     CdkDragPlaceholder,
     CdkDragPreview,
     CdkDragStart,
@@ -10,8 +9,8 @@ import {
 } from "@angular/cdk/drag-drop";
 import { NgStyle, NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
-    ChangeDetectorRef,
     Component,
     computed,
     contentChild,
@@ -22,7 +21,6 @@ import {
     inject,
     input,
     model,
-    OnInit,
     output,
     signal,
     TemplateRef,
@@ -65,7 +63,6 @@ import {
     gridHeaderTableRowThemeVariants,
     gridHeaderTableThemeVariants,
     gridHeaderThemeVariants,
-    gridListTableCellThemeVariants,
     gridNoDataThemeVariants,
     GridVariantInput,
     GridVariantProps
@@ -108,8 +105,7 @@ import {
         "[attr.data-uid]": "uid"
     }
 })
-export class GridComponent<T> implements OnInit, GridVariantInput {
-    readonly #cdr = inject(ChangeDetectorRef);
+export class GridComponent<T> implements GridVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
@@ -189,7 +185,6 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
     protected readonly resizing = signal(false);
     protected readonly uid = v4();
-    protected gridColumns: Column[] = [];
 
     /**
      * Emitted when a cell is edited.
@@ -199,38 +194,38 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
     /**
      * The row data to be displayed in the grid.
      */
-    public data = input<Iterable<T>>([]);
+    public readonly data = input<Iterable<T>>([]);
 
     /**
      * Initial filter configuration to be applied to the grid when it is loaded.
      */
-    public filter = model<CompositeFilterDescriptor[]>([]);
+    public readonly filter = model<CompositeFilterDescriptor[]>([]);
 
     /**
      * Whether the grid is filterable.
      */
-    public filterable = input(false);
+    public readonly filterable = input(false);
 
     /**
      * The number of items to be displayed on a page.
      */
-    public pageSize = input<number>();
+    public readonly pageSize = input<number>();
 
     /**
      * The page sizes that the user can select from.
      * These values will be displayed in the page size dropdown.
      */
-    public pageSizeValues = input<number[]>([]);
+    public readonly pageSizeValues = input<number[]>([]);
 
     /**
      * Whether the columns of the grid can be reordered.
      */
-    public reorderable = input(false);
+    public readonly reorderable = input(false);
 
     /**
      * Whether the columns of the grid can be resized.
      */
-    public resizable = input(false);
+    public readonly resizable = input(false);
 
     /**
      * The method to be used to set initial column widths.
@@ -241,20 +236,20 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
      *   will have the same width.
      * @default "fitView"
      */
-    public resizeMethod = input<ResizeMethod>("fitView");
+    public readonly resizeMethod = input<ResizeMethod>("fitView");
 
     /**
      * Whether the pager is responsive.
      * If set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.
      */
-    public responsivePager = input(true);
+    public readonly responsivePager = input(true);
 
     public readonly rounded = input<GridVariantProps["rounded"]>("medium");
 
     /**
      * Initial sort configuration to be applied to the grid when it is loaded.
      */
-    public sort = model<SortDescriptor[]>([]);
+    public readonly sort = model<SortDescriptor[]>([]);
 
     /**
      * Whether the grid is sortable.
@@ -272,23 +267,24 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         this.setGridHeaderElementEffect();
         this.setGridDetailEffect();
         this.setDataEffect();
+        afterNextRender({
+            read: () => {
+                this.setSubscriptions();
+                this.setResizeObserver();
+            }
+        });
         this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
-    public ngOnInit(): void {
-        this.setSubscriptions();
-        this.setResizeObserver();
-    }
-
-    public onColumnDragEnter(event: CdkDragEnter<void, Column>, column: Column): void {
+    public onColumnDragEnter(event: CdkDragEnter<void, Column>): void {
         this.groupPanelPlaceholderVisible.set(event.container !== this.groupColumnList());
     }
 
-    public onColumnDragEnterForGrouping(event: CdkDragEnter<void, Column>): void {
+    public onColumnDragEnterForGrouping(): void {
         this.groupingInProgress.set(true);
     }
 
-    public onColumnDragExitForGrouping(event: CdkDragExit<void, Column>): void {
+    public onColumnDragExitForGrouping(): void {
         this.groupingInProgress.set(false);
     }
 
@@ -300,7 +296,7 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         this.dragColumn.set(event.source.data);
     }
 
-    public onColumnDrop(event: CdkDragDrop<Column>): void {
+    public onColumnDrop(): void {
         const dragColumn = this.dragColumn();
         const dropColumn = this.dropColumn();
         if (!dropColumn || !dragColumn || !this.columnDragging() || this.resizing() || !this.reorderable()) {
@@ -363,7 +359,7 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         }
     }
 
-    public onColumnMouseEnter(event: MouseEvent, column: Column): void {
+    public onColumnMouseEnter(column: Column): void {
         if (!this.columnDragging() || this.resizing()) {
             return;
         }
@@ -521,8 +517,7 @@ export class GridComponent<T> implements OnInit, GridVariantInput {
         effect(() => {
             const columns = this.columns();
             untracked(() => {
-                this.gridColumns = columns.map(c => c.column);
-                this.gridService.columns.update(list => list.clear().addAll(this.gridColumns));
+                this.gridService.columns.update(list => list.clear().addAll(columns.map(c => c.column)));
                 this.gridService.columns().forEach((c, i) => c.index.set(i));
                 if (this.filter().length !== 0) {
                     this.gridService.loadFilters(this.filter());
