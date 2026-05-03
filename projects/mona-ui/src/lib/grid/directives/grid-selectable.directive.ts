@@ -6,8 +6,7 @@ import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { GridService } from "../services/grid.service";
 
 @Directive({
-    selector: "mona-grid[monaGridSelectable]",
-    standalone: true
+    selector: "mona-grid[monaGridSelectable]"
 })
 export class GridSelectableDirective {
     readonly #destroyRef = inject(DestroyRef);

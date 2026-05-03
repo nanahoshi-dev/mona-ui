@@ -153,6 +153,7 @@ export * from "./grid/directives/grid-selectable.directive";
 export * from "./grid/directives/grid-virtual-scroll.directive";
 export * from "./grid/components/grid-column/grid-column.component";
 export * from "./grid/components/grid/grid.component";
+export type { ResizeMethod } from "./grid/models/ResizeMethod";
 
 /** Inputs */
 export * from "./inputs/check-box/directives/checkbox.directive";

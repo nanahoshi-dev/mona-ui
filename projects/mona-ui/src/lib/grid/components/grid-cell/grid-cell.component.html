@@ -5,7 +5,8 @@
     (cdkFocusChange)="onFocusChange($event)"
     [attr.data-ruid]="row().uid"
     [attr.data-field]="column().field()"
-    [attr.data-col-index]="column().index()">
+    [attr.data-col-index]="column().index()"
+    [attr.aria-readonly]="gridService.editableOptions.enabled && column().editable() ? false : true">
     @if (editing()) {
         <ng-container [ngTemplateOutlet]="cellEditTemplate"></ng-container>
     } @else {

@@ -7,7 +7,7 @@ import {
     CdkDragStart,
     CdkDropList
 } from "@angular/cdk/drag-drop";
-import { NgStyle, NgTemplateOutlet } from "@angular/common";
+import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ChangeDetectionStrategy,
@@ -22,14 +22,14 @@ import {
     input,
     model,
     output,
+    PLATFORM_ID,
     signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { swap } from "@mirei/ts-collections";
-import { asyncScheduler, filter, observeOn, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
@@ -48,6 +48,7 @@ import { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { SortableOptions } from "../../models/SortableOptions";
+import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -85,7 +86,6 @@ import {
     imports: [
         CdkDropList,
         ChipComponent,
-        NgStyle,
         CdkDrag,
         NgTemplateOutlet,
         GridFilterMenuComponent,
@@ -98,16 +98,19 @@ import {
         PlaceholderComponent,
         PopupMenuComponent,
         PopupMenuItemComponent,
-        PopupMenuTextTemplateDirective
+        PopupMenuTextTemplateDirective,
+        ColumnAriaSortPipe
     ],
     host: {
         "[class]": "baseClass()",
-        "[attr.data-uid]": "uid"
+        "[attr.data-uid]": "uid",
+        role: "grid"
     }
 })
 export class GridComponent<T> implements GridVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #platformId = inject(PLATFORM_ID);
     readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     protected readonly baseClass = computed(() => {
@@ -264,11 +267,13 @@ export class GridComponent<T> implements GridVariantInput {
         this.setSortEffect();
         this.setPageSizeEffect();
         this.setColumnEffect();
-        this.setGridHeaderElementEffect();
         this.setGridDetailEffect();
         this.setDataEffect();
         afterNextRender({
             read: () => {
+                this.gridService.gridHeaderElement.set(this.gridHeaderElement().nativeElement);
+                this.setInitialCalculatedWidthOfColumns();
+                this.gridWidthSet.set(true);
                 this.setSubscriptions();
                 this.setResizeObserver();
             }
@@ -314,7 +319,7 @@ export class GridComponent<T> implements GridVariantInput {
             list.remove(dragColumn);
             const index = dropColumnIndex > dragColumnIndex ? dropColumnIndex - 1 : dropColumnIndex;
             list.addAt(dragColumn, index);
-            list.forEach((c, i) => c.index.set(i));
+            list.forEach((c, i) => c.setIndex(i));
             return list.toImmutableList();
         });
         this.clearDragState();
@@ -331,7 +336,7 @@ export class GridComponent<T> implements GridVariantInput {
             return;
         }
 
-        column.groupSortDirection.set("asc");
+        column.setGroupSortDirection("asc");
         this.gridService.groupColumns.update(columns => columns.add(column));
         this.gridService.appliedGroupSorts.update(dict =>
             dict.put(column.field(), { sort: { field: column.field(), dir: "asc" } })
@@ -342,10 +347,10 @@ export class GridComponent<T> implements GridVariantInput {
     public onColumnFilter(column: Column, state: ColumnFilterState): void {
         if (state.filter && state.filter.filters.length > 0) {
             this.gridService.appliedFilters.update(dict => dict.put(column.field(), state));
-            column.filtered.set(true);
+            column.setFiltered(true);
         } else {
             this.gridService.appliedFilters.update(dict => dict.remove(column.field()));
-            column.filtered.set(false);
+            column.setFiltered(false);
         }
         const allFilters = this.gridService
             .appliedFilters()
@@ -378,14 +383,14 @@ export class GridComponent<T> implements GridVariantInput {
             return;
         }
         if (column.columnSortDirection() == null) {
-            column.columnSortDirection.set("asc");
+            column.setColumnSortDirection("asc");
         } else if (column.columnSortDirection() === "asc") {
-            column.columnSortDirection.set("desc");
+            column.setColumnSortDirection("desc");
         } else if (this.gridService.sortableOptions.allowUnsort) {
-            column.columnSortDirection.set(null);
-            column.sortIndex.set(null);
+            column.setColumnSortDirection(null);
+            column.setSortIndex(null);
         } else {
-            column.columnSortDirection.set("asc");
+            column.setColumnSortDirection("asc");
         }
         this.applyColumnSort(column, column.columnSortDirection());
         const sortDescriptors = this.gridService
@@ -398,7 +403,7 @@ export class GridComponent<T> implements GridVariantInput {
 
     public onGroupingColumnRemove(event: Event, column: Column): void {
         event.stopPropagation();
-        column.groupSortDirection.set(null);
+        column.setGroupSortDirection(null);
         this.gridService.appliedGroupSorts.update(dict => dict.remove(column.field()));
         this.gridService.groupColumns.update(columns =>
             columns.where(c => c.field() !== column.field()).toImmutableSet()
@@ -427,11 +432,11 @@ export class GridComponent<T> implements GridVariantInput {
 
     public onGroupingColumnSort(column: Column): void {
         if (column.groupSortDirection() == null) {
-            column.groupSortDirection.set("asc");
+            column.setGroupSortDirection("asc");
         } else if (column.groupSortDirection() === "asc") {
-            column.groupSortDirection.set("desc");
+            column.setGroupSortDirection("desc");
         } else if (column.groupSortDirection() === "desc") {
-            column.groupSortDirection.set("asc");
+            column.setGroupSortDirection("asc");
         }
         this.gridService.appliedGroupSorts.update(dict =>
             dict
@@ -445,9 +450,13 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.pageState.skip.set(event.skip);
         this.gridService.pageState.take.set(event.take);
 
-        const scrollableElement = this.#hostElementRef.nativeElement.querySelector("div.mona-grid-list") as HTMLElement;
-        if (scrollableElement) {
-            scrollableElement.scrollTop = 0;
+        if (isPlatformBrowser(this.#platformId)) {
+            const scrollableElement = this.#hostElementRef.nativeElement.querySelector(
+                "div.mona-grid-list"
+            ) as HTMLElement;
+            if (scrollableElement) {
+                scrollableElement.scrollTop = 0;
+            }
         }
     }
 
@@ -458,14 +467,14 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {
-        column.columnSortDirection.set(sortDirection);
+        column.setColumnSortDirection(sortDirection);
         if (this.gridService.sortableOptions.mode === "single") {
             this.gridService
                 .columns()
                 .where(c => c.field() !== column.field())
                 .forEach(c => {
-                    c.columnSortDirection.set(null);
-                    c.sortIndex.set(null);
+                    c.setColumnSortDirection(null);
+                    c.setSortIndex(null);
                     this.gridService.appliedSorts.update(dict => dict.remove(c.field()));
                 });
         }
@@ -477,7 +486,7 @@ export class GridComponent<T> implements GridVariantInput {
             this.gridService.appliedSorts.update(dict => dict.put(column.field(), { sort: sortDescriptor }));
         } else {
             this.gridService.appliedSorts.update(dict => dict.remove(column.field()));
-            column.sortIndex.set(null);
+            column.setSortIndex(null);
         }
         this.gridService
             .appliedSorts()
@@ -485,7 +494,7 @@ export class GridComponent<T> implements GridVariantInput {
             .forEach((field, fx) => {
                 const col = this.gridService.columns().firstOrDefault(c => c.field() === field);
                 if (col) {
-                    col.sortIndex.set(fx + 1);
+                    col.setSortIndex(fx + 1);
                 }
             });
     }
@@ -518,7 +527,7 @@ export class GridComponent<T> implements GridVariantInput {
             const columns = this.columns();
             untracked(() => {
                 this.gridService.columns.update(list => list.clear().addAll(columns.map(c => c.column)));
-                this.gridService.columns().forEach((c, i) => c.index.set(i));
+                this.gridService.columns().forEach((c, i) => c.setIndex(i));
                 if (this.filter().length !== 0) {
                     this.gridService.loadFilters(this.filter());
                 }
@@ -550,21 +559,6 @@ export class GridComponent<T> implements GridVariantInput {
         });
     }
 
-    private setGridHeaderElementEffect(): void {
-        toObservable(this.gridHeaderElement)
-            .pipe(
-                filter(h => h != null),
-                observeOn(asyncScheduler),
-                take(1),
-                tap(h => {
-                    this.gridService.gridHeaderElement.set(h.nativeElement);
-                    this.setInitialCalculatedWidthOfColumns();
-                    this.gridWidthSet.set(true);
-                })
-            )
-            .subscribe();
-    }
-
     private setInitialCalculatedWidthOfColumns(): void {
         if (this.gridService.gridHeaderElement()) {
             const headerElement = this.gridService.gridHeaderElement() as HTMLElement;
@@ -591,7 +585,7 @@ export class GridComponent<T> implements GridVariantInput {
                     calculatedWidth = this.gridService.findTextWidthOfColumn(gridCol, columnTh);
                 }
                 if (gridCol.width() != null) {
-                    gridCol.calculatedWidth.set(gridCol.width());
+                    gridCol.setCalculatedWidth(gridCol.width());
                 } else {
                     const minWidth = gridCol.minWidth();
                     const maxWidth = gridCol.maxWidth();
@@ -600,7 +594,7 @@ export class GridComponent<T> implements GridVariantInput {
                     } else if (maxWidth && calculatedWidth > maxWidth) {
                         calculatedWidth = maxWidth;
                     }
-                    gridCol.calculatedWidth.set(calculatedWidth);
+                    gridCol.setCalculatedWidth(calculatedWidth);
                 }
             }
         }
@@ -616,6 +610,9 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     private setResizeObserver(): void {
+        if (typeof ResizeObserver === "undefined") {
+            return;
+        }
         this.#resizeObserver = new ResizeObserver(() => {
             const rect = this.#hostElementRef.nativeElement.getBoundingClientRect();
             this.gridService.virtualGridMinBuffer.set(rect.height);

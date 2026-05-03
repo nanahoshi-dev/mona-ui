@@ -23,6 +23,7 @@ import { LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
 import { DateTime } from "luxon";
 import { fromEvent, pairwise, startWith } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
+import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { ContainsPipe } from "../../../pipes/contains.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
@@ -108,9 +109,13 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
     public data = input<ImmutableSet<Row>>(ImmutableSet.create());
 
     public ngAfterViewInit(): void {
-        window.setTimeout(() => {
-            this.synchronizeHorizontalScroll();
-        }, 0);
+        rxTimeout(
+            this.#destroyRef,
+            () => {
+                this.synchronizeHorizontalScroll();
+            },
+            0
+        );
     }
 
     public ngOnInit(): void {
@@ -253,7 +258,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
                 });
                 if (selectedRow != null) {
                     const index = viewData.indexOf(selectedRow);
-                    window.setTimeout(() => {
+                    rxTimeout(this.#destroyRef, () => {
                         this.viewport().scrollToIndex(index);
                     });
                 }
@@ -270,7 +275,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
                 });
                 if (selectedRow != null) {
                     const index = viewData.indexOf(selectedRow);
-                    window.setTimeout(() => {
+                    rxTimeout(this.#destroyRef, () => {
                         this.viewport().scrollToIndex(index);
                     });
                 }

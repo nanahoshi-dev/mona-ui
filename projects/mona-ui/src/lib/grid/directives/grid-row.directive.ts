@@ -9,7 +9,9 @@ import { gridListTableRowThemeVariants } from "../styles/grid.styles";
     host: {
         "[class]": "baseClass()",
         "[attr.data-ruid]": "row().uid",
-        "[attr.data-row-view-index]": "index()"
+        "[attr.data-row-view-index]": "index()",
+        "role": "row",
+        "[attr.aria-selected]": "selectable() ? selected() : null"
     },
     exportAs: "monaGridRow"
 })
@@ -21,6 +23,7 @@ export class GridRowDirective {
         const selected = this.selected();
         return gridListTableRowThemeVariants(theme)({ selected });
     });
+    protected readonly selectable = computed(() => this.#gridService.selectableOptions.enabled);
     public readonly expanded = computed(() => this.#gridService.isRowExpanded(this.row()));
     public readonly index = input.required<number>();
     public readonly row = input.required<Row>();

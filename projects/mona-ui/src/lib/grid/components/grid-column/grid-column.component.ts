@@ -2,19 +2,16 @@ import { ChangeDetectionStrategy, Component, contentChild, effect, input, Templa
 import { DataType } from "../../../models/DataType";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
 import { GridColumnTitleTemplateDirective } from "../../directives/grid-column-title-template.directive";
-import { Column } from "../../models/Column";
+import { Column, ColumnConfig } from "../../models/Column";
 
 @Component({
     selector: "mona-grid-column",
     template: "",
-    styleUrls: [],
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GridColumnComponent {
-    protected readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
-    protected readonly titleTemplate = contentChild(GridColumnTitleTemplateDirective, { read: TemplateRef });
-
+    private readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
+    private readonly titleTemplate = contentChild(GridColumnTitleTemplateDirective, { read: TemplateRef });
     public readonly column = new Column();
     public readonly editable = input<boolean>(true);
     public readonly field = input<string>("");
@@ -26,40 +23,18 @@ export class GridColumnComponent {
 
     public constructor() {
         effect(() => {
-            const cellTemplate = this.cellTemplate();
-            untracked(() => this.column.cellTemplate.set(cellTemplate ?? null));
-        });
-        effect(() => {
-            const editable = this.editable();
-            untracked(() => this.column.editable.set(editable));
-        });
-        effect(() => {
-            const field = this.field();
-            untracked(() => this.column.field.set(field));
-        });
-        effect(() => {
-            const maxWidth = this.maxWidth();
-            untracked(() => this.column.maxWidth.set(maxWidth));
-        });
-        effect(() => {
-            const minWidth = this.minWidth();
-            untracked(() => this.column.minWidth.set(minWidth));
-        });
-        effect(() => {
-            const title = this.title();
-            untracked(() => this.column.title.set(title));
-        });
-        effect(() => {
-            const titleTemplate = this.titleTemplate();
-            untracked(() => this.column.titleTemplate.set(titleTemplate ?? null));
-        });
-        effect(() => {
-            const type = this.type();
-            untracked(() => this.column.dataType.set(type));
-        });
-        effect(() => {
-            const width = this.width();
-            untracked(() => this.column.width.set(width));
+            const config: ColumnConfig = {
+                cellTemplate: this.cellTemplate() ?? null,
+                dataType: this.type(),
+                editable: this.editable(),
+                field: this.field(),
+                maxWidth: this.maxWidth(),
+                minWidth: this.minWidth(),
+                title: this.title(),
+                titleTemplate: this.titleTemplate() ?? null,
+                width: this.width()
+            };
+            untracked(() => this.column.setConfig(config));
         });
     }
 }

@@ -46,7 +46,7 @@
         }
     </div>
 }
-<div [class]="headerClass()" [ngStyle]="{ margin: headerMargin }" #gridHeaderElement>
+<div [class]="headerClass()" [style.margin]="headerMargin" #gridHeaderElement>
     <div class="mona-grid-header-wrap">
         <table [class]="headerTableClass()">
             <thead [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
@@ -56,13 +56,20 @@
                     (cdkDropListDropped)="onColumnDrop()"
                     [class]="headerTableRowClass()">
                     @for (_ of gridService.groupColumns(); track $index) {
-                        <th class="border-r border-border" [style.width.px]="gridService.groupColumnWidth"></th>
+                        <th
+                            scope="col"
+                            class="border-r border-border"
+                            [style.width.px]="gridService.groupColumnWidth"></th>
                     }
                     @if (gridService.masterDetailTemplate()) {
-                        <th class="border-r border-border" [style.width.px]="gridService.detailColumnWidth"></th>
+                        <th
+                            scope="col"
+                            class="border-r border-border"
+                            [style.width.px]="gridService.detailColumnWidth"></th>
                     }
                     @for (column of gridService.columns(); track $index) {
                         <th
+                            scope="col"
                             cdkDrag
                             [cdkDragData]="column"
                             [cdkDragDisabled]="!reorderable() && !groupable()"
@@ -71,7 +78,12 @@
                             (cdkDragEntered)="onColumnDragEnter($event)"
                             (cdkDragStarted)="onColumnDragStart($event)"
                             [style.min-width.px]="column.minWidth()"
-                            [style.width.px]="column.calculatedWidth()">
+                            [style.width.px]="column.calculatedWidth()"
+                            [attr.aria-sort]="
+                                gridService.sortableOptions.enabled
+                                    ? (column.columnSortDirection() | columnAriaSort)
+                                    : null
+                            ">
                             <div [class]="headerTableColumnWrapClass()">
                                 @if (column.titleTemplate()) {
                                     <ng-container [ngTemplateOutlet]="column.titleTemplate()"></ng-container>
@@ -80,6 +92,11 @@
                                         [class]="headerTableColumnTitleClass()"
                                         (click)="onColumnSort(column)"
                                         [title]="column.title()"
+                                        [attr.role]="gridService.sortableOptions.enabled ? 'button' : null"
+                                        [attr.tabindex]="gridService.sortableOptions.enabled ? '0' : null"
+                                        [attr.aria-label]="
+                                            gridService.sortableOptions.enabled ? 'Sort by ' + column.title() : null
+                                        "
                                         >{{ column.title() }}</span
                                     >
                                 }

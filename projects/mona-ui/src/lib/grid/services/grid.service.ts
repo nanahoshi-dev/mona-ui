@@ -1,4 +1,5 @@
-import { computed, DOCUMENT, inject, Injectable, OutputEmitterRef, signal, TemplateRef } from "@angular/core";
+import { computed, DOCUMENT, inject, Injectable, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { any, Dictionary, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
@@ -23,6 +24,7 @@ import { SortableOptions } from "../models/SortableOptions";
 @Injectable()
 export class GridService {
     readonly #document = inject(DOCUMENT);
+    readonly #platformId = inject(PLATFORM_ID);
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
@@ -108,12 +110,12 @@ export class GridService {
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 28 });
     public editableOptions: EditableOptions = { enabled: false };
     public gridHeaderElement = signal<HTMLDivElement | null>(null);
+    /** @internal Intentionally mutable (not a signal) — collapse state is nested and mutated in-place across list components. */
     public gridGroupExpandState = new Dictionary<string, Dictionary<number, boolean>>();
     public selectableOptions: GridSelectableOptions = {
         enabled: false,
         mode: "single"
     };
-    public selectedKeysChange!: OutputEmitterRef<unknown[]>;
     public sortableOptions: SortableOptions = {
         enabled: false,
         mode: "single",
@@ -126,6 +128,9 @@ export class GridService {
     }
 
     public findTextWidthOfColumn(column: Column, element: HTMLTableCellElement): number {
+        if (!isPlatformBrowser(this.#platformId)) {
+            return 0;
+        }
         let longestValue = this.findLongestCellContentOfColumn(column);
         if (column.title().length > longestValue.length) {
             longestValue = column.title();
@@ -217,7 +222,7 @@ export class GridService {
                 });
             }
         }
-        this.columns().forEach(c => c.filtered.set(newAppliedFilters.containsKey(c.field())));
+        this.columns().forEach(c => c.setFiltered(newAppliedFilters.containsKey(c.field())));
         this.appliedFilters.set(
             newAppliedFilters.toImmutableDictionary(
                 p => p.key,
@@ -237,7 +242,7 @@ export class GridService {
         for (const descriptor of descriptors) {
             const column = columns.firstOrDefault(c => c.field() === descriptor.field);
             if (column != null) {
-                column.groupSortDirection.set(descriptor.dir ?? "asc");
+                column.setGroupSortDirection(descriptor.dir ?? "asc");
                 this.appliedGroupSorts.update(v =>
                     v.add(column.field(), { sort: { field: descriptor.field, dir: descriptor.dir ?? "asc" } })
                 );
@@ -259,8 +264,8 @@ export class GridService {
                 newAppliedSorts.add(column.field(), {
                     sort: sort
                 });
-                column.sortIndex.set(index + 1);
-                column.columnSortDirection.set(sort.dir);
+                column.setSortIndex(index + 1);
+                column.setColumnSortDirection(sort.dir);
             }
         }
         this.appliedSorts.set(

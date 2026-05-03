@@ -61,7 +61,11 @@
             <ng-template #gridGroupTemplate let-groupData let-column="column" let-cx="cx" let-depth="depth">
                 @if (groupData | gridGroup: column : gridService.pageState.page(); as groupItem) {
                     @for (subGroup of groupItem; track $index) {
-                        <tr [class]="groupRowClass()">
+                        <tr
+                            [class]="groupRowClass()"
+                            role="row"
+                            [attr.aria-level]="depth + 1"
+                            [attr.aria-expanded]="!subGroup.collapsed">
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : cx; track $index) {
                                 <td [style.width.px]="gridService.groupColumnWidth"></td>
                             }

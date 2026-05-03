@@ -1,24 +1,92 @@
-import { signal, TemplateRef } from "@angular/core";
+import { signal, Signal, TemplateRef, WritableSignal } from "@angular/core";
 import { DataType } from "../../models/DataType";
 import { SortDirection } from "../../query/sort/SortDescriptor";
 
+export interface ColumnConfig {
+    cellTemplate: TemplateRef<unknown> | null;
+    dataType: DataType;
+    editable: boolean;
+    field: string;
+    maxWidth: number | null;
+    minWidth: number;
+    title: string;
+    titleTemplate: TemplateRef<unknown> | null;
+    width: number | undefined;
+}
+
 export class Column {
-    /**
-     * Only used internally for column resizing
-     */
-    public readonly calculatedWidth = signal<number | undefined>(undefined);
-    public readonly cellTemplate = signal<TemplateRef<any> | null>(null);
-    public readonly columnSortDirection = signal<SortDirection | null>(null);
-    public readonly dataType = signal<DataType>("string");
-    public readonly editable = signal(false);
-    public readonly field = signal("");
-    public readonly filtered = signal(false);
-    public readonly groupSortDirection = signal<SortDirection | null>(null);
-    public readonly index = signal(0); // 0-based
-    public readonly maxWidth = signal<number | null>(null);
-    public readonly minWidth = signal(40);
-    public readonly sortIndex = signal<number | null>(null); // 1-based
-    public readonly title = signal("");
-    public readonly titleTemplate = signal<TemplateRef<any> | null>(null);
-    public readonly width = signal<number | undefined>(undefined);
+    readonly #calculatedWidth = signal<number | undefined>(undefined);
+    readonly #cellTemplate = signal<TemplateRef<unknown> | null>(null);
+    readonly #columnSortDirection = signal<SortDirection | null>(null);
+    readonly #dataType = signal<DataType>("string");
+    readonly #editable = signal(false);
+    readonly #field = signal("");
+    readonly #filtered = signal(false);
+    readonly #groupSortDirection = signal<SortDirection | null>(null);
+    readonly #index = signal(0);
+    readonly #maxWidth = signal<number | null>(null);
+    readonly #minWidth = signal(40);
+    readonly #sortIndex = signal<number | null>(null);
+    readonly #title = signal("");
+    readonly #titleTemplate = signal<TemplateRef<unknown> | null>(null);
+    readonly #width = signal<number | undefined>(undefined);
+
+    public readonly calculatedWidth = this.#calculatedWidth.asReadonly();
+    public readonly cellTemplate = this.#cellTemplate.asReadonly();
+    public readonly columnSortDirection = this.#columnSortDirection.asReadonly();
+    public readonly dataType = this.#dataType.asReadonly();
+    public readonly editable = this.#editable.asReadonly();
+    public readonly field = this.#field.asReadonly();
+    public readonly filtered = this.#filtered.asReadonly();
+    public readonly groupSortDirection = this.#groupSortDirection.asReadonly();
+    public readonly index = this.#index.asReadonly();
+    public readonly maxWidth = this.#maxWidth.asReadonly();
+    public readonly minWidth = this.#minWidth.asReadonly();
+    public readonly sortIndex = this.#sortIndex.asReadonly();
+    public readonly title = this.#title.asReadonly();
+    public readonly titleTemplate = this.#titleTemplate.asReadonly();
+    public readonly width = this.#width.asReadonly();
+
+    /** @internal */
+    public setCalculatedWidth(value: number | undefined): void {
+        this.#calculatedWidth.set(value);
+    }
+
+    /** @internal */
+    public setColumnSortDirection(value: SortDirection | null): void {
+        this.#columnSortDirection.set(value);
+    }
+
+    /** @internal */
+    public setConfig(config: ColumnConfig): void {
+        this.#cellTemplate.set(config.cellTemplate);
+        this.#dataType.set(config.dataType);
+        this.#editable.set(config.editable);
+        this.#field.set(config.field);
+        this.#maxWidth.set(config.maxWidth);
+        this.#minWidth.set(config.minWidth);
+        this.#title.set(config.title);
+        this.#titleTemplate.set(config.titleTemplate);
+        this.#width.set(config.width);
+    }
+
+    /** @internal */
+    public setFiltered(value: boolean): void {
+        this.#filtered.set(value);
+    }
+
+    /** @internal */
+    public setGroupSortDirection(value: SortDirection | null): void {
+        this.#groupSortDirection.set(value);
+    }
+
+    /** @internal */
+    public setIndex(value: number): void {
+        this.#index.set(value);
+    }
+
+    /** @internal */
+    public setSortIndex(value: number | null): void {
+        this.#sortIndex.set(value);
+    }
 }

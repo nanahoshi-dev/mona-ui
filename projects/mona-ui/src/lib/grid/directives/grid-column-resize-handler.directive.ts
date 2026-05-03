@@ -1,12 +1,11 @@
 import {
-    AfterViewInit,
+    afterNextRender,
     DestroyRef,
     Directive,
     DOCUMENT,
     ElementRef,
     inject,
     input,
-    NgZone,
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -16,19 +15,21 @@ import { Column } from "../models/Column";
 @Directive({
     selector: "[monaGridColumnResizeHandler]"
 })
-export class GridColumnResizeHandlerDirective implements AfterViewInit {
+export class GridColumnResizeHandlerDirective {
+    readonly #defaultMaxWidth = 1000;
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
-    readonly #zone: NgZone = inject(NgZone);
 
     public readonly resizeEnd = output();
     public readonly resizeStart = output();
     public column = input.required<Column>();
     public gridId = input.required<string>();
 
-    public ngAfterViewInit(): void {
-        this.setEvents();
+    public constructor() {
+        afterNextRender({
+            write: () => this.setEvents()
+        });
     }
 
     private onMouseDown(event: MouseEvent) {
@@ -50,7 +51,7 @@ export class GridColumnResizeHandlerDirective implements AfterViewInit {
         const onMouseMove = (event: MouseEvent) => {
             const deltaX = event.clientX - initialX;
             const minWidth = this.column().minWidth();
-            const maxWidth = this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? 1000; //TODO: Change 1000 to a constant
+            const maxWidth = this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? this.#defaultMaxWidth;
 
             if (initialWidth + deltaX < minWidth) {
                 return;
@@ -61,8 +62,8 @@ export class GridColumnResizeHandlerDirective implements AfterViewInit {
             }
 
             const oldWidth = this.column().calculatedWidth() ?? element.getBoundingClientRect().width;
-            this.column().calculatedWidth.set(initialWidth + deltaX);
-            const calculatedWidth = this.column().calculatedWidth() as number;
+            const calculatedWidth = initialWidth + deltaX;
+            this.column().setCalculatedWidth(calculatedWidth);
             if (headerTableElement) {
                 headerTableElement.style.width = `${
                     headerTableElement.getBoundingClientRect().width + (calculatedWidth - oldWidth)
@@ -87,13 +88,11 @@ export class GridColumnResizeHandlerDirective implements AfterViewInit {
     }
 
     private setEvents(): void {
-        this.#zone.runOutsideAngular(() => {
-            fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "mousedown")
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(event => {
-                    event.stopImmediatePropagation();
-                    this.onMouseDown(event);
-                });
-        });
+        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "mousedown")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(event => {
+                event.stopImmediatePropagation();
+                this.onMouseDown(event);
+            });
     }
 }
