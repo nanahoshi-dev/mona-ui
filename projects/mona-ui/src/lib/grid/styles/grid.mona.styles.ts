@@ -30,6 +30,7 @@ export const gridCellContainerVariants = cva(
         flex items-center w-full h-full
         flex-1 overflow-hidden outline-none
         px-2.75 py-1.5
+        focus:ring-1 focus:ring-inset focus:ring-primary/40
     `,
     {
         variants: {

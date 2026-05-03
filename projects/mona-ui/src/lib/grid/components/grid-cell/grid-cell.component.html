@@ -1,4 +1,5 @@
 <div
+    role="gridcell"
     [class]="cellContainerClass()"
     [attr.tabindex]="editing() ? -1 : 0"
     cdkMonitorSubtreeFocus
@@ -32,11 +33,11 @@
 </div>
 
 <ng-template #cellEditTemplate>
-    <form [formGroup]="editForm" class="w-full">
+    <form [formGroup]="editForm" class="w-full h-full">
         @switch (column().dataType()) {
             @case ("string") {
                 <mona-text-box
-                    class="w-full"
+                    class="w-full h-full"
                     [inputAttributes]="{ autocomplete: 'off' }"
                     [formControlName]="column().field()"
                     [rounded]="'none'"
@@ -44,7 +45,7 @@
             }
             @case ("number") {
                 <mona-numeric-text-box
-                    class="w-full"
+                    class="w-full h-full"
                     [formControlName]="column().field()"
                     [decimals]="3"
                     [size]="'small'"
@@ -52,10 +53,9 @@
             }
             @case ("date") {
                 <mona-date-picker
-                    class="w-full"
+                    class="w-full h-full"
                     [rounded]="'none'"
                     [size]="'small'"
-                    [popupWidth]="'256px'"
                     [formControlName]="column().field()"></mona-date-picker>
             }
             @case ("boolean") {

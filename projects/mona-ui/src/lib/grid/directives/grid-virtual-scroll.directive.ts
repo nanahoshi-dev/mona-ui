@@ -3,8 +3,7 @@ import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
 import { GridService } from "../services/grid.service";
 
 @Directive({
-    selector: "mona-grid[monaGridVirtualScroll]",
-    standalone: true
+    selector: "mona-grid[monaGridVirtualScroll]"
 })
 export class GridVirtualScrollDirective {
     readonly #defaultOptions: VirtualScrollOptions = {

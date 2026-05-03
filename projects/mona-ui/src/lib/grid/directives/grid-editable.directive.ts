@@ -3,8 +3,7 @@ import { EditableOptions } from "../models/EditableOptions";
 import { GridService } from "../services/grid.service";
 
 @Directive({
-    selector: "[monaGridEditable]",
-    standalone: true
+    selector: "[monaGridEditable]"
 })
 export class GridEditableDirective {
     readonly #gridService: GridService = inject(GridService);

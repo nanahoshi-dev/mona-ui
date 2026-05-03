@@ -1,4 +1,4 @@
-import { signal, Signal, TemplateRef, WritableSignal } from "@angular/core";
+import { signal, TemplateRef } from "@angular/core";
 import { DataType } from "../../models/DataType";
 import { SortDirection } from "../../query/sort/SortDescriptor";
 

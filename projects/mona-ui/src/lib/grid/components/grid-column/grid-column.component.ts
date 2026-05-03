@@ -13,12 +13,39 @@ export class GridColumnComponent {
     private readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
     private readonly titleTemplate = contentChild(GridColumnTitleTemplateDirective, { read: TemplateRef });
     public readonly column = new Column();
+    /**
+     * @description Whether this column is editable when the grid is in edit mode.
+     */
     public readonly editable = input<boolean>(true);
+
+    /**
+     * @description The field name of the data property to display in this column.
+     */
     public readonly field = input<string>("");
+
+    /**
+     * @description The maximum width of this column in pixels.
+     */
     public readonly maxWidth = input<number | null>(null);
+
+    /**
+     * @description The minimum width of this column in pixels.
+     */
     public readonly minWidth = input<number>(40);
+
+    /**
+     * @description The title displayed in the column header.
+     */
     public readonly title = input<string>("");
+
+    /**
+     * @description The data type of the column. Determines the edit component and filter behavior.
+     */
     public readonly type = input<DataType>("string");
+
+    /**
+     * @description The fixed width of this column in pixels. If not set, the column width is calculated automatically.
+     */
     public readonly width = input<number | undefined>(undefined);
 
     public constructor() {

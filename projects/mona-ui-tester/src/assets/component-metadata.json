@@ -71,6 +71,18 @@
       }
     ]
   },
+  "GridCellDirective": {
+    "name": "GridCellDirective",
+    "selector": "\"[monaGridCell]\"",
+    "inputs": [
+      {
+        "name": "hasRightBorder",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "GridColumnResizeHandlerDirective": {
     "name": "GridColumnResizeHandlerDirective",
     "selector": "\"[monaGridColumnResizeHandler]\"",
@@ -137,19 +149,31 @@
       }
     ]
   },
+  "GridRowDirective": {
+    "name": "GridRowDirective",
+    "selector": "\"tr[monaGridRow]\"",
+    "inputs": [
+      {
+        "name": "index",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "row",
+        "type": "Row",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "GridSelectableDirective": {
     "name": "GridSelectableDirective",
     "selector": "\"mona-grid[monaGridSelectable]\"",
     "inputs": [
       {
-        "name": "selectedKeysChange",
-        "type": "unknown[]",
-        "description": "",
-        "kind": "output"
-      },
-      {
         "name": "options",
-        "type": "SelectableOptions | \"\" | undefined",
+        "type": "GridSelectableOptions | \"\"",
         "description": "",
         "kind": "input"
       },
@@ -164,6 +188,12 @@
         "type": "Iterable<unknown>",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "selectedKeysChange",
+        "type": "unknown[]",
+        "description": "",
+        "kind": "output"
       }
     ]
   },
@@ -1379,7 +1409,7 @@
       },
       {
         "name": "pageSize",
-        "type": "number | undefined",
+        "type": "number",
         "description": "",
         "kind": "input"
       },
@@ -1414,6 +1444,12 @@
         "kind": "input"
       },
       {
+        "name": "rounded",
+        "type": "GridVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "sort",
         "type": "SortDescriptor[]",
         "description": "",
@@ -1422,6 +1458,12 @@
       {
         "name": "sortable",
         "type": "boolean | SortableOptions",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }
@@ -1434,13 +1476,13 @@
       {
         "name": "column",
         "type": "Column",
-        "description": "",
+        "description": "The column configuration for this cell.",
         "kind": "input"
       },
       {
         "name": "row",
         "type": "Row",
-        "description": "",
+        "description": "The row data for this cell.",
         "kind": "input"
       }
     ]
@@ -1452,43 +1494,43 @@
       {
         "name": "editable",
         "type": "boolean",
-        "description": "",
+        "description": "Whether this column is editable when the grid is in edit mode.",
         "kind": "input"
       },
       {
         "name": "field",
         "type": "string",
-        "description": "",
+        "description": "The field name of the data property to display in this column.",
         "kind": "input"
       },
       {
         "name": "maxWidth",
         "type": "number | null",
-        "description": "",
+        "description": "The maximum width of this column in pixels.",
         "kind": "input"
       },
       {
         "name": "minWidth",
         "type": "number",
-        "description": "",
+        "description": "The minimum width of this column in pixels.",
         "kind": "input"
       },
       {
         "name": "title",
         "type": "string",
-        "description": "",
+        "description": "The title displayed in the column header.",
         "kind": "input"
       },
       {
         "name": "type",
         "type": "DataType",
-        "description": "",
+        "description": "The data type of the column. Determines the edit component and filter behavior.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "number | undefined",
-        "description": "",
+        "description": "The fixed width of this column in pixels. If not set, the column width is calculated automatically.",
         "kind": "input"
       }
     ]
@@ -5076,7 +5118,7 @@
       {
         "name": "showLabels",
         "type": "boolean",
-        "description": "Sets whether to show labels on the slider.\r\nOnly applicable if `showTicks` is `true`.",
+        "description": "Sets whether to show labels on the slider.\nOnly applicable if `showTicks` is `true`.",
         "kind": "input"
       },
       {
@@ -5106,7 +5148,7 @@
       {
         "name": "trackSize",
         "type": "string | number | null",
-        "description": "Sets the size of the slider track.\r\nFor horizontal sliders, this sets the height.\r\nFor vertical sliders, this sets the width.",
+        "description": "Sets the size of the slider track.\nFor horizontal sliders, this sets the height.\nFor vertical sliders, this sets the width.",
         "kind": "input"
       }
     ]
@@ -5514,7 +5556,7 @@
       {
         "name": "linear",
         "type": "boolean",
-        "description": "Sets the flow of the stepper.\r\nIf set to true, the user will only be able to navigate to the previous or the next step.",
+        "description": "Sets the flow of the stepper.\nIf set to true, the user will only be able to navigate to the previous or the next step.",
         "kind": "input"
       },
       {

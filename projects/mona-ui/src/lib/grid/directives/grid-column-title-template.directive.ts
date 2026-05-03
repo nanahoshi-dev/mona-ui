@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "[monaGridColumnTitleTemplate]",
-    standalone: true
+    selector: "[monaGridColumnTitleTemplate]"
 })
 export class GridColumnTitleTemplateDirective {}

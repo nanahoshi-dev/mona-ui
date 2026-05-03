@@ -49,7 +49,7 @@
 <div [class]="headerClass()" [style.margin]="headerMargin" #gridHeaderElement>
     <div class="mona-grid-header-wrap">
         <table [class]="headerTableClass()">
-            <thead [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
+            <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
                 <tr
                     cdkDropList
                     [cdkDropListConnectedTo]="groupable() ? [groupColumnList()!] : []"
@@ -70,6 +70,7 @@
                     @for (column of gridService.columns(); track $index) {
                         <th
                             scope="col"
+                            role="columnheader"
                             cdkDrag
                             [cdkDragData]="column"
                             [cdkDragDisabled]="!reorderable() && !groupable()"

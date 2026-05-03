@@ -1,10 +1,8 @@
 import { Directive, inject, TemplateRef } from "@angular/core";
 import { GridService } from "../services/grid.service";
 
-
 @Directive({
-    selector: "ng-template[monaGridCellTooltipTemplate]",
-    standalone: true
+    selector: "ng-template[monaGridCellTooltipTemplate]"
 })
 export class GridCellTooltipTemplateDirective {
     readonly #gridService = inject(GridService);

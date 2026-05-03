@@ -5,6 +5,7 @@ import {
     Component,
     computed,
     DestroyRef,
+    DOCUMENT,
     effect,
     ElementRef,
     inject,
@@ -60,6 +61,7 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
 })
 export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
@@ -121,13 +123,13 @@ export class GridListComponent implements GridListVariantInput {
     }
 
     private setSubscriptions(): void {
-        fromEvent<MouseEvent>(document, "click")
-            .pipe(mergeWith(fromEvent<KeyboardEvent>(document, "keyup")), takeUntilDestroyed(this.#destroyRef))
+        fromEvent<MouseEvent>(this.#document, "click")
+            .pipe(mergeWith(fromEvent<KeyboardEvent>(this.#document, "keyup")), takeUntilDestroyed(this.#destroyRef))
             .subscribe(e => {
                 if (e.type === "click") {
                     const event = e as MouseEvent;
                     const target = event.target as HTMLElement;
-                    if (target.closest(".mona-grid-cell") == null) {
+                    if (target.closest("mona-grid-cell") == null) {
                         this.gridService.isInEditMode.set(false);
                     }
                 }

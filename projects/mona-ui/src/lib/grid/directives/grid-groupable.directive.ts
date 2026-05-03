@@ -7,8 +7,7 @@ import { GroupDescriptor } from "../models/GroupDescriptor";
 import { GridService } from "../services/grid.service";
 
 @Directive({
-    selector: "mona-grid[monaGridGroupable]",
-    standalone: true
+    selector: "mona-grid[monaGridGroupable]"
 })
 export class GridGroupableDirective implements OnInit {
     readonly #destroyRef = inject(DestroyRef);

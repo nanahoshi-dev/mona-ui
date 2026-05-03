@@ -1,5 +1,5 @@
 <table [class]="tableClass()">
-    <tbody>
+    <tbody role="rowgroup">
         @if (gridService.groupColumns().length === 0) {
             @for (row of data(); track row.uid) {
                 <tr

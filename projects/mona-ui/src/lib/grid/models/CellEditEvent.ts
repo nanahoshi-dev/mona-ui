@@ -11,27 +11,27 @@ export class CellEditEvent extends PreventableEvent {
         return this.#options.field;
     }
 
-    public get newValue(): any {
+    public get newValue(): unknown {
         return this.#options.newValue;
     }
 
-    public get oldValue(): any {
+    public get oldValue(): unknown {
         return this.#options.oldValue;
     }
 
-    public get rowData(): any {
+    public get rowData(): unknown {
         return this.#options.rowData;
     }
 
-    public setNewValue(value: any): void {
+    public setNewValue(value: unknown): void {
         this.#options.setNewValue(value);
     }
 }
 
 export interface CellEditEventOptions {
     field: string;
-    newValue: any;
-    oldValue: any;
-    rowData: any;
-    setNewValue: (value: any) => void;
+    newValue: unknown;
+    oldValue: unknown;
+    rowData: unknown;
+    setNewValue: (value: unknown) => void;
 }

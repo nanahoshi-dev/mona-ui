@@ -4,7 +4,7 @@
     [minBufferPx]="gridService.virtualGridMinBuffer()"
     [maxBufferPx]="gridService.virtualGridMaxBuffer()">
     <table [class]="tableClass()">
-        <tbody>
+        <tbody role="rowgroup">
             @if (gridService.groupColumns().length === 0) {
                 <ng-container *cdkVirtualFor="let row of data(); let $index = index">
                     <tr
