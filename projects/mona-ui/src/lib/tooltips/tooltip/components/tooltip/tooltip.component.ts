@@ -1,17 +1,19 @@
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
     effect,
     inject,
+    ElementRef,
     input,
     linkedSignal,
     TemplateRef,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { takeUntil } from "rxjs";
+import { fromEvent, take, takeUntil } from "rxjs";
 import { fadeIn, fadeOut } from "../../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../../models/Position";
 import { PopupRef } from "../../../../popup/models/PopupRef";
@@ -72,16 +74,29 @@ export class TooltipComponent implements TooltipVariantInputs {
     public readonly target = input.required<PopupAnchor>();
 
     public constructor() {
-        effect(() => {
-            if (this.popupRef) {
-                this.popupRef.close();
-                this.popupRef = null;
+        afterNextRender({
+            read: () => {
+                const target = this.target();
+                if (typeof target === "string") {
+                    this.#createTooltip();
+                } else {
+                    const element = this.#getAnchorElement(target);
+                    if (element) {
+                        fromEvent<PointerEvent>(element, "pointerenter")
+                            .pipe(takeUntilDestroyed(this.#destroyRef))
+                            .subscribe(() => {
+                                if (this.popupRef) {
+                                    return;
+                                }
+                                this.#createTooltip();
+                            });
+                    }
+                }
             }
-            this.createTooltip();
         });
     }
 
-    private createTooltip(): void {
+    #createTooltip(): void {
         this.currentArrowPosition.set(this.position());
         const connectionPoints = getPositionConnectionPoints(this.position());
         const offset = getOffsetForPosition(this.position(), true);
@@ -103,6 +118,10 @@ export class TooltipComponent implements TooltipVariantInputs {
             withPush: false
         });
 
+        this.popupRef.closed.pipe(take(1)).subscribe(() => {
+            this.popupRef = null;
+        });
+
         if (typeof this.target() !== "string") {
             this.popupRef.positionChanges
                 .pipe(takeUntil(this.popupRef.closed), takeUntilDestroyed(this.#destroyRef))
@@ -111,5 +130,15 @@ export class TooltipComponent implements TooltipVariantInputs {
                     this.currentArrowPosition.set(newArrowPosition);
                 });
         }
+    }
+
+    #getAnchorElement(anchor: PopupAnchor): HTMLElement | null {
+        if (anchor instanceof HTMLElement) {
+            return anchor;
+        }
+        if (typeof anchor === "object" && "nativeElement" in anchor && anchor.nativeElement instanceof HTMLElement) {
+            return anchor.nativeElement;
+        }
+        return null;
     }
 }

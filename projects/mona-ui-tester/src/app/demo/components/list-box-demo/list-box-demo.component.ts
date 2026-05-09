@@ -396,7 +396,6 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         event: ListBoxActionEvent<(typeof dropdownFoodData)[0]>,
         listBox: "first" | "second" | "third"
     ): void {
-        console.log(event);
         if (event.action === "moveDown" || event.action === "moveUp") {
             const dataToProcess =
                 listBox === "first"
@@ -454,7 +453,6 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
     }
 
     protected onSelectedKeysChange(keys: unknown[], listBox: "first" | "second" | "third"): void {
-        console.log(listBox, keys);
         if (listBox === "first") {
             this.firstListSelectedKeys.set(ImmutableSet.create(keys));
         } else if (listBox === "second") {

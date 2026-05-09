@@ -26,7 +26,7 @@ export type PathValue<T, P> = P extends readonly [infer K, ...infer R]
         : never
     : never;
 
-export type ArrayStrategy = { kind: "replace" } | { kind: "concat" } | { kind: "unionBy"; key: string | string[] }; // Updated to support composite keys
+export type ArrayStrategy = { kind: "replace" } | { kind: "concat" } | { kind: "unionBy"; key: string | string[] };
 
 export interface DeepMergeOptions {
     arrayStrategy?: ArrayStrategy | ((key: PropertyKey, path: ReadonlyArray<PropertyKey>) => ArrayStrategy);
@@ -106,7 +106,6 @@ export function deepMerge<T>(
                     const id = getIdentifier(item);
                     const existing = map.get(id);
 
-                    // Perform a deep merge on the items themselves if they are objects
                     const mergedItem =
                         isPlainObject(item) && isPlainObject(existing)
                             ? deepMerge(existing, item, options)
@@ -188,7 +187,7 @@ export function prunePatch<T>(base: T | DeepPartial<T>, patch: DeepPartial<T>): 
             } else {
                 result[key] = pruned;
             }
-        } else if (baseValue === patchValue) {
+        } else if (deepEquals(baseValue, patchValue)) {
             delete result[key];
         }
     }

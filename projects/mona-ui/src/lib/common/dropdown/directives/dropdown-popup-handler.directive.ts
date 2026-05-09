@@ -33,6 +33,7 @@ export class DropdownPopupHandlerDirective {
                     .subscribe(s => this.togglePopup(s));
             }
         });
+        this.#destroyRef.onDestroy(() => this.closePopup());
     }
 
     private closePopup(): void {

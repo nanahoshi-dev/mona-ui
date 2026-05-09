@@ -182,15 +182,9 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         { field: "Freight", title: "Freight", filterType: "number" },
         { field: "ShipCity", title: "Ship City", filterType: "string" },
         { field: "ShipCountry", title: "Ship Country", filterType: "string" },
-        { field: "ShipRegion", title: "Ship Region", filterType: "string" },
-        { field: "ShipVia", title: "Ship Via", filterType: "number" },
-        { field: "ShipPostalCode", title: "Ship Postal Code", filterType: "string" },
-        { field: "ShipAddress", title: "Ship Address", filterType: "string" },
+        { field: "Delivered", title: "Delivered", filterType: "boolean" },
         { field: "OrderDate", title: "Order Date", filterType: "date" },
-        { field: "RequiredDate", title: "Required Date", filterType: "date" },
-        { field: "ShippedDate", title: "Shipped Date", filterType: "date" },
-        { field: "CustomerID", title: "Customer ID", filterType: "string" },
-        { field: "EmployeeID", title: "Employee ID", filterType: "number" }
+        { field: "ShippedDate", title: "Shipped Date", filterType: "date" }
     ];
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly selection = computed(() => {
@@ -308,15 +302,9 @@ function generateRandomGridData(count: number) {
             Freight: Math.floor(Math.random() * 100),
             ShipCity: cities[randomCityIndex],
             ShipCountry: countries[randomCountryIndex],
-            ShipRegion: "",
-            ShipVia: Math.random() > 0.5, //Math.floor(Math.random() * 4),
-            ShipPostalCode: "0000" + Math.floor(Math.random() * 100),
-            ShipAddress: "Random Street, " + Math.floor(Math.random() * 100),
+            Delivered: Math.random() > 0.5, //Math.floor(Math.random() * 4),
             OrderDate: new Date(),
-            RequiredDate: new Date(now.setDate(now.getDate() + Math.random() * 30)),
-            ShippedDate: new Date(now.setDate(now.getDate() + Math.random() * 30)),
-            CustomerID: v4(),
-            EmployeeID: Math.floor(Math.random() * 10)
+            ShippedDate: new Date(now.setDate(now.getDate() + Math.random() * 30))
         });
     }
 
