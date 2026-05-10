@@ -12,6 +12,7 @@
                 <mona-chip
                     [removable]="true"
                     size="small"
+                    [rounded]="rounded()"
                     (click)="onGroupingColumnSort(groupColumn)"
                     (remove)="onGroupingColumnRemove($event, groupColumn)">
                     @if (groupColumn.groupSortDirection() === "asc") {

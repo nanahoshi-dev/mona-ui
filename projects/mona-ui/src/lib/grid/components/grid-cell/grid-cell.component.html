@@ -1,66 +1,22 @@
+@let dataItem = row().data;
+@let dataKey = column().field();
+
 <div
     role="gridcell"
     [class]="cellContainerClass()"
-    [attr.tabindex]="editing() ? -1 : 0"
     cdkMonitorSubtreeFocus
-    (cdkFocusChange)="onFocusChange($event)"
     [attr.data-ruid]="row().uid"
-    [attr.data-field]="column().field()"
+    [attr.data-field]="dataKey"
     [attr.data-col-index]="column().index()"
-    [attr.aria-readonly]="gridService.editableOptions.enabled && column().editable() ? false : true">
-    @if (editing()) {
-        <ng-container [ngTemplateOutlet]="cellEditTemplate"></ng-container>
+    [attr.aria-readonly]="!(gridService.editableOptions.enabled && column().editable())">
+    @if (column().cellTemplate()) {
+        <ng-container
+            [ngTemplateOutlet]="column().cellTemplate()"
+            [ngTemplateOutletContext]="{
+                $implicit: dataItem,
+                column: column()
+            }"></ng-container>
     } @else {
-        @if (column().cellTemplate()) {
-            <ng-container
-                [ngTemplateOutlet]="column().cellTemplate()"
-                [ngTemplateOutletContext]="{ $implicit: row(), column: column() }"></ng-container>
-        } @else {
-            <span [class]="cellTextClass()" #cellElement>{{ row().data[column().field()] }}</span>
-            @if (gridService.cellTooltipTemplate()) {
-                <mona-tooltip [target]="cellElement">
-                    <ng-container
-                        [ngTemplateOutlet]="gridService.cellTooltipTemplate()"
-                        [ngTemplateOutletContext]="{
-                            $implicit: row().data[column().field()],
-                            field: column().field(),
-                            dataItem: row().data
-                        }"></ng-container>
-                </mona-tooltip>
-            }
-        }
+        <span [class]="cellTextClass()">{{ dataItem[dataKey] }}</span>
     }
 </div>
-
-<ng-template #cellEditTemplate>
-    <form [formGroup]="editForm" class="w-full h-full">
-        @switch (column().dataType()) {
-            @case ("string") {
-                <mona-text-box
-                    class="w-full h-full"
-                    [inputAttributes]="{ autocomplete: 'off' }"
-                    [formControlName]="column().field()"
-                    [rounded]="'none'"
-                    [size]="'small'"></mona-text-box>
-            }
-            @case ("number") {
-                <mona-numeric-text-box
-                    class="w-full h-full"
-                    [formControlName]="column().field()"
-                    [decimals]="3"
-                    [size]="'small'"
-                    [rounded]="'none'"></mona-numeric-text-box>
-            }
-            @case ("date") {
-                <mona-date-picker
-                    class="w-full h-full"
-                    [rounded]="'none'"
-                    [size]="'small'"
-                    [formControlName]="column().field()"></mona-date-picker>
-            }
-            @case ("boolean") {
-                <mona-check-box [rounded]="'none'" [formControlName]="column().field()"></mona-check-box>
-            }
-        }
-    </form>
-</ng-template>

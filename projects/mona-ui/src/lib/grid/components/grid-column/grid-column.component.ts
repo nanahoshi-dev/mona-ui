@@ -46,7 +46,7 @@ export class GridColumnComponent {
     /**
      * @description The fixed width of this column in pixels. If not set, the column width is calculated automatically.
      */
-    public readonly width = input<number | undefined>(undefined);
+    public readonly width = input<number | null>();
 
     public constructor() {
         effect(() => {
@@ -59,7 +59,7 @@ export class GridColumnComponent {
                 minWidth: this.minWidth(),
                 title: this.title(),
                 titleTemplate: this.titleTemplate() ?? null,
-                width: this.width()
+                width: this.width() ?? null
             };
             untracked(() => this.column.setConfig(config));
         });

@@ -108,7 +108,8 @@ export function deepMerge<T>(
 
                     const mergedItem =
                         isPlainObject(item) && isPlainObject(existing)
-                            ? deepMerge(existing, item, options)
+                            ? // @ts-ignore // TODO: Remove this when it is no longer flagged as error
+                              deepMerge(existing, item, options)
                             : { ...(existing as object | undefined), ...item };
 
                     map.set(id, mergedItem);

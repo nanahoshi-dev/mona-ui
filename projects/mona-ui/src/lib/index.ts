@@ -142,7 +142,6 @@ export { GridSelectableOptions } from "./grid/models/GridSelectableOptions";
 export * from "./grid/models/GroupDescriptor";
 export * from "./grid/models/SortableOptions";
 export * from "./grid/directives/grid-cell-template.directive";
-export * from "./grid/directives/grid-cell-tooltip-template.directive";
 export * from "./grid/directives/grid-column-title-template.directive";
 export * from "./grid/directives/grid-context-menu.directive";
 export * from "./grid/directives/grid-detail-template.directive";

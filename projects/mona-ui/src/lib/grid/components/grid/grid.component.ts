@@ -49,6 +49,7 @@ import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { SortableOptions } from "../../models/SortableOptions";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
+import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -82,7 +83,7 @@ import {
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GridService],
+    providers: [GridService, GridNavigationService],
     imports: [
         CdkDropList,
         ChipComponent,
@@ -585,7 +586,7 @@ export class GridComponent<T> implements GridVariantInput {
                     calculatedWidth = this.gridService.findTextWidthOfColumn(gridCol, columnTh);
                 }
                 if (gridCol.width() != null) {
-                    gridCol.setCalculatedWidth(gridCol.width());
+                    gridCol.setCalculatedWidth(gridCol.width() ?? null);
                 } else {
                     const minWidth = gridCol.minWidth();
                     const maxWidth = gridCol.maxWidth();

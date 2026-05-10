@@ -14,11 +14,10 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Dictionary, ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
-import { ChevronDownIcon, ChevronRightIcon, LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
+import { cx } from "class-variance-authority";
+import { LucideAngularModule } from "lucide-angular";
 import { fromEvent, mergeWith } from "rxjs";
-import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { ElementAtPipe } from "../../../pipes/element-at.pipe";
 import { SlicePipe } from "../../../pipes/slice.pipe";
@@ -37,6 +36,7 @@ import {
     GridListVariantInput
 } from "../../styles/grid.styles";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
+import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 
 @Component({
     selector: "mona-grid-list",
@@ -44,7 +44,6 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         GridCellComponent,
-        ButtonDirective,
         FontAwesomeModule,
         NgTemplateOutlet,
         GridGroupPipe,
@@ -53,7 +52,8 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         GridRowDirective,
         GridCellDirective,
         SlicePipe,
-        LucideAngularModule
+        LucideAngularModule,
+        GridToggleComponent
     ],
     host: {
         "[class]": "baseClass()"
@@ -68,11 +68,7 @@ export class GridListComponent implements GridListVariantInput {
         const theme = this.#themeService.theme();
         return gridListBaseThemeVariants(theme)({ virtual: false });
     });
-    protected readonly detailCollapseIcon = MinusIcon;
-    protected readonly detailExpandIcon = PlusIcon;
     protected readonly gridService = inject(GridService);
-    protected readonly groupCollapseIcon = ChevronDownIcon;
-    protected readonly groupExpandIcon = ChevronRightIcon;
     protected readonly groupRowClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridGroupRowThemeVariants(theme)();
@@ -116,8 +112,7 @@ export class GridListComponent implements GridListVariantInput {
         }
     }
 
-    public onToggleDetailClick(event: MouseEvent, row: Row): void {
-        event.stopPropagation();
+    public onToggleDetailClick(row: Row): void {
         const expanded = this.gridService.isRowExpanded(row);
         this.gridService.setRowExpanded(row, !expanded);
     }
@@ -156,4 +151,5 @@ export class GridListComponent implements GridListVariantInput {
     }
 
     protected readonly span = span;
+    protected readonly cx = cx;
 }

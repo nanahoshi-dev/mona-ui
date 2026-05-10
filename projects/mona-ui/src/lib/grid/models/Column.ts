@@ -11,11 +11,11 @@ export interface ColumnConfig {
     minWidth: number;
     title: string;
     titleTemplate: TemplateRef<unknown> | null;
-    width: number | undefined;
+    width: number | null;
 }
 
 export class Column {
-    readonly #calculatedWidth = signal<number | undefined>(undefined);
+    readonly #calculatedWidth = signal<number | null>(null);
     readonly #cellTemplate = signal<TemplateRef<unknown> | null>(null);
     readonly #columnSortDirection = signal<SortDirection | null>(null);
     readonly #dataType = signal<DataType>("string");
@@ -29,7 +29,7 @@ export class Column {
     readonly #sortIndex = signal<number | null>(null);
     readonly #title = signal("");
     readonly #titleTemplate = signal<TemplateRef<unknown> | null>(null);
-    readonly #width = signal<number | undefined>(undefined);
+    readonly #width = signal<number | null>(null);
 
     public readonly calculatedWidth = this.#calculatedWidth.asReadonly();
     public readonly cellTemplate = this.#cellTemplate.asReadonly();
@@ -48,7 +48,7 @@ export class Column {
     public readonly width = this.#width.asReadonly();
 
     /** @internal */
-    public setCalculatedWidth(value: number | undefined): void {
+    public setCalculatedWidth(value: number | null): void {
         this.#calculatedWidth.set(value);
     }
 

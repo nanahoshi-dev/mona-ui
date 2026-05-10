@@ -6,40 +6,29 @@
     <table [class]="tableClass()">
         <tbody role="rowgroup">
             @if (gridService.groupColumns().length === 0) {
-                <ng-container *cdkVirtualFor="let row of data(); let $index = index">
+                <ng-container *cdkVirtualFor="let row of data(); let rowIndex = index">
                     <tr
                         monaGridRow
-                        [index]="$index"
+                        [index]="rowIndex"
                         [row]="row"
                         (click)="onGridRowClick($event, row)"
                         #gridRow="monaGridRow"
                         #rowElement>
                         @if (gridService.masterDetailTemplate()) {
                             <td>
-                                <span
-                                    [style.width.px]="gridService.detailColumnWidth"
-                                    class="inline-block border-r border-r-border">
-                                    <button
-                                        monaButton
-                                        look="ghost"
-                                        rounded="none"
-                                        [iconOnly]="true"
-                                        size="small"
-                                        class="w-8.5"
-                                        (click)="onToggleDetailClick($event, row)">
-                                        @if (gridRow.expanded()) {
-                                            <lucide-icon [name]="detailCollapseIcon" [size]="16"></lucide-icon>
-                                        } @else {
-                                            <lucide-icon [name]="detailExpandIcon" [size]="16"></lucide-icon>
-                                        }
-                                    </button>
-                                </span>
+                                <mona-grid-toggle
+                                    [expanded]="gridRow.expanded()"
+                                    [type]="'detail'"
+                                    [width]="gridService.detailColumnWidth"
+                                    (expandedChange)="onToggleDetailClick(row)"></mona-grid-toggle>
                             </td>
                         }
                         @for (column of columns(); track $index) {
+                            @let columnIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
                             <td
                                 monaGridCell
-                                [hasRightBorder]="true"
+                                [columnIndex]="columnIndex"
+                                [rowIndex]="rowIndex"
                                 [style.width.px]="column.calculatedWidth()"
                                 [style.min-width.px]="column.minWidth()">
                                 <mona-grid-cell [column]="column" [row]="row"></mona-grid-cell>
@@ -51,7 +40,7 @@
                                 [ngTemplateOutletContext]="{
                                     $implicit: row.data,
                                     element: rowElement,
-                                    index: $index
+                                    index: rowIndex
                                 }">
                             </ng-container>
                         }
@@ -67,7 +56,7 @@
                     }
                 </ng-container>
             } @else {
-                <ng-container *cdkVirtualFor="let rowItem of groupedGridRows(); let $index = index">
+                <ng-container *cdkVirtualFor="let rowItem of groupedGridRows(); let rowIndex = index">
                     @if (rowItem.type === "group") {
                         <tr
                             [class]="groupRowClass()"
@@ -77,24 +66,11 @@
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : rowItem.level + 1; track $index) {
                                 <td [style.width.px]="gridService.groupColumnWidth">
                                     @if ($index === rowItem.level) {
-                                        <span
-                                            class="inline-block border-r border-r-border"
-                                            [style.width.px]="gridService.groupColumnWidth">
-                                            <button
-                                                monaButton
-                                                look="ghost"
-                                                rounded="none"
-                                                [iconOnly]="true"
-                                                size="small"
-                                                class="w-8.5"
-                                                (click)="onGroupExpandChange(rowItem)">
-                                                @if (collapsedGroups() | monaContains: rowItem.groupId) {
-                                                    <fa-icon [icon]="expandIcon"></fa-icon>
-                                                } @else {
-                                                    <fa-icon [icon]="collapseIcon"></fa-icon>
-                                                }
-                                            </button>
-                                        </span>
+                                        <mona-grid-toggle
+                                            [expanded]="collapsedGroups() | monaContains: rowItem.groupId"
+                                            [width]="gridService.groupColumnWidth"
+                                            [type]="'group'"
+                                            (expandedChange)="onGroupExpandChange(rowItem)"></mona-grid-toggle>
                                     }
                                 </td>
                             }
@@ -108,40 +84,35 @@
                         <tr
                             (click)="onGridRowClick($event, rowItem.row)"
                             monaGridRow
-                            [index]="$index"
+                            [index]="rowIndex"
                             [row]="rowItem.row"
                             #gridRow="monaGridRow"
                             #rowElement>
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : rowItem.level + 1; track $index) {
                                 <td
                                     monaGridCell
-                                    [hasRightBorder]="$last"
+                                    [columnIndex]="$index"
+                                    [rowIndex]="rowIndex"
                                     [style.width.px]="gridService.groupColumnWidth"></td>
                             }
                             @if (gridService.masterDetailTemplate()) {
                                 <td [style.width.px]="gridService.detailColumnWidth">
-                                    <span class="inline-block border-r border-r-border">
-                                        <button
-                                            monaButton
-                                            look="ghost"
-                                            rounded="none"
-                                            [iconOnly]="true"
-                                            size="small"
-                                            class="w-8.5"
-                                            (click)="onToggleDetailClick($event, rowItem)">
-                                            @if (gridRow.expanded()) {
-                                                <lucide-icon [name]="detailCollapseIcon" [size]="16"></lucide-icon>
-                                            } @else {
-                                                <lucide-icon [name]="detailExpandIcon" [size]="16"></lucide-icon>
-                                            }
-                                        </button>
-                                    </span>
+                                    <mona-grid-toggle
+                                        [expanded]="gridRow.expanded()"
+                                        [type]="'detail'"
+                                        [width]="gridService.detailColumnWidth"
+                                        (expandedChange)="onToggleDetailClick(rowItem)"></mona-grid-toggle>
                                 </td>
                             }
                             @for (column of columns(); track $index) {
+                                @let columnIndex =
+                                    gridService.masterDetailTemplate()
+                                        ? $index + gridService.groupColumns().length
+                                        : $index;
                                 <td
                                     monaGridCell
-                                    [hasRightBorder]="!$last"
+                                    [columnIndex]="columnIndex"
+                                    [rowIndex]="rowIndex"
                                     [style.width.px]="column.calculatedWidth()"
                                     [style.min-width.px]="column.minWidth()">
                                     <mona-grid-cell [column]="column" [row]="rowItem.row"></mona-grid-cell>
@@ -153,7 +124,7 @@
                                     [ngTemplateOutletContext]="{
                                         $implicit: rowItem.row.data,
                                         element: rowElement,
-                                        index: $index
+                                        index: rowIndex
                                     }">
                                 </ng-container>
                             }

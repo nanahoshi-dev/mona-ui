@@ -30,7 +30,7 @@ export const gridCellContainerVariants = cva(
         flex items-center w-full h-full
         flex-1 overflow-hidden outline-none
         px-2.75 py-1.5
-        focus:ring-1 focus:ring-inset focus:ring-primary/40
+
     `,
     {
         variants: {
@@ -61,7 +61,7 @@ export const gridColumnDragPreviewVariants = cva(
 );
 
 export const gridColumnDropHintVariants = cva(`
-    absolute flex w-px h-full bg-primary z-1 top-0 bottom-0
+    absolute flex w-1 h-full bg-primary z-10! top-0 bottom-0
 `);
 
 export const gridColumnResizerVariants = cva(`
@@ -86,6 +86,7 @@ export const gridGroupRowVariants = cva(
     `
         w-full
         border-b border-b-border
+        border-r border-r-border
     `
 );
 
@@ -164,15 +165,10 @@ export const gridListTableRowVariants = cva(`inline-flex not-last:border-b not-l
 export const gridListTableCellVariants = cva(
     `
         relative flex
-    `,
-    {
-        variants: {
-            hasRightBorder: {
-                true: "border-r border-r-border",
-                false: ""
-            }
-        }
-    }
+        outline-none z-1
+        shadow-[-1px_0_0_0_var(--color-border)_inset]
+        focus:ring-1 focus:ring-inset focus:ring-primary/40
+    `
 );
 
 export const gridNoDataVariants = cva(

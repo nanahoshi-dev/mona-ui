@@ -1,7 +1,8 @@
-import { JsonPipe, NgComponentOutlet } from "@angular/common";
+import { DatePipe, JsonPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import {
     DataType,
+    GridCellTemplateDirective,
     GridColumnComponent,
     GridComponent,
     GridDetailTemplateDirective,
@@ -10,9 +11,9 @@ import {
     GridSelectableDirective,
     GridSelectableOptions,
     GridVirtualScrollDirective,
+    TooltipComponent,
     VirtualScrollOptions
 } from "mona-ui";
-import { v4 } from "uuid";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -104,7 +105,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             resizeMethod: {
                 type: "dropdown",
                 value: ["auto", "fitView"],
-                defaultValue: "auto"
+                defaultValue: "fitView"
             },
             responsivePager: {
                 type: "boolean",
@@ -141,7 +142,9 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         GridVirtualScrollDirective,
         GridDetailTemplateDirective,
         JsonPipe,
-        GridEditableDirective
+        GridEditableDirective,
+        GridCellTemplateDirective,
+        DatePipe
     ],
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
@@ -164,14 +167,26 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [monaGridSelectable]="selection()"
             class="w-full h-96">
             @for (column of columns; track column.field) {
+                @let width = column.field === "OrderID" || column.field === "Freight" ? 80 : null;
                 <mona-grid-column
                     [field]="column.field"
                     [title]="column.title"
-                    [type]="column.filterType"></mona-grid-column>
+                    [type]="column.filterType"
+                    [width]="width">
+                    <ng-template monaGridCellTemplate let-dataItem>
+                        <span #cellElement>
+                            @if (column.filterType === "date") {
+                                {{ dataItem[column.field] | date }}
+                            } @else {
+                                {{ dataItem[column.field] }}
+                            }
+                        </span>
+                    </ng-template>
+                </mona-grid-column>
             }
-            <ng-template monaGridDetailTemplate let-dataItem>
-                <span class="block h-full w-full p-2">{{ dataItem | json }}</span>
-            </ng-template>
+            <!--            <ng-template monaGridDetailTemplate let-dataItem>-->
+            <!--                <span class="block h-full w-full p-2">{{ dataItem | json }}</span>-->
+            <!--            </ng-template>-->
         </mona-grid>
     `
 })
@@ -213,7 +228,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     public readonly pageSizeValues = input<ReturnType<GridComponent<unknown>["pageSizeValues"]>>([10, 20, 30, 40, 50]);
     public readonly reorderable = input<ReturnType<GridComponent<unknown>["reorderable"]>>(false);
     public readonly resizable = input<ReturnType<GridComponent<unknown>["resizable"]>>(false);
-    public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("auto");
+    public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("fitView");
     public readonly rounded = input<ReturnType<GridComponent<unknown>["rounded"]>>("medium");
     public readonly responsivePager = input<ReturnType<GridComponent<unknown>["responsivePager"]>>(false);
     public readonly sort = model<ReturnType<GridComponent<unknown>["sort"]>>([]);

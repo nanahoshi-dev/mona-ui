@@ -29,7 +29,6 @@ export class GridService {
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly cellEdit$ = new Subject<CellEditEvent>();
-    public readonly cellTooltipTemplate = signal<TemplateRef<any> | null>(null);
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 34;

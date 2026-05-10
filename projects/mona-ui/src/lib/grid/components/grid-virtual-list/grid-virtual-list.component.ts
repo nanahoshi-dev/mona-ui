@@ -16,13 +16,10 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
-import { LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
+import { LucideAngularModule } from "lucide-angular";
 import { DateTime } from "luxon";
 import { fromEvent, pairwise, startWith } from "rxjs";
-import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { ContainsPipe } from "../../../pipes/contains.pipe";
@@ -40,6 +37,7 @@ import {
     gridListTableThemeVariants
 } from "../../styles/grid.styles";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
+import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 
 @Component({
     selector: "mona-grid-virtual-list",
@@ -48,15 +46,14 @@ import { GridCellComponent } from "../grid-cell/grid-cell.component";
         CdkFixedSizeVirtualScroll,
         CdkVirtualForOf,
         GridCellComponent,
-        ButtonDirective,
-        FaIconComponent,
         SlicePipe,
         ContainsPipe,
         NgTemplateOutlet,
         ContextMenuComponent,
         GridRowDirective,
         GridCellDirective,
-        LucideAngularModule
+        LucideAngularModule,
+        GridToggleComponent
     ],
     templateUrl: "./grid-virtual-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,11 +77,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
         const theme = this.#themeService.theme();
         return gridListBaseThemeVariants(theme)({ virtual: true });
     });
-    protected readonly collapseIcon = faChevronDown;
     protected readonly collapsedGroups = signal<ImmutableSet<string>>(ImmutableSet.create());
-    protected readonly detailCollapseIcon = MinusIcon;
-    protected readonly detailExpandIcon = PlusIcon;
-    protected readonly expandIcon = faChevronRight;
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -138,8 +131,7 @@ export class GridVirtualListComponent implements OnInit, AfterViewInit {
         this.gridService.handleRowClick(event, row);
     }
 
-    public onToggleDetailClick(event: MouseEvent, row: VirtualGridRow | Row): void {
-        event.stopPropagation();
+    public onToggleDetailClick(row: VirtualGridRow | Row): void {
         if (row instanceof Row) {
             this.gridService.setRowExpanded(row, !this.gridService.isRowExpanded(row));
         } else if (row.type === "row") {

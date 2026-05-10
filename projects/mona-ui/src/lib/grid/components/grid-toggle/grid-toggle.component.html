@@ -1,0 +1,17 @@
+<span [style.width.px]="width()" class="inline-flex items-center h-full">
+    <button
+        monaButton
+        look="ghost"
+        rounded="none"
+        [iconOnly]="true"
+        size="small"
+        class="w-8.5 h-full"
+        [tabindex]="-1"
+        (click)="onToggleDetailClick($event)">
+        @if (expanded()) {
+            <lucide-icon [name]="collapseIcon()" [size]="16"></lucide-icon>
+        } @else {
+            <lucide-icon [name]="expandIcon()" [size]="16"></lucide-icon>
+        }
+    </button>
+</span>
