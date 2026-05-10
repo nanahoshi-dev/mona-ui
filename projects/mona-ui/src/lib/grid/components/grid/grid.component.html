@@ -49,7 +49,18 @@
 }
 <div [class]="headerClass()" [style.margin]="headerMargin" #gridHeaderElement>
     <div class="mona-grid-header-wrap">
-        <table [class]="headerTableClass()">
+        <table [class]="headerTableClass()" [style.width.px]="gridService.tableWidth()">
+            <colgroup>
+                @for (_ of gridService.groupColumns(); track $index) {
+                    <col [style.width.px]="gridService.groupColumnWidth" />
+                }
+                @if (gridService.masterDetailTemplate()) {
+                    <col [style.width.px]="gridService.groupColumnWidth" />
+                }
+                @for (col of gridService.columns(); track $index) {
+                    <col [style.width.px]="col.calculatedWidth()" />
+                }
+            </colgroup>
             <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
                 <tr
                     cdkDropList
@@ -60,19 +71,30 @@
                         <th
                             scope="col"
                             class="border-r border-border"
+                            [attr.colspan]="1"
                             [style.width.px]="gridService.groupColumnWidth"></th>
                     }
                     @if (gridService.masterDetailTemplate()) {
                         <th
                             scope="col"
                             class="border-r border-border"
+                            [attr.colspan]="1"
                             [style.width.px]="gridService.detailColumnWidth"></th>
                     }
                     @for (column of gridService.columns(); track $index) {
+                        @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
                         <th
                             scope="col"
                             role="columnheader"
                             cdkDrag
+                            monaGridLogicalCell
+                            [rowIndex]="-1"
+                            [colIndex]="colIndex"
+                            [firstInRow]="colIndex === 0"
+                            [lastInRow]="
+                                colIndex === gridService.columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
+                            "
+                            (toggle)="onColumnSort(column)"
                             [cdkDragData]="column"
                             [cdkDragDisabled]="!reorderable() && !groupable()"
                             [class]="headerTableCellClass()"
@@ -81,6 +103,7 @@
                             (cdkDragStarted)="onColumnDragStart($event)"
                             [style.min-width.px]="column.minWidth()"
                             [style.width.px]="column.calculatedWidth()"
+                            [attr.colspan]="1"
                             [attr.aria-sort]="
                                 gridService.sortableOptions.enabled
                                     ? (column.columnSortDirection() | columnAriaSort)
@@ -94,11 +117,6 @@
                                         [class]="headerTableColumnTitleClass()"
                                         (click)="onColumnSort(column)"
                                         [title]="column.title()"
-                                        [attr.role]="gridService.sortableOptions.enabled ? 'button' : null"
-                                        [attr.tabindex]="gridService.sortableOptions.enabled ? '0' : null"
-                                        [attr.aria-label]="
-                                            gridService.sortableOptions.enabled ? 'Sort by ' + column.title() : null
-                                        "
                                         >{{ column.title() }}</span
                                     >
                                 }
@@ -140,9 +158,12 @@
                             </ng-template>
                             <ng-template cdkDragPlaceholder>
                                 @if (groupingInProgress()) {
-                                    <mona-chip style="z-index: 10; pointer-events: none" [removable]="true">{{
-                                        column.title()
-                                    }}</mona-chip>
+                                    <mona-chip
+                                        style="z-index: 10; pointer-events: none"
+                                        [removable]="true"
+                                        [rounded]="rounded()"
+                                        >{{ column.title() }}</mona-chip
+                                    >
                                 }
                             </ng-template>
                         </th>
@@ -150,6 +171,7 @@
                             <th
                                 [class]="headerTableCellClass()"
                                 [style.min-width.px]="column.minWidth()"
+                                [attr.colspan]="1"
                                 [style.width.px]="column.calculatedWidth()">
                                 <div [class]="headerTableColumnWrapClass()">
                                     @if (column.titleTemplate()) {

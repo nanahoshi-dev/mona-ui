@@ -1,4 +1,15 @@
-<table [class]="tableClass()">
+<table [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+    <colgroup>
+        @for (_ of gridService.groupColumns(); track $index) {
+            <col [style.width.px]="gridService.groupColumnWidth" />
+        }
+        @if (gridService.masterDetailTemplate()) {
+            <col [style.width.px]="gridService.groupColumnWidth" />
+        }
+        @for (col of gridService.columns(); track $index) {
+            <col [style.width.px]="col.calculatedWidth()" />
+        }
+    </colgroup>
     <tbody role="rowgroup">
         @if (gridService.groupColumns().length === 0) {
             @for (row of data(); track row.uid) {
@@ -11,7 +22,16 @@
                     #gridRow="monaGridRow"
                     #rowElement>
                     @if (gridService.masterDetailTemplate()) {
-                        <td monaGridCell [columnIndex]="0" [rowIndex]="rowIndex">
+                        <td
+                            monaGridCell
+                            [masterDetailToggle]="true"
+                            monaGridLogicalCell
+                            [colIndex]="0"
+                            [firstInRow]="true"
+                            [lastInRow]="columns().length === 0"
+                            [rowIndex]="rowIndex"
+                            [style.width.px]="gridService.detailColumnWidth"
+                            [attr.colspan]="1">
                             <mona-grid-toggle
                                 [expanded]="gridRow.expanded()"
                                 [type]="'detail'"
@@ -23,8 +43,13 @@
                         @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
                         <td
                             monaGridCell
-                            [columnIndex]="colIndex"
+                            [dataCell]="true"
+                            monaGridLogicalCell
+                            [colIndex]="colIndex"
                             [rowIndex]="rowIndex"
+                            [firstInRow]="colIndex === 0"
+                            [lastInRow]="colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)"
+                            [attr.colspan]="1"
                             [style.width.px]="column.calculatedWidth()"
                             [style.min-width.px]="column.minWidth()">
                             <mona-grid-cell [column]="column" [row]="row"></mona-grid-cell>
@@ -39,7 +64,12 @@
                 </tr>
                 @if (gridRow.expanded()) {
                     <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
-                        <td>
+                        <td
+                            monaGridCell
+                            [indentCell]="true"
+                            [attr.colspan]="1"
+                            [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
+                        <td monaGridCell [masterDetailContent]="true" [attr.colspan]="columns().length">
                             <ng-container
                                 [ngTemplateOutlet]="gridService.masterDetailTemplate()"
                                 [ngTemplateOutletContext]="{ $implicit: row.data }"></ng-container>
@@ -48,108 +78,163 @@
                 }
             }
         } @else {
-            <ng-template #gridGroupTemplate let-groupData let-column="column" let-cx="cx" let-depth="depth">
-                @if (groupData | gridGroup: column : gridService.pageState.page(); as groupItem) {
-                    @for (subGroup of groupItem; track $index) {
-                        <tr
-                            [class]="groupRowClass()"
-                            role="row"
-                            [attr.aria-level]="depth + 1"
-                            [attr.aria-expanded]="!subGroup.collapsed">
-                            @for (_ of gridService.groupColumns() | monaSlice: 0 : cx + 1; track $index) {
-                                <td
-                                    class="shadow-[-1px_0_0_0_var(--color-border)_inset]"
-                                    [style.width.px]="gridService.groupColumnWidth">
-                                    @if (cx === $index) {
-                                        <mona-grid-toggle
-                                            [expanded]="!subGroup.collapsed"
-                                            [width]="gridService.groupColumnWidth"
-                                            [type]="'group'"
-                                            (expandedChange)="onGroupExpandChange(subGroup)"></mona-grid-toggle>
-                                    }
-                                </td>
-                            }
-                            <td>
-                                <span class="font-bold text-sm ml-2 whitespace-nowrap"
-                                    >{{ column.title() }}: {{ subGroup.rows[0].data[column.field()] }}</span
-                                >
+            @for (viewRow of flattenedGroupedRows(); track $index) {
+                @let rowIndex = $index;
+                @if (viewRow.type === "group") {
+                    @let isCollapsed = gridService.isGroupCollapsed(viewRow.groupKey);
+                    @let prevRow = flattenedGroupedRows()[rowIndex - 1];
+                    @let nextRow = flattenedGroupedRows()[rowIndex + 1];
+
+                    <tr
+                        [class]="groupRowClass()"
+                        role="row"
+                        [attr.aria-level]="viewRow.depth + 1"
+                        [attr.aria-expanded]="!isCollapsed">
+                        @for (_ of gridService.groupColumns() | monaSlice: 0 : viewRow.depth; track $index) {
+                            <td
+                                monaGridCell
+                                [grouped]="true"
+                                [indentCell]="true"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.groupColumnWidth"></td>
+                        }
+                        @let colspan =
+                            columns().length +
+                            gridService.groupColumns().length +
+                            (gridService.masterDetailTemplate() ? 1 : 0) -
+                            viewRow.depth;
+
+                        @let groupToggleCellTopBorder =
+                            prevRow == null || prevRow.type !== "group" ? "" : "border-t border-t-border";
+                        <td
+                            monaGridCell
+                            [grouped]="true"
+                            [groupToggle]="true"
+                            [style.width.px]="gridService.groupColumnWidth"
+                            [class]="groupToggleCellTopBorder">
+                            <mona-grid-toggle
+                                [expanded]="!isCollapsed"
+                                [width]="gridService.groupColumnWidth"
+                                [type]="'group'"
+                                (expandedChange)="onGroupExpandChange(viewRow.groupKey)"></mona-grid-toggle>
+                        </td>
+
+                        @let groupRowTopBorder = prevRow == null ? "" : "border-t border-t-border";
+                        @let groupRowBottomBorder = nextRow?.type !== "data" ? "" : "border-b border-b-border";
+                        <td
+                            monaGridCell
+                            monaGridLogicalCell
+                            [rowIndex]="rowIndex"
+                            [colIndex]="0"
+                            [groupHeader]="true"
+                            [firstInRow]="true"
+                            [lastInRow]="columns().length === 0"
+                            [groupKey]="viewRow.groupKey"
+                            (toggle)="onGroupExpandChange(viewRow.groupKey)"
+                            [attr.colspan]="colspan"
+                            [class]="`${groupRowTopBorder} ${groupRowBottomBorder}`">
+                            <p class="flex items-center text-sm whitespace-nowrap px-2">
+                                <span class="font-bold">{{ viewRow.column.title() }}: {{ viewRow.groupValue }}</span>
+                            </p>
+                        </td>
+                    </tr>
+                } @else {
+                    @let currRow = flattenedGroupedRows()[rowIndex];
+                    @let nextRow = flattenedGroupedRows()[rowIndex + 1];
+                    <tr
+                        (click)="onGridRowClick($event, viewRow.row)"
+                        monaGridRow
+                        [index]="rowIndex"
+                        [row]="viewRow.row"
+                        #gridRow="monaGridRow"
+                        #rowElement>
+                        @for (_ of gridService.groupColumns(); track $index) {
+                            <td
+                                monaGridCell
+                                [grouped]="true"
+                                [indentCell]="true"
+                                [style.width.px]="gridService.groupColumnWidth"></td>
+                        }
+                        @if (gridService.masterDetailTemplate()) {
+                            <td
+                                monaGridCell
+                                monaGridLogicalCell
+                                [grouped]="true"
+                                [masterDetailToggle]="true"
+                                [rowIndex]="rowIndex"
+                                [colIndex]="0"
+                                [firstInRow]="true"
+                                [lastInRow]="columns().length === 0"
+                                [class.border-b]="currRow.type === 'data' && nextRow?.type === 'data'"
+                                [class.border-b-border]="currRow.type === 'data' && nextRow?.type === 'data'"
+                                [style.width.px]="gridService.detailColumnWidth">
+                                <mona-grid-toggle
+                                    [expanded]="gridRow.expanded()"
+                                    [type]="'detail'"
+                                    [width]="gridService.detailColumnWidth"
+                                    (expandedChange)="onToggleDetailClick(viewRow.row)"></mona-grid-toggle>
                             </td>
-                        </tr>
-                        @if (cx < gridService.groupColumns().length - 1 && !subGroup.collapsed) {
+                        }
+                        @for (column of columns(); track $index) {
+                            @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
+                            <td
+                                monaGridCell
+                                [grouped]="true"
+                                [dataCell]="true"
+                                monaGridLogicalCell
+                                [colIndex]="colIndex"
+                                [firstInRow]="colIndex === 0"
+                                [lastInRow]="
+                                    colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
+                                "
+                                [rowIndex]="rowIndex"
+                                [class.border-b]="currRow.type === 'data' && nextRow?.type === 'data'"
+                                [class.border-b-border]="currRow.type === 'data' && nextRow?.type === 'data'"
+                                [style.width.px]="column.calculatedWidth()"
+                                [style.min-width.px]="column.minWidth()">
+                                <mona-grid-cell [column]="column" [row]="viewRow.row"></mona-grid-cell>
+                            </td>
+                        }
+                        @if (gridService.contextMenuItems().length !== 0) {
                             <ng-container
-                                [ngTemplateOutlet]="gridGroupTemplate"
+                                [ngTemplateOutlet]="contextMenuTemplate"
                                 [ngTemplateOutletContext]="{
-                                    $implicit: subGroup.rows,
-                                    column: gridService.groupColumns() | monaElementAt: cx + 1,
-                                    cx: cx + 1,
-                                    depth: depth + 1
+                                    $implicit: viewRow.row.data,
+                                    element: rowElement,
+                                    index: rowIndex
                                 }">
                             </ng-container>
                         }
-                        @if (depth === gridService.groupColumns().length - 1 && !subGroup.collapsed) {
-                            @for (row of subGroup.rows; track row.uid) {
-                                @let rowIndex = $index;
-                                <tr
-                                    (click)="onGridRowClick($event, row)"
-                                    monaGridRow
-                                    [index]="rowIndex"
-                                    [row]="row"
-                                    #gridRow="monaGridRow"
-                                    #rowElement>
-                                    @for (_ of gridService.groupColumns(); track $index) {
-                                        <td monaGridCell [style.width.px]="gridService.groupColumnWidth"></td>
-                                    }
-                                    @if (gridService.masterDetailTemplate()) {
-                                        <td monaGridCell [style.width.px]="gridService.detailColumnWidth">
-                                            <mona-grid-toggle
-                                                [expanded]="gridRow.expanded()"
-                                                [type]="'detail'"
-                                                [width]="gridService.detailColumnWidth"
-                                                (expandedChange)="onToggleDetailClick(row)"></mona-grid-toggle>
-                                        </td>
-                                    }
-                                    @for (column of columns(); track $index) {
-                                        <td
-                                            monaGridCell
-                                            [columnIndex]="$index"
-                                            [rowIndex]="rowIndex"
-                                            [style.width.px]="column.calculatedWidth()">
-                                            <mona-grid-cell [column]="column" [row]="row"></mona-grid-cell>
-                                        </td>
-                                    }
-                                    @if (gridService.contextMenuItems().length !== 0) {
-                                        <ng-container
-                                            [ngTemplateOutlet]="contextMenuTemplate"
-                                            [ngTemplateOutletContext]="{
-                                                $implicit: row.data,
-                                                element: rowElement,
-                                                index: $index
-                                            }">
-                                        </ng-container>
-                                    }
-                                </tr>
-                                @if (gridRow.expanded()) {
-                                    <tr [style.width.px]="gridService.masterDetailRowWidth()">
-                                        <td class="border-b border-border">
-                                            <ng-container
-                                                [ngTemplateOutlet]="gridService.masterDetailTemplate()"
-                                                [ngTemplateOutletContext]="{ $implicit: row.data }"></ng-container>
-                                        </td>
-                                    </tr>
-                                }
+                    </tr>
+                    @if (gridRow.expanded()) {
+                        <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
+                            @for (_ of gridService.groupColumns() | monaSlice: 0 : viewRow.depth + 1; track $index) {
+                                <td
+                                    monaGridCell
+                                    [grouped]="true"
+                                    [indentCell]="true"
+                                    [attr.colspan]="1"
+                                    [style.width.px]="gridService.groupColumnWidth"></td>
                             }
-                        }
+
+                            @let masterDetailIndentBorderBottom =
+                                nextRow?.type !== "group" ? "border-b border-b-border" : "";
+                            <td
+                                class="border-r border-r-border {{ masterDetailIndentBorderBottom }}"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
+                            @let colspan = columns().length + gridService.groupColumns().length - 1;
+                            @let topBorder = nextRow?.type === "group" ? "border-t border-t-border" : "";
+                            @let bottomBorder = nextRow?.type !== "group" ? "border-b border-b-border" : "";
+                            <td [attr.colspan]="colspan" class="{{ bottomBorder }} {{ topBorder }}">
+                                <ng-container
+                                    [ngTemplateOutlet]="gridService.masterDetailTemplate()"
+                                    [ngTemplateOutletContext]="{ $implicit: viewRow.row.data }"></ng-container>
+                            </td>
+                        </tr>
                     }
                 }
-            </ng-template>
-            <ng-container
-                [ngTemplateOutlet]="gridGroupTemplate"
-                [ngTemplateOutletContext]="{
-                    $implicit: data(),
-                    column: gridService.groupColumns() | monaElementAt: 0,
-                    cx: 0,
-                    depth: 0
-                }"></ng-container>
+            }
         }
     </tbody>
 </table>

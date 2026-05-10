@@ -42,6 +42,7 @@ import { SortDescriptor, SortDirection } from "../../../query/sort/SortDescripto
 import { ThemeService } from "../../../theme/services/theme.service";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
 import { GridDetailTemplateDirective } from "../../directives/grid-detail-template.directive";
+import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
 import { CellEditEvent } from "../../models/CellEditEvent";
 import { Column } from "../../models/Column";
@@ -50,6 +51,7 @@ import { ResizeMethod } from "../../models/ResizeMethod";
 import { SortableOptions } from "../../models/SortableOptions";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
+import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridBaseThemeVariants,
@@ -83,7 +85,7 @@ import {
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GridService, GridNavigationService],
+    providers: [GridService, GridNavigationService, GridRowFlattenerService],
     imports: [
         CdkDropList,
         ChipComponent,
@@ -100,7 +102,8 @@ import {
         PopupMenuComponent,
         PopupMenuItemComponent,
         PopupMenuTextTemplateDirective,
-        ColumnAriaSortPipe
+        ColumnAriaSortPipe,
+        GridLogicalCellDirective
     ],
     host: {
         "[class]": "baseClass()",
@@ -409,12 +412,7 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.groupColumns.update(columns =>
             columns.where(c => c.field() !== column.field()).toImmutableSet()
         );
-        this.gridService.gridGroupExpandState = this.gridService.gridGroupExpandState
-            .where(p => !p.key.startsWith(column.field()))
-            .toDictionary(
-                p => p.key,
-                p => p.value
-            );
+        this.gridService.clearCollapsedGroups(key => key.includes(column.field()));
         this.groupPanelPlaceholderVisible.set(this.gridService.groupColumns().length === 0);
     }
 

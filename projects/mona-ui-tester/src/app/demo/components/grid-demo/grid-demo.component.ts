@@ -11,7 +11,6 @@ import {
     GridSelectableDirective,
     GridSelectableOptions,
     GridVirtualScrollDirective,
-    TooltipComponent,
     VirtualScrollOptions
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -166,8 +165,15 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [monaGridGroupable]="{ enabled: true }"
             [monaGridSelectable]="selection()"
             class="w-full h-96">
+            <!--            <ng-container monaGridContextMenu>-->
+            <!--                <mona-contextmenu-item [label]="'Menu Item 1'">-->
+            <!--                    <mona-contextmenu-item [label]="'Submenu Item 1'"></mona-contextmenu-item>-->
+            <!--                    <mona-contextmenu-item [label]="'Submenu Item 2'"></mona-contextmenu-item>-->
+            <!--                </mona-contextmenu-item>-->
+            <!--                <mona-contextmenu-item [label]="'Menu Item 2'"></mona-contextmenu-item>-->
+            <!--            </ng-container>-->
             @for (column of columns; track column.field) {
-                @let width = column.field === "OrderID" || column.field === "Freight" ? 80 : null;
+                @let width = null;
                 <mona-grid-column
                     [field]="column.field"
                     [title]="column.title"
@@ -184,9 +190,9 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     </ng-template>
                 </mona-grid-column>
             }
-            <!--            <ng-template monaGridDetailTemplate let-dataItem>-->
-            <!--                <span class="block h-full w-full p-2">{{ dataItem | json }}</span>-->
-            <!--            </ng-template>-->
+            <ng-template monaGridDetailTemplate let-dataItem>
+                <pre class="h-full w-full p-2">{{ dataItem | json }}</pre>
+            </ng-template>
         </mona-grid>
     `
 })

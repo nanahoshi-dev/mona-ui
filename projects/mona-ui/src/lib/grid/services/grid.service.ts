@@ -1,5 +1,5 @@
-import { computed, DOCUMENT, inject, Injectable, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
+import { computed, DOCUMENT, inject, Injectable, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { any, Dictionary, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
@@ -14,11 +14,11 @@ import { ColumnFilterState } from "../models/ColumnFilterState";
 import { ColumnSortState } from "../models/ColumnSortState";
 import { EditableOptions } from "../models/EditableOptions";
 import { GridKeySelector } from "../models/GridKeySelector";
+import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { GroupDescriptor } from "../models/GroupDescriptor";
 import { PageState } from "../models/PageState";
 import { Row } from "../models/Row";
-import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 
 @Injectable()
@@ -50,6 +50,19 @@ export class GridService {
         return this.detailColumnWidth * (this.groupColumns().size() + 1);
     });
     public readonly masterDetailTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly tableWidth = computed(() => {
+        const columns = this.columns();
+        if (!columns.any()) {
+            return null;
+        }
+        if (columns.any(c => c.calculatedWidth() == null && c.width() == null)) {
+            return null;
+        }
+        const dataWidth = columns.aggregate((acc, c) => acc + (c.calculatedWidth() ?? c.width() ?? 0), 0);
+        const groupWidth = this.groupColumnWidth * this.groupColumns().size();
+        const detailWidth = this.masterDetailTemplate() != null ? this.detailColumnWidth : 0;
+        return dataWidth + groupWidth + detailWidth;
+    });
     public readonly pageState: PageState = { page: signal(1), skip: signal(0), take: signal(10) };
     public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
     public readonly selectBy = signal<GridKeySelector<unknown>>("");
@@ -109,8 +122,8 @@ export class GridService {
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 28 });
     public editableOptions: EditableOptions = { enabled: false };
     public gridHeaderElement = signal<HTMLDivElement | null>(null);
-    /** @internal Intentionally mutable (not a signal) — collapse state is nested and mutated in-place across list components. */
-    public gridGroupExpandState = new Dictionary<string, Dictionary<number, boolean>>();
+    /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
+    public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
     public selectableOptions: GridSelectableOptions = {
         enabled: false,
         mode: "single"
@@ -121,6 +134,14 @@ export class GridService {
         allowUnsort: true,
         showIndices: true
     };
+
+    public clearCollapsedGroups(predicate?: (key: string) => boolean): void {
+        if (predicate) {
+            this.collapsedGroupKeys.update(keys => keys.where(k => !predicate(k)).toImmutableSet());
+        } else {
+            this.collapsedGroupKeys.update(keys => keys.clear());
+        }
+    }
 
     public deselectAllRows(): void {
         this.selectedKeys.update(set => set.clear());
@@ -192,6 +213,14 @@ export class GridService {
 
     public isRowExpanded(row: Row): boolean {
         return this.expandedKeys().contains(this.getRowSelectionKey(row));
+    }
+
+    public isGroupCollapsed(groupKey: string): boolean {
+        return this.collapsedGroupKeys().contains(groupKey);
+    }
+
+    public toggleGroupCollapse(groupKey: string): void {
+        this.collapsedGroupKeys.update(keys => (keys.contains(groupKey) ? keys.remove(groupKey) : keys.add(groupKey)));
     }
 
     public isRowSelected(row: Row): boolean {

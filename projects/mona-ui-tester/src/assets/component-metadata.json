@@ -71,18 +71,6 @@
       }
     ]
   },
-  "GridCellDirective": {
-    "name": "GridCellDirective",
-    "selector": "\"[monaGridCell]\"",
-    "inputs": [
-      {
-        "name": "hasRightBorder",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
   "GridColumnResizeHandlerDirective": {
     "name": "GridColumnResizeHandlerDirective",
     "selector": "\"[monaGridColumnResizeHandler]\"",
@@ -146,6 +134,54 @@
         "type": "GroupableOptions | \"\" | undefined",
         "description": "",
         "kind": "input"
+      }
+    ]
+  },
+  "GridLogicalCellDirective": {
+    "name": "GridLogicalCellDirective",
+    "selector": "\"td[monaGridLogicalCell], th[monaGridLogicalCell]\"",
+    "inputs": [
+      {
+        "name": "colIndex",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "firstInRow",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "groupHeader",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "groupKey",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "lastInRow",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rowIndex",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "toggle",
+        "type": "void",
+        "description": "",
+        "kind": "output"
       }
     ]
   },
@@ -1529,7 +1565,7 @@
       },
       {
         "name": "width",
-        "type": "number | undefined",
+        "type": "number | null",
         "description": "The fixed width of this column in pixels. If not set, the column width is calculated automatically.",
         "kind": "input"
       }
@@ -1572,6 +1608,30 @@
       {
         "name": "data",
         "type": "ImmutableSet<Row>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridToggleComponent": {
+    "name": "GridToggleComponent",
+    "selector": "\"mona-grid-toggle\"",
+    "inputs": [
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "description": "",
+        "kind": "model"
+      },
+      {
+        "name": "type",
+        "type": "\"detail\" | \"group\"",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "number",
         "description": "",
         "kind": "input"
       }
@@ -6330,7 +6390,7 @@
       {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

@@ -84,8 +84,7 @@ export const gridGroupPanelVariants = cva(
 
 export const gridGroupRowVariants = cva(
     `
-        w-full
-        border-b border-b-border
+        w-full bg-gray-100
         border-r border-r-border
     `
 );
@@ -100,16 +99,18 @@ export const gridHeaderVariants = cva(
 
 export const gridHeaderTableVariants = cva(
     `
-        border-collapse table-fixed
+        border-separate border-spacing-0 table-fixed
     `
 );
 
-export const gridHeaderTableRowVariants = cva(`relative flex`);
+export const gridHeaderTableRowVariants = cva(`relative inline-flex`);
 
 export const gridHeaderTableCellVariants = cva(
     `
-        relative select-none inline-flex
-        truncate text-left border-r border-r-border
+        relative select-none
+        truncate text-left
+        outline-none border-r border-r-border
+        focus:ring-1 focus:ring-inset focus:ring-primary/40
     `
 );
 
@@ -132,6 +133,7 @@ export const gridListBaseVariants = cva(
     `
         w-full h-full
         border-t border-t-border
+        outline-none
     `,
     {
         variants: {
@@ -145,13 +147,11 @@ export const gridListBaseVariants = cva(
 
 export const gridListTableVariants = cva(
     `
-        border-collapse w-full h-full
-        [&>tbody]:flex [&>tbody]:flex-col
-        [&>tbody]:text-left
+        border-separate border-spacing-0 w-full table-fixed
     `
 );
 
-export const gridListTableRowVariants = cva(`inline-flex not-last:border-b not-last:border-b-border`, {
+export const gridListTableRowVariants = cva(` `, {
     variants: {
         selected: {
             true: `
@@ -164,11 +164,90 @@ export const gridListTableRowVariants = cva(`inline-flex not-last:border-b not-l
 
 export const gridListTableCellVariants = cva(
     `
-        relative flex
+        relative
         outline-none z-1
-        shadow-[-1px_0_0_0_var(--color-border)_inset]
         focus:ring-1 focus:ring-inset focus:ring-primary/40
-    `
+    `,
+    {
+        variants: {
+            groupHeader: {
+                true: "",
+                false: ""
+            },
+            groupToggle: {
+                true: "",
+                false: ""
+            },
+            grouped: {
+                true: "",
+                false: ""
+            },
+            indentCell: {
+                true: "",
+                false: ""
+            },
+            masterDetailContent: {
+                true: "",
+                false: ""
+            },
+            masterDetailToggle: {
+                true: "",
+                false: ""
+            },
+            dataCell: {
+                true: "",
+                false: ""
+            }
+        },
+        compoundVariants: [
+            {
+                grouped: false,
+                masterDetailToggle: true,
+                class: "border-b border-b-border border-r border-r-border"
+            },
+            {
+                grouped: false,
+                dataCell: true,
+                class: "border-b border-b-border border-r border-r-border"
+            },
+            {
+                grouped: false,
+                indentCell: true,
+                class: "border-r border-r-border border-b border-b-border"
+            },
+            {
+                grouped: false,
+                masterDetailContent: true,
+                class: "border-b border-b-border"
+            },
+            {
+                grouped: true,
+                masterDetailToggle: true,
+                class: "border-b border-b-border border-r border-r-border"
+            },
+            {
+                grouped: true,
+                dataCell: true,
+                class: "border-b border-b-border border-r border-r-border"
+            },
+            {
+                grouped: true,
+                indentCell: true,
+                class: "border-r border-r-border bg-gray-100"
+            },
+            {
+                grouped: true,
+                indentCell: true,
+                masterDetailToggle: true,
+                class: "border-r border-r-border"
+            },
+            {
+                grouped: true,
+                groupToggle: true,
+                class: "border-r-none border-b-none"
+            }
+        ]
+    }
 );
 
 export const gridNoDataVariants = cva(

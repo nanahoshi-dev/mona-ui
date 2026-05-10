@@ -267,8 +267,7 @@ export type GridListVariantProps = VariantProps<ReturnType<typeof gridListBaseTh
     GridListTableCellVariantProps;
 export type GridListVariantInput = Omit<GridListBaseVariantInput, "virtual"> &
     GridListTableVariantInput &
-    Omit<GridListTableRowVariantInput, "selected"> &
-    Omit<GridListTableCellVariantInput, "hasRightBorder">;
+    Omit<GridListTableRowVariantInput, "selected">;
 
 export type GridVariantProps = GridBaseVariantProps &
     GridHeaderTableCellVariantProps &
