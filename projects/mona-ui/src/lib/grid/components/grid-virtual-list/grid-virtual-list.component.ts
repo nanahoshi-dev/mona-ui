@@ -221,6 +221,17 @@ export class GridVirtualListComponent {
         const scrollableElement = gridElement.querySelector(".cdk-virtual-scroll-viewport") as HTMLElement;
         fromEvent(scrollableElement, "scroll")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => (headerElement.scrollLeft = scrollableElement.scrollLeft));
+            .subscribe(() => {
+                if (headerElement.scrollLeft !== scrollableElement.scrollLeft) {
+                    headerElement.scrollLeft = scrollableElement.scrollLeft;
+                }
+            });
+        fromEvent(headerElement, "scroll")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                if (scrollableElement.scrollLeft !== headerElement.scrollLeft) {
+                    scrollableElement.scrollLeft = headerElement.scrollLeft;
+                }
+            });
     }
 }

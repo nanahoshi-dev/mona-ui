@@ -137,10 +137,21 @@ export class GridListComponent implements GridListVariantInput {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 const headerElement = this.gridService.gridHeaderElement();
-                if (headerElement) {
+                if (headerElement && headerElement.scrollLeft !== this.#hostElementRef.nativeElement.scrollLeft) {
                     headerElement.scrollLeft = this.#hostElementRef.nativeElement.scrollLeft;
                 }
             });
+        const headerElement = this.gridService.gridHeaderElement();
+        if (headerElement) {
+            fromEvent(headerElement, "scroll")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => {
+                    const contentEl = this.#hostElementRef.nativeElement;
+                    if (contentEl.scrollLeft !== headerElement.scrollLeft) {
+                        contentEl.scrollLeft = headerElement.scrollLeft;
+                    }
+                });
+        }
     }
 
     protected readonly span = span;
