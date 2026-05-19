@@ -83,7 +83,6 @@
                 @if (viewRow.type === "group") {
                     @let isCollapsed = gridService.isGroupCollapsed(viewRow.groupKey);
                     @let prevRow = flattenedGroupedRows()[rowIndex - 1];
-                    @let nextRow = flattenedGroupedRows()[rowIndex + 1];
 
                     <tr
                         [class]="groupRowClass()"
@@ -102,25 +101,10 @@
                             columns().length +
                             gridService.groupColumns().length +
                             (gridService.masterDetailTemplate() ? 1 : 0) -
-                            viewRow.depth;
-
-                        @let groupToggleCellTopBorder =
-                            prevRow == null || prevRow.type !== "group" ? "" : "border-t border-t-border";
-                        <td
-                            monaGridCell
-                            [grouped]="true"
-                            [groupToggle]="true"
-                            [style.width.px]="gridService.groupColumnWidth"
-                            [class]="groupToggleCellTopBorder">
-                            <mona-grid-toggle
-                                [expanded]="!isCollapsed"
-                                [width]="gridService.groupColumnWidth"
-                                [type]="'group'"
-                                (expandedChange)="onGroupExpandChange(viewRow.groupKey)"></mona-grid-toggle>
-                        </td>
+                            viewRow.depth +
+                            1;
 
                         @let groupRowTopBorder = prevRow == null ? "" : "border-t border-t-border";
-                        @let groupRowBottomBorder = nextRow?.type !== "data" ? "" : "border-b border-b-border";
                         <td
                             monaGridCell
                             monaGridLogicalCell
@@ -132,8 +116,13 @@
                             [groupKey]="viewRow.groupKey"
                             (toggle)="onGroupExpandChange(viewRow.groupKey)"
                             [attr.colspan]="colspan"
-                            [class]="`${groupRowTopBorder} ${groupRowBottomBorder}`">
-                            <p class="flex items-center text-sm whitespace-nowrap px-2">
+                            [class]="`${groupRowTopBorder}`">
+                            <p class="flex items-center text-sm whitespace-nowrap">
+                                <mona-grid-toggle
+                                    [expanded]="!isCollapsed"
+                                    [width]="gridService.groupColumnWidth"
+                                    [type]="'group'"
+                                    (expandedChange)="onGroupExpandChange(viewRow.groupKey)"></mona-grid-toggle>
                                 <span class="font-bold">{{ viewRow.column.title() }}: {{ viewRow.groupValue }}</span>
                             </p>
                         </td>
@@ -141,6 +130,7 @@
                 } @else {
                     @let currRow = flattenedGroupedRows()[rowIndex];
                     @let nextRow = flattenedGroupedRows()[rowIndex + 1];
+                    @let prevRow = flattenedGroupedRows()[rowIndex - 1];
                     <tr
                         (click)="onGridRowClick($event, viewRow.row)"
                         monaGridRow
@@ -155,6 +145,7 @@
                                 [indentCell]="true"
                                 [style.width.px]="gridService.groupColumnWidth"></td>
                         }
+
                         @if (gridService.masterDetailTemplate()) {
                             <td
                                 monaGridCell
@@ -165,6 +156,12 @@
                                 [colIndex]="0"
                                 [firstInRow]="true"
                                 [lastInRow]="columns().length === 0"
+                                [class.border-t]="
+                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
+                                "
+                                [class.border-t-border]="
+                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
+                                "
                                 [class.border-b]="currRow.type === 'data' && nextRow?.type === 'data'"
                                 [class.border-b-border]="currRow.type === 'data' && nextRow?.type === 'data'"
                                 [style.width.px]="gridService.detailColumnWidth">
@@ -188,6 +185,12 @@
                                     colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
                                 "
                                 [rowIndex]="rowIndex"
+                                [class.border-t]="
+                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
+                                "
+                                [class.border-t-border]="
+                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
+                                "
                                 [class.border-b]="currRow.type === 'data' && nextRow?.type === 'data'"
                                 [class.border-b-border]="currRow.type === 'data' && nextRow?.type === 'data'"
                                 [style.width.px]="column.calculatedWidth()"

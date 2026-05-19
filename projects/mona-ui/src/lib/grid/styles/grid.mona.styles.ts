@@ -74,11 +74,9 @@ export const gridGroupPanelPlaceholderVariants = cva(`
 
 export const gridGroupPanelVariants = cva(
     `
-        flex items-center
-        px-1
-        h-10
+        flex items-center flex-wrap
+        p-1 h-auto gap-1
         border-b border-b-border
-        [&>mona-chip]:mr-1
     `
 );
 

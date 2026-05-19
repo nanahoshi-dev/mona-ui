@@ -80,9 +80,6 @@ export class GridListComponent implements GridListVariantInput {
         const theme = this.#themeService.theme();
         return gridGroupRowThemeVariants(theme)();
     });
-    protected readonly maxDepth = computed(() => {
-        return select(this.flattenedGroupedRows(), r => r.depth).max();
-    });
     protected readonly tableClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridListTableThemeVariants(theme)();

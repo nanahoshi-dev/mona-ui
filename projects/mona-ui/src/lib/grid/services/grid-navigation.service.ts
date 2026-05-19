@@ -69,7 +69,6 @@ export class GridNavigationService {
 
     #focusElement(element: HTMLElement): void {
         element.focus();
-        // element.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
 
     #findCellsInRow(rowIndex: number): { key: string; value: NavigationData }[] {
