@@ -28,6 +28,10 @@ export class ThemeService {
             "--color-hover": "oklch(22.5% 0 0)",
             "--color-active": "oklch(19.5% 0 0)",
             "--color-selected": "oklch(24% 0 0)",
+
+            "--color-header-background": "oklch(0.18 0 0)",
+            "--color-header-foreground": "oklch(0.20 0 0)",
+
             "--color-accent": "oklch(24.5% 0 0)",
             "--color-accent-dark": "oklch(21.5% 0 0)",
             "--color-accent-foreground": "oklch(97% 0 0)",
@@ -111,6 +115,10 @@ export class ThemeService {
             "--color-hover": "oklch(0.96 0 0)",
             "--color-active": "oklch(0.94 0 0)",
             "--color-selected": "#f4f5f7",
+
+            "--color-header-background": "oklch(0.97 0 0)",
+            "--color-header-foreground": "oklch(0.99 0 0)",
+
             "--color-accent": "oklch(0.96 0 0)",
             "--color-accent-dark": "oklch(0.93 0 0)",
             "--color-accent-foreground": "oklch(0.21 0 0)",

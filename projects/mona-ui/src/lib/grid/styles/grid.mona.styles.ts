@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { GridRowNeighborType } from "../models/GridRowNeighbourType";
 
 export const gridBaseVariants = cva(
     `
@@ -68,6 +69,33 @@ export const gridColumnResizerVariants = cva(`
     absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-1 -right-1.5
 `);
 
+export const gridDetailContentCellVariants = cva(``, {
+    variants: {
+        nextIsGroup: {
+            true: "border-t border-t-border",
+            false: "border-b border-b-border"
+        }
+    }
+});
+
+export const gridDetailIndentCellVariants = cva(
+    `
+        border-r border-r-border
+    `,
+    {
+        variants: {
+            nextIsGroup: {
+                true: "",
+                false: "border-b border-b-border"
+            }
+        }
+    }
+);
+
+export const gridDetailRowVariants = cva(`
+    border-b border-b-border
+`);
+
 export const gridGroupPanelPlaceholderVariants = cva(`
     truncate opacity-70
 `);
@@ -82,7 +110,7 @@ export const gridGroupPanelVariants = cva(
 
 export const gridGroupRowVariants = cva(
     `
-        w-full bg-gray-100
+        w-full bg-header-background
         border-r border-r-border
     `
 );
@@ -91,7 +119,7 @@ export const gridHeaderVariants = cva(
     `
         flex flex-row grow-0 shrink-0 basis-auto
         overflow-hidden
-        bg-background-dark border-r border-r-border
+        bg-header-background border-r border-r-border
     `
 );
 
@@ -221,17 +249,17 @@ export const gridListTableCellVariants = cva(
             {
                 grouped: true,
                 masterDetailToggle: true,
-                class: "border-b border-b-border border-r border-r-border"
+                class: "border-r border-r-border"
             },
             {
                 grouped: true,
                 dataCell: true,
-                class: "border-b border-b-border border-r border-r-border"
+                class: "border-r border-r-border"
             },
             {
                 grouped: true,
                 indentCell: true,
-                class: "border-r border-r-border bg-gray-100"
+                class: "border-r border-r-border bg-header-background"
             },
             {
                 grouped: true,
@@ -254,3 +282,29 @@ export const gridNoDataVariants = cva(
         border-t border-t-border
     `
 );
+
+export function monaGridCellPositionalBorders(options: {
+    grouped: boolean;
+    groupHeader: boolean;
+    dataCell: boolean;
+    masterDetailToggle: boolean;
+    prevRowType: GridRowNeighborType;
+    nextRowType: GridRowNeighborType;
+}): string {
+    const classes: string[] = [];
+    if (!options.grouped) {
+        return "";
+    }
+    if (options.dataCell || options.masterDetailToggle) {
+        if (options.prevRowType === "group") {
+            classes.push("border-t", "border-t-border");
+        }
+        if (options.nextRowType === "data") {
+            classes.push("border-b", "border-b-border");
+        }
+    }
+    if (options.groupHeader && options.prevRowType !== null) {
+        classes.push("border-t", "border-t-border");
+    }
+    return classes.join(" ");
+}

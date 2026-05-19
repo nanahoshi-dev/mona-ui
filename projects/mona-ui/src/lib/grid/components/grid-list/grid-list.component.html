@@ -63,7 +63,7 @@
                     }
                 </tr>
                 @if (gridRow.expanded()) {
-                    <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
+                    <tr monaGridDetailRow [style.width.px]="gridService.masterDetailRowWidth()">
                         <td
                             monaGridCell
                             [indentCell]="true"
@@ -104,19 +104,19 @@
                             viewRow.depth +
                             1;
 
-                        @let groupRowTopBorder = prevRow == null ? "" : "border-t border-t-border";
                         <td
                             monaGridCell
                             monaGridLogicalCell
                             [rowIndex]="rowIndex"
                             [colIndex]="0"
+                            [grouped]="true"
                             [groupHeader]="true"
+                            [prevRowType]="prevRow?.type ?? null"
                             [firstInRow]="true"
                             [lastInRow]="columns().length === 0"
                             [groupKey]="viewRow.groupKey"
                             (toggle)="onGroupExpandChange(viewRow.groupKey)"
-                            [attr.colspan]="colspan"
-                            [class]="`${groupRowTopBorder}`">
+                            [attr.colspan]="colspan">
                             <p class="flex items-center text-sm whitespace-nowrap">
                                 <mona-grid-toggle
                                     [expanded]="!isCollapsed"
@@ -128,7 +128,6 @@
                         </td>
                     </tr>
                 } @else {
-                    @let currRow = flattenedGroupedRows()[rowIndex];
                     @let nextRow = flattenedGroupedRows()[rowIndex + 1];
                     @let prevRow = flattenedGroupedRows()[rowIndex - 1];
                     <tr
@@ -152,18 +151,12 @@
                                 monaGridLogicalCell
                                 [grouped]="true"
                                 [masterDetailToggle]="true"
+                                [prevRowType]="prevRow?.type ?? null"
+                                [nextRowType]="nextRow?.type ?? null"
                                 [rowIndex]="rowIndex"
                                 [colIndex]="0"
                                 [firstInRow]="true"
                                 [lastInRow]="columns().length === 0"
-                                [class.border-t]="
-                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
-                                "
-                                [class.border-t-border]="
-                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
-                                "
-                                [class.border-b]="currRow.type === 'data' && nextRow?.type === 'data'"
-                                [class.border-b-border]="currRow.type === 'data' && nextRow?.type === 'data'"
                                 [style.width.px]="gridService.detailColumnWidth">
                                 <mona-grid-toggle
                                     [expanded]="gridRow.expanded()"
@@ -178,6 +171,8 @@
                                 monaGridCell
                                 [grouped]="true"
                                 [dataCell]="true"
+                                [prevRowType]="prevRow?.type ?? null"
+                                [nextRowType]="nextRow?.type ?? null"
                                 monaGridLogicalCell
                                 [colIndex]="colIndex"
                                 [firstInRow]="colIndex === 0"
@@ -185,14 +180,6 @@
                                     colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
                                 "
                                 [rowIndex]="rowIndex"
-                                [class.border-t]="
-                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
-                                "
-                                [class.border-t-border]="
-                                    prevRow == null || prevRow.type === 'data' ? '' : 'border-t border-t-border'
-                                "
-                                [class.border-b]="currRow.type === 'data' && nextRow?.type === 'data'"
-                                [class.border-b-border]="currRow.type === 'data' && nextRow?.type === 'data'"
                                 [style.width.px]="column.calculatedWidth()"
                                 [style.min-width.px]="column.minWidth()">
                                 <mona-grid-cell [column]="column" [row]="viewRow.row"></mona-grid-cell>
@@ -210,7 +197,7 @@
                         }
                     </tr>
                     @if (gridRow.expanded()) {
-                        <tr class="border-b border-b-border" [style.width.px]="gridService.masterDetailRowWidth()">
+                        <tr monaGridDetailRow [style.width.px]="gridService.masterDetailRowWidth()">
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : viewRow.depth + 1; track $index) {
                                 <td
                                     monaGridCell
@@ -219,17 +206,16 @@
                                     [attr.colspan]="1"
                                     [style.width.px]="gridService.groupColumnWidth"></td>
                             }
-
-                            @let masterDetailIndentBorderBottom =
-                                nextRow?.type !== "group" ? "border-b border-b-border" : "";
+                            @let colspan = columns().length + gridService.groupColumns().length - 1;
                             <td
-                                class="border-r border-r-border {{ masterDetailIndentBorderBottom }}"
+                                monaGridDetailIndentCell
+                                [nextRowType]="nextRow?.type ?? null"
                                 [attr.colspan]="1"
                                 [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
-                            @let colspan = columns().length + gridService.groupColumns().length - 1;
-                            @let topBorder = nextRow?.type === "group" ? "border-t border-t-border" : "";
-                            @let bottomBorder = nextRow?.type !== "group" ? "border-b border-b-border" : "";
-                            <td [attr.colspan]="colspan" class="{{ bottomBorder }} {{ topBorder }}">
+                            <td
+                                monaGridDetailContentCell
+                                [nextRowType]="nextRow?.type ?? null"
+                                [attr.colspan]="colspan">
                                 <ng-container
                                     [ngTemplateOutlet]="gridService.masterDetailTemplate()"
                                     [ngTemplateOutletContext]="{ $implicit: viewRow.row.data }"></ng-container>

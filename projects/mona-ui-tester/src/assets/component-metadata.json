@@ -71,6 +71,66 @@
       }
     ]
   },
+  "GridCellDirective": {
+    "name": "GridCellDirective",
+    "selector": "\"td[monaGridCell]\"",
+    "inputs": [
+      {
+        "name": "groupHeader",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "groupToggle",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "grouped",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "indentCell",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "masterDetailContent",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "masterDetailToggle",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "dataCell",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "prevRowType",
+        "type": "GridRowNeighborType",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "nextRowType",
+        "type": "GridRowNeighborType",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "GridColumnResizeHandlerDirective": {
     "name": "GridColumnResizeHandlerDirective",
     "selector": "\"[monaGridColumnResizeHandler]\"",
@@ -96,6 +156,30 @@
       {
         "name": "gridId",
         "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridDetailContentCellDirective": {
+    "name": "GridDetailContentCellDirective",
+    "selector": "\"td[monaGridDetailContentCell]\"",
+    "inputs": [
+      {
+        "name": "nextRowType",
+        "type": "GridRowNeighborType",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridDetailIndentCellDirective": {
+    "name": "GridDetailIndentCellDirective",
+    "selector": "\"td[monaGridDetailIndentCell]\"",
+    "inputs": [
+      {
+        "name": "nextRowType",
+        "type": "GridRowNeighborType",
         "description": "",
         "kind": "input"
       }

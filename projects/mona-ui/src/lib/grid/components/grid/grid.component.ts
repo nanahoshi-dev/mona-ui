@@ -30,6 +30,11 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { swap } from "@mirei/ts-collections";
+import {
+    PopupMenuComponent,
+    PopupMenuItemComponent,
+    PopupMenuTextTemplateDirective
+} from "projects/mona-ui/src/public-api";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
@@ -75,11 +80,6 @@ import { GridColumnComponent } from "../grid-column/grid-column.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
-import {
-    PopupMenuComponent,
-    PopupMenuItemComponent,
-    PopupMenuTextTemplateDirective
-} from "projects/mona-ui/src/public-api";
 
 @Component({
     selector: "mona-grid",

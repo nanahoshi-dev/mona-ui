@@ -4,7 +4,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from "@an
 import { ThemeService } from "../../../theme/services/theme.service";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
-import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridCellBaseThemeVariants,
@@ -22,7 +21,6 @@ import {
     }
 })
 export class GridCellComponent {
-    readonly #gridNavigationService = inject(GridNavigationService);
     readonly #themeService = inject(ThemeService);
 
     protected readonly baseClass = computed(() => {

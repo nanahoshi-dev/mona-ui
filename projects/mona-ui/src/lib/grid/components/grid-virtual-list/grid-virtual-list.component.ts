@@ -22,6 +22,9 @@ import { ContextMenuComponent } from "../../../menus/contextmenu/components/cont
 import { SlicePipe } from "../../../pipes/slice.pipe";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
+import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
+import { GridDetailIndentCellDirective } from "../../directives/grid-detail-indent-cell.directive";
+import { GridDetailRowDirective } from "../../directives/grid-detail-row.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridRowDirective } from "../../directives/grid-row.directive";
 import { Column } from "../../models/Column";
@@ -50,6 +53,9 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         ContextMenuComponent,
         GridRowDirective,
         GridCellDirective,
+        GridDetailRowDirective,
+        GridDetailIndentCellDirective,
+        GridDetailContentCellDirective,
         GridLogicalCellDirective,
         LucideAngularModule,
         GridToggleComponent

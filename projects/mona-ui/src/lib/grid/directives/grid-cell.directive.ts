@@ -1,9 +1,11 @@
-import { afterRenderEffect, computed, DestroyRef, Directive, ElementRef, inject, input } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent, tap } from "rxjs";
+import { computed, Directive, inject, input } from "@angular/core";
 import { ThemeService } from "../../theme/services/theme.service";
-import { GridNavigationService } from "../services/grid-navigation.service";
-import { gridListTableCellThemeVariants, GridListTableCellVariantInput } from "../styles/grid.styles";
+import { type GridRowNeighborType } from "../models/GridRowNeighbourType";
+import {
+    gridCellPositionalBordersThemeResolver,
+    gridListTableCellThemeVariants,
+    type GridListTableCellVariantInput
+} from "../styles/grid.styles";
 
 @Directive({
     selector: "td[monaGridCell]",
@@ -22,7 +24,7 @@ export class GridCellDirective implements GridListTableCellVariantInput {
         const indentCell = this.indentCell();
         const masterDetailContent = this.masterDetailContent();
         const masterDetailToggle = this.masterDetailToggle();
-        return gridListTableCellThemeVariants(theme)({
+        const variantClass = gridListTableCellThemeVariants(theme)({
             dataCell,
             groupHeader,
             groupToggle,
@@ -31,6 +33,15 @@ export class GridCellDirective implements GridListTableCellVariantInput {
             masterDetailContent,
             masterDetailToggle
         });
+        const positionalClass = gridCellPositionalBordersThemeResolver(theme)({
+            grouped,
+            groupHeader,
+            dataCell,
+            masterDetailToggle,
+            prevRowType: this.prevRowType(),
+            nextRowType: this.nextRowType()
+        });
+        return positionalClass ? `${variantClass} ${positionalClass}` : variantClass;
     });
     public readonly groupHeader = input(false);
     public readonly groupToggle = input(false);
@@ -39,4 +50,6 @@ export class GridCellDirective implements GridListTableCellVariantInput {
     public readonly masterDetailContent = input(false);
     public readonly masterDetailToggle = input(false);
     public readonly dataCell = input(false);
+    public readonly prevRowType = input<GridRowNeighborType>(null);
+    public readonly nextRowType = input<GridRowNeighborType>(null);
 }
