@@ -1,12 +1,10 @@
 import {
-    afterNextRender,
+    afterRenderEffect,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
-    effect,
     inject,
-    ElementRef,
     input,
     linkedSignal,
     TemplateRef,
@@ -74,7 +72,7 @@ export class TooltipComponent implements TooltipVariantInputs {
     public readonly target = input.required<PopupAnchor>();
 
     public constructor() {
-        afterNextRender({
+        afterRenderEffect({
             read: () => {
                 const target = this.target();
                 if (typeof target === "string") {
