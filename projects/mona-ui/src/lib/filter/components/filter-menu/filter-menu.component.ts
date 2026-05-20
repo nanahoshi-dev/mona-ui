@@ -42,13 +42,14 @@ import { ValuelessOperatorPipe } from "../../pipes/valueless-operator.pipe";
 import {
     filterMenuActionsThemeVariants,
     filterMenuBaseThemeVariants,
-    filterMenuItemThemeVariants
+    filterMenuItemThemeVariants,
+    type FilterMenuVariantInput,
+    type FilterMenuVariantProps
 } from "../../styles/filter.styles";
 
 @Component({
     selector: "mona-filter-menu",
     templateUrl: "./filter-menu.component.html",
-    styleUrls: ["./filter-menu.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         DropdownListComponent,
@@ -67,7 +68,7 @@ import {
         "[class]": "baseClass()"
     }
 })
-export class FilterMenuComponent {
+export class FilterMenuComponent implements FilterMenuVariantInput {
     #booleanFilterValues: [boolean | null, boolean | null] = [null, null];
     readonly #themeService = inject(ThemeService);
     protected readonly applyDisabled = computed(() => {
@@ -215,6 +216,8 @@ export class FilterMenuComponent {
     });
     public readonly field = model("");
     public readonly operators = model<Iterable<FilterOperators>>([]);
+    public readonly rounded = input<FilterMenuVariantProps["rounded"]>("medium");
+    public readonly size = input<FilterMenuVariantProps["size"]>("medium");
     public readonly type = model<DataType>("string");
     public readonly value = model<FilterMenuValue>();
 

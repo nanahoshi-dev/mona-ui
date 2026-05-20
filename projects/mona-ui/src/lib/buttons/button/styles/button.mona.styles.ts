@@ -108,8 +108,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-selected text-foreground
-                    hover:bg-selected/95
-                    active:bg-selected/100
+                     hover:bg-selected/95 hover:text-foreground
+                    active:bg-selected/100 active:text-foreground
                 `
             },
             {
@@ -117,8 +117,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-primary-selected text-primary-foreground
-                    hover:bg-primary-selected/95
-                    active:bg-primary-selected/100
+                    hover:bg-primary-selected/95 hover:text-primary-foreground
+                    active:bg-primary-selected/100 active:text-primary-foreground
                 `
             },
             {
@@ -126,8 +126,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-secondary-selected text-secondary-foreground
-                    hover:bg-secondary-selected/95
-                    active:bg-secondary-selected/100
+                    hover:bg-secondary-selected/95 hover:text-secondary-foreground
+                    active:bg-secondary-selected/100 active:text-secondary-foreground
                 `
             },
             {
@@ -135,8 +135,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-success-selected text-success-foreground
-                    hover:bg-success-selected/95
-                    active:bg-success-selected/100
+                    hover:bg-success-selected/95 hover:text-success-foreground
+                    active:bg-success-selected/100 active:text-success-foreground
                 `
             },
             {
@@ -144,8 +144,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-error-selected text-error-foreground
-                    hover:bg-error-selected/95
-                    active:bg-error-selected/100
+                    hover:bg-error-selected/95 hover:text-error-foreground
+                    active:bg-error-selected/100 active:text-error-foreground
                 `
             },
             {
@@ -153,8 +153,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-warning-selected text-warning-foreground
-                    hover:bg-warning-selected/95
-                    active:bg-warning-selected/100
+                    hover:bg-warning-selected/95 hover:text-warning-foreground
+                    active:bg-warning-selected/100 active:text-warning-foreground
                 `
             },
             {
@@ -162,8 +162,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-info-selected text-info-foreground
-                    hover:bg-info-selected/95
-                    active:bg-info-selected/100
+                    hover:bg-info-selected/95 hover:text-info-foreground
+                    active:bg-info-selected/100 active:text-info-foreground
                 `
             },
             {
@@ -171,8 +171,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-primary-selected text-primary-foreground
-                    hover:bg-primary-selected/95
-                    active:bg-primary-selected/100
+                    hover:bg-primary-selected/95 hover:text-primary-foreground
+                    active:bg-primary-selected/100 active:text-primary-foreground
                 `
             },
             {
@@ -180,8 +180,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-secondary-selected text-secondary-foreground
-                    hover:bg-secondary-selected/95
-                    active:bg-secondary-selected/100
+                    hover:bg-secondary-selected/95 hover:text-secondary-foreground
+                    active:bg-secondary-selected/100 active:text-secondary-foreground
                 `
             },
             {
@@ -189,8 +189,8 @@ export const buttonVariants = cva(
                 selected: true,
                 class: `
                     bg-secondary-selected text-secondary-foreground
-                    hover:bg-secondary-selected/95
-                    active:bg-secondary-selected/100
+                    hover:bg-secondary-selected/95 hover:text-secondary-foreground
+                    active:bg-secondary-selected/100 active:text-secondary-foreground
                 `
             },
             {

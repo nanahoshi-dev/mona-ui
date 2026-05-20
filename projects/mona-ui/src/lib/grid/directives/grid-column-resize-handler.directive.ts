@@ -36,7 +36,6 @@ export class GridColumnResizeHandlerDirective {
         ) as HTMLTableElement;
 
         this.#document.onselectstart = () => false;
-
         this.resizeStart.emit();
 
         const onMouseMove = (event: MouseEvent) => {

@@ -1,4 +1,6 @@
+import type { VariantProps } from "class-variance-authority";
 import type { ThemeStyle } from "../../theme/models/Theme";
+import type { VariantInputs } from "../../utils/VariantInputs";
 import {
     filterMenuBaseVariants as monaFilterMenuBaseVariants,
     filterMenuActionVariants as monaFilterMenuActionVariants,
@@ -31,3 +33,9 @@ export const filterMenuItemThemeVariants = (theme: ThemeStyle) => {
             return monaFilterMenuItemVariants;
     }
 };
+
+type FilterMenuBaseVariantProps = VariantProps<ReturnType<typeof filterMenuBaseThemeVariants>>;
+type FilterMenuBaseVariantInput = VariantInputs<FilterMenuBaseVariantProps>;
+
+export type FilterMenuVariantProps = FilterMenuBaseVariantProps;
+export type FilterMenuVariantInput = FilterMenuBaseVariantInput;

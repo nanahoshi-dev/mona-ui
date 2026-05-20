@@ -57,6 +57,7 @@ export class GridFilterMenuComponent {
         const componentRef = this.#popupRef.component as ComponentRef<FilterMenuComponent>;
         componentRef.instance.type.set(this.type());
         componentRef.instance.field.set(this.column().field());
+        componentRef.setInput("size", "small");
         if (filterState?.filterMenuValue) {
             componentRef.instance.value.set(filterState.filterMenuValue);
         }

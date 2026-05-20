@@ -4,11 +4,14 @@
             [data]="stringFilterMenuDataItems | operatorFilter: operators()"
             textField="text"
             valueField="value"
+            [size]="size()"
+            [rounded]="rounded()"
             [ngModel]="selectedFilterMenuDataItemList()[0]"
             (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
         <mona-text-box
             [ngModel]="stringFilterValues()[0]"
             (ngModelChange)="stringFilterValues.set([$event, stringFilterValues()[1]])"
+            [size]="size()"
             [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-text-box>
     }
 
@@ -17,11 +20,15 @@
             [data]="numericFilterMenuDataItems | operatorFilter: operators()"
             textField="text"
             valueField="value"
+            [size]="size()"
+            [rounded]="rounded()"
             [ngModel]="selectedFilterMenuDataItemList()[0]"
             (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
         <mona-numeric-text-box
             [ngModel]="numberFilterValues()[0]"
             (ngModelChange)="numberFilterValues.set([$event, numberFilterValues()[1]])"
+            [size]="size()"
+            [rounded]="rounded()"
             [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
     }
 
@@ -30,6 +37,8 @@
             [data]="dateFilterMenuDataItems | operatorFilter: operators()"
             textField="text"
             valueField="value"
+            [size]="size()"
+            [rounded]="rounded()"
             [ngModel]="selectedFilterMenuDataItemList()[0]"
             (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
 
@@ -38,6 +47,8 @@
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
                 [format]="dateOptions().format"
+                [size]="size()"
+                [rounded]="rounded()"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-date-picker>
         }
 
@@ -46,6 +57,8 @@
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
                 [format]="dateOptions().format"
+                [size]="size()"
+                [rounded]="rounded()"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-datetime-picker>
         }
 
@@ -54,6 +67,8 @@
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
                 [format]="dateOptions().format"
+                [size]="size()"
+                [rounded]="rounded()"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-time-picker>
         }
     }
@@ -64,12 +79,14 @@
             textField="text"
             valueField="value"
             [ngModel]="selectedFilterMenuDataItemList()[0]"
+            [size]="size()"
+            [rounded]="rounded()"
             (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
     }
 </div>
 @if (firstFilterValid()) {
     <div [class]="filterMenuItemClass()">
-        <mona-button-group selection="single" [disabled]="!firstFilterValid()">
+        <mona-button-group selection="single" [size]="size()" [rounded]="rounded()" [disabled]="!firstFilterValid()">
             @for (item of connectorDataItems; track item) {
                 <button
                     monaButton
@@ -88,6 +105,8 @@
                 [data]="stringFilterMenuDataItems | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
+                [size]="size()"
+                [rounded]="rounded()"
                 [ngModel]="selectedFilterMenuDataItemList()[1]"
                 (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
             <mona-text-box
@@ -101,10 +120,14 @@
                 [data]="numericFilterMenuDataItems | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
+                [size]="size()"
+                [rounded]="rounded()"
                 [ngModel]="selectedFilterMenuDataItemList()[1]"
                 (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
 
             <mona-numeric-text-box
+                [size]="size()"
+                [rounded]="rounded()"
                 [ngModel]="numberFilterValues()[1]"
                 (ngModelChange)="numberFilterValues.set([numberFilterValues()[0], $event])"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
@@ -115,6 +138,8 @@
                 [data]="dateFilterMenuDataItems | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
+                [size]="size()"
+                [rounded]="rounded()"
                 [ngModel]="selectedFilterMenuDataItemList()[1]"
                 (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
 
@@ -123,6 +148,8 @@
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
                     [format]="dateOptions().format"
+                    [size]="size()"
+                    [rounded]="rounded()"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-date-picker>
             }
 
@@ -131,6 +158,8 @@
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
                     [format]="dateOptions().format"
+                    [size]="size()"
+                    [rounded]="rounded()"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-datetime-picker>
             }
 
@@ -139,6 +168,8 @@
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
                     [format]="dateOptions().format"
+                    [size]="size()"
+                    [rounded]="rounded()"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-time-picker>
             }
         }
@@ -148,12 +179,22 @@
                 [data]="booleanFilterMenuDataItems | operatorFilter: operators()"
                 textField="text"
                 valueField="value"
+                [size]="size()"
+                [rounded]="rounded()"
                 [ngModel]="selectedFilterMenuDataItemList()[1]"
                 (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
         }
     </div>
 }
 <div [class]="`${filterMenuItemClass()} ${filterMenuActionsClass()}`">
-    <button monaButton (click)="onFilterApply()" [look]="'primary'" [disabled]="applyDisabled()">Apply</button>
-    <button monaButton (click)="onFilterClear()" [look]="'default'">Clear</button>
+    <button
+        monaButton
+        (click)="onFilterApply()"
+        [look]="'primary'"
+        [size]="size()"
+        [rounded]="rounded()"
+        [disabled]="applyDisabled()">
+        Apply
+    </button>
+    <button monaButton (click)="onFilterClear()" [look]="'default'" [size]="size()" [rounded]="rounded()">Clear</button>
 </div>

@@ -6,7 +6,22 @@ export const filterMenuBaseVariants = cva(
         p-1 gap-2
         bg-background-dark border border-border
         shadow-lg
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg"
+            },
+            size: {
+                small: "",
+                medium: "",
+                large: ""
+            }
+        }
+    }
 );
 
 export const filterMenuItemVariants = cva(

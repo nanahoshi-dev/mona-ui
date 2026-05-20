@@ -21,7 +21,7 @@
                         <i class="ri-arrow-up-line"></i>
                     }
                     <span>{{ groupColumn.title() }}</span>
-                    <span style="margin-left: 0.5rem" (click)="$event.stopPropagation()" #groupReorder>
+                    <span class="ml-2" (click)="$event.stopPropagation()" #groupReorder>
                         <i class="ri-more-2-fill"></i>
                     </span>
                     <mona-popup-menu size="small" [target]="groupReorder">
