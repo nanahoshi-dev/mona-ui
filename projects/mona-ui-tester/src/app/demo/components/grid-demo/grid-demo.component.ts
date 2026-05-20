@@ -36,6 +36,12 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             numericMin: 0,
             numericMax: 1000000
         },
+        cellTemplate: {
+            code: ``,
+            name: "Cell Template",
+            description: "Customize the cell template for grid rows",
+            active: false
+        },
         selection: {
             code: ``,
             name: "Row Selection",
@@ -147,6 +153,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
     ],
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
+        @let featureData = this.features();
         <mona-grid
             [data]="effectiveGridData"
             [filter]="filter()"
@@ -179,15 +186,17 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     [title]="column.title"
                     [type]="column.filterType"
                     [width]="width">
-                    <ng-template monaGridCellTemplate let-dataItem>
-                        <span #cellElement>
-                            @if (column.filterType === "date") {
-                                {{ dataItem[column.field] | date }}
-                            } @else {
-                                {{ dataItem[column.field] }}
-                            }
-                        </span>
-                    </ng-template>
+                    @if (featureData["cellTemplate"].active) {
+                        <ng-template monaGridCellTemplate let-dataItem>
+                            <span class="truncate" #cellElement>
+                                @if (column.filterType === "date") {
+                                    {{ dataItem[column.field] | date }}
+                                } @else {
+                                    {{ dataItem[column.field] }}
+                                }
+                            </span>
+                        </ng-template>
+                    }
                 </mona-grid-column>
             }
             <ng-template monaGridDetailTemplate let-dataItem>

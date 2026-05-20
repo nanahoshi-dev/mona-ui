@@ -94,9 +94,7 @@
     --color-scrollbar-corner: #f9fafb;
 
     --page-background: #fff;
-    /*--page-background: oklch(96.79% 0.0011 17.18);*/
     --color-demo-background: #FFF;
-    /*--color-demo-background: #f9fafb;*/
 }
 
 :root {

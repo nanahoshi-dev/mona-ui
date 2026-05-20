@@ -1,13 +1,4 @@
-import {
-    afterNextRender,
-    DestroyRef,
-    Directive,
-    DOCUMENT,
-    ElementRef,
-    inject,
-    input,
-    output
-} from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, output } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { Column } from "../models/Column";
@@ -51,7 +42,8 @@ export class GridColumnResizeHandlerDirective {
         const onMouseMove = (event: MouseEvent) => {
             const deltaX = event.clientX - initialX;
             const minWidth = this.column().minWidth();
-            const maxWidth = this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? this.#defaultMaxWidth;
+            const maxWidth =
+                this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? this.#defaultMaxWidth;
 
             if (initialWidth + deltaX < minWidth) {
                 return;
@@ -92,6 +84,7 @@ export class GridColumnResizeHandlerDirective {
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {
                 event.stopImmediatePropagation();
+                event.preventDefault();
                 this.onMouseDown(event);
             });
     }

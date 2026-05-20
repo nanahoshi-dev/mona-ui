@@ -48,7 +48,7 @@
     </div>
 }
 <div [class]="headerClass()" [style.margin]="headerMargin" #gridHeaderElement>
-    <div class="mona-grid-header-wrap">
+    <div>
         <table [class]="headerTableClass()" [style.width.px]="gridService.tableWidth()">
             <colgroup>
                 @for (_ of gridService.groupColumns(); track $index) {
@@ -134,8 +134,7 @@
                                         <mona-grid-filter-menu
                                             [column]="column"
                                             [type]="column.dataType()"
-                                            (apply)="onColumnFilter(column, $event)"
-                                            style="width: 30px"></mona-grid-filter-menu>
+                                            (apply)="onColumnFilter(column, $event)"></mona-grid-filter-menu>
                                     }
                                 </div>
                             </div>

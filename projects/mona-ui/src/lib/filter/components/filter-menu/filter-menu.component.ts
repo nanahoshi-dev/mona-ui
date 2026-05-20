@@ -3,6 +3,7 @@ import {
     Component,
     computed,
     effect,
+    inject,
     input,
     model,
     output,
@@ -31,12 +32,18 @@ import {
     StringFilterDescriptor,
     StringFilterOperators
 } from "../../../query/filter/FilterDescriptor";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { FilterMenuConnectorItem } from "../../models/FilterMenuConnectorItem";
 import { FilterMenuDataItem } from "../../models/FilterMenuDataItem";
 import { FilterMenuDateOptions } from "../../models/FilterMenuDateOptions";
 import { FilterMenuValue } from "../../models/FilterMenuValue";
 import { OperatorFilterPipe } from "../../pipes/operator-filter.pipe";
 import { ValuelessOperatorPipe } from "../../pipes/valueless-operator.pipe";
+import {
+    filterMenuActionsThemeVariants,
+    filterMenuBaseThemeVariants,
+    filterMenuItemThemeVariants
+} from "../../styles/filter.styles";
 
 @Component({
     selector: "mona-filter-menu",
@@ -57,16 +64,21 @@ import { ValuelessOperatorPipe } from "../../pipes/valueless-operator.pipe";
         OperatorFilterPipe
     ],
     host: {
-        "[class.mona-filter-menu]": "true"
+        "[class]": "baseClass()"
     }
 })
 export class FilterMenuComponent {
-    private booleanFilterValues: [boolean | null, boolean | null] = [null, null];
+    #booleanFilterValues: [boolean | null, boolean | null] = [null, null];
+    readonly #themeService = inject(ThemeService);
     protected readonly applyDisabled = computed(() => {
         if (!this.firstFilterValid()) {
             return true;
         }
         return !!(this.selectedConnectorItem() && !this.secondFilterValid());
+    });
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return filterMenuBaseThemeVariants(theme)();
     });
     protected readonly booleanFilterMenuDataItems: FilterMenuDataItem[] = [
         { text: "Is true", value: "eq" },
@@ -89,6 +101,14 @@ export class FilterMenuComponent {
         { text: "Is not null", value: "isnotnull" }
     ];
     protected readonly dateFilterValues = signal<[Date | null, Date | null]>([null, null]);
+    protected readonly filterMenuActionsClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return filterMenuActionsThemeVariants(theme)();
+    });
+    protected readonly filterMenuItemClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return filterMenuItemThemeVariants(theme)();
+    });
     protected readonly firstFilterValid = computed(() => {
         const operator = this.selectedFilterMenuDataItemList()[0]?.value;
         const type = this.type();
@@ -189,15 +209,14 @@ export class FilterMenuComponent {
     protected readonly stringFilterValues = signal<[string, string]>(["", ""]);
 
     public readonly apply = output<CompositeFilterDescriptor>();
-
-    public dateOptions = input<FilterMenuDateOptions>({
+    public readonly dateOptions = input<FilterMenuDateOptions>({
         format: "dd/MM/yyyy",
         type: "date"
     });
-    public field = model("");
-    public operators = model<Iterable<FilterOperators>>([]);
-    public type = model<DataType>("string");
-    public value = model<FilterMenuValue>();
+    public readonly field = model("");
+    public readonly operators = model<Iterable<FilterOperators>>([]);
+    public readonly type = model<DataType>("string");
+    public readonly value = model<FilterMenuValue>();
 
     public constructor() {
         effect(() => {
@@ -210,12 +229,47 @@ export class FilterMenuComponent {
         });
     }
 
-    public onConnectorChange(item: FilterMenuConnectorItem): void {
-        if (item.value === this.selectedConnectorItem()?.value) {
-            this.selectedConnectorItem.set(null);
-        } else {
+    protected onConnectorChange(item: FilterMenuConnectorItem, selected: boolean): void {
+        if (selected) {
             this.selectedConnectorItem.set(item);
+        } else if (item.value === this.selectedConnectorItem()?.value) {
+            this.selectedConnectorItem.set(null);
         }
+    }
+
+    protected onFilterApply(): void {
+        if (!this.selectedConnectorItem) {
+            this.clearSecondFilterValues();
+        }
+        if (this.type() === "string") {
+            this.applyStringFilters();
+        } else if (this.type() === "number") {
+            this.applyNumberFilters();
+        } else if (this.type() === "date") {
+            this.applyDateFilters();
+        } else if (this.type() === "boolean") {
+            this.applyBooleanFilters();
+        }
+    }
+
+    protected onFilterClear(): void {
+        this.numberFilterValues.set([null, null]);
+        this.stringFilterValues.set(["", ""]);
+        this.dateFilterValues.set([null, null]);
+        this.#booleanFilterValues = [null, null];
+        this.selectedFilterMenuDataItemList.set([undefined, undefined]);
+        this.selectedConnectorItem.set(null);
+        this.apply.emit({
+            logic: "and",
+            filters: []
+        });
+    }
+
+    protected onFilterOperatorChange(index: number, item: FilterMenuDataItem): void {
+        this.selectedFilterMenuDataItemList.update(list => {
+            list[index] = item;
+            return [...list];
+        });
     }
 
     private getBooleanDescriptor(operator: BooleanFilterOperators): BooleanFilterDescriptor | null {
@@ -301,41 +355,6 @@ export class FilterMenuComponent {
         return null;
     }
 
-    public onFilterApply(): void {
-        if (!this.selectedConnectorItem) {
-            this.clearSecondFilterValues();
-        }
-        if (this.type() === "string") {
-            this.applyStringFilters();
-        } else if (this.type() === "number") {
-            this.applyNumberFilters();
-        } else if (this.type() === "date") {
-            this.applyDateFilters();
-        } else if (this.type() === "boolean") {
-            this.applyBooleanFilters();
-        }
-    }
-
-    public onFilterClear(): void {
-        this.numberFilterValues.set([null, null]);
-        this.stringFilterValues.set(["", ""]);
-        this.dateFilterValues.set([null, null]);
-        this.booleanFilterValues = [null, null];
-        this.selectedFilterMenuDataItemList.set([undefined, undefined]);
-        this.selectedConnectorItem.set(null);
-        this.apply.emit({
-            logic: "and",
-            filters: []
-        });
-    }
-
-    public onFilterOperatorChange(index: number, item: FilterMenuDataItem): void {
-        this.selectedFilterMenuDataItemList.update(list => {
-            list[index] = item;
-            return [...list];
-        });
-    }
-
     public getFilterValues(): FilterMenuValue {
         type TargetType = string | number | Date | boolean | null;
         const filterValue = (target: [TargetType, TargetType]) => {
@@ -356,7 +375,7 @@ export class FilterMenuComponent {
             case "date":
                 return filterValue(this.dateFilterValues());
             case "boolean":
-                return filterValue(this.booleanFilterValues);
+                return filterValue(this.#booleanFilterValues);
             default:
                 return {
                     operator1: undefined,
@@ -487,7 +506,7 @@ export class FilterMenuComponent {
                 this.dateFilterValues.set([this.dateFilterValues()[0], null]);
                 break;
             case "boolean":
-                this.booleanFilterValues[1] = null;
+                this.#booleanFilterValues[1] = null;
                 break;
             default:
                 break;
@@ -537,7 +556,7 @@ export class FilterMenuComponent {
                 if (this.type() === "date") {
                     this.dateFilterValues.set(filterValues as [Date, Date]);
                 } else {
-                    this.booleanFilterValues = filterValues as [boolean, boolean];
+                    this.#booleanFilterValues = filterValues as [boolean, boolean];
                 }
                 break;
             default:

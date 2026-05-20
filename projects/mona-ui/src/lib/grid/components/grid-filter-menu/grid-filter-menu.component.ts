@@ -1,6 +1,6 @@
 import { animate, AnimationBuilder, style } from "@angular/animations";
-import { NgClass } from "@angular/common";
 import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, inject, input, output } from "@angular/core";
+import { FunnelIcon, LucideAngularModule } from "lucide-angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
@@ -14,12 +14,8 @@ import { GridService } from "../../services/grid.service";
 @Component({
     selector: "mona-grid-filter-menu",
     templateUrl: "./grid-filter-menu.component.html",
-    styleUrls: ["./grid-filter-menu.component.scss"],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ButtonDirective, NgClass],
-    host: {
-        class: "mona-grid-filter-menu"
-    }
+    imports: [ButtonDirective, LucideAngularModule]
 })
 export class GridFilterMenuComponent {
     readonly #animationBuilder = inject(AnimationBuilder);
@@ -27,23 +23,21 @@ export class GridFilterMenuComponent {
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
     #popupRef?: PopupRef;
-
+    protected readonly filterIcon = FunnelIcon;
     public readonly apply = output<ColumnFilterState>();
-
-    public column = input.required<Column>();
-    public type = input<DataType>("string");
+    public readonly column = input.required<Column>();
+    public readonly type = input<DataType>("string");
 
     public openPopup(): void {
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             content: FilterMenuComponent,
-            popupClass: "mona-grid-filter-menu-popup-content",
             closeOnBackdropClick: false,
             hasBackdrop: true,
             preventClose: event => {
                 if (event.originalEvent instanceof MouseEvent) {
                     const target = event.originalEvent.target as HTMLElement;
-                    if (target.closest(".mona-popup-content")) {
+                    if (target.closest("mona-filter-menu")) {
                         return true;
                     }
                 }

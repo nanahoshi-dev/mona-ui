@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { GridRowNeighborType } from "../models/GridRowNeighbourType";
+import type { GridRowNeighborType } from "../models/GridRowNeighbourType";
 
 export const gridBaseVariants = cva(
     `
@@ -66,7 +66,7 @@ export const gridColumnDropHintVariants = cva(`
 `);
 
 export const gridColumnResizerVariants = cva(`
-    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-1 -right-1.5
+    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -right-1.5
 `);
 
 export const gridDetailContentCellVariants = cva(``, {
@@ -134,7 +134,7 @@ export const gridHeaderTableRowVariants = cva(`relative inline-flex`);
 export const gridHeaderTableCellVariants = cva(
     `
         relative select-none
-        truncate text-left
+        text-left overflow-visible
         outline-none border-r border-r-border
         focus:ring-1 focus:ring-inset focus:ring-primary/40
     `
@@ -142,7 +142,7 @@ export const gridHeaderTableCellVariants = cva(
 
 export const gridHeaderTableColumnWrapVariants = cva(
     `
-       w-full h-full
+        w-full h-full px-1
         flex items-center justify-between
         cursor-pointer overflow-hidden
     `
@@ -150,7 +150,7 @@ export const gridHeaderTableColumnWrapVariants = cva(
 
 export const gridHeaderTableColumnTitleVariants = cva(
     `
-        flex-1 px-2 py-1 truncate
+        flex-1 px-1 py-2 truncate
         font-medium
     `
 );
