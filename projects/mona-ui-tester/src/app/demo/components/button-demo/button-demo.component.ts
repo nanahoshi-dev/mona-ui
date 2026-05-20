@@ -52,7 +52,8 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
                     "link",
                     "secondary",
                     "ghost",
-                    "outline"
+                    "outline",
+                    "clear"
                 ],
                 defaultValue: "default"
             },
