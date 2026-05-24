@@ -1486,6 +1486,18 @@
         "kind": "model"
       },
       {
+        "name": "rounded",
+        "type": "FilterMenuVariantProps[\"rounded\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "FilterMenuVariantProps[\"size\"]",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "type",
         "type": "DataType",
         "description": "",
@@ -6474,7 +6486,7 @@
       {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

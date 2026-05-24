@@ -4,7 +4,7 @@ export const buttonVariants = cva(
     `
         inline-flex items-center justify-center gap-2
         text-sm font-medium cursor-pointer whitespace-nowrap
-        outline-none
+        outline-none shadow-xs
         focus-visible:outline-none focus-visible:shadow
         transition-colors duration-100 ease-in-out
     `,
@@ -72,16 +72,18 @@ export const buttonVariants = cva(
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 ghost: `
+                    shadow-none
                     hover:bg-secondary-hover
                     active:bg-secondary-active
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 link: `
+                    shadow-none
                     underline-offset-4 hover:underline
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 clear: `
-                    bg-transparent border-0
+                    bg-transparent border-0 shadow-none
                     hover:bg-transparent active:bg-transparent
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `

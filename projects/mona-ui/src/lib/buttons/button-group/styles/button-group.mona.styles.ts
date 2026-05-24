@@ -3,11 +3,12 @@ import { cva } from "class-variance-authority";
 export const buttonGroupVariants = cva(
     `
         inline-flex items-center justify-center
-        border border-border
+        border border-border shadow-xs
         [&>button]:border-0
         [&>button]:focus-visible:ring-2
         [&>button]:focus-visible:z-10
         [&>button]:rounded-none
+        [&>button]:shadow-none
     `,
     {
         variants: {

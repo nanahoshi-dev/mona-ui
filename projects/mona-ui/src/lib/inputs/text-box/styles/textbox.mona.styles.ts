@@ -57,6 +57,8 @@ export const inputVariants = cva(
 
         transition-[color,box-shadow,border] ease-in-out duration-300
 
+        shadow-xs
+
         file:text-foreground
         file:inline-flex file:border-0
         file:bg-transparent file:text-xs
