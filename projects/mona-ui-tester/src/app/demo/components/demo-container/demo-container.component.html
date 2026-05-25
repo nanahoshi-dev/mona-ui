@@ -4,18 +4,18 @@
             <button monaButton look="ghost" (click)="onCodeToggle()">
                 <lucide-angular [name]="Code" [size]="20"></lucide-angular>
             </button>
-            <mona-dropdown-list
-                [data]="['ltr', 'rtl']"
-                size="small"
-                [ngModel]="direction()"
-                (ngModelChange)="onDirectionChange($event)">
-                <ng-template monaDropDownListItemTemplate let-dataItem>
-                    <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>
-                </ng-template>
-                <ng-template monaDropDownListValueTemplate let-dataItem>
-                    <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>
-                </ng-template>
-            </mona-dropdown-list>
+            <!--            <mona-dropdown-list-->
+            <!--                [data]="['ltr', 'rtl']"-->
+            <!--                size="small"-->
+            <!--                [ngModel]="direction()"-->
+            <!--                (ngModelChange)="onDirectionChange($event)">-->
+            <!--                <ng-template monaDropDownListItemTemplate let-dataItem>-->
+            <!--                    <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>-->
+            <!--                </ng-template>-->
+            <!--                <ng-template monaDropDownListValueTemplate let-dataItem>-->
+            <!--                    <span [style.text-transform]="'uppercase'">{{ dataItem }}</span>-->
+            <!--                </ng-template>-->
+            <!--            </mona-dropdown-list>-->
             <mona-color-picker
                 [ngModel]="customColor()"
                 (ngModelChange)="customColor.set($event)"

@@ -1,30 +1,30 @@
 import {
+    afterRenderEffect,
     Component,
     ComponentRef,
     computed,
     createComponent,
     DestroyRef,
     Directive,
-    effect,
     ElementRef,
     EnvironmentInjector,
     inject,
     input,
     linkedSignal,
-    OnInit,
     Renderer2,
     signal,
     TemplateRef,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { fromEvent, mergeWith, Subscription, take, takeUntil, tap } from "rxjs";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { fadeIn, fadeOut } from "../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../models/Position";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupService } from "../../../popup/services/popup.service";
 import { ThemeService } from "../../../theme/services/theme.service";
+import { createElementControlId } from "../../../utils/createElementControlId";
 import {
     tooltipArrowThemeVariants,
     tooltipBaseThemeVariants,
@@ -40,9 +40,7 @@ import {
 @Directive({
     selector: "[monaTooltip]",
     host: {
-        "[aria-describedby]": "originalTitle()",
-        "[attr.data-mona-title]": "originalTitle()",
-        "[attr.role]": "'tooltip'"
+        "[attr.data-mona-title]": "originalTitle()"
     }
 })
 export class TooltipDirective implements TooltipVariantInputs {
@@ -51,10 +49,16 @@ export class TooltipDirective implements TooltipVariantInputs {
     readonly #injector = inject(EnvironmentInjector);
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
+    #currentAnchor: HTMLElement | null = null;
     #popupRef: PopupRef | null = null;
     #subscription: Subscription | null = null;
-    #tooltipElement: HTMLElement | null = null;
+    #tooltipId = createElementControlId();
     protected readonly originalTitle = signal("");
+
+    /**
+     * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown.
+     */
+    public readonly disabled = input<boolean>(false);
 
     /**
      * @description The filter to select elements that will have tooltips.
@@ -62,6 +66,11 @@ export class TooltipDirective implements TooltipVariantInputs {
      * Only applies when `mode` is set to `content`.
      */
     public readonly filter = input<string>("[title]");
+
+    /**
+     * @description The delay in milliseconds before hiding the tooltip.
+     */
+    public readonly hideDelay = input<number>(0);
 
     /**
      * @description The mode of the tooltip.
@@ -82,34 +91,45 @@ export class TooltipDirective implements TooltipVariantInputs {
         alias: "tooltipRounded"
     });
 
+    /**
+     * @description The delay in milliseconds before showing the tooltip after the trigger event.
+     */
+    public readonly showDelay = input<number>(0);
+
     public constructor() {
-        effect(() => {
-            this.mode();
-            this.position();
-            if (this.#subscription) {
-                this.#subscription.unsubscribe();
-                this.#subscription = null;
+        afterRenderEffect({
+            read: () => {
+                this.mode();
+                this.position();
+                if (this.#subscription) {
+                    this.#subscription.unsubscribe();
+                    this.#subscription = null;
+                }
+                this.#currentAnchor = null;
+                this.#popupRef?.close();
+                this.#setSubscription();
             }
-            this.setSubscription();
         });
     }
 
-    private createTooltip(text: string, anchor: HTMLElement): void {
-        const component = this.createTooltipTemplate(text);
+    #createTooltip(text: string, anchor: HTMLElement): void {
+        this.#currentAnchor = anchor;
+        const component = this.#createTooltipTemplate(text);
         if (!component) {
             return;
         }
 
         const connectionPoints = getPositionConnectionPoints(this.position());
         const offset = getOffsetForPosition(this.position(), true);
-        this.#popupRef = this.#popupService.create({
+        const popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint: connectionPoints.anchor,
             animation: {
                 show: fadeIn,
                 hide: fadeOut
             },
-            closeOnMouseLeave: true,
+            closeOnEscape: true,
+            closeOnMouseLeave: false,
             closeOnOutsideClick: true,
             content: component.instance.templateRef(),
             hasBackdrop: false,
@@ -118,22 +138,27 @@ export class TooltipDirective implements TooltipVariantInputs {
             restoreFocus: false,
             withPush: false
         });
-        this.#popupRef.positionChanges
-            .pipe(takeUntil(this.#popupRef.closed), takeUntilDestroyed(this.#destroyRef))
+        this.#popupRef = popupRef;
+
+        this.#renderer.setAttribute(anchor, "aria-describedby", this.#tooltipId);
+
+        popupRef.positionChanges
+            .pipe(takeUntil(popupRef.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(connectionPair => {
                 const newArrowPosition = getArrowPositionFromConnectionPair(connectionPair);
                 component.instance.currentArrowPosition.set(newArrowPosition);
             });
-        this.#popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.#popupRef = null;
-            if (this.#tooltipElement) {
-                this.#renderer.setAttribute(this.#tooltipElement, "title", text);
-                this.#tooltipElement = null;
+        popupRef.closed.pipe(take(1)).subscribe(() => {
+            if (this.#popupRef === popupRef) {
+                this.#popupRef = null;
+                this.#currentAnchor = null;
             }
+            this.#renderer.removeAttribute(anchor, "aria-describedby");
+            this.#renderer.setAttribute(anchor, "title", text);
         });
     }
 
-    private createTooltipTemplate(text: string): ComponentRef<TooltipTemplateComponent> | null {
+    #createTooltipTemplate(text: string): ComponentRef<TooltipTemplateComponent> | null {
         if (!text) {
             return null;
         }
@@ -143,45 +168,113 @@ export class TooltipDirective implements TooltipVariantInputs {
         component.setInput("content", text);
         component.setInput("position", this.position());
         component.setInput("rounded", this.rounded());
+        component.setInput("tooltipId", this.#tooltipId);
         return component;
     }
 
-    private setSubscription(): void {
-        const filter = this.filter();
-        let element: HTMLElement[] = [];
-        if (this.mode() === "host") {
-            element = [this.#host.nativeElement];
-        } else {
-            element = this.#host.nativeElement.querySelectorAll(filter);
+    #handleHide(): void {
+        if (!this.#popupRef) {
+            return;
         }
-        this.#subscription = fromEvent<PointerEvent>(element, "pointerenter")
-            .pipe(
-                tap(event => {
-                    const targetElement = event.currentTarget as HTMLElement;
-                    let title: string = "";
-                    const mode = this.mode();
-                    if (mode === "host") {
-                        title = targetElement.getAttribute("title") || "";
-                        this.#renderer.removeAttribute(targetElement, "title");
-                    } else if (mode === "content") {
-                        title = targetElement.getAttribute("title") || "";
-                        this.#renderer.removeAttribute(targetElement, "title");
+        const hideDelay = this.hideDelay();
+        if (hideDelay > 0) {
+            const popupRef = this.#popupRef;
+            setTimeout(() => {
+                if (this.#popupRef === popupRef) {
+                    popupRef.close();
+                }
+            }, hideDelay);
+        } else {
+            this.#popupRef.close();
+        }
+    }
+
+    #handleShow(targetElement: HTMLElement): void {
+        if (this.disabled()) {
+            return;
+        }
+        if (this.#popupRef && this.#currentAnchor === targetElement) {
+            return;
+        }
+        this.#popupRef?.close();
+        const title = targetElement.getAttribute("title") || "";
+        this.#renderer.removeAttribute(targetElement, "title");
+        if (this.mode() === "host") {
+            this.originalTitle.set(title);
+        }
+        if (title) {
+            const showDelay = this.showDelay();
+            if (showDelay > 0) {
+                setTimeout(() => {
+                    if (!this.#popupRef || this.#currentAnchor !== targetElement) {
+                        this.#createTooltip(title, targetElement);
                     }
-                    if (title && targetElement) {
-                        this.createTooltip(title, targetElement);
-                    }
-                    this.#tooltipElement = targetElement;
-                }),
-                takeUntilDestroyed(this.#destroyRef)
-            )
-            .subscribe();
+                }, showDelay);
+            } else {
+                this.#createTooltip(title, targetElement);
+            }
+        }
+    }
+
+    #setSubscription(): void {
+        const composite = new Subscription();
+        let elements: HTMLElement[];
+        if (this.mode() === "host") {
+            elements = [this.#host.nativeElement];
+        } else {
+            elements = Array.from(this.#host.nativeElement.querySelectorAll(this.filter()) as NodeListOf<HTMLElement>);
+        }
+
+        composite.add(
+            fromEvent<PointerEvent>(elements, "pointerenter")
+                .pipe(
+                    tap(event => {
+                        const targetElement = event.currentTarget as HTMLElement;
+                        this.#handleShow(targetElement);
+                    }),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
+                .subscribe()
+        );
+
+        composite.add(
+            fromEvent<PointerEvent>(elements, "pointerleave")
+                .pipe(
+                    tap(() => this.#handleHide()),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
+                .subscribe()
+        );
+
+        composite.add(
+            fromEvent<FocusEvent>(elements, "focusin")
+                .pipe(
+                    tap(event => {
+                        const targetElement = event.currentTarget as HTMLElement;
+                        this.#handleShow(targetElement);
+                    }),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
+                .subscribe()
+        );
+
+        composite.add(
+            fromEvent<FocusEvent>(elements, "focusout")
+                .pipe(
+                    tap(() => this.#handleHide()),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
+                .subscribe()
+        );
+
+        this.#subscription = composite;
     }
 }
 
 @Component({
     template: `
         <ng-template>
-            <div [class]="baseClasses()">
+            <div role="tooltip" [id]="tooltipId()" [class]="baseClasses()">
                 <div>
                     {{ content() }}
                 </div>
@@ -203,11 +296,13 @@ class TooltipTemplateComponent {
         const variants = tooltipBaseThemeVariants(theme)({ rounded });
         return twMerge(variants, userClasses);
     });
-    public readonly currentArrowPosition = linkedSignal({
-        source: () => this.position(),
-        computation: () => this.position()
-    });
+    public readonly currentArrowPosition = linkedSignal(() => this.position());
+
+    /**
+     * @description The text content displayed in the tooltip.
+     */
     public readonly content = input.required<string>();
+
     /**
      * @description The position of the tooltip relative to the target element.
      */
@@ -217,5 +312,11 @@ class TooltipTemplateComponent {
      * @description The border radius of the tooltip.
      */
     public readonly rounded = input<TooltipVariantProps["rounded"]>("medium");
+
+    /**
+     * @description The unique id for the tooltip element, used for aria-describedby linkage.
+     */
+    public readonly tooltipId = input<string>("");
+
     public readonly templateRef = viewChild.required(TemplateRef);
 }

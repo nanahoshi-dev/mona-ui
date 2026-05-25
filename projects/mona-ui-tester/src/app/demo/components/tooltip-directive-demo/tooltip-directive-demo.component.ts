@@ -15,10 +15,18 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
     protected readonly config = signal<ComponentConfig<TooltipDirective>>({
         code: ``,
         inputs: {
+            disabled: {
+                type: "boolean",
+                value: false
+            },
             filter: {
                 type: "dropdown",
                 value: ["button[look='primary']", "button[look='error']", "button"],
                 defaultValue: "button"
+            },
+            hideDelay: {
+                type: "number",
+                value: 0
             },
             mode: {
                 type: "dropdown",
@@ -35,6 +43,10 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
                 value: ["full", "large", "medium", "none", "small"],
                 defaultValue: "medium",
                 alias: "tooltipRounded"
+            },
+            showDelay: {
+                type: "number",
+                value: 0
             }
         }
     });
@@ -53,9 +65,12 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
                     look="primary"
                     title="This tooltip will not be shown on 'content' mode."
                     monaTooltip
+                    [disabled]="disabled()"
+                    [hideDelay]="hideDelay()"
+                    [mode]="mode()"
                     [position]="position()"
-                    [tooltipRounded]="rounded()"
-                    [mode]="mode()">
+                    [showDelay]="showDelay()"
+                    [tooltipRounded]="rounded()">
                     Host Mode Tooltip
                 </button>
                 <p>Tooltip visible when mode is set to 'host'.</p>
@@ -63,9 +78,12 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
             <div
                 class="flex flex-col gap-4"
                 monaTooltip
+                [disabled]="disabled()"
                 [filter]="filter()"
+                [hideDelay]="hideDelay()"
                 [mode]="mode()"
                 [position]="position()"
+                [showDelay]="showDelay()"
                 [tooltipRounded]="rounded()">
                 <div class="flex flex-col gap-2">
                     <button monaButton look="primary" title="This tooltip will be shown on 'content' mode.">
@@ -86,8 +104,11 @@ export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<Tooltip
     `
 })
 class TooltipDirectiveWrapperComponent implements ComponentInputsAsSignal<TooltipDirective> {
+    public readonly disabled = input<ReturnType<TooltipDirective["disabled"]>>(false);
     public readonly filter = input<ReturnType<TooltipDirective["filter"]>>("button");
+    public readonly hideDelay = input<ReturnType<TooltipDirective["hideDelay"]>>(0);
     public readonly mode = input<ReturnType<TooltipDirective["mode"]>>("host");
     public readonly position = input<ReturnType<TooltipDirective["position"]>>("top");
     public readonly rounded = input<ReturnType<TooltipDirective["rounded"]>>("medium");
+    public readonly showDelay = input<ReturnType<TooltipDirective["showDelay"]>>(0);
 }

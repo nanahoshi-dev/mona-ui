@@ -2398,15 +2398,27 @@
     "selector": "\"[monaTooltip]\"",
     "inputs": [
       {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown.",
+        "kind": "input"
+      },
+      {
         "name": "filter",
         "type": "string",
-        "description": "The filter to select elements that will have tooltips.\r\nIt can be a CSS selector that matches elements within the host element.\r\nOnly applies when `mode` is set to `content`.",
+        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element.\nOnly applies when `mode` is set to `content`.",
+        "kind": "input"
+      },
+      {
+        "name": "hideDelay",
+        "type": "number",
+        "description": "The delay in milliseconds before hiding the tooltip.",
         "kind": "input"
       },
       {
         "name": "mode",
         "type": "\"host\" | \"content\"",
-        "description": "The mode of the tooltip.\r\n\"host\" mode receives the tooltip from the host element's title attribute.\r\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "description": "The mode of the tooltip.\n\"host\" mode receives the tooltip from the host element's title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
         "kind": "input"
       },
       {
@@ -2419,6 +2431,12 @@
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
         "description": "The border radius of the tooltip.",
+        "kind": "input"
+      },
+      {
+        "name": "showDelay",
+        "type": "number",
+        "description": "The delay in milliseconds before showing the tooltip after the trigger event.",
         "kind": "input"
       }
     ]
@@ -2430,7 +2448,7 @@
       {
         "name": "content",
         "type": "string",
-        "description": "",
+        "description": "The text content displayed in the tooltip.",
         "kind": "input"
       },
       {
@@ -2443,6 +2461,12 @@
         "name": "rounded",
         "type": "TooltipVariantProps[\"rounded\"]",
         "description": "The border radius of the tooltip.",
+        "kind": "input"
+      },
+      {
+        "name": "tooltipId",
+        "type": "string",
+        "description": "The unique id for the tooltip element, used for aria-describedby linkage.",
         "kind": "input"
       }
     ]
@@ -6472,6 +6496,18 @@
     "selector": "\"mona-tooltip\"",
     "inputs": [
       {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Whether the tooltip is disabled. When disabled, the tooltip will not be shown.",
+        "kind": "input"
+      },
+      {
+        "name": "hideDelay",
+        "type": "number",
+        "description": "The delay in milliseconds before showing the tooltip after the trigger event.",
+        "kind": "input"
+      },
+      {
         "name": "position",
         "type": "Position",
         "description": "The position of the tooltip relative to the target element.",
@@ -6484,9 +6520,15 @@
         "kind": "input"
       },
       {
+        "name": "showDelay",
+        "type": "number",
+        "description": "The delay in milliseconds before showing the tooltip after the trigger event.",
+        "kind": "input"
+      },
+      {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

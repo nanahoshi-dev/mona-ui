@@ -7,17 +7,20 @@ import {
     inject,
     input,
     linkedSignal,
+    Renderer2,
     TemplateRef,
     viewChild
 } from "@angular/core";
+import { DOCUMENT } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { fromEvent, take, takeUntil } from "rxjs";
+import { delay, fromEvent, merge, Subscription, take, takeUntil } from "rxjs";
 import { fadeIn, fadeOut } from "../../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../../models/Position";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupAnchor } from "../../../../popup/models/PopupSettings";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
+import { createElementControlId } from "../../../../utils/createElementControlId";
 import {
     tooltipArrowThemeVariants,
     tooltipBaseThemeVariants,
@@ -37,8 +40,13 @@ import {
 })
 export class TooltipComponent implements TooltipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #popupService = inject(PopupService);
+    readonly #renderer = inject(Renderer2);
     readonly #themeService = inject(ThemeService);
+    #currentAnchor: HTMLElement | null = null;
+    #eventSubscription: Subscription | null = null;
+    #popupRef: PopupRef | null = null;
     protected readonly arrowClasses = computed(() => {
         const theme = this.#themeService.theme();
         return tooltipArrowThemeVariants(theme)();
@@ -48,12 +56,19 @@ export class TooltipComponent implements TooltipVariantInputs {
         const rounded = this.rounded();
         return tooltipBaseThemeVariants(theme)({ rounded });
     });
-    protected readonly currentArrowPosition = linkedSignal({
-        source: () => this.position(),
-        computation: () => this.position()
-    });
+    protected readonly currentArrowPosition = linkedSignal(() => this.position());
     protected readonly templateRef = viewChild.required(TemplateRef);
-    protected popupRef: PopupRef | null = null;
+    protected readonly tooltipId = createElementControlId();
+
+    /**
+     * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown.
+     */
+    public readonly disabled = input<boolean>(false);
+
+    /**
+     * @description The delay in milliseconds before showing the tooltip after the trigger event.
+     */
+    public readonly hideDelay = input<number>(0);
 
     /**
      * @description The position of the tooltip relative to the target element.
@@ -66,6 +81,11 @@ export class TooltipComponent implements TooltipVariantInputs {
     public readonly rounded = input<TooltipVariantProps["rounded"]>("medium");
 
     /**
+     * @description The delay in milliseconds before showing the tooltip after the trigger event.
+     */
+    public readonly showDelay = input<number>(0);
+
+    /**
      * @description The target element(s) to which the tooltip is attached.
      * Can be an Element, ElementRef, or CSS selector string.
      */
@@ -75,38 +95,45 @@ export class TooltipComponent implements TooltipVariantInputs {
         afterRenderEffect({
             read: () => {
                 const target = this.target();
+                this.position(); // reactive dependency: re-run when position changes
+
+                this.#eventSubscription?.unsubscribe();
+                this.#eventSubscription = null;
+                this.#currentAnchor = null;
+                this.#popupRef?.close();
+
                 if (typeof target === "string") {
-                    this.#createTooltip();
+                    const elements = Array.from(this.#document.querySelectorAll<HTMLElement>(target));
+                    const composite = new Subscription();
+                    for (const element of elements) {
+                        composite.add(this.#subscribeToElement(element));
+                    }
+                    this.#eventSubscription = composite;
                 } else {
                     const element = this.#getAnchorElement(target);
                     if (element) {
-                        fromEvent<PointerEvent>(element, "pointerenter")
-                            .pipe(takeUntilDestroyed(this.#destroyRef))
-                            .subscribe(() => {
-                                if (this.popupRef) {
-                                    return;
-                                }
-                                this.#createTooltip();
-                            });
+                        this.#eventSubscription = this.#subscribeToElement(element);
                     }
                 }
             }
         });
     }
 
-    #createTooltip(): void {
+    #createTooltip(anchor: HTMLElement): void {
+        this.#currentAnchor = anchor;
         this.currentArrowPosition.set(this.position());
         const connectionPoints = getPositionConnectionPoints(this.position());
         const offset = getOffsetForPosition(this.position(), true);
 
-        this.popupRef = this.#popupService.create({
-            anchor: this.target(),
+        const popupRef = this.#popupService.create({
+            anchor,
             anchorConnectionPoint: connectionPoints.anchor,
             animation: {
                 show: fadeIn,
                 hide: fadeOut
             },
-            closeOnMouseLeave: true,
+            closeOnEscape: true,
+            closeOnMouseLeave: false,
             closeOnOutsideClick: true,
             content: this.templateRef(),
             hasBackdrop: false,
@@ -115,19 +142,24 @@ export class TooltipComponent implements TooltipVariantInputs {
             restoreFocus: false,
             withPush: false
         });
+        this.#popupRef = popupRef;
 
-        this.popupRef.closed.pipe(take(1)).subscribe(() => {
-            this.popupRef = null;
+        this.#renderer.setAttribute(anchor, "aria-describedby", this.tooltipId);
+
+        popupRef.closed.pipe(take(1)).subscribe(() => {
+            if (this.#popupRef === popupRef) {
+                this.#popupRef = null;
+                this.#currentAnchor = null;
+            }
+            this.#renderer.removeAttribute(anchor, "aria-describedby");
         });
 
-        if (typeof this.target() !== "string") {
-            this.popupRef.positionChanges
-                .pipe(takeUntil(this.popupRef.closed), takeUntilDestroyed(this.#destroyRef))
-                .subscribe(connectionPair => {
-                    const newArrowPosition = getArrowPositionFromConnectionPair(connectionPair);
-                    this.currentArrowPosition.set(newArrowPosition);
-                });
-        }
+        popupRef.positionChanges
+            .pipe(takeUntil(popupRef.closed), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(connectionPair => {
+                const newArrowPosition = getArrowPositionFromConnectionPair(connectionPair);
+                this.currentArrowPosition.set(newArrowPosition);
+            });
     }
 
     #getAnchorElement(anchor: PopupAnchor): HTMLElement | null {
@@ -138,5 +170,72 @@ export class TooltipComponent implements TooltipVariantInputs {
             return anchor.nativeElement;
         }
         return null;
+    }
+
+    #handleHide(): void {
+        if (!this.#popupRef) {
+            return;
+        }
+        const hideDelay = this.hideDelay();
+        if (hideDelay > 0) {
+            const popupRef = this.#popupRef;
+            setTimeout(() => {
+                if (this.#popupRef === popupRef) {
+                    popupRef.close();
+                }
+            }, hideDelay);
+        } else {
+            this.#popupRef.close();
+        }
+    }
+
+    #handleShow(element: HTMLElement): void {
+        if (this.disabled()) {
+            return;
+        }
+        if (this.#popupRef && this.#currentAnchor === element) {
+            return;
+        }
+        this.#popupRef?.close();
+        const showDelay = this.showDelay();
+        if (showDelay > 0) {
+            setTimeout(() => {
+                if (!this.#popupRef || this.#currentAnchor !== element) {
+                    this.#createTooltip(element);
+                }
+            }, showDelay);
+        } else {
+            this.#createTooltip(element);
+        }
+    }
+
+    #subscribeToElement(element: HTMLElement): Subscription {
+        const composite = new Subscription();
+
+        composite.add(
+            fromEvent<PointerEvent>(element, "pointerenter")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => this.#handleShow(element))
+        );
+
+        composite.add(
+            fromEvent<PointerEvent>(element, "pointerleave")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => this.#handleHide())
+        );
+
+        composite.add(
+            fromEvent<FocusEvent>(element, "focusin")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => this.#handleShow(element))
+        );
+
+        composite.add(
+            fromEvent<FocusEvent>(element, "focusout")
+                .pipe(takeUntilDestroyed(this.#destroyRef))
+                .subscribe(() => this.#handleHide())
+        );
+
+        return composite;
     }
 }
