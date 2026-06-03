@@ -7,7 +7,6 @@ import { GridService } from "../services/grid.service";
 })
 export class GridEditableDirective {
     readonly #gridService: GridService = inject(GridService);
-
     public options = input<EditableOptions | "" | undefined>(undefined, {
         alias: "monaGridEditable"
     });

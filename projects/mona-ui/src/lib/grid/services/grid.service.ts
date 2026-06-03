@@ -1,18 +1,29 @@
 import { isPlatformBrowser } from "@angular/common";
 import { computed, DOCUMENT, inject, Injectable, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
-import { any, Dictionary, ImmutableDictionary, ImmutableList, ImmutableSet, select } from "@mirei/ts-collections";
+import {
+    any,
+    Dictionary,
+    ImmutableDictionary,
+    ImmutableList,
+    ImmutableSet,
+    KeyValuePair,
+    select
+} from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
 import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
 import { PopupMenuItem } from "../../common/popup-menu/models/PopupMenuItem";
 import { Query } from "../../query/core/Query";
 import { CompositeFilterDescriptor, FilterDescriptor } from "../../query/filter/FilterDescriptor";
 import { SortDescriptor } from "../../query/sort/SortDescriptor";
+import type { DeepPartial } from "../../utils/deepMerge";
+import { createIterablePatchStore } from "../../utils/PatchStore";
 import { CellEditEvent } from "../models/CellEditEvent";
 import { Column } from "../models/Column";
 import { ColumnFilterState } from "../models/ColumnFilterState";
 import { ColumnSortState } from "../models/ColumnSortState";
 import { EditableOptions } from "../models/EditableOptions";
+import type { GridEditContext } from "../models/GridEditContext";
 import { GridKeySelector } from "../models/GridKeySelector";
 import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { GroupableOptions } from "../models/GroupableOptions";
@@ -21,9 +32,26 @@ import { PageState } from "../models/PageState";
 import { Row } from "../models/Row";
 import { SortableOptions } from "../models/SortableOptions";
 
+// Flat projection of a Row used as the IterablePatchStore item type.
+// $rowId is injected to carry the row identity without modifying Row.data.
+interface RowEditDataItem extends Record<string, unknown> {
+    readonly $rowId: string;
+}
+
 @Injectable()
 export class GridService {
     readonly #document = inject(DOCUMENT);
+    readonly #editContext = signal<GridEditContext | null>(null);
+    readonly #editSource = computed(() =>
+        this.rows()
+            .select<RowEditDataItem>(r => ({ $rowId: r.uid, ...r.data }))
+            .toImmutableSet()
+    );
+    readonly #editStore = createIterablePatchStore<RowEditDataItem, string>({
+        baseChangeStrategy: "wipe",
+        idOf: item => item.$rowId,
+        source: () => this.#editSource
+    });
     readonly #platformId = inject(PLATFORM_ID);
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
@@ -32,12 +60,27 @@ export class GridService {
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 34;
+    public readonly editBaseDict = computed(() => {
+        const pairs = this.#editSource().select(item => new KeyValuePair(item.$rowId, item));
+        return ImmutableDictionary.create(pairs);
+    });
+    public readonly editContext = this.#editContext.asReadonly();
+    public readonly editPristine = this.#editStore.pristine;
+    public readonly editViewDict = computed(() => {
+        const pairs = this.#editStore.view().map(item => new KeyValuePair(item.$rowId, item));
+        return ImmutableDictionary.create(pairs);
+    });
+    public readonly editingCellUid = computed(() => {
+        const context = this.#editContext();
+        return context?.mode === "cell" ? context.cellUid : null;
+    });
+    public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
     public readonly expandedKeys = signal(ImmutableSet.create());
     public readonly filterLoad$ = new Subject<void>();
     public readonly groupColumnWidth = 34;
     public readonly groupColumns = signal<ImmutableSet<Column>>(ImmutableSet.create());
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false });
-    public readonly isInEditMode = signal(false);
+    public readonly isInEditMode = computed(() => this.#editContext() != null);
     public readonly masterDetailRowWidth = computed(() => {
         const groupColumns = this.groupColumns();
         const columns = this.columns();
@@ -135,11 +178,47 @@ export class GridService {
         showIndices: true
     };
 
+    public cancelEdit(): void {
+        const rowUid = this.#editContext()?.rowUid;
+        this.#editContext.set(null);
+        if (rowUid) {
+            this.#editStore.clear(rowUid);
+        }
+    }
+
     public clearCollapsedGroups(predicate?: (key: string) => boolean): void {
         if (predicate) {
             this.collapsedGroupKeys.update(keys => keys.where(k => !predicate(k)).toImmutableSet());
         } else {
             this.collapsedGroupKeys.update(keys => keys.clear());
+        }
+    }
+
+    public commitRowEdit(): void {
+        const context = this.#editContext();
+        if (!context || context.mode !== "row") {
+            return;
+        }
+        this.#editContext.set(null);
+        const editedRowData = this.editViewDict().get(context.rowUid);
+        if (!editedRowData) {
+            return;
+        }
+        for (const [field, newValue] of Object.entries(editedRowData)) {
+            if (field === "$rowId") {
+                continue;
+            }
+            const oldValue = context.row.data[field];
+            if (newValue === oldValue) {
+                continue;
+            }
+            const event = new CellEditEvent({
+                field,
+                newValue,
+                oldValue,
+                rowData: context.row.data
+            });
+            this.cellEdit$.next(event);
         }
     }
 
@@ -304,6 +383,10 @@ export class GridService {
         );
     }
 
+    public patchCellEdit(rowUid: string, field: string, value: unknown): void {
+        this.#editStore.patch(rowUid, { [field]: value } as DeepPartial<RowEditDataItem>);
+    }
+
     public selectRow(row: Row): void {
         const key = this.getRowSelectionKey(row);
         this.selectedKeys.update(set => set.add(key));
@@ -336,6 +419,32 @@ export class GridService {
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {
         this.virtualScrollOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public startCellEdit(uid: string, row: Row, column: Column): void {
+        this.#editContext.set({ cellUid: uid, column, mode: "cell", row, rowUid: row.uid });
+    }
+
+    public startRowEdit(row: Row): void {
+        this.#editContext.set({ mode: "row", row, rowUid: row.uid });
+    }
+
+    public stopCellEdit(): void {
+        const context = this.#editContext();
+        if (!context || context.mode !== "cell") {
+            return;
+        }
+        this.#editContext.set(null);
+        const oldValue = context.row.data[context.column.field()];
+        const editedRowData = this.editViewDict().get(context.rowUid);
+        const resolvedValue = editedRowData?.[context.column.field()] ?? oldValue;
+        const event = new CellEditEvent({
+            field: context.column.field(),
+            newValue: resolvedValue,
+            oldValue,
+            rowData: context.row.data
+        });
+        this.cellEdit$.next(event);
     }
 
     private findLongestCellContentOfColumn(column: Column): string {

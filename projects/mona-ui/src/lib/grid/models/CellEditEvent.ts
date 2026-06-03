@@ -22,10 +22,6 @@ export class CellEditEvent extends PreventableEvent {
     public get rowData(): unknown {
         return this.#options.rowData;
     }
-
-    public setNewValue(value: unknown): void {
-        this.#options.setNewValue(value);
-    }
 }
 
 export interface CellEditEventOptions {
@@ -33,5 +29,4 @@ export interface CellEditEventOptions {
     newValue: unknown;
     oldValue: unknown;
     rowData: unknown;
-    setNewValue: (value: unknown) => void;
 }

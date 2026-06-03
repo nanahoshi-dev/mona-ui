@@ -23,6 +23,7 @@ export const gridBaseVariants = cva(
 export const gridCellBaseVariants = cva(
     `
         w-full h-full flex
+        absolute inset-0
     `
 );
 
@@ -42,6 +43,13 @@ export const gridCellContainerVariants = cva(
         }
     }
 );
+
+export const gridCellDirtyIndicatorVariants = cva(`
+    absolute top-0 right-0 w-0 h-0
+    border-t-[8px] border-l-[8px]
+    border-t-destructive border-l-transparent
+    pointer-events-none
+`);
 
 export const gridCellTextVariants = cva(`
     truncate cursor-default select-none

@@ -5,6 +5,7 @@ import {
     gridBaseVariants as monaGridBaseVariants,
     gridCellBaseVariants as monaGridCellBaseVariants,
     gridCellContainerVariants as monaGridCellContainerVariants,
+    gridCellDirtyIndicatorVariants as monaGridCellDirtyIndicatorVariants,
     gridCellTextVariants as monaGridCellTextVariants,
     gridColumnActionsVariants as monaGridColumnActionsVariants,
     gridColumnDragPreviewVariants as monaGridColumnDragPreviewVariants,
@@ -54,6 +55,15 @@ export const gridCellContainerThemeVariants = (theme: ThemeStyle) => {
             return monaGridCellContainerVariants;
         default:
             return monaGridCellContainerVariants;
+    }
+};
+
+export const gridCellDirtyIndicatorThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridCellDirtyIndicatorVariants;
+        default:
+            return monaGridCellDirtyIndicatorVariants;
     }
 };
 

@@ -868,7 +868,6 @@ export class AppComponent implements OnInit {
     public onGridCellEdit(event: CellEditEvent): void {
         if (!event.newValue) {
             event.preventDefault();
-            event.setNewValue("--");
         }
         console.log(event);
     }

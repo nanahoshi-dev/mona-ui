@@ -5,18 +5,63 @@
     role="gridcell"
     [class]="cellContainerClass()"
     cdkMonitorSubtreeFocus
+    [attr.data-uid]="cellUid()"
     [attr.data-ruid]="row().uid"
     [attr.data-field]="dataKey"
     [attr.data-col-index]="column().index()"
-    [attr.aria-readonly]="!(gridService.editableOptions.enabled && column().editable())">
-    @if (column().cellTemplate()) {
+    [attr.aria-readonly]="!(gridService.editableOptions.enabled && column().editable())"
+    (dblclick)="onCellDoubleClick()">
+    @if (isEditing()) {
+        @switch (column().dataType()) {
+            @case ("string") {
+                <mona-text-box
+                    class="w-full h-full"
+                    [inputAttributes]="{ autocomplete: 'off' }"
+                    [rounded]="'none'"
+                    (keydown.enter)="onEditCommit()"
+                    (keydown.escape)="onEditCancel()"
+                    [ngModel]="displayValue()"
+                    (ngModelChange)="onCellValueChange($event)"
+                    (inputBlur)="onEditCommit()"
+                    [size]="'small'"></mona-text-box>
+            }
+            @case ("number") {
+                <mona-numeric-text-box
+                    class="w-full h-full"
+                    [rounded]="'none'"
+                    [ngModel]="displayValue()"
+                    (ngModelChange)="onCellValueChange($event)"
+                    (keydown.enter)="onEditCommit()"
+                    (keydown.escape)="onEditCancel()"
+                    (inputBlur)="onEditCommit()"
+                    [size]="'small'"></mona-numeric-text-box>
+            }
+            @case ("boolean") {
+                <mona-check-box
+                    class="w-full h-full"
+                    [rounded]="'none'"
+                    [ngModel]="displayValue()"
+                    (ngModelChange)="onCellValueChange($event)"></mona-check-box>
+            }
+            @case ("date") {
+                <mona-date-picker
+                    class="w-full h-full"
+                    [rounded]="'none'"
+                    [ngModel]="displayValue()"
+                    (ngModelChange)="onCellValueChange($event)"
+                    (keydown.escape)="onEditCancel()"
+                    (blur)="onEditCommit()"
+                    size="small"></mona-date-picker>
+            }
+        }
+    } @else if (column().cellTemplate()) {
         <ng-container
             [ngTemplateOutlet]="column().cellTemplate()"
-            [ngTemplateOutletContext]="{
-                $implicit: dataItem,
-                column: column()
-            }"></ng-container>
+            [ngTemplateOutletContext]="{ $implicit: dataItem, column: column() }"></ng-container>
     } @else {
-        <span [class]="cellTextClass()">{{ dataItem[dataKey] }}</span>
+        <span [class]="cellTextClass()">{{ displayValue() }}</span>
+    }
+    @if (!isCellPristine()) {
+        <span aria-hidden="true" [class]="cellDirtyIndicatorClass()" title="Modified"></span>
     }
 </div>
