@@ -4,12 +4,16 @@ import {
     Component,
     computed,
     contentChildren,
+    DestroyRef,
+    ElementRef,
     forwardRef,
     inject,
+    Injector,
     input,
     output,
     signal,
-    TemplateRef
+    TemplateRef,
+    viewChild
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { LucideAngularModule, X } from "lucide-angular";
@@ -17,6 +21,7 @@ import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { AttributeBinderDirective } from "../../../../common/directives/attribute-binder.directive";
 import { AttributeConfig } from "../../../../common/models/AttributeConfig";
+import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
@@ -45,6 +50,7 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
     }
 })
 export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInput {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #formFieldValidationService = inject(FormFieldValidationService, { optional: true });
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<string, any> | null = null;
@@ -58,6 +64,7 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
         return twMerge(classes, userClass);
     });
     protected readonly clearIcon = X;
+    protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });
     protected readonly parentInvalid = computed(() => this.#formFieldValidationService?.invalid() ?? false);
@@ -132,6 +139,14 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
      */
     public readonly value = signal<string>("");
     public readonly userClass = input<string>("", { alias: "class" });
+
+    public focus(): void {
+        const el = this.inputRef().nativeElement;
+        el.focus();
+        rxTimeout(this.#destroyRef, () => {
+            el.scrollLeft = el.scrollWidth;
+        });
+    }
 
     public onClearClick(): void {
         this.value.set("");

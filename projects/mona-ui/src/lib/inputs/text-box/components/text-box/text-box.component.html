@@ -3,18 +3,20 @@
         <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
     </span>
 }
-<input [disabled]="disabled()"
-       [readonly]="readonly()"
-       [required]="required()"
-       [placeholder]="placeholder()"
-       [type]="type()"
-       [class]="inputClass()"
-       [style]="inputStyle()"
-       [monaAttributeBinder]="inputAttributes()"
-       [ngModel]="value()"
-       (ngModelChange)="onValueChange($event)"
-       (blur)="onInputBlur($event)"
-       (focus)="inputFocus.emit($event)" />
+<input
+    [disabled]="disabled()"
+    [readonly]="readonly()"
+    [required]="required()"
+    [placeholder]="placeholder()"
+    [type]="type()"
+    [class]="inputClass()"
+    [style]="inputStyle()"
+    [monaAttributeBinder]="inputAttributes()"
+    [ngModel]="value()"
+    (ngModelChange)="onValueChange($event)"
+    (blur)="onInputBlur($event)"
+    (focus)="inputFocus.emit($event)"
+    #input />
 
 @if (clearButton() && value().length !== 0) {
     <button monaButton look="link" size="small" class="p-0 mr-2" [tabindex]="-1" (click)="onClearClick()">

@@ -56,7 +56,7 @@ export class GridRowFlattenerService {
             return;
         }
         const field = column.field();
-        const isDate = column.dataType() === "date";
+        const isDate = column.dataType() === "date" || column.dataType() === "datetime" || column.dataType() === "time";
 
         // Native Map gives O(n) grouping per level. The ts-collections groupBy with an
         // EqualityComparator is O(n×g) — it compares each row against all existing group

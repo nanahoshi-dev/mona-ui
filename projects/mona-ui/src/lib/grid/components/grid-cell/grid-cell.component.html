@@ -41,17 +41,50 @@
                     class="w-full h-full"
                     [rounded]="'none'"
                     [ngModel]="displayValue()"
-                    (ngModelChange)="onCellValueChange($event)"></mona-check-box>
+                    (ngModelChange)="onCheckBoxValueChange($event)"
+                    (inputBlur)="onEditCommit()"
+                    (keydown.escape)="onEditCancel()"
+                    (keydown.enter)="onEditCommit()"></mona-check-box>
             }
             @case ("date") {
                 <mona-date-picker
+                    #datePickerEl
                     class="w-full h-full"
                     [rounded]="'none'"
                     [ngModel]="displayValue()"
                     (ngModelChange)="onCellValueChange($event)"
+                    (keydown.enter)="onDatePickerEnter($event)"
                     (keydown.escape)="onEditCancel()"
-                    (blur)="onEditCommit()"
+                    (focusout)="onDatePickerFocusOut($event)"
+                    (opened)="onDatePickerOpen()"
+                    (closed)="onDatePickerClose()"
                     size="small"></mona-date-picker>
+            }
+            @case ("datetime") {
+                <mona-datetime-picker
+                    #dateTimePickerEl
+                    class="w-full h-full"
+                    [ngModel]="displayValue()"
+                    (ngModelChange)="onCellValueChange($event)"
+                    (keydown.enter)="onDatePickerEnter($event)"
+                    (keydown.escape)="onEditCancel()"
+                    (focusout)="onDatePickerFocusOut($event)"
+                    (opened)="onDatePickerOpen()"
+                    (closed)="onDatePickerClose()"
+                    size="small"></mona-datetime-picker>
+            }
+            @case ("time") {
+                <mona-time-picker
+                    #timePickerEl
+                    class="w-full h-full"
+                    [ngModel]="displayValue()"
+                    (ngModelChange)="onCellValueChange($event)"
+                    (keydown.enter)="onDatePickerEnter($event)"
+                    (keydown.escape)="onEditCancel()"
+                    (focusout)="onDatePickerFocusOut($event)"
+                    (opened)="onDatePickerOpen()"
+                    (closed)="onDatePickerClose()"
+                    size="small"></mona-time-picker>
             }
         }
     } @else if (column().cellTemplate()) {

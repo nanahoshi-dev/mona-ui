@@ -1,6 +1,7 @@
 import { FocusMonitor, FocusOrigin } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -10,8 +11,6 @@ import {
     forwardRef,
     inject,
     input,
-    OnDestroy,
-    OnInit,
     output,
     Signal,
     signal,
@@ -36,6 +35,7 @@ import {
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
+import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { TextBoxDirective } from "../../../text-box/directives/text-box.directive";
@@ -72,7 +72,7 @@ type Sign = "-" | "+";
         "[attr.aria-required]": "required()"
     }
 })
-export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueAccessor, NumericTextboxVariantInputs {
+export class NumericTextBoxComponent implements ControlValueAccessor, NumericTextboxVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
@@ -216,6 +216,27 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     public readonly tabindex = input(0);
     public readonly userClass = input<string>("", { alias: "class" });
 
+    public constructor() {
+        afterNextRender({
+            read: () => {
+                this.setSubscriptions();
+                this.#focusMonitor
+                    .monitor(this.#hostElementRef, true)
+                    .pipe(takeUntilDestroyed(this.#destroyRef))
+                    .subscribe((focusOrigin: FocusOrigin) => {
+                        const isFocused = focusOrigin !== null;
+                        this.focused.set(isFocused);
+                        if (isFocused && !this.readonly()) {
+                            const currentValue = this.value();
+                            const rawValue = currentValue?.toString() ?? "";
+                            this.rawInputValue.set(rawValue);
+                        }
+                    });
+            }
+        });
+        this.#destroyRef.onDestroy(() => this.#focusMonitor.stopMonitoring(this.#hostElementRef.nativeElement));
+    }
+
     private static calculate(value: number, step: number, type: Sign): number {
         const precision = Math.max(
             NumericTextBoxComponent.getPrecision(value),
@@ -260,6 +281,13 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
         this.focus();
     }
 
+    public focus(): void {
+        this.#focusMonitor.focusVia(this.valueTextBoxRef(), "keyboard");
+        rxTimeout(this.#destroyRef, () => {
+            this.valueTextBoxRef().nativeElement.scrollLeft = this.valueTextBoxRef().nativeElement.scrollWidth;
+        });
+    }
+
     public increase(): void {
         const value = this.value();
         if (value == null) {
@@ -273,26 +301,6 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
             this.valueChange$.next(result.toString());
         }
         this.focus();
-    }
-
-    public ngOnDestroy(): void {
-        this.#focusMonitor.stopMonitoring(this.#hostElementRef.nativeElement);
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
-        this.#focusMonitor
-            .monitor(this.#hostElementRef, true)
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe((focusOrigin: FocusOrigin) => {
-                const isFocused = focusOrigin !== null;
-                this.focused.set(isFocused);
-                if (isFocused && !this.readonly()) {
-                    const currentValue = this.value();
-                    const rawValue = currentValue?.toString() ?? "";
-                    this.rawInputValue.set(rawValue);
-                }
-            });
     }
 
     public onBlur(event: FocusEvent): void {
@@ -341,10 +349,6 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
         if (max != null && value > max) {
             this.valueChange$.next(max.toString());
         }
-    }
-
-    private focus(): void {
-        this.#focusMonitor.focusVia(this.valueTextBoxRef(), "keyboard");
     }
 
     private formatValueForDisplay(value: number | null): string {

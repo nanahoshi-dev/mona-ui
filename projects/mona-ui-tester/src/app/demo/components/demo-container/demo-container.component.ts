@@ -27,8 +27,7 @@ import { ConfigComponent } from "../config/config.component";
         CodeViewerComponent,
         ButtonDirective,
         LucideAngularModule,
-        ColorPickerComponent,
-        DropDownItemTemplateDirective
+        ColorPickerComponent
     ],
     templateUrl: "./demo-container.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,

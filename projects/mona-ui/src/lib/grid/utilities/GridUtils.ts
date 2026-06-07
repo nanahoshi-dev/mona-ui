@@ -3,7 +3,7 @@ import { Column } from "../models/Column";
 
 export const cellComparer = (column: Column): EqualityComparator<any> => {
     return (r1: any, r2: any): boolean => {
-        if (column.dataType() === "date") {
+        if (column.dataType() === "date" || column.dataType() === "datetime" || column.dataType() === "time") {
             if (r1 == null || r2 == null) {
                 return Object.is(r1, r2);
             }
