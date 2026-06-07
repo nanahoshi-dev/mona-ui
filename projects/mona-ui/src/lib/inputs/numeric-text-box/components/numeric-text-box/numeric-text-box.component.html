@@ -31,6 +31,7 @@
     <div [class]="spinButtonClasses()">
         <button monaButton [disabled]="disabled()" [tabindex]="-1"
                 look="secondary" [size]="size()"
+                (mousedown)="$event.preventDefault()"
                 (pointerdown)="spin$.next('+')"
                 (pointerup)="spinStop$.next()"
                 (pointerleave)="spinStop$.next()"
@@ -39,6 +40,7 @@
         </button>
         <button monaButton [disabled]="disabled()" [tabindex]="-1"
                 look="secondary" [size]="size()"
+                (mousedown)="$event.preventDefault()"
                 (pointerdown)="spin$.next('-')"
                 (pointerup)="spinStop$.next()"
                 (pointerleave)="spinStop$.next()"
