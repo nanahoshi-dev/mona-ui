@@ -5,7 +5,7 @@ import { v4 } from "uuid";
 @Injectable()
 export class GridNavigationService {
     readonly #cellElementDict = signal(ImmutableDictionary.create<string, NavigationData>());
-    readonly #lastFocusedKey = signal<string | null>(null);
+    readonly #lastFocusedCellKey = signal<string | null>(null);
     readonly #lastNonGroupCellKey = signal<string | null>(null);
 
     public focusFirstCell(): void {
@@ -16,12 +16,12 @@ export class GridNavigationService {
             .firstOrDefault();
         if (firstCell) {
             this.#focusElement(firstCell.value.element);
-            this.#lastFocusedKey.set(firstCell.key);
+            this.#lastFocusedCellKey.set(firstCell.key);
         }
     }
 
     public isFocused(cellKey: string): boolean {
-        return this.#lastFocusedKey() === cellKey;
+        return this.#lastFocusedCellKey() === cellKey;
     }
 
     public navigate(cellKey: string, navigationKey: string): boolean {
@@ -51,6 +51,10 @@ export class GridNavigationService {
         const cellKey = this.#createCellKey(data);
         this.#cellElementDict.update(dict => dict.put(cellKey, data));
         return cellKey;
+    }
+
+    public setLastFocusedCellKey(key: string): void {
+        this.#lastFocusedCellKey.set(key);
     }
 
     public unregisterCell(cellKey: string): void {
@@ -94,7 +98,7 @@ export class GridNavigationService {
             const prevData = this.#cellElementDict().get(prevKey);
             if (prevData) {
                 this.#focusElement(prevData.element);
-                this.#lastFocusedKey.set(prevKey);
+                this.#lastFocusedCellKey.set(prevKey);
                 return true;
             }
         } else if (direction === "right") {
@@ -105,7 +109,7 @@ export class GridNavigationService {
             const nextData = this.#cellElementDict().get(nextKey);
             if (nextData) {
                 this.#focusElement(nextData.element);
-                this.#lastFocusedKey.set(nextKey);
+                this.#lastFocusedCellKey.set(nextKey);
                 return true;
             }
         }
@@ -138,7 +142,7 @@ export class GridNavigationService {
         const targetData = this.#cellElementDict().get(targetKey);
         if (targetData) {
             this.#focusElement(targetData.element);
-            this.#lastFocusedKey.set(targetKey);
+            this.#lastFocusedCellKey.set(targetKey);
             return true;
         }
         return false;
@@ -158,7 +162,7 @@ export class GridNavigationService {
             return false;
         }
         this.#focusElement(target.value.element);
-        this.#lastFocusedKey.set(target.key);
+        this.#lastFocusedCellKey.set(target.key);
         if (!target.value.groupHeader) {
             this.#lastNonGroupCellKey.set(target.key);
         }
@@ -176,7 +180,7 @@ export class GridNavigationService {
             return false;
         }
         this.#focusElement(target.value.element);
-        this.#lastFocusedKey.set(target.key);
+        this.#lastFocusedCellKey.set(target.key);
         if (!target.value.groupHeader) {
             this.#lastNonGroupCellKey.set(target.key);
         }

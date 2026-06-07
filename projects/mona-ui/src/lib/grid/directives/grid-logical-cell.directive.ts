@@ -84,10 +84,22 @@ export class GridLogicalCellDirective {
     }
 
     #setKeyboardNavigation(): void {
+        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(() => {
+                const key = this.#cellKey();
+                if (key) {
+                    this.#gridNavigationService.setLastFocusedCellKey(key);
+                }
+            });
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(e => e.key.startsWith("Arrow") || e.key === "Enter" || e.key === "Home" || e.key === "End")
+                filter(e => e.key.startsWith("Arrow") || e.key === "Enter" || e.key === "Home" || e.key === "End"),
+                filter(e => {
+                    const tag = (e.target as HTMLElement).tagName.toLowerCase();
+                    return tag !== "input" && tag !== "textarea";
+                })
             )
             .subscribe(e => {
                 if (e.key === "ArrowDown") {

@@ -1,6 +1,6 @@
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
 import { CheckBoxComponent } from "../../../inputs/check-box/components/check-box/check-box.component";
@@ -35,6 +35,7 @@ import {
     }
 })
 export class GridCellComponent {
+    readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
 
     protected readonly baseClass = computed(() => {
@@ -99,12 +100,20 @@ export class GridCellComponent {
 
     protected onEditCancel(): void {
         this.gridService.cancelEdit();
+        const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
+        if (cellElement) {
+            cellElement.focus();
+        }
     }
 
     protected onEditCommit(): void {
         const context = this.gridService.editContext();
         if (context && context.mode === "cell") {
             this.gridService.stopCellEdit();
+            const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
+            if (cellElement) {
+                cellElement.focus();
+            }
         }
     }
 }

@@ -296,6 +296,10 @@ export class NumericTextBoxComponent implements OnInit, OnDestroy, ControlValueA
     }
 
     public onBlur(event: FocusEvent): void {
+        const relatedTarget = event.relatedTarget as Node | null;
+        if (relatedTarget && this.#hostElementRef.nativeElement.contains(relatedTarget)) {
+            return;
+        }
         this.#propagateTouched?.();
         this.correctValue();
         this.rawInputValue.set(this.formatValueForDisplay(this.value()));
