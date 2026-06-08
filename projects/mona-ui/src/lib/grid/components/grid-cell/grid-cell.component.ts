@@ -107,7 +107,7 @@ export class GridCellComponent {
     public readonly column = input.required<Column>();
     public readonly row = input.required<Row>();
 
-    protected onCellDoubleClick(): void {
+    public startEdit(): void {
         if (!this.gridService.editableOptions.enabled || !this.column().editable()) {
             return;
         }
@@ -132,6 +132,10 @@ export class GridCellComponent {
             },
             { injector: this.#injector }
         );
+    }
+
+    protected onCellDoubleClick(): void {
+        this.startEdit();
     }
 
     protected onCellValueChange(value: unknown): void {

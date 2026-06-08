@@ -57,8 +57,9 @@
                                 "
                                 [attr.colspan]="1"
                                 [style.width.px]="column.calculatedWidth()"
-                                [style.min-width.px]="column.minWidth()">
-                                <mona-grid-cell [column]="column" [row]="row"></mona-grid-cell>
+                                [style.min-width.px]="column.minWidth()"
+                                (edit)="gridCell.startEdit()">
+                                <mona-grid-cell #gridCell [column]="column" [row]="row"></mona-grid-cell>
                             </td>
                         }
                         @if (gridService.contextMenuItems().length !== 0) {
@@ -191,8 +192,9 @@
                                     "
                                     [rowIndex]="rowIndex"
                                     [style.width.px]="column.calculatedWidth()"
-                                    [style.min-width.px]="column.minWidth()">
-                                    <mona-grid-cell [column]="column" [row]="rowItem.row"></mona-grid-cell>
+                                    [style.min-width.px]="column.minWidth()"
+                                    (edit)="gridCell.startEdit()">
+                                    <mona-grid-cell #gridCell [column]="column" [row]="rowItem.row"></mona-grid-cell>
                                 </td>
                             }
                             @if (gridService.contextMenuItems().length !== 0) {

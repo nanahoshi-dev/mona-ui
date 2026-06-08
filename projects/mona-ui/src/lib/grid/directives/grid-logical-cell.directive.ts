@@ -56,6 +56,7 @@ export class GridLogicalCellDirective {
         return this.#gridNavigationService.isFocused(key);
     });
     public readonly colIndex = input.required<number>();
+    public readonly edit = output();
     public readonly firstInRow = input.required<boolean>();
     public readonly groupHeader = input<boolean>(false);
     public readonly groupKey = input<string>();
@@ -95,7 +96,14 @@ export class GridLogicalCellDirective {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(e => e.key.startsWith("Arrow") || e.key === "Enter" || e.key === "Home" || e.key === "End"),
+                filter(
+                    e =>
+                        e.key.startsWith("Arrow") ||
+                        e.key === "Enter" ||
+                        e.key === "F2" ||
+                        e.key === "Home" ||
+                        e.key === "End"
+                ),
                 filter(e => {
                     const tag = (e.target as HTMLElement).tagName.toLowerCase();
                     return tag !== "input" && tag !== "textarea";
@@ -123,7 +131,14 @@ export class GridLogicalCellDirective {
                     this.#navigate("ArrowUp");
                 } else if (e.key === "Enter") {
                     e.preventDefault();
-                    this.toggle.emit();
+                    if (this.groupHeader()) {
+                        this.toggle.emit();
+                    } else {
+                        this.edit.emit();
+                    }
+                } else if (e.key === "F2") {
+                    e.preventDefault();
+                    this.edit.emit();
                 } else if (e.key === "Home") {
                     e.preventDefault();
                     if (e.ctrlKey) {
