@@ -19,6 +19,7 @@ import { SortDescriptor } from "../../query/sort/SortDescriptor";
 import type { DeepPartial } from "../../utils/deepMerge";
 import { createIterablePatchStore } from "../../utils/PatchStore";
 import { CellEditEvent } from "../models/CellEditEvent";
+import { RowEditEvent } from "../models/RowEditEvent";
 import { Column } from "../models/Column";
 import { ColumnFilterState } from "../models/ColumnFilterState";
 import { ColumnSortState } from "../models/ColumnSortState";
@@ -28,7 +29,7 @@ import { GridKeySelector } from "../models/GridKeySelector";
 import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { GroupDescriptor } from "../models/GroupDescriptor";
-import { PageState } from "../models/PageState";
+import { PaginationState } from "../models/PaginationState";
 import { Row } from "../models/Row";
 import { SortableOptions } from "../models/SortableOptions";
 
@@ -53,10 +54,14 @@ export class GridService {
         source: () => this.#editSource
     });
     readonly #platformId = inject(PLATFORM_ID);
+    readonly #textMeasureCache = new Map<string, number>();
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
+    public readonly bodyTableElement = signal<HTMLTableElement | null>(null);
     public readonly cellEdit$ = new Subject<CellEditEvent>();
+    /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
+    public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 34;
@@ -70,17 +75,22 @@ export class GridService {
         const pairs = this.#editStore.view().map(item => new KeyValuePair(item.$rowId, item));
         return ImmutableDictionary.create(pairs);
     });
+    public readonly editableOptions = signal<EditableOptions>({ enabled: false, mode: "cell" });
     public readonly editingCellUid = computed(() => {
         const context = this.#editContext();
         return context?.mode === "cell" ? context.cellUid : null;
     });
     public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
     public readonly expandedKeys = signal(ImmutableSet.create());
-    public readonly filterLoad$ = new Subject<void>();
+    public readonly gridHeaderElement = signal<HTMLDivElement | null>(null);
     public readonly groupColumnWidth = 34;
     public readonly groupColumns = signal<ImmutableSet<Column>>(ImmutableSet.create());
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false });
+    public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly isInEditMode = computed(() => this.#editContext() != null);
+    public readonly masterDetailEmptyCellWidth = computed(() => {
+        return this.detailColumnWidth * (this.groupColumns().size() + 1);
+    });
     public readonly masterDetailRowWidth = computed(() => {
         const groupColumns = this.groupColumns();
         const columns = this.columns();
@@ -89,10 +99,29 @@ export class GridService {
         const columnListWidth = columns.aggregate((acc, c) => acc + (c.calculatedWidth() ?? c.width() ?? 0), 0);
         return groupColumnWidth * (groupColumnCount + 1) + columnListWidth;
     });
-    public readonly masterDetailEmptyCellWidth = computed(() => {
-        return this.detailColumnWidth * (this.groupColumns().size() + 1);
-    });
     public readonly masterDetailTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
+    public readonly rowEdit$ = new Subject<RowEditEvent>();
+    public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
+    public readonly selectBy = signal<GridKeySelector<unknown>>("");
+    public readonly selectableOptions = signal<GridSelectableOptions>({ enabled: false, mode: "single" });
+    public readonly selectedKeys = signal(ImmutableSet.create());
+    public readonly selectedKeysChange$ = toObservable(this.selectedKeys);
+    public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
+    public readonly selectedRows = computed(() => {
+        const selectedKeys = this.selectedKeys();
+        return selectedKeys
+            .select(key => this.rows().firstOrDefault(r => this.getRowSelectionKey(r) === key))
+            .where(i => i != null)
+            .toImmutableSet();
+    });
+    public readonly selectedRowsChange$ = toObservable(this.selectedRows);
+    public readonly sortableOptions = signal<SortableOptions>({
+        enabled: false,
+        mode: "single",
+        allowUnsort: true,
+        showIndices: true
+    });
     public readonly tableWidth = computed(() => {
         const columns = this.columns();
         if (!columns.any()) {
@@ -106,31 +135,16 @@ export class GridService {
         const detailWidth = this.masterDetailTemplate() != null ? this.detailColumnWidth : 0;
         return dataWidth + groupWidth + detailWidth;
     });
-    public readonly pageState: PageState = { page: signal(1), skip: signal(0), take: signal(10) };
-    public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
-    public readonly selectBy = signal<GridKeySelector<unknown>>("");
-    public readonly selectedKeys = signal(ImmutableSet.create());
-    public readonly selectedKeysChange$ = toObservable(this.selectedKeys);
-    public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
-    public readonly selectedRows = computed(() => {
-        const selectedKeys = this.selectedKeys();
-        return selectedKeys
-            .select(key => this.rows().firstOrDefault(r => this.getRowSelectionKey(r) === key))
-            .where(i => i != null)
-            .toImmutableSet();
-    });
-    public readonly selectedRowsChange$ = new Subject<Iterable<Row>>();
-    public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
-    public readonly virtualGridMinBuffer = signal(0);
     public readonly viewPageRows = computed(() => {
-        const skip = this.pageState.skip();
-        const take = this.pageState.take();
+        const skip = this.paginationState().skip;
+        const take = this.paginationState().take;
         const viewRows = this.viewRows();
         if (!viewRows.any()) {
             return ImmutableSet.create<Row>();
         }
         return viewRows.skip(skip).take(take).toImmutableSet();
     });
+    public readonly viewRowCount = computed(() => this.viewRows().size());
     public readonly viewRows = computed(() => {
         const rows = this.rows();
         const appliedFilters = this.appliedFilters();
@@ -161,22 +175,9 @@ export class GridService {
         const result = queryEnumerable.run();
         return ImmutableSet.create(result);
     });
-    public readonly viewRowCount = computed(() => this.viewRows().size());
+    public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
+    public readonly virtualGridMinBuffer = signal(0);
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 28 });
-    public editableOptions: EditableOptions = { enabled: false };
-    public gridHeaderElement = signal<HTMLDivElement | null>(null);
-    /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
-    public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
-    public selectableOptions: GridSelectableOptions = {
-        enabled: false,
-        mode: "single"
-    };
-    public sortableOptions: SortableOptions = {
-        enabled: false,
-        mode: "single",
-        allowUnsort: true,
-        showIndices: true
-    };
 
     public cancelEdit(): void {
         const rowUid = this.#editContext()?.rowUid;
@@ -200,26 +201,8 @@ export class GridService {
             return;
         }
         this.#editContext.set(null);
-        const editedRowData = this.editViewDict().get(context.rowUid);
-        if (!editedRowData) {
-            return;
-        }
-        for (const [field, newValue] of Object.entries(editedRowData)) {
-            if (field === "$rowId") {
-                continue;
-            }
-            const oldValue = context.row.data[field];
-            if (newValue === oldValue) {
-                continue;
-            }
-            const event = new CellEditEvent({
-                field,
-                newValue,
-                oldValue,
-                rowData: context.row.data
-            });
-            this.cellEdit$.next(event);
-        }
+        this.#editStore.clear(context.rowUid);
+        this.rowEdit$.next(new RowEditEvent({ rowData: context.row.data }));
     }
 
     public deselectAllRows(): void {
@@ -234,11 +217,6 @@ export class GridService {
         if (column.title().length > longestValue.length) {
             longestValue = column.title();
         }
-        const div = this.#document.createElement("canvas");
-        const context = div.getContext("2d");
-        if (context == null) {
-            return 0;
-        }
         const documentBodyStyle = window.getComputedStyle(this.#document.body);
         const fontFamily = documentBodyStyle.getPropertyValue("font-family");
         const fontSize = documentBodyStyle.getPropertyValue("font-size");
@@ -250,8 +228,21 @@ export class GridService {
               parseInt(window.getComputedStyle(titleElement).paddingRight, 10)
             : 0;
         const totalAdditionalWidth = actionsWidth + leftRightPadding;
-        context.font = `${fontSize} ${fontFamily}`;
-        return context.measureText(longestValue).width + totalAdditionalWidth;
+        const fontKey = `${fontSize} ${fontFamily}`;
+        const cacheKey = `${fontKey}|${longestValue}`;
+        const cached = this.#textMeasureCache.get(cacheKey);
+        if (cached != null) {
+            return cached + totalAdditionalWidth;
+        }
+        const canvas = this.#document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (context == null) {
+            return 0;
+        }
+        context.font = fontKey;
+        const measured = context.measureText(longestValue).width;
+        this.#textMeasureCache.set(cacheKey, measured);
+        return measured + totalAdditionalWidth;
     }
 
     public getGroupDescriptors(columns: Iterable<Column>): GroupDescriptor[] {
@@ -273,12 +264,11 @@ export class GridService {
         if (!this.isSelectableGrid()) {
             return;
         }
-        if (this.selectableOptions.mode === "single") {
+        if (this.selectableOptions().mode === "single") {
             this.handleSingleSelection(event, row);
         } else {
             this.handleMultipleSelection(event, row);
         }
-        this.selectedRowsChange$.next(this.selectedRows());
     }
 
     public handleSingleSelection(event: MouseEvent, row: Row): void {
@@ -307,7 +297,7 @@ export class GridService {
     }
 
     public isSelectableGrid(): boolean {
-        return this.selectableOptions != null && !!this.selectableOptions.enabled;
+        return !!this.selectableOptions().enabled;
     }
 
     public loadFilters(filters: CompositeFilterDescriptor[]): void {
@@ -336,7 +326,6 @@ export class GridService {
                 p => p.value
             )
         );
-        this.filterLoad$.next();
     }
 
     public loadGroupColumns(descriptors: Iterable<GroupDescriptor>): void {
@@ -393,11 +382,15 @@ export class GridService {
     }
 
     public setEditableOptions(options: EditableOptions): void {
-        this.editableOptions = { ...this.editableOptions, ...options };
+        this.editableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setGroupableOptions(options: Partial<GroupableOptions>): void {
         this.groupableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setPageState(state: Partial<PaginationState>): void {
+        this.paginationState.update(v => ({ ...v, ...state }));
     }
 
     public setRowExpanded(row: Row, expanded: boolean): void {
@@ -410,11 +403,11 @@ export class GridService {
     }
 
     public setSelectableOptions(options: GridSelectableOptions): void {
-        this.selectableOptions = { ...this.selectableOptions, ...options };
+        this.selectableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setSortableOptions(options: Partial<SortableOptions>): void {
-        this.sortableOptions = { ...this.sortableOptions, ...options };
+        this.sortableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {

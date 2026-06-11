@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, contentChild, effect, input, Templa
 import { DataType } from "../../../models/DataType";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
 import { GridColumnTitleTemplateDirective } from "../../directives/grid-column-title-template.directive";
+import { GridEditTemplateDirective } from "../../directives/grid-edit-template.directive";
 import { Column, ColumnConfig } from "../../models/Column";
 
 @Component({
@@ -11,6 +12,7 @@ import { Column, ColumnConfig } from "../../models/Column";
 })
 export class GridColumnComponent {
     private readonly cellTemplate = contentChild(GridCellTemplateDirective, { read: TemplateRef });
+    private readonly editTemplate = contentChild(GridEditTemplateDirective, { read: TemplateRef });
     private readonly titleTemplate = contentChild(GridColumnTitleTemplateDirective, { read: TemplateRef });
     public readonly column = new Column();
     /**
@@ -53,6 +55,7 @@ export class GridColumnComponent {
             const config: ColumnConfig = {
                 cellTemplate: this.cellTemplate() ?? null,
                 dataType: this.type(),
+                editTemplate: this.editTemplate() ?? null,
                 editable: this.editable(),
                 field: this.field(),
                 maxWidth: this.maxWidth(),

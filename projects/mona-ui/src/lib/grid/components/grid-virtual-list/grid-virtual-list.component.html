@@ -3,7 +3,7 @@
     [itemSize]="gridService.virtualScrollOptions().height"
     [minBufferPx]="gridService.virtualGridMinBuffer()"
     [maxBufferPx]="gridService.virtualGridMaxBuffer()">
-    <table [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+    <table #bodyTable [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
         <colgroup>
             @for (_ of gridService.groupColumns(); track $index) {
                 <col [style.width.px]="gridService.groupColumnWidth" />

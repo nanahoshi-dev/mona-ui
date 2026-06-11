@@ -5,14 +5,14 @@ import {
     Component,
     computed,
     DestroyRef,
-    DOCUMENT,
     ElementRef,
     inject,
-    input
+    input,
+    viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { ImmutableList, ImmutableSet, select, span } from "@mirei/ts-collections";
+import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
 import { LucideAngularModule } from "lucide-angular";
 import { fromEvent } from "rxjs";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
@@ -64,11 +64,11 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 })
 export class GridListComponent implements GridListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #document = inject(DOCUMENT);
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #rowFlattener = inject(GridRowFlattenerService);
     readonly #themeService = inject(ThemeService);
+    private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridListBaseThemeVariants(theme)({ virtual: false });
@@ -96,7 +96,10 @@ export class GridListComponent implements GridListVariantInput {
 
     public constructor() {
         afterNextRender({
-            read: () => this.setSubscriptions()
+            read: () => {
+                this.gridService.bodyTableElement.set(this.bodyTableElementRef().nativeElement);
+                this.setSubscriptions();
+            }
         });
     }
 
@@ -114,23 +117,6 @@ export class GridListComponent implements GridListVariantInput {
     }
 
     private setSubscriptions(): void {
-        // fromEvent<MouseEvent>(this.#document, "click")
-        //     .pipe(mergeWith(fromEvent<KeyboardEvent>(this.#document, "keyup")), takeUntilDestroyed(this.#destroyRef))
-        //     .subscribe(e => {
-        //         if (e.type === "click") {
-        //             const event = e as MouseEvent;
-        //             const target = event.target as HTMLElement;
-        //             if (target.closest("mona-grid-cell") == null) {
-        //                 this.gridService.isInEditMode.set(false);
-        //             }
-        //         }
-        //         if (e.type === "keyup") {
-        //             const event = e as KeyboardEvent;
-        //             if (event.key === "Escape") {
-        //                 this.gridService.isInEditMode.set(false);
-        //             }
-        //         }
-        //     });
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {

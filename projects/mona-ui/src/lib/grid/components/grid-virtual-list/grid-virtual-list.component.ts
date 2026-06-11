@@ -6,7 +6,6 @@ import {
     Component,
     computed,
     DestroyRef,
-    DOCUMENT,
     ElementRef,
     inject,
     Injector,
@@ -14,7 +13,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { ImmutableList, ImmutableSet, max } from "@mirei/ts-collections";
+import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { LucideAngularModule } from "lucide-angular";
 import { fromEvent } from "rxjs";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
@@ -68,13 +67,13 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 })
 export class GridVirtualListComponent {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #document = inject(DOCUMENT);
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #groupColumns$ = toObservable(inject(GridService).groupColumns);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #injector = inject(Injector);
     readonly #rowFlattener = inject(GridRowFlattenerService);
     readonly #themeService = inject(ThemeService);
+    private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridListBaseThemeVariants(theme)({ virtual: true });
@@ -90,11 +89,7 @@ export class GridVirtualListComponent {
             return [] as GridViewRow[];
         }
         const collapsedKeys = new Set(this.gridService.collapsedGroupKeys());
-        const rows = this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys);
-        return rows;
-    });
-    protected readonly maxDepth = computed(() => {
-        return max(this.flattenedGroupedRows(), r => r.depth);
+        return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys);
     });
     protected readonly tableClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -107,8 +102,8 @@ export class GridVirtualListComponent {
     public constructor() {
         afterNextRender({
             read: () => {
+                this.gridService.bodyTableElement.set(this.bodyTableElementRef().nativeElement);
                 this.synchronizeHorizontalScroll();
-                this.setEditModeSubscription();
                 this.setFocusSubscription();
             }
         });
@@ -126,26 +121,6 @@ export class GridVirtualListComponent {
 
     public onToggleDetailClick(row: Row): void {
         this.gridService.setRowExpanded(row, !this.gridService.isRowExpanded(row));
-    }
-
-    private setEditModeSubscription(): void {
-        // fromEvent<MouseEvent>(this.#document, "click")
-        //     .pipe(mergeWith(fromEvent<KeyboardEvent>(this.#document, "keyup")), takeUntilDestroyed(this.#destroyRef))
-        //     .subscribe(e => {
-        //         if (e.type === "click") {
-        //             const event = e as MouseEvent;
-        //             const target = event.target as HTMLElement;
-        //             if (target.closest("mona-grid-cell") == null) {
-        //                 this.gridService.isInEditMode.set(false);
-        //             }
-        //         }
-        //         if (e.type === "keyup") {
-        //             const event = e as KeyboardEvent;
-        //             if (event.key === "Escape") {
-        //                 this.gridService.isInEditMode.set(false);
-        //             }
-        //         }
-        //     });
     }
 
     private setFocusSubscription(): void {

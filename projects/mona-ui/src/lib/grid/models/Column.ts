@@ -5,6 +5,7 @@ import { SortDirection } from "../../query/sort/SortDescriptor";
 export interface ColumnConfig {
     cellTemplate: TemplateRef<unknown> | null;
     dataType: DataType;
+    editTemplate: TemplateRef<unknown> | null;
     editable: boolean;
     field: string;
     maxWidth: number | null;
@@ -19,6 +20,7 @@ export class Column {
     readonly #cellTemplate = signal<TemplateRef<unknown> | null>(null);
     readonly #columnSortDirection = signal<SortDirection | null>(null);
     readonly #dataType = signal<DataType>("string");
+    readonly #editTemplate = signal<TemplateRef<unknown> | null>(null);
     readonly #editable = signal(false);
     readonly #field = signal("");
     readonly #filtered = signal(false);
@@ -35,6 +37,7 @@ export class Column {
     public readonly cellTemplate = this.#cellTemplate.asReadonly();
     public readonly columnSortDirection = this.#columnSortDirection.asReadonly();
     public readonly dataType = this.#dataType.asReadonly();
+    public readonly editTemplate = this.#editTemplate.asReadonly();
     public readonly editable = this.#editable.asReadonly();
     public readonly field = this.#field.asReadonly();
     public readonly filtered = this.#filtered.asReadonly();
@@ -61,6 +64,7 @@ export class Column {
     public setConfig(config: ColumnConfig): void {
         this.#cellTemplate.set(config.cellTemplate);
         this.#dataType.set(config.dataType);
+        this.#editTemplate.set(config.editTemplate);
         this.#editable.set(config.editable);
         this.#field.set(config.field);
         this.#maxWidth.set(config.maxWidth);

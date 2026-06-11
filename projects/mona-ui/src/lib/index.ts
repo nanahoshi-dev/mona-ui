@@ -138,6 +138,7 @@ export * from "./filter/components/filter-menu/filter-menu.component";
 /** Grid */
 export * from "./query/sort/SortDescriptor";
 export * from "./grid/models/CellEditEvent";
+export * from "./grid/models/RowEditEvent";
 export { GridSelectableOptions } from "./grid/models/GridSelectableOptions";
 export * from "./grid/models/GroupDescriptor";
 export * from "./grid/models/SortableOptions";
@@ -145,6 +146,7 @@ export * from "./grid/directives/grid-cell-template.directive";
 export * from "./grid/directives/grid-column-title-template.directive";
 export * from "./grid/directives/grid-context-menu.directive";
 export * from "./grid/directives/grid-detail-template.directive";
+export * from "./grid/directives/grid-edit-template.directive";
 export * from "./grid/directives/grid-editable.directive";
 export * from "./grid/directives/grid-groupable.directive";
 export * from "./grid/directives/grid-no-data-template.directive";

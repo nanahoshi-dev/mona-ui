@@ -19,7 +19,7 @@ export class CellEditEvent extends PreventableEvent {
         return this.#options.oldValue;
     }
 
-    public get rowData(): unknown {
+    public get rowData(): Record<PropertyKey, unknown> {
         return this.#options.rowData;
     }
 }
@@ -28,5 +28,5 @@ export interface CellEditEventOptions {
     field: string;
     newValue: unknown;
     oldValue: unknown;
-    rowData: unknown;
+    rowData: Record<PropertyKey, unknown>;
 }

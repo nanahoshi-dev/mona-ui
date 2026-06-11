@@ -50,6 +50,7 @@ import { GridDetailTemplateDirective } from "../../directives/grid-detail-templa
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
 import { CellEditEvent } from "../../models/CellEditEvent";
+import { RowEditEvent } from "../../models/RowEditEvent";
 import { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { ResizeMethod } from "../../models/ResizeMethod";
@@ -146,6 +147,7 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly dropColumn = signal<Column | null>(null);
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
+    protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
     protected readonly gridService = inject(GridService);
     protected readonly gridWidthSet = signal(false);
     protected readonly groupColumnList = viewChild<CdkDropList>("groupColumnList");
@@ -197,6 +199,11 @@ export class GridComponent<T> implements GridVariantInput {
      * Emitted when a cell is edited.
      */
     public readonly cellEdit = output<CellEditEvent>();
+
+    /**
+     * Emitted when a row edit is committed (row mode only).
+     */
+    public readonly rowEdit = output<RowEditEvent>();
 
     /**
      * The row data to be displayed in the grid.
@@ -276,6 +283,7 @@ export class GridComponent<T> implements GridVariantInput {
         afterNextRender({
             read: () => {
                 this.gridService.gridHeaderElement.set(this.gridHeaderElement().nativeElement);
+                this.gridService.headerTableElement.set(this.gridHeaderTableElement().nativeElement);
                 this.setInitialCalculatedWidthOfColumns();
                 this.gridWidthSet.set(true);
                 this.setSubscriptions();
@@ -380,7 +388,7 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     public onColumnSort(column: Column): void {
-        if (!this.gridService.sortableOptions.enabled) {
+        if (!this.gridService.sortableOptions().enabled) {
             return;
         }
         if (!column.field()) {
@@ -390,7 +398,7 @@ export class GridComponent<T> implements GridVariantInput {
             column.setColumnSortDirection("asc");
         } else if (column.columnSortDirection() === "asc") {
             column.setColumnSortDirection("desc");
-        } else if (this.gridService.sortableOptions.allowUnsort) {
+        } else if (this.gridService.sortableOptions().allowUnsort) {
             column.setColumnSortDirection(null);
             column.setSortIndex(null);
         } else {
@@ -445,9 +453,7 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     public onPageChange(event: PageChangeEvent): void {
-        this.gridService.pageState.page.set(event.page);
-        this.gridService.pageState.skip.set(event.skip);
-        this.gridService.pageState.take.set(event.take);
+        this.gridService.setPageState({ page: event.page, skip: event.skip, take: event.take });
 
         if (isPlatformBrowser(this.#platformId)) {
             const scrollableElement = this.#hostElementRef.nativeElement.querySelector(
@@ -460,14 +466,12 @@ export class GridComponent<T> implements GridVariantInput {
     }
 
     public onPageSizeChange(data: PageSizeChangeEvent): void {
-        this.gridService.pageState.page.set(1);
-        this.gridService.pageState.skip.set(0);
-        this.gridService.pageState.take.set(data.newPageSize);
+        this.gridService.setPageState({ take: data.newPageSize });
     }
 
     private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {
         column.setColumnSortDirection(sortDirection);
-        if (this.gridService.sortableOptions.mode === "single") {
+        if (this.gridService.sortableOptions().mode === "single") {
             this.gridService
                 .columns()
                 .where(c => c.field() !== column.field())
@@ -603,7 +607,7 @@ export class GridComponent<T> implements GridVariantInput {
         effect(() => {
             const pageSize = this.pageSize();
             if (pageSize != null) {
-                untracked(() => this.gridService.pageState.take.set(pageSize));
+                untracked(() => this.gridService.setPageState({ take: pageSize }));
             }
         });
     }
@@ -643,5 +647,8 @@ export class GridComponent<T> implements GridVariantInput {
         this.gridService.cellEdit$
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe((event: CellEditEvent) => this.cellEdit.emit(event));
+        this.gridService.rowEdit$
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe((event: RowEditEvent) => this.rowEdit.emit(event));
     }
 }

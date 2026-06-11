@@ -18,7 +18,7 @@ export class GridEditableDirective {
                 if (options) {
                     this.#gridService.setEditableOptions(options);
                 } else if (options === "") {
-                    this.#gridService.setEditableOptions({ enabled: true });
+                    this.#gridService.setEditableOptions({ enabled: true, mode: "cell" });
                 }
             });
         });

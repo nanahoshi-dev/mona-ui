@@ -2,6 +2,7 @@ import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, i
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
 import { Column } from "../models/Column";
+import { GridService } from "../services/grid.service";
 
 @Directive({
     selector: "[monaGridColumnResizeHandler]"
@@ -10,12 +11,12 @@ export class GridColumnResizeHandlerDirective {
     readonly #defaultMaxWidth = 1000;
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
+    readonly #gridService = inject(GridService);
     readonly #hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
 
     public readonly resizeEnd = output();
     public readonly resizeStart = output();
     public column = input.required<Column>();
-    public gridId = input.required<string>();
 
     public constructor() {
         afterNextRender({
@@ -28,12 +29,8 @@ export class GridColumnResizeHandlerDirective {
         const initialWidth = this.column().calculatedWidth() ?? element.getBoundingClientRect().width;
         const initialX = event.clientX;
         const oldSelectStart = this.#document.onselectstart;
-        const headerTableElement = this.#document.querySelector(
-            `[data-grid-id='${this.gridId()}'] table:first-child`
-        ) as HTMLTableElement;
-        const bodyTableElement = this.#document.querySelector(
-            `[data-grid-id='${this.gridId()}'] table:last-child`
-        ) as HTMLTableElement;
+        const headerTableElement = this.#gridService.headerTableElement();
+        const bodyTableElement = this.#gridService.bodyTableElement();
 
         this.#document.onselectstart = () => false;
         this.resizeStart.emit();

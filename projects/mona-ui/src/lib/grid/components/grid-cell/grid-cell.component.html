@@ -9,88 +9,94 @@
     [attr.data-ruid]="row().uid"
     [attr.data-field]="dataKey"
     [attr.data-col-index]="column().index()"
-    [attr.aria-readonly]="!(gridService.editableOptions.enabled && column().editable())"
+    [attr.aria-readonly]="!(gridService.editableOptions().enabled && column().editable())"
     (dblclick)="onCellDoubleClick()">
     @if (isEditing()) {
-        @switch (column().dataType()) {
-            @case ("string") {
-                <mona-text-box
-                    class="w-full h-full"
-                    [inputAttributes]="{ autocomplete: 'off' }"
-                    [rounded]="'none'"
-                    (keydown.enter)="onEditCommit()"
-                    (keydown.escape)="onEditCancel()"
-                    [ngModel]="displayValue()"
-                    (ngModelChange)="onCellValueChange($event)"
-                    (inputBlur)="onEditCommit()"
-                    [size]="'small'"></mona-text-box>
-            }
-            @case ("number") {
-                <mona-numeric-text-box
-                    class="w-full h-full"
-                    [rounded]="'none'"
-                    [ngModel]="displayValue()"
-                    (ngModelChange)="onCellValueChange($event)"
-                    (keydown.enter)="onEditCommit()"
-                    (keydown.escape)="onEditCancel()"
-                    (inputBlur)="onEditCommit()"
-                    [size]="'small'"></mona-numeric-text-box>
-            }
-            @case ("boolean") {
-                <mona-check-box
-                    class="w-full h-full"
-                    [rounded]="'none'"
-                    [ngModel]="displayValue()"
-                    (ngModelChange)="onCheckBoxValueChange($event)"
-                    (inputBlur)="onEditCommit()"
-                    (keydown.escape)="onEditCancel()"
-                    (keydown.enter)="onEditCommit()"></mona-check-box>
-            }
-            @case ("date") {
-                <mona-date-picker
-                    #datePickerEl
-                    class="w-full h-full"
-                    [rounded]="'none'"
-                    [ngModel]="displayValue()"
-                    (ngModelChange)="onCellValueChange($event)"
-                    (keydown.enter)="onDatePickerEnter($event)"
-                    (keydown.escape)="onEditCancel()"
-                    (focusout)="onDatePickerFocusOut($event)"
-                    (opened)="onDatePickerOpen()"
-                    (closed)="onDatePickerClose()"
-                    size="small"></mona-date-picker>
-            }
-            @case ("datetime") {
-                <mona-datetime-picker
-                    #dateTimePickerEl
-                    class="w-full h-full"
-                    [ngModel]="displayValue()"
-                    (ngModelChange)="onCellValueChange($event)"
-                    (keydown.enter)="onDatePickerEnter($event)"
-                    (keydown.escape)="onEditCancel()"
-                    (focusout)="onDatePickerFocusOut($event)"
-                    (opened)="onDatePickerOpen()"
-                    (closed)="onDatePickerClose()"
-                    size="small"></mona-datetime-picker>
-            }
-            @case ("time") {
-                <mona-time-picker
-                    #timePickerEl
-                    class="w-full h-full"
-                    [ngModel]="displayValue()"
-                    (ngModelChange)="onCellValueChange($event)"
-                    (keydown.enter)="onDatePickerEnter($event)"
-                    (keydown.escape)="onEditCancel()"
-                    (focusout)="onDatePickerFocusOut($event)"
-                    (opened)="onDatePickerOpen()"
-                    (closed)="onDatePickerClose()"
-                    size="small"></mona-time-picker>
+        @if (column().editTemplate()) {
+            <ng-container
+                [ngTemplateOutlet]="column().editTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: dataItem, column: column().field() }"></ng-container>
+        } @else {
+            @switch (column().dataType()) {
+                @case ("string") {
+                    <mona-text-box
+                        class="w-full h-full"
+                        [inputAttributes]="{ autocomplete: 'off' }"
+                        [rounded]="'none'"
+                        (keydown.enter)="onEnterKeyCommit()"
+                        (keydown.escape)="onEditCancel()"
+                        [ngModel]="displayValue()"
+                        (ngModelChange)="onCellValueChange($event)"
+                        (inputBlur)="onEditCommit()"
+                        [size]="'small'"></mona-text-box>
+                }
+                @case ("number") {
+                    <mona-numeric-text-box
+                        class="w-full h-full"
+                        [rounded]="'none'"
+                        [ngModel]="displayValue()"
+                        (ngModelChange)="onCellValueChange($event)"
+                        (keydown.enter)="onEnterKeyCommit()"
+                        (keydown.escape)="onEditCancel()"
+                        (inputBlur)="onEditCommit()"
+                        [size]="'small'"></mona-numeric-text-box>
+                }
+                @case ("boolean") {
+                    <mona-check-box
+                        class="w-full h-full"
+                        [rounded]="'none'"
+                        [ngModel]="displayValue()"
+                        (ngModelChange)="onCheckBoxValueChange($event)"
+                        (inputBlur)="onEditCommit()"
+                        (keydown.escape)="onEditCancel()"
+                        (keydown.enter)="onEnterKeyCommit()"></mona-check-box>
+                }
+                @case ("date") {
+                    <mona-date-picker
+                        #datePickerEl
+                        class="w-full h-full"
+                        [rounded]="'none'"
+                        [ngModel]="displayValue()"
+                        (ngModelChange)="onCellValueChange($event)"
+                        (keydown.enter)="onDatePickerEnter($event)"
+                        (keydown.escape)="onEditCancel()"
+                        (focusout)="onDatePickerFocusOut($event)"
+                        (opened)="onDatePickerOpen()"
+                        (closed)="onDatePickerClose()"
+                        size="small"></mona-date-picker>
+                }
+                @case ("datetime") {
+                    <mona-datetime-picker
+                        #dateTimePickerEl
+                        class="w-full h-full"
+                        [ngModel]="displayValue()"
+                        (ngModelChange)="onCellValueChange($event)"
+                        (keydown.enter)="onDatePickerEnter($event)"
+                        (keydown.escape)="onEditCancel()"
+                        (focusout)="onDatePickerFocusOut($event)"
+                        (opened)="onDatePickerOpen()"
+                        (closed)="onDatePickerClose()"
+                        size="small"></mona-datetime-picker>
+                }
+                @case ("time") {
+                    <mona-time-picker
+                        #timePickerEl
+                        class="w-full h-full"
+                        [ngModel]="displayValue()"
+                        (ngModelChange)="onCellValueChange($event)"
+                        (keydown.enter)="onDatePickerEnter($event)"
+                        (keydown.escape)="onEditCancel()"
+                        (focusout)="onDatePickerFocusOut($event)"
+                        (opened)="onDatePickerOpen()"
+                        (closed)="onDatePickerClose()"
+                        size="small"></mona-time-picker>
+                }
             }
         }
     } @else if (column().cellTemplate()) {
         <ng-container
             [ngTemplateOutlet]="column().cellTemplate()"
-            [ngTemplateOutletContext]="{ $implicit: dataItem, column: column() }"></ng-container>
+            [ngTemplateOutletContext]="{ $implicit: dataItem, column: column().field() }"></ng-container>
     } @else {
         <span [class]="cellTextClass()">{{ displayValue() }}</span>
     }

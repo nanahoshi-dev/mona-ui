@@ -68,10 +68,7 @@ export class GridRowFlattenerService {
             const rawValue = row.data[field];
             // Normalize Date values to a string key so that two Date objects representing
             // the same second hash to the same Map entry (mirrors cellComparer behaviour).
-            const mapKey =
-                isDate && rawValue instanceof Date
-                    ? `${rawValue.getFullYear()}-${rawValue.getMonth()}-${rawValue.getDate()}-${rawValue.getHours()}-${rawValue.getMinutes()}-${rawValue.getSeconds()}`
-                    : rawValue;
+            const mapKey = isDate && rawValue instanceof Date ? rawValue.toISOString() : rawValue;
             if (!groupMap.has(mapKey)) {
                 groupMap.set(mapKey, []);
                 keyOrder.push(mapKey);

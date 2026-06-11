@@ -108,10 +108,16 @@ export class GridCellComponent {
     public readonly row = input.required<Row>();
 
     public startEdit(): void {
-        if (!this.gridService.editableOptions.enabled || !this.column().editable()) {
+        if (!this.gridService.editableOptions().enabled || !this.column().editable()) {
             return;
         }
-        this.gridService.startCellEdit(this.cellUid(), this.row(), this.column());
+        if (this.gridService.editableOptions().mode === "row") {
+            if (this.gridService.editingRowUid() !== this.row().uid) {
+                this.gridService.startRowEdit(this.row());
+            }
+        } else {
+            this.gridService.startCellEdit(this.cellUid(), this.row(), this.column());
+        }
         afterNextRender(
             {
                 read: () => {
@@ -193,6 +199,19 @@ export class GridCellComponent {
             if (cellElement) {
                 cellElement.focus();
             }
+        }
+    }
+
+    protected onEnterKeyCommit(): void {
+        const context = this.gridService.editContext();
+        if (context?.mode === "cell") {
+            this.gridService.stopCellEdit();
+            const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
+            if (cellElement) {
+                cellElement.focus();
+            }
+        } else if (context?.mode === "row") {
+            this.gridService.commitRowEdit();
         }
     }
 }
