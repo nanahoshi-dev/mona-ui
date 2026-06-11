@@ -91,7 +91,7 @@ import {
     ],
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
-        "[attr.tabindex]": "disabled() ? null : 0",
+        "[attr.tabindex]": "disabled() ? null : -1",
         "[class]": "baseClass()",
         "(blur)": "onTimeInputBlur()"
     }
