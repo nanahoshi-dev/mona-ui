@@ -105,6 +105,7 @@ export class GridVirtualListComponent {
                 this.gridService.bodyTableElement.set(this.bodyTableElementRef().nativeElement);
                 this.synchronizeHorizontalScroll();
                 this.setFocusSubscription();
+                this.setScrollEndSubscription();
             }
         });
         this.setGroupSubscriptions();
@@ -129,6 +130,18 @@ export class GridVirtualListComponent {
             .subscribe(() => {
                 this.#gridNavigationService.focusFirstCell();
             });
+    }
+
+    private setScrollEndSubscription(): void {
+        const viewport = this.viewport();
+        viewport.scrolledIndexChange.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            const bottomOffset = viewport.measureScrollOffset('bottom');
+            const itemHeight = this.gridService.virtualScrollOptions().height;
+            const threshold = this.gridService.scrollEndThreshold();
+            if (bottomOffset <= threshold * itemHeight) {
+                this.gridService.scrollEnd$.next();
+            }
+        });
     }
 
     private setSelectedKeysLoadSubscription(): void {

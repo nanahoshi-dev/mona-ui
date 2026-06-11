@@ -1,4 +1,5 @@
-import { Directive, effect, inject, input, untracked } from "@angular/core";
+import { DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
 import { GridService } from "../services/grid.service";
 
@@ -10,10 +11,14 @@ export class GridVirtualScrollDirective {
         enabled: true,
         height: 32
     };
+    readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
-    public options = input<Partial<VirtualScrollOptions> | "" | undefined>(undefined, {
+
+    public readonly options = input<Partial<VirtualScrollOptions> | "" | undefined>(undefined, {
         alias: "monaGridVirtualScroll"
     });
+    public readonly scrollEnd = output<void>();
+    public readonly scrollEndThreshold = input<number>(5);
 
     public constructor() {
         effect(() => {
@@ -29,5 +34,10 @@ export class GridVirtualScrollDirective {
                 }
             });
         });
+        effect(() => {
+            const threshold = this.scrollEndThreshold();
+            untracked(() => this.#gridService.setScrollEndThreshold(threshold));
+        });
+        this.#gridService.scrollEnd$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => this.scrollEnd.emit());
     }
 }

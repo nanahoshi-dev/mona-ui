@@ -134,7 +134,7 @@
                             size="small"
                             (ngModelChange)="
                                 parentKey
-                                    ? handler!.updateSubFeature('boolean', parentKey, entry[0], $event)
+                                    ? handler!.updateSubFeature('boolean', [...parentKey, entry[0]], $event)
                                     : handler!.updateProperty('boolean', entry[0], $event)
                             "></mona-switch>
                     } @else if (entry[1].type === "number") {
@@ -142,7 +142,7 @@
                             [ngModel]="entry[1].numericValue"
                             (ngModelChange)="
                                 parentKey
-                                    ? handler!.updateSubFeature('number', parentKey, entry[0], $event)
+                                    ? handler!.updateSubFeature('number', [...parentKey, entry[0]], $event)
                                     : handler!.updateProperty('number', entry[0], $event)
                             "
                             [min]="entry[1].numericMin ?? null"
@@ -157,7 +157,7 @@
                             [placeholder]="entry[1].placeholder ?? ''"
                             (ngModelChange)="
                                 parentKey
-                                    ? handler!.updateSubFeature('dropdown', parentKey, entry[0], $event)
+                                    ? handler!.updateSubFeature('dropdown', [...parentKey, entry[0]], $event)
                                     : handler!.updateProperty('dropdown', entry[0], $event)
                             "
                             [textField]="entry[1].dropdownTextField"
@@ -196,7 +196,7 @@
                             [ngModel]="entry[1].stringValue"
                             (ngModelChange)="
                                 parentKey
-                                    ? handler!.updateSubFeature('string', parentKey, entry[0], $event)
+                                    ? handler!.updateSubFeature('string', [...parentKey, entry[0]], $event)
                                     : handler!.updateProperty('string', entry[0], $event)
                             "
                             [size]="'small'"
@@ -217,7 +217,7 @@
                     [ngTemplateOutlet]="featureListTemplate"
                     [ngTemplateOutletContext]="{
                         $implicit: subFeatureEntries,
-                        parentKey: entry[0],
+                        parentKey: parentKey ? [...parentKey, entry[0]] : [entry[0]],
                         level: level + 1
                     }"></ng-container>
             }

@@ -8,7 +8,6 @@ import { GridService } from "../services/grid.service";
     selector: "[monaGridColumnResizeHandler]"
 })
 export class GridColumnResizeHandlerDirective {
-    readonly #defaultMaxWidth = 1000;
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #gridService = inject(GridService);
@@ -38,8 +37,7 @@ export class GridColumnResizeHandlerDirective {
         const onMouseMove = (event: MouseEvent) => {
             const deltaX = event.clientX - initialX;
             const minWidth = this.column().minWidth();
-            const maxWidth =
-                this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? this.#defaultMaxWidth;
+            const maxWidth = this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? Infinity;
 
             if (initialWidth + deltaX < minWidth) {
                 return;

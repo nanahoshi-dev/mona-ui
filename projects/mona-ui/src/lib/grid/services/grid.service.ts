@@ -102,6 +102,8 @@ export class GridService {
     public readonly masterDetailTemplate = signal<TemplateRef<any> | null>(null);
     public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
     public readonly rowEdit$ = new Subject<RowEditEvent>();
+    public readonly scrollEnd$ = new Subject<void>();
+    public readonly scrollEndThreshold = signal<number>(5);
     public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
     public readonly selectBy = signal<GridKeySelector<unknown>>("");
     public readonly selectableOptions = signal<GridSelectableOptions>({ enabled: false, mode: "single" });
@@ -408,6 +410,10 @@ export class GridService {
 
     public setSortableOptions(options: Partial<SortableOptions>): void {
         this.sortableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setScrollEndThreshold(threshold: number): void {
+        this.scrollEndThreshold.set(threshold);
     }
 
     public setVirtualScrollOptions(options: VirtualScrollOptions): void {

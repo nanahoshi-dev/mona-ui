@@ -1,6 +1,18 @@
 import { DatePipe, JsonPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import {
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    inject,
+    input,
+    linkedSignal,
+    model,
+    signal
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import {
+    CellEditEvent,
+    RowEditEvent,
     DataType,
     GridCellTemplateDirective,
     GridColumnComponent,
@@ -11,7 +23,9 @@ import {
     GridSelectableDirective,
     GridSelectableOptions,
     GridVirtualScrollDirective,
-    VirtualScrollOptions
+    VirtualScrollOptions,
+    GridEditTemplateDirective,
+    SwitchComponent
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -72,6 +86,23 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     name: "Row Height",
                     type: "number",
                     numericValue: 32
+                },
+                infiniteScroll: {
+                    code: ``,
+                    active: false,
+                    description: `Enable infinite scroll for the grid to load more data as the user scrolls.`,
+                    name: "Infinite Scroll",
+                    type: "boolean",
+                    subFeatures: {
+                        scrollEndThreshold: {
+                            code: ``,
+                            active: false,
+                            description: `The threshold in pixels from the end of the grid at which the infinite scroll will trigger.`,
+                            name: "Scroll End Threshold",
+                            type: "number",
+                            numericValue: 100
+                        }
+                    }
                 }
             }
         }
@@ -149,7 +180,10 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         JsonPipe,
         GridEditableDirective,
         GridCellTemplateDirective,
-        DatePipe
+        DatePipe,
+        GridEditTemplateDirective,
+        SwitchComponent,
+        FormsModule
     ],
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
@@ -167,8 +201,12 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [rounded]="rounded()"
             [sort]="sort()"
             [sortable]="sortable()"
-            [monaGridEditable]="{ enabled: true }"
+            (cellEdit)="onCellEdit($event)"
+            (rowEdit)="onRowEdit($event)"
+            [monaGridEditable]="{ enabled: true, mode: 'cell' }"
             [monaGridVirtualScroll]="virtualization()"
+            [scrollEndThreshold]="infiniteScroll()?.scrollEndThreshold || 5"
+            (scrollEnd)="onScrollEnd()"
             [monaGridGroupable]="{ enabled: true }"
             [monaGridSelectable]="selection()"
             class="w-full h-96">
@@ -217,6 +255,23 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         { field: "ShippedDate", title: "Shipped Date", filterType: "date" }
     ];
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly gridData = signal(generateRandomGridData(1000));
+    protected readonly infiniteScroll = computed(() => {
+        const features = this.features();
+        const virtualizationFeature = features["virtualization"];
+        if (!virtualizationFeature.active) {
+            return null;
+        }
+
+        const virtualizationSubFeatures = virtualizationFeature.subFeatures || {};
+        const infiniteScrollOptions = virtualizationSubFeatures["infiniteScroll"];
+        if (!infiniteScrollOptions.active) {
+            return null;
+        }
+        const infiniteScrollSubFeatures = infiniteScrollOptions.subFeatures || {};
+        const scrollEndThreshold = infiniteScrollSubFeatures["scrollEndThreshold"]?.numericValue ?? 5;
+        return { scrollEndThreshold };
+    });
     protected readonly selection = computed(() => {
         const features = this.features();
         const subFeatures = features["selection"].subFeatures || {};
@@ -226,12 +281,22 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         };
         return selectableOptions;
     });
-    protected readonly gridData = signal(generateRandomGridData(1000));
-    protected readonly virtualGridData = signal(generateRandomGridData(100000));
+    protected readonly virtualGridData = linkedSignal<
+        { scrollEndThreshold: number } | null,
+        Record<PropertyKey, unknown>[]
+    >({
+        source: () => this.infiniteScroll(),
+        computation: (params, previous) => {
+            if (!params) {
+                return generateRandomGridData(100000);
+            }
+            return generateRandomGridData(100);
+        }
+    });
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"].subFeatures || {};
-        const height = subFeatures["rowHeight"].numericValue ?? 32;
+        const height = subFeatures["rowHeight"].numericValue ?? 31;
         const enabled = features["virtualization"].active ?? false;
         const virtualization: VirtualScrollOptions = { enabled, height };
         return virtualization;
@@ -248,9 +313,18 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     public readonly responsivePager = input<ReturnType<GridComponent<unknown>["responsivePager"]>>(false);
     public readonly sort = model<ReturnType<GridComponent<unknown>["sort"]>>([]);
     public readonly sortable = input<ReturnType<GridComponent<unknown>["sortable"]>>(false);
+
+    protected onScrollEnd(): void {
+        if (this.infiniteScroll()) {
+            this.virtualGridData.update(data => [
+                ...data,
+                ...generateRandomGridData(10, this.virtualGridData().length)
+            ]);
+        }
+    }
 }
 
-function generateRandomGridData(count: number) {
+function generateRandomGridData(count: number, startFrom = 0): Record<PropertyKey, unknown>[] {
     const generatedData = [];
     const cities = [
         "Paris",
@@ -318,7 +392,7 @@ function generateRandomGridData(count: number) {
         "Uncharted Journey",
         "Thunderous Whirlpool"
     ];
-    let orderNumber = 1;
+    let orderNumber = 1 + startFrom;
 
     for (let i = 0; i < count; i++) {
         const now = new Date();

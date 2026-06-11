@@ -46,78 +46,56 @@ export class FeatureConfigHandler {
         }
     }
 
-    public updateSubFeature<K extends keyof ComponentConfigFeatureItem>(
-        type: ComponentConfigFeatureItemOptions["type"],
-        parentProperty: K,
-        subProperty: string,
-        value: boolean
-    ): void {
+    public updateSubFeature(type: ComponentConfigFeatureItemOptions["type"], path: string[], value: unknown): void {
         const currentData = this.#data();
-        if (currentData && currentData[parentProperty] && currentData[parentProperty].subFeatures) {
-            let updatedData: ComponentConfigFeatureItem;
-            if (type === "boolean") {
-                updatedData = {
-                    ...currentData,
-                    [parentProperty]: {
-                        ...currentData[parentProperty],
-                        subFeatures: {
-                            ...currentData[parentProperty].subFeatures,
-                            [subProperty]: {
-                                ...currentData[parentProperty].subFeatures![subProperty],
-                                active: value
-                            }
-                        }
-                    }
-                };
-            } else if (type === "number") {
-                updatedData = {
-                    ...currentData,
-                    [parentProperty]: {
-                        ...currentData[parentProperty],
-                        subFeatures: {
-                            ...currentData[parentProperty].subFeatures,
-                            [subProperty]: {
-                                ...currentData[parentProperty].subFeatures![subProperty],
-                                numericValue: value
-                            }
-                        }
-                    }
-                };
-            } else if (type === "string") {
-                updatedData = {
-                    ...currentData,
-                    [parentProperty]: {
-                        ...currentData[parentProperty],
-                        subFeatures: {
-                            ...currentData[parentProperty].subFeatures,
-                            [subProperty]: {
-                                ...currentData[parentProperty].subFeatures![subProperty],
-                                stringValue: value
-                            }
-                        }
-                    }
-                };
-            } else {
-                updatedData = {
-                    ...currentData,
-                    [parentProperty]: {
-                        ...currentData[parentProperty],
-                        subFeatures: {
-                            ...currentData[parentProperty].subFeatures,
-                            [subProperty]: {
-                                ...currentData[parentProperty].subFeatures![subProperty],
-                                dropdownValue: value
-                            }
-                        }
-                    }
-                };
-            }
-            this.#data.set(updatedData);
+        const [topKey, ...subPath] = path;
+        const topItem = currentData[topKey];
+        if (!topItem) {
+            return;
         }
+        this.#data.set({
+            ...currentData,
+            [topKey]: this.#updateAtPath(type, topItem, subPath, value)
+        });
     }
 
     public get data(): Signal<ComponentConfigFeatureItem> {
         return this.#data.asReadonly();
+    }
+
+    #applyValue(
+        type: ComponentConfigFeatureItemOptions["type"],
+        item: ComponentConfigFeatureItem[string],
+        value: unknown
+    ): ComponentConfigFeatureItem[string] {
+        if (type === "boolean") {
+            return { ...item, active: value as boolean };
+        }
+        if (type === "number") {
+            return { ...item, numericValue: value as number };
+        }
+        if (type === "string") {
+            return { ...item, stringValue: value as string };
+        }
+        return { ...item, dropdownValue: value };
+    }
+
+    #updateAtPath(
+        type: ComponentConfigFeatureItemOptions["type"],
+        item: ComponentConfigFeatureItem[string],
+        path: string[],
+        value: unknown
+    ): ComponentConfigFeatureItem[string] {
+        const [key, ...rest] = path;
+        if (!item.subFeatures?.[key]) return item;
+        const updatedChild =
+            rest.length === 0
+                ? this.#applyValue(type, item.subFeatures[key], value)
+                : this.#updateAtPath(type, item.subFeatures[key], rest, value);
+        return {
+            ...item,
+            subFeatures: { ...item.subFeatures, [key]: updatedChild }
+        };
     }
 }
 
