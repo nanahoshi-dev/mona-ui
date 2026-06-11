@@ -1,3 +1,4 @@
+import { Clipboard } from "@angular/cdk/clipboard";
 import {
     afterNextRender,
     afterRenderEffect,
@@ -14,6 +15,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { filter, fromEvent } from "rxjs";
 import { ThemeService } from "../../theme/services/theme.service";
 import { GridNavigationService, NavigationData } from "../services/grid-navigation.service";
+import { GridService } from "../services/grid.service";
 import { gridListTableCellThemeVariants } from "../styles/grid.styles";
 
 @Directive({
@@ -24,6 +26,7 @@ import { gridListTableCellThemeVariants } from "../styles/grid.styles";
     }
 })
 export class GridLogicalCellDirective {
+    readonly #clipboard = inject(Clipboard);
     readonly #cellData = computed(() => {
         const data: NavigationData = {
             colIndex: this.colIndex(),
@@ -40,6 +43,7 @@ export class GridLogicalCellDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef);
     readonly #gridNavigationService = inject(GridNavigationService);
+    readonly #gridService = inject(GridService);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         if (this.#hostElementRef.nativeElement.tagName === "TH") {
@@ -72,6 +76,7 @@ export class GridLogicalCellDirective {
         });
         afterNextRender({
             read: () => {
+                this.#setCellCopySubscription();
                 this.#setKeyboardNavigation();
             }
         });
@@ -84,6 +89,21 @@ export class GridLogicalCellDirective {
         });
     }
 
+    #setCellCopySubscription(): void {
+        fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                filter(e => (e.ctrlKey || e.metaKey) && e.key === "c"),
+                filter(() => this.rowIndex() >= 0 && !this.#gridService.isInEditMode())
+            )
+            .subscribe(() => {
+                const text = (this.#hostElementRef.nativeElement as HTMLElement).innerText?.trim() ?? "";
+                if (text) {
+                    this.#clipboard.copy(text);
+                }
+            });
+    }
+
     #setKeyboardNavigation(): void {
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
             .pipe(takeUntilDestroyed(this.#destroyRef))
@@ -93,6 +113,7 @@ export class GridLogicalCellDirective {
                     this.#gridNavigationService.setLastFocusedCellKey(key);
                 }
             });
+
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
