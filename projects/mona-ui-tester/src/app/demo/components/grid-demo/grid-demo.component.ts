@@ -25,7 +25,9 @@ import {
     GridVirtualScrollDirective,
     VirtualScrollOptions,
     GridEditTemplateDirective,
-    SwitchComponent
+    SwitchComponent,
+    GridExportDirective,
+    ButtonDirective
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -183,11 +185,16 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         DatePipe,
         GridEditTemplateDirective,
         SwitchComponent,
-        FormsModule
+        FormsModule,
+        GridExportDirective,
+        ButtonDirective
     ],
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
         @let featureData = this.features();
+
+        <button monaButton (click)="gridExport.exportCsv()">Export Grid</button>
+
         <mona-grid
             [data]="effectiveGridData"
             [filter]="filter()"
@@ -209,6 +216,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             (scrollEnd)="onScrollEnd()"
             [monaGridGroupable]="{ enabled: true }"
             [monaGridSelectable]="selection()"
+            monaGridExport
+            #gridExport="monaGridExport"
             class="w-full h-96">
             <!--            <ng-container monaGridContextMenu>-->
             <!--                <mona-contextmenu-item [label]="'Menu Item 1'">-->
