@@ -19,6 +19,7 @@ import { SortDescriptor } from "../../query/sort/SortDescriptor";
 import type { DeepPartial } from "../../utils/deepMerge";
 import { createIterablePatchStore } from "../../utils/PatchStore";
 import { CellEditEvent } from "../models/CellEditEvent";
+import type { FilterableOptions } from "../models/FilterableOptions";
 import { RowEditEvent } from "../models/RowEditEvent";
 import { Column } from "../models/Column";
 import { ColumnFilterState } from "../models/ColumnFilterState";
@@ -53,6 +54,7 @@ export class GridService {
         idOf: item => item.$rowId,
         source: () => this.#editSource
     });
+    readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
     readonly #platformId = inject(PLATFORM_ID);
     readonly #textMeasureCache = new Map<string, number>();
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
@@ -82,6 +84,8 @@ export class GridService {
     });
     public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
     public readonly expandedKeys = signal(ImmutableSet.create());
+    public readonly filterChange$ = new Subject<CompositeFilterDescriptor[]>();
+    public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly gridHeaderElement = signal<HTMLDivElement | null>(null);
     public readonly groupColumnWidth = 34;
     public readonly groupColumns = signal<ImmutableSet<Column>>(ImmutableSet.create());
@@ -385,6 +389,10 @@ export class GridService {
 
     public setEditableOptions(options: EditableOptions): void {
         this.editableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setFilterableOptions(options: Partial<FilterableOptions>): void {
+        this.#filterableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setGroupableOptions(options: Partial<GroupableOptions>): void {

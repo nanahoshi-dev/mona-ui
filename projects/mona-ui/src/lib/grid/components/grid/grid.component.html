@@ -130,7 +130,7 @@
                                     } @else if (column.columnSortDirection() === "desc") {
                                         <i class="ri-arrow-up-line"></i>
                                     }
-                                    @if (filterable()) {
+                                    @if (filterMenuEnabled()) {
                                         <mona-grid-filter-menu
                                             [column]="column"
                                             [type]="column.dataType()"

@@ -27,7 +27,10 @@ import {
     GridEditTemplateDirective,
     SwitchComponent,
     GridExportDirective,
-    ButtonDirective
+    ButtonDirective,
+    GridFilterableDirective,
+    type CompositeFilterDescriptor,
+    GridFilterableOptions
 } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -57,6 +60,23 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             name: "Cell Template",
             description: "Customize the cell template for grid rows",
             active: false
+        },
+        filtering: {
+            code: ``,
+            name: "Filtering",
+            description: "Enable filtering for grid rows",
+            active: false,
+            subFeatures: {
+                type: {
+                    code: ``,
+                    active: false,
+                    description: "Filtering type for grid rows",
+                    name: "Type",
+                    type: "dropdown",
+                    dropdownDataSource: ["menu", "row", "both"] as const,
+                    dropdownValue: "menu"
+                }
+            }
         },
         selection: {
             code: ``,
@@ -115,14 +135,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             data: {
                 type: "iterable",
                 value: []
-            },
-            filter: {
-                type: "iterable",
-                value: []
-            },
-            filterable: {
-                type: "boolean",
-                value: false
             },
             pageSize: {
                 type: "number",
@@ -187,7 +199,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         SwitchComponent,
         FormsModule,
         GridExportDirective,
-        ButtonDirective
+        ButtonDirective,
+        GridFilterableDirective
     ],
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
@@ -197,8 +210,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
 
         <mona-grid
             [data]="effectiveGridData"
-            [filter]="filter()"
-            [filterable]="filterable()"
             [pageSize]="pageSize()"
             [pageSizeValues]="pageSizeValues()"
             [reorderable]="reorderable()"
@@ -211,6 +222,9 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             (cellEdit)="onCellEdit($event)"
             (rowEdit)="onRowEdit($event)"
             [monaGridEditable]="{ enabled: true, mode: 'cell' }"
+            [monaGridFilterable]="filterable()"
+            [filter]="filter()"
+            (filterChange)="onFilterChange($event)"
             [monaGridVirtualScroll]="virtualization()"
             [scrollEndThreshold]="infiniteScroll()?.scrollEndThreshold || 5"
             (scrollEnd)="onScrollEnd()"
@@ -244,6 +258,13 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                             </span>
                         </ng-template>
                     }
+                    @if (column.field === "Delivered") {
+                        <ng-template monaGridEditTemplate let-dataItem>
+                            <mona-switch
+                                [ngModel]="dataItem[column.field]"
+                                (ngModelChange)="updateCellValue(dataItem, column.field, $event)"></mona-switch>
+                        </ng-template>
+                    }
                 </mona-grid-column>
             }
             <ng-template monaGridDetailTemplate let-dataItem>
@@ -260,10 +281,32 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         { field: "ShipCity", title: "Ship City", filterType: "string" },
         { field: "ShipCountry", title: "Ship Country", filterType: "string" },
         { field: "Delivered", title: "Delivered", filterType: "boolean" },
-        { field: "OrderDate", title: "Order Date", filterType: "date" },
-        { field: "ShippedDate", title: "Shipped Date", filterType: "date" }
+        { field: "OrderDate", title: "Order Date", filterType: "datetime" },
+        { field: "ShippedDate", title: "Shipped Date", filterType: "time" }
     ];
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly filter = signal<CompositeFilterDescriptor[]>([
+        {
+            logic: "and",
+            filters: [
+                {
+                    field: "ShipName",
+                    operator: "contains",
+                    value: "e"
+                }
+            ]
+        }
+    ]);
+    protected readonly filterable = computed(() => {
+        const features = this.features();
+        const filteringFeature = features["filtering"];
+        const filteringTypeFeature = filteringFeature.subFeatures || {};
+        const options: GridFilterableOptions = {
+            enabled: filteringFeature.active ?? false,
+            type: filteringTypeFeature["type"]?.dropdownValue || "menu"
+        };
+        return options;
+    });
     protected readonly gridData = signal(generateRandomGridData(1000));
     protected readonly infiniteScroll = computed(() => {
         const features = this.features();
@@ -311,8 +354,6 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return virtualization;
     });
     public readonly data = input<ReturnType<GridComponent<unknown>["data"]>>([]);
-    public readonly filter = model<ReturnType<GridComponent<unknown>["filter"]>>([]);
-    public readonly filterable = input<ReturnType<GridComponent<unknown>["filterable"]>>(false);
     public readonly pageSize = input<ReturnType<GridComponent<unknown>["pageSize"]>>(10);
     public readonly pageSizeValues = input<ReturnType<GridComponent<unknown>["pageSizeValues"]>>([10, 20, 30, 40, 50]);
     public readonly reorderable = input<ReturnType<GridComponent<unknown>["reorderable"]>>(false);
@@ -323,6 +364,11 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     public readonly sort = model<ReturnType<GridComponent<unknown>["sort"]>>([]);
     public readonly sortable = input<ReturnType<GridComponent<unknown>["sortable"]>>(false);
 
+    protected onFilterChange(event: CompositeFilterDescriptor[]): void {
+        console.log("Filter changed:", event);
+        this.filter.set(event);
+    }
+
     protected onScrollEnd(): void {
         if (this.infiniteScroll()) {
             this.virtualGridData.update(data => [
@@ -330,6 +376,33 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
                 ...generateRandomGridData(10, this.virtualGridData().length)
             ]);
         }
+    }
+
+    protected onRowEdit(event: RowEditEvent): void {
+        console.log("Row edited:", event);
+    }
+
+    protected onCellEdit(event: CellEditEvent): void {
+        console.log("Cell edited:", event);
+        window.setTimeout(() => {
+            const gridData = this.virtualization().enabled ? this.virtualGridData() : this.gridData();
+            const row = gridData.find(row => row === event.rowData);
+            if (!row) return;
+            const field = event.field as keyof typeof row;
+            if (row) {
+                if ((row as any)[field] === event.newValue) return;
+                (row as any)[field] = event.newValue;
+            }
+            gridData.splice(gridData.indexOf(event.rowData as typeof row), 1, row);
+            this.virtualization().enabled ? this.virtualGridData.set([...gridData]) : this.gridData.set([...gridData]);
+        }, 1000);
+    }
+
+    protected updateCellValue(dataItem: Record<PropertyKey, unknown>, field: string, value: unknown): void {
+        dataItem[field] = value;
+        this.virtualization().enabled
+            ? this.virtualGridData.set([...this.virtualGridData()])
+            : this.gridData.set([...this.gridData()]);
     }
 }
 

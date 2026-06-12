@@ -42,7 +42,6 @@ import { PlaceholderComponent } from "../../../layout/placeholder/components/pla
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
 import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
-import { CompositeFilterDescriptor } from "../../../query/filter/FilterDescriptor";
 import { SortDescriptor, SortDirection } from "../../../query/sort/SortDescriptor";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
@@ -145,6 +144,9 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly columns = contentChildren(GridColumnComponent);
     protected readonly dragColumn = signal<Column | null>(null);
     protected readonly dropColumn = signal<Column | null>(null);
+    protected readonly filterMenuEnabled = computed(
+        () => this.gridService.filterableOptions().enabled && this.gridService.filterableOptions().type === "menu"
+    );
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
     protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
@@ -211,16 +213,6 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly data = input<Iterable<T>>([]);
 
     /**
-     * Initial filter configuration to be applied to the grid when it is loaded.
-     */
-    public readonly filter = model<CompositeFilterDescriptor[]>([]);
-
-    /**
-     * Whether the grid is filterable.
-     */
-    public readonly filterable = input(false);
-
-    /**
      * The number of items to be displayed on a page.
      */
     public readonly pageSize = input<number>();
@@ -273,7 +265,6 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
-        this.setFilterEffect();
         this.setSortableOptionsEffect();
         this.setSortEffect();
         this.setPageSizeEffect();
@@ -370,9 +361,7 @@ export class GridComponent<T> implements GridVariantInput {
             .select(p => p.filter)
             .where(f => f != null);
         if (allFilters.any()) {
-            this.filter.set(allFilters.toArray() as CompositeFilterDescriptor[]);
-        } else if (this.filter().length !== 0) {
-            this.filter.set([]);
+            this.gridService.filterChange$.next(allFilters.toArray());
         }
     }
 
@@ -531,9 +520,6 @@ export class GridComponent<T> implements GridVariantInput {
             untracked(() => {
                 this.gridService.columns.update(list => list.clear().addAll(columns.map(c => c.column)));
                 this.gridService.columns().forEach((c, i) => c.setIndex(i));
-                if (this.filter().length !== 0) {
-                    this.gridService.loadFilters(this.filter());
-                }
                 if (this.sort().length !== 0) {
                     this.gridService.loadSorts(this.sort());
                 }
@@ -545,13 +531,6 @@ export class GridComponent<T> implements GridVariantInput {
         effect(() => {
             const data = this.data();
             untracked(() => this.gridService.setRows(data));
-        });
-    }
-
-    private setFilterEffect(): void {
-        effect(() => {
-            const filter = this.filter();
-            untracked(() => this.gridService.loadFilters(filter));
         });
     }
 
