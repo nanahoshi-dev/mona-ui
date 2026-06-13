@@ -69,6 +69,7 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
             }
         </div>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full flex items-center justify-center"
     }

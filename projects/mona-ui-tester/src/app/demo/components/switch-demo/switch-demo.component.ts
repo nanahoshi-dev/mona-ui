@@ -114,6 +114,7 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
         SwitchOnLabelTemplateDirective,
         SwitchHandleContentTemplateDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-switch

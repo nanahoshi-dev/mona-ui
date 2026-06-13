@@ -1,8 +1,9 @@
-import { Component, input, model, TemplateRef, viewChild } from "@angular/core";
+import { Component, input, model, TemplateRef, viewChild, ChangeDetectionStrategy } from "@angular/core";
 import { v4 } from "uuid";
 
 @Component({
     selector: "mona-splitter-pane",
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <ng-template>
             <ng-content></ng-content>

@@ -210,6 +210,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
         LucideAngularModule,
         RandomColorPipe
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <div class="flex gap-2">

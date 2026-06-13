@@ -81,6 +81,7 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
 
 @Component({
     imports: [ChipComponent, ChipPrefixTemplateDirective, AvatarComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-chip
@@ -98,9 +99,7 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
                 <ng-template monaChipPrefixTemplate>
                     <mona-avatar
                         [label]="'N'"
-                        [image]="
-                            'https://photos.smugmug.com/photos/i-fgmzcP4/0/LcnnHTpqhgGgTjHtbmvtjgmLWrVH2JhVGckRnpZqq/Th/i-fgmzcP4-Th.png'
-                        "
+                        [image]="'https://photos.smugmug.com/photos/i-fgmzcP4/0/LcnnHTpqhgGgTjHtbmvtjgmLWrVH2JhVGckRnpZqq/Th/i-fgmzcP4-Th.png'"
                         [width]="16"
                         [height]="16"
                         [borderRadius]="'50%'"

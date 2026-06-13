@@ -1,11 +1,20 @@
-import { Component, inject, Injector, linkedSignal, Signal, signal, WritableSignal } from "@angular/core";
+import {
+    Component,
+    inject,
+    Injector,
+    linkedSignal,
+    Signal,
+    signal,
+    WritableSignal,
+    ChangeDetectionStrategy
+} from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { filter, map } from "rxjs";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { DemoService } from "../../services/demo.service";
 import { ComponentConfig, extractConfigValues } from "../../utils/componentConfig";
 
-@Component({ template: "" })
+@Component({ changeDetection: ChangeDetectionStrategy.Eager, template: "" })
 export abstract class AbstractDemoComponent<TComponent> {
     readonly #injector = inject(Injector);
     protected readonly demoService = inject(DemoService);

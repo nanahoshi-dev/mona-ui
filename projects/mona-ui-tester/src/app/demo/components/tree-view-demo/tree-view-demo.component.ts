@@ -358,6 +358,7 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                 ]"></app-event-viewer>
         }
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full flex items-start!"
     }

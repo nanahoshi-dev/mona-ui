@@ -30,14 +30,12 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { swap } from "@mirei/ts-collections";
-import {
-    PopupMenuComponent,
-    PopupMenuItemComponent,
-    PopupMenuTextTemplateDirective
-} from "projects/mona-ui/src/public-api";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
+import { PopupMenuItemComponent } from "../../../common/popup-menu/components/popup-menu-item/popup-menu-item.component";
+import { PopupMenuComponent } from "../../../common/popup-menu/components/popup-menu/popup-menu.component";
+import { PopupMenuTextTemplateDirective } from "../../../common/popup-menu/directives/popup-menu-text-template.directive";
 import { FilterService } from "../../../filter/services/filter.service";
 import { PlaceholderComponent } from "../../../layout/placeholder/components/placeholder/placeholder.component";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";

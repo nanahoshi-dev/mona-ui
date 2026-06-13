@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, inject, Signal } from "@angular/core";
+import { Component, computed, effect, ElementRef, inject, Signal, ChangeDetectionStrategy } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -9,6 +9,7 @@ import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "..
 @Component({
     selector: "mona-tree-drop-hint",
     templateUrl: "./tree-drop-hint.component.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         "[class]": "baseClass()"
     }

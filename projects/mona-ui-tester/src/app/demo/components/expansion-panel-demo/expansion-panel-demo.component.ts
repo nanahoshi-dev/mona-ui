@@ -169,6 +169,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
             </mona-expansion-panel>
         }
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full gap-0!"
     }

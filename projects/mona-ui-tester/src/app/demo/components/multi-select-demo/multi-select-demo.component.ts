@@ -193,6 +193,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         MultiSelectTagTemplateDirective,
         DropDownGroupableDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let tagConfigData = tagConfig();

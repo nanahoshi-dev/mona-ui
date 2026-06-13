@@ -150,6 +150,7 @@ export class SplitterDemoComponent extends AbstractDemoComponent<SplitterCompone
             </mona-splitter-pane>
         </mona-splitter>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full h-64"
     }

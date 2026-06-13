@@ -65,6 +65,7 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
 
 @Component({
     imports: [ColorPaletteComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let customPaletteActive = features()["customPalette"] && features()["customPalette"].active;
         <mona-color-palette

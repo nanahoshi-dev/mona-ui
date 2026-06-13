@@ -65,6 +65,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
 
 @Component({
     imports: [ColorGradientComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-color-gradient
             [disabled]="disabled()"

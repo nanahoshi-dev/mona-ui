@@ -240,6 +240,7 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
             }
         </mona-stepper>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full flex items-center justify-center",
         "[style.height.px]": "orientation() === 'vertical' ? 500 : undefined"

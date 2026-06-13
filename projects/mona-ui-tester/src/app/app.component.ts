@@ -77,7 +77,7 @@ interface TreeNodeDataItem {
     selector: "app-root",
     templateUrl: "./app.component.html",
     styleUrls: ["./app.component.scss"],
-    changeDetection: ChangeDetectionStrategy.Default,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [LucideAngularModule, CommonModule, FontAwesomeModule, FormsModule, HeaderComponent, RouterOutlet]
 })
 export class AppComponent implements OnInit {

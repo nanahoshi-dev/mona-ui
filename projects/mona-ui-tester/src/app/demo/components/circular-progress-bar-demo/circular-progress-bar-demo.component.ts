@@ -87,6 +87,7 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
 
 @Component({
     imports: [CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-circular-progress-bar

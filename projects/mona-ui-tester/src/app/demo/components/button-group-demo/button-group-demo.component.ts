@@ -64,6 +64,7 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
 
 @Component({
     imports: [ButtonGroupComponent, ButtonDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-button-group
             [allowEmpty]="allowEmpty()"

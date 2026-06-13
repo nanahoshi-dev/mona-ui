@@ -189,6 +189,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         DropdownPrefixTemplateDirective,
         ReactiveFormsModule
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};

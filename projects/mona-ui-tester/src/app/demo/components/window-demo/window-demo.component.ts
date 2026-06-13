@@ -271,6 +271,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
             </div>
         </ng-template>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {}
 })
 class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent> {

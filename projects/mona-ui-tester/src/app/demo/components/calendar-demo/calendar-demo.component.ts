@@ -94,6 +94,7 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
         CalendarYearCellTemplateDirective,
         CalendarDecadeCellTemplateDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <span>{{ formValueText() }}</span>

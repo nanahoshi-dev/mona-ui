@@ -141,6 +141,7 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
 
 @Component({
     imports: [ButtonDirective, PlaceholderComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <button monaButton (click)="showNotification()">Show Notification</button>
         <button monaButton look="error" (click)="hideAll()">Hide All Notifications</button>

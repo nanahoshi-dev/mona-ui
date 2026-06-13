@@ -76,6 +76,7 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
 
 @Component({
     imports: [ColorPickerComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let customPaletteActive = features()["customPalette"] && features()["customPalette"].active;
         <mona-color-picker

@@ -178,6 +178,7 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
         DateInputPrefixTemplateDirective,
         LucideAngularModule
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <span>Selected Date: {{ formValueText() }}</span>

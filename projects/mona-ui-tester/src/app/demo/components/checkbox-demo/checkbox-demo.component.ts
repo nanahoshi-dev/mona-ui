@@ -75,6 +75,7 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
 
 @Component({
     imports: [CheckBoxComponent, CheckboxDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-check-box
             [disabled]="disabled()"

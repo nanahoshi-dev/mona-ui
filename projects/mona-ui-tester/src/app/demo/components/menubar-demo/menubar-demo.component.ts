@@ -430,6 +430,7 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
         MenuTextTemplateDirective,
         RandomColorPipe
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-menubar

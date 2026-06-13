@@ -125,6 +125,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             }
         </mona-tabs>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full flex items-center justify-center"
     }

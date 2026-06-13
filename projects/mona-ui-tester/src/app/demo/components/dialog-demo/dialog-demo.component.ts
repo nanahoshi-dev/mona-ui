@@ -201,6 +201,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
         TextBoxComponent,
         TextBoxDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <button monaButton look="primary" (click)="dialogVisible.set(true)">Open</button>

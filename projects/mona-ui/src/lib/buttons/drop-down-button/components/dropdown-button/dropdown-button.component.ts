@@ -12,7 +12,8 @@ import {
     output,
     signal,
     TemplateRef,
-    viewChild
+    viewChild,
+    ChangeDetectionStrategy
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
@@ -35,6 +36,7 @@ import { DropdownButtonTextTemplateDirective } from "../../directives/dropdown-b
 @Component({
     selector: "mona-dropdown-button",
     templateUrl: "./dropdown-button.component.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         ButtonDirective,
         PopupMenuComponent,

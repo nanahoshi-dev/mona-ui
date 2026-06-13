@@ -120,6 +120,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
 
 @Component({
     imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, LucideAngularModule, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-numeric-text-box

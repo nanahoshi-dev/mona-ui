@@ -12,7 +12,8 @@ import {
     Signal,
     signal,
     TemplateRef,
-    viewChild
+    viewChild,
+    ChangeDetectionStrategy
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
@@ -58,6 +59,7 @@ import {
         ColorGradientComponent,
         NgTemplateOutlet
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         "[class]": "baseClasses()",
         "[attr.tabindex]": "disabled() ? -1 : 0",

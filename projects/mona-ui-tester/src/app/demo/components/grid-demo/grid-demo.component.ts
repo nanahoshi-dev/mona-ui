@@ -202,6 +202,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         ButtonDirective,
         GridFilterableDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
         @let featureData = this.features();

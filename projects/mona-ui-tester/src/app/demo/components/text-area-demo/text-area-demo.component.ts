@@ -29,6 +29,7 @@ export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirecti
 
 @Component({
     template: ` <textarea monaTextArea [rounded]="rounded()" class="w-144 h-32 resize-none"></textarea> `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TextAreaDirective]
 })
 export class TextAreaWrapperComponent implements ComponentInputsAsSignal<TextAreaDirective> {

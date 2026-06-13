@@ -305,6 +305,7 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
         LucideAngularModule,
         RandomColorPipe
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-split-button

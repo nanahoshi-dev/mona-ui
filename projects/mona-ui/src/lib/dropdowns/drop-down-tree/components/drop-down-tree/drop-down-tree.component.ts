@@ -17,7 +17,8 @@ import {
     signal,
     TemplateRef,
     untracked,
-    viewChild
+    viewChild,
+    ChangeDetectionStrategy
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
@@ -68,6 +69,7 @@ import { DropDownTreeNodeTemplateDirective } from "../../directives/drop-down-tr
             multi: true
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-haspopup]": "true",

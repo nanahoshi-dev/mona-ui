@@ -102,6 +102,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             }
         </button>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "flex items-center"
     }

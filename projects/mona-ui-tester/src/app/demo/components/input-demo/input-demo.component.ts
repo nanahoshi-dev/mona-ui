@@ -34,6 +34,7 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
 
 @Component({
     imports: [TextBoxDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: ` <input type="email" [rounded]="rounded()" [size]="size()" monaTextBox /> `
 })
 export class InputWrapperComponent implements ComponentInputsAsSignal<TextBoxDirective> {

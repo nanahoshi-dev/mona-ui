@@ -174,6 +174,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         CurrencyPipe,
         ReactiveFormsModule
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};

@@ -135,6 +135,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         ReactiveFormsModule,
         DropdownButtonTextTemplateDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-text-box

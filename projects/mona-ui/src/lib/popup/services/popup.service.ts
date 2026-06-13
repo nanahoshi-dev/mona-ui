@@ -11,7 +11,7 @@ import {
     PositionStrategy
 } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
-import { CdkScrollable, ScrollDispatcher } from "@angular/cdk/scrolling";
+import { CdkScrollable, ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scrolling";
 import { DestroyRef, DOCUMENT, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
@@ -244,8 +244,8 @@ export class PopupService {
         return connectionPosition(anchorPoint, popupPoint);
     }
 
-    private getScrollableContainers(anchor: FlexibleConnectedPositionStrategyOrigin): CdkScrollable[] {
-        const scrollables: CdkScrollable[] = [];
+    private getScrollableContainers(anchor: FlexibleConnectedPositionStrategyOrigin): ScrollDispatcherTarget[] {
+        const scrollables: ScrollDispatcherTarget[] = [];
         if (anchor instanceof HTMLElement) {
             const ancestorScrollables = this.#scrollDispatcher.getAncestorScrollContainers(anchor);
             scrollables.push(...ancestorScrollables);

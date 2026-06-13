@@ -1,4 +1,14 @@
-import { Component, computed, DOCUMENT, forwardRef, inject, input, signal, Signal } from "@angular/core";
+import {
+    Component,
+    computed,
+    DOCUMENT,
+    forwardRef,
+    inject,
+    input,
+    signal,
+    Signal,
+    ChangeDetectionStrategy
+} from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { count } from "@mirei/ts-collections";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -23,6 +33,7 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
             multi: true
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         "[class]": "baseClasses()",
         "[style.grid-template-columns]": "'repeat('+colorScheme().columns+', minmax('+tileSize()+'px, 1fr))'",

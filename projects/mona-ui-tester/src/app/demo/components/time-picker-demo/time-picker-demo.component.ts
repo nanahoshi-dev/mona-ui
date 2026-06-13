@@ -125,6 +125,7 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
 
 @Component({
     imports: [TimePickerComponent, ReactiveFormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <span>Selected Time: {{ formValueText() }}</span>
         <form [formGroup]="formGroup">

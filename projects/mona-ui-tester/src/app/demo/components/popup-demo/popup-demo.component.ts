@@ -167,6 +167,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
 
 @Component({
     imports: [ButtonDirective, PopupComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <button monaButton #popupAnchor>Popup</button>
         <mona-popup

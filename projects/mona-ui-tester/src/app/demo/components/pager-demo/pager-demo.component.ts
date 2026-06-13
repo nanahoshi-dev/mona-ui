@@ -477,6 +477,7 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
             </mona-pager>
         </div>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full"
     }

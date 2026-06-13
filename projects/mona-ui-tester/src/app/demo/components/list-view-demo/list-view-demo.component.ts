@@ -364,6 +364,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         ListViewPageableDirective,
         SlicePipe
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};

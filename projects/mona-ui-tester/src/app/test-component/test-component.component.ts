@@ -1,10 +1,11 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
 import { PopupRef } from "mona-ui";
 
 @Component({
     selector: "app-test-component",
     templateUrl: "./test-component.component.html",
     styleUrls: ["./test-component.component.scss"],
+    changeDetection: ChangeDetectionStrategy.Eager,
     standalone: true
 })
 export class TestComponentComponent implements OnInit {

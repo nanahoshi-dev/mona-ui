@@ -128,6 +128,7 @@ export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarC
         </mona-progress-bar>
     `,
     imports: [ProgressBarComponent, ProgressBarLabelTemplateDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full"
     }

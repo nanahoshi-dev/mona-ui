@@ -146,6 +146,7 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
         NgOptimizedImage,
         LucideAngularModule
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <button monaButton #anchor>Popover Anchor</button>

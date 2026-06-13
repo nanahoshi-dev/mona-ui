@@ -2,7 +2,10 @@
     @if (treeService.nodeTemplate()) {
         <ng-container
             [ngTemplateOutlet]="treeService.nodeTemplate()"
-            [ngTemplateOutletContext]="{ $implicit: node()?.data, element: element.parentElement }"></ng-container>
+            [ngTemplateOutletContext]="{
+                $implicit: $safeNavigationMigration(node()?.data),
+                element: element.parentElement
+            }"></ng-container>
     } @else {
         <span class="truncate">{{ nodeText() }}</span>
     }

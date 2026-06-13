@@ -306,6 +306,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         LucideAngularModule,
         RandomColorPipe
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-dropdown-button

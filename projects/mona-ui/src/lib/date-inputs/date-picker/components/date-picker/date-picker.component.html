@@ -53,21 +53,21 @@
             @if (decadeCellTemplate()) {
                 <ng-template monaCalendarDecadeCellTemplate let-year>
                     <ng-container
-                        [ngTemplateOutlet]="decadeCellTemplate()?.templateRef"
+                        [ngTemplateOutlet]="$safeNavigationMigration(decadeCellTemplate()?.templateRef)"
                         [ngTemplateOutletContext]="{ $implicit: year }"></ng-container>
                 </ng-template>
             }
             @if (monthCellTemplate()) {
                 <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
                     <ng-container
-                        [ngTemplateOutlet]="monthCellTemplate()?.templateRef"
+                        [ngTemplateOutlet]="$safeNavigationMigration(monthCellTemplate()?.templateRef)"
                         [ngTemplateOutletContext]="{ $implicit: day, date }"></ng-container>
                 </ng-template>
             }
             @if (yearCellTemplate()) {
                 <ng-template monaCalendarYearCellTemplate let-year let-text="text">
                     <ng-container
-                        [ngTemplateOutlet]="yearCellTemplate()?.templateRef"
+                        [ngTemplateOutlet]="$safeNavigationMigration(yearCellTemplate()?.templateRef)"
                         [ngTemplateOutletContext]="{ $implicit: year, text }"></ng-container>
                 </ng-template>
             }

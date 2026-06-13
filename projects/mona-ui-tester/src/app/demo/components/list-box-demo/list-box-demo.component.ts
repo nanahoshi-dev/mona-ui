@@ -328,6 +328,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 #thirdList></mona-list-box>
         }
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "flex gap-1"
     }

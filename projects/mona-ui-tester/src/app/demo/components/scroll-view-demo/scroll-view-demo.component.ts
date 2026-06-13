@@ -90,6 +90,7 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
 
 @Component({
     imports: [ScrollViewComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-scroll-view
             [animate]="animate()"

@@ -1,6 +1,6 @@
-@let numericButtonsTemplateRef = numericButtonsTemplate()?.templateRef;
+@let numericButtonsTemplateRef = $safeNavigationMigration(numericButtonsTemplate()?.templateRef);
 @let pageSizeTemplateRef = pageSizeTemplate();
-@let pagerInfoTemplateRef = pagerInfoTemplate()?.templateRef;
+@let pagerInfoTemplateRef = $safeNavigationMigration(pagerInfoTemplate()?.templateRef);
 
 @if (type() === "numeric") {
     @if (pageListVisible()) {

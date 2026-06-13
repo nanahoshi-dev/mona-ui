@@ -299,6 +299,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         LucideAngularModule,
         RandomColorPipe
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <button monaButton class="mr-4" #menuTarget>Context Menu Target</button>

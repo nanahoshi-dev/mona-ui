@@ -14,7 +14,8 @@ import {
     Renderer2,
     signal,
     TemplateRef,
-    viewChild
+    viewChild,
+    ChangeDetectionStrategy
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
@@ -272,6 +273,7 @@ export class TooltipDirective implements TooltipVariantInputs {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <ng-template>
             <div role="tooltip" [id]="tooltipId()" [class]="baseClasses()">

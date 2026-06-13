@@ -81,6 +81,7 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
 
 @Component({
     imports: [AvatarComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-avatar
             [backgroundColor]="backgroundColor()"

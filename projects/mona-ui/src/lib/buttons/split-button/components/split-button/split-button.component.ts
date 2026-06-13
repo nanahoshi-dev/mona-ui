@@ -12,7 +12,8 @@ import {
     output,
     signal,
     TemplateRef,
-    viewChild
+    viewChild,
+    ChangeDetectionStrategy
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
@@ -53,6 +54,7 @@ import {
         PopupMenuShortcutTemplateDirective,
         PopupMenuTextTemplateDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         "[class]": "classes()",
         "[class.mona-split-button]": "true"

@@ -155,6 +155,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
         FaIconComponent,
         SliderHandleTemplateDirective
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-slider

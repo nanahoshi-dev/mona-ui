@@ -69,6 +69,7 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
 
 @Component({
     imports: [BreadcrumbComponent, BreadcrumbSeparatorTemplateDirective, LucideAngularModule, BreadcrumbItemComponent],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-breadcrumb [disabled]="disabled()">

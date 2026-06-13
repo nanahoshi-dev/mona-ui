@@ -69,6 +69,7 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
 
 @Component({
     imports: [ButtonDirective, TooltipComponent, TextBoxDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <div class="flex flex-row flex-wrap items-center justify-center gap-8 border border-border p-4 mb-4">
             <button monaButton look="primary" #primary>Primary Button</button>

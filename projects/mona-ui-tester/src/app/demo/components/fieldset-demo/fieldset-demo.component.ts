@@ -55,6 +55,7 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
             }
         </mona-fieldset>
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full flex items-center justify-center"
     }

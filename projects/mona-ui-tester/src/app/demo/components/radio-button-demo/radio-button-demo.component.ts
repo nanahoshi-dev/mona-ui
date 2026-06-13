@@ -166,6 +166,7 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
 
 @Component({
     imports: [RadioButtonComponent, FormsModule, RadioButtonDirective],
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <div class="flex gap-4">
             <mona-radio-button
