@@ -243,8 +243,7 @@ export class GridFilterRowCellComponent {
                 break;
             case "boolean":
                 this.selectedOperator.set(v.operator1 as RowFilterOperator);
-                const item =
-                    this.booleanFilterMenuItems.find(i => this.#getBooleanValue(i) === (v.value1 as boolean)) || null;
+                const item = this.booleanFilterMenuItems.find(i => i.value === v.operator1) ?? null;
                 this.booleanValue.set(item);
                 break;
         }

@@ -48,7 +48,7 @@ export const dropdownListInputVariants = cva(
 export const dropdownListValueContainerVariants = cva(`overflow-hidden h-full w-full flex items-center`, {
     variants: {
         hasTemplate: {
-            false: "[&>span]:flex-1 [&>span]:truncate [&>span]:items-center [&>span]:inline-block"
+            false: "[&>span]:flex-1 [&>span]:truncate [&>span]:items-center [&>span]:inline-flex"
         }
     }
 });
