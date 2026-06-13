@@ -5,7 +5,7 @@ export type NullFilterOperators = "isnull" | "isnotnull";
 export type EmptyFilterOperators = "isempty" | "isnotempty";
 export type NullOrEmptyFilterOperators = "isnullorempty" | "isnotnullorempty";
 
-export type BooleanFilterOperators = CommonFilterOperators | NullFilterOperators;
+export type BooleanFilterOperators = "istrue" | "isfalse" | NullFilterOperators;
 
 export type NumericFilterOperators = CommonFilterOperators | "gt" | "gte" | "lt" | "lte" | NullFilterOperators;
 
@@ -46,7 +46,7 @@ export type NullFilterDescriptor = FieldDefinition & { operator: NullFilterOpera
 export type EmptyFilterDescriptor = FieldDefinition & { operator: EmptyFilterOperators };
 export type NullOrEmptyFilterDescriptor = FieldDefinition & { operator: NullOrEmptyFilterOperators };
 
-export type BooleanFilterDescriptor = CommonFilterDescriptor | NullFilterDescriptor;
+export type BooleanFilterDescriptor = FieldDefinition & ({ operator: BooleanFilterOperators } | NullFilterDescriptor);
 
 export type NumericFilterDescriptor = FieldDefinition &
     (
@@ -99,7 +99,9 @@ export type FilterDescriptor =
     | RangeFilterDescriptor
     | FunctionFilterDescriptor;
 
+export type FilterLogic = "and" | "or";
+
 export interface CompositeFilterDescriptor {
-    logic: "and" | "or";
+    logic: FilterLogic;
     filters: Array<FilterDescriptor | CompositeFilterDescriptor>;
 }

@@ -104,6 +104,8 @@ export const gridDetailRowVariants = cva(`
     border-b border-b-border
 `);
 
+export const gridFilterRowCellVariants = cva(`flex items-center px-1 py-0.5 w-full`);
+
 export const gridGroupPanelPlaceholderVariants = cva(`
     truncate opacity-70
 `);
@@ -137,7 +139,7 @@ export const gridHeaderTableVariants = cva(
     `
 );
 
-export const gridHeaderTableRowVariants = cva(`relative inline-flex`);
+export const gridHeaderTableRowVariants = cva(`relative inline-flex not-first:border-t not-first:border-t-border`);
 
 export const gridHeaderTableCellVariants = cva(
     `

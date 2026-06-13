@@ -1,9 +1,9 @@
-import { animate, AnimationBuilder, style } from "@angular/animations";
 import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, inject, input, output } from "@angular/core";
 import { FunnelIcon, LucideAngularModule } from "lucide-angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
+import { FilterService } from "../../../filter/services/filter.service";
 import { DataType } from "../../../models/DataType";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupService } from "../../../popup/services/popup.service";
@@ -18,7 +18,7 @@ import { GridService } from "../../services/grid.service";
     imports: [ButtonDirective, LucideAngularModule]
 })
 export class GridFilterMenuComponent {
-    readonly #animationBuilder = inject(AnimationBuilder);
+    readonly #filterService = inject(FilterService);
     readonly #gridService = inject(GridService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
@@ -42,17 +42,14 @@ export class GridFilterMenuComponent {
                     }
                 }
                 return false;
-            }
+            },
+            providers: [{ provide: FilterService, useValue: this.#filterService }]
         });
         this.#popupRef.overlayRef
             .backdropClick()
             .pipe(take(1))
-            .subscribe(() => {
-                this.animateLeave();
-                this.#popupRef?.closeWithDelay(100);
-            });
+            .subscribe(() => this.#popupRef?.close());
 
-        this.animateEnter();
         const filterState = this.#gridService.appliedFilters().get(this.column().field());
         const componentRef = this.#popupRef.component as ComponentRef<FilterMenuComponent>;
         componentRef.instance.type.set(this.type());
@@ -67,35 +64,8 @@ export class GridFilterMenuComponent {
                 filter,
                 filterMenuValue: componentRef.instance.getFilterValues()
             };
-            this.animateLeave();
-            this.#popupRef?.closeWithDelay(100);
+            this.#popupRef?.close();
             this.apply.emit(filterState);
         });
-    }
-
-    private animateEnter(): void {
-        if (this.#popupRef?.overlayRef?.overlayElement?.parentElement) {
-            this.#popupRef.overlayRef.overlayElement.parentElement.style.overflow = "hidden";
-        }
-        this.#animationBuilder
-            .build([
-                style({ transform: "translateY(-100%)", opacity: 1 }),
-                animate("0.15s ease-out", style({ transform: "translateY(0)", opacity: 1 }))
-            ])
-            .create(this.#popupRef?.overlayRef?.overlayElement)
-            .play();
-    }
-
-    private animateLeave(): void {
-        if (this.#popupRef?.overlayRef?.overlayElement?.parentElement) {
-            this.#popupRef.overlayRef.overlayElement.parentElement.style.overflow = "hidden";
-        }
-        this.#animationBuilder
-            .build([
-                style({ transform: "translateY(0)", opacity: 1 }),
-                animate("0.15s ease-out", style({ transform: "translateY(-100%)", opacity: 1 }))
-            ])
-            .create(this.#popupRef?.overlayRef?.overlayElement)
-            .play();
     }
 }

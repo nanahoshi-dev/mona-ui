@@ -38,6 +38,7 @@ import {
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ChipComponent } from "../../../buttons/chip/component/chip.component";
+import { FilterService } from "../../../filter/services/filter.service";
 import { PlaceholderComponent } from "../../../layout/placeholder/components/placeholder/placeholder.component";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { PageChangeEvent } from "../../../pager/models/PageChangeEvent";
@@ -78,6 +79,7 @@ import {
 } from "../../styles/grid.styles";
 import { GridColumnComponent } from "../grid-column/grid-column.component";
 import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.component";
+import { GridFilterRowCellComponent } from "../grid-filter-row-cell/grid-filter-row-cell.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
 
@@ -85,13 +87,14 @@ import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list
     selector: "mona-grid",
     templateUrl: "./grid.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [GridService, GridNavigationService, GridRowFlattenerService],
+    providers: [GridService, GridNavigationService, GridRowFlattenerService, FilterService],
     imports: [
         CdkDropList,
         ChipComponent,
         CdkDrag,
         NgTemplateOutlet,
         GridFilterMenuComponent,
+        GridFilterRowCellComponent,
         GridColumnResizeHandlerDirective,
         CdkDragPreview,
         GridListComponent,
@@ -144,9 +147,14 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly columns = contentChildren(GridColumnComponent);
     protected readonly dragColumn = signal<Column | null>(null);
     protected readonly dropColumn = signal<Column | null>(null);
-    protected readonly filterMenuEnabled = computed(
-        () => this.gridService.filterableOptions().enabled && this.gridService.filterableOptions().type === "menu"
-    );
+    protected readonly filterMenuEnabled = computed(() => {
+        const opts = this.gridService.filterableOptions();
+        return opts.enabled && (opts.type === "menu" || opts.type === "menu, row");
+    });
+    protected readonly filterRowEnabled = computed(() => {
+        const opts = this.gridService.filterableOptions();
+        return opts.enabled && (opts.type === "row" || opts.type === "menu, row");
+    });
     protected readonly gridDetailTemplate = contentChild(GridDetailTemplateDirective, { read: TemplateRef });
     protected readonly gridHeaderElement = viewChild.required<ElementRef<HTMLDivElement>>("gridHeaderElement");
     protected readonly gridHeaderTableElement = viewChild.required<ElementRef<HTMLTableElement>>("headerTable");
@@ -359,10 +367,9 @@ export class GridComponent<T> implements GridVariantInput {
             .appliedFilters()
             .values()
             .select(p => p.filter)
-            .where(f => f != null);
-        if (allFilters.any()) {
-            this.gridService.filterChange$.next(allFilters.toArray());
-        }
+            .where(f => f != null)
+            .toArray();
+        this.gridService.filterChange$.next(allFilters);
     }
 
     public onColumnMouseEnter(column: Column): void {

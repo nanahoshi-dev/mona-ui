@@ -1,0 +1,115 @@
+@let dataType = column().dataType();
+
+@switch (dataType) {
+    @case ("string") {
+        <div class="flex gap-0.5 w-full">
+            <mona-text-box
+                size="small"
+                [ngModel]="stringValue()"
+                (ngModelChange)="onStringChange($event)"
+                placeholder="Filter..." />
+            <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
+                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="!!stringValue()"></lucide-icon>
+            </button>
+            <ng-container
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!stringValue() }"></ng-container>
+        </div>
+        <mona-popup-menu [target]="filterButton" [size]="'small'">
+            @for (item of stringFilterMenuItems; track item) {
+                <mona-popup-menu-checkbox-item
+                    size="small"
+                    [label]="item.text"
+                    (menuClick)="onOperatorChange(item.value)"
+                    [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
+            }
+        </mona-popup-menu>
+    }
+    @case ("number") {
+        <div class="flex gap-0.5 w-full">
+            <mona-numeric-text-box
+                size="small"
+                [ngModel]="numberValue()"
+                (ngModelChange)="onNumberChange($event)"
+                [style.width.%]="100" />
+
+            <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
+                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="!!numberValue()"></lucide-icon>
+            </button>
+            <mona-popup-menu [target]="filterButton" [size]="'small'">
+                @for (item of numericFilterMenuItems; track item) {
+                    <mona-popup-menu-checkbox-item
+                        size="small"
+                        [label]="item.text"
+                        (menuClick)="onOperatorChange(item.value)"
+                        [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
+                }
+            </mona-popup-menu>
+            <ng-container
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!numberValue() }"></ng-container>
+        </div>
+    }
+    @case ("date")
+    @case ("datetime")
+    @case ("time") {
+        <div class="flex gap-0.5 w-full">
+            @if (dataType === "date") {
+                <mona-date-picker
+                    size="small"
+                    [ngModel]="dateValue()"
+                    (ngModelChange)="onDateChange($event)"
+                    [style.width.%]="100" />
+            }
+            @if (dataType === "datetime") {
+                <mona-datetime-picker
+                    size="small"
+                    [ngModel]="dateValue()"
+                    (ngModelChange)="onDateChange($event)"
+                    [style.width.%]="100" />
+            }
+            @if (dataType === "time") {
+                <mona-time-picker
+                    size="small"
+                    [ngModel]="dateValue()"
+                    (ngModelChange)="onDateChange($event)"
+                    [style.width.%]="100" />
+            }
+            <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
+                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="!!dateValue()"></lucide-icon>
+            </button>
+            <ng-container
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!dateValue() }"></ng-container>
+        </div>
+        <mona-popup-menu [target]="filterButton" [size]="'small'">
+            @for (item of dateFilterMenuItems; track item) {
+                <mona-popup-menu-checkbox-item
+                    size="small"
+                    [label]="item.text"
+                    (menuClick)="onOperatorChange(item.value)"
+                    [checked]="selectedOperator() === item.value"></mona-popup-menu-checkbox-item>
+            }
+        </mona-popup-menu>
+    }
+    @case ("boolean") {
+        <div class="flex gap-0.5 w-full">
+            <mona-dropdown-list
+                size="small"
+                [data]="booleanFilterMenuItems"
+                textField="text"
+                valueField="value"
+                placeholder="(All)"
+                [ngModel]="booleanValue()"
+                (ngModelChange)="onBooleanChange($event)"
+                [style.width.%]="100" />
+            <ng-container
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!booleanValue() }"></ng-container>
+        </div>
+    }
+}
+
+<ng-template #clearFilterButtonTemplate let-hasValue>
+    @if (selectedOperator() != null && hasValue) {
+        <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" (click)="onClear()">
+            <lucide-icon [name]="filterRemoveIcon" size="14" class="text-error"></lucide-icon>
+        </button>
+    }
+</ng-template>

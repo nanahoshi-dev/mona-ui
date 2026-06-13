@@ -7,11 +7,14 @@ import {
     forwardRef,
     inject,
     input,
+    linkedSignal,
     model,
     OnInit,
-    output
+    output,
+    signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { readonly } from "@angular/forms/signals";
 import { Subject, tap } from "rxjs";
 import { v4 } from "uuid";
 import {
@@ -37,6 +40,7 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
     ]
 })
 export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
+    readonly #checked = linkedSignal(() => this.checked());
     readonly #click$ = new Subject<PopupMenuItemClickEvent>();
     readonly #destroyRef = inject(DestroyRef);
     // protected readonly items = contentChildren(PopupMenuToken, { descendants: false });
@@ -50,7 +54,12 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
     /**
      * @description Sets the checked state of the menu item.
      */
-    public readonly checked = model(false);
+    public readonly checked = input(false);
+
+    /**
+     * @description Emits when the checked state of the menu item changes.
+     */
+    public readonly checkedChange = output<boolean>();
 
     /**
      * @description Sets the disabled state of the menu item.
@@ -72,7 +81,7 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
         return [
             {
                 checkable: true,
-                checked: computed(() => this.checked()),
+                checked: computed(() => this.#checked()),
                 click$: this.#click$,
                 disabled: this.disabled(),
                 group: Symbol(),
@@ -98,7 +107,7 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
                 tap(e => {
                     this.menuClick.emit(e);
                     if (!e.isDefaultPrevented()) {
-                        this.checked.update(c => !c);
+                        this.checkedChange.emit(!this.#checked());
                     }
                 })
             )

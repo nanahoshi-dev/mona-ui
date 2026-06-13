@@ -14,6 +14,7 @@ import {
     gridDetailContentCellVariants as monaGridDetailContentCellVariants,
     gridDetailIndentCellVariants as monaGridDetailIndentCellVariants,
     gridDetailRowVariants as monaGridDetailRowVariants,
+    gridFilterRowCellVariants as monaGridFilterRowCellVariants,
     gridGroupPanelPlaceholderVariants as monaGridGroupPanelPlaceholderVariants,
     gridGroupPanelVariants as monaGridGroupPanelVariants,
     gridGroupRowVariants as monaGridGroupRowVariants,
@@ -109,6 +110,15 @@ export const gridColumnDropHintThemeVariants = (theme: ThemeStyle) => {
             return monaGridColumnDropHintVariants;
         default:
             return monaGridColumnDropHintVariants;
+    }
+};
+
+export const gridFilterRowCellThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridFilterRowCellVariants;
+        default:
+            return monaGridFilterRowCellVariants;
     }
 };
 
@@ -336,6 +346,6 @@ export type GridVariantInput = GridBaseVariantInput &
     GridHeaderTableCellVariantInput &
     GridHeaderTableColumnTitleVariantInput &
     GridHeaderTableColumnWrapVariantInput &
-    GridHeaderTableRowVariantInput &
+    Omit<GridHeaderTableRowVariantInput, "isFilterRow"> &
     GridHeaderTableVariantInput &
     GridHeaderVariantInput;

@@ -187,6 +187,35 @@
                         }
                     }
                 </tr>
+                @if (filterRowEnabled()) {
+                    <tr role="row" [class]="headerTableRowClass()">
+                        @for (_ of gridService.groupColumns(); track $index) {
+                            <th
+                                scope="col"
+                                class="border-r border-border"
+                                [style.width.px]="gridService.groupColumnWidth"></th>
+                        }
+                        @if (gridService.masterDetailTemplate()) {
+                            <th
+                                scope="col"
+                                class="border-r border-border"
+                                [style.width.px]="gridService.detailColumnWidth"></th>
+                        }
+                        @for (column of gridService.columns(); track $index) {
+                            <th
+                                scope="col"
+                                class="border-r border-border overflow-hidden"
+                                [style.width.px]="column.calculatedWidth()"
+                                [attr.aria-label]="'Filter by ' + column.title()">
+                                @if (column.field()) {
+                                    <mona-grid-filter-row-cell
+                                        [column]="column"
+                                        (apply)="onColumnFilter(column, $event)" />
+                                }
+                            </th>
+                        }
+                    </tr>
+                }
             </thead>
         </table>
     </div>

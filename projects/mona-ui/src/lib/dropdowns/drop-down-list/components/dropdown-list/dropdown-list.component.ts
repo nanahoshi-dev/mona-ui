@@ -379,6 +379,8 @@ export class DropdownListComponent<TData = unknown>
         this.updateValue(obj, false);
         if (obj != null) {
             this.#listService.setSelectedDataItems([obj]);
+        } else {
+            this.#listService.clearSelections();
         }
     }
 

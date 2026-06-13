@@ -1,0 +1,245 @@
+import { NgTemplateOutlet } from "@angular/common";
+import {
+    afterNextRender,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    DestroyRef,
+    inject,
+    input,
+    output,
+    signal
+} from "@angular/core";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { FormsModule } from "@angular/forms";
+import { FunnelIcon, FunnelXIcon, LucideAngularModule } from "lucide-angular";
+import { debounceTime } from "rxjs";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
+import { PopupMenuCheckboxItemComponent } from "../../../common/popup-menu/components/popup-menu-checkbox-item/popup-menu-checkbox-item.component";
+import { PopupMenuComponent } from "../../../common/popup-menu/components/popup-menu/popup-menu.component";
+import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
+import { DateTimePickerComponent } from "../../../date-inputs/datetime-picker/components/datetime-picker/datetime-picker.component";
+import { TimePickerComponent } from "../../../date-inputs/time-picker/components/time-picker/time-picker.component";
+import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
+import type { FilterMenuDataItem } from "../../../filter/models/FilterMenuDataItem";
+import type { FilterMenuValue } from "../../../filter/models/FilterMenuValue";
+import { FilterService } from "../../../filter/services/filter.service";
+import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
+import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
+import type {
+    BooleanFilterOperators,
+    CompositeFilterDescriptor,
+    DateFilterOperators,
+    FilterOperators,
+    NumericFilterOperators,
+    StringFilterOperators
+} from "../../../query/filter/FilterDescriptor";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { Column } from "../../models/Column";
+import type { ColumnFilterState } from "../../models/ColumnFilterState";
+import { GridService } from "../../services/grid.service";
+import { gridFilterRowCellThemeVariants } from "../../styles/grid.styles";
+
+type RowFilterOperator = Exclude<FilterOperators, "function">;
+type RowFilterValue = string | number | Date | boolean | null | undefined;
+
+@Component({
+    selector: "mona-grid-filter-row-cell",
+    templateUrl: "./grid-filter-row-cell.component.html",
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        FormsModule,
+        TextBoxComponent,
+        NumericTextBoxComponent,
+        DatePickerComponent,
+        DateTimePickerComponent,
+        TimePickerComponent,
+        DropdownListComponent,
+        LucideAngularModule,
+        ButtonDirective,
+        PopupMenuComponent,
+        PopupMenuCheckboxItemComponent,
+        NgTemplateOutlet
+    ],
+    host: {
+        "[class]": "baseClass()"
+    }
+})
+export class GridFilterRowCellComponent {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #filterService = inject(FilterService);
+    readonly #gridService = inject(GridService);
+    readonly #themeService = inject(ThemeService);
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridFilterRowCellThemeVariants(theme)();
+    });
+    protected readonly booleanFilterMenuItems = this.#filterService.booleanFilterMenuItems;
+    protected readonly booleanValue = signal<FilterMenuDataItem | null>(null);
+    protected readonly dateFilterMenuItems = this.#filterService.dateFilterMenuItems;
+    protected readonly dateValue = signal<Date | null>(null);
+    protected readonly filterIcon = FunnelIcon;
+    protected readonly filterRemoveIcon = FunnelXIcon;
+    protected readonly numberValue = signal<number | null>(null);
+    protected readonly numberValue$ = toObservable(this.numberValue);
+    protected readonly numericFilterMenuItems = this.#filterService.numericFilterMenuItems;
+    protected readonly selectedOperator = signal<RowFilterOperator>("eq");
+    protected readonly stringFilterMenuItems = this.#filterService.stringFilterMenuItems;
+    protected readonly stringValue = signal<string>("");
+    protected readonly stringValue$ = toObservable(this.stringValue);
+
+    public readonly apply = output<ColumnFilterState>();
+    public readonly column = input.required<Column>();
+
+    public constructor() {
+        afterNextRender({
+            read: () => {
+                this.#hydrateFromAppliedFilters();
+                this.#setValueChangeSubscriptions();
+            }
+        });
+    }
+
+    protected onBooleanChange(value: FilterMenuDataItem): void {
+        this.booleanValue.set(value);
+        this.selectedOperator.set(value.value as RowFilterOperator);
+        this.#emitFilter(this.#getBooleanValue(value));
+    }
+
+    protected onClear(): void {
+        this.stringValue.set("");
+        this.numberValue.set(null);
+        this.dateValue.set(null);
+        this.booleanValue.set(null);
+        this.selectedOperator.set("eq");
+        this.#emitClearFilter();
+    }
+
+    protected onDateChange(value: Date | null): void {
+        this.dateValue.set(value);
+        if (value) {
+            this.#emitFilter(value);
+        } else {
+            this.#emitClearFilter();
+        }
+    }
+
+    protected onNumberChange(value: number | null): void {
+        this.numberValue.set(value);
+    }
+
+    protected onOperatorChange(operator: FilterOperators): void {
+        this.selectedOperator.set(operator as RowFilterOperator);
+    }
+
+    protected onStringChange(value: string): void {
+        this.stringValue.set(value);
+    }
+
+    #emitClearFilter(): void {
+        this.apply.emit({ filter: { logic: "and", filters: [] } });
+    }
+
+    #emitFilter(value: RowFilterValue): void {
+        const operator = this.selectedOperator();
+        const field = this.column().field();
+        let filter: CompositeFilterDescriptor;
+        let filterOperator = operator;
+        switch (this.column().dataType()) {
+            case "string":
+                filter = this.#filterService.buildStringFilterDescriptor({
+                    field,
+                    logic: null,
+                    operator1: operator as StringFilterOperators,
+                    value1: value as string
+                });
+                break;
+            case "number":
+                filter = this.#filterService.buildNumberFilterDescriptor({
+                    field,
+                    logic: null,
+                    operator1: operator as NumericFilterOperators,
+                    value1: value as number
+                });
+                break;
+            case "date":
+            case "datetime":
+            case "time":
+                filter = this.#filterService.buildDateFilterDescriptor({
+                    field,
+                    logic: null,
+                    operator1: operator as DateFilterOperators,
+                    value1: value as Date
+                });
+                break;
+            case "boolean":
+                filter = this.#filterService.buildBooleanFilterDescriptor({
+                    field,
+                    logic: null,
+                    operator1: operator as BooleanFilterOperators,
+                    value1: value != null ? (value as boolean) : null
+                });
+                break;
+        }
+        const filterMenuValue: FilterMenuValue = { operator1: filterOperator, value1: value };
+        this.apply.emit({ filter, filterMenuValue });
+    }
+
+    #getBooleanValue(item: FilterMenuDataItem): boolean | null {
+        if (item.value === "istrue") {
+            return true;
+        }
+        if (item.value === "isfalse") {
+            return false;
+        }
+        return null;
+    }
+
+    #hydrateFromAppliedFilters(): void {
+        const filterState = this.#gridService.appliedFilters().get(this.column().field());
+        if (!filterState?.filterMenuValue) {
+            return;
+        }
+        const v = filterState.filterMenuValue;
+        switch (this.column().dataType()) {
+            case "string":
+                this.selectedOperator.set(v.operator1 as RowFilterOperator);
+                this.stringValue.set((v.value1 as string) ?? "");
+                break;
+            case "number":
+                this.selectedOperator.set(v.operator1 as RowFilterOperator);
+                this.numberValue.set((v.value1 as number) ?? null);
+                break;
+            case "date":
+            case "datetime":
+            case "time":
+                this.selectedOperator.set(v.operator1 as RowFilterOperator);
+                this.dateValue.set((v.value1 as Date) ?? null);
+                break;
+            case "boolean":
+                this.selectedOperator.set(v.operator1 as RowFilterOperator);
+                const item =
+                    this.booleanFilterMenuItems.find(i => this.#getBooleanValue(i) === (v.value1 as boolean)) || null;
+                this.booleanValue.set(item);
+                break;
+        }
+    }
+
+    #setValueChangeSubscriptions(): void {
+        this.stringValue$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
+            if (value.trim()) {
+                this.#emitFilter(value);
+            } else {
+                this.#emitClearFilter();
+            }
+        });
+
+        this.numberValue$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
+            if (value !== null && value !== undefined) {
+                this.#emitFilter(value);
+            } else {
+                this.#emitClearFilter();
+            }
+        });
+    }
+}

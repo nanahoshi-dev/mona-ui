@@ -63,6 +63,10 @@ export const descriptorToPredicate = <T>(
                 return typeof value === "string"
                     ? !value.toLowerCase().includes(descriptor.value.toLowerCase())
                     : false;
+            case "isfalse":
+                return value === false;
+            case "istrue":
+                return value === true;
             case "isnull":
                 return value == null;
             case "isnotnull":
