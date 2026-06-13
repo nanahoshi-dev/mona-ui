@@ -17,7 +17,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { filter, fromEvent, merge, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { FadeAnimation } from "../../../../animations/models/fade.animation";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { SwitchHandleContentTemplateDirective } from "../../directives/switch-handle-content-template.directive";
@@ -34,7 +33,44 @@ import {
 @Component({
     selector: "mona-switch",
     templateUrl: "./switch.component.html",
-    animations: [FadeAnimation()],
+    styles: [
+        `
+            .mona-switch-label-enter {
+                animation: mona-switch-label-fade-in 200ms ease-out;
+            }
+
+            .mona-switch-label-leave {
+                animation: mona-switch-label-fade-out 200ms ease-out;
+            }
+
+            @keyframes mona-switch-label-fade-in {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            @keyframes mona-switch-label-fade-out {
+                from {
+                    opacity: 1;
+                }
+
+                to {
+                    opacity: 0;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .mona-switch-label-enter,
+                .mona-switch-label-leave {
+                    animation-duration: 1ms;
+                }
+            }
+        `
+    ],
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

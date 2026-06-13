@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { PopupAnimationService } from "../../../animations/services/popup-animation.service";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
 import { Column } from "../../models/Column";
@@ -27,7 +26,7 @@ describe("GridFilterMenuComponent", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [GridFilterMenuComponent, ButtonDirective, FilterMenuComponent, BrowserAnimationsModule],
-            providers: [PopupAnimationService, GridService]
+            providers: [GridService]
         });
         hostFixture = TestBed.createComponent(GridFilterMenuComponentTest);
         hostComponent = hostFixture.componentInstance;

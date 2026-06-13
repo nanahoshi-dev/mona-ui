@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 
 import { SwitchComponent } from "./switch.component";
 
@@ -9,7 +8,7 @@ describe("SwitchComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [SwitchComponent, BrowserAnimationsModule]
+            imports: [SwitchComponent]
         });
         fixture = TestBed.createComponent(SwitchComponent);
         component = fixture.componentInstance;

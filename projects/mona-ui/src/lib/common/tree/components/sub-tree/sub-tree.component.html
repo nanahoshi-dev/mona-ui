@@ -33,10 +33,12 @@
                         tabindex="-1"
                         [class]="nodeExpanderClass()"
                         [class.mona-disabled]="nodeComponent.disabled()"
-                        [attr.aria-label]="(nodeComponent.expanded() ? 'Collapse' : 'Expand') + ' ' + nodeComponent.nodeText()"
+                        [attr.aria-label]="
+                            (nodeComponent.expanded() ? 'Collapse' : 'Expand') + ' ' + nodeComponent.nodeText()
+                        "
                         (click)="onExpandStateChange(node)">
                         @if (node.loading()) {
-                            <i class="ri-loader-2-line mona-rotate-anim"></i>
+                            <i class="ri-loader-2-line"></i>
                         } @else if (nodeComponent.expanded()) {
                             <i class="ri-arrow-down-s-fill"></i>
                         } @else {
@@ -58,9 +60,12 @@
             </div>
             @if (node.children().length > 0 && nodeComponent.expanded()) {
                 <div
-                    [@nodeExpand]="nodeComponent.expanded()"
-                    [@.disabled]="!treeService.animationEnabled() || treeService.filterText().length !== 0">
-                    <mona-sub-tree [nodes]="node.children()" [depth]="depth() + 1" [parent]="node"></mona-sub-tree>
+                    class="grid overflow-hidden"
+                    [animate.enter]="nodeExpandEnterClass()"
+                    [animate.leave]="nodeExpandLeaveClass()">
+                    <div class="min-h-0 overflow-hidden">
+                        <mona-sub-tree [nodes]="node.children()" [depth]="depth() + 1" [parent]="node"></mona-sub-tree>
+                    </div>
                 </div>
             }
             @if (!nodeComponent.disabled()) {

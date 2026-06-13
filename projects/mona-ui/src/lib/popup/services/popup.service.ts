@@ -1,4 +1,3 @@
-import { AnimationBuilder } from "@angular/animations";
 import { Directionality } from "@angular/cdk/bidi";
 import {
     ComponentType,
@@ -15,20 +14,22 @@ import { CdkScrollable, ScrollDispatcher, type ScrollDispatcherTarget } from "@a
 import { DestroyRef, DOCUMENT, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
-import { defaultPopupHideAnimation, defaultPopupShowAnimation } from "../animations/popup.animation";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
-import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
+import {
+    PopupDataInjectionToken,
+    PopupReferenceInjectionToken,
+    PopupSettingsInjectionToken
+} from "../models/PopupInjectionToken";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
-import { PopupAnchor, PopupAnimationSettings, PopupSettings } from "../models/PopupSettings";
+import { PopupAnchor, PopupSettings } from "../models/PopupSettings";
 import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition";
 
 @Injectable({
     providedIn: "root"
 })
 export class PopupService {
-    readonly #animationBuilder = inject(AnimationBuilder);
     readonly #destroyRef = inject(DestroyRef);
     readonly #directionality = inject(Directionality, { optional: true });
     readonly #document = inject(DOCUMENT);
@@ -45,41 +46,23 @@ export class PopupService {
         return this.createSingleElementPopup(settings);
     }
 
-    private attachComponentContent(
-        settings: PopupSettings,
-        popupReference: PopupReference,
-        overlayRef: OverlayRef,
-        injector: Injector
-    ): HTMLElement {
-        const portal = new ComponentPortal(settings.content as ComponentType<never>, null, injector);
-        popupReference.componentRef = overlayRef.attach(portal);
-        return popupReference.componentRef.location.nativeElement;
-    }
-
     private attachContent(
         settings: PopupSettings,
         popupReference: PopupReference,
         overlayRef: OverlayRef,
         injector: Injector
     ): HTMLElement {
-        if (settings.content instanceof TemplateRef) {
-            return this.attachTemplateContent(settings, popupReference, overlayRef, injector);
-        }
-        return this.attachComponentContent(settings, popupReference, overlayRef, injector);
-    }
-
-    private attachTemplateContent(
-        settings: PopupSettings,
-        popupReference: PopupReference,
-        overlayRef: OverlayRef,
-        injector: Injector
-    ): HTMLElement {
         const portal = new ComponentPortal(PopupWrapperComponent, null, injector);
-        popupReference.componentRef = overlayRef.attach(portal);
-        const component = popupReference.componentRef.instance as PopupWrapperComponent;
-        component.templateRef.set(settings.content as TemplateRef<never>);
-        popupReference.componentRef.changeDetectorRef.detectChanges();
-        return popupReference.componentRef.location.nativeElement;
+        const wrapperComponentRef = overlayRef.attach(portal);
+        popupReference.wrapperComponentRef = wrapperComponentRef;
+        wrapperComponentRef.changeDetectorRef.detectChanges();
+        popupReference.componentRef =
+            wrapperComponentRef.instance.attachContent(
+                settings.content as TemplateRef<unknown> | ComponentType<unknown>,
+                injector
+            ) ?? undefined;
+        wrapperComponentRef.changeDetectorRef.detectChanges();
+        return wrapperComponentRef.location.nativeElement;
     }
 
     private buildPanelClass(popupClass?: string | string[]): string | string[] {
@@ -121,6 +104,7 @@ export class PopupService {
             providers: [
                 { provide: PopupRef, useFactory: () => popupReference.popupRef },
                 { provide: PopupDataInjectionToken, useValue: settings.data },
+                { provide: PopupReferenceInjectionToken, useValue: popupReference },
                 { provide: PopupSettingsInjectionToken, useValue: settings },
                 ...(settings.providers ?? [])
             ]
@@ -197,9 +181,8 @@ export class PopupService {
 
         popupReference.notifyOpen();
 
-        const animationElement = this.attachContent(settings, popupReference, overlayRef, injector);
+        this.attachContent(settings, popupReference, overlayRef, injector);
 
-        this.setupAnimations(settings.animation, animationElement, popupReference);
         const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
         this.setupCleanupSubscription(popupReference, subscription, settings, originallyFocusedElement);
         if (settings.closeOnScroll) {
@@ -220,19 +203,6 @@ export class PopupService {
             return anchor.nativeElement;
         }
         return null;
-    }
-
-    private getAnimationConfig(config?: boolean | PopupAnimationSettings): Required<PopupAnimationSettings> | null {
-        if (config === undefined) {
-            return { hide: defaultPopupHideAnimation, show: defaultPopupShowAnimation };
-        }
-        if (typeof config === "boolean") {
-            return config ? { hide: defaultPopupHideAnimation, show: defaultPopupShowAnimation } : null;
-        }
-        return {
-            hide: config.hide ?? defaultPopupHideAnimation,
-            show: config.show ?? defaultPopupShowAnimation
-        };
     }
 
     private getPosition(
@@ -295,25 +265,6 @@ export class PopupService {
         if (anchorElement) {
             anchorElement.focus();
         }
-    }
-
-    private setupAnimations(
-        animationSettings: PopupAnimationSettings | boolean | undefined,
-        element: HTMLElement,
-        popupReference: PopupReference
-    ): void {
-        const config = this.getAnimationConfig(animationSettings);
-        if (!config || !element) {
-            return;
-        }
-
-        this.#animationBuilder.build(config.show).create(element).play();
-        popupReference.closeStart$
-            .pipe(
-                take(1),
-                tap(() => this.#animationBuilder.build(config.hide).create(element).play())
-            )
-            .subscribe();
     }
 
     private setupBackdropCloseSubscription(

@@ -19,8 +19,8 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { filter, fromEvent, map, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
-import { fadeIn, fadeOut } from "../../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../../models/Position";
+import { fadePopupAnimation } from "../../../../popup/models/PopupAnimationClasses";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -186,10 +186,7 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
         this.popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint: connectionPoints.anchor,
-            animation: {
-                show: fadeIn,
-                hide: fadeOut
-            },
+            animation: fadePopupAnimation,
             closeOnOutsideClick: true,
             content,
             hasBackdrop: false,

@@ -152,12 +152,6 @@
         "type": "Column",
         "description": "",
         "kind": "input"
-      },
-      {
-        "name": "gridId",
-        "type": "string",
-        "description": "",
-        "kind": "input"
       }
     ]
   },
@@ -191,7 +185,25 @@
     "inputs": [
       {
         "name": "options",
-        "type": "EditableOptions | \"\" | undefined",
+        "type": "EditableOptions | \"\"",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridFilterableDirective": {
+    "name": "GridFilterableDirective",
+    "selector": "\"mona-grid[monaGridFilterable]\"",
+    "inputs": [
+      {
+        "name": "filter",
+        "type": "CompositeFilterDescriptor[]",
+        "description": "",
+        "kind": "model"
+      },
+      {
+        "name": "options",
+        "type": "FilterableOptions | \"\"",
         "description": "",
         "kind": "input"
       }
@@ -230,6 +242,12 @@
         "type": "number",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "edit",
+        "type": "void",
+        "description": "",
+        "kind": "output"
       },
       {
         "name": "firstInRow",
@@ -324,6 +342,18 @@
       {
         "name": "options",
         "type": "Partial<VirtualScrollOptions> | \"\" | undefined",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "scrollEnd",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "scrollEndThreshold",
+        "type": "number",
         "description": "",
         "kind": "input"
       }
@@ -1522,20 +1552,14 @@
         "kind": "output"
       },
       {
+        "name": "rowEdit",
+        "type": "RowEditEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "data",
         "type": "Iterable<T>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "filter",
-        "type": "CompositeFilterDescriptor[]",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "filterable",
-        "type": "boolean",
         "description": "",
         "kind": "input"
       },
@@ -1608,13 +1632,13 @@
       {
         "name": "column",
         "type": "Column",
-        "description": "The column configuration for this cell.",
+        "description": "",
         "kind": "input"
       },
       {
         "name": "row",
         "type": "Row",
-        "description": "The row data for this cell.",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -1686,6 +1710,24 @@
       {
         "name": "type",
         "type": "DataType",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridFilterRowCellComponent": {
+    "name": "GridFilterRowCellComponent",
+    "selector": "\"mona-grid-filter-row-cell\"",
+    "inputs": [
+      {
+        "name": "apply",
+        "type": "ColumnFilterState",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "column",
+        "type": "Column",
         "description": "",
         "kind": "input"
       }
@@ -2406,7 +2448,7 @@
       {
         "name": "filter",
         "type": "string",
-        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element.\nOnly applies when `mode` is set to `content`.",
+        "description": "The filter to select elements that will have tooltips.\r\nIt can be a CSS selector that matches elements within the host element.\r\nOnly applies when `mode` is set to `content`.",
         "kind": "input"
       },
       {
@@ -2418,7 +2460,7 @@
       {
         "name": "mode",
         "type": "\"host\" | \"content\"",
-        "description": "The mode of the tooltip.\n\"host\" mode receives the tooltip from the host element's title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "description": "The mode of the tooltip.\r\n\"host\" mode receives the tooltip from the host element's title attribute.\r\n\"content\" mode uses the title attribute of elements matching the filter.",
         "kind": "input"
       },
       {
@@ -2677,7 +2719,13 @@
         "name": "checked",
         "type": "boolean",
         "description": "Sets the checked state of the menu item.",
-        "kind": "model"
+        "kind": "input"
+      },
+      {
+        "name": "checkedChange",
+        "type": "boolean",
+        "description": "Emits when the checked state of the menu item changes.",
+        "kind": "output"
       },
       {
         "name": "disabled",
@@ -2863,7 +2911,13 @@
         "name": "checked",
         "type": "boolean",
         "description": "Sets the checked state of the menu item.",
-        "kind": "model"
+        "kind": "input"
+      },
+      {
+        "name": "checkedChange",
+        "type": "boolean",
+        "description": "Emits when the checked state of the menu item changes.",
+        "kind": "output"
       },
       {
         "name": "disabled",
@@ -3265,7 +3319,13 @@
         "name": "checked",
         "type": "boolean",
         "description": "Sets the checked state of the menu item.",
-        "kind": "model"
+        "kind": "input"
+      },
+      {
+        "name": "checkedChange",
+        "type": "boolean",
+        "description": "Emits when the checked state of the menu item changes.",
+        "kind": "output"
       },
       {
         "name": "disabled",
@@ -5959,7 +6019,13 @@
         "name": "checked",
         "type": "boolean",
         "description": "Sets the checked state of the menu item.",
-        "kind": "model"
+        "kind": "input"
+      },
+      {
+        "name": "checkedChange",
+        "type": "boolean",
+        "description": "Emits when the checked state of the menu item changes.",
+        "kind": "output"
       },
       {
         "name": "disabled",
@@ -6097,7 +6163,13 @@
         "name": "checked",
         "type": "boolean",
         "description": "Sets the checked state of the menu item.",
-        "kind": "model"
+        "kind": "input"
+      },
+      {
+        "name": "checkedChange",
+        "type": "boolean",
+        "description": "Emits when the checked state of the menu item changes.",
+        "kind": "output"
       },
       {
         "name": "disabled",

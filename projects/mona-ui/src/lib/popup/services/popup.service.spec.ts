@@ -1,5 +1,4 @@
 import { TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { PopupService } from "./popup.service";
 
@@ -7,9 +6,7 @@ describe("PopupService", () => {
     let service: PopupService;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [provideAnimations()]
-        });
+        TestBed.configureTestingModule({});
         service = TestBed.inject(PopupService);
     });
 

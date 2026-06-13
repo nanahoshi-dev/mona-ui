@@ -33,7 +33,6 @@ import { ConnectionPoint } from "../../utils/connectionPosition";
 @Component({
     selector: "mona-popup",
     templateUrl: "./popup.component.html",
-    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {

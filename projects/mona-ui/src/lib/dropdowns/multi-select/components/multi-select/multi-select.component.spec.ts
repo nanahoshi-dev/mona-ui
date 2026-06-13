@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
 
 import { MultiSelectComponent } from "./multi-select.component";
 
@@ -11,7 +10,7 @@ describe("MultiSelectComponent", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [MultiSelectComponent, BrowserAnimationsModule],
-            providers: [PopupAnimationService]
+            providers: []
         });
         fixture = TestBed.createComponent(MultiSelectComponent);
         component = fixture.componentInstance;

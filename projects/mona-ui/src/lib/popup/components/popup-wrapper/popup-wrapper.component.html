@@ -1,1 +1,16 @@
-<ng-container [ngTemplateOutlet]="templateRef()"></ng-container>
+@if (visible()) {
+    <div
+        #animationElement
+        class="w-full h-full origin-center"
+        [animate.enter]="enterAnimationClasses()"
+        [animate.leave]="leaveAnimationClasses()"
+        (animationcancel)="onNativeLeaveComplete($event)"
+        (animationend)="onNativeLeaveComplete($event)"
+        (transitioncancel)="onNativeLeaveComplete($event)"
+        (transitionend)="onNativeLeaveComplete($event)">
+        @if (templateRef()) {
+            <ng-container [ngTemplateOutlet]="templateRef()"></ng-container>
+        }
+        <ng-container #componentOutlet></ng-container>
+    </div>
+}

@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from "@angular/animations";
 import {
     CdkDrag,
     CdkDragDrop,
@@ -34,14 +33,47 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [TreeNodeComponent, FormsModule, CdkDropList, CdkDrag, CdkDragPreview, CheckBoxComponent],
     templateUrl: "./sub-tree.component.html",
-    animations: [
-        trigger("nodeExpand", [
-            transition(":enter", [
-                style({ height: "0px", opacity: 0 }),
-                animate("0.15s ease-out", style({ height: "*", opacity: 1 }))
-            ]),
-            transition(":leave", [animate("0.15s ease-out", style({ height: "0px", opacity: 0 }))])
-        ])
+    styles: [
+        `
+            .mona-tree-node-expand-enter {
+                animation: mona-tree-node-expand-in 150ms ease-out;
+            }
+
+            .mona-tree-node-expand-leave {
+                animation: mona-tree-node-expand-out 150ms ease-out;
+            }
+
+            @keyframes mona-tree-node-expand-in {
+                from {
+                    grid-template-rows: 0fr;
+                    opacity: 0;
+                }
+
+                to {
+                    grid-template-rows: 1fr;
+                    opacity: 1;
+                }
+            }
+
+            @keyframes mona-tree-node-expand-out {
+                from {
+                    grid-template-rows: 1fr;
+                    opacity: 1;
+                }
+
+                to {
+                    grid-template-rows: 0fr;
+                    opacity: 0;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .mona-tree-node-expand-enter,
+                .mona-tree-node-expand-leave {
+                    animation-duration: 1ms;
+                }
+            }
+        `
     ]
 })
 export class SubTreeComponent<T> {
@@ -64,19 +96,35 @@ export class SubTreeComponent<T> {
         const theme = this.#themeService.theme();
         return treeNodeDraggingThemeVariants(theme)();
     });
+    protected readonly nodeExpandEnterClass = computed(() =>
+        this.nodeAnimationDisabled() ? "" : "mona-tree-node-expand-enter"
+    );
+    protected readonly nodeExpandLeaveClass = computed(() =>
+        this.nodeAnimationDisabled() ? "" : "mona-tree-node-expand-leave"
+    );
     protected readonly nodeExpanderClass = computed(() => {
         const theme = this.#themeService.theme();
         return treeNodeExpanderThemeVariants(theme)();
     });
     protected readonly treeService = inject(TreeService);
     protected readonly visibleNodes = computed(() => {
-        return this.nodes().where(n => this.treeService.isVisible(n)).toImmutableSet();
+        return this.nodes()
+            .where(n => this.treeService.isVisible(n))
+            .toImmutableSet();
     });
     public readonly depth = input.required<number>();
     public readonly nodes = input.required<ImmutableSet<TreeNode<T>>, Iterable<TreeNode<T>>>({
         transform: value => ImmutableSet.create(value)
     });
     public readonly parent = input.required<TreeNode<T> | null>();
+
+    protected nodeAnimationDisabled(): boolean {
+        return (
+            !this.treeService.animationEnabled() ||
+            this.treeService.animationTemporarilyDisabled() ||
+            this.treeService.filterText().length !== 0
+        );
+    }
 
     public onExpandStateChange(node: TreeNode<T>): void {
         const expanded = this.treeService.isExpanded(node);

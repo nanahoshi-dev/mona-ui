@@ -21,10 +21,7 @@ import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { faChevronDown, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { fromEvent, take, takeUntil } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import {
-    dropdownPopupHideAnimation,
-    dropdownPopupShowAnimation
-} from "../../../../dropdowns/animations/dropdown.animation";
+import { dropdownPopupAnimation } from "../../../../popup/models/PopupAnimationClasses";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -231,10 +228,7 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
         this.popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             anchorConnectionPoint: "bottomleft",
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
+            animation: dropdownPopupAnimation,
             closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,

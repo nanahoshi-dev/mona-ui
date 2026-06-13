@@ -36,8 +36,13 @@
         </div>
     </div>
     @if (codeVisible()) {
-        <div class="overflow-hidden p-2 border-b border-b-border" @slideDown>
-            <app-code-viewer [code]="config().code || ''" language="html"></app-code-viewer>
+        <div
+            class="grid overflow-hidden border-b border-b-border"
+            animate.enter="demo-code-panel-enter"
+            animate.leave="demo-code-panel-leave">
+            <div class="min-h-0 overflow-hidden p-2">
+                <app-code-viewer [code]="config().code || ''" language="html"></app-code-viewer>
+            </div>
         </div>
     }
     <div>

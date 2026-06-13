@@ -14,8 +14,8 @@ import {
 import { DOCUMENT } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { delay, fromEvent, merge, Subscription, take, takeUntil } from "rxjs";
-import { fadeIn, fadeOut } from "../../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../../models/Position";
+import { fadePopupAnimation } from "../../../../popup/models/PopupAnimationClasses";
 import { PopupRef } from "../../../../popup/models/PopupRef";
 import { PopupAnchor } from "../../../../popup/models/PopupSettings";
 import { PopupService } from "../../../../popup/services/popup.service";
@@ -128,10 +128,7 @@ export class TooltipComponent implements TooltipVariantInputs {
         const popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint: connectionPoints.anchor,
-            animation: {
-                show: fadeIn,
-                hide: fadeOut
-            },
+            animation: fadePopupAnimation,
             closeOnEscape: true,
             closeOnMouseLeave: false,
             closeOnOutsideClick: true,

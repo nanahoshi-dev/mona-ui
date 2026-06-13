@@ -1,4 +1,3 @@
-import { AnimationMetadata } from "@angular/animations";
 import { StaticProvider, TemplateRef } from "@angular/core";
 import {
     ComponentType,
@@ -188,12 +187,12 @@ export interface PopupSettings<T = unknown, C = void> {
 
 export interface PopupAnimationSettings {
     /**
-     * Animation that will play when the popup is hidden.
+     * CSS class or classes applied by animate.enter when the popup is shown.
      */
-    hide?: AnimationMetadata | AnimationMetadata[];
+    enter?: string | string[];
 
     /**
-     * Animation that will play when the popup is shown.
+     * CSS class or classes applied by animate.leave when the popup is hidden.
      */
-    show?: AnimationMetadata | AnimationMetadata[];
+    leave?: string | string[];
 }

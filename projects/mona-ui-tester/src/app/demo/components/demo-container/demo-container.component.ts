@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from "@angular/animations";
 import { Directionality } from "@angular/cdk/bidi";
 import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -30,11 +29,43 @@ import { ConfigComponent } from "../config/config.component";
     ],
     templateUrl: "./demo-container.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [
-        trigger("slideDown", [
-            transition(":enter", [style({ height: "0" }), animate("300ms ease-out", style({ height: "*" }))]),
-            transition(":leave", [animate("300ms ease-in", style({ height: "0" }))])
-        ])
+    styles: [
+        `
+            .demo-code-panel-enter {
+                animation: demo-code-panel-in 300ms ease-out;
+            }
+
+            .demo-code-panel-leave {
+                animation: demo-code-panel-out 300ms ease-in;
+            }
+
+            @keyframes demo-code-panel-in {
+                from {
+                    grid-template-rows: 0fr;
+                }
+
+                to {
+                    grid-template-rows: 1fr;
+                }
+            }
+
+            @keyframes demo-code-panel-out {
+                from {
+                    grid-template-rows: 1fr;
+                }
+
+                to {
+                    grid-template-rows: 0fr;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .demo-code-panel-enter,
+                .demo-code-panel-leave {
+                    animation-duration: 1ms;
+                }
+            }
+        `
     ]
 })
 export class DemoContainerComponent<TComponent> {

@@ -1,46 +1,80 @@
-import { Component, TemplateRef, viewChild, ViewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
-import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
+import { Subject } from "rxjs";
+import { PopupCloseEvent } from "../../models/PopupCloseEvent";
+import { PopupReferenceInjectionToken, PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
 import { PopupSettings } from "../../models/PopupSettings";
 
 import { PopupWrapperComponent } from "./popup-wrapper.component";
 
-@Component({
-    template: `
-        <ng-template #contentTemplate>
-            <div>Test</div>
-        </ng-template>
-        <div>Test</div>
-    `,
-    standalone: false
-})
-class PopupWrapperComponentTestComponent {
-    public contentTemplate = viewChild.required<TemplateRef<any>>("contentTemplate");
+interface PopupWrapperComponentTestApi {
+    onNativeLeaveComplete(event: AnimationEvent | TransitionEvent): void;
 }
-
-const POPUP_TOKEN = [
-    {
-        provide: PopupSettingsInjectionToken,
-        useValue: {} as PopupSettings
-    }
-];
 
 describe("PopupWrapperComponent", () => {
     let component: PopupWrapperComponent;
+    let completeClose: ReturnType<typeof vi.fn>;
+    let closeStart$: Subject<PopupCloseEvent>;
     let fixture: ComponentFixture<PopupWrapperComponent>;
 
-    beforeEach(() => {
+    const setup = (popupSettings: PopupSettings = {} as PopupSettings) => {
+        closeStart$ = new Subject<PopupCloseEvent>();
+        completeClose = vi.fn();
         TestBed.configureTestingModule({
             imports: [PopupWrapperComponent],
-            providers: [POPUP_TOKEN, provideAnimations()]
+            providers: [
+                {
+                    provide: PopupReferenceInjectionToken,
+                    useValue: {
+                        closeStart$,
+                        completeClose
+                    }
+                },
+                {
+                    provide: PopupSettingsInjectionToken,
+                    useValue: popupSettings
+                }
+            ]
         });
         fixture = TestBed.createComponent(PopupWrapperComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+        setup();
     });
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("should complete close when the animated wrapper finishes leaving", () => {
+        const closeEvent = new PopupCloseEvent();
+        const animationEvent = new AnimationEvent("animationend");
+        const target = document.createElement("div");
+
+        closeStart$.next(closeEvent);
+        Object.defineProperties(animationEvent, {
+            currentTarget: { value: target },
+            target: { value: target }
+        });
+        (component as unknown as PopupWrapperComponentTestApi).onNativeLeaveComplete(animationEvent);
+
+        expect(completeClose).toHaveBeenCalledOnce();
+        expect(completeClose).toHaveBeenCalledWith(closeEvent);
+    });
+
+    it("should ignore animation events from popup content children", () => {
+        const closeEvent = new PopupCloseEvent();
+        const animationEvent = new AnimationEvent("animationend");
+
+        closeStart$.next(closeEvent);
+        Object.defineProperties(animationEvent, {
+            currentTarget: { value: document.createElement("div") },
+            target: { value: document.createElement("span") }
+        });
+        (component as unknown as PopupWrapperComponentTestApi).onNativeLeaveComplete(animationEvent);
+
+        expect(completeClose).not.toHaveBeenCalled();
     });
 });

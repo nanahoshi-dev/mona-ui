@@ -322,6 +322,7 @@ export * from "./pager/components/pager/pager.component";
 /** Popup */
 export { PopupRef } from "./popup/models/PopupRef";
 export { PopupCloseEvent } from "./popup/models/PopupCloseEvent";
+export * from "./popup/models/PopupAnimationClasses";
 export * from "./popup/models/PopupSettings";
 export * from "./popup/services/popup.service";
 export * from "./popup/components/popup/popup.component";

@@ -1,4 +1,3 @@
-import { transition, trigger } from "@angular/animations";
 import { FocusMonitor } from "@angular/cdk/a11y";
 import {
     afterNextRender,
@@ -32,7 +31,6 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
     imports: [SubTreeComponent, TreeDropHintComponent],
     templateUrl: "./tree.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [trigger("nodeExpandParent", [transition(":enter", [])])],
     host: {
         "[class]": "baseClass()",
         "[attr.role]": "'tree'",

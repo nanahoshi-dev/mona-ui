@@ -1,19 +1,19 @@
 <span [class]="labelClasses()">
     @if (active() && !onLabelTemplate()) {
-        <span @fadeInOut>{{ onLabel() }}</span>
+        <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">{{ onLabel() }}</span>
     }
     @if (active() && onLabelTemplate()) {
-        <span @fadeInOut>
+        <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">
             <ng-container [ngTemplateOutlet]="onLabelTemplate()??null"></ng-container>
         </span>
     }
 </span>
 <span [class]="labelClasses()">
     @if (!active() && !offLabelTemplate()) {
-        <span @fadeInOut>{{ offLabel() }}</span>
+        <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">{{ offLabel() }}</span>
     }
     @if (!active() && offLabelTemplate()) {
-        <span @fadeInOut>
+        <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">
             <ng-container [ngTemplateOutlet]="offLabelTemplate()??null"></ng-container>
         </span>
     }

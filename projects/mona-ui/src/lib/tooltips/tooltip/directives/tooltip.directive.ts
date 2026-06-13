@@ -20,8 +20,8 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { fadeIn, fadeOut } from "../../../layout/scroll-view/models/ScrollViewAnimations";
 import { Position } from "../../../models/Position";
+import { fadePopupAnimation } from "../../../popup/models/PopupAnimationClasses";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupService } from "../../../popup/services/popup.service";
 import { ThemeService } from "../../../theme/services/theme.service";
@@ -125,10 +125,7 @@ export class TooltipDirective implements TooltipVariantInputs {
         const popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint: connectionPoints.anchor,
-            animation: {
-                show: fadeIn,
-                hide: fadeOut
-            },
+            animation: fadePopupAnimation,
             closeOnEscape: true,
             closeOnMouseLeave: false,
             closeOnOutsideClick: true,

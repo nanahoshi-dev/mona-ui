@@ -36,9 +36,9 @@ import { TreeNode } from "../../../../common/tree/models/TreeNode";
 import { TreeService } from "../../../../common/tree/services/tree.service";
 import { PlaceholderComponent } from "../../../../layout/placeholder/components/placeholder/placeholder.component";
 import { PopupRef } from "../../../../popup/models/PopupRef";
+import { dropdownPopupAnimation } from "../../../../popup/models/PopupAnimationClasses";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { Action } from "../../../../utils/Action";
-import { dropdownPopupHideAnimation, dropdownPopupShowAnimation } from "../../../animations/dropdown.animation";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
 import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
 import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
@@ -175,10 +175,7 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             anchorConnectionPoint: "bottomleft",
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
+            animation: dropdownPopupAnimation,
             closeOnOutsideClick: true,
             content: this.popupTemplate(),
             hasBackdrop: false,

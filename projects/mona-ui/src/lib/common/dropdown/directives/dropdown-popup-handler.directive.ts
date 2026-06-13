@@ -1,11 +1,8 @@
 import { afterNextRender, DestroyRef, Directive, ElementRef, inject, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take, takeUntil } from "rxjs";
-import {
-    dropdownPopupHideAnimation,
-    dropdownPopupShowAnimation
-} from "../../../dropdowns/animations/dropdown.animation";
 import { DropdownPopupInputToken } from "../../../dropdowns/models/DropdownPopupInput";
+import { dropdownPopupAnimation } from "../../../popup/models/PopupAnimationClasses";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { PopupSettings } from "../../../popup/models/PopupSettings";
 import { PopupService } from "../../../popup/services/popup.service";
@@ -100,10 +97,7 @@ export class DropdownPopupHandlerDirective {
         popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint,
-            animation: {
-                hide: dropdownPopupHideAnimation,
-                show: dropdownPopupShowAnimation
-            },
+            animation: dropdownPopupAnimation,
             content,
             closeOnOutsideClick,
             closeOnScroll,

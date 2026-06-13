@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { PopupAnimationService } from "../../../../animations/services/popup-animation.service";
 import { PopoverTrigger } from "../../models/PopoverTrigger";
 
 import { PopoverComponent } from "./popover.component";
@@ -24,7 +23,7 @@ describe("PopoverComponent", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PopoverComponent, PopoverComponentTestComponent, BrowserAnimationsModule],
-            providers: [PopupAnimationService]
+            providers: []
         });
         hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
         hostComponent = hostFixture.componentInstance;
