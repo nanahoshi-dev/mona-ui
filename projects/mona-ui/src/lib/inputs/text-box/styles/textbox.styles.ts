@@ -8,8 +8,6 @@ export const textBoxThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaTextBoxVariants;
-        case "shadcn":
-            return monaTextBoxVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaTextBoxVariants; // Default to Mona styles
     }
@@ -19,8 +17,6 @@ export const inputThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaInputVariants;
-        case "shadcn":
-            return monaInputVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaInputVariants; // Default to Mona styles
     }

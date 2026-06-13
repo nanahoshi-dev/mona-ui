@@ -22,12 +22,12 @@
                 size="small"></mona-color-picker>
             <mona-dropdown-list
                 [data]="themeDropdownData()"
+                textField="text"
+                valueField="value"
                 [ngModel]="selectedTheme()"
                 size="small"
+                [style.width.px]="100"
                 (ngModelChange)="onThemeChange($event)">
-                <ng-template monaDropDownListValueTemplate let-dataItem>
-                    <span [style.text-transform]="'capitalize'">{{ dataItem }}</span>
-                </ng-template>
             </mona-dropdown-list>
         </div>
         <div

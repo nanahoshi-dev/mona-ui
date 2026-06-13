@@ -6,11 +6,11 @@ import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
     ColorPickerComponent,
-    DropDownItemTemplateDirective,
     DropdownListComponent,
-    DropDownListValueTemplateDirective,
+    type ThemeId,
     ThemeService,
-    ThemeStyle
+    ThemeStyle,
+    type ThemeVariant
 } from "mona-ui";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { ComponentConfig } from "../../utils/componentConfig";
@@ -23,7 +23,6 @@ import { ConfigComponent } from "../config/config.component";
         ConfigComponent,
         DropdownListComponent,
         FormsModule,
-        DropDownListValueTemplateDirective,
         CodeViewerComponent,
         ButtonDirective,
         LucideAngularModule,
@@ -53,8 +52,15 @@ export class DemoContainerComponent<TComponent> {
     protected readonly codeVisible = signal(false);
     protected readonly customColor = signal<string | null>(null);
     protected readonly direction = signal<"ltr" | "rtl">("ltr");
-    protected readonly selectedTheme = computed(() => this.#themeService.theme());
-    protected readonly themeDropdownData = signal<ThemeStyle[]>(["mona", "shadcn"]);
+    protected readonly selectedTheme = computed(() => {
+        return this.themeDropdownData().find(theme => theme.id === this.#themeService.themeId());
+    });
+    protected readonly themeDropdownData = signal<
+        Array<{ text: string; theme: ThemeStyle; variant: ThemeVariant; id: ThemeId }>
+    >([
+        { text: "Mona Light", theme: "mona", variant: "light", id: "mona-light" },
+        { text: "Mona Dark", theme: "mona", variant: "dark", id: "mona-dark" }
+    ]);
     public readonly config = input.required<ComponentConfig<TComponent>>();
     public readonly metadata = input.required<ComponentMetadata>();
     public readonly subComponentMetadata = input<Record<string, ComponentMetadata>>();
@@ -70,7 +76,7 @@ export class DemoContainerComponent<TComponent> {
         this.#directionality.change.emit(direction);
     }
 
-    protected onThemeChange(theme: ThemeStyle): void {
-        this.#themeService.setTheme(theme);
+    protected onThemeChange(item: { text: string; theme: ThemeStyle; variant: ThemeVariant; id: ThemeId }): void {
+        this.#themeService.setThemeId(item.id);
     }
 }

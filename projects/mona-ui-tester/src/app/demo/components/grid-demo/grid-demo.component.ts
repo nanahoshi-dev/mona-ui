@@ -73,7 +73,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     description: "Filtering type for grid rows",
                     name: "Type",
                     type: "dropdown",
-                    dropdownDataSource: ["menu", "row", "both"] as const,
+                    dropdownDataSource: ["menu", "row", "menu, row"] as const,
                     dropdownValue: "menu"
                 }
             }

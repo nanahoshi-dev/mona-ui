@@ -7,8 +7,6 @@ export const chipThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaChipVariants;
-        case "shadcn":
-            return monaChipVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaChipVariants;
     }

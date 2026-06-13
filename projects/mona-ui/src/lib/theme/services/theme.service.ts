@@ -1,5 +1,5 @@
 import { DOCUMENT, inject, Injectable, signal } from "@angular/core";
-import { ThemeStyle } from "../models/Theme";
+import { type ThemeId, ThemeStyle, type ThemeVariant } from "../models/Theme";
 import { generatePrimaryColorPalette } from "../utils/generateThemeColors";
 import { themeColorMap } from "../utils/themeColorMap";
 
@@ -8,16 +8,31 @@ import { themeColorMap } from "../utils/themeColorMap";
 })
 export class ThemeService {
     readonly #document = inject(DOCUMENT);
-    readonly #theme = signal<ThemeStyle>("shadcn");
+    readonly #theme = signal<ThemeStyle>("mona");
+    readonly #themeVariant = signal<ThemeVariant>("light");
+    public readonly themeId = signal<ThemeId>("mona-light");
     public readonly theme = this.#theme.asReadonly();
+    public readonly themeVariant = this.#themeVariant.asReadonly();
 
-    public setTheme(theme: ThemeStyle): void {
+    public constructor() {
+        this.updateThemeVariables();
+    }
+
+    public setThemeId(themeId: ThemeId): void {
+        const [theme, variant] = themeId.split("-") as [ThemeStyle, ThemeVariant];
         this.#theme.set(theme);
+        this.#themeVariant.set(variant);
+        this.themeId.set(themeId);
         this.updateThemeVariables();
     }
 
     private getActiveThemeVariables(): Record<string, string> {
-        return this.#theme() === "mona" ? this.getMonaDarkThemeVariables() : this.getMonaLightThemeVariables();
+        const theme = this.theme();
+        const variant = this.themeVariant();
+        if (theme === "mona") {
+            return variant === "light" ? this.getMonaLightThemeVariables() : this.getMonaDarkThemeVariables();
+        }
+        return {};
     }
 
     private getMonaDarkThemeVariables(): Record<string, string> {

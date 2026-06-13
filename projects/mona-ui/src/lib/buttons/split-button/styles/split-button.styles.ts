@@ -7,8 +7,6 @@ export const splitButtonThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
         case "mona":
             return monaSplitButtonVariants;
-        case "shadcn":
-            return monaSplitButtonVariants; // Placeholder for Shadcn styles, if available
         default:
             return monaSplitButtonVariants; // Default to Mona styles
     }
