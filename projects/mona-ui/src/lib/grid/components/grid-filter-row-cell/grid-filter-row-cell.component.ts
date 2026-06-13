@@ -1,19 +1,20 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
+    effect,
     inject,
     input,
     output,
-    signal
+    signal,
+    untracked
 } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { FunnelIcon, FunnelXIcon, LucideAngularModule } from "lucide-angular";
-import { debounceTime } from "rxjs";
+import { debounceTime, Subject } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PopupMenuCheckboxItemComponent } from "../../../common/popup-menu/components/popup-menu-checkbox-item/popup-menu-checkbox-item.component";
 import { PopupMenuComponent } from "../../../common/popup-menu/components/popup-menu/popup-menu.component";
@@ -69,6 +70,8 @@ export class GridFilterRowCellComponent {
     readonly #destroyRef = inject(DestroyRef);
     readonly #filterService = inject(FilterService);
     readonly #gridService = inject(GridService);
+    readonly #numberInput$ = new Subject<number | null>();
+    readonly #stringInput$ = new Subject<string>();
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -81,23 +84,20 @@ export class GridFilterRowCellComponent {
     protected readonly filterIcon = FunnelIcon;
     protected readonly filterRemoveIcon = FunnelXIcon;
     protected readonly numberValue = signal<number | null>(null);
-    protected readonly numberValue$ = toObservable(this.numberValue);
     protected readonly numericFilterMenuItems = this.#filterService.numericFilterMenuItems;
     protected readonly selectedOperator = signal<RowFilterOperator>("eq");
     protected readonly stringFilterMenuItems = this.#filterService.stringFilterMenuItems;
     protected readonly stringValue = signal<string>("");
-    protected readonly stringValue$ = toObservable(this.stringValue);
 
     public readonly apply = output<ColumnFilterState>();
     public readonly column = input.required<Column>();
 
     public constructor() {
-        afterNextRender({
-            read: () => {
-                this.#hydrateFromAppliedFilters();
-                this.#setValueChangeSubscriptions();
-            }
+        effect(() => {
+            const filterState = this.#gridService.appliedFilters().get(this.column().field()) ?? null;
+            untracked(() => this.#syncFromFilterState(filterState));
         });
+        this.#setValueChangeSubscriptions();
     }
 
     protected onBooleanChange(value: FilterMenuDataItem): void {
@@ -126,14 +126,35 @@ export class GridFilterRowCellComponent {
 
     protected onNumberChange(value: number | null): void {
         this.numberValue.set(value);
+        this.#numberInput$.next(value);
     }
 
     protected onOperatorChange(operator: FilterOperators): void {
         this.selectedOperator.set(operator as RowFilterOperator);
+        switch (this.column().dataType()) {
+            case "string":
+                if (this.stringValue().trim()) {
+                    this.#emitFilter(this.stringValue());
+                }
+                break;
+            case "number":
+                if (this.numberValue() != null) {
+                    this.#emitFilter(this.numberValue());
+                }
+                break;
+            case "date":
+            case "datetime":
+            case "time":
+                if (this.dateValue()) {
+                    this.#emitFilter(this.dateValue());
+                }
+                break;
+        }
     }
 
     protected onStringChange(value: string): void {
         this.stringValue.set(value);
+        this.#stringInput$.next(value);
     }
 
     #emitClearFilter(): void {
@@ -195,9 +216,13 @@ export class GridFilterRowCellComponent {
         return null;
     }
 
-    #hydrateFromAppliedFilters(): void {
-        const filterState = this.#gridService.appliedFilters().get(this.column().field());
+    #syncFromFilterState(filterState: ColumnFilterState | null): void {
         if (!filterState?.filterMenuValue) {
+            this.stringValue.set("");
+            this.numberValue.set(null);
+            this.dateValue.set(null);
+            this.booleanValue.set(null);
+            this.selectedOperator.set("eq");
             return;
         }
         const v = filterState.filterMenuValue;
@@ -226,7 +251,7 @@ export class GridFilterRowCellComponent {
     }
 
     #setValueChangeSubscriptions(): void {
-        this.stringValue$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
+        this.#stringInput$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
             if (value.trim()) {
                 this.#emitFilter(value);
             } else {
@@ -234,7 +259,7 @@ export class GridFilterRowCellComponent {
             }
         });
 
-        this.numberValue$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
+        this.#numberInput$.pipe(debounceTime(300), takeUntilDestroyed(this.#destroyRef)).subscribe(value => {
             if (value !== null && value !== undefined) {
                 this.#emitFilter(value);
             } else {
