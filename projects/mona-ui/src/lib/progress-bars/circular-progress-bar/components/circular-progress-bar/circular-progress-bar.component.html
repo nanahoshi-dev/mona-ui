@@ -22,7 +22,7 @@
     <div class="mona-circular-progress-bar-label">
         @if (labelTemplate()) {
             <ng-container
-                [ngTemplateOutlet]="$safeNavigationMigration(labelTemplate()?.templateRef)"
+                [ngTemplateOutlet]="labelTemplate()?.templateRef"
                 [ngTemplateOutletContext]="{ $implicit: value(), min: min(), max: max(), percent: progress() }">
             </ng-container>
         } @else {

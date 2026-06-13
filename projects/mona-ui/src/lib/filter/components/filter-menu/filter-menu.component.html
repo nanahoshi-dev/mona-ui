@@ -12,9 +12,7 @@
             [ngModel]="stringFilterValues()[0]"
             (ngModelChange)="stringFilterValues.set([$event, stringFilterValues()[1]])"
             [size]="size()"
-            [disabled]="
-                $safeNavigationMigration(selectedFilterMenuDataItemList()[0]?.value) | valuelessOperator
-            "></mona-text-box>
+            [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-text-box>
     }
 
     @if (type() === "number") {
@@ -31,9 +29,7 @@
             (ngModelChange)="numberFilterValues.set([$event, numberFilterValues()[1]])"
             [size]="size()"
             [rounded]="rounded()"
-            [disabled]="
-                $safeNavigationMigration(selectedFilterMenuDataItemList()[0]?.value) | valuelessOperator
-            "></mona-numeric-text-box>
+            [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
     }
 
     @if (type() === "date") {
@@ -53,9 +49,7 @@
                 [format]="dateOptions().format"
                 [size]="size()"
                 [rounded]="rounded()"
-                [disabled]="
-                    $safeNavigationMigration(selectedFilterMenuDataItemList()[0]?.value) | valuelessOperator
-                "></mona-date-picker>
+                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-date-picker>
         }
 
         @if (dateOptions().type === "datetime") {
@@ -65,9 +59,7 @@
                 [format]="dateOptions().format"
                 [size]="size()"
                 [rounded]="rounded()"
-                [disabled]="
-                    $safeNavigationMigration(selectedFilterMenuDataItemList()[0]?.value) | valuelessOperator
-                "></mona-datetime-picker>
+                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-datetime-picker>
         }
 
         @if (dateOptions().type === "time") {
@@ -77,9 +69,7 @@
                 [format]="dateOptions().format"
                 [size]="size()"
                 [rounded]="rounded()"
-                [disabled]="
-                    $safeNavigationMigration(selectedFilterMenuDataItemList()[0]?.value) | valuelessOperator
-                "></mona-time-picker>
+                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-time-picker>
         }
     }
 
@@ -122,9 +112,7 @@
             <mona-text-box
                 [ngModel]="stringFilterValues()[1]"
                 (ngModelChange)="stringFilterValues.set([stringFilterValues()[0], $event])"
-                [disabled]="
-                    $safeNavigationMigration(selectedFilterMenuDataItemList()[1]?.value) | valuelessOperator
-                "></mona-text-box>
+                [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-text-box>
         }
 
         @if (type() === "number") {
@@ -142,9 +130,7 @@
                 [rounded]="rounded()"
                 [ngModel]="numberFilterValues()[1]"
                 (ngModelChange)="numberFilterValues.set([numberFilterValues()[0], $event])"
-                [disabled]="
-                    $safeNavigationMigration(selectedFilterMenuDataItemList()[0]?.value) | valuelessOperator
-                "></mona-numeric-text-box>
+                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
         }
 
         @if (type() === "date") {
@@ -164,9 +150,7 @@
                     [format]="dateOptions().format"
                     [size]="size()"
                     [rounded]="rounded()"
-                    [disabled]="
-                        $safeNavigationMigration(selectedFilterMenuDataItemList()[1]?.value) | valuelessOperator
-                    "></mona-date-picker>
+                    [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-date-picker>
             }
 
             @if (dateOptions().type === "datetime") {
@@ -176,9 +160,7 @@
                     [format]="dateOptions().format"
                     [size]="size()"
                     [rounded]="rounded()"
-                    [disabled]="
-                        $safeNavigationMigration(selectedFilterMenuDataItemList()[1]?.value) | valuelessOperator
-                    "></mona-datetime-picker>
+                    [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-datetime-picker>
             }
 
             @if (dateOptions().type === "time") {
@@ -188,9 +170,7 @@
                     [format]="dateOptions().format"
                     [size]="size()"
                     [rounded]="rounded()"
-                    [disabled]="
-                        $safeNavigationMigration(selectedFilterMenuDataItemList()[1]?.value) | valuelessOperator
-                    "></mona-time-picker>
+                    [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-time-picker>
             }
         }
 
