@@ -245,6 +245,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         if (this.currentPopupMenu() === popupMenu || !this.currentPopupMenu()) {
             return;
         }
+        this.currentPopupMenu()?.clearFocusRestoration();
         this.currentPopupMenu()?.closeMenu();
         this.currentPopupMenu.set(popupMenu);
         this.currentPopupElement.set(element);
@@ -385,6 +386,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
     }
 
     private updateCurrentMenuData(index: number): void {
+        this.currentPopupMenu()?.clearFocusRestoration();
         this.currentPopupMenu()?.closeMenu();
         this.currentPopupMenu.set(this.menuList()[index].popupMenu);
         const element = this.findMenuElementByUid(this.menuList()[index].uid);

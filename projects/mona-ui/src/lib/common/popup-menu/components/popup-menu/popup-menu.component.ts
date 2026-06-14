@@ -1,16 +1,16 @@
 import { Point } from "@angular/cdk/drag-drop";
 import {
+    afterNextRender,
+    afterRenderEffect,
     ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
     contentChildren,
     DestroyRef,
-    effect,
     ElementRef,
     inject,
     input,
-    OnInit,
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -23,6 +23,7 @@ import { PopupAnchor } from "../../../../popup/models/PopupSettings";
 import { PopupService } from "../../../../popup/services/popup.service";
 import { ConnectionPoint } from "../../../../popup/utils/connectionPosition";
 import { toCssValue } from "../../../../utils/toCssValue";
+import { rxTimeout } from "../../../utils/rxTimeout";
 import { PopupMenuCloseEvent } from "../../models/PopupMenuCloseEvent";
 import {
     PopupMenuGroupTemplateToken,
@@ -44,7 +45,7 @@ import { PopupMenuListComponent } from "../popup-menu-list/popup-menu-list.compo
     template: "",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
+export class PopupMenuComponent implements PopupMenuVariantInput {
     readonly #close$ = new Subject<void>();
     readonly #destroyRef = inject(DestroyRef);
     readonly #menuItemClick$ = new Subject<PopupMenuItemClickEvent>();
@@ -182,16 +183,27 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
     public readonly width = input<string | number>();
 
     public constructor() {
-        effect(() => {
-            this.anchor();
-            this.target();
-            this.trigger();
-            if (this.#triggerSubscription) {
-                this.#triggerSubscription.unsubscribe();
-                this.#triggerSubscription = null;
-            }
-            this.setTriggerSubscription();
+        afterNextRender({
+            read: () => this.setSubscriptions()
         });
+        afterRenderEffect({
+            read: () => {
+                rxTimeout(this.#destroyRef, () => {
+                    this.anchor();
+                    this.target();
+                    this.trigger();
+                    if (this.#triggerSubscription) {
+                        this.#triggerSubscription.unsubscribe();
+                        this.#triggerSubscription = null;
+                    }
+                    this.setTriggerSubscription();
+                });
+            }
+        });
+    }
+
+    public clearFocusRestoration(): void {
+        this.#shouldRestoreFocus = false;
     }
 
     public closeMenu(): void {
@@ -199,10 +211,6 @@ export class PopupMenuComponent implements OnInit, PopupMenuVariantInput {
             this.popupRef.close();
             this.popupRef = null;
         }
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
     }
 
     public openMenu(viaContextMenuKey: boolean): void {

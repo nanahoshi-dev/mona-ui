@@ -431,7 +431,12 @@ export class PopupMenuListComponent implements OnInit {
                 takeUntilDestroyed(this.#destroyRef),
                 takeUntil(this.#parentConfig.parentClose$),
                 filter(e => e.item !== this.activeMenuItem()),
-                tap(() => this.popupRef?.close()),
+                tap(e => {
+                    this.popupRef?.close();
+                    if (e.item.items.length === 0) {
+                        this.activeMenuItem.set(null);
+                    }
+                }),
                 filter(e => e.item.items.length > 0),
                 switchMap(e => {
                     this.activeMenuItem.set(e.item);
