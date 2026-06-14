@@ -102,10 +102,22 @@ export class GridVirtualListComponent {
     public constructor() {
         afterNextRender({
             read: () => {
-                this.gridService.bodyTableElement.set(this.bodyTableElementRef().nativeElement);
-                this.synchronizeHorizontalScroll();
+                const bodyTableElement = this.bodyTableElementRef().nativeElement;
+                const bodyScrollElement = this.#hostElementRef.nativeElement.querySelector(
+                    ".cdk-virtual-scroll-viewport"
+                ) as HTMLElement | null;
+                this.gridService.bodyTableElement.set(bodyTableElement);
+                this.gridService.bodyScrollElement.set(bodyScrollElement);
                 this.setFocusSubscription();
                 this.setScrollEndSubscription();
+                this.#destroyRef.onDestroy(() => {
+                    if (this.gridService.bodyTableElement() === bodyTableElement) {
+                        this.gridService.bodyTableElement.set(null);
+                    }
+                    if (bodyScrollElement != null && this.gridService.bodyScrollElement() === bodyScrollElement) {
+                        this.gridService.bodyScrollElement.set(null);
+                    }
+                });
             }
         });
         this.setGroupSubscriptions();
@@ -206,26 +218,4 @@ export class GridVirtualListComponent {
         });
     }
 
-    private synchronizeHorizontalScroll(): void {
-        const headerElement = this.gridService.gridHeaderElement();
-        const gridElement = this.#hostElementRef.nativeElement as HTMLElement;
-        if (headerElement == null || gridElement == null) {
-            return;
-        }
-        const scrollableElement = gridElement.querySelector(".cdk-virtual-scroll-viewport") as HTMLElement;
-        fromEvent(scrollableElement, "scroll")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                if (headerElement.scrollLeft !== scrollableElement.scrollLeft) {
-                    headerElement.scrollLeft = scrollableElement.scrollLeft;
-                }
-            });
-        fromEvent(headerElement, "scroll")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                if (scrollableElement.scrollLeft !== headerElement.scrollLeft) {
-                    scrollableElement.scrollLeft = headerElement.scrollLeft;
-                }
-            });
-    }
 }

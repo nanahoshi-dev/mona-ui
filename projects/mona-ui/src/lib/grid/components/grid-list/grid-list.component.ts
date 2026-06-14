@@ -97,8 +97,19 @@ export class GridListComponent implements GridListVariantInput {
     public constructor() {
         afterNextRender({
             read: () => {
-                this.gridService.bodyTableElement.set(this.bodyTableElementRef().nativeElement);
+                const bodyTableElement = this.bodyTableElementRef().nativeElement;
+                const bodyScrollElement = this.#hostElementRef.nativeElement;
+                this.gridService.bodyTableElement.set(bodyTableElement);
+                this.gridService.bodyScrollElement.set(bodyScrollElement);
                 this.setSubscriptions();
+                this.#destroyRef.onDestroy(() => {
+                    if (this.gridService.bodyTableElement() === bodyTableElement) {
+                        this.gridService.bodyTableElement.set(null);
+                    }
+                    if (this.gridService.bodyScrollElement() === bodyScrollElement) {
+                        this.gridService.bodyScrollElement.set(null);
+                    }
+                });
             }
         });
     }
@@ -122,25 +133,6 @@ export class GridListComponent implements GridListVariantInput {
             .subscribe(() => {
                 this.#gridNavigationService.focusFirstCell();
             });
-        fromEvent(this.#hostElementRef.nativeElement, "scroll")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => {
-                const headerElement = this.gridService.gridHeaderElement();
-                if (headerElement && headerElement.scrollLeft !== this.#hostElementRef.nativeElement.scrollLeft) {
-                    headerElement.scrollLeft = this.#hostElementRef.nativeElement.scrollLeft;
-                }
-            });
-        const headerElement = this.gridService.gridHeaderElement();
-        if (headerElement) {
-            fromEvent(headerElement, "scroll")
-                .pipe(takeUntilDestroyed(this.#destroyRef))
-                .subscribe(() => {
-                    const contentEl = this.#hostElementRef.nativeElement;
-                    if (contentEl.scrollLeft !== headerElement.scrollLeft) {
-                        contentEl.scrollLeft = headerElement.scrollLeft;
-                    }
-                });
-        }
     }
 
     protected readonly span = span;

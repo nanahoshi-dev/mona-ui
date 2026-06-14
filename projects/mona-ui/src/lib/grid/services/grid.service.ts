@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from "@angular/common";
-import { computed, DOCUMENT, inject, Injectable, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
+import { computed, DOCUMENT, effect, inject, Injectable, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import {
     any,
@@ -55,11 +55,13 @@ export class GridService {
         source: () => this.#editSource
     });
     readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
+    readonly #horizontalScrollLeft = signal(0);
     readonly #platformId = inject(PLATFORM_ID);
     readonly #textMeasureCache = new Map<string, number>();
     public readonly appliedFilters = signal(ImmutableDictionary.create<string, ColumnFilterState>());
     public readonly appliedGroupSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
+    public readonly bodyScrollElement = signal<HTMLElement | null>(null);
     public readonly bodyTableElement = signal<HTMLTableElement | null>(null);
     public readonly cellEdit$ = new Subject<CellEditEvent>();
     /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
@@ -184,6 +186,10 @@ export class GridService {
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
     public readonly virtualGridMinBuffer = signal(0);
     public readonly virtualScrollOptions = signal<VirtualScrollOptions>({ enabled: false, height: 28 });
+
+    public constructor() {
+        this.setHorizontalScrollSyncEffects();
+    }
 
     public cancelEdit(): void {
         const rowUid = this.#editContext()?.rowUid;
@@ -469,10 +475,6 @@ export class GridService {
         return longestValue;
     }
 
-    private getRowSelectionKey(row: Row): unknown {
-        return this.getRowDataItemSelectionKey(row.data);
-    }
-
     private getRowDataItemSelectionKey(data: Record<PropertyKey, unknown>): unknown {
         const selectBy = this.selectBy();
         if (!selectBy) {
@@ -482,5 +484,49 @@ export class GridService {
             return data[selectBy];
         }
         return selectBy(data);
+    }
+
+    private getRowSelectionKey(row: Row): unknown {
+        return this.getRowDataItemSelectionKey(row.data);
+    }
+
+    private setElementScrollLeft(element: HTMLElement | null, scrollLeft: number): void {
+        if (element != null && element.scrollLeft !== scrollLeft) {
+            element.scrollLeft = scrollLeft;
+        }
+    }
+
+    private setHorizontalScrollLeft(scrollLeft: number): void {
+        if (this.#horizontalScrollLeft() !== scrollLeft) {
+            this.#horizontalScrollLeft.set(scrollLeft);
+        }
+    }
+
+    private setHorizontalScrollSyncEffects(): void {
+        effect(onCleanup => {
+            const headerElement = this.gridHeaderElement();
+            const bodyElement = this.bodyScrollElement();
+            const cleanups: Array<() => void> = [];
+
+            if (headerElement != null) {
+                const onHeaderScroll = (): void => this.setHorizontalScrollLeft(headerElement.scrollLeft);
+                headerElement.addEventListener("scroll", onHeaderScroll);
+                cleanups.push(() => headerElement.removeEventListener("scroll", onHeaderScroll));
+            }
+
+            if (bodyElement != null) {
+                const onBodyScroll = (): void => this.setHorizontalScrollLeft(bodyElement.scrollLeft);
+                bodyElement.addEventListener("scroll", onBodyScroll);
+                cleanups.push(() => bodyElement.removeEventListener("scroll", onBodyScroll));
+            }
+
+            onCleanup(() => cleanups.forEach(cleanup => cleanup()));
+        });
+
+        effect(() => {
+            const scrollLeft = this.#horizontalScrollLeft();
+            this.setElementScrollLeft(this.gridHeaderElement(), scrollLeft);
+            this.setElementScrollLeft(this.bodyScrollElement(), scrollLeft);
+        });
     }
 }
