@@ -361,6 +361,7 @@ export class GridComponent<T> implements GridVariantInput {
             this.gridService.appliedFilters.update(dict => dict.remove(column.field()));
             column.setFiltered(false);
         }
+        this.adjustPageAfterFilter();
         const allFilters = this.gridService
             .appliedFilters()
             .values()
@@ -461,6 +462,18 @@ export class GridComponent<T> implements GridVariantInput {
 
     public onPageSizeChange(data: PageSizeChangeEvent): void {
         this.gridService.setPageState({ take: data.newPageSize });
+    }
+
+    private adjustPageAfterFilter(): void {
+        const rowCount = this.gridService.viewRowCount();
+        if (rowCount === 0) {
+            return;
+        }
+        const { skip, take } = this.gridService.paginationState();
+        if (skip >= rowCount) {
+            const lastPage = Math.ceil(rowCount / take);
+            this.gridService.setPageState({ skip: (lastPage - 1) * take, page: lastPage });
+        }
     }
 
     private applyColumnSort(column: Column, sortDirection: SortDirection | null): void {

@@ -9,10 +9,10 @@
                 (ngModelChange)="onStringChange($event)"
                 placeholder="Filter..." />
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
-                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="!!stringValue()"></lucide-icon>
+                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="isFilterActive()"></lucide-icon>
             </button>
             <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!stringValue() }"></ng-container>
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
         </div>
         <mona-popup-menu [target]="filterButton" [size]="'small'">
             @for (item of stringFilterMenuItems; track item) {
@@ -33,7 +33,7 @@
                 [style.width.%]="100" />
 
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
-                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="!!numberValue()"></lucide-icon>
+                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="isFilterActive()"></lucide-icon>
             </button>
             <mona-popup-menu [target]="filterButton" [size]="'small'">
                 @for (item of numericFilterMenuItems; track item) {
@@ -45,7 +45,7 @@
                 }
             </mona-popup-menu>
             <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!numberValue() }"></ng-container>
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
         </div>
     }
     @case ("date")
@@ -74,10 +74,10 @@
                     [style.width.%]="100" />
             }
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
-                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="!!dateValue()"></lucide-icon>
+                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="isFilterActive()"></lucide-icon>
             </button>
             <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!dateValue() }"></ng-container>
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
         </div>
         <mona-popup-menu [target]="filterButton" [size]="'small'">
             @for (item of dateFilterMenuItems; track item) {
@@ -101,7 +101,7 @@
                 (ngModelChange)="onBooleanChange($event)"
                 [style.width.%]="100" />
             <ng-container
-                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: !!booleanValue() }"></ng-container>
+                *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
         </div>
     }
 }

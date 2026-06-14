@@ -77,6 +77,32 @@ export class GridFilterRowCellComponent {
         const theme = this.#themeService.theme();
         return gridFilterRowCellThemeVariants(theme)();
     });
+    protected readonly isFilterActive = computed(() => {
+        const op = this.selectedOperator();
+        if (op === "isnull" || op === "isnotnull") {
+            return true;
+        }
+        switch (this.column().dataType()) {
+            case "string":
+                return (
+                    this.stringValue().trim().length > 0 ||
+                    op === "isempty" ||
+                    op === "isnotempty" ||
+                    op === "isnullorempty" ||
+                    op === "isnotnullorempty"
+                );
+            case "number":
+                return this.numberValue() !== null;
+            case "date":
+            case "datetime":
+            case "time":
+                return this.dateValue() !== null;
+            case "boolean":
+                return this.booleanValue() !== null;
+            default:
+                return false;
+        }
+    });
     protected readonly booleanFilterMenuItems = this.#filterService.booleanFilterMenuItems;
     protected readonly booleanValue = signal<FilterMenuDataItem | null>(null);
     protected readonly dateFilterMenuItems = this.#filterService.dateFilterMenuItems;
@@ -131,6 +157,17 @@ export class GridFilterRowCellComponent {
 
     protected onOperatorChange(operator: FilterOperators): void {
         this.selectedOperator.set(operator as RowFilterOperator);
+        const isValueless =
+            operator === "isnull" ||
+            operator === "isnotnull" ||
+            operator === "isempty" ||
+            operator === "isnotempty" ||
+            operator === "isnullorempty" ||
+            operator === "isnotnullorempty";
+        if (isValueless) {
+            this.#emitFilter(null);
+            return;
+        }
         switch (this.column().dataType()) {
             case "string":
                 if (this.stringValue().trim()) {
@@ -138,7 +175,7 @@ export class GridFilterRowCellComponent {
                 }
                 break;
             case "number":
-                if (this.numberValue() != null) {
+                if (this.numberValue() !== null) {
                     this.#emitFilter(this.numberValue());
                 }
                 break;

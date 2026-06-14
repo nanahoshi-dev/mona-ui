@@ -325,7 +325,9 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     public writeValue(obj: number | null | undefined) {
         const value = obj == null ? null : Number(obj);
         this.value.set(value);
-        this.rawInputValue.set(this.formatValueForDisplay(value));
+        const displayValue = this.formatValueForDisplay(value);
+        this.rawInputValue.set(displayValue);
+        this.valueChange$.next(displayValue);
     }
 
     private correctValue(): void {
