@@ -7,6 +7,7 @@ import {
     effect,
     inject,
     input,
+    linkedSignal,
     output,
     signal,
     untracked
@@ -111,7 +112,7 @@ export class GridFilterRowCellComponent {
     protected readonly filterRemoveIcon = FunnelXIcon;
     protected readonly numberValue = signal<number | null>(null);
     protected readonly numericFilterMenuItems = this.#filterService.numericFilterMenuItems;
-    protected readonly selectedOperator = signal<RowFilterOperator>("eq");
+    protected readonly selectedOperator = linkedSignal<RowFilterOperator>(() => this.#getDefaultOperator());
     protected readonly stringFilterMenuItems = this.#filterService.stringFilterMenuItems;
     protected readonly stringValue = signal<string>("");
 
@@ -137,7 +138,7 @@ export class GridFilterRowCellComponent {
         this.numberValue.set(null);
         this.dateValue.set(null);
         this.booleanValue.set(null);
-        this.selectedOperator.set("eq");
+        this.selectedOperator.set(this.#getDefaultOperator());
         this.#emitClearFilter();
     }
 
@@ -253,17 +254,24 @@ export class GridFilterRowCellComponent {
         return null;
     }
 
+    #getDefaultOperator(): RowFilterOperator {
+        const dataType = this.column().dataType();
+        return dataType === "string" ? "contains" : "eq";
+    }
+
     #syncFromFilterState(filterState: ColumnFilterState | null): void {
+        const column = this.column();
+        const dataType = column.dataType();
         if (!filterState?.filterMenuValue) {
             this.stringValue.set("");
             this.numberValue.set(null);
             this.dateValue.set(null);
             this.booleanValue.set(null);
-            this.selectedOperator.set("eq");
+            this.selectedOperator.set(this.#getDefaultOperator());
             return;
         }
         const v = filterState.filterMenuValue;
-        switch (this.column().dataType()) {
+        switch (dataType) {
             case "string":
                 this.selectedOperator.set(v.operator1 as RowFilterOperator);
                 this.stringValue.set((v.value1 as string) ?? "");
