@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
-import type { GridRowNeighborType } from "../models/GridRowNeighbourType";
+
+const gridRowHeightClass = "h-9";
+const gridBodyRowSeparatorClass = "shadow-[inset_0_-1px_0_0_var(--color-border)]";
 
 export const gridBaseVariants = cva(
     `
@@ -22,24 +24,26 @@ export const gridBaseVariants = cva(
 
 export const gridCellBaseVariants = cva(
     `
-        w-full h-full flex
-        absolute inset-0
+        absolute inset-0 h-[calc(100%-1px)]
+        flex w-full
     `
 );
 
 export const gridCellContainerVariants = cva(
     `
-        flex items-center w-full h-full
-        flex-1 overflow-hidden outline-none
-        px-2.75 py-1.5
-
+        flex h-full w-full items-center
+        flex-1 outline-none
+        overflow-hidden
     `,
     {
         variants: {
             editing: {
-                true: "p-0.25!",
-                false: ""
+                true: "px-0",
+                false: "px-2"
             }
+        },
+        defaultVariants: {
+            editing: false
         }
     }
 );
@@ -77,24 +81,24 @@ export const gridColumnResizerVariants = cva(`
     absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -right-1.5
 `);
 
-export const gridDetailContentCellVariants = cva(``, {
+export const gridDetailContentCellVariants = cva(`border-b border-b-border`, {
     variants: {
         nextIsGroup: {
-            true: "border-t border-t-border",
-            false: "border-b border-b-border"
+            true: "",
+            false: ""
         }
     }
 });
 
 export const gridDetailIndentCellVariants = cva(
     `
-        border-r border-r-border
+        border-r border-r-border border-b border-b-border
     `,
     {
         variants: {
             nextIsGroup: {
                 true: "",
-                false: "border-b border-b-border"
+                false: ""
             }
         }
     }
@@ -105,6 +109,31 @@ export const gridDetailRowVariants = cva(`
 `);
 
 export const gridFilterRowCellVariants = cva(`flex items-center px-1 py-0.5 w-full`);
+
+export const gridFooterVariants = cva(
+    `
+        flex flex-row grow-0 shrink-0 basis-auto
+        overflow-hidden
+        bg-header-background border-r border-r-border border-t border-t-border
+    `
+);
+
+export const gridFooterTableVariants = cva(
+    `
+        border-separate border-spacing-0 table-fixed
+    `
+);
+
+export const gridFooterTableRowVariants = cva(`relative inline-flex [&>td:last-child]:border-r-0`);
+
+export const gridFooterTableCellVariants = cva(
+    `
+        relative overflow-hidden
+        text-left align-middle px-2 py-2
+        border-r border-r-border border-b border-b-border
+        bg-header-background font-medium
+    `
+);
 
 export const gridGroupPanelPlaceholderVariants = cva(`
     truncate opacity-70
@@ -122,6 +151,7 @@ export const gridGroupRowVariants = cva(
     `
         w-full bg-header-background
         border-r border-r-border
+        relative z-10
     `
 );
 
@@ -139,7 +169,9 @@ export const gridHeaderTableVariants = cva(
     `
 );
 
-export const gridHeaderTableRowVariants = cva(`relative inline-flex not-first:border-t not-first:border-t-border`);
+export const gridHeaderTableRowVariants = cva(
+    `relative inline-flex not-first:border-t not-first:border-t-border [&>th:last-child]:border-r-0`
+);
 
 export const gridHeaderTableCellVariants = cva(
     `
@@ -174,7 +206,7 @@ export const gridListBaseVariants = cva(
     {
         variants: {
             virtual: {
-                true: "overflow-x-hidden overflow-y-hidden",
+                true: "overflow-x-hidden overflow-y-hidden flex flex-col min-h-0",
                 false: "overflow-x-auto overflow-y-scroll"
             }
         }
@@ -187,13 +219,14 @@ export const gridListTableVariants = cva(
     `
 );
 
-export const gridListTableRowVariants = cva(` `, {
+export const gridListTableRowVariants = cva(`${gridBodyRowSeparatorClass}`, {
     variants: {
         selected: {
             true: `
+                    ${gridRowHeightClass}
                     bg-primary text-primary-foreground
                 `,
-            false: "odd:bg-background even:bg-background-dark "
+            false: `${gridRowHeightClass} odd:bg-background even:bg-background-dark `
         }
     }
 });
@@ -201,7 +234,9 @@ export const gridListTableRowVariants = cva(` `, {
 export const gridListTableCellVariants = cva(
     `
         relative
+        ${gridRowHeightClass}
         outline-none z-1
+        align-top
         focus:ring-1 focus:ring-inset focus:ring-primary/40
     `,
     {
@@ -222,6 +257,10 @@ export const gridListTableCellVariants = cva(
                 true: "",
                 false: ""
             },
+            lastInRow: {
+                true: "",
+                false: "border-r border-r-border"
+            },
             masterDetailContent: {
                 true: "",
                 false: ""
@@ -239,48 +278,57 @@ export const gridListTableCellVariants = cva(
             {
                 grouped: false,
                 masterDetailToggle: true,
-                class: "border-b border-b-border border-r border-r-border"
+                class: ""
             },
             {
                 grouped: false,
                 dataCell: true,
-                class: "border-b border-b-border border-r border-r-border"
+                class: ""
             },
             {
                 grouped: false,
                 indentCell: true,
-                class: "border-r border-r-border border-b border-b-border"
+                class: ""
             },
             {
                 grouped: false,
                 masterDetailContent: true,
-                class: "border-b border-b-border"
+                class: ""
+            },
+            {
+                groupHeader: true,
+                class: ""
             },
             {
                 grouped: true,
                 masterDetailToggle: true,
-                class: "border-r border-r-border"
+                class: ""
             },
             {
                 grouped: true,
                 dataCell: true,
-                class: "border-r border-r-border"
+                class: ""
             },
             {
                 grouped: true,
                 indentCell: true,
-                class: "border-r border-r-border bg-header-background"
+                class: "bg-header-background border-b border-b-border"
+            },
+            {
+                grouped: true,
+                indentCell: false,
+                class: "border-b border-b-border"
             },
             {
                 grouped: true,
                 indentCell: true,
                 masterDetailToggle: true,
-                class: "border-r border-r-border"
+                class: ""
             },
             {
                 grouped: true,
                 groupToggle: true,
-                class: "border-r-none border-b-none"
+                class: ""
             }
         ]
     }
@@ -292,29 +340,3 @@ export const gridNoDataVariants = cva(
         border-t border-t-border
     `
 );
-
-export function monaGridCellPositionalBorders(options: {
-    grouped: boolean;
-    groupHeader: boolean;
-    dataCell: boolean;
-    masterDetailToggle: boolean;
-    prevRowType: GridRowNeighborType;
-    nextRowType: GridRowNeighborType;
-}): string {
-    const classes: string[] = [];
-    if (!options.grouped) {
-        return "";
-    }
-    if (options.dataCell || options.masterDetailToggle) {
-        if (options.prevRowType === "group") {
-            classes.push("border-t", "border-t-border");
-        }
-        if (options.nextRowType === "data") {
-            classes.push("border-b", "border-b-border");
-        }
-    }
-    if (options.groupHeader && options.prevRowType !== null) {
-        classes.push("border-t", "border-t-border");
-    }
-    return classes.join(" ");
-}

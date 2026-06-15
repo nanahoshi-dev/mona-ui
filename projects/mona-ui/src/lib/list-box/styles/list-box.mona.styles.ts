@@ -3,6 +3,7 @@ import { cva } from "class-variance-authority";
 export const listBoxBaseVariants = cva(
     `
         flex gap-1
+        [&_mona-list-view]:w-full
     `,
     {
         variants: {

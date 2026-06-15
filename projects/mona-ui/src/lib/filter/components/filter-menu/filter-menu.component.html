@@ -32,7 +32,7 @@
             [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
     }
 
-    @if (type() === "date") {
+    @if (type() === "date" || type() === "datetime" || type() === "time") {
         <mona-dropdown-list
             [data]="dateFilterMenuDataItems | operatorFilter: operators()"
             textField="text"
@@ -42,31 +42,31 @@
             [ngModel]="selectedFilterMenuDataItemList()[0]"
             (ngModelChange)="onFilterOperatorChange(0, $event)"></mona-dropdown-list>
 
-        @if (dateOptions().type === "date") {
+        @if (type() === "date") {
             <mona-date-picker
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
-                [format]="dateOptions().format"
+                [format]="effectiveDateOptions().format"
                 [size]="size()"
                 [rounded]="rounded()"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-date-picker>
         }
 
-        @if (dateOptions().type === "datetime") {
+        @if (type() === "datetime") {
             <mona-datetime-picker
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
-                [format]="dateOptions().format"
+                [format]="effectiveDateOptions().format"
                 [size]="size()"
                 [rounded]="rounded()"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-datetime-picker>
         }
 
-        @if (dateOptions().type === "time") {
+        @if (type() === "time") {
             <mona-time-picker
                 [ngModel]="dateFilterValues()[0]"
                 (ngModelChange)="dateFilterValues.set([$event, dateFilterValues()[1]])"
-                [format]="dateOptions().format"
+                [format]="effectiveDateOptions().format"
                 [size]="size()"
                 [rounded]="rounded()"
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-time-picker>
@@ -133,7 +133,7 @@
                 [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
         }
 
-        @if (type() === "date") {
+        @if (type() === "date" || type() === "datetime" || type() === "time") {
             <mona-dropdown-list
                 [data]="dateFilterMenuDataItems | operatorFilter: operators()"
                 textField="text"
@@ -143,31 +143,31 @@
                 [ngModel]="selectedFilterMenuDataItemList()[1]"
                 (ngModelChange)="onFilterOperatorChange(1, $event)"></mona-dropdown-list>
 
-            @if (dateOptions().type === "date") {
+            @if (type() === "date") {
                 <mona-date-picker
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
-                    [format]="dateOptions().format"
+                    [format]="effectiveDateOptions().format"
                     [size]="size()"
                     [rounded]="rounded()"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-date-picker>
             }
 
-            @if (dateOptions().type === "datetime") {
+            @if (type() === "datetime") {
                 <mona-datetime-picker
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
-                    [format]="dateOptions().format"
+                    [format]="effectiveDateOptions().format"
                     [size]="size()"
                     [rounded]="rounded()"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-datetime-picker>
             }
 
-            @if (dateOptions().type === "time") {
+            @if (type() === "time") {
                 <mona-time-picker
                     [ngModel]="dateFilterValues()[1]"
                     (ngModelChange)="dateFilterValues.set([dateFilterValues()[0], $event])"
-                    [format]="dateOptions().format"
+                    [format]="effectiveDateOptions().format"
                     [size]="size()"
                     [rounded]="rounded()"
                     [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-time-picker>

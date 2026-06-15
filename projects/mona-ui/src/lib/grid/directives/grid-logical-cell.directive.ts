@@ -50,7 +50,10 @@ export class GridLogicalCellDirective {
             return "";
         }
         const theme = this.#themeService.theme();
-        return gridListTableCellThemeVariants(theme)();
+        return gridListTableCellThemeVariants(theme)({
+            groupHeader: this.groupHeader(),
+            lastInRow: this.lastInRow() || this.groupHeader()
+        });
     });
     protected readonly focused = computed(() => {
         const key = this.#cellKey();

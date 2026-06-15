@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const listViewBaseVariants = cva(
     `
-        flex flex-col w-full h-full
+        flex flex-col h-full
         outline-none overflow-hidden
         bg-background text-foreground
         border border-border

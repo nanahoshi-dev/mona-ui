@@ -76,6 +76,12 @@
     "selector": "\"td[monaGridCell]\"",
     "inputs": [
       {
+        "name": "dataCell",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "groupHeader",
         "type": "boolean",
         "description": "",
@@ -100,6 +106,12 @@
         "kind": "input"
       },
       {
+        "name": "lastInRow",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "masterDetailContent",
         "type": "boolean",
         "description": "",
@@ -112,19 +124,13 @@
         "kind": "input"
       },
       {
-        "name": "dataCell",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "prevRowType",
+        "name": "nextRowType",
         "type": "GridRowNeighborType",
         "description": "",
         "kind": "input"
       },
       {
-        "name": "nextRowType",
+        "name": "prevRowType",
         "type": "GridRowNeighborType",
         "description": "",
         "kind": "input"
@@ -150,6 +156,30 @@
       {
         "name": "column",
         "type": "Column",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridEditCommandDirective": {
+    "name": "GridEditCommandDirective",
+    "selector": "\"button[monaGridEditCommand]\"",
+    "inputs": [
+      {
+        "name": "row",
+        "type": "Row | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridRemoveCommandDirective": {
+    "name": "GridRemoveCommandDirective",
+    "selector": "\"button[monaGridRemoveCommand]\"",
+    "inputs": [
+      {
+        "name": "row",
+        "type": "Row | null",
         "description": "",
         "kind": "input"
       }
@@ -209,6 +239,30 @@
       }
     ]
   },
+  "GridFooterTableCellDirective": {
+    "name": "GridFooterTableCellDirective",
+    "selector": "\"td[monaGridFooterTableCell]\"",
+    "inputs": [
+      {
+        "name": "footerCellMinWidth",
+        "type": "number | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "footerCellWidth",
+        "type": "number | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "footerColumn",
+        "type": "Column | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
   "GridGroupableDirective": {
     "name": "GridGroupableDirective",
     "selector": "\"mona-grid[monaGridGroupable]\"",
@@ -228,6 +282,30 @@
       {
         "name": "options",
         "type": "GroupableOptions | \"\" | undefined",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridLockedCellDirective": {
+    "name": "GridLockedCellDirective",
+    "selector": "\"td[monaGridLockedCell], th[monaGridLockedCell]\"",
+    "inputs": [
+      {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "lockedCellHeader",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "lockedStructuralOffset",
+        "type": "number | null",
         "description": "",
         "kind": "input"
       }
@@ -332,6 +410,24 @@
         "type": "unknown[]",
         "description": "",
         "kind": "output"
+      }
+    ]
+  },
+  "GridStatePersistenceDirective": {
+    "name": "GridStatePersistenceDirective",
+    "selector": "\"mona-grid[monaGridStatePersistence]\"",
+    "inputs": [
+      {
+        "name": "options",
+        "type": "GridStatePersistenceOptions | \"\"",
+        "description": "State persistence options such as schema version and page size persistence.",
+        "kind": "input"
+      },
+      {
+        "name": "state",
+        "type": "GridState | null",
+        "description": "The persisted grid state to apply and update when the grid state changes.",
+        "kind": "model"
       }
     ]
   },
@@ -1546,80 +1642,128 @@
     "selector": "\"mona-grid\"",
     "inputs": [
       {
+        "name": "add",
+        "type": "GridAddEvent",
+        "description": "Emitted before the grid displays the new-row editor.",
+        "kind": "output"
+      },
+      {
+        "name": "cancel",
+        "type": "GridCancelEvent",
+        "description": "Emitted before an edit operation is cancelled.",
+        "kind": "output"
+      },
+      {
         "name": "cellEdit",
         "type": "CellEditEvent",
-        "description": "",
+        "description": "Emitted when a cell is edited.",
+        "kind": "output"
+      },
+      {
+        "name": "edit",
+        "type": "GridEditEvent",
+        "description": "Emitted before a row enters edit mode.",
+        "kind": "output"
+      },
+      {
+        "name": "newRowFactory",
+        "type": "() => Record<PropertyKey, unknown>",
+        "description": "Creates the initial data object used by the add-row editor.",
+        "kind": "input"
+      },
+      {
+        "name": "remove",
+        "type": "GridRemoveEvent",
+        "description": "Emitted when a row remove command is triggered.",
         "kind": "output"
       },
       {
         "name": "rowEdit",
         "type": "RowEditEvent",
-        "description": "",
+        "description": "Emitted when a row edit is committed (row mode only).",
+        "kind": "output"
+      },
+      {
+        "name": "save",
+        "type": "GridSaveEvent",
+        "description": "Emitted before an edited or new row is saved.",
         "kind": "output"
       },
       {
         "name": "data",
         "type": "Iterable<T>",
-        "description": "",
+        "description": "The row data to be displayed in the grid.",
         "kind": "input"
       },
       {
         "name": "pageSize",
         "type": "number",
-        "description": "",
+        "description": "The number of items to be displayed on a page.",
         "kind": "input"
       },
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "",
+        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
         "kind": "input"
       },
       {
         "name": "reorderable",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the columns of the grid can be reordered.",
         "kind": "input"
       },
       {
         "name": "resizable",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the columns of the grid can be resized.",
         "kind": "input"
       },
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "",
+        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "GridVariantProps[\"rounded\"]",
-        "description": "",
+        "description": "The border radius of the grid.",
         "kind": "input"
       },
       {
         "name": "sort",
         "type": "SortDescriptor[]",
-        "description": "",
+        "description": "Initial sort configuration to be applied to the grid when it is loaded.",
         "kind": "model"
       },
       {
         "name": "sortable",
         "type": "boolean | SortableOptions",
-        "description": "",
+        "description": "Whether the grid is sortable.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridAddRowComponent": {
+    "name": "GridAddRowComponent",
+    "selector": "\"tr[monaGridAddRow]\"",
+    "inputs": [
+      {
+        "name": "columns",
+        "type": "ImmutableList<Column>",
         "description": "",
         "kind": "input"
       }
@@ -1648,6 +1792,12 @@
     "selector": "\"mona-grid-column\"",
     "inputs": [
       {
+        "name": "aggregate",
+        "type": "AggregateFunction | null",
+        "description": "The aggregate shown in the grid footer for this column.",
+        "kind": "input"
+      },
+      {
         "name": "editable",
         "type": "boolean",
         "description": "Whether this column is editable when the grid is in edit mode.",
@@ -1660,6 +1810,30 @@
         "kind": "input"
       },
       {
+        "name": "format",
+        "type": "ColumnFormat | null",
+        "description": "Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.",
+        "kind": "input"
+      },
+      {
+        "name": "hidden",
+        "type": "boolean",
+        "description": "Whether this column is hidden from the rendered grid.",
+        "kind": "input"
+      },
+      {
+        "name": "locked",
+        "type": "boolean",
+        "description": "Whether this column remains fixed while the grid scrolls horizontally.",
+        "kind": "input"
+      },
+      {
+        "name": "lockedPosition",
+        "type": "GridColumnLockedPosition",
+        "description": "The side of the grid where this locked column is fixed.",
+        "kind": "input"
+      },
+      {
         "name": "maxWidth",
         "type": "number | null",
         "description": "The maximum width of this column in pixels.",
@@ -1669,6 +1843,12 @@
         "name": "minWidth",
         "type": "number",
         "description": "The minimum width of this column in pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "stateKey",
+        "type": "string | null",
+        "description": "A stable key used to persist state for columns whose field is empty or unstable.",
         "kind": "input"
       },
       {
@@ -1688,6 +1868,162 @@
         "type": "number | null",
         "description": "The fixed width of this column in pixels. If not set, the column width is calculated automatically.",
         "kind": "input"
+      }
+    ]
+  },
+  "GridColumnChooserComponent": {
+    "name": "GridColumnChooserComponent",
+    "selector": "\"mona-grid-column-chooser\"",
+    "inputs": [
+      {
+        "name": "apply",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "cancel",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      }
+    ]
+  },
+  "GridCommandCellComponent": {
+    "name": "GridCommandCellComponent",
+    "selector": "\"mona-grid-command-cell\"",
+    "inputs": [
+      {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "newRow",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "row",
+        "type": "Row | null",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridCommandColumnComponent": {
+    "name": "GridCommandColumnComponent",
+    "selector": "\"mona-grid-command-column\"",
+    "inputs": [
+      {
+        "name": "hidden",
+        "type": "boolean",
+        "description": "Whether this command column is hidden from the rendered grid.",
+        "kind": "input"
+      },
+      {
+        "name": "locked",
+        "type": "boolean",
+        "description": "Whether this command column remains fixed while the grid scrolls horizontally.",
+        "kind": "input"
+      },
+      {
+        "name": "lockedPosition",
+        "type": "GridColumnLockedPosition",
+        "description": "The side of the grid where this locked command column is fixed.",
+        "kind": "input"
+      },
+      {
+        "name": "maxWidth",
+        "type": "number | null",
+        "description": "The maximum width of this command column in pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "minWidth",
+        "type": "number | null",
+        "description": "The minimum width of this command column in pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "removeConfirmation",
+        "type": "boolean",
+        "description": "Whether the built-in remove command asks for confirmation before emitting remove.",
+        "kind": "input"
+      },
+      {
+        "name": "stateKey",
+        "type": "string | null",
+        "description": "A stable key used to persist state for this command column.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "The title displayed in the command column header.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "number | null",
+        "description": "The fixed width of this command column in pixels.",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridEditorComponent": {
+    "name": "GridEditorComponent",
+    "selector": "\"mona-grid-editor\"",
+    "inputs": [
+      {
+        "name": "autoFocus",
+        "type": "boolean",
+        "description": "Controls whether the editor focuses its input after it renders.",
+        "kind": "input"
+      },
+      {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "isNew",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rowData",
+        "type": "Record<PropertyKey, unknown>",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "unknown",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "cancel",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "commit",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "valueChange",
+        "type": "unknown",
+        "description": "",
+        "kind": "output"
       }
     ]
   },
@@ -1728,6 +2064,30 @@
       {
         "name": "column",
         "type": "Column",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridFooterCellComponent": {
+    "name": "GridFooterCellComponent",
+    "selector": "\"mona-grid-footer-cell\"",
+    "inputs": [
+      {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "columnIndex",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "groupKey",
+        "type": "string | null",
         "description": "",
         "kind": "input"
       }
@@ -2080,6 +2440,18 @@
         "kind": "input"
       },
       {
+        "name": "maxHeight",
+        "type": "string | number",
+        "description": "Sets the maximum height of the list.",
+        "kind": "input"
+      },
+      {
+        "name": "maxWidth",
+        "type": "string | number",
+        "description": "Sets the maximum width of the list.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "ListViewVariantProps[\"rounded\"]",
         "description": "Sets the rounding of the list.",
@@ -2292,7 +2664,7 @@
       {
         "name": "closeOnBackdropClick",
         "type": "boolean",
-        "description": "Whether to close the popup when clicking on the backdrop.\r\nOnly applies when the popup has a backdrop.",
+        "description": "Whether to close the popup when clicking on the backdrop.\nOnly applies when the popup has a backdrop.",
         "kind": "input"
       },
       {
@@ -2388,19 +2760,19 @@
       {
         "name": "positionStrategy",
         "type": "\"global\" | \"connected\"",
-        "description": "The strategy for positioning the popup.\r\n`global` means the popup will be positioned relative to the viewport,\r\n`connected` means the popup will be positioned relative to the anchor element.",
+        "description": "The strategy for positioning the popup.\n`global` means the popup will be positioned relative to the viewport,\n`connected` means the popup will be positioned relative to the anchor element.",
         "kind": "input"
       },
       {
         "name": "positions",
         "type": "Array<ConnectedPosition | ConnectionPositionPair>",
-        "description": "The positions to use for the popup.\r\nThe popup will try to position itself in the first position that fits.\r\nThis is only used when the `positionStrategy` is set to `connected`.",
+        "description": "The positions to use for the popup.\nThe popup will try to position itself in the first position that fits.\nThis is only used when the `positionStrategy` is set to `connected`.",
         "kind": "input"
       },
       {
         "name": "preventClose",
         "type": "Action<PopupCloseEvent, boolean>",
-        "description": "Called when the popup is requested to close.\r\nThis can be used to prevent the popup from closing.",
+        "description": "Called when the popup is requested to close.\nThis can be used to prevent the popup from closing.",
         "kind": "input"
       },
       {
@@ -3148,6 +3520,12 @@
         "kind": "input"
       },
       {
+        "name": "maxWidth",
+        "type": "ListSizeInputType",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "size",
         "type": "ReturnType<TextBoxComponent[\"size\"]>",
         "description": "",
@@ -3210,13 +3588,13 @@
       {
         "name": "anchor",
         "type": "ElementRef<HTMLElement> | Element",
-        "description": "The anchor element that the context menu will be anchored to.\r\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The anchor connection point of the popup menu.\r\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor connection point of the popup menu.\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
@@ -3246,13 +3624,13 @@
       {
         "name": "minWidth",
         "type": "string | number",
-        "description": "Sets the minimum width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "navigate",
         "type": "PopupMenuNavigationEvent",
-        "description": "The event that is emitted when the popup menu is navigated.\r\nThis is used to handle keyboard navigation within the popup menu.",
+        "description": "The event that is emitted when the popup menu is navigated.\nThis is used to handle keyboard navigation within the popup menu.",
         "kind": "output"
       },
       {
@@ -3270,25 +3648,25 @@
       {
         "name": "popupConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The connection point of the popup element to which the anchor will be connected.\r\nOnly applicable when `precise` is set to `false`.",
+        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "precise",
         "type": "boolean",
-        "description": "Whether the context menu should be opened with precise positioning.\r\nIf true, the context menu will be positioned at the mouse cursor position.\r\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "PopupMenuVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "PopupMenuVariantProps[\"size\"]",
-        "description": "Sets the size of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the size of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
@@ -3306,7 +3684,7 @@
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       }
     ]

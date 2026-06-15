@@ -10,7 +10,7 @@
 
 @theme {
     --color-background: oklch(1 0 0);
-    --color-background-dark: oklch(0.99 0 0);
+    --color-background-dark: oklch(0.98 0 0);
     --color-foreground: #09090b;
     --color-hover: oklch(0.96 0 0);
     --color-active: oklch(0.94 0 0);

@@ -96,6 +96,14 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs {
         const items = this.items();
         return ImmutableSet.create(items);
     });
+    protected readonly listMaxHeight = computed(() => {
+        const maxHeight = this.maxHeight();
+        return typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
+    });
+    protected readonly listMaxWidth = computed(() => {
+        const maxWidth = this.maxWidth();
+        return typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
+    });
     protected readonly listService = inject<ListService<T>>(ListService);
     protected readonly listWidth = computed(() => {
         const width = this.width();
@@ -134,6 +142,16 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs {
      * @description The items to display in the list.
      */
     public readonly items = input<Iterable<T>>([]);
+
+    /**
+     * @description Sets the maximum height of the list.
+     */
+    public readonly maxHeight = input<string | number>("");
+
+    /**
+     * @description Sets the maximum width of the list.
+     */
+    public readonly maxWidth = input<string | number>("");
 
     /**
      * @description Sets the rounding of the list.

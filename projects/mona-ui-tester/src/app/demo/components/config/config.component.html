@@ -162,19 +162,14 @@
                             "
                             [textField]="entry[1].dropdownTextField"
                             [valueField]="entry[1].dropdownValueField"
+                            [showClearButton]="entry[1].clearable"
                             [size]="'small'"
                             class="w-37.5">
                             <ng-template monaDropDownListValueTemplate let-dataItem>
                                 @if (entry[1].dropdownTextField) {
                                     <span>{{ dataItem[entry[1].dropdownTextField] }}</span>
                                 } @else {
-                                    @if (dataItem === undefined) {
-                                        <span>undefined</span>
-                                    } @else if (dataItem === null) {
-                                        <span>null</span>
-                                    } @else {
-                                        <span>{{ dataItem }}</span>
-                                    }
+                                    <span>{{ dataItem }}</span>
                                 }
                             </ng-template>
                             <ng-template monaDropDownListItemTemplate let-dataItem>

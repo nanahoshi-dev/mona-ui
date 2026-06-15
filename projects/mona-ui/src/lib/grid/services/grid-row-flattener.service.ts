@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
+import { Dictionary } from "@mirei/ts-collections";
 import type { Column } from "../models/Column";
-import type { GridViewDataRow, GridViewGroupRow, GridViewRow } from "../models/GridGroup";
+import type { GridGroupAggregate } from "../models/GridAggregate";
+import type { GridViewDataRow, GridViewGroupFooterRow, GridViewGroupRow, GridViewRow } from "../models/GridGroup";
 import type { Row } from "../models/Row";
 
 /**
@@ -15,19 +17,22 @@ export class GridRowFlattenerService {
      * @param rows - The source data rows.
      * @param groupColumns - The ordered list of columns to group by.
      * @param collapsedKeys - The set of group keys that are currently collapsed.
+     * @param groupAggregates - The dictionary of group aggregates.
      * @returns A flat array of `GridViewRow` items.
      */
     public flatten(
         rows: Iterable<Row>,
         groupColumns: Iterable<Column>,
-        collapsedKeys: ReadonlySet<string>
+        collapsedKeys: ReadonlySet<string>,
+        showFooter: boolean,
+        groupAggregates: Dictionary<string, GridGroupAggregate> = new Dictionary<string, GridGroupAggregate>()
     ): GridViewRow[] {
         const columnArray = [...groupColumns];
         if (columnArray.length === 0) {
             return [];
         }
         const result: GridViewRow[] = [];
-        this.#flattenRecursive([...rows], columnArray, 0, null, collapsedKeys, result);
+        this.#flattenRecursive([...rows], columnArray, groupAggregates, 0, null, collapsedKeys, showFooter, result);
         return result;
     }
 
@@ -46,28 +51,25 @@ export class GridRowFlattenerService {
     #flattenRecursive(
         rows: Row[],
         groupColumns: Column[],
+        groupAggregates: Dictionary<string, GridGroupAggregate>,
         depth: number,
         parentKey: string | null,
         collapsedKeys: ReadonlySet<string>,
+        showFooter: boolean,
         result: GridViewRow[]
     ): void {
         const column = groupColumns[depth];
         if (column == null) {
             return;
         }
-        const field = column.field();
-        const isDate = column.dataType() === "date" || column.dataType() === "datetime" || column.dataType() === "time";
+        const field = column.field;
+        const isDate = column.dataType === "date" || column.dataType === "datetime" || column.dataType === "time";
 
-        // Native Map gives O(n) grouping per level. The ts-collections groupBy with an
-        // EqualityComparator is O(n×g) — it compares each row against all existing group
-        // keys — which compounds badly across nested levels on large datasets.
         const groupMap = new Map<unknown, Row[]>();
         const keyOrder: unknown[] = [];
 
         for (const row of rows) {
             const rawValue = row.data[field];
-            // Normalize Date values to a string key so that two Date objects representing
-            // the same second hash to the same Map entry (mirrors cellComparer behaviour).
             const mapKey = isDate && rawValue instanceof Date ? rawValue.toISOString() : rawValue;
             if (!groupMap.has(mapKey)) {
                 groupMap.set(mapKey, []);
@@ -84,16 +86,27 @@ export class GridRowFlattenerService {
             const groupRow: GridViewGroupRow = {
                 type: "group",
                 depth,
-                column,
+                field,
                 groupKey,
                 groupValue,
-                count: groupRows.length
+                count: groupRows.length,
+                title: column.title
             };
             result.push(groupRow);
 
-            if (!collapsedKeys.has(groupKey)) {
+            const isCollapsed = collapsedKeys.has(groupKey);
+            if (!isCollapsed) {
                 if (depth < groupColumns.length - 1) {
-                    this.#flattenRecursive(groupRows, groupColumns, depth + 1, groupKey, collapsedKeys, result);
+                    this.#flattenRecursive(
+                        groupRows,
+                        groupColumns,
+                        groupAggregates,
+                        depth + 1,
+                        groupKey,
+                        collapsedKeys,
+                        showFooter,
+                        result
+                    );
                 } else {
                     for (const row of groupRows) {
                         const dataRow: GridViewDataRow = {
@@ -105,6 +118,17 @@ export class GridRowFlattenerService {
                         result.push(dataRow);
                     }
                 }
+
+            }
+
+            const groupAggregate = groupAggregates.get(groupKey);
+            if (groupAggregate != null && (!isCollapsed || showFooter)) {
+                const groupFooterRow: GridViewGroupFooterRow = {
+                    type: "groupFooter",
+                    depth,
+                    groupAggregate
+                };
+                result.push(groupFooterRow);
             }
         }
     }

@@ -83,7 +83,7 @@ export class GridFilterRowCellComponent {
         if (op === "isnull" || op === "isnotnull") {
             return true;
         }
-        switch (this.column().dataType()) {
+        switch (this.column().dataType) {
             case "string":
                 return (
                     this.stringValue().trim().length > 0 ||
@@ -121,7 +121,7 @@ export class GridFilterRowCellComponent {
 
     public constructor() {
         effect(() => {
-            const filterState = this.#gridService.appliedFilters().get(this.column().field()) ?? null;
+            const filterState = this.#gridService.appliedFilters().get(this.column().field) ?? null;
             untracked(() => this.#syncFromFilterState(filterState));
         });
         this.#setValueChangeSubscriptions();
@@ -169,7 +169,7 @@ export class GridFilterRowCellComponent {
             this.#emitFilter(null);
             return;
         }
-        switch (this.column().dataType()) {
+        switch (this.column().dataType) {
             case "string":
                 if (this.stringValue().trim()) {
                     this.#emitFilter(this.stringValue());
@@ -201,10 +201,10 @@ export class GridFilterRowCellComponent {
 
     #emitFilter(value: RowFilterValue): void {
         const operator = this.selectedOperator();
-        const field = this.column().field();
+        const field = this.column().field;
         let filter: CompositeFilterDescriptor;
         let filterOperator = operator;
-        switch (this.column().dataType()) {
+        switch (this.column().dataType) {
             case "string":
                 filter = this.#filterService.buildStringFilterDescriptor({
                     field,
@@ -255,13 +255,13 @@ export class GridFilterRowCellComponent {
     }
 
     #getDefaultOperator(): RowFilterOperator {
-        const dataType = this.column().dataType();
+        const dataType = this.column().dataType;
         return dataType === "string" ? "contains" : "eq";
     }
 
     #syncFromFilterState(filterState: ColumnFilterState | null): void {
         const column = this.column();
-        const dataType = column.dataType();
+        const dataType = column.dataType;
         if (!filterState?.filterMenuValue) {
             this.stringValue.set("");
             this.numberValue.set(null);

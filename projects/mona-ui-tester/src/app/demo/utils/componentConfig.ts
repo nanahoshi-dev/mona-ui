@@ -97,6 +97,7 @@ export type ComponentConfigOutputType<TComponent> = {
 export interface ComponentConfigFeatureItemOptions<TDropdown = any> {
     active: boolean;
     code: string;
+    clearable?: boolean;
     codeVisible?: boolean;
     description: string;
     dropdownDataSource?: Iterable<TDropdown>;

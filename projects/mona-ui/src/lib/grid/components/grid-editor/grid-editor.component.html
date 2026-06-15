@@ -1,0 +1,80 @@
+@if (column().editTemplate) {
+    <ng-container
+        [ngTemplateOutlet]="column().editTemplate"
+        [ngTemplateOutletContext]="editTemplateContext()"></ng-container>
+} @else {
+    @switch (column().dataType) {
+        @case ("string") {
+            <mona-text-box
+                [class]="editorClass"
+                [inputAttributes]="{ autocomplete: 'off' }"
+                [rounded]="'none'"
+                (keydown.enter)="commit.emit()"
+                (keydown.escape)="onEditCancel()"
+                [ngModel]="value()"
+                (ngModelChange)="onValueChange($event)"
+                (inputBlur)="commit.emit()"
+                [size]="'small'"></mona-text-box>
+        }
+        @case ("number") {
+            <mona-numeric-text-box
+                [class]="editorClass"
+                [rounded]="'none'"
+                [ngModel]="value()"
+                (ngModelChange)="onValueChange($event)"
+                (keydown.enter)="commit.emit()"
+                (keydown.escape)="onEditCancel()"
+                (inputBlur)="commit.emit()"
+                [size]="'small'"></mona-numeric-text-box>
+        }
+        @case ("boolean") {
+            <mona-check-box
+                class="{{ editorClass }} ml-2"
+                [rounded]="'none'"
+                [ngModel]="value()"
+                (ngModelChange)="onCheckBoxValueChange($event)"
+                (inputBlur)="commit.emit()"
+                (keydown.escape)="onEditCancel()"
+                (keydown.enter)="commit.emit()"></mona-check-box>
+        }
+        @case ("date") {
+            <mona-date-picker
+                [class]="editorClass"
+                [rounded]="'none'"
+                [ngModel]="value()"
+                (ngModelChange)="onValueChange($event)"
+                (keydown.enter)="onDatePickerEnter($event)"
+                (keydown.escape)="onEditCancel()"
+                (focusout)="onDatePickerFocusOut($event)"
+                (opened)="onDatePickerOpen()"
+                (closed)="onDatePickerClose()"
+                size="small"></mona-date-picker>
+        }
+        @case ("datetime") {
+            <mona-datetime-picker
+                [class]="editorClass"
+                [rounded]="'none'"
+                [ngModel]="value()"
+                (ngModelChange)="onValueChange($event)"
+                (keydown.enter)="onDatePickerEnter($event)"
+                (keydown.escape)="onEditCancel()"
+                (focusout)="onDatePickerFocusOut($event)"
+                (opened)="onDatePickerOpen()"
+                (closed)="onDatePickerClose()"
+                size="small"></mona-datetime-picker>
+        }
+        @case ("time") {
+            <mona-time-picker
+                [class]="editorClass"
+                [rounded]="'none'"
+                [ngModel]="value()"
+                (ngModelChange)="onValueChange($event)"
+                (keydown.enter)="onDatePickerEnter($event)"
+                (keydown.escape)="onEditCancel()"
+                (focusout)="onDatePickerFocusOut($event)"
+                (opened)="onDatePickerOpen()"
+                (closed)="onDatePickerClose()"
+                size="small"></mona-time-picker>
+        }
+    }
+}

@@ -31,7 +31,7 @@ import {
 import { ThemeService } from "../../../theme/services/theme.service";
 import { FilterMenuConnectorItem } from "../../models/FilterMenuConnectorItem";
 import { FilterMenuDataItem } from "../../models/FilterMenuDataItem";
-import { FilterMenuDateOptions } from "../../models/FilterMenuDateOptions";
+import type { FilterMenuDateOptions, FilterMenuDateType } from "../../models/FilterMenuDateOptions";
 import { FilterMenuValue } from "../../models/FilterMenuValue";
 import { OperatorFilterPipe } from "../../pipes/operator-filter.pipe";
 import { ValuelessOperatorPipe } from "../../pipes/valueless-operator.pipe";
@@ -86,6 +86,20 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
     ];
     protected readonly dateFilterMenuDataItems = this.#filterService.dateFilterMenuItems;
     protected readonly dateFilterValues = signal<[Date | null, Date | null]>([null, null]);
+    protected readonly effectiveDateOptions = computed(() => {
+        const type = this.type();
+        const dateOptions = this.dateOptions();
+        if (type !== "date" && type !== "datetime" && type !== "time") {
+            return dateOptions;
+        }
+        if (dateOptions.type === type) {
+            return dateOptions;
+        }
+        return {
+            format: this.getDefaultDateFormat(type),
+            type
+        };
+    });
     protected readonly filterMenuActionsClass = computed(() => {
         const theme = this.#themeService.theme();
         return filterMenuActionsThemeVariants(theme)();
@@ -120,6 +134,8 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             case "number":
                 return numberFilterValues[0] !== null;
             case "date":
+            case "datetime":
+            case "time":
                 return dateFilterValues[0] !== null;
             case "boolean":
                 return true;
@@ -155,6 +171,8 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             case "number":
                 return numberFilterValues[1] !== null;
             case "date":
+            case "datetime":
+            case "time":
                 return dateFilterValues[1] !== null;
             case "boolean":
                 return true;
@@ -209,7 +227,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             this.applyStringFilters();
         } else if (this.type() === "number") {
             this.applyNumberFilters();
-        } else if (this.type() === "date") {
+        } else if (this.type() === "date" || this.type() === "datetime" || this.type() === "time") {
             this.applyDateFilters();
         } else if (this.type() === "boolean") {
             this.applyBooleanFilters();
@@ -254,6 +272,8 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             case "number":
                 return filterValue(this.numberFilterValues());
             case "date":
+            case "datetime":
+            case "time":
                 return filterValue(this.dateFilterValues());
             case "boolean":
                 return filterValue(this.#booleanFilterValues);
@@ -351,6 +371,8 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 this.numberFilterValues.set([this.numberFilterValues()[0], null]);
                 break;
             case "date":
+            case "datetime":
+            case "time":
                 this.dateFilterValues.set([this.dateFilterValues()[0], null]);
                 break;
             case "boolean":
@@ -376,9 +398,11 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 filterValues = [values.value1 ?? null, values.value2 ?? null];
                 break;
             case "date":
+            case "datetime":
+            case "time":
             case "boolean":
                 filterMenuDataItems =
-                    this.type() === "date" ? this.dateFilterMenuDataItems : this.booleanFilterMenuDataItems;
+                    this.type() !== "boolean" ? this.dateFilterMenuDataItems : this.booleanFilterMenuDataItems;
                 filterValues = [values.value1 ?? null, values.value2 ?? null];
                 break;
             default:
@@ -400,12 +424,12 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 this.numberFilterValues.set(filterValues as [number, number]);
                 break;
             case "date":
+            case "datetime":
+            case "time":
+                this.dateFilterValues.set(filterValues as [Date, Date]);
+                break;
             case "boolean":
-                if (this.type() === "date") {
-                    this.dateFilterValues.set(filterValues as [Date, Date]);
-                } else {
-                    this.#booleanFilterValues = filterValues as [boolean, boolean];
-                }
+                this.#booleanFilterValues = filterValues as [boolean, boolean];
                 break;
             default:
                 break;
@@ -415,5 +439,18 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             ? (this.connectorDataItems.find(c => c.value === values.logic) ?? null)
             : null;
         this.selectedConnectorItem.set(selectedConnectorItem);
+    }
+
+    private getDefaultDateFormat(type: FilterMenuDateType): string {
+        switch (type) {
+            case "datetime":
+                return "dd/MM/yyyy HH:mm";
+            case "time":
+                return "HH:mm";
+            case "date":
+                return "dd/MM/yyyy";
+            default:
+                return "dd/MM/yyyy";
+        }
     }
 }

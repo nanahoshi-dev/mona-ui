@@ -32,8 +32,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             active: true,
             code: `
                 <mona-list-box [connectedList]="list2"></mona-list-box>
-                <mona-list-box [connectedList]="list3" #list2></mona-list-box>
-                <mona-list-box #list3></mona-list-box>
+                <mona-list-box #list2></mona-list-box>
             `,
             name: "Connected Lists",
             description: "Display connected lists"
@@ -305,7 +304,6 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 [selectedKeys]="secondListSelectedKeys()"
                 (selectedKeysChange)="onSelectedKeysChange($event, 'second')"
                 (selectionChange)="onSelectionChange($event, 'second')"
-                [connectedList]="thirdList"
                 [height]="height()"
                 [items]="secondListBoxItems()"
                 [rounded]="rounded()"
@@ -314,23 +312,11 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                 [toolbar]="true"
                 [width]="width()"
                 #secondList></mona-list-box>
-
-            <mona-list-box
-                (actionClick)="onActionClick($event, 'third')"
-                (selectionChange)="onSelectionChange($event, 'third')"
-                [height]="height()"
-                [items]="thirdListBoxItems()"
-                [rounded]="rounded()"
-                [size]="size()"
-                [textField]="textField()"
-                [toolbar]="false"
-                [width]="width()"
-                #thirdList></mona-list-box>
         }
     `,
     changeDetection: ChangeDetectionStrategy.Eager,
     host: {
-        class: "flex gap-1"
+        class: "flex flex-row! gap-1"
     }
 })
 class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponent> {
@@ -422,9 +408,6 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
             if (listBox === "second") {
                 this.#listData.update(set => set.addAll(event.selectedItems));
                 this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
-            } else if (listBox === "third") {
-                this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
-                this.thirdListBoxItems.update(set => set.removeAll(event.selectedItems));
             }
         } else if (event.action === "transferAllTo") {
             if (listBox === "first") {
@@ -438,17 +421,12 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
             if (listBox === "second") {
                 this.#listData.update(set => set.addAll(this.secondListBoxItems()));
                 this.secondListBoxItems.update(set => set.clear());
-            } else if (listBox === "third") {
-                this.secondListBoxItems.update(set => set.addAll(this.thirdListBoxItems()));
-                this.thirdListBoxItems.update(set => set.clear());
             }
         } else if (event.action === "remove") {
             if (listBox === "first") {
                 this.#listData.update(set => set.removeAll(event.selectedItems));
             } else if (listBox === "second") {
                 this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
-            } else if (listBox === "third") {
-                this.thirdListBoxItems.update(set => set.removeAll(event.selectedItems));
             }
         }
     }

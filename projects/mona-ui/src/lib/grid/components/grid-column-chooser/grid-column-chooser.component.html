@@ -1,0 +1,29 @@
+<mona-list-view
+    [items]="columnListSource()"
+    [textField]="'title'"
+    [height]="'auto'"
+    [maxHeight]="300"
+    [monaListViewSelectable]="{ enabled: true, mode: 'multiple', checkboxes: true }"
+    [selectBy]="'field'"
+    [selectedKeys]="selectedColumnFields()"
+    (selectedKeysChange)="onSelectedKeysChange($event)"
+    [rounded]="'none'"
+    [size]="'small'"
+    class="shadow-lg">
+    <ng-template monaListViewHeaderTemplate>
+        <div class="flex p-1 bg-header-background border-b border-b-border">
+            <mona-filter-input
+                [filter]="filterText()"
+                (filterChange)="filterText.set($event.filter)"></mona-filter-input>
+        </div>
+    </ng-template>
+    <ng-template monaListViewFooterTemplate>
+        <div class="flex px-3 py-1 font-medium bg-header-background border-t border-t-border">
+            {{ selectedColumnFields().length }} selected columns
+        </div>
+        <div class="flex gap-2 px-2 py-2 bg-header-background border-t border-t-border">
+            <button class="flex-1" monaButton [size]="'small'" look="primary" (click)="onApplyClick()">Apply</button>
+            <button class="flex-1" monaButton [size]="'small'" (click)="onCancelClick()">Cancel</button>
+        </div>
+    </ng-template>
+</mona-list-view>

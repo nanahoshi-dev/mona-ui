@@ -1,3 +1,23 @@
+@if (toolbarTemplate()) {
+    <div class="flex min-h-10 items-center gap-2 border-b border-border p-2">
+        <ng-container
+            [ngTemplateOutlet]="toolbarTemplate() ?? null"
+            [ngTemplateOutletContext]="toolbarContext()"></ng-container>
+        <button monaButton size="small" #columnsButton>Columns</button>
+        <mona-popup
+            [anchor]="columnsButton"
+            [animation]="{ leave: [] }"
+            [width]="'max-content'"
+            [anchorConnectionPoint]="'bottomleft'"
+            [popupConnectionPoint]="'topleft'"
+            #popup>
+            <mona-grid-column-chooser
+                (apply)="popup.closePopup()"
+                (cancel)="popup.closePopup()"></mona-grid-column-chooser>
+        </mona-popup>
+    </div>
+}
+
 @if (groupable()) {
     <div
         [class]="groupPanelClass()"
@@ -15,12 +35,12 @@
                     [rounded]="rounded()"
                     (click)="onGroupingColumnSort(groupColumn)"
                     (remove)="onGroupingColumnRemove($event, groupColumn)">
-                    @if (groupColumn.groupSortDirection() === "asc") {
+                    @if (groupColumn.groupSortDirection === "asc") {
                         <i class="ri-arrow-down-line"></i>
-                    } @else if (groupColumn.groupSortDirection() === "desc") {
+                    } @else if (groupColumn.groupSortDirection === "desc") {
                         <i class="ri-arrow-up-line"></i>
                     }
-                    <span>{{ groupColumn.title() }}</span>
+                    <span>{{ groupColumn.title }}</span>
                     <span class="ml-2" (click)="$event.stopPropagation()" #groupReorder>
                         <i class="ri-more-2-fill"></i>
                     </span>
@@ -47,7 +67,7 @@
         }
     </div>
 }
-<div [class]="headerClass()" [style.margin]="headerMargin" #gridHeaderElement>
+<div [class]="headerClass()" [style.margin-right.px]="headerMarginRight()" #gridHeaderElement>
     <div>
         <table #headerTable [class]="headerTableClass()" [style.width.px]="gridService.tableWidth()">
             <colgroup>
@@ -57,8 +77,8 @@
                 @if (gridService.masterDetailTemplate()) {
                     <col [style.width.px]="gridService.groupColumnWidth" />
                 }
-                @for (col of gridService.columns(); track $index) {
-                    <col [style.width.px]="col.calculatedWidth()" />
+                @for (col of gridService.visibleColumns(); track $index) {
+                    <col [style.width.px]="col.calculatedWidth" />
                 }
             </colgroup>
             <thead role="rowgroup" [style.visibility]="!gridWidthSet() ? 'hidden' : undefined">
@@ -69,6 +89,9 @@
                     [class]="headerTableRowClass()">
                     @for (_ of gridService.groupColumns(); track $index) {
                         <th
+                            monaGridLockedCell
+                            [lockedCellHeader]="true"
+                            [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                             scope="col"
                             class="border-r border-border"
                             [attr.colspan]="1"
@@ -76,65 +99,78 @@
                     }
                     @if (gridService.masterDetailTemplate()) {
                         <th
+                            monaGridLockedCell
+                            [lockedCellHeader]="true"
+                            [lockedStructuralOffset]="gridService.groupColumns().length * gridService.groupColumnWidth"
                             scope="col"
                             class="border-r border-border"
                             [attr.colspan]="1"
                             [style.width.px]="gridService.detailColumnWidth"></th>
                     }
-                    @for (column of gridService.columns(); track $index) {
+                    @for (column of gridService.visibleColumns(); track $index) {
                         @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
                         <th
                             scope="col"
                             role="columnheader"
                             cdkDrag
+                            monaGridLockedCell
+                            [column]="column"
+                            [lockedCellHeader]="true"
                             monaGridLogicalCell
                             [rowIndex]="-1"
                             [colIndex]="colIndex"
                             [firstInRow]="colIndex === 0"
                             [lastInRow]="
-                                colIndex === gridService.columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
+                                colIndex ===
+                                gridService.visibleColumns().length - (gridService.masterDetailTemplate() ? 0 : 1)
                             "
                             (toggle)="onColumnSort(column)"
                             [cdkDragData]="column"
-                            [cdkDragDisabled]="!reorderable() && !groupable()"
+                            [cdkDragDisabled]="isColumnDragDisabled(column)"
                             [class]="headerTableCellClass()"
                             (mouseenter)="onColumnMouseEnter(column)"
                             (cdkDragEntered)="onColumnDragEnter($event)"
                             (cdkDragStarted)="onColumnDragStart($event)"
-                            [style.min-width.px]="column.minWidth()"
-                            [style.width.px]="column.calculatedWidth()"
+                            [style.min-width.px]="column.minWidth"
+                            [style.width.px]="column.calculatedWidth"
                             [attr.colspan]="1"
                             [attr.aria-sort]="
                                 gridService.sortableOptions().enabled
-                                    ? (column.columnSortDirection() | columnAriaSort)
+                                    ? (column.columnSortDirection | columnAriaSort)
                                     : null
                             ">
                             <div [class]="headerTableColumnWrapClass()">
-                                @if (column.titleTemplate()) {
-                                    <ng-container [ngTemplateOutlet]="column.titleTemplate()"></ng-container>
+                                @if (column.headerTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="column.headerTemplate"
+                                        [ngTemplateOutletContext]="{ $implicit: column, column }"></ng-container>
+                                } @else if (column.titleTemplate) {
+                                    <ng-container [ngTemplateOutlet]="column.titleTemplate"></ng-container>
                                 } @else {
                                     <span
                                         [class]="headerTableColumnTitleClass()"
                                         (click)="onColumnSort(column)"
-                                        [title]="column.title()"
-                                        >{{ column.title() }}</span
+                                        [title]="column.title"
+                                        >{{ column.title }}</span
                                     >
                                 }
 
                                 <div [class]="columnActionsClass()" [attr.data-column-actions]="true">
-                                    @if (gridService.sortableOptions().showIndices && column.sortIndex() !== null) {
-                                        <span>{{ column.sortIndex() }}</span>
+                                    @if (gridService.sortableOptions().showIndices && column.sortIndex !== null) {
+                                        <span>{{ column.sortIndex }}</span>
                                     }
-                                    @if (column.columnSortDirection() === "asc") {
+                                    @if (column.columnSortDirection === "asc") {
                                         <i class="ri-arrow-down-line"></i>
-                                    } @else if (column.columnSortDirection() === "desc") {
+                                    } @else if (column.columnSortDirection === "desc") {
                                         <i class="ri-arrow-up-line"></i>
                                     }
                                     @if (filterMenuEnabled()) {
-                                        <mona-grid-filter-menu
-                                            [column]="column"
-                                            [type]="column.dataType()"
-                                            (apply)="onColumnFilter(column, $event)"></mona-grid-filter-menu>
+                                        @if (column.kind === "data") {
+                                            <mona-grid-filter-menu
+                                                [column]="column"
+                                                [type]="column.dataType"
+                                                (apply)="onColumnFilter(column, $event)"></mona-grid-filter-menu>
+                                        }
                                     }
                                 </div>
                             </div>
@@ -151,7 +187,7 @@
                             }
                             <ng-template cdkDragPreview>
                                 <div [class]="columnDragPreviewClass()">
-                                    <span>{{ column.title() }}</span>
+                                    <span>{{ column.title }}</span>
                                 </div>
                             </ng-template>
                             <ng-template cdkDragPlaceholder>
@@ -160,26 +196,33 @@
                                         style="z-index: 10; pointer-events: none"
                                         [removable]="true"
                                         [rounded]="rounded()"
-                                        >{{ column.title() }}</mona-chip
+                                        >{{ column.title }}</mona-chip
                                     >
                                 }
                             </ng-template>
                         </th>
                         @if (columnDragging() && dragColumn() === column) {
                             <th
+                                monaGridLockedCell
+                                [column]="column"
+                                [lockedCellHeader]="true"
                                 [class]="headerTableCellClass()"
-                                [style.min-width.px]="column.minWidth()"
+                                [style.min-width.px]="column.minWidth"
                                 [attr.colspan]="1"
-                                [style.width.px]="column.calculatedWidth()">
+                                [style.width.px]="column.calculatedWidth">
                                 <div [class]="headerTableColumnWrapClass()">
-                                    @if (column.titleTemplate()) {
-                                        <ng-container [ngTemplateOutlet]="column.titleTemplate()"></ng-container>
+                                    @if (column.headerTemplate) {
+                                        <ng-container
+                                            [ngTemplateOutlet]="column.headerTemplate"
+                                            [ngTemplateOutletContext]="{ $implicit: column, column }"></ng-container>
+                                    } @else if (column.titleTemplate) {
+                                        <ng-container [ngTemplateOutlet]="column.titleTemplate"></ng-container>
                                     } @else {
                                         <span
                                             [class]="headerTableColumnTitleClass()"
                                             (click)="onColumnSort(column)"
-                                            [title]="column.title()"
-                                            >{{ column.title() }}</span
+                                            [title]="column.title"
+                                            >{{ column.title }}</span
                                         >
                                     }
                                 </div>
@@ -191,23 +234,34 @@
                     <tr role="row" [class]="headerTableRowClass()">
                         @for (_ of gridService.groupColumns(); track $index) {
                             <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                 scope="col"
                                 class="border-r border-border"
                                 [style.width.px]="gridService.groupColumnWidth"></th>
                         }
                         @if (gridService.masterDetailTemplate()) {
                             <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="
+                                    gridService.groupColumns().length * gridService.groupColumnWidth
+                                "
                                 scope="col"
                                 class="border-r border-border"
                                 [style.width.px]="gridService.detailColumnWidth"></th>
                         }
-                        @for (column of gridService.columns(); track $index) {
+                        @for (column of gridService.visibleColumns(); track $index) {
                             <th
+                                monaGridLockedCell
+                                [column]="column"
+                                [lockedCellHeader]="true"
                                 scope="col"
                                 class="border-r border-border overflow-hidden"
-                                [style.width.px]="column.calculatedWidth()"
-                                [attr.aria-label]="'Filter by ' + column.title()">
-                                @if (column.field()) {
+                                [style.width.px]="column.calculatedWidth"
+                                [attr.aria-label]="'Filter by ' + column.title">
+                                @if (column.kind === "data" && column.field) {
                                     <mona-grid-filter-row-cell
                                         [column]="column"
                                         (apply)="onColumnFilter(column, $event)" />
@@ -223,22 +277,82 @@
 
 @defer (when gridWidthSet()) {
     @if (gridService.virtualScrollOptions().enabled) {
-        @if (gridService.viewRows().length !== 0) {
+        @if (gridService.viewRows().length !== 0 || gridService.addRowVisible()) {
             <mona-grid-virtual-list
-                [columns]="gridService.columns()"
+                [columns]="gridService.visibleColumns()"
                 [data]="gridService.viewRows()"></mona-grid-virtual-list>
         } @else {
             <ng-container [ngTemplateOutlet]="emptyGridTemplate"></ng-container>
         }
     } @else {
-        @if (gridService.viewPageRows().length !== 0) {
-            <mona-grid-list [columns]="gridService.columns()" [data]="gridService.viewPageRows()"></mona-grid-list>
+        @if (gridService.viewPageRows().length !== 0 || gridService.addRowVisible()) {
+            <mona-grid-list
+                [columns]="gridService.visibleColumns()"
+                [data]="gridService.viewPageRows()"></mona-grid-list>
+            @if (footerVisible()) {
+                <div
+                    [class]="footerClass()"
+                    [style.margin-right.px]="gridService.scrollbarGutterWidth()"
+                    #footerScrollElement
+                    data-grid-footer-scroll>
+                    <div>
+                        <table [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
+                            <colgroup>
+                                @for (_ of gridService.groupColumns(); track $index) {
+                                    <col [style.width.px]="gridService.groupColumnWidth" />
+                                }
+                                @if (gridService.masterDetailTemplate()) {
+                                    <col [style.width.px]="gridService.groupColumnWidth" />
+                                }
+                                @for (col of gridService.visibleColumns(); track $index) {
+                                    <col [style.width.px]="col.calculatedWidth" />
+                                }
+                            </colgroup>
+                            <tfoot role="rowgroup">
+                                <tr [class]="footerTableRowClass()">
+                                    @for (_ of gridService.groupColumns(); track $index) {
+                                        <td
+                                            monaGridFooterTableCell
+                                            monaGridLockedCell
+                                            [lockedCellHeader]="true"
+                                            [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+                                            [footerCellWidth]="gridService.groupColumnWidth"></td>
+                                    }
+                                    @if (gridService.masterDetailTemplate()) {
+                                        <td
+                                            monaGridFooterTableCell
+                                            monaGridLockedCell
+                                            [lockedCellHeader]="true"
+                                            [lockedStructuralOffset]="
+                                                gridService.groupColumns().length * gridService.groupColumnWidth
+                                            "
+                                            [footerCellWidth]="gridService.detailColumnWidth"></td>
+                                    }
+                                    @for (column of gridService.visibleColumns(); track $index) {
+                                        <td
+                                            monaGridFooterTableCell
+                                            monaGridLockedCell
+                                            [column]="column"
+                                            [lockedCellHeader]="true"
+                                            [footerColumn]="column">
+                                            <mona-grid-footer-cell
+                                                [column]="column"
+                                                [columnIndex]="$index"></mona-grid-footer-cell>
+                                        </td>
+                                    }
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            }
             <mona-pager
                 class="border-0 border-t border-t-border rounded-tl-none rounded-tr-none"
                 [skip]="gridService.paginationState().skip"
                 [pageSize]="gridService.paginationState().take"
                 [total]="gridService.viewRowCount()"
                 [size]="'small'"
+                [rounded]="rounded()"
                 [pageInput]="true"
                 [pageSizeValues]="pageSizeValues()"
                 [responsive]="responsivePager()"

@@ -1,106 +1,37 @@
 @let dataItem = row().data;
-@let dataKey = column().field();
+@let dataKey = column().field;
 
-<div
-    role="gridcell"
-    [class]="cellContainerClass()"
-    cdkMonitorSubtreeFocus
-    [attr.data-uid]="cellUid()"
-    [attr.data-ruid]="row().uid"
-    [attr.data-field]="dataKey"
-    [attr.data-col-index]="column().index()"
-    [attr.aria-readonly]="!(gridService.editableOptions().enabled && column().editable())"
-    (dblclick)="onCellDoubleClick()">
-    @if (isEditing()) {
-        @if (column().editTemplate()) {
+@if (column().kind === "command") {
+    <mona-grid-command-cell [column]="column()" [row]="row()"></mona-grid-command-cell>
+} @else {
+    <div
+        role="gridcell"
+        [class]="cellContainerClass()"
+        cdkMonitorSubtreeFocus
+        [attr.data-uid]="cellUid()"
+        [attr.data-ruid]="row().uid"
+        [attr.data-field]="dataKey"
+        [attr.data-col-index]="column().index"
+        [attr.aria-readonly]="!(gridService.editableOptions().enabled && column().editable)"
+        (dblclick)="onCellDoubleClick($event)">
+        @if (isEditing()) {
+            <mona-grid-editor
+                [column]="column()"
+                [autoFocus]="shouldAutoFocusEditor()"
+                [rowData]="dataItem"
+                [value]="displayValue()"
+                (valueChange)="onCellValueChange($event)"
+                (commit)="onEditCommit()"
+                (cancel)="onEditCancel()"></mona-grid-editor>
+        } @else if (column().cellTemplate) {
             <ng-container
-                [ngTemplateOutlet]="column().editTemplate()"
-                [ngTemplateOutletContext]="{ $implicit: dataItem, column: column().field() }"></ng-container>
+                [ngTemplateOutlet]="column().cellTemplate"
+                [ngTemplateOutletContext]="{ $implicit: dataItem, column: column().field }"></ng-container>
         } @else {
-            @switch (column().dataType()) {
-                @case ("string") {
-                    <mona-text-box
-                        class="w-full h-full"
-                        [inputAttributes]="{ autocomplete: 'off' }"
-                        [rounded]="'none'"
-                        (keydown.enter)="onEnterKeyCommit()"
-                        (keydown.escape)="onEditCancel()"
-                        [ngModel]="displayValue()"
-                        (ngModelChange)="onCellValueChange($event)"
-                        (inputBlur)="onEditCommit()"
-                        [size]="'small'"></mona-text-box>
-                }
-                @case ("number") {
-                    <mona-numeric-text-box
-                        class="w-full h-full"
-                        [rounded]="'none'"
-                        [ngModel]="displayValue()"
-                        (ngModelChange)="onCellValueChange($event)"
-                        (keydown.enter)="onEnterKeyCommit()"
-                        (keydown.escape)="onEditCancel()"
-                        (inputBlur)="onEditCommit()"
-                        [size]="'small'"></mona-numeric-text-box>
-                }
-                @case ("boolean") {
-                    <mona-check-box
-                        class="w-full h-full"
-                        [rounded]="'none'"
-                        [ngModel]="displayValue()"
-                        (ngModelChange)="onCheckBoxValueChange($event)"
-                        (inputBlur)="onEditCommit()"
-                        (keydown.escape)="onEditCancel()"
-                        (keydown.enter)="onEnterKeyCommit()"></mona-check-box>
-                }
-                @case ("date") {
-                    <mona-date-picker
-                        #datePickerEl
-                        class="w-full h-full"
-                        [rounded]="'none'"
-                        [ngModel]="displayValue()"
-                        (ngModelChange)="onCellValueChange($event)"
-                        (keydown.enter)="onDatePickerEnter($event)"
-                        (keydown.escape)="onEditCancel()"
-                        (focusout)="onDatePickerFocusOut($event)"
-                        (opened)="onDatePickerOpen()"
-                        (closed)="onDatePickerClose()"
-                        size="small"></mona-date-picker>
-                }
-                @case ("datetime") {
-                    <mona-datetime-picker
-                        #dateTimePickerEl
-                        class="w-full h-full"
-                        [ngModel]="displayValue()"
-                        (ngModelChange)="onCellValueChange($event)"
-                        (keydown.enter)="onDatePickerEnter($event)"
-                        (keydown.escape)="onEditCancel()"
-                        (focusout)="onDatePickerFocusOut($event)"
-                        (opened)="onDatePickerOpen()"
-                        (closed)="onDatePickerClose()"
-                        size="small"></mona-datetime-picker>
-                }
-                @case ("time") {
-                    <mona-time-picker
-                        #timePickerEl
-                        class="w-full h-full"
-                        [ngModel]="displayValue()"
-                        (ngModelChange)="onCellValueChange($event)"
-                        (keydown.enter)="onDatePickerEnter($event)"
-                        (keydown.escape)="onEditCancel()"
-                        (focusout)="onDatePickerFocusOut($event)"
-                        (opened)="onDatePickerOpen()"
-                        (closed)="onDatePickerClose()"
-                        size="small"></mona-time-picker>
-                }
-            }
+            <span [class]="cellTextClass()">{{ formattedDisplayValue() }}</span>
         }
-    } @else if (column().cellTemplate()) {
-        <ng-container
-            [ngTemplateOutlet]="column().cellTemplate()"
-            [ngTemplateOutletContext]="{ $implicit: dataItem, column: column().field() }"></ng-container>
-    } @else {
-        <span [class]="cellTextClass()">{{ displayValue() }}</span>
-    }
-    @if (!isCellPristine()) {
-        <span aria-hidden="true" [class]="cellDirtyIndicatorClass()" title="Modified"></span>
-    }
-</div>
+        @if (!isCellPristine()) {
+            <span aria-hidden="true" [class]="cellDirtyIndicatorClass()" title="Modified"></span>
+        }
+    </div>
+}

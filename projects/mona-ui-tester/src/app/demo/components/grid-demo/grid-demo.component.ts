@@ -1,20 +1,24 @@
-import { DatePipe, JsonPipe, NgComponentOutlet } from "@angular/common";
+import { JsonPipe, NgComponentOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
+    effect,
     inject,
     input,
     linkedSignal,
     model,
     signal
 } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { ContainerIcon, LucideAngularModule } from "lucide-angular";
 import {
     CellEditEvent,
+    GridAddCommandDirective,
     RowEditEvent,
     DataType,
     GridCellTemplateDirective,
+    GridCommandColumnComponent,
     GridColumnComponent,
     GridComponent,
     GridDetailTemplateDirective,
@@ -24,14 +28,26 @@ import {
     GridSelectableOptions,
     GridVirtualScrollDirective,
     VirtualScrollOptions,
-    GridEditTemplateDirective,
-    SwitchComponent,
+    GridFooterTemplateDirective,
+    GridGroupFooterTemplateDirective,
+    GridRemoveEvent,
+    GridSaveEvent,
+    GridToolbarTemplateDirective,
     GridExportDirective,
     ButtonDirective,
     GridFilterableDirective,
     type CompositeFilterDescriptor,
-    GridFilterableOptions
+    type AggregateFunction,
+    type GridColumnLockedPosition,
+    type GridGroupableOptions,
+    type GridFilterableOptions,
+    ChipComponent,
+    GridNoDataTemplateDirective,
+    GridStatePersistenceDirective,
+    type GridState,
+    GridHeaderTemplateDirective
 } from "mona-ui";
+import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -45,6 +61,39 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unknown>> {
     readonly #injector = createFeatureInjector({
+        aggregation: {
+            code: ``,
+            name: "Aggregation",
+            description: "Customize the aggregation function for grid columns",
+            active: false,
+            subFeatures: {
+                column: {
+                    code: ``,
+                    name: "Column",
+                    description: "Select a grid column for aggregation",
+                    active: false,
+                    type: "dropdown",
+                    dropdownDataSource: ["Freight"],
+                    clearable: true
+                },
+                aggregate: {
+                    code: ``,
+                    name: "Aggregate",
+                    description: "Customize the aggregation function for a grid column",
+                    active: false,
+                    type: "dropdown",
+                    dropdownDataSource: ["sum", "avg", "count", "min", "max"],
+                    dropdownDefaultValue: "sum",
+                    dropdownValue: "sum"
+                },
+                template: {
+                    code: ``,
+                    name: "Template",
+                    description: "Customize the template of the footer cell",
+                    active: true
+                }
+            }
+        },
         dataCount: {
             code: ``,
             name: "Data Count",
@@ -59,6 +108,12 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             code: ``,
             name: "Cell Template",
             description: "Customize the cell template for grid rows",
+            active: false
+        },
+        export: {
+            code: ``,
+            name: "Export",
+            description: "Export the grid data",
             active: false
         },
         filtering: {
@@ -78,6 +133,65 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 }
             }
         },
+        grouping: {
+            code: ``,
+            name: "Grouping",
+            description: "Enable grouping for grid rows",
+            active: false,
+            subFeatures: {
+                showFooter: {
+                    code: ``,
+                    active: false,
+                    description: "Display aggregation footer when group is collapsed",
+                    name: "Show Footer"
+                }
+            }
+        },
+        headerTemplate: {
+            code: ``,
+            name: "Header Template",
+            description: "Customize the look of header cells",
+            active: false
+        },
+        lockedColumns: {
+            code: ``,
+            name: "Locked Columns",
+            description: "Configure locked columns",
+            active: false,
+            subFeatures: {
+                column: {
+                    code: ``,
+                    active: false,
+                    description: "Select locked column",
+                    name: "Locked Column",
+                    type: "dropdown",
+                    dropdownDataSource: ["Ship Name", "Ship City"],
+                    dropdownValue: null,
+                    clearable: true
+                },
+                lockedPosition: {
+                    code: ``,
+                    active: false,
+                    description: "Locked position for selected column",
+                    name: "Locked Position",
+                    type: "dropdown",
+                    dropdownDataSource: ["left", "right"] as const,
+                    dropdownValue: "left"
+                }
+            }
+        },
+        masterDetail: {
+            code: ``,
+            name: "Master Detail",
+            description: "Enable master detail",
+            active: false
+        },
+        noDataTemplate: {
+            code: ``,
+            name: "No Data Template",
+            description: "Customize the template for when there is no data to display",
+            active: false
+        },
         selection: {
             code: ``,
             name: "Row Selection",
@@ -92,6 +206,20 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     type: "dropdown",
                     dropdownDataSource: ["single", "multiple"] as const,
                     dropdownValue: "single"
+                }
+            }
+        },
+        statePersistence: {
+            code: ``,
+            name: "State Persistence",
+            description: "Persist the grid state across sessions",
+            active: false,
+            subFeatures: {
+                persistPageSize: {
+                    code: ``,
+                    active: false,
+                    description: "Persist the page size across sessions",
+                    name: "Persist Page Size"
                 }
             }
         },
@@ -186,6 +314,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
 @Component({
     imports: [
         GridComponent,
+        GridAddCommandDirective,
+        GridCommandColumnComponent,
         GridColumnComponent,
         GridSelectableDirective,
         GridGroupableDirective,
@@ -194,20 +324,27 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         JsonPipe,
         GridEditableDirective,
         GridCellTemplateDirective,
-        DatePipe,
-        GridEditTemplateDirective,
-        SwitchComponent,
-        FormsModule,
+        GridFooterTemplateDirective,
+        GridGroupFooterTemplateDirective,
         GridExportDirective,
         ButtonDirective,
-        GridFilterableDirective
+        GridFilterableDirective,
+        ChipComponent,
+        GridNoDataTemplateDirective,
+        CodeViewerComponent,
+        GridStatePersistenceDirective,
+        GridToolbarTemplateDirective,
+        GridHeaderTemplateDirective,
+        LucideAngularModule
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let effectiveGridData = virtualization().enabled ? virtualGridData() : gridData();
         @let featureData = this.features();
 
-        <button monaButton (click)="gridExport.exportCsv()">Export Grid</button>
+        @if (exportable()) {
+            <button monaButton (click)="gridExport.exportCsv()">Export as CSV</button>
+        }
 
         <mona-grid
             [data]="effectiveGridData"
@@ -220,71 +357,156 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [rounded]="rounded()"
             [sort]="sort()"
             [sortable]="sortable()"
+            [newRowFactory]="createGridRow"
             (cellEdit)="onCellEdit($event)"
             (rowEdit)="onRowEdit($event)"
-            [monaGridEditable]="{ enabled: true, mode: 'cell' }"
+            (save)="onSave($event)"
+            (remove)="onRemove($event)"
+            [monaGridEditable]="{ enabled: true, mode: 'row' }"
             [monaGridFilterable]="filterable()"
             [filter]="filter()"
             (filterChange)="onFilterChange($event)"
             [monaGridVirtualScroll]="virtualization()"
             [scrollEndThreshold]="infiniteScroll()?.scrollEndThreshold || 5"
             (scrollEnd)="onScrollEnd()"
-            [monaGridGroupable]="{ enabled: true }"
+            [monaGridGroupable]="groupable()"
             [monaGridSelectable]="selection()"
             monaGridExport
             #gridExport="monaGridExport"
-            class="w-full h-96">
-            <!--            <ng-container monaGridContextMenu>-->
-            <!--                <mona-contextmenu-item [label]="'Menu Item 1'">-->
-            <!--                    <mona-contextmenu-item [label]="'Submenu Item 1'"></mona-contextmenu-item>-->
-            <!--                    <mona-contextmenu-item [label]="'Submenu Item 2'"></mona-contextmenu-item>-->
-            <!--                </mona-contextmenu-item>-->
-            <!--                <mona-contextmenu-item [label]="'Menu Item 2'"></mona-contextmenu-item>-->
-            <!--            </ng-container>-->
+            [monaGridStatePersistence]="statePersistence()"
+            [state]="state()"
+            (stateChange)="onStateChange($event)"
+            class="w-full h-112">
+            <ng-template monaGridToolbarTemplate let-addRowVisible="addRowVisible">
+                <button monaButton monaGridAddCommand [disabled]="addRowVisible">Add</button>
+            </ng-template>
             @for (column of columns; track column.field) {
                 @let width = null;
                 <mona-grid-column
                     [field]="column.field"
                     [title]="column.title"
                     [type]="column.filterType"
+                    [aggregate]="aggregationColumn() === column.title ? aggregationFunction() : null"
+                    [locked]="lockedColumn() === column.title"
+                    [lockedPosition]="lockedPosition() || 'left'"
                     [width]="width">
                     @if (featureData["cellTemplate"].active) {
                         <ng-template monaGridCellTemplate let-dataItem>
                             <span class="truncate" #cellElement>
-                                @if (column.filterType === "date") {
-                                    {{ dataItem[column.field] | date }}
+                                @if (column.field === "Freight") {
+                                    @let type =
+                                        dataItem[column.field] < 25
+                                            ? "success"
+                                            : dataItem[column.field] > 89
+                                              ? "error"
+                                              : "info";
+                                    <mona-chip [rounded]="'small'" [look]="type">
+                                        {{ dataItem[column.field] }} tonnes
+                                    </mona-chip>
                                 } @else {
                                     {{ dataItem[column.field] }}
                                 }
                             </span>
                         </ng-template>
                     }
-                    @if (column.field === "Delivered") {
-                        <ng-template monaGridEditTemplate let-dataItem>
-                            <mona-switch
-                                [ngModel]="dataItem[column.field]"
-                                (ngModelChange)="updateCellValue(dataItem, column.field, $event)"></mona-switch>
+                    @if (column.field === "Freight") {
+                        @if (featureData["headerTemplate"].active) {
+                            <ng-template monaGridHeaderTemplate let-column>
+                                <div class="w-full h-full gap-2 flex items-center px-2 overflow-hidden">
+                                    <lucide-icon [name]="containerIcon" [size]="12"></lucide-icon>
+                                    <span class="font-semibold">{{ column.title }}</span>
+                                </div>
+                            </ng-template>
+                        }
+                    }
+                    <!--                    @if (column.field === "Delivered") {-->
+                    <!--                        <ng-template monaGridEditTemplate let-dataItem>-->
+                    <!--                            <div class="w-full h-full flex items-center px-2">-->
+                    <!--                                <mona-switch-->
+                    <!--                                    [ngModel]="dataItem[column.field]"-->
+                    <!--                                    (ngModelChange)="updateCellValue(dataItem, column.field, $event)"></mona-switch>-->
+                    <!--                            </div>-->
+                    <!--                        </ng-template>-->
+                    <!--                    }-->
+                    @if (column.field === "Freight") {
+                        @if (aggregationTemplate()) {
+                            <ng-template monaGridFooterTemplate let-value let-aggregates="aggregate">
+                                <span class="text-info">{{ value }}</span>
+                            </ng-template>
+                        }
+                        <ng-template monaGridGroupFooterTemplate let-count="count" let-groupValue="groupValue">
+                            <span class="block truncate font-medium"> {{ count }} rows in {{ groupValue }} </span>
                         </ng-template>
                     }
                 </mona-grid-column>
             }
-            <ng-template monaGridDetailTemplate let-dataItem>
-                <pre class="h-full w-full p-2">{{ dataItem | json }}</pre>
-            </ng-template>
+            <mona-grid-command-column
+                [width]="80"
+                [locked]="true"
+                [lockedPosition]="'right'"
+                [title]="'TEST'"
+                [removeConfirmation]="true"></mona-grid-command-column>
+            @if (masterDetail()) {
+                <ng-template monaGridDetailTemplate let-dataItem>
+                    <!--                    <pre class="h-full w-full p-2">{{ dataItem | json }}</pre>-->
+                    <app-code-viewer [code]="dataItem | json" [language]="'json'"></app-code-viewer>
+                </ng-template>
+            }
+            @if (noDataTemplate()) {
+                <ng-template monaGridNoDataTemplate>
+                    <p class="uppercase text-pink-800">No records...</p>
+                </ng-template>
+            }
         </mona-grid>
     `
 })
 class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unknown>> {
-    protected readonly columns: Array<{ field: string; title: string; filterType: DataType }> = [
-        { field: "OrderID", title: "Order ID", filterType: "number" },
-        { field: "ShipName", title: "Ship Name", filterType: "string" },
-        { field: "Freight", title: "Freight", filterType: "number" },
+    readonly #stateStorageKey = "grid-demo-state";
+    protected readonly aggregation = computed(() => {
+        const features = this.features();
+        return features["aggregation"].subFeatures || {};
+    });
+    protected readonly aggregationColumn = computed(() => {
+        const aggregation = this.aggregation();
+        return aggregation["column"].dropdownValue || "";
+    });
+    protected readonly aggregationFunction = computed(() => {
+        const aggregation = this.aggregation();
+        return aggregation["aggregate"].dropdownValue || "";
+    });
+    protected readonly aggregationTemplate = computed(() => {
+        const aggregation = this.aggregation();
+        return aggregation["template"].active || "";
+    });
+    protected readonly columns: Array<{
+        field: string;
+        title: string;
+        filterType: DataType;
+        aggregate?: AggregateFunction | null;
+        locked?: boolean;
+        lockedPosition?: GridColumnLockedPosition;
+    }> = [
+        {
+            field: "OrderID",
+            title: "Order ID",
+            filterType: "number",
+            aggregate: "count",
+            locked: false,
+            lockedPosition: "left"
+        },
+        { field: "ShipName", title: "Ship Name", filterType: "string", aggregate: "custom" },
+        { field: "Freight", title: "Freight", filterType: "number", aggregate: "avg" },
         { field: "ShipCity", title: "Ship City", filterType: "string" },
         { field: "ShipCountry", title: "Ship Country", filterType: "string" },
-        { field: "Delivered", title: "Delivered", filterType: "boolean" },
+        { field: "Delivered", title: "Delivered", filterType: "boolean", lockedPosition: "right" },
         { field: "OrderDate", title: "Order Date", filterType: "datetime" },
         { field: "ShippedDate", title: "Shipped Date", filterType: "time" }
     ];
+    protected readonly exportable = computed(() => {
+        const features = this.features();
+        const exportFeature = features["export"];
+        return exportFeature ? exportFeature.active : false;
+    });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly filter = signal<CompositeFilterDescriptor[]>([
         {
@@ -309,6 +531,36 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return options;
     });
     protected readonly gridData = signal(generateRandomGridData(1000));
+    protected readonly containerIcon = ContainerIcon;
+    protected readonly createGridRow = (): Record<PropertyKey, unknown> => {
+        const gridData = this.getActiveGridData();
+        const nextOrderId =
+            gridData.reduce((max, row) => {
+                const orderId = row["OrderID"];
+                return typeof orderId === "number" ? Math.max(max, orderId) : max;
+            }, 0) + 1;
+        const now = new Date();
+        return {
+            Delivered: false,
+            Freight: 0,
+            OrderDate: now,
+            OrderID: nextOrderId,
+            ShipCity: "",
+            ShipCountry: "",
+            ShipName: "",
+            ShippedDate: now
+        };
+    };
+    protected readonly groupable = computed(() => {
+        const features = this.features();
+        const groupingFeature = features["grouping"];
+        const subFeatures = groupingFeature.subFeatures || {};
+        const options: GridGroupableOptions = {
+            enabled: groupingFeature.active ?? false,
+            showFooter: subFeatures["showFooter"]?.active ?? false
+        };
+        return options;
+    });
     protected readonly infiniteScroll = computed(() => {
         const features = this.features();
         const virtualizationFeature = features["virtualization"];
@@ -325,6 +577,24 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         const scrollEndThreshold = infiniteScrollSubFeatures["scrollEndThreshold"]?.numericValue ?? 5;
         return { scrollEndThreshold };
     });
+    protected readonly lockedColumn = computed(() => {
+        const features = this.features();
+        const subFeatures = features["lockedColumns"].subFeatures || {};
+        return subFeatures["column"].dropdownValue || null;
+    });
+    protected readonly lockedPosition = computed(() => {
+        const features = this.features();
+        const subFeatures = features["lockedColumns"].subFeatures || {};
+        return subFeatures["lockedPosition"].dropdownValue || null;
+    });
+    protected readonly masterDetail = computed(() => {
+        const features = this.features();
+        return features["masterDetail"].active ?? false;
+    });
+    protected readonly noDataTemplate = computed(() => {
+        const features = this.features();
+        return features["noDataTemplate"].active;
+    });
     protected readonly selection = computed(() => {
         const features = this.features();
         const subFeatures = features["selection"].subFeatures || {};
@@ -333,6 +603,15 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
             mode: subFeatures["mode"].dropdownValue ?? "single"
         };
         return selectableOptions;
+    });
+    protected readonly state = signal<GridState | null>(null);
+    protected readonly statePersistence = computed(() => {
+        const features = this.features();
+        const subFeatures = features["statePersistence"].subFeatures || {};
+        return {
+            enabled: features["statePersistence"].active ?? false,
+            persistPageSize: subFeatures["persistPageSize"].active ?? false
+        };
     });
     protected readonly virtualGridData = linkedSignal<
         { scrollEndThreshold: number } | null,
@@ -365,9 +644,61 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     public readonly sort = model<ReturnType<GridComponent<unknown>["sort"]>>([]);
     public readonly sortable = input<ReturnType<GridComponent<unknown>["sortable"]>>(false);
 
+    public constructor() {
+        effect(() => {
+            console.log("Locked column:", this.lockedColumn());
+        });
+        afterNextRender({
+            read: () => {
+                const state = window.localStorage.getItem(this.#stateStorageKey);
+                if (state) {
+                    this.state.set(JSON.parse(state));
+                }
+            }
+        });
+    }
+
+    protected onCellEdit(event: CellEditEvent): void {
+        console.log("Cell edited:", event);
+        window.setTimeout(() => {
+            const gridData = this.getActiveGridData();
+            const row = gridData.find(row => row === event.rowData);
+            if (!row) return;
+            const field = event.field as keyof typeof row;
+            if (row[field] === event.newValue) {
+                return;
+            }
+            row[field] = event.newValue;
+            gridData.splice(gridData.indexOf(event.rowData as typeof row), 1, row);
+            this.setActiveGridData(gridData);
+        }, 1000);
+    }
+
     protected onFilterChange(event: CompositeFilterDescriptor[]): void {
         console.log("Filter changed:", event);
         this.filter.set(event);
+    }
+
+    protected onRowEdit(event: RowEditEvent): void {
+        console.log("Row edited:", event);
+    }
+
+    protected onRemove(event: GridRemoveEvent): void {
+        const gridData = this.getActiveGridData();
+        this.setActiveGridData(gridData.filter(row => row !== event.rowData));
+    }
+
+    protected onSave(event: GridSaveEvent): void {
+        const gridData = this.getActiveGridData();
+        if (event.operation === "create") {
+            this.setActiveGridData([event.rowData, ...gridData]);
+            return;
+        }
+        const originalRowData = event.originalRowData;
+        if (originalRowData == null) {
+            return;
+        }
+        this.setActiveGridData(gridData.map(row => (row === originalRowData ? event.rowData : row)));
     }
 
     protected onScrollEnd(): void {
@@ -379,24 +710,10 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         }
     }
 
-    protected onRowEdit(event: RowEditEvent): void {
-        console.log("Row edited:", event);
-    }
-
-    protected onCellEdit(event: CellEditEvent): void {
-        console.log("Cell edited:", event);
-        window.setTimeout(() => {
-            const gridData = this.virtualization().enabled ? this.virtualGridData() : this.gridData();
-            const row = gridData.find(row => row === event.rowData);
-            if (!row) return;
-            const field = event.field as keyof typeof row;
-            if (row) {
-                if ((row as any)[field] === event.newValue) return;
-                (row as any)[field] = event.newValue;
-            }
-            gridData.splice(gridData.indexOf(event.rowData as typeof row), 1, row);
-            this.virtualization().enabled ? this.virtualGridData.set([...gridData]) : this.gridData.set([...gridData]);
-        }, 1000);
+    protected onStateChange(event: GridState | null): void {
+        if (event) {
+            window.localStorage.setItem(this.#stateStorageKey, JSON.stringify(event));
+        }
     }
 
     protected updateCellValue(dataItem: Record<PropertyKey, unknown>, field: string, value: unknown): void {
@@ -404,6 +721,14 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         this.virtualization().enabled
             ? this.virtualGridData.set([...this.virtualGridData()])
             : this.gridData.set([...this.gridData()]);
+    }
+
+    private getActiveGridData(): Record<PropertyKey, unknown>[] {
+        return this.virtualization().enabled ? this.virtualGridData() : this.gridData();
+    }
+
+    private setActiveGridData(data: Record<PropertyKey, unknown>[]): void {
+        this.virtualization().enabled ? this.virtualGridData.set([...data]) : this.gridData.set([...data]);
     }
 }
 

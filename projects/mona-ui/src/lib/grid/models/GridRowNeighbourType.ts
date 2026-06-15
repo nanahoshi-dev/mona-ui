@@ -1,1 +1,1 @@
-export type GridRowNeighborType = "data" | "group" | null;
+export type GridRowNeighborType = "data" | "group" | "groupFooter" | undefined | null;

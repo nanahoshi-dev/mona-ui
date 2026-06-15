@@ -20,7 +20,7 @@ export class GridGroupableDirective implements OnInit {
             return !sequenceEqual(
                 prev,
                 curr,
-                (p, n) => p.field() === n.field() && p.groupSortDirection() === n.groupSortDirection()
+                (p, n) => p.field === n.field && p.groupSortDirection === n.groupSortDirection
             );
         }),
         map(([_, curr]) => {

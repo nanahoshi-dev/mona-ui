@@ -3,6 +3,7 @@ import { FunnelIcon, LucideAngularModule } from "lucide-angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
+import type { FilterMenuDateOptions, FilterMenuDateType } from "../../../filter/models/FilterMenuDateOptions";
 import { FilterService } from "../../../filter/services/filter.service";
 import { DataType } from "../../../models/DataType";
 import { PopupRef } from "../../../popup/models/PopupRef";
@@ -28,7 +29,7 @@ export class GridFilterMenuComponent {
     public readonly column = input.required<Column>();
     public readonly type = input<DataType>("string");
 
-    public openPopup(): void {
+    protected openPopup(): void {
         this.#popupRef = this.#popupService.create({
             anchor: this.#hostElementRef.nativeElement,
             content: FilterMenuComponent,
@@ -50,11 +51,15 @@ export class GridFilterMenuComponent {
             .pipe(take(1))
             .subscribe(() => this.#popupRef?.close());
 
-        const filterState = this.#gridService.appliedFilters().get(this.column().field());
+        const filterState = this.#gridService.appliedFilters().get(this.column().field);
         const componentRef = this.#popupRef.component as ComponentRef<FilterMenuComponent>;
         componentRef.instance.type.set(this.type());
-        componentRef.instance.field.set(this.column().field());
+        componentRef.instance.field.set(this.column().field);
         componentRef.setInput("size", "small");
+        const dateOptions = this.#createDateOptions();
+        if (dateOptions != null) {
+            componentRef.setInput("dateOptions", dateOptions);
+        }
         if (filterState?.filterMenuValue) {
             componentRef.instance.value.set(filterState.filterMenuValue);
         }
@@ -67,5 +72,30 @@ export class GridFilterMenuComponent {
             this.#popupRef?.close();
             this.apply.emit(filterState);
         });
+    }
+
+    #createDateOptions(): FilterMenuDateOptions | null {
+        const type = this.type();
+        if (type !== "date" && type !== "datetime" && type !== "time") {
+            return null;
+        }
+        const format = this.column().format;
+        return {
+            format: typeof format === "string" ? format : this.#getDefaultDateFormat(type),
+            type
+        };
+    }
+
+    #getDefaultDateFormat(type: FilterMenuDateType): string {
+        switch (type) {
+            case "datetime":
+                return "dd/MM/yyyy HH:mm";
+            case "time":
+                return "HH:mm";
+            case "date":
+                return "dd/MM/yyyy";
+            default:
+                return "dd/MM/yyyy";
+        }
     }
 }

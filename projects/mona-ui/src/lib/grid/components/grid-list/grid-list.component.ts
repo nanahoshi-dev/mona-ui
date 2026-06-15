@@ -22,6 +22,8 @@ import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
 import { GridDetailIndentCellDirective } from "../../directives/grid-detail-indent-cell.directive";
 import { GridDetailRowDirective } from "../../directives/grid-detail-row.directive";
+import { GridFooterTableCellDirective } from "../../directives/grid-footer-table-cell.directive";
+import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridRowDirective } from "../../directives/grid-row.directive";
 import { Column } from "../../models/Column";
@@ -31,12 +33,15 @@ import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
 import { GridService } from "../../services/grid.service";
 import {
+    gridFooterTableRowThemeVariants,
     gridGroupRowThemeVariants,
     gridListBaseThemeVariants,
     gridListTableThemeVariants,
     GridListVariantInput
 } from "../../styles/grid.styles";
+import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
+import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
 import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 
 @Component({
@@ -44,6 +49,7 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
     templateUrl: "./grid-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
+        GridAddRowComponent,
         GridCellComponent,
         FontAwesomeModule,
         NgTemplateOutlet,
@@ -56,7 +62,10 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         SlicePipe,
         LucideAngularModule,
         GridToggleComponent,
-        GridLogicalCellDirective
+        GridFooterTableCellDirective,
+        GridLogicalCellDirective,
+        GridLockedCellDirective,
+        GridFooterCellComponent
     ],
     host: {
         "[class]": "baseClass()"
@@ -79,7 +88,16 @@ export class GridListComponent implements GridListVariantInput {
             return [];
         }
         const collapsedKeys = new Set(this.gridService.collapsedGroupKeys());
-        return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys);
+        const groupAggregateDict = this.gridService.groupAggregateMap().toDictionary(
+            e => e.key,
+            e => e.value
+        );
+        const showFooter = this.gridService.groupableOptions().showFooter;
+        return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys, showFooter, groupAggregateDict);
+    });
+    protected readonly footerTableRowClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridFooterTableRowThemeVariants(theme)();
     });
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {

@@ -17,6 +17,7 @@ export const numericTextboxVariants = cva(
         data-[disabled='true']:opacity-50
 
         focus-within:ring-2 focus-within:ring-primary/40
+        focus-within:border-primary
 
         [&.ng-touched.ng-invalid]:border-error
     `,
@@ -30,9 +31,9 @@ export const numericTextboxVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-11.5",
-                medium: "h-8.75",
-                small: "h-8.25"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
         }
     }

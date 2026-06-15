@@ -1,9 +1,8 @@
-import type { Column } from "./Column";
 import type { Row } from "./Row";
 
 export interface CellEditContext {
-    readonly column: Column;
     readonly cellUid: string;
+    readonly columnId: string;
     readonly mode: "cell";
     readonly row: Row;
     readonly rowUid: string;

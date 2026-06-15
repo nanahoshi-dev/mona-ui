@@ -61,6 +61,7 @@ import { ListItemComponent } from "../list-item/list-item.component";
         "[class]": "classes()",
         "[style.height]": "listHeight()",
         "[style.max-height]": "listMaxHeight()",
+        "[style.max-width]": "listMaxWidth()",
         "[style.width]": "listWidth()"
     }
 })
@@ -108,6 +109,16 @@ export class ListComponent<TData> implements OnInit {
         }
         return maxHeight;
     });
+    protected readonly listMaxWidth = computed(() => {
+        const maxWidth = this.maxWidth();
+        if (maxWidth == null) {
+            return undefined;
+        }
+        if (typeof maxWidth === "number") {
+            return `${maxWidth}px`;
+        }
+        return maxWidth;
+    });
     protected readonly listService = inject<ListService<TData>>(ListService);
     protected readonly listWidth: Signal<ListSizeType> = computed(() => {
         const width = this.width();
@@ -145,10 +156,11 @@ export class ListComponent<TData> implements OnInit {
     public readonly listItemClass = input("");
     public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
-    public readonly maxHeight = input<ListSizeInputType>(undefined);
+    public readonly maxHeight = input<ListSizeInputType>();
+    public readonly maxWidth = input<ListSizeInputType>();
     public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium"); // TODO: Update this to a cva variable when list styles are added
     public readonly textField = input<ListKeySelector<TData, string> | undefined>(null);
-    public readonly width = input<ListSizeInputType>(undefined);
+    public readonly width = input<ListSizeInputType>();
 
     public constructor() {
         effect(() => {

@@ -116,6 +116,7 @@ import {
     hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
+        "[attr.data-expanded]": "expanded()",
         "[class]": "baseClass()",
         "(blur)": "onDateInputBlur()"
     }
@@ -137,7 +138,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
-        const variantClass = dateTimePickerBaseThemeVariants(theme)({ focused });
+        const rounded = this.rounded();
+        const size = this.size();
+        const variantClass = dateTimePickerBaseThemeVariants(theme)({ focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });

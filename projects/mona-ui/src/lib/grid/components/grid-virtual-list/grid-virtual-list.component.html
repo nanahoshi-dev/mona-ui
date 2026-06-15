@@ -1,5 +1,29 @@
+@if (gridService.addRowVisible()) {
+    <div
+        class="shrink-0 overflow-hidden border-b border-b-border"
+        [style.margin-right.px]="gridService.scrollbarGutterWidth()"
+        #addRowScrollElement>
+        <table [class]="tableClass()" [style.width.px]="gridService.tableWidth()">
+            <colgroup>
+                @for (_ of gridService.groupColumns(); track $index) {
+                    <col [style.width.px]="gridService.groupColumnWidth" />
+                }
+                @if (gridService.masterDetailTemplate()) {
+                    <col [style.width.px]="gridService.groupColumnWidth" />
+                }
+                @for (col of columns(); track $index) {
+                    <col [style.width.px]="col.calculatedWidth" />
+                }
+            </colgroup>
+            <tbody role="rowgroup">
+                <tr monaGridAddRow [columns]="columns()"></tr>
+            </tbody>
+        </table>
+    </div>
+}
+
 <cdk-virtual-scroll-viewport
-    [style.height.%]="100"
+    class="flex-1 min-h-0"
     [itemSize]="gridService.virtualScrollOptions().height"
     [minBufferPx]="gridService.virtualGridMinBuffer()"
     [maxBufferPx]="gridService.virtualGridMaxBuffer()">
@@ -11,8 +35,8 @@
             @if (gridService.masterDetailTemplate()) {
                 <col [style.width.px]="gridService.groupColumnWidth" />
             }
-            @for (col of gridService.columns(); track $index) {
-                <col [style.width.px]="col.calculatedWidth()" />
+            @for (col of columns(); track $index) {
+                <col [style.width.px]="col.calculatedWidth" />
             }
         </colgroup>
         <tbody role="rowgroup">
@@ -28,6 +52,8 @@
                         @if (gridService.masterDetailTemplate()) {
                             <td
                                 monaGridCell
+                                monaGridLockedCell
+                                [lockedStructuralOffset]="0"
                                 [masterDetailToggle]="true"
                                 monaGridLogicalCell
                                 [colIndex]="0"
@@ -36,17 +62,21 @@
                                 [rowIndex]="rowIndex"
                                 [style.width.px]="gridService.detailColumnWidth"
                                 [attr.colspan]="1">
-                                <mona-grid-toggle
-                                    [expanded]="gridRow.expanded()"
-                                    [type]="'detail'"
-                                    [width]="gridService.detailColumnWidth"
-                                    (expandedChange)="onToggleDetailClick(row)"></mona-grid-toggle>
+                                <span class="flex h-full w-full items-stretch justify-center">
+                                    <mona-grid-toggle
+                                        [expanded]="gridRow.expanded()"
+                                        [type]="'detail'"
+                                        [width]="gridService.detailColumnWidth"
+                                        (expandedChange)="onToggleDetailClick(row)"></mona-grid-toggle>
+                                </span>
                             </td>
                         }
                         @for (column of columns(); track $index) {
                             @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
                             <td
                                 monaGridCell
+                                monaGridLockedCell
+                                [column]="column"
                                 [dataCell]="true"
                                 monaGridLogicalCell
                                 [colIndex]="colIndex"
@@ -56,8 +86,8 @@
                                     colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
                                 "
                                 [attr.colspan]="1"
-                                [style.width.px]="column.calculatedWidth()"
-                                [style.min-width.px]="column.minWidth()"
+                                [style.width.px]="column.calculatedWidth"
+                                [style.min-width.px]="column.minWidth"
                                 (edit)="gridCell.startEdit()">
                                 <mona-grid-cell #gridCell [column]="column" [row]="row"></mona-grid-cell>
                             </td>
@@ -77,6 +107,8 @@
                         <tr monaGridDetailRow [style.width.px]="gridService.masterDetailRowWidth()">
                             <td
                                 monaGridCell
+                                monaGridLockedCell
+                                [lockedStructuralOffset]="0"
                                 [indentCell]="true"
                                 [attr.colspan]="1"
                                 [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
@@ -101,6 +133,9 @@
                             @for (_ of gridService.groupColumns() | monaSlice: 0 : rowItem.depth; track $index) {
                                 <td
                                     monaGridCell
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                     [grouped]="true"
                                     [indentCell]="true"
                                     [attr.colspan]="1"
@@ -121,23 +156,55 @@
                                 [colIndex]="0"
                                 [grouped]="true"
                                 [groupHeader]="true"
-                                [prevRowType]="prevRow?.type ?? null"
+                                [prevRowType]="prevRow?.type"
                                 [firstInRow]="true"
                                 [lastInRow]="columns().length === 0"
                                 [groupKey]="rowItem.groupKey"
                                 [attr.colspan]="colspan"
                                 (toggle)="onGroupExpandChange(rowItem.groupKey)">
-                                <p class="flex items-center text-sm whitespace-nowrap">
+                                <p class="flex h-8 items-center text-sm whitespace-nowrap">
                                     <mona-grid-toggle
                                         [expanded]="!isCollapsed"
                                         [width]="gridService.groupColumnWidth"
                                         [type]="'group'"
                                         (expandedChange)="onGroupExpandChange(rowItem.groupKey)"></mona-grid-toggle>
-                                    <span class="font-bold"
-                                        >{{ rowItem.column.title() }}: {{ rowItem.groupValue }}</span
-                                    >
+                                    <span class="font-bold">{{ rowItem.title }}: {{ rowItem.groupValue }}</span>
                                 </p>
                             </td>
+                        </tr>
+                    } @else if (rowItem.type === "groupFooter") {
+                        <tr role="row" [class]="footerTableRowClass()">
+                            @for (_ of gridService.groupColumns(); track $index) {
+                                <td
+                                    monaGridFooterTableCell
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+                                    [footerCellWidth]="gridService.groupColumnWidth"></td>
+                            }
+                            @if (gridService.masterDetailTemplate()) {
+                                <td
+                                    monaGridFooterTableCell
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [lockedStructuralOffset]="
+                                        gridService.groupColumns().length * gridService.groupColumnWidth
+                                    "
+                                    [footerCellWidth]="gridService.detailColumnWidth"></td>
+                            }
+                            @for (column of columns(); track $index) {
+                                <td
+                                    monaGridFooterTableCell
+                                    monaGridLockedCell
+                                    [column]="column"
+                                    [lockedCellHeader]="true"
+                                    [footerColumn]="column">
+                                    <mona-grid-footer-cell
+                                        [column]="column"
+                                        [columnIndex]="$index"
+                                        [groupKey]="rowItem.groupAggregate.groupKey"></mona-grid-footer-cell>
+                                </td>
+                            }
                         </tr>
                     } @else if (rowItem.type === "data") {
                         @let nextRow = flattenedGroupedRows()[rowIndex + 1];
@@ -152,6 +219,9 @@
                             @for (_ of gridService.groupColumns(); track $index) {
                                 <td
                                     monaGridCell
+                                    monaGridLockedCell
+                                    [lockedCellHeader]="true"
+                                    [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                     [grouped]="true"
                                     [indentCell]="true"
                                     [style.width.px]="gridService.groupColumnWidth"></td>
@@ -160,30 +230,38 @@
                                 <td
                                     monaGridCell
                                     monaGridLogicalCell
+                                    monaGridLockedCell
+                                    [lockedStructuralOffset]="
+                                        gridService.groupColumns().length * gridService.groupColumnWidth
+                                    "
                                     [grouped]="true"
                                     [masterDetailToggle]="true"
-                                    [prevRowType]="prevRow?.type ?? null"
-                                    [nextRowType]="nextRow?.type ?? null"
+                                    [prevRowType]="prevRow?.type"
+                                    [nextRowType]="nextRow?.type"
                                     [rowIndex]="rowIndex"
                                     [colIndex]="0"
                                     [firstInRow]="true"
                                     [lastInRow]="columns().length === 0"
                                     [style.width.px]="gridService.detailColumnWidth">
-                                    <mona-grid-toggle
-                                        [expanded]="gridRow.expanded()"
-                                        [type]="'detail'"
-                                        [width]="gridService.detailColumnWidth"
-                                        (expandedChange)="onToggleDetailClick(rowItem.row)"></mona-grid-toggle>
+                                    <span class="flex h-full w-full items-stretch justify-center">
+                                        <mona-grid-toggle
+                                            [expanded]="gridRow.expanded()"
+                                            [type]="'detail'"
+                                            [width]="gridService.detailColumnWidth"
+                                            (expandedChange)="onToggleDetailClick(rowItem.row)"></mona-grid-toggle>
+                                    </span>
                                 </td>
                             }
                             @for (column of columns(); track $index) {
                                 @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
                                 <td
                                     monaGridCell
+                                    monaGridLockedCell
+                                    [column]="column"
                                     [grouped]="true"
                                     [dataCell]="true"
-                                    [prevRowType]="prevRow?.type ?? null"
-                                    [nextRowType]="nextRow?.type ?? null"
+                                    [prevRowType]="prevRow?.type"
+                                    [nextRowType]="nextRow?.type"
                                     monaGridLogicalCell
                                     [colIndex]="colIndex"
                                     [firstInRow]="colIndex === 0"
@@ -191,8 +269,8 @@
                                         colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
                                     "
                                     [rowIndex]="rowIndex"
-                                    [style.width.px]="column.calculatedWidth()"
-                                    [style.min-width.px]="column.minWidth()"
+                                    [style.width.px]="column.calculatedWidth"
+                                    [style.min-width.px]="column.minWidth"
                                     (edit)="gridCell.startEdit()">
                                     <mona-grid-cell #gridCell [column]="column" [row]="rowItem.row"></mona-grid-cell>
                                 </td>
@@ -216,6 +294,9 @@
                                 ) {
                                     <td
                                         monaGridCell
+                                        monaGridLockedCell
+                                        [lockedCellHeader]="true"
+                                        [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
                                         [grouped]="true"
                                         [indentCell]="true"
                                         [attr.colspan]="1"
@@ -224,13 +305,12 @@
                                 @let colspan = columns().length + gridService.groupColumns().length;
                                 <td
                                     monaGridDetailIndentCell
-                                    [nextRowType]="nextRow?.type ?? null"
+                                    monaGridLockedCell
+                                    [lockedStructuralOffset]="(rowItem.depth + 1) * gridService.groupColumnWidth"
+                                    [nextRowType]="nextRow?.type"
                                     [attr.colspan]="1"
                                     [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
-                                <td
-                                    monaGridDetailContentCell
-                                    [nextRowType]="nextRow?.type ?? null"
-                                    [attr.colspan]="colspan">
+                                <td monaGridDetailContentCell [nextRowType]="nextRow?.type" [attr.colspan]="colspan">
                                     <ng-container
                                         [ngTemplateOutlet]="gridService.masterDetailTemplate()"
                                         [ngTemplateOutletContext]="{ $implicit: rowItem.row.data }"></ng-container>
@@ -243,6 +323,58 @@
         </tbody>
     </table>
 </cdk-virtual-scroll-viewport>
+
+@if (gridService.hasFooter()) {
+    <div [class]="footerClass()" [style.margin-right.px]="gridService.scrollbarGutterWidth()" #footerScrollElement>
+        <div>
+            <table [class]="footerTableClass()" [style.width.px]="gridService.tableWidth()">
+                <colgroup>
+                    @for (_ of gridService.groupColumns(); track $index) {
+                        <col [style.width.px]="gridService.groupColumnWidth" />
+                    }
+                    @if (gridService.masterDetailTemplate()) {
+                        <col [style.width.px]="gridService.groupColumnWidth" />
+                    }
+                    @for (col of columns(); track $index) {
+                        <col [style.width.px]="col.calculatedWidth" />
+                    }
+                </colgroup>
+                <tfoot role="rowgroup">
+                    <tr [class]="footerTableRowClass()">
+                        @for (_ of gridService.groupColumns(); track $index) {
+                            <td
+                                monaGridFooterTableCell
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+                                [footerCellWidth]="gridService.groupColumnWidth"></td>
+                        }
+                        @if (gridService.masterDetailTemplate()) {
+                            <td
+                                monaGridFooterTableCell
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="
+                                    gridService.groupColumns().length * gridService.groupColumnWidth
+                                "
+                                [footerCellWidth]="gridService.detailColumnWidth"></td>
+                        }
+                        @for (column of columns(); track $index) {
+                            <td
+                                monaGridFooterTableCell
+                                monaGridLockedCell
+                                [column]="column"
+                                [lockedCellHeader]="true"
+                                [footerColumn]="column">
+                                <mona-grid-footer-cell [column]="column" [columnIndex]="$index"></mona-grid-footer-cell>
+                            </td>
+                        }
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}
 
 <ng-template let-rowData let-element="element" let-rowIndex="index" #contextMenuTemplate>
     <mona-contextmenu [target]="element" [items]="gridService.contextMenuItems()"></mona-contextmenu>

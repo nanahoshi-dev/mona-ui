@@ -1,7 +1,7 @@
 import { afterNextRender, DestroyRef, Directive, DOCUMENT, ElementRef, inject, input, output } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
-import { Column } from "../models/Column";
+import type { Column } from "../models/Column";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -25,7 +25,7 @@ export class GridColumnResizeHandlerDirective {
 
     private onMouseDown(event: MouseEvent) {
         const element = this.#hostElementRef.nativeElement;
-        const initialWidth = this.column().calculatedWidth() ?? element.getBoundingClientRect().width;
+        const initialWidth = this.#gridService.getColumnWidth(this.column());
         const initialX = event.clientX;
         const oldSelectStart = this.#document.onselectstart;
         const headerTableElement = this.#gridService.headerTableElement();
@@ -36,8 +36,8 @@ export class GridColumnResizeHandlerDirective {
 
         const onMouseMove = (event: MouseEvent) => {
             const deltaX = event.clientX - initialX;
-            const minWidth = this.column().minWidth();
-            const maxWidth = this.column().maxWidth() ?? this.#document.defaultView?.innerWidth ?? Infinity;
+            const minWidth = this.column().minWidth ?? 0;
+            const maxWidth = this.column().maxWidth ?? this.#document.defaultView?.innerWidth ?? Infinity;
 
             if (initialWidth + deltaX < minWidth) {
                 return;
@@ -47,9 +47,9 @@ export class GridColumnResizeHandlerDirective {
                 return;
             }
 
-            const oldWidth = this.column().calculatedWidth() ?? element.getBoundingClientRect().width;
-            const calculatedWidth = initialWidth + deltaX;
-            this.column().setCalculatedWidth(calculatedWidth);
+            const oldWidth = this.#gridService.getColumnWidth(this.column());
+            const calculatedWidth = this.#gridService.normalizeRenderedWidth(initialWidth + deltaX);
+            this.#gridService.setCalculatedWidth(this.column().id, calculatedWidth);
             if (headerTableElement) {
                 headerTableElement.style.width = `${
                     headerTableElement.getBoundingClientRect().width + (calculatedWidth - oldWidth)

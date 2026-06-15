@@ -29,6 +29,7 @@ import {
     SlicePipe,
     VirtualScrollOptions
 } from "mona-ui";
+import type { SelectableOptions } from "mona-ui/src/lib/common/list/models/SelectableOptions";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -246,6 +247,14 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             description: "Enables selection for the list view",
             name: "Selection",
             subFeatures: {
+                checkboxes: {
+                    code: ``,
+                    hasCode: false,
+                    active: false,
+                    description: "Enables checkboxes for selection",
+                    name: "Checkboxes",
+                    type: "boolean"
+                },
                 mode: {
                     code: ``,
                     hasCode: false,
@@ -322,6 +331,14 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
                 value: [{}, { backgroundColor: "aliceblue" }],
                 defaultValue: {}
             },
+            maxHeight: {
+                type: "string",
+                value: ""
+            },
+            maxWidth: {
+                type: "string",
+                value: ""
+            },
             rounded: {
                 type: "dropdown",
                 value: ["none", "small", "medium", "large"],
@@ -375,6 +392,8 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
             [listItemClass]="listItemClass()"
             [listItemStyle]="listItemStyle()"
             [listStyle]="listStyle()"
+            [maxHeight]="maxHeight()"
+            [maxWidth]="maxWidth()"
             [rounded]="rounded()"
             [size]="size()"
             [textField]="textField()"
@@ -543,21 +562,24 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         return options;
     });
     protected readonly scrollBottomItemCount = signal(20);
-    protected readonly selectedKeys = signal<number[]>([]);
-    protected readonly selection = computed<GridSelectableOptions>(() => {
+    protected readonly selectedKeys = signal<number[]>([5]);
+    protected readonly selection = computed<SelectableOptions>(() => {
         const features = this.features();
         const subFeatures = features["selection"]?.subFeatures || {};
         const mode = subFeatures["mode"].dropdownValue;
+        const checkboxes = subFeatures["checkboxes"].active;
         if (mode === "single") {
             return {
                 enabled: features["selection"].active,
                 mode: "single",
-                toggleable: subFeatures["toggleable"].active
+                toggleable: subFeatures["toggleable"].active,
+                checkboxes
             };
         }
         return {
             enabled: features["selection"].active,
-            mode: "multiple"
+            mode: "multiple",
+            checkboxes
         };
     });
     protected readonly selectBy = computed(() => {
@@ -580,6 +602,8 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
     public readonly listItemStyle = input<ReturnType<ListViewComponent["listItemStyle"]>>({});
     public readonly listStyle = input<ReturnType<ListViewComponent["listStyle"]>>({});
     public readonly items = input<ReturnType<ListViewComponent["items"]>>([]);
+    public readonly maxHeight = input<ReturnType<ListViewComponent["maxHeight"]>>("");
+    public readonly maxWidth = input<ReturnType<ListViewComponent["maxWidth"]>>("");
     public readonly rounded = input<ReturnType<ListViewComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<ListViewComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ListViewComponent["textField"]>>("");

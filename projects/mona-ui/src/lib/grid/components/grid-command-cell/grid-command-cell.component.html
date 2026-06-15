@@ -1,0 +1,51 @@
+@if (column().commandTemplate) {
+    <ng-container
+        [ngTemplateOutlet]="column().commandTemplate"
+        [ngTemplateOutletContext]="commandContext()"></ng-container>
+} @else {
+    <div class="flex h-8 items-center gap-1 px-1">
+        @if (isEditing()) {
+            <button
+                monaButton
+                look="ghost"
+                size="small"
+                [iconOnly]="true"
+                aria-label="Save row"
+                title="Save"
+                (click)="save($event)">
+                <lucide-angular [name]="saveIcon" [size]="16"></lucide-angular>
+            </button>
+            <button
+                monaButton
+                look="ghost"
+                size="small"
+                [iconOnly]="true"
+                aria-label="Cancel row edit"
+                title="Cancel"
+                (click)="cancel($event)">
+                <lucide-angular [name]="cancelIcon" [size]="16"></lucide-angular>
+            </button>
+        } @else {
+            <button
+                monaButton
+                look="ghost"
+                size="small"
+                [iconOnly]="true"
+                aria-label="Edit row"
+                title="Edit"
+                (click)="edit($event)">
+                <lucide-angular [name]="editIcon" [size]="16"></lucide-angular>
+            </button>
+            <button
+                monaButton
+                look="ghost"
+                size="small"
+                [iconOnly]="true"
+                aria-label="Remove row"
+                title="Remove"
+                (click)="remove($event)">
+                <lucide-angular [name]="removeIcon" [size]="16"></lucide-angular>
+            </button>
+        }
+    </div>
+}

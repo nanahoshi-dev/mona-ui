@@ -1,38 +1,114 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
-import { Column } from "../../models/Column";
+import type { FilterMenuDateOptions } from "../../../filter/models/FilterMenuDateOptions";
+import { FilterService } from "../../../filter/services/filter.service";
+import type { Column } from "../../models/Column";
 import { GridService } from "../../services/grid.service";
 
 import { GridFilterMenuComponent } from "./grid-filter-menu.component";
 
-@Component({
-    template: ` <mona-grid-filter-menu [column]="column"></mona-grid-filter-menu> `,
-    imports: [GridFilterMenuComponent],
-    changeDetection: ChangeDetectionStrategy.OnPush
-})
-class GridFilterMenuComponentTest {
-    public column: Column = new Column();
+function createColumn(): Column {
+    return {
+        aggregate: null,
+        calculatedWidth: null,
+        cellTemplate: null,
+        columnSortDirection: null,
+        commandTemplate: null,
+        configuredHidden: false,
+        dataType: "string",
+        editTemplate: null,
+        editable: false,
+        field: "test",
+        filtered: false,
+        format: null,
+        footerTemplate: null,
+        groupFooterTemplate: null,
+        headerTemplate: null,
+        groupSortDirection: null,
+        hidden: false,
+        id: "test",
+        index: 0,
+        kind: "data",
+        locked: false,
+        lockedPosition: "left",
+        maxWidth: null,
+        minWidth: 10,
+        removeConfirmation: false,
+        sortIndex: null,
+        stateKey: null,
+        title: "Test",
+        titleTemplate: null,
+        width: null
+    };
 }
 
 describe("GridFilterMenuComponent", () => {
     let component: GridFilterMenuComponent;
-    let hostComponent: GridFilterMenuComponentTest;
     let fixture: ComponentFixture<GridFilterMenuComponent>;
-    let hostFixture: ComponentFixture<GridFilterMenuComponentTest>;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [GridFilterMenuComponent, ButtonDirective, FilterMenuComponent, BrowserAnimationsModule],
-            providers: [GridService]
+            imports: [GridFilterMenuComponent, ButtonDirective, FilterMenuComponent],
+            providers: [FilterService, GridService]
         });
-        hostFixture = TestBed.createComponent(GridFilterMenuComponentTest);
-        hostComponent = hostFixture.componentInstance;
+        fixture = TestBed.createComponent(GridFilterMenuComponent);
+        component = fixture.componentInstance;
+        setColumnInput(createColumn());
+        fixture.detectChanges();
     });
 
     it("should create", () => {
-        expect(hostComponent).toBeTruthy();
+        expect(component).toBeTruthy();
     });
+
+    it("creates default date options for datetime columns", () => {
+        setColumnInput({
+            ...createColumn(),
+            dataType: "datetime"
+        });
+        fixture.detectChanges();
+
+        expect(readDateOptions()).toEqual({
+            format: "dd/MM/yyyy HH:mm",
+            type: "datetime"
+        });
+    });
+
+    it("creates default date options for time columns", () => {
+        setColumnInput({
+            ...createColumn(),
+            dataType: "time"
+        });
+        fixture.detectChanges();
+
+        expect(readDateOptions()).toEqual({
+            format: "HH:mm",
+            type: "time"
+        });
+    });
+
+    it("uses the column string format for date options", () => {
+        setColumnInput({
+            ...createColumn(),
+            dataType: "date",
+            format: "yyyy-MM-dd"
+        });
+        fixture.detectChanges();
+
+        expect(readDateOptions()).toEqual({
+            format: "yyyy-MM-dd",
+            type: "date"
+        });
+    });
+
+    function readDateOptions(): FilterMenuDateOptions | null {
+        type DateOptionsReader = { createDateOptions(): FilterMenuDateOptions | null };
+        return (component as unknown as DateOptionsReader).createDateOptions();
+    }
+
+    function setColumnInput(column: Column): void {
+        fixture.componentRef.setInput("column", column);
+        fixture.componentRef.setInput("type", column.dataType);
+    }
 });

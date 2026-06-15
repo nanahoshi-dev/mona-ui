@@ -1,0 +1,58 @@
+@if (gridService.addRowData(); as rowData) {
+    @for (_ of gridService.groupColumns(); track $index) {
+        <td
+            monaGridCell
+            monaGridLockedCell
+            [lockedCellHeader]="true"
+            [lockedStructuralOffset]="$index * gridService.groupColumnWidth"
+            [grouped]="true"
+            [indentCell]="true"
+            [attr.colspan]="1"
+            [style.width.px]="gridService.groupColumnWidth"></td>
+    }
+    @if (gridService.masterDetailTemplate()) {
+        <td
+            monaGridCell
+            monaGridLogicalCell
+            monaGridLockedCell
+            [lockedStructuralOffset]="gridService.groupColumns().length * gridService.groupColumnWidth"
+            [masterDetailToggle]="true"
+            [rowIndex]="-1"
+            [colIndex]="0"
+            [firstInRow]="true"
+            [lastInRow]="columns().length === 0"
+            [style.width.px]="gridService.detailColumnWidth"></td>
+    }
+    @for (column of columns(); track $index) {
+        @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
+        <td
+            monaGridCell
+            monaGridLockedCell
+            [column]="column"
+            [dataCell]="true"
+            monaGridLogicalCell
+            [colIndex]="colIndex"
+            [rowIndex]="-1"
+            [firstInRow]="colIndex === 0"
+            [lastInRow]="colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)"
+            [attr.colspan]="1"
+            [style.width.px]="column.calculatedWidth"
+            [style.min-width.px]="column.minWidth">
+            @if (column.kind === "command") {
+                <mona-grid-command-cell [column]="column" [newRow]="true"></mona-grid-command-cell>
+            } @else if (column.editable) {
+                <mona-grid-editor
+                    [column]="column"
+                    [autoFocus]="isFirstEditableColumn(column)"
+                    [isNew]="true"
+                    [rowData]="rowData"
+                    [value]="rowData[column.field]"
+                    (valueChange)="onValueChange(column, $event)"
+                    (commit)="onCommit()"
+                    (cancel)="onCancel()"></mona-grid-editor>
+            } @else {
+                <span class="block truncate px-2">{{ rowData[column.field] }}</span>
+            }
+        </td>
+    }
+}

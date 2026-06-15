@@ -15,6 +15,10 @@ import {
     gridDetailIndentCellVariants as monaGridDetailIndentCellVariants,
     gridDetailRowVariants as monaGridDetailRowVariants,
     gridFilterRowCellVariants as monaGridFilterRowCellVariants,
+    gridFooterTableCellVariants as monaGridFooterTableCellVariants,
+    gridFooterTableRowVariants as monaGridFooterTableRowVariants,
+    gridFooterTableVariants as monaGridFooterTableVariants,
+    gridFooterVariants as monaGridFooterVariants,
     gridGroupPanelPlaceholderVariants as monaGridGroupPanelPlaceholderVariants,
     gridGroupPanelVariants as monaGridGroupPanelVariants,
     gridGroupRowVariants as monaGridGroupRowVariants,
@@ -28,8 +32,7 @@ import {
     gridListTableCellVariants as monaGridListTableCellVariants,
     gridListTableRowVariants as monaGridListTableRowVariants,
     gridListTableVariants as monaGridListTableVariants,
-    gridNoDataVariants as monaGridNoDataVariants,
-    monaGridCellPositionalBorders
+    gridNoDataVariants as monaGridNoDataVariants
 } from "./grid.mona.styles";
 
 export const gridBaseThemeVariants = (theme: ThemeStyle) => {
@@ -119,6 +122,42 @@ export const gridFilterRowCellThemeVariants = (theme: ThemeStyle) => {
             return monaGridFilterRowCellVariants;
         default:
             return monaGridFilterRowCellVariants;
+    }
+};
+
+export const gridFooterThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridFooterVariants;
+        default:
+            return monaGridFooterVariants;
+    }
+};
+
+export const gridFooterTableThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridFooterTableVariants;
+        default:
+            return monaGridFooterTableVariants;
+    }
+};
+
+export const gridFooterTableRowThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridFooterTableRowVariants;
+        default:
+            return monaGridFooterTableRowVariants;
+    }
+};
+
+export const gridFooterTableCellThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridFooterTableCellVariants;
+        default:
+            return monaGridFooterTableCellVariants;
     }
 };
 
@@ -275,15 +314,6 @@ export const gridDetailContentCellThemeVariants = (theme: ThemeStyle) => {
     }
 };
 
-export const gridCellPositionalBordersThemeResolver = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellPositionalBorders;
-        default:
-            return monaGridCellPositionalBorders;
-    }
-};
-
 type GridBaseVariantProps = VariantProps<ReturnType<typeof gridBaseThemeVariants>>;
 type GridBaseVariantInput = VariantInputs<GridBaseVariantProps>;
 
@@ -320,12 +350,6 @@ export type GridListTableVariantInput = VariantInputs<GridListTableVariantProps>
 
 type GridListBaseVariantProps = VariantProps<ReturnType<typeof gridListBaseThemeVariants>>;
 type GridListBaseVariantInput = VariantInputs<GridListBaseVariantProps>;
-
-export type GridDetailRowVariantProps = VariantProps<ReturnType<typeof gridDetailRowThemeVariants>>;
-export type GridDetailIndentCellVariantProps = VariantProps<ReturnType<typeof gridDetailIndentCellThemeVariants>>;
-export type GridDetailIndentCellVariantInput = VariantInputs<GridDetailIndentCellVariantProps>;
-export type GridDetailContentCellVariantProps = VariantProps<ReturnType<typeof gridDetailContentCellThemeVariants>>;
-export type GridDetailContentCellVariantInput = VariantInputs<GridDetailContentCellVariantProps>;
 
 export type GridListVariantProps = VariantProps<ReturnType<typeof gridListBaseThemeVariants>> &
     GridListTableVariantProps &

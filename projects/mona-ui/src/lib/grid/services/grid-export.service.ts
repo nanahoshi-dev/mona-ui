@@ -14,15 +14,15 @@ export class GridExportService {
         if (!isPlatformBrowser(this.#platformId)) {
             return;
         }
-        const columns = this.#gridService.columns().where(c => !!c.field()).toArray();
+        const columns = this.#gridService.columns().where(c => !!c.field).toArray();
         if (columns.length === 0) {
             return;
         }
-        const header = columns.map(c => this.#escapeCsvValue(c.title())).join(",");
+        const header = columns.map(c => this.#escapeCsvValue(c.title)).join(",");
         const rowLines: string[] = [];
         this.#gridService.viewRows().forEach(row => {
             const line = columns
-                .map(col => this.#formatValue(row.data[col.field()], col.dataType()))
+                .map(col => this.#formatValue(row.data[col.field], col.dataType))
                 .join(",");
             rowLines.push(line);
         });

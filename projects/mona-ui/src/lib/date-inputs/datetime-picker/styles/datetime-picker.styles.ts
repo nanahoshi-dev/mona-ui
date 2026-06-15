@@ -1,5 +1,4 @@
 import { VariantProps } from "class-variance-authority";
-import { TextBoxVariantInput, TextBoxVariantProps } from "../../../inputs/text-box/styles/textbox.styles";
 import { ThemeStyle } from "../../../theme/models/Theme";
 import { VariantInputs } from "../../../utils/VariantInputs";
 import {
@@ -45,10 +44,8 @@ type DateTimePickerFooterVariantProps = VariantProps<ReturnType<typeof dateTimeP
 type DateTimePickerFooterVariantInput = VariantInputs<DateTimePickerFooterVariantProps>;
 
 export type DateTimePickerVariantProps = DateTimePickerBaseVariantProps &
-    Pick<TextBoxVariantProps, "rounded" | "size"> &
     DateTimePickerHeaderVariantProps &
     DateTimePickerFooterVariantProps;
 export type DateTimePickerVariantInput = Omit<DateTimePickerBaseVariantInput, "focused"> &
-    Pick<TextBoxVariantInput, "rounded" | "size"> &
     DateTimePickerHeaderVariantInput &
     DateTimePickerFooterVariantInput;

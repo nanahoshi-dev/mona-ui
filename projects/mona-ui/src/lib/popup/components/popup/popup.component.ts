@@ -199,6 +199,10 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
         effect(() => this.setupEventListeners());
     }
 
+    public closePopup(): void {
+        this.popupRef?.close();
+    }
+
     public ngAfterViewInit(): void {
         window.setTimeout(() => this.setupEventListeners());
     }
@@ -291,11 +295,15 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                 this.popupRef.closed.pipe(take(1)).subscribe(result => {
                     this.popupRef = null;
                     this.close.emit();
-                    if (result instanceof PointerEvent && result.type === trigger) {
-                        this.#popupOpened =
-                            target instanceof HTMLElement && target.contains(result.target as HTMLElement);
-                    } else if (result instanceof PointerEvent && pointAnchor && result.type !== trigger) {
-                        this.#popupOpened = false;
+                    if (result instanceof PopupCloseEvent) {
+                        if (!result.originalEvent) {
+                            this.#popupOpened = false;
+                        } else if (result instanceof PointerEvent && result.type === trigger) {
+                            this.#popupOpened =
+                                target instanceof HTMLElement && target.contains(result.target as HTMLElement);
+                        } else if (result instanceof PointerEvent && pointAnchor && result.type !== trigger) {
+                            this.#popupOpened = false;
+                        }
                     }
                 });
                 if (pointAnchor) {
