@@ -50,31 +50,5 @@
                 (closed)="onDatePickerClose()"
                 size="small"></mona-date-picker>
         }
-        @case ("datetime") {
-            <mona-datetime-picker
-                [class]="editorClass"
-                [rounded]="'none'"
-                [ngModel]="value()"
-                (ngModelChange)="onValueChange($event)"
-                (keydown.enter)="onDatePickerEnter($event)"
-                (keydown.escape)="onEditCancel()"
-                (focusout)="onDatePickerFocusOut($event)"
-                (opened)="onDatePickerOpen()"
-                (closed)="onDatePickerClose()"
-                size="small"></mona-datetime-picker>
-        }
-        @case ("time") {
-            <mona-time-picker
-                [class]="editorClass"
-                [rounded]="'none'"
-                [ngModel]="value()"
-                (ngModelChange)="onValueChange($event)"
-                (keydown.enter)="onDatePickerEnter($event)"
-                (keydown.escape)="onEditCancel()"
-                (focusout)="onDatePickerFocusOut($event)"
-                (opened)="onDatePickerOpen()"
-                (closed)="onDatePickerClose()"
-                size="small"></mona-time-picker>
-        }
     }
 }

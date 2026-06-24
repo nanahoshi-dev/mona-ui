@@ -61,7 +61,7 @@ export class GridCellComponent {
         if (typeof format === "function") {
             return format(column);
         }
-        if (column.dataType === "date" || column.dataType === "datetime" || column.dataType === "time") {
+        if (column.dataType === "date") {
             return this.formatDateValue(value, format);
         }
         return value;
@@ -104,11 +104,7 @@ export class GridCellComponent {
     public readonly row = input.required<Row>();
 
     public startEdit(originalEvent?: Event): void {
-        if (
-            !this.gridService.editableOptions().enabled ||
-            !this.column().editable ||
-            this.column().kind !== "data"
-        ) {
+        if (!this.gridService.editableOptions().enabled || !this.column().editable || this.column().kind !== "data") {
             return;
         }
         this.gridService.startCellEdit(this.cellUid(), this.row(), this.column(), originalEvent);

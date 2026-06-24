@@ -14,16 +14,17 @@ export class GridExportService {
         if (!isPlatformBrowser(this.#platformId)) {
             return;
         }
-        const columns = this.#gridService.columns().where(c => !!c.field).toArray();
+        const columns = this.#gridService
+            .columns()
+            .where(c => !!c.field)
+            .toArray();
         if (columns.length === 0) {
             return;
         }
         const header = columns.map(c => this.#escapeCsvValue(c.title)).join(",");
         const rowLines: string[] = [];
         this.#gridService.viewRows().forEach(row => {
-            const line = columns
-                .map(col => this.#formatValue(row.data[col.field], col.dataType))
-                .join(",");
+            const line = columns.map(col => this.#formatValue(row.data[col.field], col.dataType)).join(",");
             rowLines.push(line);
         });
         const csv = "﻿" + [header, ...rowLines].join("\r\n");
@@ -52,19 +53,7 @@ export class GridExportService {
         }
         switch (dataType) {
             case "date":
-                return value instanceof Date
-                    ? value.toISOString().split("T")[0]
-                    : this.#escapeCsvValue(String(value));
-            case "datetime":
-                return value instanceof Date ? value.toISOString() : this.#escapeCsvValue(String(value));
-            case "time":
-                if (value instanceof Date) {
-                    const h = String(value.getHours()).padStart(2, "0");
-                    const m = String(value.getMinutes()).padStart(2, "0");
-                    const s = String(value.getSeconds()).padStart(2, "0");
-                    return `${h}:${m}:${s}`;
-                }
-                return this.#escapeCsvValue(String(value));
+                return value instanceof Date ? value.toISOString().split("T")[0] : this.#escapeCsvValue(String(value));
             case "boolean":
             case "number":
                 return String(value);

@@ -20,8 +20,6 @@ import { ButtonDirective } from "../../../buttons/button/directives/button.direc
 import { PopupMenuCheckboxItemComponent } from "../../../common/popup-menu/components/popup-menu-checkbox-item/popup-menu-checkbox-item.component";
 import { PopupMenuComponent } from "../../../common/popup-menu/components/popup-menu/popup-menu.component";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
-import { DateTimePickerComponent } from "../../../date-inputs/datetime-picker/components/datetime-picker/datetime-picker.component";
-import { TimePickerComponent } from "../../../date-inputs/time-picker/components/time-picker/time-picker.component";
 import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
 import type { FilterMenuDataItem } from "../../../filter/models/FilterMenuDataItem";
 import type { FilterMenuValue } from "../../../filter/models/FilterMenuValue";
@@ -54,8 +52,6 @@ type RowFilterValue = string | number | Date | boolean | null | undefined;
         TextBoxComponent,
         NumericTextBoxComponent,
         DatePickerComponent,
-        DateTimePickerComponent,
-        TimePickerComponent,
         DropdownListComponent,
         LucideAngularModule,
         ButtonDirective,
@@ -95,8 +91,6 @@ export class GridFilterRowCellComponent {
             case "number":
                 return this.numberValue() !== null;
             case "date":
-            case "datetime":
-            case "time":
                 return this.dateValue() !== null;
             case "boolean":
                 return this.booleanValue() !== null;
@@ -181,8 +175,6 @@ export class GridFilterRowCellComponent {
                 }
                 break;
             case "date":
-            case "datetime":
-            case "time":
                 if (this.dateValue()) {
                     this.#emitFilter(this.dateValue());
                 }
@@ -222,8 +214,6 @@ export class GridFilterRowCellComponent {
                 });
                 break;
             case "date":
-            case "datetime":
-            case "time":
                 filter = this.#filterService.buildDateFilterDescriptor({
                     field,
                     logic: null,
@@ -281,8 +271,6 @@ export class GridFilterRowCellComponent {
                 this.numberValue.set((v.value1 as number) ?? null);
                 break;
             case "date":
-            case "datetime":
-            case "time":
                 this.selectedOperator.set(v.operator1 as RowFilterOperator);
                 this.dateValue.set((v.value1 as Date) ?? null);
                 break;

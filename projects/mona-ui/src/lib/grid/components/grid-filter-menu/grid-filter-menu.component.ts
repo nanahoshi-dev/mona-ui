@@ -76,7 +76,7 @@ export class GridFilterMenuComponent {
 
     #createDateOptions(): FilterMenuDateOptions | null {
         const type = this.type();
-        if (type !== "date" && type !== "datetime" && type !== "time") {
+        if (type !== "date") {
             return null;
         }
         const format = this.column().format;

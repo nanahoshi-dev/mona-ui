@@ -63,7 +63,7 @@ export class GridRowFlattenerService {
             return;
         }
         const field = column.field;
-        const isDate = column.dataType === "date" || column.dataType === "datetime" || column.dataType === "time";
+        const isDate = column.dataType === "date";
 
         const groupMap = new Map<unknown, Row[]>();
         const keyOrder: unknown[] = [];
@@ -118,7 +118,6 @@ export class GridRowFlattenerService {
                         result.push(dataRow);
                     }
                 }
-
             }
 
             const groupAggregate = groupAggregates.get(groupKey);

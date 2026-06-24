@@ -40,11 +40,11 @@ export class GridColumnComponent implements GridColumnDefinition {
         editable: this.editable(),
         field: this.field(),
         filtered: false,
-        format: this.format(),
         footerTemplate: this.footerTemplate() ?? null,
+        format: this.format() ?? null,
         groupFooterTemplate: this.groupFooterTemplate() ?? null,
-        headerTemplate: this.headerTemplate() ?? null,
         groupSortDirection: null,
+        headerTemplate: this.headerTemplate() ?? null,
         hidden: this.hidden(),
         id: this.#columnId,
         index: 0,
@@ -84,7 +84,7 @@ export class GridColumnComponent implements GridColumnDefinition {
     /**
      * @description Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.
      */
-    public readonly format = input<ColumnFormat | null>(null);
+    public readonly format = input<ColumnFormat | null>();
 
     /**
      * @description Whether this column is hidden from the rendered grid.

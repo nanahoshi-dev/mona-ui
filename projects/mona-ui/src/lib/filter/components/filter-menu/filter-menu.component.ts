@@ -14,8 +14,6 @@ import { FormsModule } from "@angular/forms";
 import { ButtonGroupComponent } from "../../../buttons/button-group/components/button-group/button-group.component";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
-import { DateTimePickerComponent } from "../../../date-inputs/datetime-picker/components/datetime-picker/datetime-picker.component";
-import { TimePickerComponent } from "../../../date-inputs/time-picker/components/time-picker/time-picker.component";
 import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
@@ -54,8 +52,6 @@ import {
         TextBoxComponent,
         NumericTextBoxComponent,
         DatePickerComponent,
-        DateTimePickerComponent,
-        TimePickerComponent,
         ButtonGroupComponent,
         ButtonDirective,
         ValuelessOperatorPipe,
@@ -89,7 +85,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
     protected readonly effectiveDateOptions = computed(() => {
         const type = this.type();
         const dateOptions = this.dateOptions();
-        if (type !== "date" && type !== "datetime" && type !== "time") {
+        if (type !== "date") {
             return dateOptions;
         }
         if (dateOptions.type === type) {
@@ -134,8 +130,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             case "number":
                 return numberFilterValues[0] !== null;
             case "date":
-            case "datetime":
-            case "time":
                 return dateFilterValues[0] !== null;
             case "boolean":
                 return true;
@@ -171,8 +165,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             case "number":
                 return numberFilterValues[1] !== null;
             case "date":
-            case "datetime":
-            case "time":
                 return dateFilterValues[1] !== null;
             case "boolean":
                 return true;
@@ -227,7 +219,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             this.applyStringFilters();
         } else if (this.type() === "number") {
             this.applyNumberFilters();
-        } else if (this.type() === "date" || this.type() === "datetime" || this.type() === "time") {
+        } else if (this.type() === "date") {
             this.applyDateFilters();
         } else if (this.type() === "boolean") {
             this.applyBooleanFilters();
@@ -272,8 +264,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
             case "number":
                 return filterValue(this.numberFilterValues());
             case "date":
-            case "datetime":
-            case "time":
                 return filterValue(this.dateFilterValues());
             case "boolean":
                 return filterValue(this.#booleanFilterValues);
@@ -371,8 +361,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 this.numberFilterValues.set([this.numberFilterValues()[0], null]);
                 break;
             case "date":
-            case "datetime":
-            case "time":
                 this.dateFilterValues.set([this.dateFilterValues()[0], null]);
                 break;
             case "boolean":
@@ -398,8 +386,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 filterValues = [values.value1 ?? null, values.value2 ?? null];
                 break;
             case "date":
-            case "datetime":
-            case "time":
             case "boolean":
                 filterMenuDataItems =
                     this.type() !== "boolean" ? this.dateFilterMenuDataItems : this.booleanFilterMenuDataItems;
@@ -424,8 +410,6 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 this.numberFilterValues.set(filterValues as [number, number]);
                 break;
             case "date":
-            case "datetime":
-            case "time":
                 this.dateFilterValues.set(filterValues as [Date, Date]);
                 break;
             case "boolean":

@@ -1130,10 +1130,7 @@ export class GridService {
         if (Array.isArray(value)) {
             return value.map(item => this.deserializeFilterValue(item, column));
         }
-        if (
-            typeof value === "string" &&
-            (column.dataType === "date" || column.dataType === "datetime" || column.dataType === "time")
-        ) {
+        if (typeof value === "string" && column.dataType === "date") {
             return new Date(value);
         }
         return value;
@@ -1185,7 +1182,7 @@ export class GridService {
 
     private groupRowsByColumn(rows: readonly Row[], column: Column): Array<[unknown, Row[]]> {
         const field = column.field;
-        const isDate = column.dataType === "date" || column.dataType === "datetime" || column.dataType === "time";
+        const isDate = column.dataType === "date";
         const groupMap = new Map<unknown, Row[]>();
         const keyOrder: unknown[] = [];
 

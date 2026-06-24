@@ -12,6 +12,7 @@ import {
     signal
 } from "@angular/core";
 import { ContainerIcon, LucideAngularModule } from "lucide-angular";
+import { DateTime } from "luxon";
 import {
     CellEditEvent,
     GridAddCommandDirective,
@@ -389,6 +390,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     [aggregate]="aggregationColumn() === column.title ? aggregationFunction() : null"
                     [locked]="lockedColumn() === column.title"
                     [lockedPosition]="lockedPosition() || 'left'"
+                    [format]="column.format"
                     [width]="width">
                     @if (featureData["cellTemplate"].active) {
                         <ng-template monaGridCellTemplate let-dataItem>
@@ -482,6 +484,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         field: string;
         title: string;
         filterType: DataType;
+        format?: string;
         aggregate?: AggregateFunction | null;
         locked?: boolean;
         lockedPosition?: GridColumnLockedPosition;
@@ -499,8 +502,8 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         { field: "ShipCity", title: "Ship City", filterType: "string" },
         { field: "ShipCountry", title: "Ship Country", filterType: "string" },
         { field: "Delivered", title: "Delivered", filterType: "boolean", lockedPosition: "right" },
-        { field: "OrderDate", title: "Order Date", filterType: "datetime" },
-        { field: "ShippedDate", title: "Shipped Date", filterType: "time" }
+        { field: "OrderDate", title: "Order Date", filterType: "date", format: "dd/MM/yyyy" },
+        { field: "ShippedDate", title: "Shipped Date", filterType: "date" }
     ];
     protected readonly exportable = computed(() => {
         const features = this.features();
@@ -808,6 +811,13 @@ function generateRandomGridData(count: number, startFrom = 0): Record<PropertyKe
         const randomCountryIndex = Math.floor(Math.random() * countries.length);
         const randomShipNameIndex = Math.floor(Math.random() * shipNames.length);
 
+        const minOrderLimit = DateTime.now().minus({ months: 3 }).toMillis();
+        const maxOrderLimit = DateTime.now().minus({ weeks: 1 }).toMillis();
+        const orderDate = DateTime.fromMillis(Math.random() * (maxOrderLimit - minOrderLimit) + minOrderLimit);
+
+        const minShippedLimit = DateTime.now().minus({ days: 3 }).toMillis();
+        const shippedDate = DateTime.fromMillis(Math.random() * (minShippedLimit - minOrderLimit) + minOrderLimit);
+
         generatedData.push({
             OrderID: orderNumber++,
             ShipName: shipNames[randomShipNameIndex],
@@ -815,8 +825,8 @@ function generateRandomGridData(count: number, startFrom = 0): Record<PropertyKe
             ShipCity: cities[randomCityIndex],
             ShipCountry: countries[randomCountryIndex],
             Delivered: Math.random() > 0.5, //Math.floor(Math.random() * 4),
-            OrderDate: new Date(),
-            ShippedDate: new Date(now.setDate(now.getDate() + Math.random() * 30))
+            OrderDate: orderDate.toJSDate(),
+            ShippedDate: shippedDate.toJSDate()
         });
     }
 

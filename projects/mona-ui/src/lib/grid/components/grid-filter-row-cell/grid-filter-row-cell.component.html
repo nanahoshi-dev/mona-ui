@@ -48,26 +48,10 @@
                 *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
         </div>
     }
-    @case ("date")
-    @case ("datetime")
-    @case ("time") {
+    @case ("date") {
         <div class="flex gap-0.5 w-full">
             @if (dataType === "date") {
                 <mona-date-picker
-                    size="small"
-                    [ngModel]="dateValue()"
-                    (ngModelChange)="onDateChange($event)"
-                    [style.width.%]="100" />
-            }
-            @if (dataType === "datetime") {
-                <mona-datetime-picker
-                    size="small"
-                    [ngModel]="dateValue()"
-                    (ngModelChange)="onDateChange($event)"
-                    [style.width.%]="100" />
-            }
-            @if (dataType === "time") {
-                <mona-time-picker
                     size="small"
                     [ngModel]="dateValue()"
                     (ngModelChange)="onDateChange($event)"

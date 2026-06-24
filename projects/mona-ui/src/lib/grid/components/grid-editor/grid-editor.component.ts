@@ -1,4 +1,6 @@
+import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -12,13 +14,9 @@ import {
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
-import { DateTimePickerComponent } from "../../../date-inputs/datetime-picker/components/datetime-picker/datetime-picker.component";
-import { TimePickerComponent } from "../../../date-inputs/time-picker/components/time-picker/time-picker.component";
 import { CheckBoxComponent } from "../../../inputs/check-box/components/check-box/check-box.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
-import { NgTemplateOutlet } from "@angular/common";
-import { afterNextRender } from "@angular/core";
 import { Column } from "../../models/Column";
 
 @Component({
@@ -28,12 +26,10 @@ import { Column } from "../../models/Column";
     imports: [
         CheckBoxComponent,
         DatePickerComponent,
-        DateTimePickerComponent,
         FormsModule,
         NgTemplateOutlet,
         NumericTextBoxComponent,
-        TextBoxComponent,
-        TimePickerComponent
+        TextBoxComponent
     ],
     host: {
         class: "w-full h-full border border-solid border-primary/40 flex items-center"
@@ -135,7 +131,7 @@ export class GridEditorComponent {
         this.textBoxRef()?.focus();
         this.numericTextBoxRef()?.focus();
         const type = this.column().dataType;
-        if (type === "date" || type === "datetime" || type === "time") {
+        if (type === "date") {
             const inputElement = this.#elementRef.nativeElement.querySelector("input") as HTMLInputElement | null;
             inputElement?.focus();
         }
