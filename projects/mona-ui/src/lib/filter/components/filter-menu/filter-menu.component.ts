@@ -419,7 +419,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
                 break;
         }
 
-        const selectedConnectorItem = filterValues[1]
+        const selectedConnectorItem = values.operator2 && values.logic
             ? (this.connectorDataItems.find(c => c.value === values.logic) ?? null)
             : null;
         this.selectedConnectorItem.set(selectedConnectorItem);

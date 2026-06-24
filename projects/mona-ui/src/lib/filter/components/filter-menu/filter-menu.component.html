@@ -110,7 +110,7 @@
                 [rounded]="rounded()"
                 [ngModel]="numberFilterValues()[1]"
                 (ngModelChange)="numberFilterValues.set([numberFilterValues()[0], $event])"
-                [disabled]="selectedFilterMenuDataItemList()[0]?.value | valuelessOperator"></mona-numeric-text-box>
+                [disabled]="selectedFilterMenuDataItemList()[1]?.value | valuelessOperator"></mona-numeric-text-box>
         }
 
         @if (type() === "date") {
