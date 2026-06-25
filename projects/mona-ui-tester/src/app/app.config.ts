@@ -9,6 +9,7 @@ import bash from "highlight.js/lib/languages/bash";
 import json from "highlight.js/lib/languages/json";
 import typescript from "highlight.js/lib/languages/typescript";
 import xml from "highlight.js/lib/languages/xml";
+import plaintext from "highlight.js/lib/languages/plaintext";
 import { markedHighlight } from "marked-highlight";
 import { MARKED_EXTENSIONS, provideMarkdown } from "ngx-markdown";
 import { routes } from "./routes";
@@ -17,6 +18,7 @@ HighlightJS.registerLanguage("bash", bash);
 HighlightJS.registerLanguage("html", xml);
 HighlightJS.registerLanguage("json", json);
 HighlightJS.registerLanguage("typescript", typescript);
+HighlightJS.registerLanguage("plaintext", plaintext);
 
 export const appConfig: ApplicationConfig = {
     providers: [

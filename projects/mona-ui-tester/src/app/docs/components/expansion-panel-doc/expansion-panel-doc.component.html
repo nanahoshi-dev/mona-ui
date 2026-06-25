@@ -1,10 +1,5 @@
-<app-section id="expansionPanel" [header]="'Expansion Panel'" headerType="H1">
-    <p>An expansion panel is a UI control that displays a header and hides its associated content by default.
-        When the user interacts with the header, the panel expands to reveal additional content, and can collapse again to conserve space and reduce visual clutter.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-expansion-panel-demo></app-expansion-panel-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/expansion-panel/intro.md"></app-markdown-doc>
+
+<app-expansion-panel-demo></app-expansion-panel-demo>
+
+<app-markdown-doc src="docs/expansion-panel/api.md" parentSectionId="expansion-panel"></app-markdown-doc>

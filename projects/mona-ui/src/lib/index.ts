@@ -346,11 +346,13 @@ export * from "./popup/services/popup.service";
 export * from "./popup/components/popup/popup.component";
 
 /** Progress */
+export * from "./progress-bars/models/LabelTemplateContext";
 export * from "./progress-bars/circular-progress-bar/directives/circular-progress-bar-label-template.directive";
 export * from "./progress-bars/circular-progress-bar/components/circular-progress-bar/circular-progress-bar.component";
 
 export * from "./progress-bars/progress-bar/components/progress-bar/progress-bar.component";
 export * from "./progress-bars/progress-bar/directives/progress-bar-label-template.directive";
+export * from "./progress-bars/progress-bar/models/LabelPosition";
 
 /** Tooltips */
 

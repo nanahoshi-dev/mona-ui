@@ -27,7 +27,7 @@
     [attr.aria-haspopup]="'menu'"
     [attr.aria-expanded]="menuOpen()"
     [attr.aria-controls]="menuId"
-    [attr.aria-label]="'Show menu options'"
+    [attr.aria-label]="menuButtonAriaLabel()"
     [tabindex]="disabled() ? -1 : 0"
     #menuButton>
     @if (menuButtonTemplate()) {

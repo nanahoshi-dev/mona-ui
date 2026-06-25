@@ -1,0 +1,208 @@
+## Overview
+
+`ProgressBarComponent` renders a full-width horizontal bar that fills proportionally to a numeric value within an explicit range. It uses a two-track `clip-path` technique so the label remains readable whether it sits inside the filled area or outside it — the label text automatically contrasts against the background it overlaps.
+
+An indeterminate mode is available for tasks where the total duration is unknown. In that mode the default label is hidden and a repeating diagonal stripe animation fills the bar.
+
+The host element carries `role="progressbar"` with `aria-valuemin`, `aria-valuemax`, and `aria-valuenow` bound to the component inputs. Set `aria-label` to describe what the bar measures.
+
+**Use `ProgressBarComponent` when you need to:**
+
+- Show file upload, download, or step-based task progress inline in a layout
+- Display a multi-step wizard progress indicator in a horizontal banner
+- Communicate an indeterminate loading state with a full-width animated bar
+
+**Use `CircularProgressBarComponent` instead when:**
+
+- A compact, self-contained round indicator suits the layout better (e.g., a dashboard card)
+
+## Import & Basic Usage
+
+```typescript
+import { ProgressBarComponent } from "@mirei/mona-ui";
+```
+
+Add `ProgressBarComponent` to your standalone component's `imports` array.
+
+**Determinate** — bind `value`, optionally `min` / `max`:
+
+```html
+<mona-progress-bar [value]="uploadPercent" aria-label="Upload progress"></mona-progress-bar>
+```
+
+**Indeterminate** — use when the completion value is unknown:
+
+```html
+<mona-progress-bar [indeterminate]="true" aria-label="Loading"></mona-progress-bar>
+```
+
+**Custom range:**
+
+```html
+<mona-progress-bar
+    [value]="completedSteps"
+    [min]="0"
+    [max]="totalSteps"
+    aria-label="Step completion">
+</mona-progress-bar>
+```
+
+**Dynamic color** — pass a CSS string or a function that maps the current percentage to a color:
+
+```html
+<!-- Fixed -->
+<mona-progress-bar [value]="75" color="#6366f1"></mona-progress-bar>
+
+<!-- Dynamic -->
+<mona-progress-bar [value]="progress" [color]="getColor"></mona-progress-bar>
+```
+
+```typescript
+protected getColor = (percent: number): string =>
+    percent >= 100 ? "#22c55e" : "#6366f1";
+```
+
+> Arrow functions cannot be defined inline in Angular templates. Assign the function to a class member and reference it by name.
+
+**Label visibility and position:**
+
+```html
+<!-- Hide the label -->
+<mona-progress-bar [value]="50" [labelVisible]="false"></mona-progress-bar>
+
+<!-- Label at the start -->
+<mona-progress-bar [value]="50" labelPosition="start"></mona-progress-bar>
+```
+
+## Appearance & Styling
+
+### Rounded presets
+
+| `rounded` | CSS class      |
+|-----------|----------------|
+| `none`    | `rounded-none` |
+| `small`   | `rounded-sm`   |
+| `medium`  | `rounded-md` (default) |
+| `large`   | `rounded-lg`   |
+| `full`    | `rounded-full` |
+
+### Label alignment
+
+| `labelPosition` | Label alignment |
+|-----------------|-----------------|
+| `start`         | Flush left      |
+| `center`        | Centered (default) |
+| `end`           | Flush right     |
+
+### Visual states
+
+| State         | Appearance                                                        |
+|---------------|-------------------------------------------------------------------|
+| Default       | Fill extends from left to `value` percentage of the bar width     |
+| Indeterminate | Repeating diagonal stripe animation; label hidden                 |
+| Disabled      | `opacity-50`, pointer events removed                              |
+| Zero value    | Fill area is transparent (bar appears empty)                      |
+
+### Track animation
+
+When `animate` is `true` (the default), the progress track transitions its clip-path and background color over 200 ms on each value change. Set `[animate]="false"` to disable all transitions — useful when updating value rapidly (e.g., a real-time byte counter).
+
+### Custom label template
+
+Replace the default `progress%` label with any content using `ng-template[monaProgressBarLabelTemplate]`:
+
+```html
+<mona-progress-bar [value]="steps" [max]="totalSteps" aria-label="Steps">
+    <ng-template monaProgressBarLabelTemplate
+                 let-value
+                 let-min="min"
+                 let-max="max"
+                 let-percent="percent">
+        <span class="text-xs font-medium">{{ value }} / {{ max }}</span>
+    </ng-template>
+</mona-progress-bar>
+```
+
+The template context exposes four variables:
+
+| Variable    | Type     | Description                                  |
+|-------------|----------|----------------------------------------------|
+| `$implicit` | `number` | The raw `value` input — use `let-value`       |
+| `min`       | `number` | The raw `min` input                           |
+| `max`       | `number` | The raw `max` input                           |
+| `percent`   | `number` | Computed percentage (0–100, rounded to 2 dp)  |
+
+The template renders inside both the filled and unfilled track regions simultaneously — the two-track technique ensures the text color contrasts against whichever region it overlaps.
+
+### Custom label styles
+
+Use `labelStyles` to apply arbitrary inline styles to the default `<span>` label. This has no effect when a custom `monaProgressBarLabelTemplate` is in use:
+
+```html
+<mona-progress-bar [value]="60" [labelStyles]="{ fontWeight: '700', fontSize: '10px' }">
+</mona-progress-bar>
+```
+
+### Custom class
+
+Merge additional Tailwind or custom classes onto the host element via the `class` attribute. They are applied through `tailwind-merge` to avoid conflicts with the computed classes:
+
+```html
+<mona-progress-bar [value]="80" class="h-3"></mona-progress-bar>
+```
+
+## API
+
+### `ProgressBarComponent`
+
+**Selector:** `mona-progress-bar`
+
+| Name            | Kind  | Type                              | Default    | Required | Description |
+|-----------------|-------|-----------------------------------|------------|----------|-------------|
+| `aria-label`    | input | `string`                          | `''`       | Optional | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label. |
+| `animate`       | input | `boolean`                         | `true`     | Optional | Enables CSS transitions on the fill track. Set to `false` when updating `value` at a high frequency. |
+| `class`         | input | `string`                          | `''`       | Optional | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `color`         | input | `string \| ((percent: number) => string)` | `''` | Optional | Fill color of the progress track. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100). |
+| `disabled`      | input | `boolean`                         | `false`    | Optional | Renders the component at 50% opacity with pointer events removed. |
+| `indeterminate` | input | `boolean`                         | `false`    | Optional | Activates a repeating diagonal stripe animation. The default label is hidden in this mode; a custom `monaProgressBarLabelTemplate` is also hidden. |
+| `labelPosition` | input | `'start' \| 'center' \| 'end'`    | `'center'` | Optional | Horizontal alignment of the label within the bar. |
+| `labelStyles`   | input | `Partial<CSSStyleDeclaration>`    | `{}`       | Optional | Inline styles applied to the default label `<span>`. Has no effect when `monaProgressBarLabelTemplate` is used. |
+| `labelVisible`  | input | `boolean`                         | `true`     | Optional | Hides the label when `false`. Has no effect in indeterminate mode (label is always hidden). |
+| `max`           | input | `number`                          | `100`      | Optional | Maximum value of the progress range. |
+| `min`           | input | `number`                          | `0`        | Optional | Minimum value of the progress range. |
+| `rounded`       | input | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Optional | Border-radius preset applied to the host and both track elements. |
+| `value`         | input | `number`                          | `0`        | Optional | Current progress value within `[min, max]`. Values outside the range are clamped visually. |
+
+`ProgressBarComponent` has no model inputs and no event outputs.
+
+### `ProgressBarLabelTemplateDirective`
+
+**Selector:** `ng-template[monaProgressBarLabelTemplate]`
+
+Structural template directive that replaces the default percentage label. The template is hidden when `indeterminate` is `true`. Import alongside the component:
+
+```typescript
+import {
+    ProgressBarComponent,
+    ProgressBarLabelTemplateDirective
+} from "@mirei/mona-ui";
+```
+
+The `LabelPosition` type used by the `labelPosition` input is also exported for use in consuming components:
+
+```typescript
+import type { LabelPosition } from "@mirei/mona-ui";
+```
+
+---
+
+<!-- verification-checklist
+- [x] API definitions and defaults verified against source and component-metadata.json
+- [x] aria-valuenow fix verified — now bound to value() not progress()
+- [x] aria-label input added to source and host binding
+- [x] aria-disabled changed to disabled() || null
+- [x] LabelPosition exported from public API (index.ts)
+- [x] @default added to color, disabled, indeterminate JSDoc
+- [x] Basic examples compile against the public API surface
+- [x] No internal or unexported APIs exposed
+-->

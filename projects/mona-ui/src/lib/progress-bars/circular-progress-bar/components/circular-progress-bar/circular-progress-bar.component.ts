@@ -32,11 +32,12 @@ import { getPercentage } from "../../../utils/progress-bar.utils";
     imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
+        "[attr.aria-label]": "ariaLabel() || null",
         "[attr.aria-valuemin]": "min()",
         "[attr.aria-valuemax]": "max()",
-        "[attr.aria-valuenow]": "progress()",
-        "[attr.aria-disabled]": "disabled()",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.aria-valuenow]": "value()",
+        "[attr.aria-disabled]": "disabled() || null",
+        "[attr.data-disabled]": "disabled() || null",
         role: "progressbar",
         "[style.width]": "pixelSize()",
         "[style.height]": "pixelSize()"
@@ -74,8 +75,18 @@ export class CircularProgressBarComponent implements CircularProgressBarBaseVari
     });
 
     /**
+     * @description Accessible label for the progress bar host element.
+     * Use to describe what is being measured (e.g., "Upload progress").
+     * When empty, assistive technology announces the role and numeric values only.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
      * @description The color of the circular progress bar.
-     * Can be a string or a function that takes the current value and returns a string.
+     * Can be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.
+     * When empty, falls back to `var(--color-primary)`.
+     * @default ""
      */
     public readonly color = input<string | Action<number, string>>("");
 

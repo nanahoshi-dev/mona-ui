@@ -30,9 +30,14 @@ export class PlaceholderComponent implements PlaceholderVariantInput {
 
     /**
      * @description The text to display inside the placeholder.
-     * Takes precedence over custom content if both are provided.
+     * Takes precedence over projected content if both are provided.
      * @default ""
      */
     public readonly text = input("");
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input("", { alias: "class" });
 }

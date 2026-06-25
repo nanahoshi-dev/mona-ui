@@ -115,54 +115,78 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     });
 
     /**
-     * @description ARIA label for the main button.
+     * @description Accessible label for the main action button.
+     * Falls back to `"{text} splitbutton"` when empty.
+     * @default ""
      */
     public readonly ariaLabel = input<string>("");
 
     /**
-     * @description ARIA labelledby for the main button.
+     * @description ID of an element that labels the main action button.
+     * Takes precedence over `ariaLabel` when set.
+     * @default ""
      */
     public readonly ariaLabelledby = input<string>("");
 
     /**
-     * @description Emits when the main button is clicked.
+     * @description Emits when the main action button is clicked.
      */
     public readonly buttonClick = output<MouseEvent>();
 
     /**
-     * @description Sets the disabled state of the button.
+     * @description Sets the disabled state of both the main button and the menu toggle button.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the look of the button.
+     * @description Sets the visual look of the button.
+     * @default "default"
      */
     public readonly look = input<SplitButtonVariantProps["look"]>("default");
 
     /**
-     * @description Emits when a menu item is clicked.
+     * @description Accessible label for the menu toggle button.
+     * Override to localize the label for non-English applications.
+     * @default "Show menu options"
+     */
+    public readonly menuButtonAriaLabel = input("Show menu options");
+
+    /**
+     * @description Emits when a menu item inside the popup is clicked.
      */
     public readonly menuItemClick = output<PopupMenuItemClickEvent>();
 
     /**
-     * @description Sets the width of the popup.
+     * @description Minimum width of the popup menu in pixels.
+     * A value of `0` means no minimum width is applied.
+     * @default 0
      */
     public readonly popupWidth = input(0);
 
     /**
      * @description Sets the border radius of the button.
+     * @default "medium"
      */
     public readonly rounded = input<SplitButtonVariantProps["rounded"]>("medium");
 
     /**
      * @description Sets the size of the button.
+     * @default "medium"
      */
     public readonly size = input<SplitButtonVariantProps["size"]>("medium");
 
     /**
-     * @description Sets the text of the button.
+     * @description Text displayed in the main action button.
+     * Ignored when `monaSplitButtonTextTemplate` is provided.
+     * @default ""
      */
     public readonly text = input("");
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

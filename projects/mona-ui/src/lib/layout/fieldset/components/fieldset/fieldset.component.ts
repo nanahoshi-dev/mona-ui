@@ -45,14 +45,21 @@ export class FieldsetComponent implements FieldsetVariantInput {
     });
 
     /**
-     * @description The legend text of the fieldset.
+     * @description The legend text of the fieldset. Shown in the top border as a labelled notch.
+     * Ignored when `monaFieldsetLegendTemplate` is provided.
+     * @default ""
      */
     public readonly legend = input("");
 
     /**
-     * @description The rounded variant of the fieldset.
+     * @description Border-radius preset applied to the fieldset and its legend.
      * @default "medium"
      */
     public readonly rounded = input<FieldsetVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input("", { alias: "class" });
 }

@@ -3,7 +3,7 @@
     @if (legendVisible()) {
         <legend [class]="legendClass()">
             @if (legendTemplate()) {
-                <ng-container *ngTemplateOutlet="legendTemplate()"></ng-container>
+                <ng-container [ngTemplateOutlet]="legendTemplate()"></ng-container>
             } @else {
                 <span>{{ legend() }}</span>
             }

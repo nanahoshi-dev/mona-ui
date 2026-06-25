@@ -18,10 +18,6 @@ export const circularProgressBarBaseVariants = cva(
             disabled: {
                 true: "opacity-50 pointer-events-none cursor-not-allowed",
                 false: ""
-            },
-            indeterminate: {
-                true: "[&_svg_circle]:animate-spin-slow",
-                false: ""
             }
         }
     }

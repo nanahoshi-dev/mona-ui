@@ -1,10 +1,5 @@
-<app-section id="fieldset" [header]="'Fieldset'" headerType="H1">
-    <p>A fieldset is a grouping element for form controls, typically rendered as a box with a border around it.
-        It is used to enhance the organization and accessibility of forms by visually separating related controls.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-fieldset-demo></app-fieldset-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/fieldset/intro.md"></app-markdown-doc>
+
+<app-fieldset-demo></app-fieldset-demo>
+
+<app-markdown-doc src="docs/fieldset/api.md" parentSectionId="fieldset"></app-markdown-doc>

@@ -36,10 +36,11 @@ import { getPercentage } from "../../../utils/progress-bar.utils";
     imports: [DecimalPipe, NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
+        "[attr.aria-label]": "ariaLabel() || null",
         "[attr.aria-valuemin]": "min()",
         "[attr.aria-valuemax]": "max()",
-        "[attr.aria-valuenow]": "progress()",
-        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-valuenow]": "value()",
+        "[attr.aria-disabled]": "disabled() || null",
         "[attr.data-disabled]": "disabled()",
         role: "progressbar"
     }
@@ -93,24 +94,36 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     protected readonly trackColor = this.#color;
 
     /**
+     * @description Accessible label for the progress bar host element.
+     * Use to describe what is being measured (e.g., "Upload progress").
+     * When empty, assistive technology announces the role and numeric values only.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
      * @description Whether to animate the progress bar track transition.
      * @default true
      */
     public readonly animate = input(true);
 
     /**
-     * @description The color of the progress bar.
-     * Can be a string or a function that takes the current value and returns a string.
+     * @description The color of the progress bar fill.
+     * Can be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.
+     * When empty, falls back to the primary theme color.
+     * @default ""
      */
     public readonly color = input<string | Action<number, string>>("");
 
     /**
      * @description Whether the progress bar is disabled.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
      * @description Whether the progress bar is in indeterminate state.
+     * @default false
      */
     public readonly indeterminate = input(false);
 

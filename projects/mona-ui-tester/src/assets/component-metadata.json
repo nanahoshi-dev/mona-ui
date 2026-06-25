@@ -3228,43 +3228,49 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "ARIA label for the main button.",
+        "description": "Accessible label for the main action button.\r\nFalls back to `\"{text} splitbutton\"` when empty.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledby",
         "type": "string",
-        "description": "ARIA labelledby for the main button.",
+        "description": "ID of an element that labels the main action button.\r\nTakes precedence over `ariaLabel` when set.",
         "kind": "input"
       },
       {
         "name": "buttonClick",
         "type": "MouseEvent",
-        "description": "Emits when the main button is clicked.",
+        "description": "Emits when the main action button is clicked.",
         "kind": "output"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button.",
+        "description": "Sets the disabled state of both the main button and the menu toggle button.",
         "kind": "input"
       },
       {
         "name": "look",
         "type": "SplitButtonVariantProps[\"look\"]",
-        "description": "Sets the look of the button.",
+        "description": "Sets the visual look of the button.",
+        "kind": "input"
+      },
+      {
+        "name": "menuButtonAriaLabel",
+        "type": "string",
+        "description": "Accessible label for the menu toggle button.\r\nOverride to localize the label for non-English applications.",
         "kind": "input"
       },
       {
         "name": "menuItemClick",
         "type": "PopupMenuItemClickEvent",
-        "description": "Emits when a menu item is clicked.",
+        "description": "Emits when a menu item inside the popup is clicked.",
         "kind": "output"
       },
       {
         "name": "popupWidth",
         "type": "number",
-        "description": "Sets the width of the popup.",
+        "description": "Minimum width of the popup menu in pixels.\r\nA value of `0` means no minimum width is applied.",
         "kind": "input"
       },
       {
@@ -3282,13 +3288,13 @@
       {
         "name": "text",
         "type": "string",
-        "description": "Sets the text of the button.",
+        "description": "Text displayed in the main action button.\r\nIgnored when `monaSplitButtonTextTemplate` is provided.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -5958,19 +5964,19 @@
       {
         "name": "legend",
         "type": "string",
-        "description": "The legend text of the fieldset.",
+        "description": "The legend text of the fieldset. Shown in the top border as a labelled notch.\r\nIgnored when `monaFieldsetLegendTemplate` is provided.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "FieldsetVariantProps[\"rounded\"]",
-        "description": "The rounded variant of the fieldset.",
+        "description": "Border-radius preset applied to the fieldset and its legend.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -5982,13 +5988,13 @@
       {
         "name": "text",
         "type": "string",
-        "description": "The text to display inside the placeholder.\r\nTakes precedence over custom content if both are provided.",
+        "description": "The text to display inside the placeholder.\r\nTakes precedence over projected content if both are provided.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -6778,9 +6784,15 @@
     "selector": "\"mona-circular-progress-bar\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible label for the progress bar host element.\r\nUse to describe what is being measured (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role and numeric values only.",
+        "kind": "input"
+      },
+      {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "The color of the circular progress bar.\r\nCan be a string or a function that takes the current value and returns a string.",
+        "description": "The color of the circular progress bar.\r\nCan be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\r\nWhen empty, falls back to `var(--color-primary)`.",
         "kind": "input"
       },
       {
@@ -6832,6 +6844,12 @@
     "selector": "\"mona-progress-bar\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible label for the progress bar host element.\r\nUse to describe what is being measured (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role and numeric values only.",
+        "kind": "input"
+      },
+      {
         "name": "animate",
         "type": "boolean",
         "description": "Whether to animate the progress bar track transition.",
@@ -6840,7 +6858,7 @@
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "The color of the progress bar.\r\nCan be a string or a function that takes the current value and returns a string.",
+        "description": "The color of the progress bar fill.\r\nCan be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\r\nWhen empty, falls back to the primary theme color.",
         "kind": "input"
       },
       {
