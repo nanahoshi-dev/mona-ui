@@ -6,13 +6,17 @@
 
 <div [class]="itemContainerClass()">
     @for (pair of valueTextMap(); track pair.key) {
-        <mona-chip look="default" [tabindex]="-1" [removable]="true"
-                   [rounded]="rounded()"
-                   [size]="size()"
-                   (remove)="onSelectedItemRemove($event, pair.key!)">
+        <mona-chip
+            look="default"
+            [tabindex]="-1"
+            [removable]="true"
+            [rounded]="rounded()"
+            [size]="size()"
+            (remove)="onSelectedItemRemove($event, pair.key!)">
             @if (tagTemplate()) {
-                <ng-container [ngTemplateOutlet]="tagTemplate()"
-                              [ngTemplateOutletContext]="{$implicit: pair.key!.data}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="tagTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: pair.key!.data }"></ng-container>
             } @else {
                 {{ pair.value }}
             }
@@ -20,13 +24,18 @@
     }
 
     @if (tagCount() >= 0 && selectedListItems().length > tagCount()) {
-        <mona-chip look="outline" [tabindex]="-1" [removable]="true"
-                   [rounded]="rounded()" [size]="size()"
-                   (remove)="onSelectedItemGroupRemove($event)">
+        <mona-chip
+            look="outline"
+            [tabindex]="-1"
+            [removable]="true"
+            [rounded]="rounded()"
+            [size]="size()"
+            (remove)="onSelectedItemGroupRemove($event)">
             @let remainingCount = selectedDataItems().length - tagCount();
             @if (summaryTagTemplate()) {
-                <ng-container [ngTemplateOutlet]="summaryTagTemplate()"
-                              [ngTemplateOutletContext]="{$implicit: selectedDataItems(), tagCount: tagCount()}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="summaryTagTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: selectedDataItems(), tagCount: tagCount() }"></ng-container>
             } @else {
                 @let itemLabel = remainingCount === 1 ? "item" : "items";
                 + {{ remainingCount }} {{ itemLabel }}
@@ -43,8 +52,7 @@
     <mona-loading-indicator></mona-loading-indicator>
 }
 
-<lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square mx-1" [name]="dropdownIcon"
-                [size]="18"></lucide-angular>
+<svg lucideChevronDown class="opacity-50 h-full flex items-center justify-center aspect-square mx-1" [size]="18"></svg>
 
 <span monaDropdownLiveRegion></span>
 
@@ -53,29 +61,31 @@
         <mona-list [listId]="listId" [focusOnMount]="false" [size]="size()" (itemSelect)="onItemSelect()">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
-                    <ng-container [ngTemplateOutlet]="footerTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="footerTemplate() ?? null"></ng-container>
                 </ng-template>
             }
             @if (groupHeaderTemplate()) {
                 <ng-template monaListGroupHeaderTemplate let-group>
-                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()??null"
-                                  [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="groupHeaderTemplate() ?? null"
+                        [ngTemplateOutletContext]="{ $implicit: group }"></ng-container>
                 </ng-template>
             }
             @if (headerTemplate()) {
                 <ng-template monaListHeaderTemplate>
-                    <ng-container [ngTemplateOutlet]="headerTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="headerTemplate() ?? null"></ng-container>
                 </ng-template>
             }
             @if (itemTemplate()) {
                 <ng-template monaListItemTemplate let-dataItem>
-                    <ng-container [ngTemplateOutlet]="itemTemplate()??null"
-                                  [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="itemTemplate() ?? null"
+                        [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-container>
                 </ng-template>
             }
             @if (noDataTemplate()) {
                 <ng-template monaListNoDataTemplate>
-                    <ng-container [ngTemplateOutlet]="noDataTemplate()??null"></ng-container>
+                    <ng-container [ngTemplateOutlet]="noDataTemplate() ?? null"></ng-container>
                 </ng-template>
             }
         </mona-list>

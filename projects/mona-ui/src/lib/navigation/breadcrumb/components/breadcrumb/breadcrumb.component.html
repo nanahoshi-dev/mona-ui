@@ -8,7 +8,7 @@
             } @else {
                 <span
                     monaBreadcrumbItem
-                    role="link"
+                    role="button"
                     [disabled]="disabled() || item.disabled()"
                     [listDisabled]="disabled()"
                     [tabindex]="disabled() || item.disabled() ? -1 : 0"
@@ -27,7 +27,7 @@
                         [ngTemplateOutlet]="separatorTemplate()"
                         [ngTemplateOutletContext]="{ $implicit: $index }"></ng-container>
                 } @else {
-                    <lucide-icon [name]="separatorIcon" [size]="18"></lucide-icon>
+                    <svg lucideChevronRight [size]="18"></svg>
                 }
             </li>
         }

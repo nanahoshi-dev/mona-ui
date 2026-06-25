@@ -1,18 +1,19 @@
-<div role="menu"
-     [attr.tabindex]="0"
-     [attr.aria-orientation]="'vertical'"
-     [attr.aria-activedescendant]="activeMenuItem()?.uid"
-     [attr.id]="menuId()"
-     [class]="containerClasses()">
+<div
+    role="menu"
+    [attr.tabindex]="0"
+    [attr.aria-orientation]="'vertical'"
+    [attr.aria-activedescendant]="activeMenuItem()?.uid"
+    [attr.id]="menuId()"
+    [class]="containerClasses()">
     @for (group of menuItems(); track $index) {
-        @if (typeof group.key === 'string') {
+        @if (typeof group.key === "string") {
             @let groupTemplate = group.first().groupTemplate?.() ?? popupGroupTemplate() ?? null;
-            <div role="group" [attr.aria-labelledby]=`${group.key}-${$index}`
-                 [class]="groupHeaderClasses()">
-                <div [id]=`${group.key}-${$index}` role="presentation">
+            <div role="group" [attr.aria-labelledby]="`${group.key}-${$index}`" [class]="groupHeaderClasses()">
+                <div [id]="`${group.key}-${$index}`" role="presentation">
                     @if (groupTemplate) {
-                        <ng-container [ngTemplateOutlet]="groupTemplate"
-                                      [ngTemplateOutletContext]="{$implicit: group.key}"></ng-container>
+                        <ng-container
+                            [ngTemplateOutlet]="groupTemplate"
+                            [ngTemplateOutletContext]="{ $implicit: group.key }"></ng-container>
                     } @else {
                         <span>{{ group.key }}</span>
                     }
@@ -26,32 +27,42 @@
                 @let iconTemplate = item.iconTemplate?.() ?? popupIconTemplate() ?? null;
                 @let shortcutTemplate = item.shortcutTemplate?.() ?? popupShortcutTemplate() ?? null;
                 @let textTemplate = item.textTemplate?.() ?? popupTextTemplate() ?? null;
-                <div role="menuitem"
-                     (pointerenter)="pointerEnter$.next({ event: $event, item: item })"
-                     (pointerleave)="pointerLeave$.next({ event: $event, item: item })"
-                     (click)="onItemClick($event, item)"
-                     [attr.data-active]="item===activeMenuItem()"
-                     [attr.aria-current]="item === activeMenuItem() ? 'true' : null"
-                     [attr.aria-disabled]="item.disabled"
-                     [attr.aria-expanded]="item.items.length > 0 && item === activeMenuItem() && !!popupRef"
-                     [attr.aria-haspopup]="item.items.length > 0 ? 'menu' : null"
-                     [attr.aria-label]="item.label"
-                     [attr.data-disabled]="item.disabled"
-                     [class]="menuItemClasses()">
+                <div
+                    role="menuitem"
+                    (pointerenter)="pointerEnter$.next({ event: $event, item: item })"
+                    (pointerleave)="pointerLeave$.next({ event: $event, item: item })"
+                    (click)="onItemClick($event, item)"
+                    [attr.data-active]="item === activeMenuItem()"
+                    [attr.aria-current]="item === activeMenuItem() ? 'true' : null"
+                    [attr.aria-disabled]="item.disabled"
+                    [attr.aria-expanded]="item.items.length > 0 && item === activeMenuItem() && !!popupRef"
+                    [attr.aria-haspopup]="item.items.length > 0 ? 'menu' : null"
+                    [attr.aria-label]="item.label"
+                    [attr.data-disabled]="item.disabled"
+                    [class]="menuItemClasses()">
                     @if (iconAreaVisible()) {
                         <div [class]="iconContainerClasses()">
                             @if (!item.checkable && !item.radio) {
-                                <ng-container [ngTemplateOutlet]="iconTemplate"
-                                              [ngTemplateOutletContext]="{$implicit:item}"></ng-container>
+                                <ng-container
+                                    [ngTemplateOutlet]="iconTemplate"
+                                    [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
                             } @else if (item.checkable) {
                                 @if (item.checked?.()) {
-                                    <lucide-angular [name]="checkIcon" [size]="14"></lucide-angular>
+                                    <svg lucideCheck [size]="14"></svg>
                                 }
                             } @else if (item.radio) {
                                 @if (item.selected?.()) {
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                         stroke-linejoin="round" class="lucide lucide-circle size-2 fill-current">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="lucide lucide-circle size-2 fill-current">
                                         <circle cx="12" cy="12" r="10"></circle>
                                     </svg>
                                 }
@@ -60,8 +71,9 @@
                     }
                     <div class="flex-1">
                         @if (textTemplate) {
-                            <ng-container [ngTemplateOutlet]="textTemplate"
-                                          [ngTemplateOutletContext]="{$implicit:item}"></ng-container>
+                            <ng-container
+                                [ngTemplateOutlet]="textTemplate"
+                                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
                         } @else {
                             {{ item.label }}
                         }
@@ -69,12 +81,13 @@
                     @if (item.items.length > 0) {
                         @if (!item.checkable) {
                             <div [class]="linkContainerClasses()">
-                                <lucide-angular [name]="linkIcon" [size]="16"></lucide-angular>
+                                <svg lucideChevronRight [size]="16"></svg>
                             </div>
                         }
                     } @else if (shortcutTemplate) {
-                        <ng-container [ngTemplateOutlet]="shortcutTemplate"
-                                      [ngTemplateOutletContext]="{$implicit:item}"></ng-container>
+                        <ng-container
+                            [ngTemplateOutlet]="shortcutTemplate"
+                            [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
                     }
                 </div>
             }

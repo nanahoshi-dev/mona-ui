@@ -1,67 +1,83 @@
-<button monaButton (click)="buttonClick.emit($event)" [disabled]="disabled()"
-        [look]="look()" [size]="size()" [rounded]="rounded()"
-        class="rounded-tr-none rounded-br-none"
-        [attr.aria-label]="splitButtonAriaLabel() || null"
-        [attr.aria-labelledby]="ariaLabelledby() || null"
-        [tabindex]="disabled() ? -1 : 0" #mainButton>
+<button
+    monaButton
+    (click)="buttonClick.emit($event)"
+    [disabled]="disabled()"
+    [look]="look()"
+    [size]="size()"
+    [rounded]="rounded()"
+    class="rounded-tr-none rounded-br-none"
+    [attr.aria-label]="splitButtonAriaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledby() || null"
+    [tabindex]="disabled() ? -1 : 0"
+    #mainButton>
     @if (mainButtonTextTemplate()) {
         <ng-container [ngTemplateOutlet]="mainButtonTextTemplate()"></ng-container>
     } @else {
         <span>{{ text() }}</span>
     }
 </button>
-<button monaButton [disabled]="disabled()"
-        [iconOnly]="true"
-        [look]="look()" [size]="size()" [rounded]="rounded()"
-        class="rounded-tl-none rounded-bl-none border-l-0"
-        [attr.aria-haspopup]="'menu'"
-        [attr.aria-expanded]="menuOpen()"
-        [attr.aria-controls]="menuId"
-        [attr.aria-label]="'Show menu options'"
-        [tabindex]="disabled() ? -1 : 0" #menuButton>
+<button
+    monaButton
+    [disabled]="disabled()"
+    [iconOnly]="true"
+    [look]="look()"
+    [size]="size()"
+    [rounded]="rounded()"
+    class="rounded-tl-none rounded-bl-none border-l-0"
+    [attr.aria-haspopup]="'menu'"
+    [attr.aria-expanded]="menuOpen()"
+    [attr.aria-controls]="menuId"
+    [attr.aria-label]="'Show menu options'"
+    [tabindex]="disabled() ? -1 : 0"
+    #menuButton>
     @if (menuButtonTemplate()) {
         <ng-container [ngTemplateOutlet]="menuButtonTemplate()"></ng-container>
     } @else {
-        <lucide-angular [name]="menuIcon" [size]="16"></lucide-angular>
+        <svg lucideChevronDown [size]="16"></svg>
     }
 </button>
 
-<mona-popup-menu [anchorConnectionPoint]="'bottomleft'"
-                 [anchor]="mainButton"
-                 [items]="menuItems()"
-                 (menuClick)="onMenuItemClick($event)"
-                 (open)="onMenuOpen()"
-                 (close)="onMenuClose()"
-                 [offset]="{horizontal: 0, vertical: 2}"
-                 [popupConnectionPoint]="'topleft'"
-                 [rounded]="popupMenuRounded()"
-                 [size]="size()"
-                 [target]="menuButton"
-                 [trigger]="'click'"
-                 [id]="menuId"
-                 #popupMenu>
+<mona-popup-menu
+    [anchorConnectionPoint]="'bottomleft'"
+    [anchor]="mainButton"
+    [items]="menuItems()"
+    (menuClick)="onMenuItemClick($event)"
+    (open)="onMenuOpen()"
+    (close)="onMenuClose()"
+    [offset]="{ horizontal: 0, vertical: 2 }"
+    [popupConnectionPoint]="'topleft'"
+    [rounded]="popupMenuRounded()"
+    [size]="size()"
+    [target]="menuButton"
+    [trigger]="'click'"
+    [id]="menuId"
+    #popupMenu>
     @if (groupTemplate()) {
         <ng-template monaPopupMenuGroupTemplate let-group>
-            <ng-container [ngTemplateOutlet]="groupTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="groupTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: group }"></ng-container>
         </ng-template>
     }
     @if (iconTemplate()) {
         <ng-template monaPopupMenuIconTemplate let-item>
-            <ng-container [ngTemplateOutlet]="iconTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="iconTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
         </ng-template>
     }
     @if (shortcutTemplate()) {
         <ng-template monaPopupMenuShortcutTemplate let-item>
-            <ng-container [ngTemplateOutlet]="shortcutTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="shortcutTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
         </ng-template>
     }
     @if (textTemplate()) {
         <ng-template monaPopupMenuTextTemplate let-item>
-            <ng-container [ngTemplateOutlet]="textTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="textTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
         </ng-template>
     }
 </mona-popup-menu>

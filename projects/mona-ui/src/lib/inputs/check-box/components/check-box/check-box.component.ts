@@ -8,12 +8,12 @@ import {
     forwardRef,
     inject,
     input,
+    model,
     output,
-    signal,
     viewChild
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { LucideAngularModule } from "lucide-angular";
+import { type FormCheckboxControl } from "@angular/forms/signals";
 import {
     checkboxContainerLabelThemeVariants,
     checkboxInputThemeVariants,
@@ -29,7 +29,7 @@ import { Action } from "../../../../utils/Action";
 
 @Component({
     selector: "mona-check-box",
-    imports: [FormsModule, LucideAngularModule, NgTemplateOutlet],
+    imports: [FormsModule, NgTemplateOutlet],
     templateUrl: "./check-box.component.html",
     providers: [
         {
@@ -46,7 +46,9 @@ import { Action } from "../../../../utils/Action";
         "[attr.data-indeterminate]": "indeterminate()"
     }
 })
-export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantInput, CheckmarkVariantInput {
+export class CheckBoxComponent
+    implements ControlValueAccessor, CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl
+{
     readonly #themeService = inject(ThemeService);
     #propagateChange: Action<boolean> | null = null;
     #propagateTouched: Action<FocusEvent> | null = null;
@@ -60,7 +62,6 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
         const rounded = this.rounded();
         return checkmarkThemeVariants(theme)({ rounded });
     });
-    protected readonly checked = signal(false);
     protected readonly containerLabelClasses = computed(() => {
         const theme = this.#themeService.theme();
         const labelSize = this.labelSize();
@@ -70,14 +71,14 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
     });
 
     /**
+     * @description Sets the checked state of the checkbox.
+     */
+    public readonly checked = model(false);
+
+    /**
      * @description Sets the disabled state of the checkbox.
      */
     public readonly disabled = input(false);
-
-    /**
-     * @description Sets the tab index of the checkbox.
-     */
-    public readonly tabIndex = input(0);
 
     /**
      * @description Sets the indeterminate state of the checkbox.
@@ -85,19 +86,19 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
     public readonly indeterminate = input(false);
 
     /**
-     * @description Emits when the checkbox is blurred.
+     * @description Emits when the checkbox span loses focus.
      */
-    protected readonly inputBlur = output<FocusEvent>();
+    public readonly inputBlur = output<FocusEvent>();
 
     /**
      * @description Emits when the checkbox value changes.
      */
-    protected readonly inputChange = output<Event>();
+    public readonly inputChange = output<Event>();
 
     /**
-     * @description Emits when the checkbox is focused.
+     * @description Emits when the checkbox span gains focus.
      */
-    protected readonly inputFocus = output<FocusEvent>();
+    public readonly inputFocus = output<FocusEvent>();
 
     /**
      * @description Sets the label text of the checkbox.
@@ -121,9 +122,18 @@ export class CheckBoxComponent implements ControlValueAccessor, CheckboxVariantI
     public readonly required = input(false);
 
     /**
-     * @description Sets the border radius of the checkmark.
+     * @description Sets the border radius of the checkmark box.
      */
     public readonly rounded = input<CheckmarkVariantProps["rounded"]>("medium");
+    /**
+     * @description Sets the tab index of the checkbox.
+     */
+    public readonly tabIndex = input(0);
+
+    /**
+     * @description Additional CSS classes merged onto the checkbox label container via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

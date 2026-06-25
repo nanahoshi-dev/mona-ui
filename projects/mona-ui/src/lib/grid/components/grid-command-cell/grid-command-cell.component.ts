@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
-import { Check, Pencil, Trash2, X, LucideAngularModule } from "lucide-angular";
+import { LucideCheck, LucidePencil, LucideTrash2, LucideX } from "@lucide/angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DialogService } from "../../../dialogs/dialog/services/dialog.service";
@@ -12,15 +12,11 @@ import { GridService } from "../../services/grid.service";
     selector: "mona-grid-command-cell",
     templateUrl: "./grid-command-cell.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ButtonDirective, LucideAngularModule, NgTemplateOutlet]
+    imports: [ButtonDirective, NgTemplateOutlet, LucideCheck, LucideX, LucidePencil, LucideTrash2]
 })
 export class GridCommandCellComponent {
     readonly #dialogService = inject(DialogService);
-    protected readonly cancelIcon = X;
-    protected readonly editIcon = Pencil;
     protected readonly gridService = inject(GridService);
-    protected readonly removeIcon = Trash2;
-    protected readonly saveIcon = Check;
     protected readonly commandContext = computed(() => ({
         $implicit: this.row()?.data ?? this.gridService.addRowData(),
         cancel: (event?: Event): void => this.cancel(event),

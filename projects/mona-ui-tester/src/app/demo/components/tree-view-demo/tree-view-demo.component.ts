@@ -11,16 +11,16 @@ import {
     untracked
 } from "@angular/core";
 import {
-    CableIcon,
-    CookingPotIcon,
-    FileIcon,
-    FolderIcon,
-    HouseHeartIcon,
-    LaptopIcon,
-    LucideAngularModule,
-    LucideIconData,
-    SmartphoneIcon
-} from "lucide-angular";
+    LucideCable,
+    LucideCookingPot,
+    LucideDynamicIcon,
+    LucideFile,
+    LucideFolder,
+    LucideHouseHeart,
+    type LucideIconInput,
+    LucideLaptop,
+    LucideSmartphone
+} from "@lucide/angular";
 import {
     CheckableOptions,
     DisableOptions,
@@ -61,7 +61,7 @@ interface FlatTreeNodeDataItem {
     parentId: string | null;
     disabled?: boolean;
     type?: "category" | "product";
-    icon?: LucideIconData;
+    icon?: LucideIconInput;
 }
 
 const childSelectors = [
@@ -288,8 +288,8 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
         TreeViewDisableDirective,
         TreeViewFilterableDirective,
         TreeViewNodeTemplateDirective,
-        LucideAngularModule,
-        EventViewerComponent
+        EventViewerComponent,
+        LucideDynamicIcon
     ],
     template: `
         @let featureData = features();
@@ -334,11 +334,11 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
                         <div class="flex items-center gap-2">
                             @if (mode() === "hierarchical") {
                                 @let icon = dataItem.items.length === 0 ? FileIcon : FolderIcon;
-                                <lucide-icon [img]="icon" [size]="14"></lucide-icon>
+                                <svg [lucideIcon]="icon" [size]="14"></svg>
                                 <span>{{ dataItem.text }}</span>
                             } @else {
                                 @if (dataItem.icon) {
-                                    <lucide-icon [img]="dataItem.icon" [size]="14"></lucide-icon>
+                                    <svg [lucideIcon]="dataItem.icon" [size]="14"></svg>
                                 }
                                 <span>{{ dataItem.text }}</span>
                             }
@@ -490,8 +490,8 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     }
 
     protected readonly TreeViewComponent = TreeViewComponent;
-    protected readonly FileIcon = FileIcon;
-    protected readonly FolderIcon = FolderIcon;
+    protected readonly FileIcon = LucideFile;
+    protected readonly FolderIcon = LucideFolder;
 }
 
 function generateFileTreeData(idPrefix: string = ""): TreeNodeDataItem[] {
@@ -540,24 +540,24 @@ function generateFileTreeData(idPrefix: string = ""): TreeNodeDataItem[] {
 
 function generateCatalogData(idPrefix: string = ""): FlatTreeNodeDataItem[] {
     return [
-        { id: `${idPrefix}elec`, text: "Electronics", parentId: null, type: "category", icon: CableIcon },
+        { id: `${idPrefix}elec`, text: "Electronics", parentId: null, type: "category", icon: LucideCable },
         {
             id: `${idPrefix}elec-1`,
             text: "Smartphones",
             parentId: `${idPrefix}elec`,
             type: "category",
-            icon: SmartphoneIcon
+            icon: LucideSmartphone
         },
         { id: `${idPrefix}elec-1-1`, text: "Model X Pro", parentId: `${idPrefix}elec-1`, type: "product" },
-        { id: `${idPrefix}elec-2`, text: "Laptops", parentId: `${idPrefix}elec`, type: "category", icon: LaptopIcon },
+        { id: `${idPrefix}elec-2`, text: "Laptops", parentId: `${idPrefix}elec`, type: "category", icon: LucideLaptop },
         { id: `${idPrefix}elec-2-1`, text: "Ultrabook 13", parentId: `${idPrefix}elec-2`, type: "product" },
-        { id: `${idPrefix}home`, text: "Home & Garden", parentId: null, type: "category", icon: HouseHeartIcon },
+        { id: `${idPrefix}home`, text: "Home & Garden", parentId: null, type: "category", icon: LucideHouseHeart },
         {
             id: `${idPrefix}home-1`,
             text: "Kitchen Appliances",
             parentId: `${idPrefix}home`,
             type: "category",
-            icon: CookingPotIcon
+            icon: LucideCookingPot
         },
         { id: `${idPrefix}home-1-1`, text: "Burr Coffee Grinder", parentId: `${idPrefix}home-1`, type: "product" },
         {

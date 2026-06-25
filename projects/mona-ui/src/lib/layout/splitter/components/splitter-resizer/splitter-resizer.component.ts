@@ -11,7 +11,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { compact } from "@mirei/ts-collections";
-import { LucideAngularModule } from "lucide-angular";
 import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
@@ -29,7 +28,7 @@ interface PaneElementData {
     selector: "mona-splitter-resizer",
     templateUrl: "./splitter-resizer.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [LucideAngularModule, SplitterResizerHandleComponent],
+    imports: [SplitterResizerHandleComponent],
     host: {
         "[class]": "baseClass()",
         "[style.cursor]": "resizable() ? (orientation()==='horizontal' ? 'ew-resize' : 'ns-resize') : 'auto'",

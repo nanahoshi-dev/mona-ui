@@ -1,46 +1,53 @@
-<div [class]="hsvRectangleClasses()"
-     [style.background-color]="hsvRectangleBackground()" #hsvRectangle>
-    <div [class]="hsvRectangleHandleClasses()"
-         [style.left.px]="hsvHandleLeft()"
-         [style.top.px]="hsvHandleTop()"
-         [attr.tabindex]="disabled() ? -1 : 0"
-         [attr.role]="'slider'"
-         [attr.aria-label]="'Color saturation and value'"
-         [attr.aria-valuemin]="0"
-         [attr.aria-valuemax]="100"
-         [attr.aria-valuenow]="hsv().s"
-         [attr.aria-valuetext]="'Saturation ' + hsv().s + '%, Value ' + hsv().v + '%'"
-         (keydown)="onHsvHandleKeyDown($event)"
-         (blur)="onHsvHandleBlur()" #hsvPointer></div>
+<div [class]="hsvRectangleClasses()" [style.background-color]="hsvRectangleBackground()" #hsvRectangle>
+    <div
+        [class]="hsvRectangleHandleClasses()"
+        [style.left.px]="hsvHandleLeft()"
+        [style.top.px]="hsvHandleTop()"
+        [attr.tabindex]="disabled() ? -1 : 0"
+        [attr.role]="'slider'"
+        [attr.aria-label]="'Color saturation and value'"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="100"
+        [attr.aria-valuenow]="hsv().s"
+        [attr.aria-valuetext]="'Saturation ' + hsv().s + '%, Value ' + hsv().v + '%'"
+        (keydown)="onHsvHandleKeyDown($event)"
+        (blur)="onHsvHandleBlur()"
+        #hsvPointer></div>
 </div>
 <div class="flex items-center gap-2">
     <div class="flex flex-1 flex-col gap-1 mr-2">
-        <mona-slider [min]="0" [max]="360"
-                     [trackBackground]="'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'"
-                     [selectionBackground]="'transparent'"
-                     [handleClasses]="sliderHandleClasses()"
-                     [trackSize]="sliderHeight"
-                     [rounded]="rounded()"
-                     [ngModel]="hsv().h"
-                     (ngModelChange)="hueValue$.next($event)"
-                     (blur)="onSliderBlur()"></mona-slider>
+        <mona-slider
+            [min]="0"
+            [max]="360"
+            [trackBackground]="'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'"
+            [selectionBackground]="'transparent'"
+            [handleClasses]="sliderHandleClasses()"
+            [trackSize]="sliderHeight"
+            [rounded]="rounded()"
+            [ngModel]="hsv().h"
+            (ngModelChange)="hueValue$.next($event)"
+            (blur)="onSliderBlur()"></mona-slider>
         @if (opacity()) {
-            <mona-slider [min]="0" [max]="255" [trackBackground]="alphaSliderBackground()"
-                         [selectionBackground]="'transparent'"
-                         [handleClasses]="sliderHandleClasses()"
-                         [trackSize]="sliderHeight"
-                         [rounded]="rounded()"
-                         [ngModel]="alpha()"
-                         (ngModelChange)="onAlphaChange($event)"
-                         (blur)="onSliderBlur()"></mona-slider>
+            <mona-slider
+                [min]="0"
+                [max]="255"
+                [trackBackground]="alphaSliderBackground()"
+                [selectionBackground]="'transparent'"
+                [handleClasses]="sliderHandleClasses()"
+                [trackSize]="sliderHeight"
+                [rounded]="rounded()"
+                [ngModel]="alpha()"
+                (ngModelChange)="onAlphaChange($event)"
+                (blur)="onSliderBlur()"></mona-slider>
         }
     </div>
     @for (preview of colorPreviews(); track preview.type) {
-        <div [class]="colorPreviewClasses()"
-             [class.cursor-pointer]="$index===1"
-             [style.background-color]="preview.color"
-             [title]="preview.title"
-             (click)="preview.onClick?.()"></div>
+        <div
+            [class]="colorPreviewClasses()"
+            [class.cursor-pointer]="$index === 1"
+            [style.background-color]="preview.color"
+            [title]="preview.title"
+            (click)="preview.onClick?.()"></div>
     }
     <button monaButton look="ghost" size="small" (click)="onClearClick()">
         <i class="ri-blur-off-line"></i>
@@ -64,37 +71,48 @@
                         (ngModelChange)="input.change($event)"
                         (inputBlur)="onNumericInputBlur()">
                         <ng-template monaNumericTextBoxPrefixTemplate>
-                            <ng-container [ngTemplateOutlet]="numericInputPrefixTemplate"
-                                          [ngTemplateOutletContext]="{$implicit: input.label}"></ng-container>
+                            <ng-container
+                                [ngTemplateOutlet]="numericInputPrefixTemplate"
+                                [ngTemplateOutletContext]="{ $implicit: input.label }"></ng-container>
                         </ng-template>
                     </mona-numeric-text-box>
                 }
             </div>
             <div class="flex flex-1 items-center justify-end">
-                <button monaButton look="ghost"
-                        [rounded]="rounded()"
-                        size="small"
-                        title="Switch color mode"
-                        (click)="onSwitchColorModeClick()">
+                <button
+                    monaButton
+                    look="ghost"
+                    [rounded]="rounded()"
+                    size="small"
+                    title="Switch color mode"
+                    (click)="onSwitchColorModeClick()">
                     <i class="ri-expand-up-down-line"></i>
                 </button>
             </div>
         </div>
     }
     @if (showHexInput()) {
-        <mona-text-box [rounded]="rounded()"
-                       [ngModel]="hex()" (ngModelChange)="onHexChange($event)"
-                       (inputBlur)="onHexInputBlur()"
-                       (inputFocus)="onHexInputFocus()" class="w-full">
+        <mona-text-box
+            [rounded]="rounded()"
+            [ngModel]="hex()"
+            (ngModelChange)="onHexChange($event)"
+            (inputBlur)="onHexInputBlur()"
+            (inputFocus)="onHexInputFocus()"
+            class="w-full">
             <ng-template monaTextBoxPrefixTemplate>
-                <ng-container [ngTemplateOutlet]="numericInputPrefixTemplate"
-                              [ngTemplateOutletContext]="{$implicit: 'HEX', classes: 'w-auto px-2'}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="numericInputPrefixTemplate"
+                    [ngTemplateOutletContext]="{ $implicit: 'HEX', classes: 'w-auto px-2' }"></ng-container>
             </ng-template>
             <ng-template monaTextBoxSuffixTemplate>
                 <mona-dropdown-button look="ghost" title="Copy color" class="h-full">
-                    <lucide-angular [name]="copyIcon" [size]="12"></lucide-angular>
-                    <mona-dropdown-button-item label="Copy as HEX" (menuClick)="onCopyColorSelect('hex')"></mona-dropdown-button-item>
-                    <mona-dropdown-button-item label="Copy as RGB" (menuClick)="onCopyColorSelect('rgb')"></mona-dropdown-button-item>
+                    <svg lucideCopy [size]="12"></svg>
+                    <mona-dropdown-button-item
+                        label="Copy as HEX"
+                        (menuClick)="onCopyColorSelect('hex')"></mona-dropdown-button-item>
+                    <mona-dropdown-button-item
+                        label="Copy as RGB"
+                        (menuClick)="onCopyColorSelect('rgb')"></mona-dropdown-button-item>
                 </mona-dropdown-button>
             </ng-template>
         </mona-text-box>
@@ -109,6 +127,8 @@
 
 <ng-template #numericInputPrefixTemplate let-text let-classes="classes">
     <span
-            [class]="classes"
-            class="inline-flex items-center justify-center select-none w-7.5 bg-secondary h-full text-xs font-semibold border-r border-r-input-border">{{ text }}</span>
+        [class]="classes"
+        class="inline-flex items-center justify-center select-none w-7.5 bg-secondary h-full text-xs font-semibold border-r border-r-input-border"
+        >{{ text }}</span
+    >
 </ng-template>

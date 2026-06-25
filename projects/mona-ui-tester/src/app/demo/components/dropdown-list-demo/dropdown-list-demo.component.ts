@@ -2,8 +2,8 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { LucideBox, LucideUtensils } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
-import { Box, LucideAngularModule, Utensils } from "lucide-angular";
 import {
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
@@ -185,9 +185,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         CurrencyPipe,
         FormsModule,
         DropDownNoDataTemplateDirective,
-        LucideAngularModule,
         DropdownPrefixTemplateDirective,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        LucideBox,
+        LucideUtensils
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -253,17 +254,17 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
                     <ng-template monaDropDownNoDataTemplate>
                         <div
                             class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <lucide-angular [name]="boxIcon"></lucide-angular>
+                            <svg lucideBox></svg>
                             <span>No items found</span>
                         </div>
                     </ng-template>
                 }
                 @if (featureData["prefixTemplate"].active) {
                     <ng-template monaDropdownPrefixTemplate>
-                        <lucide-angular
-                            [name]="foodIcon"
+                        <svg
+                            lucideUtensils
                             [size]="16"
-                            class="h-full aspect-square flex items-center justify-center"></lucide-angular>
+                            class="h-full aspect-square flex items-center justify-center"></svg>
                     </ng-template>
                 }
                 @if (featureData["valueTemplate"].active) {
@@ -284,7 +285,6 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         value: new FormControl<unknown>(null, { nonNullable: false, validators: [] })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
-    protected readonly boxIcon = Box;
     protected readonly dropdownData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -313,7 +313,6 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         };
         return filteringOptions;
     });
-    protected readonly foodIcon = Utensils;
     protected readonly formGroup = this.#formGroup;
     protected readonly formValueText = computed(() => {
         const value = this.#formValue();

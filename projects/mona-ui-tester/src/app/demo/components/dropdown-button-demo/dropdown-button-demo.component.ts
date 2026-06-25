@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { Heart, LucideAngularModule, Menu, Settings } from "lucide-angular";
+import { LucideHeart, LucideMenu, LucideSettings } from "@lucide/angular";
 import {
     DropdownButtonComponent,
     DropdownButtonGroupComponent,
@@ -47,11 +47,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         menuItemIconTemplate: {
             active: false,
             code: `
-                <mona-dropdown-button-item label="Settings">
-                    <ng-template monaDropdownButtonMenuItemIconTemplate let-item>
-                        <lucide-angular [name]="settingsIcon" size="14"></lucide-angular>
-                    </ng-template>
-                </mona-dropdown-button-item>
+
             `,
             description: `
                 This template is used to customize the icon of the menu item.
@@ -115,11 +111,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         },
         topLevelIconTemplate: {
             code: `
-                <mona-dropdown-button>
-                     <ng-template monaDropdownButtonMenuItemIconTemplate let-item>
-                        <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
-                    </ng-template>
-                </mona-dropdown-button>
+
             `,
             description: `This template is defined at the top level and can be used to customize the appearance of all icons in the dropdown button menu.`,
             name: "Top Level Icon Template",
@@ -160,75 +152,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
     });
     protected readonly config = signal<ComponentConfig<DropdownButtonComponent>>({
         code: `
-            <mona-dropdown-button
-                [disabled]="disabled()"
-                [iconOnly]="iconOnly()"
-                [look]="look()"
-                [rounded]="rounded()"
-                [size]="size()"
-                [text]="text()">
-                <mona-dropdown-button-group title="Project">
-                    <mona-dropdown-button-item label="Issues"></mona-dropdown-button-item>
-                    <mona-dropdown-button-item label="Roadmap" [disabled]="true"></mona-dropdown-button-item>
-                    <mona-dropdown-button-item label="Members">
-                        <mona-dropdown-button-item label="Managers"></mona-dropdown-button-item>
-                        <mona-dropdown-button-item label="Developers"></mona-dropdown-button-item>
-                        <mona-dropdown-button-item label="Interns"></mona-dropdown-button-item>
-                    </mona-dropdown-button-item>
-                    <ng-template monaDropdownButtonMenuGroupTemplate let-group>
-                        <span class="font-bold text-indigo-700">{{ group }}</span>
-                    </ng-template>
-                </mona-dropdown-button-group>
-                <mona-dropdown-button-separator></mona-dropdown-button-separator>
-                <mona-dropdown-button-checkbox-item label="Enable Notifications"></mona-dropdown-button-checkbox-item>
-                <mona-dropdown-button-checkbox-item label="Dark Mode" [checked]="true"></mona-dropdown-button-checkbox-item>
-                <mona-dropdown-button-separator></mona-dropdown-button-separator>
-                <mona-dropdown-button-radio-group title="Priority" value="medium">
-                    <mona-dropdown-button-radio-item label="Low" value="low"></mona-dropdown-button-radio-item>
-                    <mona-dropdown-button-radio-item label="Medium" value="medium"></mona-dropdown-button-radio-item>
-                    <mona-dropdown-button-radio-item label="High" value="high"></mona-dropdown-button-radio-item>
-                </mona-dropdown-button-radio-group>
-                <mona-dropdown-button-separator></mona-dropdown-button-separator>
-                <mona-dropdown-button-item label="Settings">
-                    <ng-template monaDropdownButtonMenuItemIconTemplate let-item>
-                        <lucide-angular [name]="settingsIcon" size="14"></lucide-angular>
-                    </ng-template>
-                </mona-dropdown-button-item>
-                <mona-dropdown-button-item label="Help">
-                    <ng-template monaDropdownButtonMenuItemTextTemplate let-item>
-                        <span class="text-green-500">{{ item.label }}</span>
-                    </ng-template>
-                </mona-dropdown-button-item>
-                <mona-dropdown-button-item label="About">
-                    <ng-template monaDropdownButtonMenuItemShortcutTemplate let-item>
-                        <span class="text-gray-500">Ctrl + Shift + O</span>
-                    </ng-template>
-                </mona-dropdown-button-item>
 
-                <ng-template monaDropdownButtonTextTemplate let-text>
-                    <span class="text-pink-800 font-bold">{{ text }}</span>
-                </ng-template>
-                <ng-template monaDropdownButtonMenuGroupTemplate let-group>
-                    <span [style.color]="'' | randomColor">{{ group }}</span>
-                </ng-template>
-                <ng-template monaDropdownButtonMenuItemIconTemplate let-item>
-                    <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
-                </ng-template>
-                <ng-template monaDropdownButtonMenuItemShortcutTemplate let-item>
-                    @if (item.label === "Interns") {
-                        <span class="text-xs text-gray-500">Ctrl + F7</span>
-                    } @else if (item.label === "Exit") {
-                        <span class="text-xs text-gray-500">Ctrl + Shift + Q</span>
-                    }
-                </ng-template>
-                <ng-template monaDropdownButtonMenuItemTextTemplate let-item>
-                    @if (item.label === "Help") {
-                        <span class="text-rose-700 underline">{{ item.label }}</span>
-                    } @else {
-                        <span [style.color]="'' | randomColor">{{ item.label }}</span>
-                    }
-                </ng-template>
-            </mona-dropdown-button>
         `,
         inputs: {
             disabled: {
@@ -303,8 +227,10 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         DropdownButtonMenuItemShortcutTemplateDirective,
         DropdownButtonMenuItemTextTemplateDirective,
         DropdownButtonTextTemplateDirective,
-        LucideAngularModule,
-        RandomColorPipe
+        RandomColorPipe,
+        LucideSettings,
+        LucideMenu,
+        LucideHeart
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -344,7 +270,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
             <mona-dropdown-button-item label="Settings">
                 @if (featureData["menuItemIconTemplate"].active) {
                     <ng-template monaDropdownButtonMenuItemIconTemplate let-item>
-                        <lucide-angular [name]="settingsIcon" size="14"></lucide-angular>
+                        <svg lucideSettings size="14"></svg>
                     </ng-template>
                 }
             </mona-dropdown-button-item>
@@ -366,7 +292,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
             @if (featureData["textTemplate"].active) {
                 <ng-template monaDropdownButtonTextTemplate let-text>
                     @if (iconOnly()) {
-                        <lucide-angular [name]="menuIcon" size="14"></lucide-angular>
+                        <svg lucideMenu size="14"></svg>
                     } @else {
                         <span class="text-pink-800 font-bold">{{ text }}</span>
                     }
@@ -381,7 +307,7 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
 
             @if (featureData["topLevelIconTemplate"].active) {
                 <ng-template monaDropdownButtonMenuItemIconTemplate let-item>
-                    <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
+                    <svg lucideHeart [size]="14" [color]="'' | randomColor"></svg>
                 </ng-template>
             }
 
@@ -409,9 +335,6 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
 })
 export class DropdownButtonWrapperComponent implements ComponentInputsAsSignal<DropdownButtonComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly heartIcon = Heart;
-    protected readonly menuIcon = Menu;
-    protected readonly settingsIcon = Settings;
     public readonly disabled = input<ReturnType<DropdownButtonComponent["disabled"]>>(false);
     public readonly iconOnly = input<ReturnType<DropdownButtonComponent["iconOnly"]>>(false);
     public readonly loading = input<ReturnType<DropdownButtonComponent["loading"]>>(false);

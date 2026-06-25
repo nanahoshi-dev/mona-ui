@@ -14,7 +14,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import { FunnelIcon, FunnelXIcon, LucideAngularModule } from "lucide-angular";
+import { LucideFunnel, LucideFunnelX } from "@lucide/angular";
 import { debounceTime, Subject } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { PopupMenuCheckboxItemComponent } from "../../../common/popup-menu/components/popup-menu-checkbox-item/popup-menu-checkbox-item.component";
@@ -53,11 +53,12 @@ type RowFilterValue = string | number | Date | boolean | null | undefined;
         NumericTextBoxComponent,
         DatePickerComponent,
         DropdownListComponent,
-        LucideAngularModule,
         ButtonDirective,
         PopupMenuComponent,
         PopupMenuCheckboxItemComponent,
-        NgTemplateOutlet
+        NgTemplateOutlet,
+        LucideFunnelX,
+        LucideFunnel
     ],
     host: {
         "[class]": "baseClass()"
@@ -102,8 +103,6 @@ export class GridFilterRowCellComponent {
     protected readonly booleanValue = signal<FilterMenuDataItem | null>(null);
     protected readonly dateFilterMenuItems = this.#filterService.dateFilterMenuItems;
     protected readonly dateValue = signal<Date | null>(null);
-    protected readonly filterIcon = FunnelIcon;
-    protected readonly filterRemoveIcon = FunnelXIcon;
     protected readonly numberValue = signal<number | null>(null);
     protected readonly numericFilterMenuItems = this.#filterService.numericFilterMenuItems;
     protected readonly selectedOperator = linkedSignal<RowFilterOperator>(() => this.#getDefaultOperator());

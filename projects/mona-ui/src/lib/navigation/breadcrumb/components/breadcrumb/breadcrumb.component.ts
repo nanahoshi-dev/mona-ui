@@ -9,8 +9,8 @@ import {
     input,
     TemplateRef
 } from "@angular/core";
+import { LucideChevronRight } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
-import { ChevronRight, LucideAngularModule } from "lucide-angular";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
@@ -24,7 +24,7 @@ import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.comp
 @Component({
     selector: "mona-breadcrumb",
     templateUrl: "./breadcrumb.component.html",
-    imports: [NgTemplateOutlet, LucideAngularModule, BreadcrumbItemDirective],
+    imports: [NgTemplateOutlet, BreadcrumbItemDirective, LucideChevronRight],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         role: "navigation",
@@ -45,7 +45,6 @@ export class BreadcrumbComponent implements BreadcrumbVariantInput {
         const variantClass = breadcrumbListThemeVariants(theme)({ disabled });
         return twMerge(variantClass, userClass);
     });
-    protected readonly separatorIcon = ChevronRight;
     protected readonly separatorTemplate = contentChild(BreadcrumbSeparatorTemplateDirective, {
         read: TemplateRef
     });
@@ -62,6 +61,10 @@ export class BreadcrumbComponent implements BreadcrumbVariantInput {
      */
     public readonly disabled = input(false);
 
+    /**
+     * @description Additional CSS classes merged onto the breadcrumb list element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     protected onItemClick(item: BreadcrumbItemComponent): void {

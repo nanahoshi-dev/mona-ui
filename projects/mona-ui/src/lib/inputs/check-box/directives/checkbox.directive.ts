@@ -26,6 +26,14 @@ export class CheckboxDirective implements CheckboxDirectiveVariantInput {
         return twMerge(variantClasses, userClass);
     });
 
+    /**
+     * @description Sets the border radius of the checkbox.
+     */
     public readonly rounded = input<CheckboxDirectiveVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Additional CSS classes merged onto the checkbox input element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 }

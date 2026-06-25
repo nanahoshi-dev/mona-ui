@@ -32,7 +32,7 @@
                     aria-label="Minimize"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onMinimizeClick()">
-                    <lucide-angular [name]="minimizeIcon" [size]="16" aria-hidden="true"></lucide-angular>
+                    <svg lucideMinus [size]="16" aria-hidden="true"></svg>
                 </button>
             }
             @if (windowData.maximizable) {
@@ -47,7 +47,7 @@
                     [attr.aria-label]="maximizeTitle"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onMaximizeClick()">
-                    <lucide-angular [name]="maximizeIcon()" [size]="16" aria-hidden="true"></lucide-angular>
+                    <svg [lucideIcon]="maximizeIcon()" [size]="16" aria-hidden="true"></svg>
                 </button>
             }
             @if (windowData.closable) {
@@ -62,7 +62,7 @@
                     aria-label="Close window"
                     (dblclick)="$event.stopPropagation()"
                     (click)="onCloseClick($event)">
-                    <lucide-angular [name]="closeIcon" [size]="16" aria-hidden="true"></lucide-angular>
+                    <svg lucideX [size]="16" aria-hidden="true"></svg>
                 </button>
             }
         </div>

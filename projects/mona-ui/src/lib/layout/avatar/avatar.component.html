@@ -1,5 +1,5 @@
 @if (image()) {
-    <img [src]="image()" [style.border-radius]="borderRadius()" alt=""/>
+    <img [src]="image()" [style.border-radius]="borderRadius()" [alt]="alt()"/>
 } @else if (!image() && label()) {
     <div [style]="avatarLabelStyles()">{{ label() }}</div>
 } @else if (!image() && !label()) {

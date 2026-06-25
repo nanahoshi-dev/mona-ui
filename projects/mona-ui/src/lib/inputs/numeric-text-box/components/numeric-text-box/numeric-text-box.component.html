@@ -3,49 +3,59 @@
         <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
     </span>
 }
-<input monaTextBox [disabled]="disabled()"
-       [required]="required()"
-       [type]="'text'"
-       inputmode="numeric"
-       [readonly]="readonly()"
-       [tabIndex]="tabindex()"
-       [ngModel]="formattedValue()"
-       (ngModelChange)="valueChange$.next($event)"
-       (keydown)="keydown$.next($event)"
-       (focus)="inputFocus.emit($event)"
-       (focusout)="inputFocusOut.emit($event)"
-       (blur)="onBlur($event)"
-       (beforeinput)="beforeInput$.next($event)"
-       (wheel)="wheel$.next($event)"
-       [size]="size()"
-       [class]="inputClasses()"
-       autocomplete="off"
-       [attr.aria-label]="ariaLabel()"
-       [attr.aria-valuenow]="value()"
-       [attr.aria-valuemin]="min()"
-       [attr.aria-valuemax]="max()"
-       [attr.aria-valuetext]="formattedValue()"
-       [attr.data-spinners]="spinners()"
-       #valueTextBox>
+<input
+    monaTextBox
+    [disabled]="disabled()"
+    [required]="required()"
+    [type]="'text'"
+    inputmode="numeric"
+    [readonly]="readonly()"
+    [tabIndex]="tabindex()"
+    [ngModel]="formattedValue()"
+    (ngModelChange)="valueChange$.next($event)"
+    (keydown)="keydown$.next($event)"
+    (focus)="inputFocus.emit($event)"
+    (focusout)="inputFocusOut.emit($event)"
+    (blur)="onBlur($event)"
+    (beforeinput)="beforeInput$.next($event)"
+    (wheel)="wheel$.next($event)"
+    [size]="size()"
+    [class]="inputClasses()"
+    autocomplete="off"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-valuenow]="value()"
+    [attr.aria-valuemin]="min()"
+    [attr.aria-valuemax]="max()"
+    [attr.aria-valuetext]="formattedValue()"
+    [attr.data-spinners]="spinners()"
+    #valueTextBox />
 @if (spinners()) {
     <div [class]="spinButtonClasses()">
-        <button monaButton [disabled]="disabled()" [tabindex]="-1"
-                look="secondary" [size]="size()"
-                (mousedown)="$event.preventDefault()"
-                (pointerdown)="spin$.next('+')"
-                (pointerup)="spinStop$.next()"
-                (pointerleave)="spinStop$.next()"
-                aria-label="Increase value">
-            <lucide-angular [img]="increaseIcon" [size]="spinButtonIconSize()"></lucide-angular>
+        <button
+            monaButton
+            [disabled]="disabled()"
+            [tabindex]="-1"
+            look="secondary"
+            [size]="size()"
+            (mousedown)="$event.preventDefault()"
+            (pointerdown)="spin$.next('+')"
+            (pointerup)="spinStop$.next()"
+            (pointerleave)="spinStop$.next()"
+            aria-label="Increase value">
+            <svg lucideChevronUp [size]="spinButtonIconSize()"></svg>
         </button>
-        <button monaButton [disabled]="disabled()" [tabindex]="-1"
-                look="secondary" [size]="size()"
-                (mousedown)="$event.preventDefault()"
-                (pointerdown)="spin$.next('-')"
-                (pointerup)="spinStop$.next()"
-                (pointerleave)="spinStop$.next()"
-                aria-label="Decrease value">
-            <lucide-angular [img]="decreaseIcon" [size]="spinButtonIconSize()"></lucide-angular>
+        <button
+            monaButton
+            [disabled]="disabled()"
+            [tabindex]="-1"
+            look="secondary"
+            [size]="size()"
+            (mousedown)="$event.preventDefault()"
+            (pointerdown)="spin$.next('-')"
+            (pointerup)="spinStop$.next()"
+            (pointerleave)="spinStop$.next()"
+            aria-label="Decrease value">
+            <svg lucideChevronDown [size]="spinButtonIconSize()"></svg>
         </button>
     </div>
 }

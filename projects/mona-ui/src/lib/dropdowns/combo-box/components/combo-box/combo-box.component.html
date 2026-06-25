@@ -4,27 +4,28 @@
     </span>
 }
 
-<input monaTextBox
-       [class]="inputClass()"
-       [disabled]="disabled()"
-       [id]="id"
-       [placeholder]="placeholder()"
-       [readonly]="readonly()"
-       [required]="required()"
-       [ngModel]="comboBoxValue()"
-       [attr.aria-activedescendant]="activeDescendant()"
-       [attr.aria-autocomplete]="'list'"
-       [attr.aria-busy]="loading()"
-       [attr.aria-controls]="listId"
-       [attr.aria-describedby]="ariaDescribedBy() || undefined"
-       [attr.aria-expanded]="expanded()"
-       [attr.aria-haspopup]="'listbox'"
-       [attr.aria-invalid]="isInvalid() || undefined"
-       [attr.aria-label]="ariaLabel() || undefined"
-       [attr.aria-labelledby]="ariaLabelledBy() || undefined"
-       role="combobox"
-       (ngModelChange)="comboBoxValue$.next($event)"
-       (blur)="onInputBlur()">
+<input
+    monaTextBox
+    [class]="inputClass()"
+    [disabled]="disabled()"
+    [id]="id"
+    [placeholder]="placeholder()"
+    [readonly]="readonly()"
+    [required]="required()"
+    [ngModel]="comboBoxValue()"
+    [attr.aria-activedescendant]="activeDescendant()"
+    [attr.aria-autocomplete]="'list'"
+    [attr.aria-busy]="loading()"
+    [attr.aria-controls]="listId"
+    [attr.aria-describedby]="ariaDescribedBy() || undefined"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-haspopup]="'listbox'"
+    [attr.aria-invalid]="isInvalid() || undefined"
+    [attr.aria-label]="ariaLabel() || undefined"
+    [attr.aria-labelledby]="ariaLabelledBy() || undefined"
+    role="combobox"
+    (ngModelChange)="comboBoxValue$.next($event)"
+    (blur)="onInputBlur()" />
 
 @if (showClearButton() && selectedListItem() && !loading()) {
     <mona-clear-button (clear)="onValueClear($event)"></mona-clear-button>
@@ -34,8 +35,7 @@
     <mona-loading-indicator></mona-loading-indicator>
 }
 
-<lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square" [name]="dropdownIcon"
-                [size]="18"></lucide-angular>
+<svg lucideChevronDown class="opacity-50 h-full flex items-center justify-center aspect-square" [size]="18"></svg>
 
 <span monaDropdownLiveRegion></span>
 
@@ -49,8 +49,9 @@
             }
             @if (groupHeaderTemplate()) {
                 <ng-template monaListGroupHeaderTemplate let-group>
-                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="groupHeaderTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: group }"></ng-container>
                 </ng-template>
             }
             @if (headerTemplate()) {
@@ -60,8 +61,9 @@
             }
             @if (itemTemplate()) {
                 <ng-template monaListItemTemplate let-dataItem>
-                    <ng-container [ngTemplateOutlet]="itemTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="itemTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-container>
                 </ng-template>
             }
             @if (noDataTemplate()) {

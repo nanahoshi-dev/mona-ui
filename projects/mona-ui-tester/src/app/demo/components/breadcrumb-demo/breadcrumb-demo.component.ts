@@ -1,20 +1,18 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import {
-    ChevronsRight,
-    CircleCheck,
-    CreditCard,
-    Download,
-    File,
-    HardDrive,
-    LucideAngularModule,
-    LucideIconData,
-    Music,
-    ShoppingCart,
-    Slash,
-    Truck,
-    User
-} from "lucide-angular";
+    LucideChevronsRight,
+    LucideCircleCheck,
+    LucideCreditCard,
+    LucideDownload,
+    LucideDynamicIcon,
+    LucideHardDrive,
+    type LucideIconInput,
+    LucideShoppingCart,
+    LucideSlash,
+    LucideTruck,
+    LucideUser
+} from "@lucide/angular";
 import { BreadcrumbComponent, BreadcrumbItemComponent, BreadcrumbSeparatorTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -22,7 +20,7 @@ import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 interface BreadcrumbDemoItem {
-    icon: LucideIconData;
+    icon: LucideIconInput;
     text: string;
     title: string;
 }
@@ -68,7 +66,7 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
 }
 
 @Component({
-    imports: [BreadcrumbComponent, BreadcrumbSeparatorTemplateDirective, LucideAngularModule, BreadcrumbItemComponent],
+    imports: [BreadcrumbComponent, BreadcrumbSeparatorTemplateDirective, BreadcrumbItemComponent, LucideDynamicIcon],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
@@ -76,14 +74,14 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
             @for (item of items(); track $index) {
                 <mona-breadcrumb-item [disabled]="$index === 3" (itemClick)="onItemClick(item)">
                     <div class="flex flex-row gap-2 items-center">
-                        <lucide-icon [img]="item.icon" [size]="16"></lucide-icon>
+                        <svg [lucideIcon]="item.icon" [size]="16"></svg>
                         <span [title]="item.title">{{ item.text }}</span>
                     </div>
                 </mona-breadcrumb-item>
             }
             @if (featureData["separatorTemplate"].active) {
                 <ng-template monaBreadcrumbSeparatorTemplate>
-                    <lucide-icon [img]="separatorIcon()" [size]="16"></lucide-icon>
+                    <svg [lucideIcon]="separatorIcon()" [size]="16"></svg>
                 </ng-template>
             }
         </mona-breadcrumb>
@@ -94,18 +92,18 @@ class BreadcrumbWrapperComponent implements ComponentInputsAsSignal<BreadcrumbCo
         {
             text: "Shopping",
             value: [
-                { text: "Cart", title: "Cart", icon: ShoppingCart },
-                { text: "Billing", title: "Billing", icon: CreditCard },
-                { text: "Shipping", title: "Shipping", icon: Truck },
-                { text: "Complete", title: "Complete", icon: CircleCheck }
+                { text: "Cart", title: "Cart", icon: LucideShoppingCart },
+                { text: "Billing", title: "Billing", icon: LucideCreditCard },
+                { text: "Shipping", title: "Shipping", icon: LucideTruck },
+                { text: "Complete", title: "Complete", icon: LucideCircleCheck }
             ] as BreadcrumbDemoItem[]
         },
         {
             text: "File Tree",
             value: [
-                { text: "C", title: "C", icon: HardDrive },
-                { text: "User", title: "User", icon: User },
-                { text: "Downloads", title: "Downloads", icon: Download }
+                { text: "C", title: "C", icon: LucideHardDrive },
+                { text: "User", title: "User", icon: LucideUser },
+                { text: "Downloads", title: "Downloads", icon: LucideDownload }
             ] as BreadcrumbDemoItem[]
         }
     ];
@@ -116,7 +114,7 @@ class BreadcrumbWrapperComponent implements ComponentInputsAsSignal<BreadcrumbCo
     });
     protected readonly separatorIcon = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
-        return dataSet === "Shopping" ? ChevronsRight : Slash;
+        return dataSet === "Shopping" ? LucideChevronsRight : LucideSlash;
     });
     public readonly disabled = input<ReturnType<BreadcrumbComponent["disabled"]>>(false);
 

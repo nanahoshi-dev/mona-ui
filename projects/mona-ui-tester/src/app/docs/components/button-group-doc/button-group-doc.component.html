@@ -1,9 +1,5 @@
-<app-section id="buttonGroup" [header]="'ButtonGroup'" headerType="H1">
-    <p>Displays a group of buttons that can be toggled on/off.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-button-group-demo></app-button-group-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/button-group/intro.md"></app-markdown-doc>
+
+<app-button-group-demo></app-button-group-demo>
+
+<app-markdown-doc src="docs/button-group/api.md" parentSectionId="button-group"></app-markdown-doc>

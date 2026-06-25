@@ -18,8 +18,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { LucideChevronLeft, LucideChevronRight } from "@lucide/angular";
 import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
-import { ChevronLeft, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { DateTime, DurationObjectUnits } from "luxon";
 import { bufferCount, fromEvent, skip, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -68,11 +68,12 @@ import { compareDates } from "../../utils/compareDates";
         ButtonDirective,
         DatePipe,
         MonthDayDirective,
-        LucideAngularModule,
         DecadeYearDirective,
         YearMonthDirective,
         NgTemplateOutlet,
-        TakeFirstPipe
+        TakeFirstPipe,
+        LucideChevronLeft,
+        LucideChevronRight
     ],
     host: {
         role: "application",
@@ -236,7 +237,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 return "Next decade";
         }
     });
-    protected readonly nextMonthIcon = ChevronRight;
     protected readonly prevButtonLabel = computed(() => {
         const view = this.calendarView();
         switch (view) {
@@ -248,7 +248,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 return "Previous decade";
         }
     });
-    protected readonly prevMonthIcon = ChevronLeft;
     protected readonly selectedDates = signal<Date[]>([]);
     protected readonly timezone = DateTime.local().zoneName ?? undefined;
     protected readonly todayButtonLabel = computed(() => {
@@ -504,8 +503,8 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 calendarView === "year"
                     ? "[monaYearMonth]"
                     : calendarView === "decade"
-                        ? "[monaDecadeYear]"
-                        : "[monaMonthDay]";
+                      ? "[monaDecadeYear]"
+                      : "[monaMonthDay]";
             const activeCell = this.#hostElementRef.nativeElement.querySelector<HTMLElement>(
                 `${selector}[tabindex="0"]`
             );

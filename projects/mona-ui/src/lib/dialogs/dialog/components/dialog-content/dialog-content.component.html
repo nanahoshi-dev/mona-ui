@@ -8,7 +8,7 @@
             } @else {
                 <div [class]="iconClass()">
                     <span aria-hidden="true"></span>
-                    <lucide-icon [name]="dialogIcon.icon" [size]="24" [style.color]="dialogIcon.color"></lucide-icon>
+                    <svg [lucideIcon]="dialogIcon.icon" [size]="24" [style.color]="dialogIcon.color"></svg>
                 </div>
             }
         </div>
@@ -31,7 +31,7 @@
                         [iconOnly]="true"
                         aria-label="Close dialog"
                         (click)="onCloseClick()">
-                        <lucide-angular [name]="closeIcon" [size]="16"></lucide-angular>
+                        <svg lucideX [size]="16"></svg>
                     </button>
                 </div>
             }

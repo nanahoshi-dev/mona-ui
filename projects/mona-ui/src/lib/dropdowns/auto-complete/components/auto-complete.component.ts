@@ -21,7 +21,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { LucideAngularModule } from "lucide-angular";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../common/clear-button/components/clear-button/clear-button.component";
@@ -103,7 +102,6 @@ import {
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
-        LucideAngularModule,
         LoadingIndicatorComponent,
         DropdownLiveRegionDirective,
         ClearButtonComponent

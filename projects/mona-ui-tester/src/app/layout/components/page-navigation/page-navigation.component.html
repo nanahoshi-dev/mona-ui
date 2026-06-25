@@ -1,10 +1,23 @@
-<div class="flex flex-col">
-    <h3 class="font-semibold text-sm pb-4 px-2">On this page</h3>
-    <ul class="text-sm font-light flex flex-col gap-1">
-        @for (item of sections(); track $index) {
+<div class="flex flex-col select-none">
+    <!-- TOC Title -->
+    <h3 class="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4 px-1">
+        On this page
+    </h3>
+
+    <!-- TOC Navigation Links List -->
+    <ul class="relative border-l border-border flex flex-col gap-1">
+        @for (item of sections(); track item.id()) {
             @if (item.parentId() != null) {
-                <li [attr.data-depth]="item.depth()" [style.padding-left.px]="(item.depth()-1)*16">
-                    <a class="px-2 py-1 rounded-sm hover:bg-gray-100" href="{{currentRoute()}}#{{item.id()}}">{{item.header()}}</a>
+                <li [attr.data-depth]="item.depth()" [style.padding-left.px]="(item.depth() - 1) * 12">
+                    <a class="block pl-4 py-1.5 text-sm font-medium transition-all cursor-pointer border-l -ml-[1px]"
+                       [class.text-primary]="activeFragment() === item.id()"
+                       [class.border-primary]="activeFragment() === item.id()"
+                       [class.font-semibold]="activeFragment() === item.id()"
+                       [class.text-muted-foreground]="activeFragment() !== item.id()"
+                       [class.border-transparent]="activeFragment() !== item.id()"
+                       href="{{currentRoute()}}#{{item.id()}}">
+                        {{ item.header() }}
+                    </a>
                 </li>
             }
         }

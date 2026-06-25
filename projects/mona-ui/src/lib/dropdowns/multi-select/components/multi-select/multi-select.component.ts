@@ -21,7 +21,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { ChevronDown, LucideAngularModule, X } from "lucide-angular";
+import { LucideChevronDown } from "@lucide/angular";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipComponent } from "../../../../buttons/chip/component/chip.component";
@@ -104,10 +104,10 @@ import {
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        LucideAngularModule,
         LoadingIndicatorComponent,
         DropdownLiveRegionDirective,
-        ClearButtonComponent
+        ClearButtonComponent,
+        LucideChevronDown
     ],
     hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     host: {
@@ -167,7 +167,6 @@ export class MultiSelectComponent<TData = unknown>
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
-    protected readonly dropdownIcon = ChevronDown;
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {

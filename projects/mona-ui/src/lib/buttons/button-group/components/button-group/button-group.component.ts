@@ -30,7 +30,9 @@ import {
     providers: [ButtonService],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[class]": "baseClass()"
+        "[attr.aria-label]": "ariaLabel()",
+        "[class]": "baseClass()",
+        "role": "group"
     }
 })
 export class ButtonGroupComponent implements ButtonGroupVariantsInput {
@@ -53,6 +55,13 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
      * Clicking a selected button will not deselect it. Defaults to true (allows empty selection).
      */
     public readonly allowEmpty = input<boolean>(true);
+
+    /**
+     * @description Accessible label for the button group landmark.
+     * Override when multiple button groups appear on the same page to distinguish them for screen reader users.
+     * @default "Button group"
+     */
+    public readonly ariaLabel = input("Button group", { alias: "aria-label" });
 
     /**
      * @description Sets the disabled state of the button group.
@@ -80,6 +89,10 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
      */
     public readonly selection = model<SelectionMode>("multiple");
 
+    /**
+     * @description Additional CSS classes merged onto the button group host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

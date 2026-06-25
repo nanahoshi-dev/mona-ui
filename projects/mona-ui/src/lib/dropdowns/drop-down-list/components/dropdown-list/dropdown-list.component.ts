@@ -22,7 +22,7 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { ChevronDown, LucideAngularModule } from "lucide-angular";
+import { LucideChevronDown } from "@lucide/angular";
 import { asyncScheduler, combineLatest, delay, Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
@@ -103,10 +103,10 @@ import {
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        LucideAngularModule,
         LoadingIndicatorComponent,
         DropdownLiveRegionDirective,
-        ClearButtonComponent
+        ClearButtonComponent,
+        LucideChevronDown
     ],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
@@ -159,7 +159,6 @@ export class DropdownListComponent<TData = unknown>
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly dropdownIcon = ChevronDown;
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {

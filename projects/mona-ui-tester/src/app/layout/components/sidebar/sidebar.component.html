@@ -1,4 +1,24 @@
-<div class="flex flex-col w-full h-full gap-4 p-2 mt-6 select-none">
+<!-- Desktop Sidebar Branding Header -->
+<div class="hidden md:flex items-center gap-2.5 px-4 h-16 border-b border-border flex-shrink-0 select-none">
+    <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+        <svg lucideSparkles [size]="18"></svg>
+    </div>
+    <span class="font-bold text-foreground text-lg tracking-tight">Mona UI</span>
+</div>
+
+<!-- Search Placeholder Button -->
+<div class="px-3 py-2 border-b border-border flex-shrink-0">
+    <button
+        class="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-background text-muted-foreground text-sm hover:bg-hover transition-colors cursor-pointer"
+        aria-label="Search documentation"
+        type="button">
+        <svg lucideSearch [size]="14"></svg>
+        <span>Search...</span>
+    </button>
+</div>
+
+<!-- Navigation Groups (scrollable without scrollbar) -->
+<div class="flex-1 min-h-0 overflow-y-auto no-scrollbar px-3 py-4 pb-8 flex flex-col gap-3 select-none">
     @for (group of groups(); track $index) {
         <app-sidebar-group [group]="group"></app-sidebar-group>
     }

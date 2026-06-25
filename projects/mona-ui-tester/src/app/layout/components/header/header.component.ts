@@ -1,14 +1,13 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { ChangeDetectionStrategy, Component, output } from "@angular/core";
 import { RouterLink } from "@angular/router";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faHeart } from "@fortawesome/free-solid-svg-icons";
+import { LucideMenu, LucideSparkles } from "@lucide/angular";
 
 @Component({
     selector: "app-header",
-    imports: [RouterLink, FaIconComponent],
+    imports: [RouterLink, LucideSparkles, LucideMenu],
     templateUrl: "./header.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent {
-    protected readonly logoIcon = faHeart;
+    public readonly menuToggle = output<void>();
 }

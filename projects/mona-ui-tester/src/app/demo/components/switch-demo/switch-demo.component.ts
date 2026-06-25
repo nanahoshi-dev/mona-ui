@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { LucideAngularModule, Moon, Sun } from "lucide-angular";
+import { LucideMoon, LucideSun } from "@lucide/angular";
 import {
     SwitchComponent,
     SwitchHandleContentTemplateDirective,
@@ -32,9 +32,7 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
         },
         offLabelTemplate: {
             code: `
-                <ng-template monaSwitchOffLabelTemplate>
-                    <lucide-angular [name]="Moon" [size]="16" class="text-indigo-400"></lucide-angular>
-                </ng-template>
+
             `,
             name: "Off Label Template",
             description: `This template is used to customize the off label of the switch.`,
@@ -42,9 +40,7 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
         },
         onLabelTemplate: {
             code: `
-                <ng-template monaSwitchOnLabelTemplate>
-                    <lucide-angular [name]="Sun" [size]="16" class="text-yellow-300"></lucide-angular>
-                </ng-template>
+
             `,
             name: "On Label Template",
             description: `This template is used to customize the on label of the switch.`,
@@ -53,26 +49,7 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
     });
     protected readonly config = signal<ComponentConfig<SwitchComponent>>({
         code: `
-            <mona-switch
-                [disabled]="disabled()"
-                [offLabel]="offLabel()"
-                [onLabel]="onLabel()"
-                [rounded]="rounded()"
-                [size]="size()">
-                <ng-template monaSwitchOffLabelTemplate>
-                    <lucide-angular [name]="Moon" [size]="16" class="text-indigo-400"></lucide-angular>
-                </ng-template>
-                <ng-template monaSwitchOnLabelTemplate>
-                    <lucide-angular [name]="Sun" [size]="16" class="text-yellow-300"></lucide-angular>
-                </ng-template>
-                <ng-template monaSwitchHandleContentTemplate let-active>
-                    @if (!active) {
-                        <lucide-icon [name]="Moon" [size]="14" class="text-indigo-400"></lucide-icon>
-                    } @else {
-                        <lucide-icon [name]="Sun" [size]="14" class="text-yellow-300"></lucide-icon>
-                    }
-                </ng-template>
-            </mona-switch>
+
         `,
         inputs: {
             disabled: {
@@ -110,9 +87,10 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
     imports: [
         SwitchComponent,
         SwitchOffLabelTemplateDirective,
-        LucideAngularModule,
         SwitchOnLabelTemplateDirective,
-        SwitchHandleContentTemplateDirective
+        SwitchHandleContentTemplateDirective,
+        LucideMoon,
+        LucideSun
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -125,20 +103,20 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
             [size]="size()">
             @if (featureData && featureData["offLabelTemplate"].active) {
                 <ng-template monaSwitchOffLabelTemplate>
-                    <lucide-angular [name]="Moon" [size]="16" class="text-indigo-400"></lucide-angular>
+                    <svg lucideMoon [size]="16" class="text-indigo-400"></svg>
                 </ng-template>
             }
             @if (featureData && featureData["onLabelTemplate"].active) {
                 <ng-template monaSwitchOnLabelTemplate>
-                    <lucide-angular [name]="Sun" [size]="16" class="text-yellow-300"></lucide-angular>
+                    <svg lucideSun [size]="16" class="text-yellow-300"></svg>
                 </ng-template>
             }
             @if (featureData && featureData["handleContentTemplate"].active) {
                 <ng-template monaSwitchHandleContentTemplate let-active>
                     @if (!active) {
-                        <lucide-icon [name]="Moon" [size]="14" class="text-indigo-400"></lucide-icon>
+                        <svg lucideMoon [size]="14" class="text-indigo-400"></svg>
                     } @else {
-                        <lucide-icon [name]="Sun" [size]="14" class="text-yellow-300"></lucide-icon>
+                        <svg lucideSun [size]="14" class="text-yellow-300"></svg>
                     }
                 </ng-template>
             }
@@ -146,8 +124,6 @@ export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> 
     `
 })
 export class SwitchWrapperComponent implements ComponentInputsAsSignal<SwitchComponent> {
-    protected readonly Moon = Moon;
-    protected readonly Sun = Sun;
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly disabled = input<ReturnType<SwitchComponent["disabled"]>>(false);
     public readonly offLabel = input<ReturnType<SwitchComponent["offLabel"]>>("");

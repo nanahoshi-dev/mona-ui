@@ -1,18 +1,16 @@
 import { ChangeDetectionStrategy, Component, output } from "@angular/core";
-import { LucideAngularModule, X } from "lucide-angular";
+import { LucideX } from "@lucide/angular";
 
 @Component({
     selector: "mona-clear-button",
-    imports: [LucideAngularModule],
     templateUrl: "./clear-button.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [LucideX],
     host: {
         class: "opacity-50 h-full flex items-center justify-center hover:opacity-90 focus:ring-1 focus:ring-primary/40 focus:outline-none"
     }
 })
 export class ClearButtonComponent {
-    protected readonly clearIcon = X;
-
     public readonly clear = output<KeyboardEvent | MouseEvent>();
 
     protected onClearClick(event: Event): void {

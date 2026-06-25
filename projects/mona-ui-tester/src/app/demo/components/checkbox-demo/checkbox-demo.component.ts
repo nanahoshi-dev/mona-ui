@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
 import { CheckBoxComponent, CheckboxDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -39,6 +39,10 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
             </label>
         `,
         inputs: {
+            checked: {
+                type: "boolean",
+                value: false
+            },
             disabled: {
                 type: "boolean",
                 value: false
@@ -78,6 +82,7 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-check-box
+            [checked]="checked()"
             [disabled]="disabled()"
             [indeterminate]="indeterminate()"
             [label]="label()"
@@ -103,6 +108,7 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
     `
 })
 export class CheckBoxWrapperComponent implements ComponentInputsAsSignal<CheckBoxComponent> {
+    public readonly checked = model(false);
     public readonly disabled = input(false);
     public readonly indeterminate = input(false);
     public readonly label = input("Checkbox Label");

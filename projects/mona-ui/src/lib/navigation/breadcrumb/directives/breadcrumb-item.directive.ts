@@ -19,7 +19,19 @@ export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {
         const userClass = this.userClass();
         return twMerge(breadcrumbListItemThemeVariants(theme)({ disabled, listDisabled }), userClass);
     });
+    /**
+     * @description Whether this individual breadcrumb item is disabled.
+     * @default false
+     */
     public readonly disabled = input(false);
+    /**
+     * @description Whether the parent breadcrumb list is disabled. Passed down by `BreadcrumbComponent`.
+     * @default false
+     */
     public readonly listDisabled = input(false);
+    /**
+     * @description Additional CSS classes merged onto the item span via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 }

@@ -1,6 +1,12 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { ClipboardCopy, ClipboardPaste, Heart, LucideAngularModule, Scissors, SortAsc } from "lucide-angular";
+import {
+    LucideArrowUpNarrowWide,
+    LucideClipboardPaste,
+    LucideCopy,
+    LucideHeart,
+    LucideScissors
+} from "@lucide/angular";
 import {
     ButtonDirective,
     ContextMenuCheckboxItemComponent,
@@ -46,11 +52,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         },
         iconTemplate: {
             code: `
-                 <mona-contextmenu-item [label]="'Sort By'">
-                    <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="sortIcon" [size]="14"></lucide-angular>
-                    </ng-template>
-                </mona-contextmenu-item>
+
             `,
             description: `
                 This template is used to customize the icon of the menu item.
@@ -91,11 +93,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         },
         topLevelIconTemplate: {
             code: `
-                <mona-contextmenu>
-                    <ng-template monaContextMenuIconTemplate let-item>
-                        <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
-                    </ng-template>
-                </mona-contextmenu>
+
             `,
             description: `This template is used to customize the icons of all menu items.`,
             name: "Top Level Icon Template",
@@ -142,103 +140,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
     });
     protected readonly config = signal<ComponentConfig<ContextMenuComponent>>({
         code: `
-            <button monaButton class="mr-4" #menuTarget>Context Menu Target</button>
-            <mona-contextmenu
-                (menuClick)="onMenuClick($event, 'mona-contextmenu')"
-                [minWidth]="minWidth()"
-                [rounded]="rounded()"
-                [size]="size()"
-                [target]="menuTarget"
-                [width]="width()">
-                <mona-contextmenu-item [label]="'Open in New Tab'"></mona-contextmenu-item>
-                <mona-contextmenu-item [label]="'Open in New Window'" [disabled]="true"></mona-contextmenu-item>
-                <mona-contextmenu-separator></mona-contextmenu-separator>
-                <mona-contextmenu-item label="View">
-                    <mona-contextmenu-checkbox-item label="Preview Pane"></mona-contextmenu-checkbox-item>
-                    <mona-contextmenu-checkbox-item label="Details Pane" [checked]="true"></mona-contextmenu-checkbox-item>
-                    <mona-contextmenu-checkbox-item
-                        label="Navigation Pane"
-                        [checked]="true"></mona-contextmenu-checkbox-item>
-                </mona-contextmenu-item>
-                <mona-contextmenu-item [label]="'Sort By'">
-                    <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="sortIcon" [size]="14"></lucide-angular>
-                    </ng-template>
-                    <mona-contextmenu-radio-group value="name">
-                        <mona-contextmenu-radio-item label="Name" value="name"></mona-contextmenu-radio-item>
-                        <mona-contextmenu-radio-item
-                            label="Date Modified"
-                            value="dateModified"></mona-contextmenu-radio-item>
-                        <mona-contextmenu-radio-item label="Type" value="type"></mona-contextmenu-radio-item>
-                        <mona-contextmenu-radio-item label="Size" value="size"></mona-contextmenu-radio-item>
-                    </mona-contextmenu-radio-group>
-                    <mona-contextmenu-separator></mona-contextmenu-separator>
-                    <mona-contextmenu-radio-group value="asc">
-                        <mona-contextmenu-radio-item label="Ascending" value="asc"></mona-contextmenu-radio-item>
-                        <mona-contextmenu-radio-item label="Descending" value="desc"></mona-contextmenu-radio-item>
-                    </mona-contextmenu-radio-group>
-                </mona-contextmenu-item>
-                <mona-contextmenu-separator></mona-contextmenu-separator>
-                <mona-contextmenu-item label="New">
-                    <mona-contextmenu-item label="Folder"></mona-contextmenu-item>
-                    <mona-contextmenu-item label="Shortcut"></mona-contextmenu-item>
-                    <mona-contextmenu-item label="Text Document"></mona-contextmenu-item>
-                    <mona-contextmenu-item label="Compressed (zipped) Folder"></mona-contextmenu-item>
-                </mona-contextmenu-item>
-                <mona-contextmenu-separator></mona-contextmenu-separator>
-                <mona-contextmenu-item label="Cut">
-                    <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="cutIcon" [size]="14"></lucide-angular>
-                    </ng-template>
-                </mona-contextmenu-item>
-                <mona-contextmenu-item label="Copy">
-                    <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="copyIcon" [size]="14"></lucide-angular>
-                    </ng-template>
-                </mona-contextmenu-item>
-                <mona-contextmenu-item label="Paste">
-                    <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="pasteIcon" [size]="14"></lucide-angular>
-                    </ng-template>
-                    <ng-template monaContextMenuTextTemplate let-item>
-                        <span class="text-amber-600">{{ item.label }}</span>
-                    </ng-template>
-                </mona-contextmenu-item>
-                <mona-contextmenu-item label="Paste Shortcut">
-                    <ng-template monaContextMenuShortcutTemplate>
-                        <div class="flex items-center gap-1 text-gray-600">Ctrl + Shift + V</div>
-                    </ng-template>
-                </mona-contextmenu-item>
-                <mona-contextmenu-separator></mona-contextmenu-separator>
-                <mona-contextmenu-group title="System Actions">
-                    <mona-contextmenu-item label="Share">
-                        <mona-contextmenu-item label="Email"></mona-contextmenu-item>
-                        <mona-contextmenu-item label="Zip and Email"></mona-contextmenu-item>
-                        <mona-contextmenu-item label="Print"></mona-contextmenu-item>
-                        <mona-contextmenu-separator></mona-contextmenu-separator>
-                        <mona-contextmenu-item label="Specific People..."></mona-contextmenu-item>
-                    </mona-contextmenu-item>
-                    <mona-contextmenu-item label="Properties"></mona-contextmenu-item>
-                    <ng-template monaContextMenuGroupTemplate let-title>
-                        <span class="text-blue-500">{{ title }}</span>
-                    </ng-template>
-                </mona-contextmenu-group>
 
-                <ng-template monaContextMenuIconTemplate let-item>
-                    <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
-                </ng-template>
-                <ng-template monaContextMenuGroupTemplate let-group>
-                    <div class="text-green-500 p-2">{{ group }}</div>
-                </ng-template>
-                <ng-template monaContextMenuShortcutTemplate let-item>
-                    @if (item.label === "Properties") {
-                        <div class="flex items center gap-1"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd></div>
-                    }
-                </ng-template>
-                <ng-template monaContextMenuTextTemplate let-item>
-                    <span [style.color]="'' | randomColor">{{ item.label }}</span>
-                </ng-template>
-            </mona-contextmenu>
         `,
         inputs: {
             // context: { type: "object", value: { prop: "Context menu context" } },
@@ -296,8 +198,12 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
         ContextMenuGroupTemplateDirective,
         ContextMenuShortcutTemplateDirective,
         ContextMenuTextTemplateDirective,
-        LucideAngularModule,
-        RandomColorPipe
+        RandomColorPipe,
+        LucideArrowUpNarrowWide,
+        LucideScissors,
+        LucideCopy,
+        LucideClipboardPaste,
+        LucideHeart
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -324,7 +230,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
             <mona-contextmenu-item [label]="'Sort By'">
                 @if (featureData["iconTemplate"].active) {
                     <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="sortIcon" [size]="14"></lucide-angular>
+                        <svg lucideSortAsc [size]="14"></svg>
                     </ng-template>
                 }
                 <mona-contextmenu-radio-group value="name">
@@ -352,21 +258,21 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
             <mona-contextmenu-item label="Cut">
                 @if (featureData["iconTemplate"].active) {
                     <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="cutIcon" [size]="14"></lucide-angular>
+                        <svg lucideScissors [size]="14"></svg>
                     </ng-template>
                 }
             </mona-contextmenu-item>
             <mona-contextmenu-item label="Copy">
                 @if (featureData["iconTemplate"].active) {
                     <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="copyIcon" [size]="14"></lucide-angular>
+                        <svg lucideCopy [size]="14"></svg>
                     </ng-template>
                 }
             </mona-contextmenu-item>
             <mona-contextmenu-item label="Paste">
                 @if (featureData["iconTemplate"].active) {
                     <ng-template monaContextMenuIconTemplate>
-                        <lucide-angular [name]="pasteIcon" [size]="14"></lucide-angular>
+                        <svg lucideClipboardPaste [size]="14"></svg>
                     </ng-template>
                 }
                 @if (featureData["textTemplate"].active) {
@@ -401,7 +307,7 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
 
             @if (featureData["topLevelIconTemplate"].active) {
                 <ng-template monaContextMenuIconTemplate let-item>
-                    <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
+                    <svg lucideHeart [size]="14" [color]="'' | randomColor"></svg>
                 </ng-template>
             }
             @if (featureData["topLevelGroupTemplate"].active) {
@@ -426,11 +332,6 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
 })
 class ContextMenuWrapperComponent implements ComponentInputsAsSignal<ContextMenuComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly copyIcon = ClipboardCopy;
-    protected readonly cutIcon = Scissors;
-    protected readonly heartIcon = Heart;
-    protected readonly pasteIcon = ClipboardPaste;
-    protected readonly sortIcon = SortAsc;
     public readonly items = input<ReturnType<ContextMenuComponent["items"]>>([]);
     public readonly minWidth = input<ReturnType<ContextMenuComponent["minWidth"]>>();
     public readonly rounded = input<ReturnType<ContextMenuComponent["rounded"]>>("medium");

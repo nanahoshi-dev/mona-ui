@@ -1,12 +1,11 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
-import { List, LucideAngularModule, Search } from "lucide-angular";
+import { LucideList, LucideSearch } from "@lucide/angular";
 import {
     DropdownButtonComponent,
     DropdownButtonItemComponent,
     DropdownButtonTextTemplateDirective,
-    MenuItemComponent,
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
     TextBoxSuffixTemplateDirective
@@ -27,9 +26,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         prefixTemplate: {
             active: false,
             code: `
-                <ng-template monaTextBoxPrefixTemplate>
-                    <lucide-angular [name]="searchIcon" [size]="20" class="pl-1"></lucide-angular>
-                </ng-template>
+
             `,
             description: `This template is used to customize the prefix of the text box.`,
             name: "Prefix Template"
@@ -37,13 +34,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         suffixTemplate: {
             active: false,
             code: `
-                <ng-template monaTextBoxSuffixTemplate>
-                    <mona-drop-down-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
-                        <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
-                        <mona-menu-item text="Menu Item 1"></mona-menu-item>
-                        <mona-menu-item text="Menu Item 2"></mona-menu-item>
-                    </mona-drop-down-button>
-                </ng-template>
+
             `,
             description: `This template is used to customize the suffix of the text box.`,
             name: "Suffix Template"
@@ -52,29 +43,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
     protected readonly TextBoxWrapperComponent = TextBoxWrapperComponent;
     protected readonly config = signal<ComponentConfig<TextBoxComponent>>({
         code: `
-            <mona-text-box
-                [clearButton]="clearButton()"
-                [disabled]="disabled()"
-                [size]="size()"
-                [inputClass]="inputClass()"
-                [inputStyle]="inputStyle()"
-                [type]="type()"
-                [readonly]="readonly()"
-                [rounded]="rounded()"
-                [placeholder]="placeholder()"
-                (inputBlur)="onInputBlur($event)"
-                (inputFocus)="onInputFocus($event)">
-                <ng-template monaTextBoxPrefixTemplate>
-                    <lucide-angular [name]="searchIcon" [size]="20" class="pl-1"></lucide-angular>
-                </ng-template>
-                <ng-template monaTextBoxSuffixTemplate>
-                    <mona-drop-down-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
-                        <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
-                        <mona-menu-item text="Menu Item 1"></mona-menu-item>
-                        <mona-menu-item text="Menu Item 2"></mona-menu-item>
-                    </mona-drop-down-button>
-                </ng-template>
-            </mona-text-box>
+
         `,
         inputs: {
             clearButton: {
@@ -128,12 +97,13 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
     imports: [
         TextBoxComponent,
         TextBoxPrefixTemplateDirective,
-        LucideAngularModule,
         TextBoxSuffixTemplateDirective,
         DropdownButtonComponent,
         DropdownButtonItemComponent,
         ReactiveFormsModule,
-        DropdownButtonTextTemplateDirective
+        DropdownButtonTextTemplateDirective,
+        LucideSearch,
+        LucideList
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -153,14 +123,14 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             class="w-48">
             @if (featureData && featureData["prefixTemplate"].active) {
                 <ng-template monaTextBoxPrefixTemplate>
-                    <lucide-angular [name]="searchIcon" [size]="20" class="pl-1"></lucide-angular>
+                    <svg lucideSearch [size]="20" class="pl-1"></svg>
                 </ng-template>
             }
             @if (featureData && featureData["suffixTemplate"].active) {
                 <ng-template monaTextBoxSuffixTemplate>
                     <mona-dropdown-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
                         <ng-template monaDropdownButtonTextTemplate>
-                            <lucide-angular [name]="listIcon" [size]="16"></lucide-angular>
+                            <svg lucideList [size]="16"></svg>
                         </ng-template>
                         <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
                         <mona-dropdown-button-item label="Menu Item 2"></mona-dropdown-button-item>
@@ -172,8 +142,6 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
 })
 export class TextBoxWrapperComponent implements ComponentInputsAsSignal<TextBoxComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly listIcon = List;
-    protected readonly searchIcon = Search;
     public readonly clearButton = input(false);
     public readonly disabled = input(false);
     public readonly inputClass = input<string | string[]>("");

@@ -1,10 +1,10 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
+import { LucideLayers } from "@lucide/angular";
 import { ButtonDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
-import { Layers, LucideAngularModule } from "lucide-angular";
 
 @Component({
     selector: "app-button-demo",
@@ -83,7 +83,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
 
 @Component({
     selector: "app-button-wrapper",
-    imports: [ButtonDirective, LucideAngularModule],
+    imports: [ButtonDirective, LucideLayers],
     template: `
         <button
             monaButton
@@ -96,7 +96,7 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
             [size]="size()"
             [toggleable]="toggleable()">
             @if (iconOnly()) {
-                <lucide-angular [name]="layersIcon" size="14"></lucide-angular>
+                <svg lucideLayers [size]="14"></svg>
             } @else {
                 Mona Button
             }
@@ -108,7 +108,6 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
     }
 })
 export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDirective> {
-    protected readonly layersIcon = Layers;
     public readonly ariaDescribedby = input("aria-describedby");
     public readonly ariaLabel = input("Button");
     public readonly ariaLabelledby = input("aria-labelledby");

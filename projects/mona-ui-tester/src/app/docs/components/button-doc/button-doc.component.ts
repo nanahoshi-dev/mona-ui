@@ -1,16 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { ButtonDemoComponent } from "../../../demo/components/button-demo/button-demo.component";
-import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
-import { SectionComponent } from "../../../layout/components/section/section.component";
+import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-button-doc",
-    imports: [SectionComponent, ButtonDemoComponent, CodeViewerComponent],
+    imports: [ButtonDemoComponent, MarkdownDocComponent],
     templateUrl: "./button-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ButtonDocComponent {
-    protected readonly importCode = `
-        import { ButtonDirective } from "mona-ui";
-    `;
-}
+export class ButtonDocComponent {}

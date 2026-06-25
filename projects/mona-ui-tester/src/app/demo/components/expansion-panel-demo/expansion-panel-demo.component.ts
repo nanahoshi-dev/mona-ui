@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { LucideArrowDown, LucideArrowUp, LucideSettings } from "@lucide/angular";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import {
     ButtonDirective,
@@ -11,7 +12,6 @@ import { createFeatureInjector, FeatureConfigHandler } from "../../utils/feature
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { NgComponentOutlet } from "@angular/common";
-import { ArrowDown, ArrowUp, LucideAngularModule, Settings } from "lucide-angular";
 
 @Component({
     selector: "app-expansion-panel-demo",
@@ -24,18 +24,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
         actionsTemplate: {
             active: false,
             code: `
-                <mona-expansion-panel>
-                    <ng-template monaExpansionPanelActionsTemplate>
-                        <button
-                            monaButton
-                            look="ghost"
-                            [size]="'small'"
-                            [iconOnly]="true"
-                            (click)="$event.stopPropagation()">
-                            <lucide-angular [name]="settingsIcon" [size]="14"></lucide-angular>
-                        </button>
-                    </ng-template>
-                </mona-expansion-panel>
+
             `,
             name: "Actions Template",
             description: "Custom template for the expansion panel actions."
@@ -43,17 +32,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
         iconTemplate: {
             active: false,
             code: `
-                <mona-expansion-panel>
-                    <ng-template monaExpansionPanelIconTemplate let-expanded>
-                        <div class="px-2">
-                            @if (expanded) {
-                                <lucide-angular [name]="collapseIcon" [size]="14"></lucide-angular>
-                            } @else {
-                                <lucide-angular [name]="expandIcon" [size]="14"></lucide-angular>
-                            }
-                        </div>
-                    </ng-template>
-                </mona-expansion-panel>
+
             `,
             name: "Icon Template",
             description: "Custom template for the expansion panel icon."
@@ -73,33 +52,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     });
     protected readonly config = signal<ComponentConfig<ExpansionPanelComponent>>({
         code: `
-            @for (country of countryData; track $index) {
-                <mona-expansion-panel [expanded]="expanded()" [rounded]="rounded()" [title]="title() || country.name">
-                    <p class="w-full h-full p-2 text-justify">{{ country.description }}</p>
-                    <ng-template monaExpansionPanelTitleTemplate>
-                        <span class="text-sm uppercase" [style.color]="country.color">{{ country.name }}</span>
-                    </ng-template>
-                    <ng-template monaExpansionPanelIconTemplate let-expanded>
-                        <div class="px-2">
-                            @if (expanded) {
-                                <lucide-angular [name]="collapseIcon" [size]="14"></lucide-angular>
-                            } @else {
-                                <lucide-angular [name]="expandIcon" [size]="14"></lucide-angular>
-                            }
-                        </div>
-                    </ng-template>
-                    <ng-template monaExpansionPanelActionsTemplate>
-                        <button
-                            monaButton
-                            look="ghost"
-                            [size]="'small'"
-                            [iconOnly]="true"
-                            (click)="$event.stopPropagation()">
-                            <lucide-angular [name]="settingsIcon" [size]="14"></lucide-angular>
-                        </button>
-                    </ng-template>
-                </mona-expansion-panel>
-            }
+
         `,
         inputs: {
             expanded: {
@@ -130,8 +83,10 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
         ExpansionPanelTitleTemplateDirective,
         ExpansionPanelActionsTemplateDirective,
         ButtonDirective,
-        LucideAngularModule,
-        ExpansionPanelIconTemplateDirective
+        ExpansionPanelIconTemplateDirective,
+        LucideArrowUp,
+        LucideArrowDown,
+        LucideSettings
     ],
     template: `
         @let featureData = features();
@@ -147,9 +102,9 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
                     <ng-template monaExpansionPanelIconTemplate let-expanded>
                         <div class="px-2">
                             @if (expanded) {
-                                <lucide-angular [name]="collapseIcon" [size]="14"></lucide-angular>
+                                <svg lucideArrowUp [size]="14"></svg>
                             } @else {
-                                <lucide-angular [name]="expandIcon" [size]="14"></lucide-angular>
+                                <svg lucideArrowDown [size]="14"></svg>
                             }
                         </div>
                     </ng-template>
@@ -162,7 +117,7 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
                             [size]="'small'"
                             [iconOnly]="true"
                             (click)="$event.stopPropagation()">
-                            <lucide-angular [name]="settingsIcon" [size]="14"></lucide-angular>
+                            <svg lucideSettings [size]="14"></svg>
                         </button>
                     </ng-template>
                 }
@@ -175,7 +130,6 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     }
 })
 class ExpansionPanelWrapperComponent implements ComponentInputsAsSignal<ExpansionPanelComponent> {
-    protected readonly collapseIcon = ArrowUp;
     protected readonly countryData = [
         {
             name: "Japan",
@@ -213,9 +167,7 @@ class ExpansionPanelWrapperComponent implements ComponentInputsAsSignal<Expansio
             color: "#F1BF00"
         }
     ];
-    protected readonly expandIcon = ArrowDown;
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly settingsIcon = Settings;
 
     public readonly expanded = model(false);
     public readonly rounded = input<ReturnType<ExpansionPanelComponent["rounded"]>>("medium");

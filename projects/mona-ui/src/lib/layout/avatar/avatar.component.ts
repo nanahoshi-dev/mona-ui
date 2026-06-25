@@ -5,6 +5,8 @@ import { ChangeDetectionStrategy, Component, computed, input, Signal } from "@an
     templateUrl: "./avatar.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
+        "[attr.aria-label]": "ariaLabel() || null",
+        "[attr.role]": "ariaLabel() ? 'img' : null",
         "[style]": "avatarStyles()"
     }
 })
@@ -38,16 +40,28 @@ export class AvatarComponent {
     });
 
     /**
+     * @description Alternative text for the avatar image.
+     * @default ""
+     */
+    public readonly alt = input("");
+
+    /**
+     * @description Accessible label for the avatar host element.
+     * @default ""
+     */
+    public readonly ariaLabel = input("", { alias: "aria-label" });
+
+    /**
      * @description Sets the background color of the avatar.
      *
      * If an image is provided, this will be ignored.
      */
-    public readonly backgroundColor = input("var(--mona-primary)");
+    public readonly backgroundColor = input("var(--color-primary)");
 
     /**
      * @description Sets the border color of the avatar.
      */
-    public readonly borderColor = input("var(--mona-border-color)");
+    public readonly borderColor = input("var(--color-border)");
 
     /**
      * @description Sets the border radius of the avatar.
@@ -76,8 +90,9 @@ export class AvatarComponent {
     });
 
     /**
-     * @description Custom styles to apply to the avatar.
-     * This can be used to override default styles or add additional styles.
+     * @description Custom styles spread over all computed host styles, taking precedence over every
+     * other style input including `display`, `height`, and `width`.
+     * Overriding layout-critical properties such as `display` may break expected rendering.
      */
     public readonly customStyles = input<Partial<CSSStyleDeclaration>>({});
 
@@ -98,6 +113,7 @@ export class AvatarComponent {
      * @description Sets the image URL for the avatar.
      * If an image is provided, the avatar will display the image instead of a label.
      */
+    // TODO(owner-review): migrate to NgOptimizedImage once width/height inputs are changed to number-only
     public readonly image = input("");
 
     /**

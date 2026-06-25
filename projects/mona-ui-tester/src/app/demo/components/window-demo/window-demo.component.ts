@@ -10,7 +10,7 @@ import {
     viewChild
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { LucideAngularModule, User } from "lucide-angular";
+import { LucideUser } from "@lucide/angular";
 import {
     ButtonDirective,
     DropdownListComponent,
@@ -170,11 +170,11 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
         TextBoxComponent,
         WindowFooterTemplateDirective,
         WindowTitleTemplateDirective,
-        LucideAngularModule,
         SwitchComponent,
         FormsModule,
         WindowContentTemplateDirective,
-        WindowActionTemplateDirective
+        WindowActionTemplateDirective,
+        LucideUser
     ],
     template: `
         @let featureData = features();
@@ -256,7 +256,7 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
                 @if (featureData["titleTemplate"].active) {
                     <ng-template monaWindowTitleTemplate>
                         <div class="flex items-center gap-2">
-                            <lucide-icon [name]="userIcon" [size]="16"></lucide-icon>
+                            <svg lucideUser [size]="16"></svg>
                             <span class="font-semibold">User Details</span>
                         </div>
                     </ng-template>
@@ -279,7 +279,6 @@ class WindowWrapperComponent implements ComponentInputsAsSignal<WindowComponent>
     private readonly dynamicWindowContent = viewChild<TemplateRef<unknown>>("dynamicWindowContentTemplate");
     protected readonly advancedMode = signal(false);
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly userIcon = User;
     protected readonly windowVisible = signal(false);
     protected dynamicWindowRef: WindowRef | null = null;
     public readonly closable = input<ReturnType<WindowComponent["closable"]>>(true);

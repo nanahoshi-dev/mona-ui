@@ -10,9 +10,15 @@
 
 @if (removable()) {
     @let removeAriaLabel = "Remove, " + (label() || "item");
-    <button monaButton look="link" [iconOnly]="true" [size]="'small'" [attr.aria-label]="removeAriaLabel"
-            [disabled]="disabled()"
-            (click)="onRemoveClick($event)" [attr.data-chip-remove]="true">
-        <lucide-angular [name]="removeIcon" [size]="iconSize()"></lucide-angular>
+    <button
+        monaButton
+        look="link"
+        [iconOnly]="true"
+        [size]="'small'"
+        [attr.aria-label]="removeAriaLabel"
+        [disabled]="disabled()"
+        (click)="onRemoveClick($event)"
+        [attr.data-chip-remove]="true">
+        <svg lucideCircleX [size]="iconSize()"></svg>
     </button>
 }

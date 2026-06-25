@@ -22,8 +22,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { LucideChevronDown } from "@lucide/angular";
 import { Selector } from "@mirei/ts-collections";
-import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import { distinctUntilChanged, fromEvent, Observable, take } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
@@ -58,7 +58,7 @@ import { DropDownTreeNodeTemplateDirective } from "../../directives/drop-down-tr
         FilterInputComponent,
         TreeNodeTemplateDirective,
         PlaceholderComponent,
-        LucideAngularModule
+        LucideChevronDown
     ],
     templateUrl: "./drop-down-tree.component.html",
     providers: [
@@ -97,7 +97,6 @@ export class DropDownTreeComponent<T> implements ControlValueAccessor, OnInit, D
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly dropdownIcon = ChevronDown;
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });

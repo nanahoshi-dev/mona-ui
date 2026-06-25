@@ -16,8 +16,8 @@ import {
     ChangeDetectionStrategy
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { LucideChevronDown } from "@lucide/angular";
 import { fromEvent } from "rxjs";
-import { ChevronDown, LucideAngularModule } from "lucide-angular";
 import { twMerge } from "tailwind-merge";
 import { PopupMenuComponent } from "../../../../common/popup-menu/components/popup-menu/popup-menu.component";
 import { PopupMenuGroupTemplateDirective } from "../../../../common/popup-menu/directives/popup-menu-group-template.directive";
@@ -47,12 +47,12 @@ import {
     imports: [
         ButtonDirective,
         NgTemplateOutlet,
-        LucideAngularModule,
         PopupMenuComponent,
         PopupMenuGroupTemplateDirective,
         PopupMenuIconTemplateDirective,
         PopupMenuShortcutTemplateDirective,
-        PopupMenuTextTemplateDirective
+        PopupMenuTextTemplateDirective,
+        LucideChevronDown
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     host: {
@@ -89,7 +89,6 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     });
     protected readonly mainButtonTextTemplate = contentChild(SplitButtonTextTemplateDirective, { read: TemplateRef });
     protected readonly menuButtonTemplate = contentChild(SplitButtonMenuButtonTemplateDirective, { read: TemplateRef });
-    protected readonly menuIcon = ChevronDown;
     protected readonly menuId = createElementControlId();
     protected readonly menuItems = computed(() => {
         return this.menuItemComponents()

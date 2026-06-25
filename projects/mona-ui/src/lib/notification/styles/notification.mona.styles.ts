@@ -4,28 +4,25 @@ import { cva } from "class-variance-authority";
 // Notification Container Component
 //---------------------------------
 
-export const notificationContainerBaseVariants = cva(
-    `p-2 z-40000`,
-    {
-        variants: {
-            position: {
-                bottom: "bottom-0 left-1/2 -translate-x-1/2",
-                bottomleft: "bottom-0 left-0",
-                bottomright: "bottom-0 right-0",
-                top: "top-0 left-1/2 -translate-x-1/2",
-                topleft: "top-0 left-0",
-                topright: "top-0 right-0"
-            },
-            positionType: {
-                fixed: "fixed",
-                absolute: "absolute"
-            }
+export const notificationContainerBaseVariants = cva(`p-2 z-40000`, {
+    variants: {
+        position: {
+            bottom: "bottom-0 left-1/2 -translate-x-1/2",
+            bottomleft: "bottom-0 left-0",
+            bottomright: "bottom-0 right-0",
+            top: "top-0 left-1/2 -translate-x-1/2",
+            topleft: "top-0 left-0",
+            topright: "top-0 right-0"
         },
-        defaultVariants: {
-            positionType: "fixed"
+        positionType: {
+            fixed: "fixed",
+            absolute: "absolute"
         }
+    },
+    defaultVariants: {
+        positionType: "fixed"
     }
-);
+});
 
 //-----------------------
 // Notification Component
@@ -35,8 +32,8 @@ export const notificationActionVariants = cva(
     `
         absolute top-1 right-1
         flex items-start h-auto
-        [&>lucide-icon]:cursor-pointer
-        [&>lucide-icon]:-mt-1
+        [&>svg.lucide]:cursor-pointer
+        [&>svg.lucide]:-mt-1
     `
 );
 

@@ -11,7 +11,7 @@ import {
     model,
     signal
 } from "@angular/core";
-import { ContainerIcon, LucideAngularModule } from "lucide-angular";
+import { LucideContainer } from "@lucide/angular";
 import { DateTime } from "luxon";
 import {
     CellEditEvent,
@@ -336,7 +336,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         GridStatePersistenceDirective,
         GridToolbarTemplateDirective,
         GridHeaderTemplateDirective,
-        LucideAngularModule
+        LucideContainer
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -415,7 +415,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                         @if (featureData["headerTemplate"].active) {
                             <ng-template monaGridHeaderTemplate let-column>
                                 <div class="w-full h-full gap-2 flex items-center px-2 overflow-hidden">
-                                    <lucide-icon [name]="containerIcon" [size]="12"></lucide-icon>
+                                    <svg lucideContainer [size]="12"></svg>
                                     <span class="font-semibold">{{ column.title }}</span>
                                 </div>
                             </ng-template>
@@ -534,7 +534,6 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return options;
     });
     protected readonly gridData = signal(generateRandomGridData(1000));
-    protected readonly containerIcon = ContainerIcon;
     protected readonly createGridRow = (): Record<PropertyKey, unknown> => {
         const gridData = this.getActiveGridData();
         const nextOrderId =

@@ -10,10 +10,10 @@ import {
     signal,
     TemplateRef,
     Type,
-    ViewContainerRef,
-    viewChild
+    viewChild,
+    ViewContainerRef
 } from "@angular/core";
-import { BadgeInfo, CircleCheckBig, LucideAngularModule, OctagonAlert, OctagonX, X } from "lucide-angular";
+import { LucideBadgeInfo, LucideCircleCheckBig, LucideOctagonAlert, LucideOctagonX, LucideX } from "@lucide/angular";
 import { asyncScheduler, interval, takeWhile } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { ProgressBarComponent } from "../../../progress-bars/progress-bar/components/progress-bar/progress-bar.component";
@@ -33,7 +33,16 @@ import {
     selector: "mona-notification",
     templateUrl: "./notification.component.html",
     styleUrl: "./notification.component.css",
-    imports: [NgTemplateOutlet, ProgressBarComponent, LucideAngularModule, ButtonDirective],
+    imports: [
+        NgTemplateOutlet,
+        ProgressBarComponent,
+        ButtonDirective,
+        LucideOctagonX,
+        LucideBadgeInfo,
+        LucideCircleCheckBig,
+        LucideOctagonAlert,
+        LucideX
+    ],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationComponent {
@@ -50,7 +59,6 @@ export class NotificationComponent {
         const theme = this.#themeService.theme();
         return notificationBodyThemeVariants(theme)();
     });
-    protected readonly closeIcon = X;
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
         return notificationContentThemeVariants(theme)();
@@ -64,7 +72,6 @@ export class NotificationComponent {
         return content instanceof TemplateRef ? (content as TemplateRef<unknown>) : null;
     });
     protected readonly contentHost = viewChild<unknown, ViewContainerRef>("contentHost", { read: ViewContainerRef });
-    protected readonly errorIcon = OctagonX;
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         return notificationHeaderThemeVariants(theme)();
@@ -74,7 +81,6 @@ export class NotificationComponent {
         const type = this.type();
         return notificationIconThemeVariants(theme)({ type });
     });
-    protected readonly infoIcon = BadgeInfo;
     protected readonly isStringContent = computed(() => typeof this.data().options.content === "string");
     protected readonly progressColor = computed(() => {
         const type = this.type();
@@ -82,13 +88,11 @@ export class NotificationComponent {
         return getComputedStyle(document.documentElement).getPropertyValue(propertyName);
     });
     protected readonly progressValue = signal(100);
-    protected readonly successIcon = CircleCheckBig;
     protected readonly textClass = computed(() => {
         const theme = this.#themeService.theme();
         return notificationTextThemeVariants(theme)();
     });
     protected readonly type = computed(() => this.data().options.type ?? "info");
-    protected readonly warningIcon = OctagonAlert;
     public readonly data = input.required<NotificationData>();
 
     public constructor() {

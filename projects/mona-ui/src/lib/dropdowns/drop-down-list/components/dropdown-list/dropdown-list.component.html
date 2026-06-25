@@ -14,8 +14,9 @@
             }
         </span>
     } @else {
-        <ng-container [ngTemplateOutlet]="valueTemplate()"
-                      [ngTemplateOutletContext]="{$implicit: selectedDataItem()}"></ng-container>
+        <ng-container
+            [ngTemplateOutlet]="valueTemplate()"
+            [ngTemplateOutletContext]="{ $implicit: selectedDataItem() }"></ng-container>
     }
 </span>
 
@@ -27,8 +28,7 @@
     <mona-loading-indicator></mona-loading-indicator>
 }
 
-<lucide-angular class="opacity-50 h-full flex items-center justify-center aspect-square" [name]="dropdownIcon"
-                [size]="18"></lucide-angular>
+<svg lucideChevronDown class="opacity-50 h-full flex items-center justify-center aspect-square"></svg>
 
 <span monaDropdownLiveRegion></span>
 
@@ -42,8 +42,9 @@
             }
             @if (groupHeaderTemplate()) {
                 <ng-template monaListGroupHeaderTemplate let-group>
-                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="groupHeaderTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: group }"></ng-container>
                 </ng-template>
             }
             @if (headerTemplate()) {
@@ -53,8 +54,9 @@
             }
             @if (itemTemplate()) {
                 <ng-template monaListItemTemplate let-dataItem>
-                    <ng-container [ngTemplateOutlet]="itemTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="itemTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-container>
                 </ng-template>
             }
             @if (noDataTemplate()) {

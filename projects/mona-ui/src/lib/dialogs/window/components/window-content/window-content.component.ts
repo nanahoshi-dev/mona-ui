@@ -17,7 +17,7 @@ import {
     viewChild,
     ViewContainerRef
 } from "@angular/core";
-import { LucideAngularModule, Maximize, Minimize, Minus, X } from "lucide-angular";
+import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/PopupCloseEvent";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
@@ -48,8 +48,10 @@ import {
         NgTemplateOutlet,
         ButtonDirective,
         WindowResizeHandlerDirective,
-        LucideAngularModule,
-        ResizePositionPipe
+        ResizePositionPipe,
+        LucideMinus,
+        LucideDynamicIcon,
+        LucideX
     ],
     host: {
         "[class]": "baseClass()",
@@ -74,7 +76,6 @@ export class WindowContentComponent implements WindowContentVariantInput {
         const rounded = this.windowData.rounded;
         return windowBaseThemeVariants(theme)({ rounded });
     });
-    protected readonly closeIcon = X;
     protected readonly componentAnchor = viewChild.required("componentAnchor", {
         read: ViewContainerRef
     });
@@ -95,10 +96,9 @@ export class WindowContentComponent implements WindowContentVariantInput {
     protected readonly contentType = signal<"template" | "component">("template");
     protected readonly headerId = createElementControlId();
     protected readonly maximizeIcon = computed(() => {
-        return this.maximized() && !this.minimized() ? Minimize : Maximize;
+        return this.maximized() && !this.minimized() ? LucideMinimize : LucideMaximize;
     });
     protected readonly maximized = signal(false);
-    protected readonly minimizeIcon = Minus;
     protected readonly minimized = signal(false);
     protected readonly titleBarActionClass = computed(() => {
         const theme = this.#themeService.theme();

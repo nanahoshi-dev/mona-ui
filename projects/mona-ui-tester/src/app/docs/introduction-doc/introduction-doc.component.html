@@ -1,0 +1,94 @@
+<app-markdown-doc src="docs/introduction/intro.md"></app-markdown-doc>
+
+<!-- Tech Stack Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 my-6">
+    <!-- Angular Card -->
+    <a
+        href="https://angular.dev"
+        target="_blank"
+        class="group flex flex-col justify-between p-5 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm bg-white transition-all duration-200 cursor-pointer">
+        <div class="flex justify-between items-start w-full">
+            <div class="w-10 h-10 rounded-lg bg-red-50/50 flex items-center justify-center text-red-600">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 5.5v10L12 22l10-6.5v-10L12 2zm8 12.8L12 19.3 4 14.8V7.2l8-2.8 8 2.8v7.6z" />
+                </svg>
+            </div>
+            <ng-container *ngTemplateOutlet="arrowIconTemplate"></ng-container>
+        </div>
+        <div class="mt-6">
+            <div class="font-bold text-gray-900 text-base">Angular</div>
+            <div class="text-sm text-gray-500 mt-1">v20.0</div>
+        </div>
+    </a>
+
+    <!-- Tailwind Card -->
+    <a
+        href="https://tailwindcss.com"
+        target="_blank"
+        class="group flex flex-col justify-between p-5 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm bg-white transition-all duration-200 cursor-pointer">
+        <div class="flex justify-between items-start w-full">
+            <div class="w-10 h-10 rounded-lg bg-teal-50/50 flex items-center justify-center text-teal-600">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 .587l3.668 3.668c1.611 1.611 1.611 4.224 0 5.835l-7.335 7.335c-1.611 1.611-4.224 1.611-5.835 0L.587 15.48c-1.611-1.611-1.611-4.224 0-5.835L12 .587zM18.165 6.752l3.668 3.668c1.611 1.611 1.611 4.224 0 5.835l-7.335 7.335c-1.611 1.611-4.224 1.611-5.835 0l-1.947-1.947 7.335-7.335c2.685-2.685 2.685-7.039 0-9.724l4.114 2.168z" />
+                </svg>
+            </div>
+            <ng-container *ngTemplateOutlet="arrowIconTemplate"></ng-container>
+        </div>
+        <div class="mt-6">
+            <div class="font-bold text-gray-900 text-base">Tailwind CSS</div>
+            <div class="text-sm text-gray-500 mt-1">v4.3</div>
+        </div>
+    </a>
+
+    <!-- TypeScript Card -->
+    <a
+        href="https://www.typescriptlang.org"
+        target="_blank"
+        class="group flex flex-col justify-between p-5 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm bg-white transition-all duration-200 cursor-pointer">
+        <div class="flex justify-between items-start w-full">
+            <div
+                class="w-10 h-10 rounded-lg bg-blue-50/50 flex items-center justify-center text-blue-700 font-bold text-sm">
+                TS
+            </div>
+            <ng-container *ngTemplateOutlet="arrowIconTemplate"></ng-container>
+        </div>
+        <div class="mt-6">
+            <div class="font-bold text-gray-900 text-base">TypeScript</div>
+            <div class="text-sm text-gray-500 mt-1">v5.9</div>
+        </div>
+    </a>
+
+    <!-- ts-collections Card -->
+    <a
+        href="https://phrolovia.github.io/ts-collections/"
+        target="_blank"
+        class="group flex flex-col justify-between p-5 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm bg-white transition-all duration-200 cursor-pointer">
+        <div class="flex justify-between items-start w-full">
+            <div class="w-10 h-10 rounded-lg bg-purple-50/50 flex items-center justify-center text-purple-600">
+                <svg
+                    class="w-6 h-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                    <path d="M12 6v6l4 2" />
+                </svg>
+            </div>
+            <ng-container *ngTemplateOutlet="arrowIconTemplate"></ng-container>
+        </div>
+        <div class="mt-6">
+            <div class="font-bold text-gray-900 text-base">ts-collections</div>
+            <div class="text-sm text-gray-500 mt-1">v17.5</div>
+        </div>
+    </a>
+</div>
+
+<app-markdown-doc src="docs/introduction/accessibility.md" parentSectionId="introduction"></app-markdown-doc>
+
+<ng-template #arrowIconTemplate>
+    <svg lucideArrowUp [size]="16" class="text-gray-400 group-hover:text-gray-600 transition-colors"></svg>
+</ng-template>

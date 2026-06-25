@@ -460,6 +460,18 @@
     "selector": "\"mona-avatar\"",
     "inputs": [
       {
+        "name": "alt",
+        "type": "string",
+        "description": "Alternative text for the avatar image.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible label for the avatar host element.",
+        "kind": "input"
+      },
+      {
         "name": "backgroundColor",
         "type": "string",
         "description": "Sets the background color of the avatar.\r\n\r\nIf an image is provided, this will be ignored.",
@@ -486,7 +498,7 @@
       {
         "name": "customStyles",
         "type": "Partial<CSSStyleDeclaration>",
-        "description": "Custom styles to apply to the avatar.\r\nThis can be used to override default styles or add additional styles.",
+        "description": "Custom styles spread over all computed host styles, taking precedence over every\r\nother style input including `display`, `height`, and `width`.\r\nOverriding layout-critical properties such as `display` may break expected rendering.",
         "kind": "input"
       },
       {
@@ -912,7 +924,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -960,7 +972,7 @@
       {
         "name": "remove",
         "type": "Event",
-        "description": "Emits when the {@link removable} is set to true and the remove icon is clicked.",
+        "description": "Emits when `removable` is `true` and the remove button is clicked.",
         "kind": "output"
       },
       {
@@ -996,7 +1008,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the chip host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
@@ -1704,7 +1716,7 @@
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
+        "description": "The page sizes that the user can select from.\r\nThese values will be displayed in the page size dropdown.",
         "kind": "input"
       },
       {
@@ -1722,13 +1734,13 @@
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
+        "description": "The method to be used to set initial column widths.\r\nIt can be the following values:\r\n- `fitView`: The columns will be resized to fit the available width.\r\n- `auto`: The columns will be resized based on the content.\r\n- A number representing the width of the columns. All columns except the columns with a specified width\r\nwill have the same width.",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
+        "description": "Whether the pager is responsive.\r\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input"
       },
       {
@@ -2160,13 +2172,13 @@
       {
         "name": "rounded",
         "type": "CheckboxDirectiveVariantProps[\"rounded\"]",
-        "description": "",
+        "description": "Sets the border radius of the checkbox.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the checkbox input element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -2496,19 +2508,19 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "",
+        "description": "Whether this individual breadcrumb item is disabled.",
         "kind": "input"
       },
       {
         "name": "listDisabled",
         "type": "boolean",
-        "description": "",
+        "description": "Whether the parent breadcrumb list is disabled. Passed down by `BreadcrumbComponent`.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the item span via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -2664,7 +2676,7 @@
       {
         "name": "closeOnBackdropClick",
         "type": "boolean",
-        "description": "Whether to close the popup when clicking on the backdrop.\nOnly applies when the popup has a backdrop.",
+        "description": "Whether to close the popup when clicking on the backdrop.\r\nOnly applies when the popup has a backdrop.",
         "kind": "input"
       },
       {
@@ -2760,19 +2772,19 @@
       {
         "name": "positionStrategy",
         "type": "\"global\" | \"connected\"",
-        "description": "The strategy for positioning the popup.\n`global` means the popup will be positioned relative to the viewport,\n`connected` means the popup will be positioned relative to the anchor element.",
+        "description": "The strategy for positioning the popup.\r\n`global` means the popup will be positioned relative to the viewport,\r\n`connected` means the popup will be positioned relative to the anchor element.",
         "kind": "input"
       },
       {
         "name": "positions",
         "type": "Array<ConnectedPosition | ConnectionPositionPair>",
-        "description": "The positions to use for the popup.\nThe popup will try to position itself in the first position that fits.\nThis is only used when the `positionStrategy` is set to `connected`.",
+        "description": "The positions to use for the popup.\r\nThe popup will try to position itself in the first position that fits.\r\nThis is only used when the `positionStrategy` is set to `connected`.",
         "kind": "input"
       },
       {
         "name": "preventClose",
         "type": "Action<PopupCloseEvent, boolean>",
-        "description": "Called when the popup is requested to close.\nThis can be used to prevent the popup from closing.",
+        "description": "Called when the popup is requested to close.\r\nThis can be used to prevent the popup from closing.",
         "kind": "input"
       },
       {
@@ -2974,6 +2986,12 @@
         "kind": "input"
       },
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible label for the button group landmark.\r\nOverride when multiple button groups appear on the same page to distinguish them for screen reader users.",
+        "kind": "input"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
@@ -3006,7 +3024,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the button group host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -3588,13 +3606,13 @@
       {
         "name": "anchor",
         "type": "ElementRef<HTMLElement> | Element",
-        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor element that the context menu will be anchored to.\r\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The anchor connection point of the popup menu.\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor connection point of the popup menu.\r\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
@@ -3624,13 +3642,13 @@
       {
         "name": "minWidth",
         "type": "string | number",
-        "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the minimum width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "navigate",
         "type": "PopupMenuNavigationEvent",
-        "description": "The event that is emitted when the popup menu is navigated.\nThis is used to handle keyboard navigation within the popup menu.",
+        "description": "The event that is emitted when the popup menu is navigated.\r\nThis is used to handle keyboard navigation within the popup menu.",
         "kind": "output"
       },
       {
@@ -3648,25 +3666,25 @@
       {
         "name": "popupConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
+        "description": "The connection point of the popup element to which the anchor will be connected.\r\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "precise",
         "type": "boolean",
-        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "description": "Whether the context menu should be opened with precise positioning.\r\nIf true, the context menu will be positioned at the mouse cursor position.\r\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "PopupMenuVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the border radius of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "PopupMenuVariantProps[\"size\"]",
-        "description": "Sets the size of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the size of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
@@ -3684,7 +3702,7 @@
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       }
     ]
@@ -5242,15 +5260,15 @@
     "selector": "\"mona-check-box\"",
     "inputs": [
       {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Sets the checked state of the checkbox.",
+        "kind": "model"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the checkbox.",
-        "kind": "input"
-      },
-      {
-        "name": "tabIndex",
-        "type": "number",
-        "description": "Sets the tab index of the checkbox.",
         "kind": "input"
       },
       {
@@ -5262,7 +5280,7 @@
       {
         "name": "inputBlur",
         "type": "FocusEvent",
-        "description": "Emits when the checkbox is blurred.",
+        "description": "Emits when the checkbox span loses focus.",
         "kind": "output"
       },
       {
@@ -5274,13 +5292,13 @@
       {
         "name": "inputFocus",
         "type": "FocusEvent",
-        "description": "Emits when the checkbox is focused.",
+        "description": "Emits when the checkbox span gains focus.",
         "kind": "output"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label text of the checkbox.\r\nIf provided, it will take precedence over the content inside the checkbox.",
+        "description": "Sets the label text of the checkbox.\nIf provided, it will take precedence over the content inside the checkbox.",
         "kind": "input"
       },
       {
@@ -5304,13 +5322,19 @@
       {
         "name": "rounded",
         "type": "CheckmarkVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the checkmark.",
+        "description": "Sets the border radius of the checkmark box.",
+        "kind": "input"
+      },
+      {
+        "name": "tabIndex",
+        "type": "number",
+        "description": "Sets the tab index of the checkbox.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the checkbox label container via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -6720,7 +6744,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the breadcrumb list element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -6978,7 +7002,7 @@
       {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

@@ -2,8 +2,8 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { LucideBox, LucideSearch } from "@lucide/angular";
 import { ImmutableSet, range } from "@mirei/ts-collections";
-import { Box, LucideAngularModule, Search } from "lucide-angular";
 import {
     ComboBoxComponent,
     DropDownFilterableDirective,
@@ -148,14 +148,15 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         DropDownVirtualScrollDirective,
         DropDownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
-        LucideAngularModule,
         DropDownFooterTemplateDirective,
         DropDownHeaderTemplateDirective,
         DropDownGroupHeaderTemplateDirective,
         DropDownGroupableDirective,
         DropDownFilterableDirective,
         CurrencyPipe,
-        DropDownItemTemplateDirective
+        DropDownItemTemplateDirective,
+        LucideBox,
+        LucideSearch
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -221,14 +222,14 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                     <ng-template monaDropDownNoDataTemplate>
                         <div
                             class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <lucide-angular [name]="boxIcon"></lucide-angular>
+                            <svg lucideBox></svg>
                             <span>No items found</span>
                         </div>
                     </ng-template>
                 }
                 @if (featureData["prefixTemplate"].active) {
                     <ng-template monaDropdownPrefixTemplate>
-                        <lucide-angular [name]="searchIcon" [size]="16" class="h-full ml-1"></lucide-angular>
+                        <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
                     </ng-template>
                 }
             </mona-combo-box>
@@ -252,7 +253,6 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         })
     });
     readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
-    protected readonly boxIcon = Box;
     protected readonly comboBoxData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -298,7 +298,6 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         };
         return groupingOptions;
     });
-    protected readonly searchIcon = Search;
     protected readonly virtualization = computed(() => {
         const features = this.features();
         const subFeatures = features["virtualization"]?.subFeatures || {};

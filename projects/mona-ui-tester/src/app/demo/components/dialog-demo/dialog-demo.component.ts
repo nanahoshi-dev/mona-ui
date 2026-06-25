@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal, TemplateRef, viewChild } from "@angular/core";
-import { FileXCorner, LucideAngularModule } from "lucide-angular";
+import { LucideFileXCorner } from "@lucide/angular";
 import {
     ButtonDirective,
     CheckBoxComponent,
@@ -195,11 +195,11 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
         DialogFooterTemplateDirective,
         CheckBoxComponent,
         DialogDescriptionTemplateDirective,
-        LucideAngularModule,
         DialogIconTemplateDirective,
         DialogContentTemplateDirective,
         TextBoxComponent,
-        TextBoxDirective
+        TextBoxDirective,
+        LucideFileXCorner
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -258,7 +258,7 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
                 }
                 @if (featureData["iconTemplate"].active) {
                     <ng-template monaDialogIconTemplate>
-                        <lucide-icon [name]="fileDeleteIcon" [size]="32"></lucide-icon>
+                        <svg lucideFileXCorner [size]="32"></svg>
                     </ng-template>
                 }
                 @if (featureData["titleTemplate"].active) {
@@ -284,7 +284,6 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
     private readonly dynamicDialogContent = viewChild<TemplateRef<unknown>>("dynamicDialogContentTemplate");
     protected readonly dialogVisible = signal(false);
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly fileDeleteIcon = FileXCorner;
     protected dynamicDialogRef: DialogRef | null = null;
     public readonly actions = input<ReturnType<DialogComponent["actions"]>>([]);
     public readonly actionsLayout = input<ReturnType<DialogComponent["actionsLayout"]>>("end");

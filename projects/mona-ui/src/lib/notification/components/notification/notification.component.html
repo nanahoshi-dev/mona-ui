@@ -13,16 +13,16 @@
             <div [class]="iconClass()" aria-hidden="true">
                 @switch (type()) {
                     @case ("error") {
-                        <lucide-icon [img]="errorIcon" aria-hidden="true"></lucide-icon>
+                        <svg lucideOctagonX aria-hidden="true"></svg>
                     }
                     @case ("info") {
-                        <lucide-icon [img]="infoIcon" aria-hidden="true"></lucide-icon>
+                        <svg lucideBadgeInfo aria-hidden="true"></svg>
                     }
                     @case ("success") {
-                        <lucide-icon [img]="successIcon" aria-hidden="true"></lucide-icon>
+                        <svg lucideCircleCheckBig aria-hidden="true"></svg>
                     }
                     @case ("warning") {
-                        <lucide-icon [img]="warningIcon" aria-hidden="true"></lucide-icon>
+                        <svg lucideOctagonAlert aria-hidden="true"></svg>
                     }
                 }
             </div>
@@ -61,7 +61,7 @@
                 [attr.aria-label]="data().options.closeTitle || 'Close'"
                 (click)="close()"
                 class="w-4 h-4 p-2">
-                <lucide-icon [img]="closeIcon" [size]="14" aria-hidden="true"></lucide-icon>
+                <svg lucideX [size]="14" aria-hidden="true"></svg>
             </button>
         </div>
     }

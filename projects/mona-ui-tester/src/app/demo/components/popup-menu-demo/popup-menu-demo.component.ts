@@ -1,15 +1,15 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, ElementRef, inject, input, signal, viewChild } from "@angular/core";
 import {
-    ArrowBigLeft,
-    ArrowBigRight,
-    ArrowLeft,
-    ArrowRight,
-    Heart,
-    LucideAngularModule,
-    RotateCw,
-    Settings
-} from "lucide-angular";
+    LucideArrowBigLeft,
+    LucideArrowBigRight,
+    LucideArrowLeft,
+    LucideArrowRight,
+    LucideHeart,
+    LucideRotateCw,
+    LucideSettings
+} from "@lucide/angular";
+import { Settings } from "luxon";
 import {
     ButtonDirective,
     MenuItemClickEvent,
@@ -207,8 +207,14 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
         PopupMenuRadioItemComponent,
         PopupMenuShortcutTemplateDirective,
         PopupMenuTextTemplateDirective,
-        LucideAngularModule,
-        RandomColorPipe
+        RandomColorPipe,
+        LucideArrowLeft,
+        LucideArrowRight,
+        LucideRotateCw,
+        LucideSettings,
+        LucideArrowBigLeft,
+        LucideArrowBigRight,
+        LucideHeart
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -238,21 +244,21 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
                 <mona-popup-menu-item label="Back">
                     @if (featureData["iconTemplate"].active) {
                         <ng-template monaPopupMenuIconTemplate>
-                            <lucide-angular [name]="backIcon" [size]="16"></lucide-angular>
+                            <svg lucideArrowLeft [size]="16"></svg>
                         </ng-template>
                     }
                 </mona-popup-menu-item>
                 <mona-popup-menu-item label="Forward" [disabled]="true">
                     @if (featureData["iconTemplate"].active) {
                         <ng-template monaPopupMenuIconTemplate>
-                            <lucide-angular [name]="forwardIcon" [size]="16"></lucide-angular>
+                            <svg lucideArrowRight [size]="16"></svg>
                         </ng-template>
                     }
                 </mona-popup-menu-item>
                 <mona-popup-menu-item label="Reload">
                     @if (featureData["iconTemplate"].active) {
                         <ng-template monaPopupMenuIconTemplate>
-                            <lucide-angular [name]="reloadIcon" [size]="14"></lucide-angular>
+                            <svg lucideRotateCw [size]="14"></svg>
                         </ng-template>
                     }
                 </mona-popup-menu-item>
@@ -341,13 +347,13 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
             @if (featureData["topLevelIconTemplate"].active) {
                 <ng-template monaPopupMenuIconTemplate let-item>
                     @if (item.label === "Settings") {
-                        <lucide-angular [name]="settingsIcon" [size]="14"></lucide-angular>
+                        <svg lucideSettings [size]="14"></svg>
                     } @else if (item.label === "Back") {
-                        <lucide-angular [name]="backIcon2" [size]="14"></lucide-angular>
+                        <svg lucideArrowBigLeft [size]="14"></svg>
                     } @else if (item.label === "Forward") {
-                        <lucide-angular [name]="forwardIcon2" [size]="14"></lucide-angular>
+                        <svg lucideArrowBigRight [size]="14"></svg>
                     } @else {
-                        <lucide-angular [name]="heartIcon" [size]="14" [color]="'' | randomColor"></lucide-angular>
+                        <svg lucideHeart [size]="14" [color]="'' | randomColor"></svg>
                     }
                 </ng-template>
             }
@@ -375,12 +381,7 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
     `
 })
 export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupMenuComponent> {
-    protected readonly backIcon = ArrowLeft;
-    protected readonly backIcon2 = ArrowBigLeft;
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly forwardIcon = ArrowRight;
-    protected readonly forwardIcon2 = ArrowBigRight;
-    protected readonly heartIcon = Heart;
     protected menuItems: MenuItem[] = [
         {
             label: "test",
@@ -395,8 +396,6 @@ export class PopupMenuWrapperComponent implements ComponentInputsAsSignal<PopupM
         { label: "test 5", checkable: true, checked: true }
     ];
     protected readonly popupAnchor = viewChild<ElementRef>("popupAnchorElement");
-    protected readonly reloadIcon = RotateCw;
-    protected readonly settingsIcon = Settings;
     public readonly anchor = input<ReturnType<PopupMenuComponent["anchor"]>>();
     public readonly anchorConnectionPoint = input<ReturnType<PopupMenuComponent["anchorConnectionPoint"]>>(null);
     public readonly items = input<any>([]);

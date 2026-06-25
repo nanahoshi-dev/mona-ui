@@ -2,10 +2,34 @@ import { Routes } from "@angular/router";
 
 export const routes: Routes = [
     {
+        path: "",
+        pathMatch: "full",
+        redirectTo: "components/introduction"
+    },
+    {
         path: "components",
         loadComponent: () =>
             import("./layout/components/components/components.component").then(m => m.ComponentsComponent),
         children: [
+            {
+                path: "",
+                pathMatch: "full",
+                redirectTo: "introduction"
+            },
+            {
+                path: "introduction",
+                loadComponent: () =>
+                    import("./docs/introduction-doc/introduction-doc.component").then(
+                        m => m.IntroductionDocComponent
+                    )
+            },
+            {
+                path: "installation",
+                loadComponent: () =>
+                    import("./docs/installation-doc/installation-doc.component").then(
+                        m => m.InstallationDocComponent
+                    )
+            },
             {
                 path: "auto-complete",
                 loadComponent: () =>

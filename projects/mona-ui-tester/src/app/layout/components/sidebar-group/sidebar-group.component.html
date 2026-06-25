@@ -1,10 +1,25 @@
-<div class="flex flex-col gap-2 p-2">
-    <div class="px-2 text-sm font-semibold text-gray-500">{{ group().title }}</div>
-    <ul class="w-full flex flex-col gap-2 text-sm font-semibold">
-        @for (item of group().items; track item) {
+<div class="flex flex-col gap-1">
+    <!-- Group Title -->
+    <div class="px-3 py-1.5 text-[11px] font-semibold tracking-widest text-muted-foreground uppercase select-none">
+        {{ group().title }}
+    </div>
+
+    <!-- Group Navigation Links -->
+    <ul class="w-full flex flex-col gap-0.5">
+        @for (item of group().items; track item.path) {
             <li>
-                <a class="px-2 py-1 rounded-sm hover:bg-gray-100" routerLink="{{group().path}}/{{item.path}}"
-                   routerLinkActive="text-blue-600">{{ item.text }}</a>
+                <a
+                    class="group flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-hover transition-all cursor-pointer"
+                    [routerLink]="[group().path + item.path]"
+                    routerLinkActive="bg-selected text-foreground font-semibold">
+                    @if (item.icon) {
+                        <svg
+                            [lucideIcon]="item.icon"
+                            [size]="16"
+                            class="text-muted-foreground group-hover:text-foreground group-[.bg-selected]:text-primary transition-colors flex-shrink-0"></svg>
+                    }
+                    <span>{{ item.text }}</span>
+                </a>
             </li>
         }
     </ul>

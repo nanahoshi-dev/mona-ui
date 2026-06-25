@@ -14,7 +14,7 @@ import {
     TemplateRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { CircleX, LucideAngularModule } from "lucide-angular";
+import { LucideCircleX } from "@lucide/angular";
 import { filter, fromEvent } from "rxjs";
 import { ButtonDirective } from "../../button/directives/button.directive";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
@@ -26,7 +26,7 @@ import { twMerge } from "tailwind-merge";
     selector: "mona-chip",
     templateUrl: "./chip.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [LucideAngularModule, ButtonDirective, NgTemplateOutlet],
+    imports: [ButtonDirective, NgTemplateOutlet, LucideCircleX],
     host: {
         "[class]": "baseClass()",
         "[attr.tabindex]": "effectiveTabIndex()",
@@ -42,10 +42,10 @@ export class ChipComponent implements ChipVariantInputs {
     readonly #themeService = inject(ThemeService);
 
     protected readonly ariaChecked = computed(() => {
-        if (this.selected() !== undefined) {
-            return this.selected() ? "true" : "false";
+        if (!this.toggleable()) {
+            return undefined;
         }
-        return undefined;
+        return this.selected() ? "true" : "false";
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -96,7 +96,6 @@ export class ChipComponent implements ChipVariantInputs {
         }
     });
     protected readonly prefixTemplate = contentChild(ChipPrefixTemplateDirective, { read: TemplateRef });
-    protected readonly removeIcon = CircleX;
     protected readonly role = computed(() => {
         if (this.toggleable()) {
             return "checkbox";
@@ -138,7 +137,7 @@ export class ChipComponent implements ChipVariantInputs {
     public readonly removable = input(false);
 
     /**
-     * @description Emits when the {@link removable} is set to true and the remove icon is clicked.
+     * @description Emits when `removable` is `true` and the remove button is clicked.
      */
     public readonly remove = output<Event>();
 
@@ -167,6 +166,10 @@ export class ChipComponent implements ChipVariantInputs {
      */
     public readonly toggleable = input(false);
 
+    /**
+     * @description Additional CSS classes merged onto the chip host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input("", { alias: "class" });
 
     /**
@@ -205,7 +208,7 @@ export class ChipComponent implements ChipVariantInputs {
             )
             .subscribe(event => {
                 const target = event.target as HTMLElement;
-                if (target.closest("lucide-angular")) {
+                if (target.closest("svg[lucideX]")) {
                     return;
                 }
                 event.preventDefault();
@@ -219,7 +222,7 @@ export class ChipComponent implements ChipVariantInputs {
             )
             .subscribe(event => {
                 const target = event.target as HTMLElement;
-                if (target.closest("lucide-angular")) {
+                if (target.closest("svg[lucideX]")) {
                     return;
                 }
                 this.#handleActivation();

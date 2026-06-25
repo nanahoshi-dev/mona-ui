@@ -19,7 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { Copy, LucideAngularModule } from "lucide-angular";
+import { LucideCopy } from "@lucide/angular";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownButtonItemComponent } from "../../../../buttons/drop-down-button/components/dropdown-button-item/dropdown-button-item.component";
@@ -75,9 +75,9 @@ import {
         TextBoxSuffixTemplateDirective,
         SliderComponent,
         NgTemplateOutlet,
-        LucideAngularModule,
         DropdownButtonComponent,
-        DropdownButtonItemComponent
+        DropdownButtonItemComponent,
+        LucideCopy
     ],
     host: {
         "[class]": "baseClasses()",
@@ -139,7 +139,6 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             onClick: () => this.onResetColorClick()
         }
     ]);
-    protected readonly copyIcon = Copy;
     protected readonly hex = computed(() => {
         const rgb = this.rgb();
         const alpha = this.alpha();

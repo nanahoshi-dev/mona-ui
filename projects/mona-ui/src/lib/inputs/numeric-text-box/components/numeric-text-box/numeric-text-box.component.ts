@@ -19,7 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { ChevronDown, ChevronUp, LucideAngularModule } from "lucide-angular";
+import { LucideChevronDown, LucideChevronUp } from "@lucide/angular";
 import {
     concatMap,
     delay,
@@ -61,7 +61,7 @@ type Sign = "-" | "+";
             multi: true
         }
     ],
-    imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideAngularModule],
+    imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideChevronUp, LucideChevronDown],
     host: {
         "[class]": "classes()",
         "[attr.role]": "'spinbutton'",
@@ -89,8 +89,6 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly decreaseIcon = ChevronDown;
-    protected readonly increaseIcon = ChevronUp;
     protected readonly inputClasses = computed(() => {
         const theme = this.#themeService.theme();
         const hasPrefixTemplate = this.prefixTemplateList().length > 0;

@@ -1,15 +1,13 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
 import {
-    Check,
-    CheckLine,
-    CreditCard,
-    FileSearchCorner,
-    LucideAngularModule,
-    MapPinHouse,
-    ShoppingCart,
-    Truck
-} from "lucide-angular";
+    LucideCheck,
+    LucideCreditCard,
+    LucideFileSearchCorner,
+    LucideMapPinHouse,
+    LucideShoppingCart,
+    LucideTruck
+} from "@lucide/angular";
 import {
     StepperComponent,
     StepperIndicatorTemplateDirective,
@@ -32,39 +30,7 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
     readonly #injector = createFeatureInjector({
         indicatorTemplate: {
             code: `
-                <mona-stepper>
-                    <ng-template
-                        monaStepperIndicatorTemplate
-                        let-dataItem
-                        let-active="active"
-                        let-index="index"
-                        let-currentIndex="currentIndex">
-                        @if (index < currentIndex || currentIndex === 5) {
-                            <lucide-angular [name]="checkIcon" class="text-lime-300 font-bold" [size]="16"></lucide-angular>
-                        } @else {
-                            @switch (dataItem.label) {
-                                @case ("Cart") {
-                                    <lucide-angular [name]="cartIcon" class="font-bold" [size]="16"></lucide-angular>
-                                }
-                                @case ("Address") {
-                                    <lucide-angular [name]="addressIcon" class="font-bold" [size]="16"></lucide-angular>
-                                }
-                                @case ("Shipping") {
-                                    <lucide-angular [name]="shippingIcon" class="font-bold" [size]="16"></lucide-angular>
-                                }
-                                @case ("Payment") {
-                                    <lucide-angular [name]="paymentIcon" class="font-bold" [size]="16"></lucide-angular>
-                                }
-                                @case ("Review") {
-                                    <lucide-angular [name]="reviewIcon" class="font-bold" [size]="16"></lucide-angular>
-                                }
-                                @case ("Complete") {
-                                    <lucide-angular [name]="completeIcon" class="font-bold" [size]="16"></lucide-angular>
-                                }
-                            }
-                        }
-                    </ng-template>
-                </mona-stepper>
+
             `,
             active: false,
             name: "Indicator Template",
@@ -166,10 +132,15 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
     imports: [
         StepperComponent,
         StepperIndicatorTemplateDirective,
-        LucideAngularModule,
         StepperLabelTemplateDirective,
         StepperStepTemplateDirective,
-        RandomColorPipe
+        RandomColorPipe,
+        LucideCheck,
+        LucideShoppingCart,
+        LucideMapPinHouse,
+        LucideTruck,
+        LucideCreditCard,
+        LucideFileSearchCorner
     ],
     template: `
         @let featureData = features();
@@ -188,26 +159,26 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
                     let-index="index"
                     let-currentIndex="currentIndex">
                     @if (index < currentIndex || currentIndex === 5) {
-                        <lucide-angular [name]="checkIcon" class="text-lime-300 font-bold" [size]="16"></lucide-angular>
+                        <svg lucideCheck class="text-lime-300 font-bold" [size]="16"></svg>
                     } @else {
                         @switch (dataItem.label) {
                             @case ("Cart") {
-                                <lucide-angular [name]="cartIcon" class="font-bold" [size]="16"></lucide-angular>
+                                <svg lucideShoppingCart class="font-bold" [size]="16"></svg>
                             }
                             @case ("Address") {
-                                <lucide-angular [name]="addressIcon" class="font-bold" [size]="16"></lucide-angular>
+                                <svg lucideMapPinHouse class="font-bold" [size]="16"></svg>
                             }
                             @case ("Shipping") {
-                                <lucide-angular [name]="shippingIcon" class="font-bold" [size]="16"></lucide-angular>
+                                <svg lucideTruck class="font-bold" [size]="16"></svg>
                             }
                             @case ("Payment") {
-                                <lucide-angular [name]="paymentIcon" class="font-bold" [size]="16"></lucide-angular>
+                                <svg lucideCreditCard class="font-bold" [size]="16"></svg>
                             }
                             @case ("Review") {
-                                <lucide-angular [name]="reviewIcon" class="font-bold" [size]="16"></lucide-angular>
+                                <svg lucideFileSearchCorner class="font-bold" [size]="16"></svg>
                             }
                             @case ("Complete") {
-                                <lucide-angular [name]="completeIcon" class="font-bold" [size]="16"></lucide-angular>
+                                <svg lucideCheck class="font-bold" [size]="16"></svg>
                             }
                         }
                     }
@@ -247,14 +218,7 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
     }
 })
 export class StepperWrapperComponent implements ComponentInputsAsSignal<StepperComponent> {
-    protected readonly addressIcon = MapPinHouse;
-    protected readonly cartIcon = ShoppingCart;
-    protected readonly checkIcon = Check;
-    protected readonly completeIcon = CheckLine;
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly paymentIcon = CreditCard;
-    protected readonly reviewIcon = FileSearchCorner;
-    protected readonly shippingIcon = Truck;
     public readonly linear = input<ReturnType<StepperComponent["linear"]>>(true);
     public readonly orientation = input<ReturnType<StepperComponent["orientation"]>>("horizontal");
     public readonly rounded = input<ReturnType<StepperComponent["rounded"]>>("full");

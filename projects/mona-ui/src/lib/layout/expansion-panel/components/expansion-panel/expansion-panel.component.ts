@@ -14,6 +14,7 @@ import {
     TemplateRef,
     viewChild
 } from "@angular/core";
+import { LucideMinus, LucidePlus } from "@lucide/angular";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
 import { ExpansionPanelTitleTemplateDirective } from "../../directives/expansion-panel-title-template.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -27,7 +28,6 @@ import {
     ExpansionPanelVariantProps
 } from "../../styles/expansion-panel.styles";
 import { ExpansionPanelIconTemplateDirective } from "../../directives/expansion-panel-icon-template.directive";
-import { LucideAngularModule, Minus, Plus } from "lucide-angular";
 import { fromEvent } from "rxjs";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { createElementControlId } from "../../../../utils/createElementControlId";
@@ -37,7 +37,7 @@ import { createElementControlId } from "../../../../utils/createElementControlId
     templateUrl: "./expansion-panel.component.html",
     styles: ``,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgTemplateOutlet, LucideAngularModule],
+    imports: [NgTemplateOutlet, LucideMinus, LucidePlus],
     host: {
         "[class]": "baseClass()"
     }
@@ -53,14 +53,12 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
         const rounded = this.rounded();
         return expansionPanelBaseThemeVariants(theme)({ rounded });
     });
-    protected readonly collapseIcon = Minus;
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
         const expanded = this.expanded();
         return expansionPanelContentThemeVariants(theme)({ expanded });
     });
     protected readonly contentId = createElementControlId();
-    protected readonly expandIcon = Plus;
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         const collapsed = !this.expanded();

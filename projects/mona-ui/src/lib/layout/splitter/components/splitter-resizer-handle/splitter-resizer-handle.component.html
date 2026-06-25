@@ -1,33 +1,49 @@
-@if (orientation() === 'horizontal') {
+@if (orientation() === "horizontal") {
     @if (previousControlsVisible()) {
-        <button monaButton look="secondary" [rounded]="'none'" (click)="collapsePrevious.emit($event)"
-                (pointerdown)="onPointerDown($event)">
-            <lucide-angular [name]="leftArrowIcon" [size]="12"></lucide-angular>
+        <button
+            monaButton
+            look="secondary"
+            [rounded]="'none'"
+            (click)="collapsePrevious.emit($event)"
+            (pointerdown)="onPointerDown($event)">
+            <svg lucideChevronLeft [size]="12"></svg>
         </button>
     }
     @if (resizable()) {
         <div class="flex h-6 w-0.5 bg-primary/40"></div>
     }
     @if (nextControlsVisible()) {
-        <button monaButton look="secondary" [rounded]="'none'" (click)="collapseNext.emit($event)"
-                (pointerdown)="onPointerDown($event)">
-            <lucide-angular [name]="rightArrowIcon" [size]="12"></lucide-angular>
+        <button
+            monaButton
+            look="secondary"
+            [rounded]="'none'"
+            (click)="collapseNext.emit($event)"
+            (pointerdown)="onPointerDown($event)">
+            <svg lucideChevronRight [size]="12"></svg>
         </button>
     }
 } @else {
     @if (previousControlsVisible()) {
-        <button monaButton look="secondary" [rounded]="'none'" (click)="collapsePrevious.emit($event)"
-                (pointerdown)="onPointerDown($event)">
-            <lucide-angular [name]="topArrowIcon" [size]="12"></lucide-angular>
+        <button
+            monaButton
+            look="secondary"
+            [rounded]="'none'"
+            (click)="collapsePrevious.emit($event)"
+            (pointerdown)="onPointerDown($event)">
+            <svg lucideChevronUp [size]="12"></svg>
         </button>
     }
     @if (resizable()) {
         <div class="flex h-0.5 w-6 bg-primary/40"></div>
     }
     @if (nextControlsVisible()) {
-        <button monaButton look="secondary" [rounded]="'none'" (click)="collapseNext.emit($event)"
-                (pointerdown)="onPointerDown($event)">
-            <lucide-angular [name]="downArrowIcon" [size]="12"></lucide-angular>
+        <button
+            monaButton
+            look="secondary"
+            [rounded]="'none'"
+            (click)="collapseNext.emit($event)"
+            (pointerdown)="onPointerDown($event)">
+            <svg lucideChevronDown [size]="12"></svg>
         </button>
     }
 }

@@ -23,12 +23,12 @@ import { PageService } from "../../services/page.service";
 })
 export class SectionComponent {
     readonly #pageService = inject(PageService);
+    private readonly nestedSections = contentChildren(SectionComponent);
     public readonly depth = signal(0);
     public readonly header = input("Header");
     public readonly headerType = input.required<HeaderType>();
     public readonly id = input.required<string>();
     public readonly parentId = signal<string | null>(null);
-    public readonly nestedSections = contentChildren(SectionComponent);
 
     public constructor() {
         effect(() => {
@@ -39,7 +39,7 @@ export class SectionComponent {
                     ns.parentId.set(id);
                     ns.depth.set(this.depth() + 1);
                 });
-                this.#pageService.setSections([this], this.parentId() == null);
+                this.#pageService.setSections([this]);
             });
         });
         inject(DestroyRef).onDestroy(() => {

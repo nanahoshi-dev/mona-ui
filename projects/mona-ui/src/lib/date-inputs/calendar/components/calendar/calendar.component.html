@@ -49,7 +49,7 @@
         [size]="'small'"
         (click)="onNavigationClick('prev')"
         [attr.aria-label]="prevButtonLabel()">
-        <lucide-angular [name]="prevMonthIcon"></lucide-angular>
+        <svg lucideChevronLeft></svg>
     </button>
     <button
         monaButton
@@ -59,7 +59,7 @@
         [size]="'small'"
         (click)="onNavigationClick('next')"
         [attr.aria-label]="nextButtonLabel()">
-        <lucide-angular [name]="nextMonthIcon"></lucide-angular>
+        <svg lucideChevronRight></svg>
     </button>
 </div>
 

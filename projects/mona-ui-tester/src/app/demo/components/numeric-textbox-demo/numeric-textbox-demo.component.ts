@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
-import { Hash, LucideAngularModule } from "lucide-angular";
+import { LucideHash } from "@lucide/angular";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -26,9 +26,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
         },
         prefixTemplate: {
             code: `
-                <ng-template monaNumericTextBoxPrefixTemplate>
-                    <lucide-icon [name]="Hash" [size]="16" class="mx-0.5"></lucide-icon>
-                </ng-template>
+
             `,
             description: `This template is used to customize the prefix of the numeric text box.`,
             name: "Prefix Template",
@@ -37,24 +35,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
     });
     protected readonly config = signal<ComponentConfig<NumericTextBoxComponent>>({
         code: `
-            <mona-numeric-text-box
-                [decimals]="decimals()"
-                [disabled]="disabled()"
-                [formatter]="formatter()"
-                [max]="max()"
-                [min]="min()"
-                [nullable]="nullable()"
-                [readonly]="readonly()"
-                [required]="required()"
-                [rounded]="rounded()"
-                [size]="size()"
-                [spinners]="spinners()"
-                [step]="step()"
-                class="w-40">
-                <ng-template monaNumericTextBoxPrefixTemplate>
-                    <lucide-icon [name]="Hash" [size]="16" class="mx-0.5"></lucide-icon>
-                </ng-template>
-            </mona-numeric-text-box>
+
         `,
         inputs: {
             decimals: {
@@ -119,7 +100,7 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
 }
 
 @Component({
-    imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, LucideAngularModule, ReactiveFormsModule],
+    imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, ReactiveFormsModule, LucideHash],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
@@ -139,14 +120,13 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
             class="w-40">
             @if (featureData && featureData["prefixTemplate"].active) {
                 <ng-template monaNumericTextBoxPrefixTemplate>
-                    <lucide-icon [name]="Hash" [size]="16" class="mx-0.5"></lucide-icon>
+                    <svg lucideHash [size]="16" class="mx-0.5"></svg>
                 </ng-template>
             }
         </mona-numeric-text-box>
     `
 })
 export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<NumericTextBoxComponent> {
-    protected readonly Hash = Hash;
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly formatterFn = computed(() => {
         const featureData = this.features();

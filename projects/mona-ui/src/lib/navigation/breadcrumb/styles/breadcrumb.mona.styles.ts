@@ -20,9 +20,9 @@ export const breadcrumbListItemVariants = cva(
     `
         flex items-center
         truncate cursor-pointer
-        h-full
+        h-full text-primary/70
         outline-none rounded-sm px-1
-        hover:bg-hover hover:text-foreground
+        hover:text-primary
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
         transition-colors duration-100 ease-in-out
     `,
@@ -45,4 +45,4 @@ export const breadcrumbListItemVariants = cva(
     }
 );
 
-export const breadcrumbCurrentItemVariants = cva(`flex items-center truncate cursor-default font-medium`);
+export const breadcrumbCurrentItemVariants = cva(`flex items-center truncate cursor-default font-medium text-primary`);

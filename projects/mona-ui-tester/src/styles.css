@@ -125,6 +125,7 @@ html,
 body {
     width: 100%;
     height: 100%;
+    overflow: hidden;
     scroll-behavior: smooth;
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
@@ -161,4 +162,135 @@ div.mona-tab-strip {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+}
+
+/* Scoped prose styles for rendered markdown content */
+markdown.block {
+    & h1 {
+        font-size: 1.875rem;
+        font-weight: 800;
+        line-height: 2.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    & h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 2rem;
+        margin-bottom: 0.5rem;
+        margin-top: 1.5rem;
+        padding-bottom: 0.375rem;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    & h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        line-height: 1.75rem;
+        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    & h4 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        margin-top: 0.75rem;
+    }
+
+    & p {
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 1.625;
+        margin-bottom: 0.75rem;
+        color: var(--color-muted-foreground);
+    }
+
+    & ul {
+        list-style-type: disc;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    & ol {
+        list-style-type: decimal;
+        padding-left: 1.5rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    & li {
+        margin-bottom: 0.25rem;
+        color: var(--color-muted-foreground);
+    }
+
+    & a {
+        color: var(--color-primary);
+        text-decoration: underline;
+    }
+
+    & blockquote {
+        border-left: 4px solid var(--color-border);
+        padding-left: 1rem;
+        color: var(--color-muted-foreground);
+        font-style: italic;
+        margin: 0.75rem 0;
+    }
+
+    & code:not(pre > code) {
+        background-color: var(--color-muted);
+        color: var(--color-foreground);
+        font-family: ui-monospace, monospace;
+        font-size: 0.8125rem;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+    }
+
+    & pre {
+        background-color: #18181b;
+        color: #d4d4d4;
+        font-family: ui-monospace, monospace;
+        font-size: 0.8125rem;
+        line-height: 1.6;
+        padding: 1rem 1.25rem;
+        border-radius: 0.375rem;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+    }
+
+    & table {
+        width: 100%;
+        font-size: 0.875rem;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+        border: 1px solid var(--color-border);
+    }
+
+    & thead {
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    & th {
+        text-align: left;
+        font-weight: 600;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--color-border);
+        background-color: var(--color-muted);
+    }
+
+    & td {
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--color-border);
+        color: var(--color-muted-foreground);
+    }
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }

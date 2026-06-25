@@ -13,7 +13,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
-import { LucideAngularModule } from "lucide-angular";
 import { fromEvent } from "rxjs";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
 import { SlicePipe } from "../../../pipes/slice.pipe";
@@ -60,7 +59,6 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         GridDetailIndentCellDirective,
         GridDetailContentCellDirective,
         SlicePipe,
-        LucideAngularModule,
         GridToggleComponent,
         GridFooterTableCellDirective,
         GridLogicalCellDirective,

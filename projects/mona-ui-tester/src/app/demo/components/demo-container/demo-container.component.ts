@@ -1,7 +1,7 @@
 import { Directionality } from "@angular/cdk/bidi";
 import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { Code, LucideAngularModule } from "lucide-angular";
+import { LucideCode } from "@lucide/angular";
 import {
     ButtonDirective,
     ColorPickerComponent,
@@ -24,8 +24,8 @@ import { ConfigComponent } from "../config/config.component";
         FormsModule,
         CodeViewerComponent,
         ButtonDirective,
-        LucideAngularModule,
-        ColorPickerComponent
+        ColorPickerComponent,
+        LucideCode
     ],
     templateUrl: "./demo-container.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,7 +72,6 @@ export class DemoContainerComponent<TComponent> {
     readonly #directionality = inject(Directionality);
     readonly #document = inject(DOCUMENT);
     readonly #themeService = inject(ThemeService);
-    protected readonly Code = Code;
     protected readonly background = computed(() => {
         const customColor = this.customColor();
         if (customColor) {

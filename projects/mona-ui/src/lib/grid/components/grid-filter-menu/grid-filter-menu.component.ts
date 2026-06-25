@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ComponentRef, ElementRef, inject, input, output } from "@angular/core";
-import { FunnelIcon, LucideAngularModule } from "lucide-angular";
+import { LucideFunnel } from "@lucide/angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { FilterMenuComponent } from "../../../filter/components/filter-menu/filter-menu.component";
@@ -16,7 +16,7 @@ import { GridService } from "../../services/grid.service";
     selector: "mona-grid-filter-menu",
     templateUrl: "./grid-filter-menu.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ButtonDirective, LucideAngularModule]
+    imports: [ButtonDirective, LucideFunnel]
 })
 export class GridFilterMenuComponent {
     readonly #filterService = inject(FilterService);
@@ -24,7 +24,6 @@ export class GridFilterMenuComponent {
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #popupService = inject(PopupService);
     #popupRef?: PopupRef;
-    protected readonly filterIcon = FunnelIcon;
     public readonly apply = output<ColumnFilterState>();
     public readonly column = input.required<Column>();
     public readonly type = input<DataType>("string");

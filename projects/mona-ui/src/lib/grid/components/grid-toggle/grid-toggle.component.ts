@@ -1,20 +1,20 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from "@angular/core";
-import { ChevronDownIcon, ChevronRightIcon, LucideAngularModule, MinusIcon, PlusIcon } from "lucide-angular";
+import { LucideChevronDown, LucideChevronRight, LucideDynamicIcon, LucideMinus, LucidePlus } from "@lucide/angular";
 
 @Component({
     selector: "mona-grid-toggle",
-    imports: [LucideAngularModule],
+    imports: [LucideDynamicIcon],
     templateUrl: "./grid-toggle.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GridToggleComponent {
     protected readonly collapseIcon = computed(() => {
         const type = this.type();
-        return type === "detail" ? MinusIcon : ChevronDownIcon;
+        return type === "detail" ? LucideMinus : LucideChevronDown;
     });
     protected readonly expandIcon = computed(() => {
         const type = this.type();
-        return type === "detail" ? PlusIcon : ChevronRightIcon;
+        return type === "detail" ? LucidePlus : LucideChevronRight;
     });
 
     public readonly expanded = model.required<boolean>();

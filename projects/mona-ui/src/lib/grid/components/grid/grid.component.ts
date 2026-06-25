@@ -29,7 +29,6 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { LucideAngularModule } from "lucide-angular";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
@@ -125,8 +124,7 @@ import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list
         GridLockedCellDirective,
         ButtonDirective,
         PopupComponent,
-        GridColumnChooserComponent,
-        LucideAngularModule
+        GridColumnChooserComponent
     ],
     host: {
         "[class]": "baseClass()",

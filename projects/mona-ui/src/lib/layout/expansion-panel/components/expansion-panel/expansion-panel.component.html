@@ -1,5 +1,11 @@
-<div #header [class]="headerClass()" role="button" tabindex="0" [attr.aria-expanded]="expanded()"
-     [attr.aria-controls]="contentId" (click)="expanded.set(!expanded())">
+<div
+    #header
+    [class]="headerClass()"
+    role="button"
+    tabindex="0"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="contentId"
+    (click)="expanded.set(!expanded())">
     <div [class]="headerTitleClass()">
         @if (titleTemplate()) {
             <ng-container [ngTemplateOutlet]="titleTemplate()"></ng-container>
@@ -14,19 +20,23 @@
     </div>
     <div [class]="iconContainerClass()">
         @if (iconTemplate()) {
-            <ng-container [ngTemplateOutlet]="iconTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: expanded()}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="iconTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: expanded() }"></ng-container>
         } @else {
             @if (expanded()) {
-                <lucide-angular [name]="collapseIcon" [size]="14"></lucide-angular>
+                <svg lucideMinus [size]="14"></svg>
             } @else {
-                <lucide-angular [name]="expandIcon" [size]="14"></lucide-angular>
+                <svg lucidePlus [size]="14"></svg>
             }
         }
     </div>
 </div>
-<div [id]="contentId" [class]="contentClass()" [attr.aria-hidden]="!expanded()"
-     [attr.inert]="!expanded() ? true : undefined">
+<div
+    [id]="contentId"
+    [class]="contentClass()"
+    [attr.aria-hidden]="!expanded()"
+    [attr.inert]="!expanded() ? true : undefined">
     <div>
         <ng-content></ng-content>
     </div>

@@ -136,6 +136,11 @@ export class ButtonDirective implements ButtonVariantsInput {
      * If set to `true`, the button will toggle its selected state on click.
      */
     public readonly toggleable = input(false);
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

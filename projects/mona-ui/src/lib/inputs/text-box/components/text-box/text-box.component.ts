@@ -8,7 +8,6 @@ import {
     ElementRef,
     forwardRef,
     inject,
-    Injector,
     input,
     output,
     signal,
@@ -16,7 +15,7 @@ import {
     viewChild
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { LucideAngularModule, X } from "lucide-angular";
+import { LucideX } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { AttributeBinderDirective } from "../../../../common/directives/attribute-binder.directive";
@@ -41,7 +40,7 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
             multi: true
         }
     ],
-    imports: [NgTemplateOutlet, FormsModule, ButtonDirective, LucideAngularModule, AttributeBinderDirective],
+    imports: [NgTemplateOutlet, FormsModule, ButtonDirective, AttributeBinderDirective, LucideX],
     host: {
         "[attr.data-disabled]": "disabled()",
         "[attr.data-readonly]": "readonly()",
@@ -63,7 +62,6 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
-    protected readonly clearIcon = X;
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });

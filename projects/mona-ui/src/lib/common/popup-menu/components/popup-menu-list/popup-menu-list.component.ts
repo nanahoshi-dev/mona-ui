@@ -11,8 +11,8 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { groupBy, selectMany } from "@mirei/ts-collections";
-import { Check, ChevronRight, LucideAngularModule } from "lucide-angular";
 import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
@@ -37,7 +37,7 @@ import {
 
 @Component({
     selector: "mona-popup-menu-list",
-    imports: [LucideAngularModule, NgTemplateOutlet],
+    imports: [NgTemplateOutlet, LucideChevronRight, LucideCheck],
     templateUrl: "./popup-menu-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
@@ -95,7 +95,6 @@ export class PopupMenuListComponent implements OnInit {
         const rounded = this.#parentConfig.rounded();
         return popupMenuBaseThemeVariants(theme)({ rounded });
     });
-    protected readonly checkIcon = Check;
     protected readonly containerClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
@@ -124,7 +123,6 @@ export class PopupMenuListComponent implements OnInit {
         const theme = this.#themeService.theme();
         return popupMenuLinkThemeVariants(theme)();
     });
-    protected readonly linkIcon = ChevronRight;
     protected readonly menuId = computed(() => this.#parentConfig.menuId);
     protected readonly menuItemClasses = computed(() => {
         const theme = this.#themeService.theme();

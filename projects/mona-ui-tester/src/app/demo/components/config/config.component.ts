@@ -1,8 +1,8 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal, untracked } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { LucideCode } from "@lucide/angular";
 import { where } from "@mirei/ts-collections";
-import { Code, LucideAngularModule } from "lucide-angular";
 import {
     ButtonDirective,
     DropDownItemTemplateDirective,
@@ -33,7 +33,6 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         ApiInputListItemComponent,
         CodeViewerComponent,
         ButtonDirective,
-        LucideAngularModule,
         InputPropertyPipe,
         NgTemplateOutlet,
         DropDownListValueTemplateDirective,
@@ -43,7 +42,8 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         TabsComponent,
         TabComponent,
         TabContentTemplateDirective,
-        TextBoxComponent
+        TextBoxComponent,
+        LucideCode
     ],
     templateUrl: "./config.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -69,7 +69,6 @@ export class ConfigComponent<C> {
         }
         return createComponentPropertyConfig(updatedConfig);
     });
-    protected readonly codeIcon = Code;
     public readonly config = input.required<ComponentConfig<C>>();
     public readonly inputProperties = computed(() => {
         return this.#componentPropertyConfig().inputs;

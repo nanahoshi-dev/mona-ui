@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal, viewChild } from "@angular/core";
+import { LucideBox } from "@lucide/angular";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -18,7 +19,6 @@ import { ComponentConfig, type ComponentInputsAsSignal } from "../../utils/compo
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
-import { Box, LucideAngularModule } from "lucide-angular";
 
 @Component({
     selector: "app-list-box-demo",
@@ -172,7 +172,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
                  <mona-list-box>
                     <ng-template monaListBoxNoDataTemplate>
                         <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <lucide-angular [name]="boxIcon"></lucide-angular>
+                            <svg lucideBox></svg>
                             <span>List box has no items.</span>
                         </div>
                     </ng-template>
@@ -241,9 +241,9 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         ListBoxItemTemplateDirective,
         CurrencyPipe,
         ListBoxNoDataTemplateDirective,
-        LucideAngularModule,
         ListBoxHeaderTemplateDirective,
-        ListBoxFooterTemplateDirective
+        ListBoxFooterTemplateDirective,
+        LucideBox
     ],
     template: `
         @let featureData = features();
@@ -289,7 +289,7 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
             @if (featureData["noDataTemplate"].active) {
                 <ng-template monaListBoxNoDataTemplate>
                     <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                        <lucide-angular [name]="boxIcon"></lucide-angular>
+                        <svg lucideBox></svg>
                         <span>List box has no items.</span>
                     </div>
                 </ng-template>
@@ -321,7 +321,6 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
 })
 class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponent> {
     #listData = signal(ImmutableSet.create(dropdownFoodData));
-    protected readonly boxIcon = Box;
     protected readonly connectedListsVisible = computed(() => {
         const features = this.features();
         return features["connectedLists"].active;

@@ -3,8 +3,8 @@
     class="inline-flex items-center justify-center h-full aspect-square"
     (click)="onToggleDetailClick($event)">
     @if (expanded()) {
-        <lucide-icon [name]="collapseIcon()" [size]="16"></lucide-icon>
+        <svg [lucideIcon]="collapseIcon()" [size]="16"></svg>
     } @else {
-        <lucide-icon [name]="expandIcon()" [size]="16"></lucide-icon>
+        <svg [lucideIcon]="expandIcon()" [size]="16"></svg>
     }
 </span>

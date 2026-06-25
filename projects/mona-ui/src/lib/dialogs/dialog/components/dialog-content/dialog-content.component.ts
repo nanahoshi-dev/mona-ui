@@ -2,15 +2,16 @@ import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, ElementRef, inject } from "@angular/core";
 import {
-    BadgeInfo,
-    BadgeQuestionMark,
-    CircleCheckBig,
-    LucideAngularModule,
-    LucideIconData,
-    OctagonAlert,
-    OctagonX,
-    X
-} from "lucide-angular";
+    LucideBadgeInfo,
+    LucideBadgeQuestionMark,
+    LucideCircleCheckBig,
+    LucideDynamicIcon,
+    LucideIconBase,
+    type LucideIconInput,
+    LucideOctagonAlert,
+    LucideOctagonX,
+    LucideX
+} from "@lucide/angular";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { AnyPipe } from "../../../../pipes/any.pipe";
 import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
@@ -35,11 +36,11 @@ import {
     DialogVariantProps
 } from "../../styles/dialog.styles";
 
-type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; icon: LucideIconData }>;
+type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; icon: LucideIconInput }>;
 
 @Component({
     templateUrl: "./dialog-content.component.html",
-    imports: [LucideAngularModule, ButtonDirective, NgTemplateOutlet, AnyPipe],
+    imports: [ButtonDirective, NgTemplateOutlet, AnyPipe, LucideX, LucideDynamicIcon],
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
@@ -52,11 +53,11 @@ type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; 
 export class DialogContentComponent {
     readonly #hostElementRef = inject(ElementRef);
     readonly #iconMap: IconMap = {
-        confirm: { color: "var(--color-success)", icon: BadgeQuestionMark },
-        error: { color: "var(--color-error)", icon: OctagonX },
-        info: { color: "var(--color-info)", icon: BadgeInfo },
-        success: { color: "var(--color-success)", icon: CircleCheckBig },
-        warning: { color: "var(--color-warning)", icon: OctagonAlert }
+        confirm: { color: "var(--color-success)", icon: LucideBadgeQuestionMark },
+        error: { color: "var(--color-error)", icon: LucideOctagonX },
+        info: { color: "var(--color-info)", icon: LucideBadgeInfo },
+        success: { color: "var(--color-success)", icon: LucideCircleCheckBig },
+        warning: { color: "var(--color-warning)", icon: LucideOctagonAlert }
     };
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
@@ -73,7 +74,6 @@ export class DialogContentComponent {
         const theme = this.#themeService.theme();
         return dialogCloseButtonContainerThemeVariants(theme)();
     });
-    protected readonly closeIcon = X;
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
         return dialogContentThemeVariants(theme)();

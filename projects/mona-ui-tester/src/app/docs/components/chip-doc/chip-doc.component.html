@@ -1,10 +1,5 @@
-<app-section id="chip" [header]="'Chip'" headerType="H1">
-    <p>Displays a chip component.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-chip-demo></app-chip-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/chip/intro.md"></app-markdown-doc>
 
+<app-chip-demo></app-chip-demo>
+
+<app-markdown-doc src="docs/chip/api.md" parentSectionId="chip"></app-markdown-doc>

@@ -1,10 +1,10 @@
 import { Clipboard } from "@angular/cdk/clipboard";
 import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { LucideCopy } from "@lucide/angular";
 import HighlightJS from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
 import json from "highlight.js/lib/languages/json";
-import { Copy, LucideAngularModule } from "lucide-angular";
 
 HighlightJS.registerLanguage("typescript", typescript);
 HighlightJS.registerLanguage("html", html);
@@ -13,15 +13,14 @@ HighlightJS.registerLanguage("json", json);
 @Component({
     selector: "app-code-viewer",
     templateUrl: "./code-viewer.component.html",
-    imports: [LucideAngularModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [LucideCopy],
     host: {
         "[class]": "'mona-code-viewer block relative overflow-auto'"
     }
 })
 export class CodeViewerComponent {
     readonly #clipboard = inject(Clipboard);
-    protected readonly copyIcon = Copy;
     protected readonly highlightedCode = computed(() => {
         const codeValue = this.processedCode();
         const lang = this.language();

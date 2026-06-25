@@ -16,7 +16,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
-import { LucideAngularModule } from "lucide-angular";
 import { fromEvent } from "rxjs";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { ContextMenuComponent } from "../../../menus/contextmenu/components/contextmenu/context-menu.component";
@@ -68,7 +67,6 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         GridLogicalCellDirective,
         GridLockedCellDirective,
         GridFooterTableCellDirective,
-        LucideAngularModule,
         GridToggleComponent,
         GridFooterCellComponent
     ],

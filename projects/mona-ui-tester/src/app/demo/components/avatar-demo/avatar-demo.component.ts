@@ -29,6 +29,14 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
                 [width]="width()"></mona-avatar>
         `,
         inputs: {
+            alt: {
+                type: "string",
+                value: ""
+            },
+            ariaLabel: {
+                type: "string",
+                value: ""
+            },
             backgroundColor: {
                 type: "color",
                 value: "#f0f0f0"
@@ -44,6 +52,9 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
             borderWidth: {
                 type: "string",
                 value: "0.15em"
+            },
+            customStyles: {
+                type: "object"
             },
             height: {
                 type: "string",
@@ -84,10 +95,13 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-avatar
+            [alt]="alt()"
+            [ariaLabel]="ariaLabel()"
             [backgroundColor]="backgroundColor()"
             [borderColor]="borderColor()"
             [borderRadius]="borderRadius()"
             [borderWidth]="borderWidth()"
+            [customStyles]="customStyles()"
             [height]="height()"
             [image]="image()"
             [label]="label()"
@@ -98,6 +112,8 @@ export class AvatarDemoComponent extends AbstractDemoComponent<AvatarComponent> 
     `
 })
 export class AvatarWrapperComponent implements ComponentInputsAsSignal<AvatarComponent> {
+    public readonly alt = input("");
+    public readonly ariaLabel = input("");
     public readonly backgroundColor = input("#f0f0f0");
     public readonly borderColor = input("#121315");
     public readonly borderRadius = input("0", {
@@ -116,6 +132,7 @@ export class AvatarWrapperComponent implements ComponentInputsAsSignal<AvatarCom
             return value;
         }
     });
+    public readonly customStyles = input({});
     public readonly height = input("64px", {
         transform: (value: string | number) => {
             if (typeof value === "string") {

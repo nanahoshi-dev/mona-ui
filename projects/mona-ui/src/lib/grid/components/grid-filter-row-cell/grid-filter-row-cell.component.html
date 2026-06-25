@@ -9,7 +9,7 @@
                 (ngModelChange)="onStringChange($event)"
                 placeholder="Filter..." />
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
-                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="isFilterActive()"></lucide-icon>
+                <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
             <ng-container
                 *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
@@ -33,7 +33,7 @@
                 [style.width.%]="100" />
 
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
-                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="isFilterActive()"></lucide-icon>
+                <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
             <mona-popup-menu [target]="filterButton" [size]="'small'">
                 @for (item of numericFilterMenuItems; track item) {
@@ -58,7 +58,7 @@
                     [style.width.%]="100" />
             }
             <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" #filterButton>
-                <lucide-icon [name]="filterIcon" [size]="14" [class.text-info]="isFilterActive()"></lucide-icon>
+                <svg lucideFunnel [size]="14" [class.text-info]="isFilterActive()"></svg>
             </button>
             <ng-container
                 *ngTemplateOutlet="clearFilterButtonTemplate; context: { $implicit: isFilterActive() }"></ng-container>
@@ -93,7 +93,7 @@
 <ng-template #clearFilterButtonTemplate let-hasValue>
     @if (selectedOperator() != null && hasValue) {
         <button monaButton look="ghost" [iconOnly]="true" [size]="'small'" (click)="onClear()">
-            <lucide-icon [name]="filterRemoveIcon" size="14" class="text-error"></lucide-icon>
+            <svg lucideFunnelX [size]="14" class="text-error"></svg>
         </button>
     }
 </ng-template>

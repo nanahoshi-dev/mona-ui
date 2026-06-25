@@ -1,11 +1,17 @@
-<header class="sticky w-full top-0 z-10 sm:flex border-b border-accent bg-background">
-    <div class="mx-auto max-w-screen-xl w-full px-6 py-4">
-        <div class="flex items-center gap-2">
-            <fa-icon [icon]="logoIcon" class="text-xl"></fa-icon>
-            <nav class="flex items-center gap-2 *:px-2 *:text-sm *:font-semibold">
-                <a>Home</a>
-                <a routerLink="/components">Components</a>
-            </nav>
+<header
+    class="md:hidden sticky w-full top-0 z-30 flex items-center justify-between border-b border-border bg-background px-5 py-4 h-16 select-none">
+    <a routerLink="/components" class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+            <svg lucideSparkles [size]="18"></svg>
         </div>
-    </div>
+        <span class="font-bold text-foreground text-lg tracking-tight">Mona UI</span>
+    </a>
+
+    <button
+        (click)="menuToggle.emit()"
+        class="w-10 h-10 flex items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-hover focus:outline-none transition-colors cursor-pointer"
+        aria-label="Toggle menu"
+        type="button">
+        <svg lucideMenu [size]="20"></svg>
+    </button>
 </header>

@@ -13,7 +13,7 @@
                 aria-label="Save row"
                 title="Save"
                 (click)="save($event)">
-                <lucide-angular [name]="saveIcon" [size]="16"></lucide-angular>
+                <svg lucideCheck [size]="16"></svg>
             </button>
             <button
                 monaButton
@@ -23,7 +23,7 @@
                 aria-label="Cancel row edit"
                 title="Cancel"
                 (click)="cancel($event)">
-                <lucide-angular [name]="cancelIcon" [size]="16"></lucide-angular>
+                <svg lucideX [size]="16"></svg>
             </button>
         } @else {
             <button
@@ -34,7 +34,7 @@
                 aria-label="Edit row"
                 title="Edit"
                 (click)="edit($event)">
-                <lucide-angular [name]="editIcon" [size]="16"></lucide-angular>
+                <svg lucidePencil [size]="16"></svg>
             </button>
             <button
                 monaButton
@@ -44,7 +44,7 @@
                 aria-label="Remove row"
                 title="Remove"
                 (click)="remove($event)">
-                <lucide-angular [name]="removeIcon" [size]="16"></lucide-angular>
+                <svg lucideTrash2 [size]="16"></svg>
             </button>
         }
     </div>

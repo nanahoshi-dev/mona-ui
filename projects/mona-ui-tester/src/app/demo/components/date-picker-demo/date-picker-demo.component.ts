@@ -2,7 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { BadgeQuestionMark, BriefcaseBusiness, LucideAngularModule, TentTree } from "lucide-angular";
+import { LucideBadgeQuestionMark, LucideBriefcaseBusiness, LucideDynamicIcon, LucideTentTree } from "@lucide/angular";
 import { DateTime } from "luxon";
 import {
     CalendarDecadeCellTemplateDirective,
@@ -149,7 +149,7 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
         CalendarMonthCellTemplateDirective,
         CalendarYearCellTemplateDirective,
         DateInputPrefixTemplateDirective,
-        LucideAngularModule
+        LucideDynamicIcon
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -191,10 +191,10 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
                 }
                 @if (featureData && featureData["prefixTemplate"].active) {
                     <ng-template monaDateInputPrefixTemplate>
-                        <lucide-angular
-                            [name]="prefixIcon()"
+                        <svg
+                            [lucideIcon]="prefixIcon()"
                             [size]="16"
-                            class="h-full aspect-square flex items-center justify-center"></lucide-angular>
+                            class="h-full aspect-square flex items-center justify-center"></svg>
                     </ng-template>
                 }
                 @if (featureData && featureData["yearCellTemplate"].active) {
@@ -223,10 +223,10 @@ class DatePickerWrapperComponent implements ComponentInputsAsSignal<DatePickerCo
     protected readonly prefixIcon = computed(() => {
         const value = this.#formValue();
         if (!value) {
-            return BadgeQuestionMark;
+            return LucideBadgeQuestionMark;
         }
         const isWeekend = DateTime.fromJSDate(value).weekday === 6 || DateTime.fromJSDate(value).weekday === 7;
-        return isWeekend ? TentTree : BriefcaseBusiness;
+        return isWeekend ? LucideTentTree : LucideBriefcaseBusiness;
     });
     public readonly disabled = model<ReturnType<DatePickerComponent["disabled"]>>(false);
     public readonly disabledDates = input<ReturnType<DatePickerComponent["disabledDates"]>>([]);

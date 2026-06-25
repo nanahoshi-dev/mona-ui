@@ -125,7 +125,7 @@
                             size="small"
                             look="ghost"
                             (click)="entry[1].codeVisible = !entry[1].codeVisible">
-                            <lucide-angular [name]="codeIcon" [size]="16"></lucide-angular>
+                            <svg lucideCode [size]="16"></svg>
                         </button>
                     }
                     @if (entry[1].type === "boolean" || !entry[1].type) {
