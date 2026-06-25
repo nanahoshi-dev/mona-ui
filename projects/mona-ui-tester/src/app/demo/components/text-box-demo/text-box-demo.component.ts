@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { LucideList, LucideSearch } from "@lucide/angular";
 import {
@@ -80,6 +80,10 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 value: ["small", "medium", "large"],
                 defaultValue: "medium"
             },
+            value: {
+                type: "string",
+                value: ""
+            },
             type: {
                 type: "dropdown",
                 value: ["text", "password", "email"], // Add more types as needed
@@ -94,6 +98,7 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         TextBoxComponent,
         TextBoxPrefixTemplateDirective,
@@ -105,7 +110,6 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         LucideSearch,
         LucideList
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-text-box
@@ -114,10 +118,11 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
             [size]="size()"
             [inputClass]="inputClass()"
             [inputStyle]="inputStyle()"
-            [type]="type()"
+            [placeholder]="placeholder()"
             [readonly]="readonly()"
             [rounded]="rounded()"
-            [placeholder]="placeholder()"
+            [type]="type()"
+            [value]="value()"
             (inputBlur)="onInputBlur($event)"
             (inputFocus)="onInputFocus($event)"
             class="w-48">
@@ -151,6 +156,7 @@ export class TextBoxWrapperComponent implements ComponentInputsAsSignal<TextBoxC
     public readonly rounded = input<ReturnType<TextBoxComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium");
     public readonly type = input<ReturnType<TextBoxComponent["type"]>>("text");
+    public readonly value = model<string>("");
     public readonly onInputBlur = (event: FocusEvent) => {
         console.log("Input blurred:", event);
     };

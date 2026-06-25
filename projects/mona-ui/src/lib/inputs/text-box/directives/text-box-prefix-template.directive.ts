@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaTextBoxPrefixTemplate]",
-    standalone: true
+    selector: "ng-template[monaTextBoxPrefixTemplate]"
 })
 export class TextBoxPrefixTemplateDirective {}

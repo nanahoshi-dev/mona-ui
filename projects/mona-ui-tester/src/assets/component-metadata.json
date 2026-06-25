@@ -1716,7 +1716,7 @@
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "The page sizes that the user can select from.\r\nThese values will be displayed in the page size dropdown.",
+        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
         "kind": "input"
       },
       {
@@ -1734,13 +1734,13 @@
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "The method to be used to set initial column widths.\r\nIt can be the following values:\r\n- `fitView`: The columns will be resized to fit the available width.\r\n- `auto`: The columns will be resized based on the content.\r\n- A number representing the width of the columns. All columns except the columns with a specified width\r\nwill have the same width.",
+        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "Whether the pager is responsive.\r\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
+        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input"
       },
       {
@@ -2232,7 +2232,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the input element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -3900,7 +3900,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the calendar.\r\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the calendar.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -5850,7 +5850,7 @@
       {
         "name": "inputAttributes",
         "type": "AttributeConfig",
-        "description": "",
+        "description": "Sets the attributes for the input element.",
         "kind": "input"
       },
       {
@@ -5874,7 +5874,7 @@
       {
         "name": "inputStyle",
         "type": "string | Partial<CSSStyleDeclaration> | null",
-        "description": "Sets the style for the input element.\r\nCan be a string or a partial CSSStyleDeclaration.",
+        "description": "Sets the style for the input element.\nCan be a string or a partial CSSStyleDeclaration.",
         "kind": "input"
       },
       {
@@ -5910,13 +5910,19 @@
       {
         "name": "type",
         "type": "InputType",
-        "description": "Sets the type of the input element.\r\nDefaults to \"text\".",
+        "description": "Sets the type of the input element.\nDefaults to \"text\".",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string",
+        "description": "Sets the value of the text box.",
+        "kind": "model"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the text box container element via `tailwind-merge`.",
         "kind": "input"
       }
     ]

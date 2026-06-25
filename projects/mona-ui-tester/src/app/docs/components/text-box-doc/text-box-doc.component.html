@@ -1,9 +1,5 @@
-<app-section id="textBox" [header]="'Text Box'" headerType="H1">
-    <p>Displays a text box.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-text-box-demo></app-text-box-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/text-box/intro.md"></app-markdown-doc>
+
+<app-text-box-demo></app-text-box-demo>
+
+<app-markdown-doc src="docs/text-box/api.md" parentSectionId="text-box"></app-markdown-doc>

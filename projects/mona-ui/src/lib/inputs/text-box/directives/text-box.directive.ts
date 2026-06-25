@@ -33,5 +33,9 @@ export class TextBoxDirective implements InputVariantInput {
      * @description Sets the size of the input.
      */
     public readonly size = input<InputVariantProps["size"]>("medium");
+    /**
+     * @description Additional CSS classes merged onto the input element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 }

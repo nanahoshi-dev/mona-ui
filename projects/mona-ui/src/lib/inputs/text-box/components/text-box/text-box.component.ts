@@ -9,12 +9,13 @@ import {
     forwardRef,
     inject,
     input,
+    model,
     output,
-    signal,
     TemplateRef,
     viewChild
 } from "@angular/core";
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
@@ -48,7 +49,7 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
         "[class]": "classes()"
     }
 })
-export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInput {
+export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInput, FormValueControl<string> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #formFieldValidationService = inject(FormFieldValidationService, { optional: true });
     readonly #themeService = inject(ThemeService);
@@ -77,6 +78,9 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
      */
     public readonly disabled = input<boolean>(false);
 
+    /**
+     * @description Sets the attributes for the input element.
+     */
     public readonly inputAttributes = input<AttributeConfig>({});
 
     /**
@@ -135,7 +139,12 @@ export class TextBoxComponent implements ControlValueAccessor, TextBoxVariantInp
     /**
      * @description Sets the value of the text box.
      */
-    public readonly value = signal<string>("");
+    public readonly value = model<string>("");
+
+    /**
+     * @description Additional CSS classes merged onto the text box container element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public focus(): void {
