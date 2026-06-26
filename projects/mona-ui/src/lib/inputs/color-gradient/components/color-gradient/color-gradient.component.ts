@@ -22,8 +22,8 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/f
 import { LucideCopy } from "@lucide/angular";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { DropdownButtonItemComponent } from "../../../../buttons/drop-down-button/components/dropdown-button-item/dropdown-button-item.component";
-import { DropdownButtonComponent } from "../../../../buttons/drop-down-button/components/dropdown-button/dropdown-button.component";
+import { DropdownButtonItemComponent } from "../../../../buttons/dropdown-button/components/dropdown-button-item/dropdown-button-item.component";
+import { DropdownButtonComponent } from "../../../../buttons/dropdown-button/components/dropdown-button/dropdown-button.component";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
 import { ColorMode, ColorOutputFormat } from "../../../models/ColorMode";

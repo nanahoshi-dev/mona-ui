@@ -85,56 +85,76 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
     });
 
     /**
-     * @description ARIA label for the dropdown button.
+     * @description Accessible label for the dropdown button.
+     * Falls back to `"{text} dropdown button"` when empty.
+     * Provide an explicit label when `iconOnly` is true and no visible text is set.
+     * @default ""
      */
     public readonly ariaLabel = input<string>("");
 
     /**
-     * @description ARIA labelledby for the dropdown button.
+     * @description ID of an element that labels the dropdown button.
+     * Takes precedence over `ariaLabel` when set.
+     * @default ""
      */
     public readonly ariaLabelledby = input<string>("");
 
     /**
      * @description Sets the icon-only state of the button.
-     * When set to true, the button will appear as square.
+     * When `true`, the button renders as a square with no horizontal text padding.
+     * Set `ariaLabel` to provide an accessible name when no visible text is present.
+     * @default false
      */
     public readonly iconOnly = input(false);
 
     /**
      * @description Sets the disabled state of the button.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
      * @description Sets the loading state of the button.
+     * When `true`, the button shows a spinner and is non-interactive.
+     * @default false
      */
     public readonly loading = input(false);
 
     /**
-     * @description Sets the look of the button.
+     * @description Sets the visual look of the button.
+     * @default "default"
      */
     public readonly look = input<ButtonVariantProps["look"]>("default");
 
     /**
-     * @description The click event of the menu item.
-     * Emits when a menu item is selected by keyboard or mouse.
+     * @description Emits when a menu item inside the popup is clicked.
      */
     public readonly menuItemClick = output<PopupMenuItemClickEvent>();
 
     /**
      * @description Sets the border radius of the button.
+     * @default "medium"
      */
     public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
 
     /**
      * @description Sets the size of the button.
+     * @default "medium"
      */
     public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
-     * @description The text of the button.
+     * @description Text displayed inside the dropdown button.
+     * Passed as `$implicit` context to `monaDropdownButtonTextTemplate` when provided.
+     * Ignored when `monaDropdownButtonTextTemplate` renders its own content.
+     * @default ""
      */
     public readonly text = input<string>("");
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {

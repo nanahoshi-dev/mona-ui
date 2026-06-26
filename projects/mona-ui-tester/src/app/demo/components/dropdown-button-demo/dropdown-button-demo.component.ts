@@ -31,13 +31,6 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
     readonly #injector = createFeatureInjector({
         groupTemplate: {
             active: false,
-            code: `
-                <mona-dropdown-button-group title="Project">
-                    <ng-template monaDropdownButtonMenuGroupTemplate let-group>
-                        <span class="font-bold text-indigo-700">{{ group }}</span>
-                    </ng-template>
-                </mona-dropdown-button-group>
-            `,
             description: `
                 This template is used to customize the group header of menu items.
                 If it is defined, it will override the top-level group template.
@@ -46,9 +39,6 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         },
         menuItemIconTemplate: {
             active: false,
-            code: `
-
-            `,
             description: `
                 This template is used to customize the icon of the menu item.
                 If it is defined, it will override the top-level icon template.
@@ -57,13 +47,6 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         },
         menuItemShortcutTemplate: {
             active: false,
-            code: `
-                <mona-dropdown-button-item label="About">
-                    <ng-template monaDropdownButtonMenuItemShortcutTemplate let-item>
-                        <span class="text-gray-500">Ctrl + Shift + O</span>
-                    </ng-template>
-                </mona-dropdown-button-item>
-            `,
             description: `
                 This template is used to customize the shortcut of the menu item.
                 If it is defined, it will override the top-level shortcut template.
@@ -72,13 +55,6 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
         },
         menuItemTextTemplate: {
             active: false,
-            code: `
-                <mona-dropdown-button-item label="Help">
-                    <ng-template monaDropdownButtonMenuItemTextTemplate let-item>
-                        <span class="text-green-500">{{ item.label }}</span>
-                    </ng-template>
-                </mona-dropdown-button-item>
-            `,
             description: `
                 This template is used to customize the text of the menu item.
                 If it is defined, it will override the top-level text template.
@@ -86,74 +62,32 @@ export class DropdownButtonDemoComponent extends AbstractDemoComponent<DropdownB
             name: "Menu Item Text Template"
         },
         textTemplate: {
-            code: `
-                <mona-dropdown-button>
-                    <ng-template monaDropdownButtonTextTemplate let-text>
-                        <span class="text-pink-800 font-bold">{{ text }}</span>
-                    </ng-template>
-                </mona-dropdown-button>
-            `,
             description: `This template is used to customize the text of the dropdown button.`,
             name: "Text Template",
             active: false
         },
         topLevelGroupTemplate: {
-            code: `
-                <mona-dropdown-button>
-                    <ng-template monaDropdownButtonMenuGroupTemplate let-group>
-                        <span [style.color]="'' | randomColor">{{ group }}</span>
-                    </ng-template>
-                </mona-dropdown-button>
-            `,
             description: `This template is defined at the top level and can be used to customize the appearance of all groups in the dropdown button menu.`,
             name: "Top Level Group Template",
             active: false
         },
         topLevelIconTemplate: {
-            code: `
-
-            `,
             description: `This template is defined at the top level and can be used to customize the appearance of all icons in the dropdown button menu.`,
             name: "Top Level Icon Template",
             active: false
         },
         topLevelShortcutTemplate: {
-            code: `
-                <mona-dropdown-button>
-                    <ng-template monaDropdownButtonMenuItemShortcutTemplate let-item>
-                        @if (item.label === "Interns") {
-                            <span class="text-xs text-gray-500">Ctrl + F7</span>
-                        } @else if (item.label === "Exit") {
-                            <span class="text-xs text-gray-500">Ctrl + Shift + Q</span>
-                        }
-                    </ng-template>
-                </mona-dropdown-button>
-            `,
             description: `This template is defined at the top level and can be used to customize the appearance of all shortcuts in the dropdown button menu.`,
             name: "Top Level Shortcut Template",
             active: false
         },
         topLevelTextTemplate: {
-            code: `
-                <mona-dropdown-button>
-                    <ng-template monaDropdownButtonMenuItemTextTemplate let-item>
-                        @if (item.label === "Help") {
-                            <span class="text-rose-700 underline">{{ item.label }}</span>
-                        } @else {
-                            <span [style.color]="'' | randomColor">{{ item.label }}</span>
-                        }
-                    </ng-template>
-                </mona-dropdown-button>
-            `,
             description: `This template is defined at the top level and can be used to customize the appearance of all text in the dropdown button menu.`,
             name: "Top Level Text Template",
             active: false
         }
     });
     protected readonly config = signal<ComponentConfig<DropdownButtonComponent>>({
-        code: `
-
-        `,
         inputs: {
             disabled: {
                 type: "boolean",
