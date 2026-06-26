@@ -8,18 +8,18 @@ export * from "./buttons/button-group/components/button-group/button-group.compo
 export * from "./buttons/chip/component/chip.component";
 export * from "./buttons/chip/directives/chip-prefix-template.directive";
 
-export * from "./buttons/drop-down-button/components/dropdown-button/dropdown-button.component";
-export * from "./buttons/drop-down-button/components/dropdown-button-checkbox-item/dropdown-button-checkbox-item.component";
-export * from "./buttons/drop-down-button/components/dropdown-button-group/dropdown-button-group.component";
-export * from "./buttons/drop-down-button/components/dropdown-button-item/dropdown-button-item.component";
-export * from "./buttons/drop-down-button/components/dropdown-button-radio-group/dropdown-button-radio-group.component";
-export * from "./buttons/drop-down-button/components/dropdown-button-radio-item/dropdown-button-radio-item.component";
-export * from "./buttons/drop-down-button/components/dropdown-button-separator/dropdown-button-separator.component";
-export * from "./buttons/drop-down-button/directives/dropdown-button-menu-group-template.directive";
-export * from "./buttons/drop-down-button/directives/dropdown-button-menu-item-icon-template.directive";
-export * from "./buttons/drop-down-button/directives/dropdown-button-menu-item-shortcut-template.directive";
-export * from "./buttons/drop-down-button/directives/dropdown-button-menu-item-text-template.directive";
-export * from "./buttons/drop-down-button/directives/dropdown-button-text-template.directive";
+export * from "./buttons/dropdown-button/components/dropdown-button/dropdown-button.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-checkbox-item/dropdown-button-checkbox-item.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-group/dropdown-button-group.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-item/dropdown-button-item.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-radio-group/dropdown-button-radio-group.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-radio-item/dropdown-button-radio-item.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-separator/dropdown-button-separator.component";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-group-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-item-icon-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-item-shortcut-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-item-text-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-text-template.directive";
 
 export * from "./buttons/split-button/components/split-button/split-button.component";
 export * from "./buttons/split-button/components/split-button-checkbox-item/split-button-checkbox-item.component";

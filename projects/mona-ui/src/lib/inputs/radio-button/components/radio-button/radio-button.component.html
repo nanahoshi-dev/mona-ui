@@ -1,23 +1,24 @@
 <label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
-    @if (labelPosition() === 'before') {
+    @if (labelPosition() === "before") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
-    <input type="radio"
-           [disabled]="disabled()"
-           [name]="name()"
-           [value]="value()"
-           [ngModel]="selectedValue()"
-           [class]="radioButtonClasses()"
-           (blur)="onBlur($event)"
-           (click)="inputClick.emit($event)"
-           (focus)="inputFocus.emit($event)"
-           (ngModelChange)="onSelectionChange($event)">
+    <input
+        type="radio"
+        [disabled]="disabled()"
+        [name]="name()"
+        [value]="radioValue()"
+        [class]="radioButtonClasses()"
+        [checked]="radioValue() === value()"
+        (blur)="onBlur($event)"
+        (click)="inputClick.emit($event)"
+        (focus)="inputFocus.emit($event)"
+        (change)="onSelectionChange()" />
     <span [class]="radioButtonCircleClasses()">
-        @if (value() === selectedValue()) {
+        @if (radioValue() === value()) {
             <span [class]="radioButtonIndicatorClasses()"></span>
         }
     </span>
-    @if (labelPosition() === 'after') {
+    @if (labelPosition() === "after") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 </label>

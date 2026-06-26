@@ -202,7 +202,7 @@ Use this path for compound controls, heavy input components, overlay systems, or
 9. Accessibility & Forms Integration
     * Keyboard Map: Document complete keyboard navigation maps confirmed explicitly by specs or runtime handlers.
     * ARIA Roles: List managed ARIA attributes, focus-trapping behaviors, and clear consumer layout responsibilities (such as manual `aria-label` requirements).
-    * Form Interaction: If a form control, explicitly document `ControlValueAccessor` execution behavior, Reactive Forms integration, and Signal-based form support.
+    * Form Interaction: If a form control, explicitly document and Signal-based form support.
 
 10. API Matrix
     * Provide granular, categorized tables for: Inputs, Signal Models, Outputs, and Public Methods/Exported Types intended for direct consumer interaction.

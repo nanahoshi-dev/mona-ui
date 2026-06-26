@@ -1,9 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, forwardRef, inject, input, output, signal } from "@angular/core";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { Component, computed, inject, input, model, output } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import {
     radioButtonCircleThemeVariants,
     radioButtonContainerLabelThemeVariants,
@@ -17,23 +17,13 @@ import {
     selector: "mona-radio-button",
     imports: [FormsModule, NgTemplateOutlet],
     templateUrl: "./radio-button.component.html",
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => RadioButtonComponent),
-            multi: true
-        }
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[attr.data-selected]": "value()===selectedValue()",
+        "[attr.data-selected]": "radioValue()===value()",
         "[attr.data-disabled]": "disabled()"
     }
 })
-export class RadioButtonComponent implements ControlValueAccessor, RadioButtonVariantInput {
+export class RadioButtonComponent implements RadioButtonVariantInput, FormValueControl<unknown> {
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<any> | null = null;
-    #propagateTouched: Action | null = null;
     protected readonly containerLabelClasses = computed(() => {
         const theme = this.#themeService.theme();
         const labelSize = this.labelSize();
@@ -52,83 +42,93 @@ export class RadioButtonComponent implements ControlValueAccessor, RadioButtonVa
         const rounded = this.rounded();
         return radioButtonIndicatorThemeVariants(theme)({ rounded });
     });
-    protected readonly selectedValue = signal<any>(undefined);
 
     /**
      * @description Sets the disabled state of the radio button.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description emits when the input loses focus.
+     * @description Emits when the input loses focus.
      */
     public readonly inputBlur = output<FocusEvent>();
 
     /**
-     * @description emits when the input is clicked.
+     * @description Emits when the input is clicked.
      */
     public readonly inputClick = output<MouseEvent>();
 
     /**
-     * @description emits when the input receives focus.
+     * @description Emits when the input receives focus.
      */
     public readonly inputFocus = output<FocusEvent>();
 
     /**
-     * @description Sets the label of the radio button.
-     * If provided, it will take precedence over the content inside the radio button.
+     * @description Text label displayed alongside the radio button.
+     * When provided, takes precedence over projected content.
+     * When empty, projected content inside `<mona-radio-button>` is used.
+     * When both are absent, the radio button has no accessible name — always provide one.
+     * @default ""
      */
     public readonly label = input("");
 
     /**
-     * @description Sets the position of the label relative to the radio button.
+     * @description Position of the label relative to the radio button circle.
+     * @default "after"
      */
     public readonly labelPosition = input<"before" | "after">("after");
 
     /**
-     * @description Sets the size of the label.
+     * @description Font size applied to the label text.
+     * @default "medium"
      */
-    public readonly labelSize = input<RadioButtonVariantProps["labelSize"]>("default");
+    public readonly labelSize = input<RadioButtonVariantProps["labelSize"]>("medium");
 
     /**
-     * @description Sets the name of the radio button, useful for grouping radio buttons together.
+     * @description HTML `name` attribute forwarded to the native input.
+     * Radio buttons that share the same `name` form a mutually exclusive group in the browser.
+     * @default ""
      */
     public readonly name = input("");
 
     /**
-     * @description Sets the border radius of the radio button.
+     * @description The identity value of this radio button within a group.
+     * Compared against `value()` to determine whether this button is selected.
+     * When this button is chosen, its `radioValue` is written to the form as the new group value.
+     * @default undefined
+     */
+    public readonly radioValue = input<any>(undefined);
+
+    /**
+     * @description Sets the border radius of the radio button circle and indicator.
+     * @default "full"
      */
     public readonly rounded = input<RadioButtonVariantProps["rounded"]>("full");
 
-    /**
-     * @description Sets the value of the radio button.
-     */
-    public readonly value = input<any>(undefined);
+    public readonly touch = output<void>();
 
+    /**
+     * @description Additional CSS classes merged onto the label container element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public writeValue(value: boolean): void {
-        this.selectedValue.set(value);
-    }
+    /**
+     * @description The currently selected value in the radio group.
+     * When bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.
+     * When bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.
+     * @default undefined
+     */
+    public readonly value = model<any>(undefined);
 
     protected onBlur(event: FocusEvent): void {
         this.inputBlur.emit(event);
-        this.#propagateTouched?.();
+        this.touch.emit();
     }
 
-    protected onSelectionChange(selectedValue: unknown): void {
-        if (selectedValue === this.value()) {
-            this.selectedValue.set(selectedValue);
-            this.#propagateChange?.(selectedValue);
-            this.#propagateTouched?.();
-        }
+    protected onSelectionChange(): void {
+        this.value.set(this.radioValue());
+        this.touch.emit();
     }
 }

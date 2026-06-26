@@ -65,13 +65,13 @@ export const radioButtonContainerLabelVariants = cva(
     {
         variants: {
             labelSize: {
-                default: "text-base",
                 small: "text-sm",
+                medium: "text-base",
                 large: "text-lg"
             }
         },
         defaultVariants: {
-            labelSize: "default"
+            labelSize: "medium"
         }
     }
 );

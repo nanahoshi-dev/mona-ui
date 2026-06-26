@@ -3036,19 +3036,19 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "ARIA label for the dropdown button.",
+        "description": "Accessible label for the dropdown button.\r\nFalls back to `\"{text} dropdown button\"` when empty.\r\nProvide an explicit label when `iconOnly` is true and no visible text is set.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledby",
         "type": "string",
-        "description": "ARIA labelledby for the dropdown button.",
+        "description": "ID of an element that labels the dropdown button.\r\nTakes precedence over `ariaLabel` when set.",
         "kind": "input"
       },
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Sets the icon-only state of the button.\r\nWhen set to true, the button will appear as square.",
+        "description": "Sets the icon-only state of the button.\r\nWhen `true`, the button renders as a square with no horizontal text padding.\r\nSet `ariaLabel` to provide an accessible name when no visible text is present.",
         "kind": "input"
       },
       {
@@ -3060,19 +3060,19 @@
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the button.",
+        "description": "Sets the loading state of the button.\r\nWhen `true`, the button shows a spinner and is non-interactive.",
         "kind": "input"
       },
       {
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
-        "description": "Sets the look of the button.",
+        "description": "Sets the visual look of the button.",
         "kind": "input"
       },
       {
         "name": "menuItemClick",
         "type": "PopupMenuItemClickEvent",
-        "description": "The click event of the menu item.\r\nEmits when a menu item is selected by keyboard or mouse.",
+        "description": "Emits when a menu item inside the popup is clicked.",
         "kind": "output"
       },
       {
@@ -3090,13 +3090,13 @@
       {
         "name": "text",
         "type": "string",
-        "description": "The text of the button.",
+        "description": "Text displayed inside the dropdown button.\r\nPassed as `$implicit` context to `monaDropdownButtonTextTemplate` when provided.\r\nIgnored when `monaDropdownButtonTextTemplate` renders its own content.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -5338,6 +5338,12 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "Additional CSS classes merged onto the checkbox label container via `tailwind-merge`.",
@@ -5628,62 +5634,74 @@
       {
         "name": "inputBlur",
         "type": "FocusEvent",
-        "description": "emits when the input loses focus.",
+        "description": "Emits when the input loses focus.",
         "kind": "output"
       },
       {
         "name": "inputClick",
         "type": "MouseEvent",
-        "description": "emits when the input is clicked.",
+        "description": "Emits when the input is clicked.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "FocusEvent",
-        "description": "emits when the input receives focus.",
+        "description": "Emits when the input receives focus.",
         "kind": "output"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the radio button.\r\nIf provided, it will take precedence over the content inside the radio button.",
+        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name — always provide one.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "\"before\" | \"after\"",
-        "description": "Sets the position of the label relative to the radio button.",
+        "description": "Position of the label relative to the radio button circle.",
         "kind": "input"
       },
       {
         "name": "labelSize",
         "type": "RadioButtonVariantProps[\"labelSize\"]",
-        "description": "Sets the size of the label.",
+        "description": "Font size applied to the label text.",
         "kind": "input"
       },
       {
         "name": "name",
         "type": "string",
-        "description": "Sets the name of the radio button, useful for grouping radio buttons together.",
+        "description": "HTML `name` attribute forwarded to the native input.\nRadio buttons that share the same `name` form a mutually exclusive group in the browser.",
+        "kind": "input"
+      },
+      {
+        "name": "radioValue",
+        "type": "any",
+        "description": "The identity value of this radio button within a group.\nCompared against `value()` to determine whether this button is selected.\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "RadioButtonVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the radio button.",
+        "description": "Sets the border radius of the radio button circle and indicator.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the label container element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "any",
-        "description": "Sets the value of the radio button.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "",
-        "kind": "input"
+        "description": "The currently selected value in the radio group.\nWhen bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.\nWhen bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.",
+        "kind": "model"
       }
     ]
   },

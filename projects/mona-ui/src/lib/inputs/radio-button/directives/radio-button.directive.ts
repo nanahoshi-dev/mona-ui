@@ -23,6 +23,7 @@ export class RadioButtonDirective implements RadioButtonDirectiveInput {
 
     /**
      * @description Sets the border radius of the radio button.
+     * @default "none"
      */
     public readonly rounded = input<RadioButtonDirectiveProps["rounded"]>("none");
 }
