@@ -28,6 +28,8 @@ Analyze the code against the following five pillars. Do **not** implement fixes 
 * **Form Interaction:** If a form control, does it have functional signal-based form support?
     * Note: Since Angular 22, `ControlValueAccessor` is now deprecated in favor of signal-based form support.
     * Note: Components should be designed with signal-based form support in mind. Reactive forms will be phased out in favor of signal-based forms in future versions of Angular.
+* **Render Callbacks:** Are `afterNextRender` and `afterRenderEffect` used effectively instead of `ngOnInit` etc.?
+    * Note: `ng*` lifecycle hooks are generally discouraged in favor of render callbacks.
 
 ## 3. API Design & DX
 

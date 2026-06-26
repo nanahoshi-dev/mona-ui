@@ -53,7 +53,7 @@ export class BreadcrumbComponent implements BreadcrumbVariantInput {
      * @description Sets the aria-label for the breadcrumb navigation landmark.
      * @default "Breadcrumb"
      */
-    public readonly ariaLabel = input("Breadcrumb");
+    public readonly ariaLabel = input("Breadcrumb", { alias: "aria-label" });
 
     /**
      * @description Whether the entire breadcrumb component is disabled.

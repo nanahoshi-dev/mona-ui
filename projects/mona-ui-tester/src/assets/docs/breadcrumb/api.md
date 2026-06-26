@@ -4,13 +4,13 @@
 
 Separators between items default to a `ChevronRight` icon and are hidden from assistive technology. Replace the default by projecting an `<ng-template monaBreadcrumbSeparatorTemplate>` anywhere inside `<mona-breadcrumb>`.
 
-**Use `BreadcrumbComponent` when you need to:**
+**Use the breadcrumb when you need to:**
 
 - Show the user's position in a multi-level hierarchy (settings pages, file explorers, e-commerce categories)
 - Provide clickable navigation to parent levels alongside the current page label
 - Mark completed steps in a wizard flow where each step corresponds to a navigated level
 
-**Do not use `BreadcrumbComponent` when:**
+**Do not use when:**
 
 - The navigation is flat with no hierarchy — use tabs or a nav bar instead
 - Only a single item would be shown — a single-item breadcrumb adds no navigational value
@@ -77,30 +77,40 @@ The separator template receives `{ $implicit: number }` context — the zero-bas
 </mona-breadcrumb>
 ```
 
-> **Multiple breadcrumbs on the same page:** Set a unique `ariaLabel` on each `<mona-breadcrumb>` so screen reader users can distinguish the navigation landmarks.
+> **Multiple breadcrumbs on the same page:** Set a unique `aria-label` on each `<mona-breadcrumb>` so screen reader users can distinguish the navigation landmarks.
 
 ## Appearance & Styling
 
 ### Visual states
 
-| State                 | Applied styles                                                           |
-|-----------------------|--------------------------------------------------------------------------|
-| Default item          | `text-primary/70`; hover → `text-primary`                                |
-| Focus-visible item    | `ring-2 ring-primary/40` focus ring                                      |
-| Individually disabled | `opacity-50 cursor-not-allowed pointer-events-none` on that item         |
-| List-level disabled   | `opacity-50 cursor-not-allowed pointer-events-none` on the entire `<ol>` |
-| Current (last) item   | `font-medium text-primary cursor-default`                                |
+| State                 | Appearance                                                                      |
+|-----------------------|---------------------------------------------------------------------------------|
+| Default item          | Subdued primary color; hovering applies full primary color                      |
+| Focus-visible item    | Visible focus ring using the primary color                                      |
+| Individually disabled | Reduced opacity, no pointer interaction                                         |
+| List-level disabled   | The entire breadcrumb list renders with reduced opacity, no pointer interaction |
+| Current (last) item   | Medium font weight, primary color, default cursor                               |
 
-When `BreadcrumbComponent.disabled` is `true`, the `<ol>` becomes fully non-interactive. When only a child item's `disabled` is `true`, only that item receives `opacity-50` (provided the list itself is not also disabled).
+When the breadcrumb is disabled via `[disabled]="true"`, all items lose pointer interaction. When only a child item's `disabled` is `true`, only that item is visually dimmed (provided the parent is not also disabled).
 
 ### Custom classes
 
-Override the `<ol>` element's styles via the `class` input on `<mona-breadcrumb>`:
+Add extra styles to the breadcrumb list via the `class` input on `<mona-breadcrumb>`:
 
 ```html
 
 <mona-breadcrumb class="text-sm gap-2">...</mona-breadcrumb>
 ```
+
+## Accessibility Notes
+
+`BreadcrumbComponent` renders `role="navigation"` on the host. This makes it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name — its default value is `"Breadcrumb"`.
+
+The last item automatically receives `aria-current="page"`. Separators are hidden from assistive technology.
+
+Non-last items respond to Enter and Space in addition to click. A disabled item receives `aria-disabled="true"` and is removed from the tab order.
+
+When multiple breadcrumbs appear on the same page, each should have a distinct `aria-label` so screen reader users can distinguish the landmarks.
 
 ## API
 
@@ -110,11 +120,11 @@ Override the `<ol>` element's styles via the `class` input on `<mona-breadcrumb>
 
 **Content projection:** accepts `<mona-breadcrumb-item>` children and an optional `<ng-template monaBreadcrumbSeparatorTemplate>`.
 
-| Name        | Kind  | Type      | Default        | Required | Description                                                                                                                                                |
-|-------------|-------|-----------|----------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ariaLabel` | input | `string`  | `'Breadcrumb'` | Optional | Accessible label for the `role="navigation"` landmark. Sets the host's `aria-label` attribute. Override when multiple breadcrumbs appear on the same page. |
-| `class`     | input | `string`  | `''`           | Optional | Additional CSS classes merged onto the inner `<ol>` element via `tailwind-merge`.                                                                          |
-| `disabled`  | input | `boolean` | `false`        | Optional | When `true`, the entire breadcrumb list becomes visually disabled and all items lose pointer interaction.                                                  |
+| Name         | Kind  | Type      | Default        | Required | Description                                                                                                        |
+|--------------|-------|-----------|----------------|----------|--------------------------------------------------------------------------------------------------------------------|
+| `aria-label` | input | `string`  | `'Breadcrumb'` | Optional | Accessible label for the `role="navigation"` landmark. Override when multiple breadcrumbs appear on the same page. |
+| `class`      | input | `string`  | `''`           | Optional | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.                                       |
+| `disabled`   | input | `boolean` | `false`        | Optional | When `true`, the entire breadcrumb list becomes visually disabled and all items lose pointer interaction.          |
 
 `BreadcrumbComponent` has no event outputs.
 
@@ -124,12 +134,12 @@ Override the `<ol>` element's styles via the `class` input on `<mona-breadcrumb>
 
 **Selector:** `mona-breadcrumb-item`
 
-Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the default slot. The component captures projected content into a template that the parent renders at the correct list position.
+Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the default slot.
 
-| Name        | Kind   | Type      | Default | Required | Description                                                                                                                                                                                          |
-|-------------|--------|-----------|---------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `disabled`  | input  | `boolean` | `false` | Optional | Disables this item. The item receives `aria-disabled="true"` and `tabindex="-1"`, and `itemClick` is suppressed. Has no visual effect when the parent `BreadcrumbComponent.disabled` is also `true`. |
-| `itemClick` | output | `void`    | —       | Optional | Emitted when the item is clicked or activated via Enter or Space. Never emitted when this is the last item (current page) or when the item is disabled.                                              |
+| Name        | Kind   | Type      | Default | Required | Description                                                                                                                                                                        |
+|-------------|--------|-----------|---------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled`  | input  | `boolean` | `false` | Optional | Disables this item. The item receives `aria-disabled="true"` and `tabindex="-1"`, and `itemClick` is suppressed. Has no visual effect when the parent breadcrumb is also disabled. |
+| `itemClick` | output | `void`    | —       | Optional | Emitted when the item is clicked or activated via Enter or Space. Never emitted when this is the last item (current page) or when the item is disabled.                            |
 
 ---
 
@@ -137,7 +147,7 @@ Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — te
 
 **Selector:** `ng-template[monaBreadcrumbSeparatorTemplate]`
 
-Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` icon. One directive per breadcrumb — the first match is used.
+Apply to an `<ng-template>` directly inside `<mona-breadcrumb>` to replace the default `ChevronRight` separator. One directive per breadcrumb — the first match is used.
 
 The template context is `{ $implicit: number }` where the implicit value is the zero-based index of the preceding item.
 
@@ -154,11 +164,8 @@ The template context is `{ $implicit: number }` where the implicit value is the 
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] BreadcrumbItemDirective confirmed internal (absent from index.ts) — not documented
-- [x] ariaLabel has no alias in source — documented as ariaLabel (not aria-label)
-- [x] itemClick correctly marked as output (kind: "output" in metadata)
 - [x] Basic examples compile against the public API surface
-- [x] No internal or unexported APIs exposed
+- [x] No internal or unexported APIs exposed (BreadcrumbItemDirective absent from index.ts; correctly omitted)
+- [x] Accessibility claims verified against source: role="navigation" and aria-label in BreadcrumbComponent host; aria-current="page" and tabindex/aria-disabled in template; Enter/Space keyboard handlers confirmed in breadcrumb.component.html
+- [x] Styling section documents only public customization points — Tailwind utility class names removed, replaced with consumer-facing descriptions
 -->
-
-<!-- TODO(owner-review): Confirm public package name is @mirei/mona-ui vs mona-ui -->
