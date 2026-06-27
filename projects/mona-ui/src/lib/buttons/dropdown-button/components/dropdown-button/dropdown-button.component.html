@@ -3,7 +3,7 @@
         [loading]="loading()"
         [rounded]="rounded()"
         [disabled]="disabled()"
-        [attr.aria-label]="dropdownButtonAriaLabel() || null"
+        [attr.aria-label]="ariaLabelledby() ? null : (dropdownButtonAriaLabel() || null)"
         [attr.aria-labelledby]="ariaLabelledby() || null"
         [attr.aria-haspopup]="'menu'"
         [attr.aria-expanded]="isMenuOpen()"

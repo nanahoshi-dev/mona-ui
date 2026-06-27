@@ -36,7 +36,10 @@ import { DropdownButtonTextTemplateDirective } from "../../directives/dropdown-b
 @Component({
     selector: "mona-dropdown-button",
     templateUrl: "./dropdown-button.component.html",
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        "[class]": "userClass()"
+    },
     imports: [
         ButtonDirective,
         PopupMenuComponent,
@@ -54,7 +57,7 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
     protected readonly dropdownButtonAriaLabel = computed(() => {
         const ariaLabel = this.ariaLabel();
         const text = this.text();
-        return ariaLabel || `${text} dropdown button`;
+        return ariaLabel || `${text} dropdown button`.trim();
     });
     protected readonly isMenuOpen = signal(false);
     protected readonly menuId = createElementControlId();
@@ -85,68 +88,64 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
     });
 
     /**
-     * @description Accessible label for the dropdown button.
-     * Falls back to `"{text} dropdown button"` when empty.
-     * Provide an explicit label when `iconOnly` is true and no visible text is set.
+     * @description Accessible name for the dropdown button.
+     * Falls back to `"{text} dropdown button"` when empty; provide an explicit value when no visible text is present.
      * @default ""
      */
-    public readonly ariaLabel = input<string>("");
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
-     * @description ID of an element that labels the dropdown button.
-     * Takes precedence over `ariaLabel` when set.
+     * @description ID of an external element that provides the accessible name for the dropdown button.
+     * Takes precedence over `ariaLabel` when both are set.
      * @default ""
      */
-    public readonly ariaLabelledby = input<string>("");
+    public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });
 
     /**
-     * @description Sets the icon-only state of the button.
-     * When `true`, the button renders as a square with no horizontal text padding.
-     * Set `ariaLabel` to provide an accessible name when no visible text is present.
+     * @description Renders the button as a square for icon-only usage, removing horizontal text padding.
+     * Set `ariaLabel` when no visible text is present to ensure an accessible name.
      * @default false
      */
     public readonly iconOnly = input(false);
 
     /**
-     * @description Sets the disabled state of the button.
+     * @description Renders the button with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the loading state of the button.
-     * When `true`, the button shows a spinner and is non-interactive.
+     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
      * @default false
      */
     public readonly loading = input(false);
 
     /**
-     * @description Sets the visual look of the button.
+     * @description Visual style preset applied to the button.
      * @default "default"
      */
     public readonly look = input<ButtonVariantProps["look"]>("default");
 
     /**
-     * @description Emits when a menu item inside the popup is clicked.
+     * @description Emitted when a menu item in the dropdown menu is clicked.
      */
     public readonly menuItemClick = output<PopupMenuItemClickEvent>();
 
     /**
-     * @description Sets the border radius of the button.
+     * @description Border-radius preset applied to the button.
      * @default "medium"
      */
     public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the size of the button.
+     * @description Size preset controlling the button's dimensions.
      * @default "medium"
      */
     public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
-     * @description Text displayed inside the dropdown button.
-     * Passed as `$implicit` context to `monaDropdownButtonTextTemplate` when provided.
-     * Ignored when `monaDropdownButtonTextTemplate` renders its own content.
+     * @description Primary text content displayed inside the dropdown button.
+     * Passed as `$implicit` to a `monaDropdownButtonTextTemplate` when one is provided.
      * @default ""
      */
     public readonly text = input<string>("");
@@ -159,7 +158,7 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
 
     public constructor() {
         afterNextRender({
-            read: () => this.setKeyboardEvents()
+            read: () => this.#setKeyboardEvents()
         });
     }
 
@@ -175,7 +174,7 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
         this.isMenuOpen.set(true);
     }
 
-    private closeMenu(): void {
+    #closeMenu(): void {
         const popupMenu = this.popupMenuRef();
         if (popupMenu && this.isMenuOpen()) {
             popupMenu.closeMenu();
@@ -183,14 +182,14 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
         }
     }
 
-    private openMenuViaKeyboard(): void {
+    #openMenuViaKeyboard(): void {
         const popupMenu = this.popupMenuRef();
         if (popupMenu && !this.isMenuOpen()) {
             popupMenu.openMenuViaKeyboard();
         }
     }
 
-    private setKeyboardEvents(): void {
+    #setKeyboardEvents(): void {
         const buttonElement = this.buttonRef()?.nativeElement;
         if (!buttonElement) {
             return;
@@ -204,11 +203,11 @@ export class DropdownButtonComponent implements DropdownButtonVariantInputs {
                     case " ":
                     case "Enter":
                         event.preventDefault();
-                        this.openMenuViaKeyboard();
+                        this.#openMenuViaKeyboard();
                         break;
                     case "Escape":
                         if (this.isMenuOpen()) {
-                            this.closeMenu();
+                            this.#closeMenu();
                         }
                         break;
                 }

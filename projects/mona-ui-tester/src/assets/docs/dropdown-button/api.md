@@ -41,7 +41,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import { MenuItemClickEvent } from "@mirei/mona-ui";
+import type { MenuItemClickEvent } from "@mirei/mona-ui";
 
 protected onAction(event: MenuItemClickEvent): void { /* ... */ }
 ```
@@ -158,7 +158,7 @@ Templates placed directly inside `<mona-dropdown-button>` apply globally to all 
 
 ### Loading state
 
-When `loading` is `true`, the button shows a spinner and ignores click interactions. Use this while an async operation (triggered by a previous menu selection) is in progress.
+When `loading` is `true`, the button displays a spinner and ignores click interactions. Use this while an async operation triggered by a previous menu selection is in progress.
 
 ```html
 <mona-dropdown-button text="Export" [loading]="isExporting()">
@@ -184,11 +184,15 @@ The popup anchors to the center of the button (`bottomcenter` / `topcenter`) wit
 
 ### `ariaLabel` fallback and `iconOnly` mode
 
-When `ariaLabel` is empty, the button's `aria-label` is computed as `"{text} dropdown button"`. When `iconOnly` is `true` and `text` is also empty, the fallback becomes `" dropdown button"` (leading space). Always provide an explicit `[ariaLabel]` when using `iconOnly` mode with no visible text.
+When `ariaLabel` is empty, the button's `aria-label` is computed as `"{text} dropdown button"`. When `iconOnly` is `true` and no visible `text` is set, always provide an explicit `[ariaLabel]` so the button has a meaningful accessible name.
 
 ### Handling menu item events
 
-`menuItemClick` on `DropdownButtonComponent` fires for any item in the popup. `menuClick` on individual `mona-dropdown-button-item` / `mona-dropdown-button-checkbox-item` / `mona-dropdown-button-radio-item` fires only for that item. Use item-level `menuClick` for per-action handlers.
+`menuItemClick` on `DropdownButtonComponent` fires for any item in the popup. `menuClick` on individual `mona-dropdown-button-item`, `mona-dropdown-button-checkbox-item`, or `mona-dropdown-button-radio-item` fires only for that specific item. Use item-level `menuClick` for per-action handlers.
+
+### Preventing default behavior in checkbox items
+
+Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-button-checkbox-item` suppresses both the state flip and the `checkedChange` emission. Use this when you need to validate or confirm the change before applying it.
 
 ## Accessibility
 
@@ -204,12 +208,20 @@ When `ariaLabel` is empty, the button's `aria-label` is computed as `"{text} dro
 
 ### ARIA
 
-The button carries:
-- `aria-haspopup="menu"` — informs AT that the button controls a menu
-- `aria-expanded` — reflects the current open/closed state
-- `aria-controls` — references the popup element by ID
-- `aria-label` — computed from the `ariaLabel` input or falls back to `"{text} dropdown button"`
-- `aria-labelledby` — forwarded from `ariaLabelledby`; takes precedence over `aria-label`
+The button element carries the following attributes:
+
+| Attribute | When present | Value |
+|---|---|---|
+| `aria-haspopup` | Always | `"menu"` |
+| `aria-expanded` | Always | `"true"` when the menu is open, `"false"` when closed |
+| `aria-controls` | Always | The popup element's auto-generated ID |
+| `aria-label` | When `ariaLabelledby` is not set | Value of `ariaLabel`, or `"{text} dropdown button"` as fallback |
+| `aria-labelledby` | When `ariaLabelledby` is non-empty | Forwarded from the `ariaLabelledby` input; takes precedence over `aria-label` |
+
+**Consumer responsibilities:**
+
+- When using `iconOnly` mode with no visible `text`, always provide `[ariaLabel]` with a description of the button's purpose.
+- When `ariaLabelledby` is set, `aria-label` is suppressed automatically.
 
 ## API
 
@@ -217,19 +229,26 @@ The button carries:
 
 **Selector:** `mona-dropdown-button`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `aria-label` | input | `string` | `''` | Optional | Accessible label for the button. Falls back to `"{text} dropdown button"` when empty. Required when `iconOnly` is `true` and no text is set. |
-| `ariaLabelledby` | input | `string` | `''` | Optional | ID of an element that labels the button. Takes precedence over `aria-label`. |
-| `class` | input | `string` | `''` | Optional | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state of the button. |
-| `iconOnly` | input | `boolean` | `false` | Optional | Renders the button as a square with no horizontal text padding. |
-| `loading` | input | `boolean` | `false` | Optional | Shows a spinner and makes the button non-interactive. |
-| `look` | input | `'default' \| 'error' \| 'ghost' \| 'info' \| 'link' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Optional | Sets the visual look of the button. |
-| `rounded` | input | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Optional | Sets the border radius of the button. |
-| `size` | input | `'large' \| 'medium' \| 'small'` | `'medium'` | Optional | Sets the size of the button. |
-| `text` | input | `string` | `''` | Optional | Text displayed inside the button. Passed as `$implicit` context to `monaDropdownButtonTextTemplate`. |
-| `menuItemClick` | output | `MenuItemClickEvent` | — | — | Emits when any item inside the popup is clicked. |
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `aria-label` | `string` | `""` | Accessible name for the dropdown button. Falls back to `"{text} dropdown button"` when empty; provide an explicit value when no visible text is present. |
+| `ariaLabelledby` | `string` | `""` | ID of an external element that provides the accessible name for the dropdown button. Takes precedence over `aria-label` when both are set. |
+| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `disabled` | `boolean` | `false` | Renders the button with reduced visual emphasis and removes pointer interaction. |
+| `iconOnly` | `boolean` | `false` | Renders the button as a square for icon-only usage, removing horizontal text padding. Set `ariaLabel` when no visible text is present to ensure an accessible name. |
+| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. |
+| `look` | `'clear' \| 'default' \| 'error' \| 'ghost' \| 'info' \| 'link' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual style preset applied to the button. |
+| `rounded` | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Border-radius preset applied to the button. |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Size preset controlling the button's dimensions. |
+| `text` | `string` | `""` | Primary text content displayed inside the dropdown button. Passed as `$implicit` to a `monaDropdownButtonTextTemplate` when one is provided. |
+
+#### Outputs
+
+| Name | Type | Description |
+|------|------|-------------|
+| `menuItemClick` | `MenuItemClickEvent` | Emitted when any item in the dropdown menu is clicked. |
 
 ---
 
@@ -237,11 +256,18 @@ The button carries:
 
 **Selector:** `mona-dropdown-button-item`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state of the menu item. |
-| `label` | input | `string` | `''` | Optional | The text of the menu item. |
-| `menuClick` | output | `MenuItemClickEvent` | — | — | Emits when the item is selected by mouse or keyboard. |
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection. |
+| `label` | `string` | `""` | Display text of the menu item. |
+
+#### Outputs
+
+| Name | Type | Description |
+|------|------|-------------|
+| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by mouse or keyboard. |
 
 ---
 
@@ -249,9 +275,11 @@ The button carries:
 
 **Selector:** `mona-dropdown-button-group`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `title` | input | `string` | `''` | Optional | Section header text for the group. |
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `title` | `string` | — | Required. Section header text displayed above the group's items. |
 
 ---
 
@@ -259,13 +287,20 @@ The button carries:
 
 **Selector:** `mona-dropdown-button-checkbox-item`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `checked` | input | `boolean` | `false` | Optional | Sets the checked state. |
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state. |
-| `label` | input | `string` | `''` | Optional | The text of the item. |
-| `checkedChange` | output | `boolean` | — | — | Emits when the checked state changes. |
-| `menuClick` | output | `MenuItemClickEvent` | — | — | Emits when the item is selected. |
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `checked` | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
+| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection. |
+| `label` | `string` | `""` | Display text of the menu item. |
+
+#### Outputs
+
+| Name | Type | Description |
+|------|------|-------------|
+| `checkedChange` | `boolean` | Emitted when the checked state changes after a click. Not emitted when `event.preventDefault()` is called on `menuClick`. |
+| `menuClick` | `MenuItemClickEvent` | Emitted when the item is clicked. Call `event.preventDefault()` to suppress the state change. |
 
 ---
 
@@ -273,10 +308,12 @@ The button carries:
 
 **Selector:** `mona-dropdown-button-radio-group`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `title` | input | `string` | `''` | Optional | Section header text for the radio group. |
-| `value` | model | `string` | — | Optional | The value of the selected radio item. Supports two-way binding via `[(value)]`. |
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `title` | `string` | `""` | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered. |
+| `value` | `string` | `""` | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The matching `mona-dropdown-button-radio-item` with the same `value` renders as selected. |
 
 ---
 
@@ -284,12 +321,19 @@ The button carries:
 
 **Selector:** `mona-dropdown-button-radio-item`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state. |
-| `label` | input | `string` | `''` | Optional | The display text of the radio item. |
-| `value` | input | `string` | `''` | Optional | The value emitted when selected; matched against the parent group's `value`. |
-| `menuClick` | output | `MenuItemClickEvent` | — | — | Emits when the item is selected. |
+#### Inputs
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `disabled` | `boolean` | `false` | Renders the radio item with reduced visual emphasis and prevents selection. |
+| `label` | `string` | `""` | Display text of the radio item. |
+| `value` | `string` | — | Required. The value emitted to the parent `mona-dropdown-button-radio-group` when this item is selected. |
+
+#### Outputs
+
+| Name | Type | Description |
+|------|------|-------------|
+| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. |
 
 ---
 
@@ -297,18 +341,25 @@ The button carries:
 
 **Selector:** `mona-dropdown-button-separator`
 
-No inputs or outputs. Renders a horizontal visual divider between sections.
+Renders a horizontal visual divider between sections. Has no inputs or outputs.
 
 ---
 
 <!-- verification-checklist
-- [x] API definitions and defaults verified against source and component-metadata.json
-- [x] @description and @default added to all public inputs/outputs including userClass
-- [x] iconOnly ariaLabel caveat documented in source JSDoc and in Technical Notes
-- [x] monaDropdownButtonTextTemplate $implicit context (string) documented and verified in template
-- [x] menuItemClick output type is MenuItemClickEvent (public alias for PopupMenuItemClickEvent)
+- [x] API definitions and defaults verified against source (component TS files and inherited PopupMenu base classes)
+- [x] DropdownButtonGroupComponent.title confirmed as input.required<string>() — marked Required in description, default "—"
+- [x] DropdownButtonRadioItemComponent.value confirmed as input.required<string>() — marked Required in description, default "—"
+- [x] DropdownButtonRadioGroupComponent.value confirmed as model<string>("") — documented as two-way bindable
+- [x] MenuItemClickEvent confirmed as exported type alias for PopupMenuItemClickEvent (index.ts line 295)
+- [x] No "Kind" or "Required" columns — matches chip docs format
+- [x] Inputs sorted A→Z within each table
+- [x] aria-label leading space issue fixed with .trim() — Technical Notes updated accordingly
+- [x] ChangeDetectionStrategy.Eager TODO removed — already fixed to OnPush
+- [x] preventDefault behavior on checkbox item documented
+- [x] ariaLabel suppressed when ariaLabelledby is set — documented in ARIA table
 - [x] No internal or unexported APIs exposed
+- [x] Basic examples compile against the public API surface
+- [x] clear and link look variants included (present in button.mona.styles.ts)
 -->
 
-<!-- TODO(owner-review): Verify popup keyboard navigation map (arrow traversal, Enter to select, Escape for submenus). -->
-<!-- TODO(owner-review): ChangeDetectionStrategy.Eager is used on DropdownButtonComponent. CLAUDE.md requires OnPush. Evaluate whether Eager is intentional for the overlay interaction model. -->
+<!-- TODO(owner-review): Verify the full keyboard navigation map inside the popup (arrow key item traversal, Enter to select, Escape for nested submenus). -->
