@@ -1,6 +1,7 @@
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
 ## TypeScript Best Practices
+
 - Use strict type checking
 - Prefer type inference when the type is obvious
 - Avoid the `any` type; use `unknown` when type is uncertain
@@ -11,6 +12,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Abide by the ESLint rules in `.eslint.config.mjs` strictly.
 
 ## Angular Best Practices
+
 - Always use standalone components over NgModules
 - Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
 - Use signals for state management
@@ -23,14 +25,17 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use `animate.enter` and `animate.leave` for animations. Do NOT use @angular/animations, since it is being deprecated.
 
 ## Accessibility Requirements
+
 - It MUST pass all AXE checks.
 - It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
 
 ### Components
+
 - Keep components small and focused on a single responsibility
 - Use `input()` and `output()` functions instead of decorators
 - Use `computed()` for derived state
-- Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator
+- Do not use `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component` decorator.
+    - Since Angular 22, the default change detection strategy is `ChangeDetectionStrategy.OnPush`.
 - Prefer inline templates for small components
 - Prefer Reactive forms instead of Template-driven ones
 - Do NOT use `ngClass`, use `class` bindings instead
@@ -40,23 +45,27 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Add/maintain `@description` JSDoc on `input()`/`model()`/`output()` properties because `projects/mona-ui-tester/scripts/extract-metadata.ts` uses it to generate `projects/mona-ui-tester/src/assets/component-metadata.json`.
 
 ## State Management
+
 - Use signals for local component state
 - Use `computed()` for derived state
 - Keep state transformations pure and predictable
 - Do NOT use `mutate` on signals, use `update` or `set` instead
- 
+
 ## Templates
+
 - Keep templates simple and avoid complex logic
 - Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
 - Use the async pipe to handle observables
 - Do not assume globals like (`new Date()`) are available.
 - Do not write arrow functions in templates (they are not supported).
- 
+
 ## Services
+
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
 
 ## Testing
+
 - Use `vitest` for unit tests
 - When running tests, only run the tests related to the changed files

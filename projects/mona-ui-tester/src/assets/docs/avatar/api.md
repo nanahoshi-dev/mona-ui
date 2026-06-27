@@ -127,11 +127,12 @@ If the avatar is purely decorative and already described by adjacent visible tex
 | Name              | Type                           | Default                     | Description |
 |-------------------|--------------------------------|-----------------------------|-------------|
 | `alt`             | `string`                       | `''`                        | Alternative text for the image in image mode. Provide a meaningful description for non-decorative images. An empty string marks the image as decorative. Has no effect in label or projected-content mode. |
-| `aria-label`      | `string`                       | `''`                        | Accessible label for the host element. When non-empty, the host receives `role="img"` and assistive technology announces this value instead of the raw visual content. Use in label mode to name what the initials represent, and in projected-content mode to describe projected content. |
+| `aria-label`      | `string`                       | `''`                        | Accessible name for the host element. In label and projected-content modes, a non-empty value also adds `role="img"` to the host so assistive technology announces the label instead of the raw visual content. In image mode, the attribute is forwarded to the host but `role="img"` is not added — the child `<img>` handles its own semantics via `alt`. |
 | `backgroundColor` | `string`                       | `'var(--color-primary)'`    | Background color of the host element. Ignored in image mode — the background becomes transparent automatically. |
 | `borderColor`     | `string`                       | `'var(--color-border)'`     | Border color applied to the host element. |
 | `borderRadius`    | `string \| number`             | `'0'`                       | Border radius. Accepts a CSS string (`'50%'`, `'8px'`) or a number converted to `px`. In image mode, the image is also clipped to this radius. |
 | `borderWidth`     | `string \| number`             | `'1px'`                     | Border width. A number is converted to `px`; a string is used as-is. |
+| `class`           | `string`                       | `''`                        | Additional CSS classes applied to the host element. |
 | `customStyles`    | `Partial<CSSStyleDeclaration>` | `{}`                        | Styles applied after all other values, taking precedence over every other style input including `display`, `height`, and `width`. Overriding layout-critical properties may break expected rendering. |
 | `height`          | `string \| number`             | `'64px'`                    | Height of the host element. A string is used as-is; a number is converted to `px`. |
 | `image`           | `string`                       | `''`                        | Image URL. When non-empty, renders an image and suppresses `label` and projected content. |
@@ -150,6 +151,9 @@ If the avatar is purely decorative and already described by adjacent visible tex
 - [x] Basic example compiles successfully against the public API surface
 - [x] No internal or unexported APIs exposed
 - [x] Accessibility claims verified against source (aria-label/role="img" host bindings confirmed in avatar.component.ts; alt binding confirmed in avatar.component.html)
+- [x] role="img" scoped to label and projected-content modes only — not applied in image mode (host binding: ariaLabel() && !image() ? 'img' : null)
+- [x] aria-label description updated to document the mode-dependent role="img" behaviour
+- [x] class input documented — direct host class binding (no twMerge; avatar uses inline styles)
 - [x] Styling section documents only public inputs — no internal Tailwind classes, data attributes, or DOM structure exposed
 -->
 

@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, input, Signal } from "@angular/core";
+import { Component, computed, input } from "@angular/core";
 
 @Component({
     selector: "mona-avatar",
     templateUrl: "./avatar.component.html",
     host: {
         "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.role]": "ariaLabel() ? 'img' : null",
+        "[attr.role]": "ariaLabel() && !image() ? 'img' : null",
+        "[class]": "userClass()",
         "[style]": "avatarStyles()"
     }
 })
 export class AvatarComponent {
-    protected readonly avatarLabelStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
+    protected readonly avatarLabelStyles = computed(() => {
         return {
             alignItems: "center",
             color: this.labelColor(),
@@ -22,7 +23,7 @@ export class AvatarComponent {
             width: "100%"
         };
     });
-    protected readonly avatarStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
+    protected readonly avatarStyles = computed(() => {
         const image = this.image();
         const backgroundColor = image ? "transparent" : this.backgroundColor();
         return {
@@ -39,32 +40,36 @@ export class AvatarComponent {
     });
 
     /**
-     * @description Alternative text for the avatar image.
+     * @description Alternative text for the avatar image. Provide a meaningful description for non-decorative images;
+     * an empty string marks the image as decorative.
      * @default ""
      */
     public readonly alt = input("");
 
     /**
-     * @description Accessible label for the avatar host element.
+     * @description Accessible name for the host element. Describe what the avatar represents.
+     * When non-empty, the host receives `role="img"` in label and projected-content modes.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
-     * @description Sets the background color of the avatar.
-     *
-     * If an image is provided, this will be ignored.
+     * @description Background color of the host element.
+     * Ignored in image mode — the background is set to transparent automatically.
+     * @default "var(--color-primary)"
      */
     public readonly backgroundColor = input("var(--color-primary)");
 
     /**
-     * @description Sets the border color of the avatar.
+     * @description Border color of the host element.
+     * @default "var(--color-border)"
      */
     public readonly borderColor = input("var(--color-border)");
 
     /**
-     * @description Sets the border radius of the avatar.
-     * Can be a percentage or pixel value.
+     * @description Border radius of the host element. Accepts a CSS string (`'50%'`, `'8px'`) or a number converted to `px`.
+     * In image mode, the image is also clipped to this radius.
+     * @default "0"
      */
     public readonly borderRadius = input("0", {
         transform: (value: string | number) => {
@@ -76,8 +81,8 @@ export class AvatarComponent {
     });
 
     /**
-     * @description Sets the border width of the avatar.
-     * Can be a pixel value.
+     * @description Border width of the host element. Accepts a CSS string or a number converted to `px`.
+     * @default "1px"
      */
     public readonly borderWidth = input("1px", {
         transform: (value: string | number) => {
@@ -89,15 +94,15 @@ export class AvatarComponent {
     });
 
     /**
-     * @description Custom styles spread over all computed host styles, taking precedence over every
-     * other style input including `display`, `height`, and `width`.
-     * Overriding layout-critical properties such as `display` may break expected rendering.
+     * @description Inline styles applied after all other style inputs,
+     * taking precedence over every computed style including `display`, `height`, and `width`.
+     * @default {}
      */
     public readonly customStyles = input<Partial<CSSStyleDeclaration>>({});
 
     /**
-     * @description Sets the height of the avatar.
-     * Can be a pixel value or a string with units (e.g., "64px").
+     * @description Height of the host element. A string is used as-is; a number is converted to `px`.
+     * @default "64px"
      */
     public readonly height = input("64px", {
         transform: (value: string | number) => {
@@ -109,39 +114,39 @@ export class AvatarComponent {
     });
 
     /**
-     * @description Sets the image URL for the avatar.
-     * If an image is provided, the avatar will display the image instead of a label.
+     * @description Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content.
+     * @default ""
      */
     // TODO(owner-review): migrate to NgOptimizedImage once width/height inputs are changed to number-only
     public readonly image = input("");
 
     /**
-     * @description Sets the label for the avatar.
-     * If an image is provided, this will be ignored.
+     * @description Text label displayed inside the avatar when no image is provided. Ignored when `image` is non-empty.
+     * @default ""
      */
     public readonly label = input("");
 
     /**
-     * @description Sets the color of the label text.
-     * If an image is provided, this will be ignored.
+     * @description Color of the label text. Ignored in image mode.
+     * @default "var(--color-foreground)"
      */
     public readonly labelColor = input("var(--color-foreground)");
 
     /**
-     * @description Sets the font size of the label text.
-     * If an image is provided, this will be ignored.
+     * @description Font size of the label text. Ignored in image mode.
+     * @default "1rem"
      */
     public readonly labelFontSize = input("1rem");
 
     /**
-     * @description Sets the font weight of the label text.
-     * If an image is provided, this will be ignored.
+     * @description Font weight of the label text. Ignored in image mode.
+     * @default "700"
      */
     public readonly labelFontWeight = input("700");
 
     /**
-     * @description Sets the width of the avatar.
-     * Can be a pixel value or a string with units (e.g., "64px").
+     * @description Width of the host element. A string is used as-is; a number is converted to `px`.
+     * @default "64px"
      */
     public readonly width = input("64px", {
         transform: (value: string | number) => {
@@ -151,4 +156,10 @@ export class AvatarComponent {
             return `${value}px`;
         }
     });
+
+    /**
+     * @description Additional CSS classes applied to the host element.
+     * @default ""
+     */
+    public readonly userClass = input("", { alias: "class" });
 }
