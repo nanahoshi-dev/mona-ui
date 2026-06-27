@@ -108,14 +108,14 @@ Both `CheckBoxComponent` and `CheckboxDirective` accept the same `rounded` input
 
 ### Visual states
 
-| State           | Appearance                                                 |
-|-----------------|------------------------------------------------------------|
-| Unchecked       | Empty box with the theme's input background and border     |
-| Checked         | Filled box using the primary color, with a white checkmark |
-| Indeterminate   | Filled box using the primary color, without a checkmark    |
-| Focused         | Visible focus ring using the primary color                 |
-| Disabled        | Reduced opacity, no pointer interaction                    |
-| Invalid (forms) | Border changes to the error color when touched and invalid |
+| State           | Appearance                                                           |
+|-----------------|----------------------------------------------------------------------|
+| Unchecked       | Empty box with the theme's input background and border               |
+| Checked         | Filled box using the primary color, with a checkmark                 |
+| Indeterminate   | Filled box using the primary color, with a dash indicator            |
+| Focused         | Visible focus ring using the primary color                           |
+| Disabled        | Reduced opacity, no pointer interaction                              |
+| Invalid (forms) | Border changes to the error color when touched and invalid           |
 
 The `Invalid` state activates when the signal forms field is touched and the value fails validation.
 
@@ -139,15 +139,13 @@ Use the `class` input to extend styles. On `CheckBoxComponent` it targets the ou
 
 ## Accessibility Notes
 
-`CheckBoxComponent` renders the native `<input type="checkbox">` as visually hidden but accessible to screen readers. The native input has its `aria-label` set from the `label` input, falling back to `'Checkbox'` when no label is provided. Always supply a non-empty `label` (or project meaningful content) so screen readers announce a useful accessible name.
+`CheckBoxComponent` renders the native `<input type="checkbox">` as visually hidden but accessible to screen readers. When `label` is non-empty, the component also sets `aria-label` on the native input to match that text. When `label` is empty, no `aria-label` is set — the accessible name is derived from the wrapping `<label>` element, which includes any projected content. Always provide either a non-empty `label` or project meaningful content so screen readers announce a useful accessible name.
 
 When `indeterminate` is `true`, the component sets `aria-checked="mixed"` on the native input, which is the correct ARIA value for a partially selected checkbox (e.g., a "select all" control with some children selected).
 
 Keyboard interaction is handled by the underlying native input. Space toggles the checked state; Enter does not activate checkboxes (browser default for `<input type="checkbox">`).
 
-`CheckboxDirective` sets `tabindex="0"` on the host, which is the browser default for native checkboxes and is generally safe.
-
-<!-- TODO(owner-review): CheckboxDirective host has [attr.role]="'checkbox'" — this is redundant for a native input[type="checkbox"] (native inputs already have an implicit ARIA role). Safe to remove; confirm before doing so. -->
+Native `<input type="checkbox">` elements are included in the tab order by default; `CheckboxDirective` does not override this behavior.
 
 ## API
 
@@ -163,12 +161,12 @@ Implements `FormCheckboxControl` from `@angular/forms/signals`. Use `[(checked)]
 |-----------------|---------------------------------------------------------|------------|-------------|
 | `checked`       | `boolean`                                               | `false`    | Two-way bindable checked state. Implements `FormCheckboxControl`, enabling use with the signal forms `[formField]` binding. |
 | `class`         | `string`                                                | `''`       | Additional CSS classes merged onto the outer `<label>` container via `tailwind-merge`. |
-| `disabled`      | `boolean`                                               | `false`    | Disables the checkbox and removes pointer interaction. |
-| `indeterminate` | `boolean`                                               | `false`    | Sets the native indeterminate state. Renders the checkbox filled without a checkmark, and sets `aria-checked="mixed"`. Activating an indeterminate checkbox sets it to checked. |
-| `label`         | `string`                                                | `''`       | Text label displayed adjacent to the checkbox. When non-empty, takes precedence over projected content and is used as the accessible name on the native input. |
+| `disabled`      | `boolean`                                               | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction. |
+| `indeterminate` | `boolean`                                               | `false`    | Sets the native indeterminate state. Renders the checkbox filled with a dash indicator, and sets `aria-checked="mixed"` on the native input. Activating an indeterminate checkbox sets it to checked. |
+| `label`         | `string`                                                | `''`       | Text label displayed adjacent to the checkbox. When non-empty, takes precedence over projected content and is also used as the accessible name on the native input. |
 | `labelPosition` | `'before' \| 'after'`                                   | `'after'`  | Position of the label relative to the checkbox box. |
 | `labelSize`     | `'small' \| 'medium' \| 'large'`                        | `'medium'` | Font size of the label text. |
-| `required`      | `boolean`                                               | `false`    | Intended to mark the field as required. <!-- TODO(owner-review): the `required` input is not forwarded to the native input in the current template — confirm whether this is intentional or an omission before documenting the expected behavior. --> |
+| `required`      | `boolean`                                               | `false`    | Marks the native input as required. Activates browser validation and the `:required` CSS pseudo-class. |
 | `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset for the visible checkbox box. |
 | `tabIndex`      | `number`                                                | `0`        | Tab index applied to the native input. Ignored when `disabled` is `true` (forced to `-1`). |
 
@@ -193,7 +191,7 @@ Applies Mona UI styling to a native `<input type="checkbox">`. All native checkb
 
 | Name      | Type                                                    | Default    | Description |
 |-----------|---------------------------------------------------------|------------|-------------|
-| `class`   | `string`                                                | `''`       | Additional CSS classes merged onto the checkbox input element via `tailwind-merge`. |
+| `class`   | `string`                                                | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset for the checkbox. |
 
 `CheckboxDirective` has no outputs. Listen to native events (`(change)`, `(focus)`, `(blur)`) on the host element directly.
@@ -201,13 +199,16 @@ Applies Mona UI styling to a native `<input type="checkbox">`. All native checkb
 ---
 
 <!-- verification-checklist
-- [x] API definitions and defaults verified against source
-- [x] false ControlValueAccessor claim removed — component implements FormCheckboxControl only; no NG_VALUE_ACCESSOR, no writeValue/registerOnChange/registerOnTouched in source
-- [x] [(ngModel)] and [formControl] examples removed from CheckBoxComponent section; directive section correctly retains them
-- [x] touch output added to API table (was missing in prior docs)
-- [x] API table sorted A→Z (checked, class, disabled, indeterminate, inputBlur, inputChange, inputFocus, label, labelPosition, labelSize, required, rounded, tabIndex, touch)
-- [x] required input description updated with TODO(owner-review) — not forwarded to native input in template
-- [x] Tailwind class names removed from Rounded presets, Visual states, and Label size tables; replaced with consumer-facing descriptions
-- [x] Accessibility claims verified against source: aria-checked="mixed" confirmed in template, aria-label fallback confirmed, sr-only native input confirmed in checkboxVariants styles
-- [x] Stale package name TODO removed
+- [x] API definitions and defaults verified against source and component-metadata.json
+- [x] Indeterminate visual corrected: now renders a dash indicator (CSS mask) for both CheckBoxComponent and CheckboxDirective
+- [x] required input documented correctly: forwarded to native input via [required]="required()" — browser validation and :required pseudo-class activate
+- [x] aria-label behavior corrected: falls back to null (not 'Checkbox') when label is empty; accessible name derives from wrapping <label>
+- [x] CheckboxDirective tabindex note updated: directive no longer sets tabindex in host; native browser default applies
+- [x] role="checkbox" TODO removed: redundant attribute was removed from CheckboxDirective host
+- [x] touch output documented (was missing in prior docs)
+- [x] ControlValueAccessor claim removed — CheckBoxComponent implements FormCheckboxControl only
+- [x] [(ngModel)] / [formControl] examples correctly placed under CheckboxDirective only
+- [x] API table sorted A→Z within each section
+- [x] No internal or unexported APIs exposed
+- [x] Accessibility claims verified against source
 -->
