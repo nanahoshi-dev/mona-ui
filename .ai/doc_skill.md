@@ -201,6 +201,7 @@ The lean layout should usually contain these sections:
 
     * One sentence describing the component’s purpose.
     * Focus on what the consumer can do with it, not how it is implemented.
+    * Do not describe how the component achieves its behavior. State only what the consumer observes or can configure.
 
 3. Interactive Demo
 
@@ -213,6 +214,8 @@ The lean layout should usually contain these sections:
     * Explain when to use this component.
     * Include a short list only when it helps consumers choose correctly.
     * Avoid marketing language.
+    * Do not explain the rendering or layout technique used internally. State the observable outcome instead.
+    * Do not mention ARIA roles, attributes, or consumer accessibility responsibilities in the overview. All ARIA information — which attributes the component manages, when they appear, and what the consumer must provide — belongs exclusively in the Accessibility Notes section.
 
 5. Import & Basic Usage
 
@@ -264,7 +267,8 @@ The lean layout should usually contain these sections:
 
     * Include only accessibility behavior confirmed by source, tests, runtime handlers, or explicit ARIA attributes.
     * Do not claim the component is accessible unless the implementation supports the claim.
-    * If the component renders ARIA attributes, document them precisely.
+    * If the component renders ARIA attributes, document them in a table with columns: Attribute, When present, Value. This is the correct home for ARIA mechanics — not the overview.
+    * Separate component-managed attributes from consumer responsibilities. Consumer responsibilities (what the consumer must provide, such as `aria-label`) should be listed explicitly after the table.
     * If the consumer must provide an accessible name, say so.
     * If decorative usage is unclear, mark it for owner review instead of inventing guidance.
 
@@ -340,6 +344,7 @@ The comprehensive layout should usually contain these sections:
     * Two to four concise paragraphs explaining the component’s core purpose.
     * Explicitly state when to use this component versus closely related Mona UI components.
     * Include a short comparison matrix only when it helps consumers choose correctly.
+    * Do not mention ARIA roles, attributes, or consumer accessibility responsibilities here. All ARIA information belongs in the Accessibility & Forms Integration section.
 
    Example:
    `Use DropDownList when the user must select from known options. Use ComboBox when text entry and filtering are part of the interaction.`
@@ -532,6 +537,8 @@ Omit these from human-facing docs unless they are explicitly public or consumer-
 * test-only utilities
 * demo-only helpers
 * implementation-specific timing details that are not public guarantees
+* rendering or layout technique names (clip-path, transforms, stroke-dasharray, etc.)
+* animation implementation details (keyframes, easing values, timing unless publicly configurable)
 
 Include these when confirmed:
 
@@ -555,6 +562,12 @@ If a true implementation detail is useful only as evidence, use it internally to
 ---
 
 Example quality bar:
+
+Bad:
+`It uses a two-track clip-path technique so the label remains readable against whichever region it overlaps.`
+
+Good:
+`The label remains readable regardless of the current fill level.`
 
 Bad:
 `Button is a customizable button component that lets you create beautiful buttons.`
@@ -597,6 +610,12 @@ Bad:
 
 Good:
 `The progress arc represents the current value within the configured range.`
+
+Bad (overview):
+`The component renders role="progressbar" and manages aria-valuemin, aria-valuemax, and aria-valuenow automatically. Always provide an accessible name via aria-label.`
+
+Good (overview):
+`Use it to indicate progress inline where a horizontal bar would be too wide, or when an indeterminate spinner is needed for a loading state of unknown duration.`
 
 ---
 

@@ -1,8 +1,11 @@
 import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input } from "@angular/core";
 
 import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { getPercentage } from "../../../utils/progress-bar.utils";
+import { ProgressBarLabelTemplateDirective } from "../../directives/progress-bar-label-template.directive";
 import { LabelPosition } from "../../models/LabelPosition";
 import {
     progressBarBaseThemeVariants,
@@ -12,9 +15,6 @@ import {
     ProgressBarVariantInput,
     ProgressBarVariantProps
 } from "../../styles/progress-bar.styles";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { ProgressBarLabelTemplateDirective } from "../../directives/progress-bar-label-template.directive";
-import { getPercentage } from "../../../utils/progress-bar.utils";
 
 @Component({
     selector: "mona-progress-bar",
@@ -36,10 +36,12 @@ import { getPercentage } from "../../../utils/progress-bar.utils";
     imports: [DecimalPipe, NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
+        "[attr.aria-busy]": "indeterminate() || null",
         "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-valuemin]": "min()",
-        "[attr.aria-valuemax]": "max()",
-        "[attr.aria-valuenow]": "value()",
+        "[attr.aria-valuemin]": "indeterminate() ? null : min()",
+        "[attr.aria-valuemax]": "indeterminate() ? null : max()",
+        "[attr.aria-valuenow]": "indeterminate() ? null : value()",
+        "[attr.aria-valuetext]": "ariaValueText() || null",
         "[attr.aria-disabled]": "disabled() || null",
         "[attr.data-disabled]": "disabled()",
         role: "progressbar"
@@ -69,9 +71,8 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     });
     protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
     protected readonly nextTrackClipPath = computed(() => {
-        const rightClip = this.rightClip();
         const progress = this.progress();
-        return `inset(-1px ${rightClip}px -1px ${progress}%)`;
+        return `inset(-1px -1px -1px ${progress}%)`;
     });
     protected readonly prevTrackClipPath = computed(() => {
         const progress = this.progress();
@@ -79,17 +80,17 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         if (indeterminate) {
             return `inset(-1px -1px -1px -1px)`;
         }
-        const left = progress < 0 ? 8 : 0;
         const right = progress < 100 ? 8 : 0;
-        return `inset(-1px ${right}px -1px ${left}px)`;
+        return `inset(-1px ${right}px -1px 0px)`;
     });
     protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
-    protected readonly rightClip = signal(-1);
     protected readonly trackClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const classes = progressBarTrackThemeVariants(theme)({ rounded });
-        return this.animate() ? classes : twMerge(classes, "data-[next='true']:transition-none");
+        return this.animate()
+            ? classes
+            : twMerge(classes, "data-[next='true']:transition-none data-[prev='true']:transition-none");
     });
     protected readonly trackColor = this.#color;
 
@@ -102,74 +103,89 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
-     * @description Whether to animate the progress bar track transition.
+     * @description Overrides the numeric aria-valuenow announcement for assistive technology.
+     * Particularly useful in indeterminate mode — set to a localized string such as "Loading"
+     * so screen readers announce state rather than silence.
+     * When empty, assistive technology falls back to the numeric value.
+     * @default ""
+     */
+    public readonly ariaValueText = input("", { alias: "aria-valuetext" });
+
+    /**
+     * @description Enables CSS transitions on fill and color changes.
+     * Set to `false` when updating `value` at high frequency (e.g., a real-time byte counter).
      * @default true
      */
     public readonly animate = input(true);
 
     /**
-     * @description The color of the progress bar fill.
-     * Can be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.
+     * @description Fill color of the progress track.
+     * Pass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.
      * When empty, falls back to the primary theme color.
      * @default ""
      */
     public readonly color = input<string | Action<number, string>>("");
 
     /**
-     * @description Whether the progress bar is disabled.
+     * @description Renders the bar with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Whether the progress bar is in indeterminate state.
+     * @description Switches to indeterminate mode: plays a looping animation and hides the label.
+     * ARIA value attributes are removed and `aria-busy` is set on the host element.
      * @default false
      */
     public readonly indeterminate = input(false);
 
     /**
-     * @description The position of the label.
+     * @description Horizontal alignment of the label within the bar.
      * @default center
      */
     public readonly labelPosition = input<LabelPosition>("center");
 
     /**
-     * @description The styles of the label.
+     * @description Inline styles applied to the default label span.
+     * Has no effect when a custom `monaProgressBarLabelTemplate` is provided.
+     * @default {}
      */
     public readonly labelStyles = input<Partial<CSSStyleDeclaration>>({});
 
     /**
-     * @description Whether the label is visible.
+     * @description Controls label visibility in determinate mode.
+     * Has no effect in indeterminate mode — the label is always hidden there.
      * @default true
      */
     public readonly labelVisible = input(true);
 
     /**
-     * @description The maximum value of the progress bar.
+     * @description Upper bound of the value range. Must be greater than `min`.
      * @default 100
      */
     public readonly max = input(100);
 
     /**
-     * @description The minimum value of the progress bar.
+     * @description Lower bound of the value range.
      * @default 0
      */
     public readonly min = input(0);
 
     /**
-     * @description The border radius of the progress bar.
+     * @description Border-radius preset applied to the bar.
      * @default medium
      */
     public readonly rounded = input<ProgressBarVariantProps["rounded"]>("medium");
 
     /**
-     * @description The user class of the progress bar.
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });
 
     /**
-     * @description The value of the progress bar.
+     * @description Current progress value within `[min, max]`.
+     * Values outside the range are clamped before rendering; non-finite values are treated as `0`.
      * @default 0
      */
     public readonly value = input(0);

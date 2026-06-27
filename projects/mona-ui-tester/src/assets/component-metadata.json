@@ -6864,79 +6864,85 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the progress bar host element.\r\nUse to describe what is being measured (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role and numeric values only.",
+        "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role and numeric values only.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaValueText",
+        "type": "string",
+        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\nParticularly useful in indeterminate mode — set to a localized string such as \"Loading\"\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input"
       },
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Whether to animate the progress bar track transition.",
+        "description": "Enables CSS transitions on fill and color changes.\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
         "kind": "input"
       },
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "The color of the progress bar fill.\r\nCan be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\r\nWhen empty, falls back to the primary theme color.",
+        "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the progress bar is disabled.",
+        "description": "Renders the bar with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "Whether the progress bar is in indeterminate state.",
+        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "LabelPosition",
-        "description": "The position of the label.",
+        "description": "Horizontal alignment of the label within the bar.",
         "kind": "input"
       },
       {
         "name": "labelStyles",
         "type": "Partial<CSSStyleDeclaration>",
-        "description": "The styles of the label.",
+        "description": "Inline styles applied to the default label span.\nHas no effect when a custom `monaProgressBarLabelTemplate` is provided.",
         "kind": "input"
       },
       {
         "name": "labelVisible",
         "type": "boolean",
-        "description": "Whether the label is visible.",
+        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode — the label is always hidden there.",
         "kind": "input"
       },
       {
         "name": "max",
         "type": "number",
-        "description": "The maximum value of the progress bar.",
+        "description": "Upper bound of the value range. Must be greater than `min`.",
         "kind": "input"
       },
       {
         "name": "min",
         "type": "number",
-        "description": "The minimum value of the progress bar.",
+        "description": "Lower bound of the value range.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ProgressBarVariantProps[\"rounded\"]",
-        "description": "The border radius of the progress bar.",
+        "description": "Border-radius preset applied to the bar.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "The user class of the progress bar.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "number",
-        "description": "The value of the progress bar.",
+        "description": "Current progress value within `[min, max]`.\nValues outside the range are clamped before rendering; non-finite values are treated as `0`.",
         "kind": "input"
       }
     ]

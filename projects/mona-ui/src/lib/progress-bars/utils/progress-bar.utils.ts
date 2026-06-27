@@ -8,8 +8,9 @@
  * @returns The percentage of the value within the range, rounded to the specified precision.
  */
 export const getPercentage = (value: number, min: number, max: number, precision: number = 2): number => {
-    if (max <= min) {
+    if (max <= min || !isFinite(value)) {
         return 0;
     }
-    return Number(Number(((value - min) / (max - min)) * 100).toFixed(precision));
+    const raw = ((value - min) / (max - min)) * 100;
+    return Number(Math.min(100, Math.max(0, raw)).toFixed(precision));
 };

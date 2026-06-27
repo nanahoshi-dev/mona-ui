@@ -1,13 +1,14 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input } from "@angular/core";
+import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import { Action } from "../../../../utils/Action";
+import { getPercentage } from "../../../utils/progress-bar.utils";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
     circularProgressBarBaseThemeVariants,
     type CircularProgressBarBaseVariantInput
 } from "../../styles/circular-progress-bar.styles";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { getPercentage } from "../../../utils/progress-bar.utils";
 
 @Component({
     selector: "mona-circular-progress-bar",
@@ -32,10 +33,12 @@ import { getPercentage } from "../../../utils/progress-bar.utils";
     imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",
+        "[attr.aria-busy]": "indeterminate() || null",
         "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-valuemin]": "min()",
-        "[attr.aria-valuemax]": "max()",
-        "[attr.aria-valuenow]": "value()",
+        "[attr.aria-valuemin]": "indeterminate() ? null : min()",
+        "[attr.aria-valuemax]": "indeterminate() ? null : max()",
+        "[attr.aria-valuenow]": "indeterminate() ? null : value()",
+        "[attr.aria-valuetext]": "ariaValueText() || null",
         "[attr.aria-disabled]": "disabled() || null",
         "[attr.data-disabled]": "disabled() || null",
         role: "progressbar",
@@ -48,14 +51,14 @@ export class CircularProgressBarComponent implements CircularProgressBarBaseVari
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
-        return circularProgressBarBaseThemeVariants(theme)({ disabled });
+        const classes = circularProgressBarBaseThemeVariants(theme)({ disabled });
+        const animateClass = this.animate() ? "" : "[&_svg_circle]:transition-none";
+        return twMerge(classes, this.userClass(), animateClass);
     });
-    protected readonly center = computed(() => {
-        return {
-            x: computed(() => this.size() / 2),
-            y: computed(() => this.size() / 2)
-        };
-    });
+    protected readonly center = computed(() => ({
+        x: this.size() / 2,
+        y: this.size() / 2
+    }));
     protected readonly circumference = computed(() => 2 * Math.PI * (this.size() / 2 - this.thickness()));
     protected readonly labelTemplate = contentChild(CircularProgressBarLabelTemplateDirective);
     protected readonly pixelSize = computed(() => `${this.size()}px`);
@@ -75,59 +78,80 @@ export class CircularProgressBarComponent implements CircularProgressBarBaseVari
     });
 
     /**
-     * @description Accessible label for the progress bar host element.
-     * Use to describe what is being measured (e.g., "Upload progress").
-     * When empty, assistive technology announces the role and numeric values only.
+     * @description Enables CSS transitions on stroke and color changes.
+     * Set to `false` when updating `value` at a high frequency.
+     * @default true
+     */
+    public readonly animate = input(true);
+
+    /**
+     * @description Accessible name for the host element. Describe what the component represents (e.g., "Upload progress").
+     * When empty, assistive technology announces the role without a label.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
-     * @description The color of the circular progress bar.
-     * Can be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.
-     * When empty, falls back to `var(--color-primary)`.
+     * @description Human-readable override for the `aria-valuenow` announcement.
+     * Useful in indeterminate mode — set to a localized string such as `"Loading"`
+     * so screen readers announce state rather than silence.
+     * When empty, assistive technology falls back to the numeric value.
+     * @default ""
+     */
+    public readonly ariaValueText = input("", { alias: "aria-valuetext" });
+
+    /**
+     * @description Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and
+     * returning a string. When empty, falls back to the primary theme color.
      * @default ""
      */
     public readonly color = input<string | Action<number, string>>("");
 
     /**
-     * @description Whether the circular progress bar is disabled.
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Whether the circular progress bar is in indeterminate state.
+     * @description Activates indeterminate mode when the completion value is unknown.
+     * ARIA value attributes are removed and `aria-busy` is set on the host element.
      * @default false
      */
     public readonly indeterminate = input(false);
 
     /**
-     * @description The maximum value of the circular progress bar.
+     * @description Upper bound of the value range. Must be greater than `min`.
      * @default 100
      */
     public readonly max = input(100);
 
     /**
-     * @description The minimum value of the circular progress bar.
+     * @description Lower bound of the value range.
      * @default 0
      */
     public readonly min = input(0);
 
     /**
-     * @description The size of the circular progress bar.
+     * @description Diameter of the indicator in pixels. Controls both width and height of the host element.
      * @default 100
      */
     public readonly size = input(100);
 
     /**
-     * @description The thickness of the circular progress bar.
+     * @description Stroke width of the circular track in pixels.
      * @default 6
      */
     public readonly thickness = input(6);
 
     /**
-     * @description The value of the circular progress bar.
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
+    public readonly userClass = input("", { alias: "class" });
+
+    /**
+     * @description Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.
      * @default 0
      */
     public readonly value = input(0);
