@@ -10,9 +10,7 @@ import { twMerge } from "tailwind-merge";
 @Directive({
     selector: "input[type='checkbox'][monaCheckbox]",
     host: {
-        "[class]": "classes()",
-        "[attr.tabindex]": "0",
-        "[attr.role]": "'checkbox'"
+        "[class]": "classes()"
     }
 })
 export class CheckboxDirective implements CheckboxDirectiveVariantInput {
@@ -26,12 +24,13 @@ export class CheckboxDirective implements CheckboxDirectiveVariantInput {
     });
 
     /**
-     * @description Sets the border radius of the checkbox.
+     * @description Border-radius preset applied to the checkbox.
+     * @default "medium"
      */
     public readonly rounded = input<CheckboxDirectiveVariantProps["rounded"]>("medium");
 
     /**
-     * @description Additional CSS classes merged onto the checkbox input element via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });

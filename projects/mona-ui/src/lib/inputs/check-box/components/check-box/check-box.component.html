@@ -7,18 +7,19 @@
         type="checkbox"
         [disabled]="disabled()"
         [indeterminate]="indeterminate()"
+        [required]="required()"
         [ngModel]="checked()"
         [tabindex]="disabled() ? -1 : tabIndex()"
         [class]="checkBoxClasses()"
-        [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
-        [attr.aria-label]="label() || 'Checkbox'"
+        [attr.aria-checked]="indeterminate() ? 'mixed' : null"
+        [attr.aria-label]="label() || null"
         (change)="onInputChange($event)"
         (blur)="onInputBlur($event)"
         (focus)="inputFocus.emit($event)"
         (ngModelChange)="onCheckedChange($event)"
         #checkBox />
 
-    <span [class]="checkMarkClasses()">
+    <span [class]="checkMarkClasses()" aria-hidden="true">
         @if (checked()) {
             <svg
                 xmlns="http://www.w3.org/2000/svg"

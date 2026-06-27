@@ -20,7 +20,16 @@ export const checkmarkVariants = cva(
 
         peer-checked:bg-primary
         peer-checked:text-primary-foreground
+
         peer-indeterminate:bg-primary
+        peer-indeterminate:text-primary-foreground
+        peer-indeterminate:after:content-['']
+        peer-indeterminate:after:absolute
+        peer-indeterminate:after:inset-[3px_0_3px_0]
+        peer-indeterminate:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14'%2F%3E%3C%2Fsvg%3E")]
+        peer-indeterminate:after:[mask-repeat:no-repeat]
+        peer-indeterminate:after:[mask-size:contain]
+        peer-indeterminate:after:bg-current
 
         [&.ng-touched.ng-invalid]:border-error
     `,
@@ -73,6 +82,7 @@ export const checkboxDirectiveVariants = cva(
         disabled:opacity-50
 
         checked:text-primary-foreground
+        indeterminate:text-primary-foreground
         indeterminate:bg-primary
         checked:bg-primary
 
@@ -82,9 +92,18 @@ export const checkboxDirectiveVariants = cva(
         checked:after:content-['']
         checked:after:absolute
         checked:after:inset-[1px_0_0_1px]
-        checked:after:bg-[url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M18%206%209%2017l-5-5'/%3E%3C/svg%3E")]
-        checked:after:bg-no-repeat
-        checked:after:bg-contain
+        checked:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M18%206%209%2017l-5-5'/%3E%3C/svg%3E")]
+        checked:after:[mask-repeat:no-repeat]
+        checked:after:[mask-size:contain]
+        checked:after:bg-current
+
+        indeterminate:after:content-['']
+        indeterminate:after:absolute
+        indeterminate:after:inset-[1px_0_1px_1px]
+        indeterminate:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14'%2F%3E%3C%2Fsvg%3E")]
+        indeterminate:after:[mask-repeat:no-repeat]
+        indeterminate:after:[mask-size:contain]
+        indeterminate:after:bg-current
 
         [&.ng-touched.ng-invalid]:border-error
     `,

@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input, model, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { type FormCheckboxControl } from "@angular/forms/signals";
+import { LucideMinus } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../../../theme/services/theme.service";
 import {
@@ -45,73 +46,81 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     });
 
     /**
-     * @description Sets the checked state of the checkbox.
+     * @description Whether the control is checked.
+     * @default false
      */
     public readonly checked = model(false);
 
     /**
-     * @description Sets the disabled state of the checkbox.
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the indeterminate state of the checkbox.
+     * @description Activates indeterminate mode, showing a dash instead of a checkmark.
+     * @default false
      */
     public readonly indeterminate = input(false);
 
     /**
-     * @description Emits when the checkbox span loses focus.
+     * @description Emitted when the checkbox input loses focus.
      */
     public readonly inputBlur = output<FocusEvent>();
 
     /**
-     * @description Emits when the checkbox value changes.
+     * @description Emitted when the checkbox value changes.
      */
     public readonly inputChange = output<Event>();
 
     /**
-     * @description Emits when the checkbox span gains focus.
+     * @description Emitted when the checkbox input gains focus.
      */
     public readonly inputFocus = output<FocusEvent>();
 
     /**
-     * @description Sets the label text of the checkbox.
-     * If provided, it will take precedence over the content inside the checkbox.
+     * @description Text label displayed alongside the checkbox. When provided, takes precedence over projected content.
+     * @default ""
      */
     public readonly label = input("");
 
     /**
-     * @description Sets the position of the label relative to the checkbox.
+     * @description Position of the label relative to the checkbox.
+     * @default "after"
      */
     public readonly labelPosition = input<"before" | "after">("after");
 
     /**
-     * @description Sets the size of the label text.
+     * @description Controls the font size of the label text.
+     * @default "medium"
      */
     public readonly labelSize = input<CheckboxVariantProps["labelSize"]>("medium");
 
     /**
-     * @description Sets the required state of the checkbox.
+     * @description Marks the control as required for form validation.
+     * @default false
      */
     public readonly required = input(false);
 
     /**
-     * @description Sets the border radius of the checkmark box.
+     * @description Border-radius preset applied to the checkmark box.
+     * @default "medium"
      */
     public readonly rounded = input<CheckmarkVariantProps["rounded"]>("medium");
+
     /**
-     * @description Sets the tab index of the checkbox.
+     * @description Tab index of the native checkbox input.
+     * @default 0
      */
     public readonly tabIndex = input(0);
 
     /**
      * @description Emitted when the checkbox loses focus or its value changes.
-     * Consumed by the signal forms `Field` directive to mark the field as touched.
      */
     public readonly touch = output<void>();
 
     /**
-     * @description Additional CSS classes merged onto the checkbox label container via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the label container via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
@@ -121,8 +130,6 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
     }
 
     protected onInputChange(event: Event): void {
-        const isChecked = (event.target as HTMLInputElement).checked;
-        this.checked.set(isChecked);
         this.inputChange.emit(event);
         this.touch.emit();
     }
