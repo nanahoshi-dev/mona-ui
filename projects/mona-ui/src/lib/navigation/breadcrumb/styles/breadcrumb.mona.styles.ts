@@ -4,7 +4,7 @@ export const breadcrumbListVariants = cva(
     `
         flex items-center
         overflow-hidden gap-1
-        list-none select-none py-1
+        list-none select-none py-1 px-2
     `,
     {
         variants: {
@@ -21,6 +21,7 @@ export const breadcrumbListItemVariants = cva(
         flex items-center
         truncate cursor-pointer
         h-full text-primary/70
+        bg-transparent border-0
         outline-none rounded-sm px-1
         hover:text-primary
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40

@@ -7,13 +7,14 @@ import { ChangeDetectionStrategy, Component, input, output, TemplateRef, viewChi
 })
 export class BreadcrumbItemComponent {
     /**
-     * @description Whether the breadcrumb item is disabled.
+     * @description Renders this item with reduced visual emphasis and removes pointer interaction.
+     * Has no visual effect when the parent breadcrumb is also disabled.
      * @default false
      */
     public readonly disabled = input(false);
     /**
-     * @description Event emitted when the breadcrumb item is clicked.
-     * @default undefined
+     * @description Emitted when the item is clicked or activated via keyboard.
+     * Not emitted when this is the last (current-page) item or when the item is disabled.
      */
     public readonly itemClick = output();
     public readonly templateRef = viewChild.required(TemplateRef);

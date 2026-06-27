@@ -462,85 +462,91 @@
       {
         "name": "alt",
         "type": "string",
-        "description": "Alternative text for the avatar image.",
+        "description": "Alternative text for the avatar image. Provide a meaningful description for non-decorative images;\r\nan empty string marks the image as decorative.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the avatar host element.",
+        "description": "Accessible name for the host element. Describe what the avatar represents.\r\nWhen non-empty, the host receives `role=\"img\"` in label and projected-content modes.",
         "kind": "input"
       },
       {
         "name": "backgroundColor",
         "type": "string",
-        "description": "Sets the background color of the avatar.\r\n\r\nIf an image is provided, this will be ignored.",
+        "description": "Background color of the host element.\r\nIgnored in image mode — the background is set to transparent automatically.",
         "kind": "input"
       },
       {
         "name": "borderColor",
         "type": "string",
-        "description": "Sets the border color of the avatar.",
+        "description": "Border color of the host element.",
         "kind": "input"
       },
       {
         "name": "borderRadius",
         "type": "string | number",
-        "description": "Sets the border radius of the avatar.\r\nCan be a percentage or pixel value.",
+        "description": "Border radius of the host element. Accepts a CSS string (`'50%'`, `'8px'`) or a number converted to `px`.\r\nIn image mode, the image is also clipped to this radius.",
         "kind": "input"
       },
       {
         "name": "borderWidth",
         "type": "string | number",
-        "description": "Sets the border width of the avatar.\r\nCan be a pixel value.",
+        "description": "Border width of the host element. Accepts a CSS string or a number converted to `px`.",
         "kind": "input"
       },
       {
         "name": "customStyles",
         "type": "Partial<CSSStyleDeclaration>",
-        "description": "Custom styles spread over all computed host styles, taking precedence over every\r\nother style input including `display`, `height`, and `width`.\r\nOverriding layout-critical properties such as `display` may break expected rendering.",
+        "description": "Inline styles applied after all other style inputs,\r\ntaking precedence over every computed style including `display`, `height`, and `width`.",
         "kind": "input"
       },
       {
         "name": "height",
         "type": "string | number",
-        "description": "Sets the height of the avatar.\r\nCan be a pixel value or a string with units (e.g., \"64px\").",
+        "description": "Height of the host element. A string is used as-is; a number is converted to `px`.",
         "kind": "input"
       },
       {
         "name": "image",
         "type": "string",
-        "description": "Sets the image URL for the avatar.\r\nIf an image is provided, the avatar will display the image instead of a label.",
+        "description": "Image URL. When non-empty, renders an `<img>` and suppresses `label` and projected content.",
         "kind": "input"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label for the avatar.\r\nIf an image is provided, this will be ignored.",
+        "description": "Text label displayed inside the avatar when no image is provided. Ignored when `image` is non-empty.",
         "kind": "input"
       },
       {
         "name": "labelColor",
         "type": "string",
-        "description": "Sets the color of the label text.\r\nIf an image is provided, this will be ignored.",
+        "description": "Color of the label text. Ignored in image mode.",
         "kind": "input"
       },
       {
         "name": "labelFontSize",
         "type": "string",
-        "description": "Sets the font size of the label text.\r\nIf an image is provided, this will be ignored.",
+        "description": "Font size of the label text. Ignored in image mode.",
         "kind": "input"
       },
       {
         "name": "labelFontWeight",
         "type": "string",
-        "description": "Sets the font weight of the label text.\r\nIf an image is provided, this will be ignored.",
+        "description": "Font weight of the label text. Ignored in image mode.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the avatar.\r\nCan be a pixel value or a string with units (e.g., \"64px\").",
+        "description": "Width of the host element. A string is used as-is; a number is converted to `px`.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes applied to the host element.",
         "kind": "input"
       }
     ]
@@ -864,61 +870,61 @@
       {
         "name": "ariaHasPopup",
         "type": "string",
-        "description": "Sets the aria-haspopup attribute of the button.",
+        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\r\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\r\nWhen inside a `ButtonGroup`, the group's disabled state takes precedence.",
         "kind": "model"
       },
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Sets the icon-only state of the button.\r\nWhen set to true, the button will appear as square.",
+        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\r\nProvide `aria-label` on the host when using icon-only buttons.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the button.\r\nWhen set to true, the button will display a loading indicator and be disabled.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\r\nSets `aria-busy=\"true\"` on the host.",
         "kind": "model"
       },
       {
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
-        "description": "Sets the look of the button.",
+        "description": "Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.",
         "kind": "model"
       },
       {
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the button.",
+        "description": "Border-radius preset applied to the component.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input"
       },
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Sets the selected state of the button.",
+        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\r\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
         "kind": "model"
       },
       {
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
-        "description": "Sets the size of the button.",
+        "description": "Size preset controlling the button's height and horizontal padding.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input"
       },
       {
         "name": "tabindex",
         "type": "number",
-        "description": "Sets the tabindex of the button.",
+        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.\r\nAccepts a numeric string and converts it to a number.",
         "kind": "input"
       },
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the button.\r\nIf set to `true`, the button will toggle its selected state on click.",
+        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\r\nMust use `[toggleable]=\"true\"` binding syntax, not bare attribute form.",
         "kind": "input"
       },
       {
@@ -2503,24 +2509,24 @@
   },
   "BreadcrumbItemDirective": {
     "name": "BreadcrumbItemDirective",
-    "selector": "\"span[monaBreadcrumbItem]\"",
+    "selector": "\"button[monaBreadcrumbItem]\"",
     "inputs": [
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether this individual breadcrumb item is disabled.",
+        "description": "Renders this item with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "listDisabled",
         "type": "boolean",
-        "description": "Whether the parent breadcrumb list is disabled. Passed down by `BreadcrumbComponent`.",
+        "description": "Reflects whether the parent breadcrumb is disabled. Controls compound disabled styling when only individual items are disabled.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the item span via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the breadcrumb item via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -2982,49 +2988,49 @@
       {
         "name": "allowEmpty",
         "type": "boolean",
-        "description": "When set to false, at least one button must remain selected in single selection mode.\nClicking a selected button will not deselect it. Defaults to true (allows empty selection).",
+        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the button group landmark.\nOverride when multiple button groups appear on the same page to distinguish them for screen reader users.",
+        "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\nso screen reader users can distinguish them.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
+        "description": "Renders all child buttons with reduced visual emphasis and removes pointer interaction.",
         "kind": "model"
       },
       {
         "name": "look",
         "type": "ButtonGroupVariantProps[\"look\"]",
-        "description": "Sets the look of the button group.",
+        "description": "Visual style variant propagated to all child buttons.\nAlso controls container-level divider and border behavior.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ButtonGroupVariantProps[\"rounded\"]",
-        "description": "Sets the rounded style of the button group.",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "ButtonGroupVariantProps[\"size\"]",
-        "description": "Sets the size of the button group.",
+        "description": "Border-radius preset applied to the container and the outer corners of the first and last child button.",
         "kind": "input"
       },
       {
         "name": "selection",
         "type": "SelectionMode",
-        "description": "Sets the selection mode of the button group.",
+        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\nor toggle independently (`\"multiple\"`).",
         "kind": "model"
+      },
+      {
+        "name": "size",
+        "type": "ButtonGroupVariantProps[\"size\"]",
+        "description": "Size preset propagated to all child buttons, overriding their individual `size` inputs.",
+        "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the button group host element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -6762,19 +6768,19 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Sets the aria-label for the breadcrumb navigation landmark.",
+        "description": "Accessible name for the breadcrumb navigation landmark.\nOverride when multiple breadcrumb components appear on the same page.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the entire breadcrumb component is disabled.",
+        "description": "Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the breadcrumb list element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -6786,13 +6792,13 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the breadcrumb item is disabled.",
+        "description": "Renders this item with reduced visual emphasis and removes pointer interaction.\r\nHas no visual effect when the parent breadcrumb is also disabled.",
         "kind": "input"
       },
       {
         "name": "itemClick",
         "type": "void",
-        "description": "Event emitted when the breadcrumb item is clicked.",
+        "description": "Emitted when the item is clicked or activated via keyboard.\r\nNot emitted when this is the last (current-page) item or when the item is disabled.",
         "kind": "output"
       }
     ]
@@ -6802,57 +6808,75 @@
     "selector": "\"mona-circular-progress-bar\"",
     "inputs": [
       {
+        "name": "animate",
+        "type": "boolean",
+        "description": "Enables CSS transitions on stroke and color changes.\nSet to `false` when updating `value` at a high frequency.",
+        "kind": "input"
+      },
+      {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the progress bar host element.\r\nUse to describe what is being measured (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role and numeric values only.",
+        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role without a label.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaValueText",
+        "type": "string",
+        "description": "Human-readable override for the `aria-valuenow` announcement.\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input"
       },
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "The color of the circular progress bar.\r\nCan be a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\r\nWhen empty, falls back to `var(--color-primary)`.",
+        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\nreturning a string. When empty, falls back to the primary theme color.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the circular progress bar is disabled.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "Whether the circular progress bar is in indeterminate state.",
+        "description": "Activates indeterminate mode when the completion value is unknown.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
         "kind": "input"
       },
       {
         "name": "max",
         "type": "number",
-        "description": "The maximum value of the circular progress bar.",
+        "description": "Upper bound of the value range. Must be greater than `min`.",
         "kind": "input"
       },
       {
         "name": "min",
         "type": "number",
-        "description": "The minimum value of the circular progress bar.",
+        "description": "Lower bound of the value range.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "number",
-        "description": "The size of the circular progress bar.",
+        "description": "Diameter of the indicator in pixels. Controls both width and height of the host element.",
         "kind": "input"
       },
       {
         "name": "thickness",
         "type": "number",
-        "description": "The thickness of the circular progress bar.",
+        "description": "Stroke width of the circular track in pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "number",
-        "description": "The value of the circular progress bar.",
+        "description": "Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.",
         "kind": "input"
       }
     ]

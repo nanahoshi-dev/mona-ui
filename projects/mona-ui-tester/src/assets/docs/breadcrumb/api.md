@@ -104,11 +104,11 @@ Add extra styles to the breadcrumb list via the `class` input on `<mona-breadcru
 
 ## Accessibility Notes
 
-`BreadcrumbComponent` renders `role="navigation"` on the host. This makes it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name — its default value is `"Breadcrumb"`.
+`BreadcrumbComponent` renders `role="navigation"` on the host, making it a landmark that screen reader users can navigate to directly. The `aria-label` input sets the landmark's accessible name — its default value is `"Breadcrumb"`.
 
-The last item automatically receives `aria-current="page"`. Separators are hidden from assistive technology.
+The item list is announced as a list by assistive technology. The last item automatically receives `aria-current="page"`. Separators are hidden from assistive technology.
 
-Non-last items respond to Enter and Space in addition to click. A disabled item receives `aria-disabled="true"` and is removed from the tab order.
+Non-last items are native buttons and respond to Enter and Space in addition to click. A disabled item is removed from the tab order and cannot be activated by keyboard or pointer.
 
 When multiple breadcrumbs appear on the same page, each should have a distinct `aria-label` so screen reader users can distinguish the landmarks.
 
@@ -124,9 +124,9 @@ When multiple breadcrumbs appear on the same page, each should have a distinct `
 
 | Name         | Type      | Default        | Description |
 |--------------|-----------|----------------|-------------|
-| `aria-label` | `string`  | `'Breadcrumb'` | Accessible label for the `role="navigation"` landmark. Override when multiple breadcrumbs appear on the same page. |
+| `aria-label` | `string`  | `'Breadcrumb'` | Accessible name for the breadcrumb navigation landmark. Override when multiple breadcrumb components appear on the same page. |
 | `class`      | `string`  | `''`           | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`. |
-| `disabled`   | `boolean` | `false`        | When `true`, the entire breadcrumb list becomes visually disabled and all items lose pointer interaction. |
+| `disabled`   | `boolean` | `false`        | Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items. |
 
 `BreadcrumbComponent` has no event outputs.
 
@@ -142,7 +142,7 @@ Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — te
 
 | Name       | Type      | Default | Description |
 |------------|-----------|---------|-------------|
-| `disabled` | `boolean` | `false` | Disables this item. The item receives `aria-disabled="true"` and `tabindex="-1"`, and `itemClick` is suppressed. Has no visual effect when the parent breadcrumb is also disabled. |
+| `disabled` | `boolean` | `false` | Renders this item with reduced visual emphasis and removes pointer interaction. Has no visual effect when the parent breadcrumb is also disabled. |
 
 #### Outputs
 
@@ -175,6 +175,6 @@ The template context is `{ $implicit: number }` where the implicit value is the 
 - [x] API definitions and defaults verified against source and component-metadata.json
 - [x] Basic examples compile against the public API surface
 - [x] No internal or unexported APIs exposed (BreadcrumbItemDirective absent from index.ts; correctly omitted)
-- [x] Accessibility claims verified against source: role="navigation" and aria-label in BreadcrumbComponent host; aria-current="page" and tabindex/aria-disabled in template; Enter/Space keyboard handlers confirmed in breadcrumb.component.html
+- [x] Accessibility claims verified against source: role="navigation" and aria-label in BreadcrumbComponent host; aria-current="page" in template; role="list" on <ol>; native disabled attribute drives disabled-item state (aria-disabled removed in S-3 fix); Enter/Space handled natively by button elements
 - [x] Styling section documents only public customization points — Tailwind utility class names removed, replaced with consumer-facing descriptions
 -->

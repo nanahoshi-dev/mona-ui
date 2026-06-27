@@ -1,14 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    contentChild,
-    contentChildren,
-    inject,
-    input,
-    TemplateRef
-} from "@angular/core";
+import { Component, computed, contentChild, contentChildren, inject, input, TemplateRef } from "@angular/core";
 import { LucideChevronRight } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -49,25 +40,26 @@ export class BreadcrumbComponent implements BreadcrumbVariantInput {
     });
 
     /**
-     * @description Sets the aria-label for the breadcrumb navigation landmark.
+     * @description Accessible name for the breadcrumb navigation landmark.
+     * Override when multiple breadcrumb components appear on the same page.
      * @default "Breadcrumb"
      */
     public readonly ariaLabel = input("Breadcrumb", { alias: "aria-label" });
 
     /**
-     * @description Whether the entire breadcrumb component is disabled.
+     * @description Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.
      * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Additional CSS classes merged onto the breadcrumb list element via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
 
     protected onItemClick(item: BreadcrumbItemComponent): void {
-        if (item.disabled()) {
+        if (this.disabled() || item.disabled()) {
             return;
         }
         item.itemClick.emit();

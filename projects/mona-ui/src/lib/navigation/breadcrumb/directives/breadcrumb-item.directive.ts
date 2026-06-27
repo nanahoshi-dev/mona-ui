@@ -4,10 +4,9 @@ import { ThemeService } from "../../../theme/services/theme.service";
 import { breadcrumbListItemThemeVariants, BreadcrumbListItemVariantInput } from "../styles/breadcrumb.styles";
 
 @Directive({
-    selector: "span[monaBreadcrumbItem]",
+    selector: "button[monaBreadcrumbItem]",
     host: {
-        "[class]": "baseClass()",
-        "[attr.aria-disabled]": "disabled() ? 'true' : null"
+        "[class]": "baseClass()"
     }
 })
 export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {
@@ -20,17 +19,17 @@ export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {
         return twMerge(breadcrumbListItemThemeVariants(theme)({ disabled, listDisabled }), userClass);
     });
     /**
-     * @description Whether this individual breadcrumb item is disabled.
+     * @description Renders this item with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
     public readonly disabled = input(false);
     /**
-     * @description Whether the parent breadcrumb list is disabled. Passed down by `BreadcrumbComponent`.
+     * @description Reflects whether the parent breadcrumb is disabled. Controls compound disabled styling when only individual items are disabled.
      * @default false
      */
     public readonly listDisabled = input(false);
     /**
-     * @description Additional CSS classes merged onto the item span via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the breadcrumb item via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
