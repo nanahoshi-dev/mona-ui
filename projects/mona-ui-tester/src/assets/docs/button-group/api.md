@@ -1,8 +1,8 @@
 ## Overview
 
-`ButtonGroupComponent` renders a `role="group"` landmark that wraps native `<button monaButton>` children. It propagates its `look`, `size`, `rounded`, and `disabled` values down to each child button, overriding the child's own inputs for those properties.
+`ButtonGroupComponent` groups native `<button monaButton>` children into a cohesive control that propagates its `look`, `size`, `rounded`, and `disabled` values down to each child, overriding the child's own inputs for those properties.
 
-When `selection` is set to `"single"` or `"multiple"`, the group coordinates toggle state across children. In `"single"` mode, activating one button deactivates all others. In `"multiple"` mode, each button toggles independently. Each child button's `aria-pressed` attribute reflects its current state.
+When `selection` is `"single"` or `"multiple"`, the group coordinates toggle state across children. In `"single"` mode, activating one button deactivates all others. In `"multiple"` mode, each button toggles independently.
 
 **Use `ButtonGroupComponent` when you need to:**
 
@@ -63,11 +63,23 @@ Add both to your standalone component's `imports` array. `ButtonDirective` is re
 </mona-button-group>
 ```
 
+**Reacting to any button click in the group:**
+
+```html
+<mona-button-group selection="single" (buttonClick)="onGroupInteraction()">
+    <button monaButton>Day</button>
+    <button monaButton>Week</button>
+    <button monaButton>Month</button>
+</mona-button-group>
+```
+
 > **Group inputs override child inputs.** When a child button is inside a `ButtonGroupComponent`, the group's `look`, `size`, `rounded`, and `disabled` values replace the child's own inputs for those properties.
 
 > **Selection state is not pre-settable via a group input.** To initialize a child as selected, bind `[(selected)]="true"` directly on that child button. There is no `value` input on the group.
 
 > **`allowEmpty` only applies to `"single"` selection mode.** In `"multiple"` mode, any number of buttons (including zero) can be active simultaneously.
+
+> **Switching from `"multiple"` to `"single"` reconciles existing state.** When `selection` changes from `"multiple"` to `"single"` at runtime, all but the first currently-selected button are automatically deselected.
 
 ## Appearance & Styling
 
@@ -75,19 +87,19 @@ Add both to your standalone component's `imports` array. `ButtonDirective` is re
 
 `look` defaults to `"outline"`. Most values affect child button fill and border. The container applies additional styling for two values:
 
-| `look`    | Container effect                                    |
-|-----------|-----------------------------------------------------|
-| `outline` | Adds a visual divider between adjacent buttons      |
-| `ghost`   | Removes the outer container border                  |
-| others    | No additional container effect                      |
+| `look`    | Container effect                               |
+|-----------|------------------------------------------------|
+| `outline` | Adds a visual divider between adjacent buttons |
+| `ghost`   | Removes the outer container border             |
+| others    | No additional container effect                 |
 
 ### Sizes
 
-| `size`   | Applied to                    |
-|----------|-------------------------------|
-| `small`  | All child buttons             |
-| `medium` | All child buttons (default)   |
-| `large`  | All child buttons             |
+| `size`   | Applied to                  |
+|----------|-----------------------------|
+| `small`  | All child buttons           |
+| `medium` | All child buttons (default) |
+| `large`  | All child buttons           |
 
 ### Rounded presets
 
@@ -118,6 +130,22 @@ Override container styles with the `class` input. When multiple groups appear on
 </mona-button-group>
 ```
 
+## Accessibility Notes
+
+The group host receives `role="group"` and an `aria-label` that defaults to `"Button group"`.
+
+| Attribute    | When present | Value                          |
+|--------------|--------------|--------------------------------|
+| `role`       | Always       | `"group"`                      |
+| `aria-label` | Always       | Value of the `aria-label` input |
+
+Each child button's `aria-pressed` attribute is managed by `ButtonDirective` and reflects the button's current `selected` state.
+
+**Consumer responsibilities:**
+
+- When multiple button groups appear on the same page, set a unique `aria-label` on each group so screen reader users can distinguish them.
+- Individual icon-only child buttons still require their own `aria-label` on the `<button>` element.
+
 ## API
 
 ### `ButtonGroupComponent`
@@ -128,30 +156,38 @@ Override container styles with the `class` input. When multiple groups appear on
 
 #### Inputs
 
-| Name         | Type                                                                                              | Default          | Description |
-|--------------|---------------------------------------------------------------------------------------------------|------------------|-------------|
-| `allowEmpty` | `boolean`                                                                                         | `true`           | When `false` and `selection` is `"single"`, at least one button must remain selected. Clicking the active button will not deselect it. Has no effect in `"multiple"` mode. |
-| `aria-label` | `string`                                                                                          | `'Button group'` | Accessible label for the `role="group"` landmark. Override when multiple button groups appear on the same page. |
-| `class`      | `string`                                                                                          | `''`             | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled`   | `boolean`                                                                                         | `false`          | Two-way bindable. When `true`, all child buttons are disabled. |
-| `look`       | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'outline'` | Visual variant propagated to all child buttons. Also controls container-level divider and border behavior. |
-| `rounded`    | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                             | `'medium'`       | Border-radius preset applied to the container and the outer corners of the first and last child button. |
-| `selection`  | `'single' \| 'multiple'`                                                                          | `'multiple'`     | Two-way bindable. Selection coordination mode. In `"single"` mode, activating one button deactivates all others. In `"multiple"` mode, each button toggles independently. |
-| `size`       | `'small' \| 'medium' \| 'large'`                                                                  | `'medium'`       | Size propagated to all child buttons, overriding their individual `size` inputs. |
+| Name         | Type                                                                                                                       | Default          | Description |
+|--------------|----------------------------------------------------------------------------------------------------------------------------|------------------|-------------|
+| `allowEmpty` | `boolean`                                                                                                                  | `true`           | When `false` and `selection` is `"single"`, at least one button must remain selected; the active button cannot be deselected. Has no effect in `"multiple"` mode. |
+| `aria-label` | `string`                                                                                                                   | `'Button group'` | Accessible name for the host element. Override when multiple button groups appear on the same page so screen reader users can distinguish them. |
+| `class`      | `string`                                                                                                                   | `''`             | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `disabled`   | `boolean`                                                                                                                  | `false`          | Two-way bindable. Renders all child buttons with reduced visual emphasis and removes pointer interaction. |
+| `look`       | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'`           | `'outline'`      | Visual style variant propagated to all child buttons. Also controls container-level divider and border behavior. |
+| `rounded`    | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                                      | `'medium'`       | Border-radius preset applied to the container and the outer corners of the first and last child button. |
+| `selection`  | `'single' \| 'multiple'`                                                                                                   | `'multiple'`     | Two-way bindable. Controls whether child buttons behave as a radio group (`"single"`) or toggle independently (`"multiple"`). `SelectionMode` is importable from `@mirei/mona-ui`. |
+| `size`       | `'small' \| 'medium' \| 'large'`                                                                                           | `'medium'`       | Size preset propagated to all child buttons, overriding their individual `size` inputs. |
 
-`ButtonGroupComponent` has no event outputs. Observe selection changes by binding `[(selected)]` on individual child buttons.
+#### Outputs
+
+| Name          | Type   | Description |
+|---------------|--------|-------------|
+| `buttonClick` | `void` | Emitted when any child button in the group is clicked. Use `[(selected)]` on child buttons to observe the resulting selection state. |
 
 ---
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] look default corrected to "outline" (source: input<...>("outline")); old docs incorrectly stated "default"
-- [x] disabled and selection correctly marked as model (kind: "model" in metadata)
-- [x] look type union excludes "link" and "clear" (ButtonGroup-specific CVA, not Button)
+- [x] look default confirmed "outline" (source: input<...>("outline"))
+- [x] disabled and selection correctly marked as Two-way bindable (kind: "model" in metadata)
+- [x] look type union excludes "link" and "clear" (ButtonGroup-specific CVA)
 - [x] Basic examples compile against the public API surface
 - [x] No internal or unexported APIs exposed
-- [x] Accessibility claims verified against source: role="group" and aria-label host bindings confirmed in button-group.component.ts; aria-pressed on children is managed by ButtonDirective
-- [x] Styling section documents only public inputs — Tailwind class names (rounded-sm/md/lg, border-r) removed, replaced with consumer-facing descriptions
+- [x] SelectionMode exported from @mirei/mona-ui — noted in selection row
+- [x] buttonClick output documented; old "no event outputs" note removed
+- [x] mode-switch reconciliation callout added (multiple→single now deselects all but first)
+- [x] Accessibility claims verified against source: role="group" and aria-label host bindings confirmed in button-group.component.ts; aria-pressed on children managed by ButtonDirective
+- [x] ARIA info moved from overview into dedicated Accessibility Notes section
+- [x] Styling section documents only public inputs — no Tailwind class names exposed
 -->
 
 <!-- TODO(owner-review): Confirm whether an initial selection value API (e.g. a group-level value input) is planned -->

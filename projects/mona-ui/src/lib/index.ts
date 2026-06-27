@@ -3,8 +3,14 @@
  */
 
 /** Buttons */
+
 export * from "./buttons/button/directives/button.directive";
+export { ButtonVariantProps } from "./buttons/button/styles/button.styles";
+
 export * from "./buttons/button-group/components/button-group/button-group.component";
+export { ButtonGroupVariantProps } from "./buttons/button-group/styles/button-group.styles";
+export { SelectionMode } from "./models/SelectionMode";
+
 export * from "./buttons/chip/component/chip.component";
 export * from "./buttons/chip/directives/chip-prefix-template.directive";
 
@@ -36,6 +42,8 @@ export * from "./buttons/split-button/directives/split-button-menu-item-text-tem
 export * from "./buttons/split-button/directives/split-button-text-template.directive";
 
 /** Common */
+export * from "./models/SelectionMode";
+
 export * from "./common/models/FilterableOptions";
 export * from "./common/models/VirtualScrollOptions";
 

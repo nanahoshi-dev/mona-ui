@@ -1,6 +1,5 @@
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChildren,
@@ -11,8 +10,9 @@ import {
     model,
     untracked
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { outputFromObservable, takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 
+import { map, pairwise } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SelectionMode } from "../../../../models/SelectionMode";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -50,46 +50,64 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     protected readonly buttons = contentChildren(ButtonDirective);
 
     /**
-     * @description When set to false, at least one button must remain selected in single selection mode.
-     * Clicking a selected button will not deselect it. Defaults to true (allows empty selection).
+     * @description When `false` and `selection` is `"single"`, at least one button must remain selected;
+     * the active button cannot be deselected. Has no effect in `"multiple"` mode.
+     * @default true
      */
     public readonly allowEmpty = input<boolean>(true);
 
     /**
-     * @description Accessible label for the button group landmark.
-     * Override when multiple button groups appear on the same page to distinguish them for screen reader users.
+     * @description Accessible name for the host element. Override when multiple button groups appear on the same page
+     * so screen reader users can distinguish them.
      * @default "Button group"
      */
     public readonly ariaLabel = input("Button group", { alias: "aria-label" });
 
     /**
-     * @description Sets the disabled state of the button group.
-     * If true, all buttons in the group will be disabled.
+     * @description Emitted when any child button in the group is clicked.
+     * Use `[(selected)]` on child buttons to observe the resulting selection state.
+     */
+    public readonly buttonClick = outputFromObservable(
+        this.#buttonService.buttonClick$.pipe(
+            map(() => undefined as void),
+            takeUntilDestroyed(this.#destroyRef)
+        )
+    );
+
+    /**
+     * @description Renders all child buttons with reduced visual emphasis and removes pointer interaction.
+     * @default false
      */
     public readonly disabled = model<boolean>(false);
 
     /**
-     * @description Sets the look of the button group.
+     * @description Visual style variant propagated to all child buttons.
+     * Also controls container-level divider and border behavior.
+     * @default "outline"
      */
     public readonly look = input<ButtonGroupVariantProps["look"]>("outline");
 
     /**
-     * @description Sets the rounded style of the button group.
+     * @description Border-radius preset applied to the container and the outer corners of the first and last child button.
+     * @default "medium"
      */
     public readonly rounded = input<ButtonGroupVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the size of the button group.
-     */
-    public readonly size = input<ButtonGroupVariantProps["size"]>("medium");
-
-    /**
-     * @description Sets the selection mode of the button group.
+     * @description Two-way bindable. Controls whether child buttons behave as a radio group (`"single"`)
+     * or toggle independently (`"multiple"`).
+     * @default "multiple"
      */
     public readonly selection = model<SelectionMode>("multiple");
 
     /**
-     * @description Additional CSS classes merged onto the button group host element via `tailwind-merge`.
+     * @description Size preset propagated to all child buttons, overriding their individual `size` inputs.
+     * @default "medium"
+     */
+    public readonly size = input<ButtonGroupVariantProps["size"]>("medium");
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
@@ -111,6 +129,16 @@ export class ButtonGroupComponent implements ButtonGroupVariantsInput {
             const size = this.size();
             untracked(() => this.#buttonService.groupSize.set(size));
         });
+        toObservable(this.selection)
+            .pipe(pairwise(), takeUntilDestroyed(this.#destroyRef))
+            .subscribe(([prev, curr]) => {
+                if (prev === "multiple" && curr === "single") {
+                    const selected = this.buttons().filter(b => b.selected());
+                    selected.slice(1).forEach(b => {
+                        this.#buttonService.buttonSelect$.next([b, false]);
+                    });
+                }
+            });
         afterNextRender({
             read: () => this.setSubscriptions()
         });
