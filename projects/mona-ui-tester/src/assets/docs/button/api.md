@@ -95,13 +95,22 @@ Button colors are derived from Mona UI theme design tokens. Override them at `:r
 
 The directive sets `type="button"` on the host, preventing accidental form submission when placed inside a `<form>`.
 
-When `disabled` or `loading` is `true`, the native `disabled` attribute is set and `aria-disabled="true"` is added. The `tabindex` is also forced to `-1` so the button is removed from the tab order.
+The following attributes are managed automatically:
 
-When `loading` is `true`, `aria-busy="true"` is set on the host.
+| Attribute        | When present                                           | Value                              |
+|------------------|--------------------------------------------------------|------------------------------------|
+| `aria-busy`      | `loading` is `true`                                    | `"true"`                           |
+| `aria-disabled`  | `disabled` or `loading` is `true`                      | `"true"`                           |
+| `aria-haspopup`  | `aria-haspopup` input is set to any value except `'false'` | The input value                |
+| `aria-pressed`   | Button is toggleable (via `toggleable` or `ButtonGroup`) | `"true"` or `"false"`           |
+| `disabled`       | `disabled` or `loading` is `true`                      | (empty string — presence-only)     |
+| `tabindex`       | `disabled` or `loading` is `true`                      | `"-1"`                             |
+| `type`           | Always                                                 | `"button"`                         |
 
-When `toggleable` is `true` (or the button is inside a `ButtonGroup`), `aria-pressed` is set to `"true"` or `"false"` based on the `selected` state.
+**Consumer responsibilities:**
 
-For icon-only buttons, set `aria-label` on the `<button>` element to provide an accessible name.
+- For icon-only buttons, provide `aria-label` on the `<button>` element so assistive technology announces a meaningful name.
+- When a button opens a popup (menu, dialog, listbox, etc.), set the `aria-haspopup` input to the appropriate token (`"menu"`, `"dialog"`, etc.).
 
 ## API
 
@@ -113,7 +122,7 @@ For icon-only buttons, set `aria-label` on the `<button>` element to provide an 
 
 | Name            | Type                                                                                                                                 | Default     | Description |
 |-----------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------|-------------|
-| `aria-haspopup` | `string`                                                                                                                             | `'false'`   | Value for the `aria-haspopup` ARIA attribute. Set when this button opens a popup, menu, listbox, tree, grid, or dialog. |
+| `aria-haspopup` | `string`                                                                                                                             | `'false'`   | Value forwarded to the `aria-haspopup` attribute. The attribute is omitted from the host when this value is `'false'`, so plain action buttons carry no `aria-haspopup`. Set to `'menu'`, `'listbox'`, `'tree'`, `'grid'`, or `'dialog'` when this button opens such a popup. |
 | `class`         | `string`                                                                                                                             | `''`        | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 | `disabled`      | `boolean`                                                                                                                            | `false`     | Two-way bindable. Disables the button. Sets the native `disabled` attribute and `aria-disabled="true"`. When inside a `ButtonGroup`, the group's disabled state takes precedence. |
 | `iconOnly`      | `boolean`                                                                                                                            | `false`     | Removes horizontal padding and fixes a square aspect ratio sized to match `size`. Provide `aria-label` on the host when using icon-only buttons. |
@@ -133,6 +142,8 @@ For icon-only buttons, set `aria-label` on the `<button>` element to provide an 
 - [x] API definitions and defaults verified against source and component-metadata.json
 - [x] Basic example compiles successfully against the public API surface
 - [x] No internal or unexported APIs exposed
-- [x] Accessibility claims verified against source: aria-busy/aria-disabled/aria-pressed/disabled/tabindex host bindings confirmed in button.directive.ts; type="button" confirmed in host
-- [x] Styling section documents only public inputs — Tailwind class names removed from Sizes and Rounded tables, replaced with consumer-facing descriptions
+- [x] Accessibility claims verified against source: aria-busy/aria-disabled/aria-haspopup/aria-pressed/disabled/tabindex/type host bindings confirmed in button.directive.ts
+- [x] aria-haspopup null-guard documented: attribute is omitted (null) when value is "false" — host binding: ariaHasPopup() !== 'false' ? ariaHasPopup() : null
+- [x] ButtonService.buttonClick$ is Subject (not ReplaySubject) — no stale-replay risk for conditionally added group members
+- [x] Styling section documents only public inputs — Tailwind class names removed, replaced with consumer-facing descriptions
 -->

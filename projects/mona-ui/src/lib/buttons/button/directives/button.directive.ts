@@ -16,7 +16,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { fromEvent, takeWhile } from "rxjs";
+import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { ThemeService } from "../../../theme/services/theme.service";
@@ -28,7 +28,7 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
     host: {
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-disabled]": "effectiveDisabled() || loading() ? 'true' : undefined",
-        "[attr.aria-haspopup]": "ariaHasPopup()",
+        "[attr.aria-haspopup]": "ariaHasPopup() !== 'false' ? ariaHasPopup() : null",
         "[attr.aria-pressed]": "effectiveToggleable() ? (selected() ? 'true' : 'false') : undefined",
         "[attr.data-look]": "effectiveLook()",
         "[attr.data-size]": "effectiveSize()",
@@ -47,6 +47,7 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #renderer = inject(Renderer2);
     readonly #themeService = inject(ThemeService);
     #loaderComponentRef: ComponentRef<LoadingIndicatorComponent> | null = null;
+    #toggleSubscription: Subscription | null = null;
 
     protected readonly effectiveDisabled = computed(() => this.#buttonService?.groupDisabled() || this.disabled());
     protected readonly effectiveLook = computed(() => this.#buttonService?.groupLook() ?? this.look());
@@ -83,57 +84,73 @@ export class ButtonDirective implements ButtonVariantsInput {
     });
 
     /**
-     * @description Sets the aria-haspopup attribute of the button.
+     * @description Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,
+     * listbox, tree, grid, or dialog. Omit or leave as `"false"` for plain action buttons.
+     * @default "false"
      */
     public readonly ariaHasPopup = input<string>("false", { alias: "aria-haspopup" });
 
     /**
-     * @description Sets the disabled state of the button.
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
+     * When inside a `ButtonGroup`, the group's disabled state takes precedence.
+     * @default false
      */
     public readonly disabled = model<boolean>(false);
 
     /**
-     * @description Sets the icon-only state of the button.
-     * When set to true, the button will appear as square.
+     * @description Removes horizontal padding and fixes a square aspect ratio sized to match `size`.
+     * Provide `aria-label` on the host when using icon-only buttons.
+     * @default false
      */
     public readonly iconOnly = input(false);
 
     /**
-     * @description Sets the loading state of the button.
-     * When set to true, the button will display a loading indicator and be disabled.
+     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
+     * Sets `aria-busy="true"` on the host.
+     * @default false
      */
     public readonly loading = model<boolean>(false);
 
     /**
-     * @description Sets the look of the button.
+     * @description Visual style variant of the button. When inside a `ButtonGroup`, the group's look takes precedence.
+     * @default "default"
      */
     public readonly look = model<ButtonVariantProps["look"]>("default");
 
     /**
-     * @description Sets the border radius of the button.
+     * @description Border-radius preset applied to the component.
+     * When inside a `ButtonGroup`, the group's value takes precedence.
+     * @default "medium"
      */
     public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the selected state of the button.
+     * @description Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.
+     * Managed by `toggleable` click handling or by `ButtonGroup` selection policy.
+     * @default false
      */
     public readonly selected = model(false);
 
     /**
-     * @description Sets the size of the button.
+     * @description Size preset controlling the button's height and horizontal padding.
+     * When inside a `ButtonGroup`, the group's value takes precedence.
+     * @default "medium"
      */
     public readonly size = input<ButtonVariantProps["size"]>("medium");
 
     /**
-     * @description Sets the tabindex of the button.
+     * @description Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.
+     * Accepts a numeric string and converts it to a number.
+     * @default 0
      */
     public readonly tabindex = input<number, number | string>(0, {
         transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
     });
 
     /**
-     * @description Sets the toggleable state of the button.
-     * If set to `true`, the button will toggle its selected state on click.
+     * @description Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.
+     * Must use `[toggleable]="true"` binding syntax, not bare attribute form.
+     * @default false
      */
     public readonly toggleable = input(false);
 
@@ -204,7 +221,8 @@ export class ButtonDirective implements ButtonVariantsInput {
     }
 
     #setToggleableEvent(): void {
-        fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
+        this.#toggleSubscription?.unsubscribe();
+        this.#toggleSubscription = fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 takeWhile(() => this.effectiveToggleable())
