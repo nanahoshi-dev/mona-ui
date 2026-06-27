@@ -2,4 +2,4 @@
 
 **Selectors:** `mona-check-box` · `input[type='checkbox'][monaCheckbox]`
 
-`CheckBoxComponent` renders a fully styled, label-integrated checkbox with Angular forms support, while `CheckboxDirective` applies Mona UI checkbox styles directly to a native `<input type="checkbox">` element.
+`CheckBoxComponent` renders a custom-styled checkbox with label management, indeterminate state, and signal forms support. `CheckboxDirective` applies the same visual style to a native `<input type="checkbox">` when full layout control is required.

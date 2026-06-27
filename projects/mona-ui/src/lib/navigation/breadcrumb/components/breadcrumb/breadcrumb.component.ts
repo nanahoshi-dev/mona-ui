@@ -25,7 +25,6 @@ import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.comp
     selector: "mona-breadcrumb",
     templateUrl: "./breadcrumb.component.html",
     imports: [NgTemplateOutlet, BreadcrumbItemDirective, LucideChevronRight],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         role: "navigation",
         "[attr.aria-label]": "ariaLabel()"

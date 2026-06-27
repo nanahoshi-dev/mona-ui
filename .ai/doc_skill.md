@@ -279,11 +279,15 @@ The lean layout should usually contain these sections:
 
 9. API Matrix
 
-    * Include a cleanly formatted table mapped directly from source code and `component-metadata.json`.
-    * Provide structured columns for: Name, Kind, Type, Default Value, Required/Optional status, and Description.
-    * Use “input”, “model”, and “output” as the Kind values.
+    * Split into two tables: **Inputs** (including two-way models) first, **Outputs** second. Omit a table entirely if the component has no members of that kind.
+    * Columns for the Inputs table: Name, Type, Default, Description.
+    * Columns for the Outputs table: Name, Type, Description.
+    * Do not include a Kind column or a Required column.
+    * Indicate two-way model inputs in their Description (e.g., “Two-way bindable ...”).
+    * Map directly from source code and `component-metadata.json`.
     * Do not include private members.
     * Do not include unexported helper types unless they appear in public signatures.
+    * Order rows by name ascending (A → Z) within each table.
 
 10. Verification Checklist
 
@@ -407,19 +411,15 @@ The comprehensive layout should usually contain these sections:
 
 10. API Matrix
 
-    * Provide granular, categorized tables for:
-
-        * Inputs
-        * Signal models
-        * Outputs
-        * Public methods, if intended for direct consumer interaction
-        * Exported public types used by the component
-        * Public directives or child components used with the component
-
+    * For each component or directive, split member tables into two groups: **Inputs** (including two-way models) first, **Outputs** second. Omit a table entirely if the component has no members of that kind.
+    * Columns for the Inputs table: Name, Type, Default, Description.
+    * Columns for the Outputs table: Name, Type, Description.
+    * Do not include a Kind column or a Required column.
+    * Indicate two-way model inputs in their Description (e.g., "Two-way bindable ...").
+    * Also provide separate tables for: Public methods (if intended for consumer use), Exported public types, Public directives or child components used with the component.
+    * Order rows by name ascending (A → Z) within each table.
     * Ensure type definitions map exactly to the framework’s strict TypeScript signatures.
-
     * Do not expose private or unexported types as supported API.
-
     * If a public signature references a type that is not exported, mark it for owner review.
 
 11. Review Checklist

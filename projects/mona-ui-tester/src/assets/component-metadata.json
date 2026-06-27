@@ -2982,19 +2982,19 @@
       {
         "name": "allowEmpty",
         "type": "boolean",
-        "description": "When set to false, at least one button must remain selected in single selection mode.\r\nClicking a selected button will not deselect it. Defaults to true (allows empty selection).",
+        "description": "When set to false, at least one button must remain selected in single selection mode.\nClicking a selected button will not deselect it. Defaults to true (allows empty selection).",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the button group landmark.\r\nOverride when multiple button groups appear on the same page to distinguish them for screen reader users.",
+        "description": "Accessible label for the button group landmark.\nOverride when multiple button groups appear on the same page to distinguish them for screen reader users.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button group.\r\nIf true, all buttons in the group will be disabled.",
+        "description": "Sets the disabled state of the button group.\nIf true, all buttons in the group will be disabled.",
         "kind": "model"
       },
       {
@@ -5340,7 +5340,7 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "",
+        "description": "Emitted when the checkbox loses focus or its value changes.\nConsumed by the signal forms `Field` directive to mark the field as touched.",
         "kind": "output"
       },
       {

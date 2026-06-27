@@ -78,13 +78,13 @@ protected getColor = (percent: number): string =>
 
 ### Rounded presets
 
-| `rounded` | CSS class      |
-|-----------|----------------|
-| `none`    | `rounded-none` |
-| `small`   | `rounded-sm`   |
-| `medium`  | `rounded-md` (default) |
-| `large`   | `rounded-lg`   |
-| `full`    | `rounded-full` |
+| `rounded` | Shape                      |
+|-----------|----------------------------|
+| `none`    | No rounding                |
+| `small`   | Slight rounding            |
+| `medium`  | Moderate rounding (default)|
+| `large`   | Strong rounding            |
+| `full`    | Pill / fully rounded       |
 
 ### Label alignment
 
@@ -100,7 +100,7 @@ protected getColor = (percent: number): string =>
 |---------------|-------------------------------------------------------------------|
 | Default       | Fill extends from left to `value` percentage of the bar width     |
 | Indeterminate | Repeating diagonal stripe animation; label hidden                 |
-| Disabled      | `opacity-50`, pointer events removed                              |
+| Disabled      | Reduced opacity, non-interactive                                  |
 | Zero value    | Fill area is transparent (bar appears empty)                      |
 
 ### Track animation
@@ -157,23 +157,25 @@ Merge additional Tailwind or custom classes onto the host element via the `class
 
 **Selector:** `mona-progress-bar`
 
-| Name            | Kind  | Type                              | Default    | Required | Description |
-|-----------------|-------|-----------------------------------|------------|----------|-------------|
-| `aria-label`    | input | `string`                          | `''`       | Optional | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label. |
-| `animate`       | input | `boolean`                         | `true`     | Optional | Enables CSS transitions on the fill track. Set to `false` when updating `value` at a high frequency. |
-| `class`         | input | `string`                          | `''`       | Optional | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `color`         | input | `string \| ((percent: number) => string)` | `''` | Optional | Fill color of the progress track. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100). |
-| `disabled`      | input | `boolean`                         | `false`    | Optional | Renders the component at 50% opacity with pointer events removed. |
-| `indeterminate` | input | `boolean`                         | `false`    | Optional | Activates a repeating diagonal stripe animation. The default label is hidden in this mode; a custom `monaProgressBarLabelTemplate` is also hidden. |
-| `labelPosition` | input | `'start' \| 'center' \| 'end'`    | `'center'` | Optional | Horizontal alignment of the label within the bar. |
-| `labelStyles`   | input | `Partial<CSSStyleDeclaration>`    | `{}`       | Optional | Inline styles applied to the default label `<span>`. Has no effect when `monaProgressBarLabelTemplate` is used. |
-| `labelVisible`  | input | `boolean`                         | `true`     | Optional | Hides the label when `false`. Has no effect in indeterminate mode (label is always hidden). |
-| `max`           | input | `number`                          | `100`      | Optional | Maximum value of the progress range. |
-| `min`           | input | `number`                          | `0`        | Optional | Minimum value of the progress range. |
-| `rounded`       | input | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Optional | Border-radius preset applied to the host and both track elements. |
-| `value`         | input | `number`                          | `0`        | Optional | Current progress value within `[min, max]`. Values outside the range are clamped visually. |
+#### Inputs
 
-`ProgressBarComponent` has no model inputs and no event outputs.
+| Name            | Type                                      | Default    | Description |
+|-----------------|-------------------------------------------|------------|-------------|
+| `animate`       | `boolean`                                 | `true`     | Enables CSS transitions on the fill track. Set to `false` when updating `value` at a high frequency. |
+| `aria-label`    | `string`                                  | `''`       | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label. |
+| `class`         | `string`                                  | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `color`         | `string \| ((percent: number) => string)` | `''`       | Fill color of the progress track. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100). |
+| `disabled`      | `boolean`                                 | `false`    | Renders the component at reduced opacity with pointer events removed. |
+| `indeterminate` | `boolean`                                 | `false`    | Activates a repeating diagonal stripe animation. The default label is hidden in this mode; a custom `monaProgressBarLabelTemplate` is also hidden. |
+| `labelPosition` | `'start' \| 'center' \| 'end'`            | `'center'` | Horizontal alignment of the label within the bar. |
+| `labelStyles`   | `Partial<CSSStyleDeclaration>`            | `{}`       | Inline styles applied to the default label `<span>`. Has no effect when `monaProgressBarLabelTemplate` is used. |
+| `labelVisible`  | `boolean`                                 | `true`     | Hides the label when `false`. Has no effect in indeterminate mode (label is always hidden). |
+| `max`           | `number`                                  | `100`      | Maximum value of the progress range. |
+| `min`           | `number`                                  | `0`        | Minimum value of the progress range. |
+| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the host and both track elements. |
+| `value`         | `number`                                  | `0`        | Current progress value within `[min, max]`. Values outside the range are clamped visually. |
+
+`ProgressBarComponent` has no event outputs.
 
 ### `ProgressBarLabelTemplateDirective`
 

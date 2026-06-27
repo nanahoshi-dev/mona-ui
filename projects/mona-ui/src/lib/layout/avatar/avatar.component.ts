@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, computed, input, Signal } from "@an
 @Component({
     selector: "mona-avatar",
     templateUrl: "./avatar.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[attr.aria-label]": "ariaLabel() || null",
         "[attr.role]": "ariaLabel() ? 'img' : null",

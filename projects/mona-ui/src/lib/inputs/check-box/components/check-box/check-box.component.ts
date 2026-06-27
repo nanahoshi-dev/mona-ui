@@ -1,19 +1,9 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    ElementRef,
-    forwardRef,
-    inject,
-    input,
-    model,
-    output,
-    viewChild
-} from "@angular/core";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { Component, computed, inject, input, model, output } from "@angular/core";
+import { FormsModule } from "@angular/forms";
 import { type FormCheckboxControl } from "@angular/forms/signals";
+import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import {
     checkboxContainerLabelThemeVariants,
     checkboxInputThemeVariants,
@@ -23,22 +13,11 @@ import {
     CheckmarkVariantInput,
     CheckmarkVariantProps
 } from "../../styles/checkbox.styles";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { twMerge } from "tailwind-merge";
-import { Action } from "../../../../utils/Action";
 
 @Component({
     selector: "mona-check-box",
     imports: [FormsModule, NgTemplateOutlet],
     templateUrl: "./check-box.component.html",
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => CheckBoxComponent),
-            multi: true
-        }
-    ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "'flex'",
         "[attr.data-checked]": "checked()",
@@ -46,13 +25,8 @@ import { Action } from "../../../../utils/Action";
         "[attr.data-indeterminate]": "indeterminate()"
     }
 })
-export class CheckBoxComponent
-    implements ControlValueAccessor, CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl
-{
+export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl {
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<boolean> | null = null;
-    #propagateTouched: Action<FocusEvent> | null = null;
-    protected readonly checkBox = viewChild.required<ElementRef<HTMLInputElement>>("checkBox");
     protected readonly checkBoxClasses = computed(() => {
         const theme = this.#themeService.theme();
         return checkboxInputThemeVariants(theme)();
@@ -131,67 +105,30 @@ export class CheckBoxComponent
     public readonly tabIndex = input(0);
 
     /**
+     * @description Emitted when the checkbox loses focus or its value changes.
+     * Consumed by the signal forms `Field` directive to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
      * @description Additional CSS classes merged onto the checkbox label container via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
 
-    public constructor() {
-        effect(() => {
-            const indeterminate = this.indeterminate();
-            this.checkBox().nativeElement.setAttribute("indeterminate", indeterminate ? "true" : "false");
-        });
-    }
-
-    public registerOnChange(fn: any) {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any) {
-        this.#propagateTouched = fn;
-    }
-
-    public writeValue(value: boolean): void {
-        if (value !== this.checked()) {
-            this.checked.set(value);
-        }
-    }
-
     protected onCheckedChange(checked: boolean): void {
         this.checked.set(checked);
-        if (this.#propagateChange) {
-            this.#propagateChange(checked);
-        }
     }
 
     protected onInputChange(event: Event): void {
+        const isChecked = (event.target as HTMLInputElement).checked;
+        this.checked.set(isChecked);
         this.inputChange.emit(event);
+        this.touch.emit();
     }
 
     protected onInputBlur(event: FocusEvent): void {
-        if (this.#propagateTouched) {
-            this.#propagateTouched(event);
-        }
         this.inputBlur.emit(event);
-    }
-
-    protected onKeyDown(event: KeyboardEvent): void {
-        if (event.key === " " && !this.disabled()) {
-            event.preventDefault(); // Prevent page scroll
-            this.toggleCheckboxViaInput();
-        }
-    }
-
-    private toggleCheckboxViaInput(): void {
-        const inputElement = this.checkBox().nativeElement;
-
-        if (inputElement.indeterminate) {
-            inputElement.checked = true;
-            inputElement.indeterminate = false;
-        } else {
-            inputElement.checked = !inputElement.checked;
-        }
-        const changeEvent = new Event("change", { bubbles: true });
-        inputElement.dispatchEvent(changeEvent);
+        this.touch.emit();
     }
 }

@@ -120,11 +120,13 @@ When multiple breadcrumbs appear on the same page, each should have a distinct `
 
 **Content projection:** accepts `<mona-breadcrumb-item>` children and an optional `<ng-template monaBreadcrumbSeparatorTemplate>`.
 
-| Name         | Kind  | Type      | Default        | Required | Description                                                                                                        |
-|--------------|-------|-----------|----------------|----------|--------------------------------------------------------------------------------------------------------------------|
-| `aria-label` | input | `string`  | `'Breadcrumb'` | Optional | Accessible label for the `role="navigation"` landmark. Override when multiple breadcrumbs appear on the same page. |
-| `class`      | input | `string`  | `''`           | Optional | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.                                       |
-| `disabled`   | input | `boolean` | `false`        | Optional | When `true`, the entire breadcrumb list becomes visually disabled and all items lose pointer interaction.          |
+#### Inputs
+
+| Name         | Type      | Default        | Description |
+|--------------|-----------|----------------|-------------|
+| `aria-label` | `string`  | `'Breadcrumb'` | Accessible label for the `role="navigation"` landmark. Override when multiple breadcrumbs appear on the same page. |
+| `class`      | `string`  | `''`           | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`. |
+| `disabled`   | `boolean` | `false`        | When `true`, the entire breadcrumb list becomes visually disabled and all items lose pointer interaction. |
 
 `BreadcrumbComponent` has no event outputs.
 
@@ -136,10 +138,17 @@ When multiple breadcrumbs appear on the same page, each should have a distinct `
 
 Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — text, icons, or elements — into the default slot.
 
-| Name        | Kind   | Type      | Default | Required | Description                                                                                                                                                                        |
-|-------------|--------|-----------|---------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `disabled`  | input  | `boolean` | `false` | Optional | Disables this item. The item receives `aria-disabled="true"` and `tabindex="-1"`, and `itemClick` is suppressed. Has no visual effect when the parent breadcrumb is also disabled. |
-| `itemClick` | output | `void`    | —       | Optional | Emitted when the item is clicked or activated via Enter or Space. Never emitted when this is the last item (current page) or when the item is disabled.                            |
+#### Inputs
+
+| Name       | Type      | Default | Description |
+|------------|-----------|---------|-------------|
+| `disabled` | `boolean` | `false` | Disables this item. The item receives `aria-disabled="true"` and `tabindex="-1"`, and `itemClick` is suppressed. Has no visual effect when the parent breadcrumb is also disabled. |
+
+#### Outputs
+
+| Name        | Type   | Description |
+|-------------|--------|-------------|
+| `itemClick` | `void` | Emitted when the item is clicked or activated via Enter or Space. Never emitted when this is the last item (current page) or when the item is disabled. |
 
 ---
 

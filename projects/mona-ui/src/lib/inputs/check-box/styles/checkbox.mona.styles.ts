@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const checkboxVariants = cva(`appearance-none outline-none peer hidden`);
+export const checkboxVariants = cva(`sr-only appearance-none outline-none peer`);
 
 export const checkmarkVariants = cva(
     `
@@ -15,8 +15,8 @@ export const checkmarkVariants = cva(
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
 
-        focus-within:ring-2 focus-within:ring-primary/40
-        focus-within:border-primary
+        peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40
+        peer-focus-visible:border-primary
 
         peer-checked:bg-primary
         peer-checked:text-primary-foreground

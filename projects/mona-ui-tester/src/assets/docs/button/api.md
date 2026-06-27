@@ -1,10 +1,10 @@
 ## Overview
 
-`ButtonDirective` is a styling directive applied to the native `<button>` element via the `monaButton` attribute selector. It computes Tailwind-based variant classes using class-variance-authority, manages ARIA attributes reactively, and handles interactive states such as loading, disabled, and toggle selection.
+`ButtonDirective` is a styling directive applied to a native `<button>` element via the `monaButton` attribute selector. It manages look, size, and border-radius variants, and handles interactive states including loading, disabled, and toggle selection.
 
-The directive is restricted to `<button>` host elements. This preserves native keyboard activation (`Enter`, `Space`), form submission semantics, and assistive technology support without requiring additional ARIA roles.
+The directive is restricted to `<button>` host elements. This preserves native keyboard activation (Enter, Space), form submission semantics, and assistive technology support without requiring additional ARIA roles.
 
-Look, size, and border-radius variants are independently configurable per button. When used inside a `ButtonGroup`, those group-level values take precedence over the individual button's inputs.
+When used inside a `ButtonGroup`, the group's look, size, and rounded values take precedence over the individual button's inputs.
 
 **Use `monaButton` when you need to:**
 
@@ -15,7 +15,7 @@ Look, size, and border-radius variants are independently configurable per button
 
 **Do not use `monaButton` when:**
 
-- The target navigates to a URL — use `<a>` instead; `monaButton` does not support `<a>` hosts
+- The target navigates to a URL — use `<a>` instead; the directive does not support `<a>` hosts
 - Multiple related buttons need shared look, size, or coordinated selection — use `ButtonGroup`
 - A button opens a dropdown menu — use `DropdownButton` or `SplitButton`
 
@@ -61,29 +61,29 @@ Add `ButtonDirective` to your standalone component's `imports` array.
 | `secondary`                              | Filled secondary color                                    |
 | `success` / `error` / `warning` / `info` | Semantic fill colors                                      |
 | `outline`                                | Transparent background with border                        |
-| `ghost`                                  | No border or shadow; hover reveals a secondary background |
+| `ghost`                                  | No border or shadow; hover reveals a subtle background    |
 | `link`                                   | No border; hover adds underline                           |
 | `clear`                                  | Fully transparent; no border, shadow, or hover background |
 
 ### Sizes
 
-| `size`   | Height           | Padding |
-|----------|------------------|---------|
-| `small`  | `h-8` (2 rem)    | `px-3`  |
-| `medium` | `h-9` (2.25 rem) | `px-4`  |
-| `large`  | `h-10` (2.5 rem) | `px-6`  |
+| `size`   | Description                              |
+|----------|------------------------------------------|
+| `small`  | Compact height and padding               |
+| `medium` | Standard height and padding (default)    |
+| `large`  | Taller height and wider padding          |
 
-When `iconOnly` is `true`, padding is removed and width matches height (`w-8` / `w-9` / `w-10`).
+When `iconOnly` is `true`, horizontal padding is removed and the button width is fixed to match its height.
 
 ### Rounded presets
 
-| `rounded` | CSS class      |
-|-----------|----------------|
-| `none`    | `rounded-none` |
-| `small`   | `rounded-sm`   |
-| `medium`  | `rounded-md`   |
-| `large`   | `rounded-lg`   |
-| `full`    | `rounded-full` |
+| `rounded` | Shape                        |
+|-----------|------------------------------|
+| `none`    | No border radius             |
+| `small`   | Slight rounding              |
+| `medium`  | Moderate rounding (default)  |
+| `large`   | Strong rounding              |
+| `full`    | Pill / fully rounded         |
 
 ### Theme tokens
 
@@ -91,25 +91,39 @@ Button colors are derived from Mona UI theme design tokens. Override them at `:r
 
 <!-- TODO(owner-review): Confirm exact CSS custom property names (--color-primary vs --primary etc.) for the theme tokens table -->
 
+## Accessibility Notes
+
+The directive sets `type="button"` on the host, preventing accidental form submission when placed inside a `<form>`.
+
+When `disabled` or `loading` is `true`, the native `disabled` attribute is set and `aria-disabled="true"` is added. The `tabindex` is also forced to `-1` so the button is removed from the tab order.
+
+When `loading` is `true`, `aria-busy="true"` is set on the host.
+
+When `toggleable` is `true` (or the button is inside a `ButtonGroup`), `aria-pressed` is set to `"true"` or `"false"` based on the `selected` state.
+
+For icon-only buttons, set `aria-label` on the `<button>` element to provide an accessible name.
+
 ## API
 
 ### `ButtonDirective`
 
 **Selector:** `button[monaButton]`
 
-| Name            | Kind  | Type                                                                                                                                | Default     | Required | Description                                                                                                                                                     |
-|-----------------|-------|-------------------------------------------------------------------------------------------------------------------------------------|-------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `disabled`      | model | `boolean`                                                                                                                           | `false`     | Optional | Disables the button. Sets the native `disabled` attribute and `aria-disabled="true"`. When inside a `ButtonGroup`, the group's disabled state takes precedence. |
-| `loading`       | model | `boolean`                                                                                                                           | `false`     | Optional | Inserts a spinner before the button's first child and blocks interaction. Sets `aria-busy="true"`. Spinner size scales with `size`.                             |
-| `look`          | model | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'error' \| 'warning' \| 'info' \| 'outline' \| 'ghost' \| 'link' \| 'clear'` | `'default'` | Optional | Visual variant. When inside a `ButtonGroup`, the group's look takes precedence.                                                                                 |
-| `selected`      | model | `boolean`                                                                                                                           | `false`     | Optional | Active/selected state. Drives `aria-pressed` when the button is toggleable. Managed by `toggleable` click handling or by `ButtonGroup` selection policy.        |
-| `aria-haspopup` | input | `string`                                                                                                                            | `'false'`   | Optional | Value for the `aria-haspopup` ARIA attribute. Set when this button opens a popup, menu, listbox, tree, grid, or dialog.                                         |
-| `class`         | input | `string`                                                                                                                            | `''`        | Optional | Additional CSS classes merged into the computed class list via `tailwind-merge`.                                                                                |
-| `iconOnly`      | input | `boolean`                                                                                                                           | `false`     | Optional | Removes padding and fixes a square aspect-ratio sized to match `size`. Provide `aria-label` on the host when using icon-only buttons.                           |
-| `rounded`       | input | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                                                | `'medium'`  | Optional | Border-radius preset. When inside a `ButtonGroup`, the group's value takes precedence.                                                                          |
-| `size`          | input | `'small' \| 'medium' \| 'large'`                                                                                                    | `'medium'`  | Optional | Controls button height and horizontal padding. When inside a `ButtonGroup`, the group's value takes precedence.                                                 |
-| `tabindex`      | input | `number`                                                                                                                            | `0`         | Optional | Tab index. Automatically overridden to `-1` when the button is disabled or loading. Accepts a string value and transforms it to a number.                       |
-| `toggleable`    | input | `boolean`                                                                                                                           | `false`     | Optional | When `true`, each click flips the `selected` model. Requires `[toggleable]="true"` binding syntax.                                                              |
+#### Inputs
+
+| Name            | Type                                                                                                                                 | Default     | Description |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------|-------------|-------------|
+| `aria-haspopup` | `string`                                                                                                                             | `'false'`   | Value for the `aria-haspopup` ARIA attribute. Set when this button opens a popup, menu, listbox, tree, grid, or dialog. |
+| `class`         | `string`                                                                                                                             | `''`        | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `disabled`      | `boolean`                                                                                                                            | `false`     | Two-way bindable. Disables the button. Sets the native `disabled` attribute and `aria-disabled="true"`. When inside a `ButtonGroup`, the group's disabled state takes precedence. |
+| `iconOnly`      | `boolean`                                                                                                                            | `false`     | Removes horizontal padding and fixes a square aspect ratio sized to match `size`. Provide `aria-label` on the host when using icon-only buttons. |
+| `loading`       | `boolean`                                                                                                                            | `false`     | Two-way bindable. Inserts a spinner before the button's first child and blocks interaction. Sets `aria-busy="true"`. Spinner size scales with `size`. |
+| `look`          | `'default' \| 'primary' \| 'secondary' \| 'success' \| 'error' \| 'warning' \| 'info' \| 'outline' \| 'ghost' \| 'link' \| 'clear'` | `'default'` | Two-way bindable. Visual variant. When inside a `ButtonGroup`, the group's look takes precedence. |
+| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                                                | `'medium'`  | Border-radius preset. When inside a `ButtonGroup`, the group's value takes precedence. |
+| `selected`      | `boolean`                                                                                                                            | `false`     | Two-way bindable. Active/selected state. Drives `aria-pressed` when the button is toggleable. Managed by `toggleable` click handling or by `ButtonGroup` selection policy. |
+| `size`          | `'small' \| 'medium' \| 'large'`                                                                                                     | `'medium'`  | Controls button height and horizontal padding. When inside a `ButtonGroup`, the group's value takes precedence. |
+| `tabindex`      | `number`                                                                                                                             | `0`         | Tab index. Automatically overridden to `-1` when the button is disabled or loading. Accepts a string value and converts it to a number. |
+| `toggleable`    | `boolean`                                                                                                                            | `false`     | When `true`, each click flips the `selected` model and `aria-pressed` is managed. Requires `[toggleable]="true"` binding syntax. |
 
 `ButtonDirective` has no event outputs. Read `[(selected)]`, `[(loading)]`, or `[(disabled)]` model bindings to observe state changes.
 
@@ -119,6 +133,6 @@ Button colors are derived from Mona UI theme design tokens. Override them at `:r
 - [x] API definitions and defaults verified against source and component-metadata.json
 - [x] Basic example compiles successfully against the public API surface
 - [x] No internal or unexported APIs exposed
+- [x] Accessibility claims verified against source: aria-busy/aria-disabled/aria-pressed/disabled/tabindex host bindings confirmed in button.directive.ts; type="button" confirmed in host
+- [x] Styling section documents only public inputs — Tailwind class names removed from Sizes and Rounded tables, replaced with consumer-facing descriptions
 -->
-
-<!-- TODO(owner-review): Confirm public package name is @mirei/mona-ui vs mona-ui -->

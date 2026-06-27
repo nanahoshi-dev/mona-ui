@@ -28,11 +28,10 @@ import {
     selector: "mona-button-group",
     templateUrl: "./button-group.component.html",
     providers: [ButtonService],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[attr.aria-label]": "ariaLabel()",
         "[class]": "baseClass()",
-        "role": "group"
+        role: "group"
     }
 })
 export class ButtonGroupComponent implements ButtonGroupVariantsInput {

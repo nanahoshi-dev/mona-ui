@@ -1,32 +1,40 @@
 <label [class]="containerLabelClasses()" [attr.data-disabled]="disabled()">
-    @if (labelPosition() === 'before') {
+    @if (labelPosition() === "before") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 
-    <input type="checkbox"
-           [disabled]="disabled()"
-           [indeterminate]="indeterminate()"
-           [ngModel]="checked()"
-           [class]="checkBoxClasses()"
-           (change)="onInputChange($event)"
-           (ngModelChange)="onCheckedChange($event)" #checkBox/>
+    <input
+        type="checkbox"
+        [disabled]="disabled()"
+        [indeterminate]="indeterminate()"
+        [ngModel]="checked()"
+        [tabindex]="disabled() ? -1 : tabIndex()"
+        [class]="checkBoxClasses()"
+        [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
+        [attr.aria-label]="label() || 'Checkbox'"
+        (change)="onInputChange($event)"
+        (blur)="onInputBlur($event)"
+        (focus)="inputFocus.emit($event)"
+        (ngModelChange)="onCheckedChange($event)"
+        #checkBox />
 
-    <span [class]="checkMarkClasses()"
-          [tabindex]="disabled() ? -1 : tabIndex()"
-          [attr.role]="'checkbox'"
-          [attr.aria-checked]="indeterminate() ? 'mixed' : checked()"
-          [attr.aria-disabled]="disabled()"
-          [attr.aria-label]="label() || 'Checkbox'"
-          (blur)="onInputBlur($event)"
-          (focus)="inputFocus.emit($event)"
-          (keydown)="onKeyDown($event)">
+    <span [class]="checkMarkClasses()">
         @if (checked()) {
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                 class="lucide lucide-check stroke-primary-foreground"><path d="M18 6 9 17l-5-5"/></svg>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-check stroke-primary-foreground">
+                <path d="M18 6 9 17l-5-5" />
+            </svg>
         }
     </span>
-    @if (labelPosition() === 'after') {
+    @if (labelPosition() === "after") {
         <ng-container [ngTemplateOutlet]="labelTemplate"></ng-container>
     }
 </label>

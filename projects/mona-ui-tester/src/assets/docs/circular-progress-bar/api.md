@@ -87,7 +87,7 @@ The `size` input controls the outer dimension of the SVG in pixels. Both width a
 
 ### Color
 
-When `color` is empty the arc color falls back to `var(--color-primary)`. The track (the full circle behind the arc) always uses `var(--color-input-border)` via the Tailwind design token `data-[stroke-trail=true]:stroke-input-border`.
+When `color` is empty the arc color falls back to `var(--color-primary)`. The track (the full circle behind the arc) always uses the `var(--color-input-border)` design token.
 
 ### Visual states
 
@@ -95,7 +95,7 @@ When `color` is empty the arc color falls back to `var(--color-primary)`. The tr
 |-----------------|--------------------------------------------------------------|
 | Default         | Arc rendered at `value` percentage of the circumference      |
 | Indeterminate   | Arc rendered as a fixed partial stroke, rotating continuously |
-| Disabled        | `opacity-50`, pointer events removed                         |
+| Disabled        | Reduced opacity, non-interactive                             |
 
 ### Custom label template
 
@@ -134,19 +134,21 @@ import type { LabelTemplateContext } from "@mirei/mona-ui";
 
 **Selector:** `mona-circular-progress-bar`
 
-| Name            | Kind  | Type                              | Default  | Required | Description |
-|-----------------|-------|-----------------------------------|----------|----------|-------------|
-| `aria-label`    | input | `string`                          | `''`     | Optional | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label. |
-| `color`         | input | `string \| ((percent: number) => string)` | `''` | Optional | Color of the progress arc. When empty, falls back to `var(--color-primary)`. Pass a function to return a color based on the current percentage (0–100). |
-| `disabled`      | input | `boolean`                         | `false`  | Optional | Renders the component at 50% opacity with pointer events removed. |
-| `indeterminate` | input | `boolean`                         | `false`  | Optional | Activates a continuous rotation animation when the completion value is unknown. The label is hidden in this mode. |
-| `max`           | input | `number`                          | `100`    | Optional | Maximum value of the progress range. |
-| `min`           | input | `number`                          | `0`      | Optional | Minimum value of the progress range. |
-| `size`          | input | `number`                          | `100`    | Optional | Width and height of the component in pixels. |
-| `thickness`     | input | `number`                          | `6`      | Optional | Stroke width of both the track and progress arc in pixels. |
-| `value`         | input | `number`                          | `0`      | Optional | Current progress value within `[min, max]`. Values outside the range are clamped visually but the raw value is still forwarded to `aria-valuenow`. |
+#### Inputs
 
-`CircularProgressBarComponent` has no model inputs and no event outputs.
+| Name            | Type                                      | Default | Description |
+|-----------------|-------------------------------------------|---------|-------------|
+| `aria-label`    | `string`                                  | `''`    | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label. |
+| `color`         | `string \| ((percent: number) => string)` | `''`    | Color of the progress arc. When empty, falls back to `var(--color-primary)`. Pass a function to return a color based on the current percentage (0–100). |
+| `disabled`      | `boolean`                                 | `false` | Renders the component at reduced opacity with pointer events removed. |
+| `indeterminate` | `boolean`                                 | `false` | Activates a continuous rotation animation when the completion value is unknown. The label is hidden in this mode. |
+| `max`           | `number`                                  | `100`   | Maximum value of the progress range. |
+| `min`           | `number`                                  | `0`     | Minimum value of the progress range. |
+| `size`          | `number`                                  | `100`   | Width and height of the component in pixels. |
+| `thickness`     | `number`                                  | `6`     | Stroke width of both the track and progress arc in pixels. |
+| `value`         | `number`                                  | `0`     | Current progress value within `[min, max]`. Values outside the range are clamped visually but the raw value is still forwarded to `aria-valuenow`. |
+
+`CircularProgressBarComponent` has no event outputs.
 
 ### `CircularProgressBarLabelTemplateDirective`
 
