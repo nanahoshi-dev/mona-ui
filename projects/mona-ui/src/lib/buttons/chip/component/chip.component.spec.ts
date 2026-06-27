@@ -18,6 +18,7 @@ import { ChipComponent } from "./chip.component";
             [label]="label()"
             [look]="look()"
             [removable]="removable()"
+            [removeLabel]="removeLabel()"
             [rounded]="rounded()"
             [selected]="selected()"
             [size]="size()"
@@ -39,6 +40,7 @@ class TestChipHostComponent {
     label = signal("");
     look = signal<ChipVariantProps["look"]>("default");
     removable = signal(false);
+    removeLabel = signal<string | undefined>(undefined);
     rounded = signal<ChipVariantProps["rounded"]>("full");
     selected = signal(false);
     size = signal<ChipVariantProps["size"]>("medium");
@@ -236,6 +238,16 @@ describe("ChipComponent", () => {
 
             const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
             expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Remove, item");
+        });
+
+        it("should use removeLabel input when provided", () => {
+            component.removable.set(true);
+            component.label.set("My Chip");
+            component.removeLabel.set("Remove tag: My Chip");
+            fixture.detectChanges();
+
+            const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Remove tag: My Chip");
         });
 
         it("should NOT emit contentClick when remove button clicked", async () => {
@@ -602,6 +614,31 @@ describe("ChipComponent", () => {
     });
 
     // =========================================================================
+    // Remove Label Input Tests
+    // =========================================================================
+    describe("removeLabel input", () => {
+        it("should override the remove button aria-label when removeLabel is set", () => {
+            component.removable.set(true);
+            component.label.set("My Chip");
+            component.removeLabel.set("Remove tag: My Chip");
+            fixture.detectChanges();
+
+            const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Remove tag: My Chip");
+        });
+
+        it("should fall back to computed label when removeLabel is not set", () => {
+            component.removable.set(true);
+            component.label.set("Fallback");
+            component.removeLabel.set(undefined);
+            fixture.detectChanges();
+
+            const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]"));
+            expect(removeButton.nativeElement.getAttribute("aria-label")).toBe("Remove, Fallback");
+        });
+    });
+
+    // =========================================================================
     // Keyboard Interaction Tests
     // =========================================================================
     describe("keyboard interaction", () => {
@@ -661,6 +698,31 @@ describe("ChipComponent", () => {
             await waitForStable(fixture);
 
             expect(component.onContentClick).not.toHaveBeenCalled();
+        });
+
+        it("should NOT emit contentClick when Enter is pressed while remove button has focus", async () => {
+            component.removable.set(true);
+            await waitForStable(fixture);
+
+            // Dispatch from the remove button so event.target is the button when it bubbles to chip
+            const removeButton = fixture.debugElement.query(By.css("[data-chip-remove]")).nativeElement as HTMLElement;
+            const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true });
+            removeButton.dispatchEvent(event);
+            await waitForStable(fixture);
+
+            expect(component.onContentClick).not.toHaveBeenCalled();
+        });
+
+        it("should emit contentClick on Enter key for non-toggleable chip with explicit tabindex", async () => {
+            component.toggleable.set(false);
+            component.tabindex.set(0);
+            await waitForStable(fixture);
+
+            const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true });
+            chipElement.dispatchEvent(event);
+            await waitForStable(fixture);
+
+            expect(component.onContentClick).toHaveBeenCalled();
         });
     });
 

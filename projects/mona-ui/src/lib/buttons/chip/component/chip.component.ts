@@ -25,7 +25,6 @@ import { twMerge } from "tailwind-merge";
 @Component({
     selector: "mona-chip",
     templateUrl: "./chip.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ButtonDirective, NgTemplateOutlet, LucideCircleX],
     host: {
         "[class]": "baseClass()",
@@ -40,7 +39,6 @@ export class ChipComponent implements ChipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #themeService = inject(ThemeService);
-
     protected readonly ariaChecked = computed(() => {
         if (!this.toggleable()) {
             return undefined;
@@ -104,76 +102,98 @@ export class ChipComponent implements ChipVariantInputs {
     });
 
     /**
-     * @description Sets the aria-label for the chip host element.
+     * @description Accessible name for the host element. Describe what the chip represents.
+     * When empty, assistive technology announces the role without a label.
+     * @default ""
      */
-    public readonly ariaLabel = input<string>();
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
-     * @description Emits when the chip is activated (clicked or keyboard triggered).
+     * @description Emitted when the chip body is clicked or activated via Enter or Space.
+     * Not emitted when the remove button is activated.
      */
     public readonly contentClick = output<void>();
 
     /**
-     * @description Sets the disabled state of the chip.
+     * @description Renders the chip with reduced visual emphasis and removes pointer interaction.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the label of the chip.
-     *
-     * If the label is set, the chip will display the label instead of the content.
+     * @description Text label displayed inside the chip. When non-empty, takes precedence over projected content.
+     * @default ""
      */
     public readonly label = input("");
 
     /**
-     * @description Sets the look of the chip.
+     * @description Visual style variant controlling the chip's background color, border, and interaction states.
+     * @default "default"
      */
     public readonly look = input<ChipVariantProps["look"]>("default");
 
     /**
-     * @description Sets the removable state of the chip.
-     * If true, the chip will display a remove icon.
+     * @description Renders a remove button inside the chip. When activated, emits the `remove` output.
+     * @default false
      */
     public readonly removable = input(false);
 
     /**
-     * @description Emits when `removable` is `true` and the remove button is clicked.
+     * @description Emitted when the remove button is clicked. Only fires when `removable` is `true`.
+     * Emits the originating `Event`.
      */
     public readonly remove = output<Event>();
 
     /**
-     * @description Sets the rounded state of the chip.
+     * @description Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback.
+     * Use when the chip shows only projected content and the default label is not descriptive enough.
+     * @default undefined
+     */
+    public readonly removeLabel = input<string>();
+
+    /**
+     * @description Border-radius preset applied to the chip.
+     * @default "full"
      */
     public readonly rounded = input<ChipVariantProps["rounded"]>("full");
 
     /**
-     * @description Sets the selected state of the chip.
+     * @description Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.
+     * Supports two-way binding via `[(selected)]`.
+     * @default false
      */
     public readonly selected = model(false);
 
     /**
-     * @description Sets the size of the chip.
+     * @description Size preset controlling the chip's padding and remove button dimensions.
+     * @default "medium"
      */
     public readonly size = input<ChipVariantProps["size"]>("medium");
 
     /**
-     * @description Sets the tabindex of the chip.
+     * @description Tab index override for the chip host element. When not set, computed automatically:
+     * `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.
+     * @default undefined
      */
     public readonly tabindex = input<number | string>();
 
     /**
-     * @description Sets the toggleable state of the chip.
+     * @description Enables toggle behavior. When `true`, each activation flips `selected`
+     * and the host receives `role="checkbox"` with `aria-checked`.
+     * @default false
      */
     public readonly toggleable = input(false);
 
     /**
-     * @description Additional CSS classes merged onto the chip host element via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });
 
     /**
-     * @description Sets the value of the chip. Useful for identification in selection scenarios.
+     * @description Arbitrary value associated with this chip.
+     * Useful for identifying which chip was selected or removed in a collection.
+     * @default undefined
      */
     public readonly value = input<unknown>();
 
@@ -208,7 +228,7 @@ export class ChipComponent implements ChipVariantInputs {
             )
             .subscribe(event => {
                 const target = event.target as HTMLElement;
-                if (target.closest("svg[lucideX]")) {
+                if (target.closest("button[data-chip-remove]")) {
                     return;
                 }
                 event.preventDefault();
@@ -220,11 +240,7 @@ export class ChipComponent implements ChipVariantInputs {
                 filter(() => !this.disabled()),
                 takeUntilDestroyed(this.#destroyRef)
             )
-            .subscribe(event => {
-                const target = event.target as HTMLElement;
-                if (target.closest("svg[lucideX]")) {
-                    return;
-                }
+            .subscribe(() => {
                 this.#handleActivation();
             });
     }

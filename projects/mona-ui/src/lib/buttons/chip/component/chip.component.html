@@ -9,7 +9,7 @@
 }
 
 @if (removable()) {
-    @let removeAriaLabel = "Remove, " + (label() || "item");
+    @let removeAriaLabel = removeLabel() ?? ("Remove, " + (label() || "item"));
     <button
         monaButton
         look="link"

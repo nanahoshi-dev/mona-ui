@@ -1,20 +1,20 @@
 ## Overview
 
-`ChipComponent` is a compact, interactive label element. It supports three content modes — a `label` input string, projected content via `<ng-content>`, or a mix of both with a prefix template — and three optional behaviors: toggle selection, removability, and plain click emission.
+`ChipComponent` is a compact interactive label element used to represent filterable tags, toggleable options, or removable selections. It supports three content modes — a `label` input string, projected content via `<ng-content>`, or a mix of both with an optional prefix template — and three optional behaviors: toggle selection, removability, and plain click emission.
 
-When `toggleable` is `true`, each activation flips the `selected` model and the host receives `role="checkbox"` with `aria-checked`. When `removable` is `true`, a remove button appears inside the chip with its own accessible label. Both behaviors can be combined.
+When `toggleable` is `true`, each activation flips the `selected` model. When `removable` is `true`, a remove button appears inside the chip. Both behaviors can be combined.
 
-**Use `ChipComponent` when you need to:**
+**Use the chip when you need to:**
 
 - Display removable tags in a tag input or multiselect
-- Represent filterable categories that can be toggled on or off
-- Show selectable options in a compact collection (skill badges, interest tags)
-- Identify entities with an optional avatar prefix (contact chips)
+- Represent filterable categories that the user can toggle on and off
+- Show selectable option badges in a compact collection (skill tags, interest categories)
+- Label entities with an optional avatar or icon prefix (contact chips)
 
-**Do not use `ChipComponent` when:**
+**Do not use when:**
 
 - A standalone action button is needed — use `<button monaButton>` instead
-- Navigating to a URL — `ChipComponent` does not support anchor semantics
+- Navigation to a URL is required — the chip does not support anchor semantics
 
 ## Import & Basic Usage
 
@@ -26,7 +26,7 @@ import { ChipPrefixTemplateDirective } from "@mirei/mona-ui";
 
 Add the imported symbols to your standalone component's `imports` array.
 
-**Display chip (label only):**
+**Display chip:**
 
 ```html
 <mona-chip label="Angular"></mona-chip>
@@ -38,15 +38,22 @@ Add the imported symbols to your standalone component's `imports` array.
 <mona-chip label="TypeScript" [toggleable]="true" [(selected)]="isSelected"></mona-chip>
 ```
 
-When `toggleable` is `true`, the chip receives `role="checkbox"` and `aria-checked`, and each activation flips `selected`.
-
 **Removable chip:**
 
 ```html
 <mona-chip label="Remove me" [removable]="true" (remove)="onRemove($event)"></mona-chip>
 ```
 
-The remove button has an automatically generated accessible label: `"Remove, <label>"`. When only projected content is used (no `label` input), the accessible label falls back to `"Remove, item"` — provide `ariaLabel` on the chip in that case.
+**Projected content:**
+
+```html
+<mona-chip>
+    <svg lucideTag [size]="12"></svg>
+    Draft
+</mona-chip>
+```
+
+When `label` is non-empty it takes precedence over projected content — both are not visible at the same time.
 
 **Prefix template — avatar chip:**
 
@@ -59,30 +66,17 @@ The remove button has an automatically generated accessible label: `"Remove, <la
 </mona-chip>
 ```
 
-The prefix template renders before the label or projected content inside the chip.
+The prefix template renders before the label or projected content. It receives no template context.
 
-**Projected content:**
-
-```html
-<mona-chip>
-    <svg lucideTag [size]="12"></svg>
-    Draft
-</mona-chip>
-```
-
-When `label` is non-empty it takes precedence over projected content — both cannot be visible at the same time.
-
-> **Keyboard access:** Chips are keyboard-accessible (`tabindex="0"`) only when `toggleable` or `removable` is `true`. For a purely display chip that emits `contentClick`, set `[tabindex]="0"` explicitly so it can be reached by keyboard.
+> **Keyboard access:** Chips receive `tabindex="0"` automatically when `toggleable` or `removable` is `true`. For a chip that emits `contentClick` without either flag, set `[tabindex]="0"` explicitly so it can be reached by keyboard.
 
 ## Appearance & Styling
 
 ### Look variants
 
-`look` defaults to `"default"`. All variants have a distinct selected-state appearance:
-
-| `look`      | Base appearance                                   |
+| `look`      | Appearance                                        |
 |-------------|---------------------------------------------------|
-| `default`   | Background + border, theme-aware                  |
+| `default`   | Background with border; adapts to the active theme |
 | `outline`   | Transparent background with border                |
 | `primary`   | Filled primary color                              |
 | `secondary` | Filled secondary color                            |
@@ -104,37 +98,48 @@ The remove button dimensions scale automatically with `size`.
 
 ### Rounded presets
 
-`rounded` defaults to `"full"` (pill shape):
-
-| `rounded` | Shape                         |
-|-----------|-------------------------------|
-| `none`    | No rounding                   |
-| `small`   | Slight rounding               |
-| `medium`  | Moderate rounding             |
-| `large`   | Strong rounding               |
-| `full`    | Pill / fully rounded (default)|
+| `rounded` | Shape                          |
+|-----------|--------------------------------|
+| `none`    | No rounding                    |
+| `small`   | Slight rounding                |
+| `medium`  | Moderate rounding              |
+| `large`   | Strong rounding                |
+| `full`    | Pill / fully rounded (default) |
 
 ### Selected state
 
-Each `look` value applies a distinct selected appearance when `selected` is `true` — typically a shifted background tone that indicates active state. Selected styles are applied automatically; no additional configuration is required.
+Each `look` value applies a distinct selected appearance when `selected` is `true` — typically a shifted background tone. Selected styles are applied automatically; no additional configuration is required.
 
 ### Custom classes
 
 ```html
-<mona-chip label="Tag" class="text-xs font-bold"></mona-chip>
+<mona-chip label="Tag" class="font-bold tracking-wide"></mona-chip>
 ```
+
+Classes passed via `class` are merged with variant classes using `tailwind-merge`.
 
 ## Accessibility Notes
 
-The chip manages the following ARIA attributes on its host element:
+The following attributes are managed automatically on the host element:
 
-- `aria-label` — set to the `ariaLabel` input when provided; falls back to the `label` input; absent when neither is set.
-- `role="checkbox"` and `aria-checked` — applied only when `toggleable` is `true`. `aria-checked` reflects the current `selected` value.
-- `aria-disabled="true"` — applied when `disabled` is `true`.
+| Attribute       | When present                                        | Value                                |
+|-----------------|-----------------------------------------------------|--------------------------------------|
+| `aria-label`    | `ariaLabel` input (`aria-label`) is non-empty       | Value of the `aria-label` input      |
+| `aria-label`    | `aria-label` is empty and `label` is non-empty      | Value of the `label` input           |
+| `aria-checked`  | `toggleable` is `true`                              | `"true"` or `"false"`                |
+| `aria-disabled` | `disabled` is `true`                                | `"true"`                             |
+| `role`          | `toggleable` is `true`                              | `"checkbox"`                         |
+| `tabindex`      | Always                                              | `0` when interactive, `-1` otherwise |
 
-The remove button (when `removable` is `true`) carries an automatically computed accessible label: `"Remove, <label>"`, or `"Remove, item"` when no `label` input is set. When using removable chips with projected content only, set the `ariaLabel` input on the chip host so context is available.
+**Remove button:** When `removable` is `true`, the remove button inside the chip has an automatically computed accessible label: `"Remove, <label>"` using the `label` input, or `"Remove, item"` when no `label` is set. Override this with the `removeLabel` input.
 
-Keyboard activation (Enter and Space) works when the chip is interactive (`toggleable` or `removable` is `true`). Space prevents the default page scroll behavior. A non-interactive display chip (neither toggleable nor removable) has `tabindex="-1"` by default and cannot be reached by keyboard — set `[tabindex]="0"` explicitly to make it keyboard-accessible.
+Keyboard activation (Enter and Space) fires when the chip host has focus. When keyboard focus moves inside the chip to the remove button, Enter and Space activate only the remove button — the chip body is not also activated. Space prevents the default page scroll behavior.
+
+**Consumer responsibilities:**
+
+- When the chip displays only projected content (no `label` input), the host has no accessible name unless `aria-label` is provided. Set `[aria-label]` in that case.
+- When `removable` is `true` and no `label` is set, provide `[removeLabel]` so the remove button carries a meaningful accessible label.
+- For icon-only or purely visual chips, set `[aria-label]` to describe what the chip represents.
 
 ## API
 
@@ -146,27 +151,28 @@ Keyboard activation (Enter and Space) works when the chip is interactive (`toggl
 
 #### Inputs
 
-| Name         | Type                                                                                                             | Default     | Description |
-|--------------|------------------------------------------------------------------------------------------------------------------|-------------|-------------|
-| `ariaLabel`  | `string`                                                                                                         | —           | Accessible label for the chip host element. When set, takes precedence over the `label` input for the host's accessible name. |
-| `class`      | `string`                                                                                                         | `''`        | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled`   | `boolean`                                                                                                        | `false`     | When `true`, the chip becomes non-interactive and shows at reduced opacity. Sets `aria-disabled="true"`. Overrides `tabindex` to `-1`. |
-| `label`      | `string`                                                                                                         | `''`        | Text displayed inside the chip. When non-empty, replaces projected content. Also used as the fallback accessible name and as part of the remove button's accessible label. |
-| `look`       | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual variant. All values support a distinct selected-state appearance. |
-| `removable`  | `boolean`                                                                                                        | `false`     | When `true`, renders a remove button with accessible label `"Remove, <label>"` (or `"Remove, item"` when no `label` is set). |
-| `rounded`    | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                            | `'full'`    | Border-radius preset. Defaults to `'full'` (pill shape). |
-| `selected`   | `boolean`                                                                                                        | `false`     | Two-way bindable selected state. When `toggleable` is `true`, each activation flips this value. Use `[(selected)]` for two-way binding. |
-| `size`       | `'small' \| 'medium' \| 'large'`                                                                                 | `'medium'`  | Size preset controlling padding and remove button dimensions. |
-| `tabindex`   | `number \| string`                                                                                               | —           | Tab index override. When not set, computed automatically: `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`. |
-| `toggleable` | `boolean`                                                                                                        | `false`     | When `true`, activating the chip flips `selected`. The host receives `role="checkbox"` and `aria-checked`. |
-| `value`      | `unknown`                                                                                                        | —           | Arbitrary value associated with this chip. Useful for identifying which chip was selected or removed in a collection. |
+| Name           | Type                                                                                                              | Default     | Description |
+|----------------|-------------------------------------------------------------------------------------------------------------------|-------------|-------------|
+| `aria-label`   | `string`                                                                                                          | `""`        | Accessible name for the host element. Describe what the chip represents. When empty, assistive technology announces the role without a label. Falls back to the `label` input value when not set. |
+| `class`        | `string`                                                                                                          | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `disabled`     | `boolean`                                                                                                         | `false`     | Renders the chip with reduced visual emphasis and removes pointer interaction. |
+| `label`        | `string`                                                                                                          | `""`        | Text label displayed inside the chip. When non-empty, takes precedence over projected content. Also used as the fallback accessible name and as part of the remove button's accessible label. |
+| `look`         | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'`  | `'default'` | Visual style variant controlling the chip's background color, border, and interaction states. |
+| `removable`    | `boolean`                                                                                                         | `false`     | Renders a remove button inside the chip. When activated, emits the `remove` output. |
+| `removeLabel`  | `string`                                                                                                          | —           | Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback. Use when the chip shows only projected content and the default label is not descriptive enough. |
+| `rounded`      | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                             | `'full'`    | Border-radius preset applied to the chip. |
+| `selected`     | `boolean`                                                                                                         | `false`     | Two-way bindable selected state. When `toggleable` is `true`, each activation flips this value. Use `[(selected)]` for two-way binding. |
+| `size`         | `'small' \| 'medium' \| 'large'`                                                                                  | `'medium'`  | Size preset controlling the chip's padding and remove button dimensions. |
+| `tabindex`     | `number \| string`                                                                                                | —           | Tab index override. When not set, computed automatically: `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`. |
+| `toggleable`   | `boolean`                                                                                                         | `false`     | Enables toggle behavior. When `true`, each activation flips `selected` and the host receives `role="checkbox"` with `aria-checked`. |
+| `value`        | `unknown`                                                                                                         | —           | Arbitrary value associated with this chip. Useful for identifying which chip was selected or removed in a collection. |
 
 #### Outputs
 
 | Name           | Type    | Description |
 |----------------|---------|-------------|
-| `contentClick` | `void`  | Emitted when the chip body is clicked or activated via Enter or Space. Fires regardless of whether `toggleable` is set. Not emitted when the remove button is activated. |
-| `remove`       | `Event` | Emitted when the remove button is clicked. `stopPropagation()` is called before emitting, so `contentClick` is not also fired. Only relevant when `removable` is `true`. |
+| `contentClick` | `void`  | Emitted when the chip body is clicked or activated via Enter or Space. Not emitted when the remove button is activated. |
+| `remove`       | `Event` | Emitted when the remove button is clicked. Only fires when `removable` is `true`. Emits the originating `Event`. |
 
 ---
 
@@ -174,7 +180,7 @@ Keyboard activation (Enter and Space) works when the chip is interactive (`toggl
 
 **Selector:** `ng-template[monaChipPrefixTemplate]`
 
-Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix content (e.g., an avatar or icon) before the chip label. The template receives no context.
+Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix content (e.g., an avatar or icon) before the chip label or projected content. The template receives no context.
 
 ```html
 <mona-chip label="Jane Smith">
@@ -191,20 +197,18 @@ Apply to an `<ng-template>` directly inside `<mona-chip>` to render prefix conte
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (chip.component.ts) and component-metadata.json
-- [x] API table split into Inputs / Outputs; Kind and Required columns removed
-- [x] Inputs sorted A→Z: ariaLabel, class, disabled, label, look, removable, rounded, selected, size, tabindex, toggleable, value
+- [x] removeLabel input added to API table (new input added in this session)
+- [x] Inputs sorted A→Z: aria-label, class, disabled, label, look, removable, removeLabel, rounded, selected, size, tabindex, toggleable, value
 - [x] Outputs sorted A→Z: contentClick, remove
-- [x] selected correctly documented as Two-way bindable (model)
+- [x] selected correctly documented as two-way bindable (model)
 - [x] tabindex default documented as computed (undefined input, automatic -1/0 logic)
-- [x] contentClick clarified: fires regardless of toggleable state
-- [x] ariaLabel type confirmed as string | undefined (input<string>() with no default)
-- [x] Tailwind class names removed from Sizes table (was ps-1/pe-1/py-0.5 etc.) — replaced with consumer-facing descriptions
-- [x] Tailwind class names removed from Rounded presets table (was rounded-sm/md/lg) — replaced with consumer-facing descriptions
-- [x] Internal compound class names removed from Selected state section (was bg-selected, bg-primary-selected etc.)
-- [x] Accessibility claims verified against source and spec: role/aria-checked/aria-disabled/aria-label/tabindex host bindings confirmed in chip.component.ts; remove button aria-label confirmed in template
-- [x] Stale package name TODO removed
+- [x] contentClick clarified: not emitted from remove button
+- [x] ariaLabel input alias confirmed as aria-label in chip.component.ts
+- [x] removeLabel and value defaults are — (undefined, no default in source)
+- [x] Accessibility claims verified against source: role/aria-checked/aria-disabled/aria-label/tabindex host bindings confirmed in chip.component.ts; remove button aria-label confirmed in template
+- [x] Keyboard guard fix confirmed: button[data-chip-remove] selector; remove button keyboard activation does not trigger chip body
 - [x] Basic examples compile against the public API surface
 - [x] No internal or unexported APIs exposed
+- [x] ChipPrefixTemplateDirective documented with selector and no-inputs note
+- [x] intro.md trimmed to title + selector + one sentence, matching button/avatar/breadcrumb pattern
 -->
-
-<!-- TODO(owner-review): When removable=true and only projected content (no label), remove button says "Remove, item" — consider a dedicated removeLabel input for this case -->

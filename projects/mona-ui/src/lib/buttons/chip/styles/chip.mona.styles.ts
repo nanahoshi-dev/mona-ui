@@ -1,4 +1,3 @@
-import { none } from "@mirei/ts-collections";
 import { cva } from "class-variance-authority";
 
 export const chipVariants = cva(

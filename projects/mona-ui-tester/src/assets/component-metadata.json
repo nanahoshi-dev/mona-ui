@@ -942,85 +942,91 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Sets the aria-label for the chip host element.",
+        "description": "Accessible name for the host element. Describe what the chip represents.\r\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input"
       },
       {
         "name": "contentClick",
         "type": "void",
-        "description": "Emits when the chip is activated (clicked or keyboard triggered).",
+        "description": "Emitted when the chip body is clicked or activated via Enter or Space.\r\nNot emitted when the remove button is activated.",
         "kind": "output"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the chip.",
+        "description": "Renders the chip with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label of the chip.\r\n\r\nIf the label is set, the chip will display the label instead of the content.",
+        "description": "Text label displayed inside the chip. When non-empty, takes precedence over projected content.",
         "kind": "input"
       },
       {
         "name": "look",
         "type": "ChipVariantProps[\"look\"]",
-        "description": "Sets the look of the chip.",
+        "description": "Visual style variant controlling the chip's background color, border, and interaction states.",
         "kind": "input"
       },
       {
         "name": "removable",
         "type": "boolean",
-        "description": "Sets the removable state of the chip.\r\nIf true, the chip will display a remove icon.",
+        "description": "Renders a remove button inside the chip. When activated, emits the `remove` output.",
         "kind": "input"
       },
       {
         "name": "remove",
         "type": "Event",
-        "description": "Emits when `removable` is `true` and the remove button is clicked.",
+        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\r\nEmits the originating `Event`.",
         "kind": "output"
+      },
+      {
+        "name": "removeLabel",
+        "type": "string",
+        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\r\nUse when the chip shows only projected content and the default label is not descriptive enough.",
+        "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ChipVariantProps[\"rounded\"]",
-        "description": "Sets the rounded state of the chip.",
+        "description": "Border-radius preset applied to the chip.",
         "kind": "input"
       },
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Sets the selected state of the chip.",
+        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\r\nSupports two-way binding via `[(selected)]`.",
         "kind": "model"
       },
       {
         "name": "size",
         "type": "ChipVariantProps[\"size\"]",
-        "description": "Sets the size of the chip.",
+        "description": "Size preset controlling the chip's padding and remove button dimensions.",
         "kind": "input"
       },
       {
         "name": "tabindex",
         "type": "number | string",
-        "description": "Sets the tabindex of the chip.",
+        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
         "kind": "input"
       },
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Sets the toggleable state of the chip.",
+        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\r\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the chip host element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "unknown",
-        "description": "Sets the value of the chip. Useful for identification in selection scenarios.",
+        "description": "Arbitrary value associated with this chip.\r\nUseful for identifying which chip was selected or removed in a collection.",
         "kind": "input"
       }
     ]
@@ -2178,13 +2184,13 @@
       {
         "name": "rounded",
         "type": "CheckboxDirectiveVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the checkbox.",
+        "description": "Border-radius preset applied to the checkbox.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the checkbox input element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -3042,61 +3048,61 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the dropdown button.\r\nFalls back to `\"{text} dropdown button\"` when empty.\r\nProvide an explicit label when `iconOnly` is true and no visible text is set.",
+        "description": "Accessible name for the dropdown button.\r\nFalls back to `\"{text} dropdown button\"` when empty; provide an explicit value when no visible text is present.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledby",
         "type": "string",
-        "description": "ID of an element that labels the dropdown button.\r\nTakes precedence over `ariaLabel` when set.",
+        "description": "ID of an external element that provides the accessible name for the dropdown button.\r\nTakes precedence over `ariaLabel` when both are set.",
         "kind": "input"
       },
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Sets the icon-only state of the button.\r\nWhen `true`, the button renders as a square with no horizontal text padding.\r\nSet `ariaLabel` to provide an accessible name when no visible text is present.",
+        "description": "Renders the button as a square for icon-only usage, removing horizontal text padding.\r\nSet `ariaLabel` when no visible text is present to ensure an accessible name.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the button.",
+        "description": "Renders the button with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the button.\r\nWhen `true`, the button shows a spinner and is non-interactive.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.",
         "kind": "input"
       },
       {
         "name": "look",
         "type": "ButtonVariantProps[\"look\"]",
-        "description": "Sets the visual look of the button.",
+        "description": "Visual style preset applied to the button.",
         "kind": "input"
       },
       {
         "name": "menuItemClick",
         "type": "PopupMenuItemClickEvent",
-        "description": "Emits when a menu item inside the popup is clicked.",
+        "description": "Emitted when a menu item in the dropdown menu is clicked.",
         "kind": "output"
       },
       {
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the button.",
+        "description": "Border-radius preset applied to the button.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
-        "description": "Sets the size of the button.",
+        "description": "Size preset controlling the button's dimensions.",
         "kind": "input"
       },
       {
         "name": "text",
         "type": "string",
-        "description": "Text displayed inside the dropdown button.\r\nPassed as `$implicit` context to `monaDropdownButtonTextTemplate` when provided.\r\nIgnored when `monaDropdownButtonTextTemplate` renders its own content.",
+        "description": "Primary text content displayed inside the dropdown button.\r\nPassed as `$implicit` to a `monaDropdownButtonTextTemplate` when one is provided.",
         "kind": "input"
       },
       {
@@ -5274,85 +5280,85 @@
       {
         "name": "checked",
         "type": "boolean",
-        "description": "Sets the checked state of the checkbox.",
+        "description": "Whether the control is checked.",
         "kind": "model"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the checkbox.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "Sets the indeterminate state of the checkbox.",
+        "description": "Activates indeterminate mode, showing a dash instead of a checkmark.",
         "kind": "input"
       },
       {
         "name": "inputBlur",
         "type": "FocusEvent",
-        "description": "Emits when the checkbox span loses focus.",
+        "description": "Emitted when the checkbox input loses focus.",
         "kind": "output"
       },
       {
         "name": "inputChange",
         "type": "Event",
-        "description": "Emits when the checkbox value changes.",
+        "description": "Emitted when the checkbox value changes.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "FocusEvent",
-        "description": "Emits when the checkbox span gains focus.",
+        "description": "Emitted when the checkbox input gains focus.",
         "kind": "output"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Sets the label text of the checkbox.\nIf provided, it will take precedence over the content inside the checkbox.",
+        "description": "Text label displayed alongside the checkbox. When provided, takes precedence over projected content.",
         "kind": "input"
       },
       {
         "name": "labelPosition",
         "type": "\"before\" | \"after\"",
-        "description": "Sets the position of the label relative to the checkbox.",
+        "description": "Position of the label relative to the checkbox.",
         "kind": "input"
       },
       {
         "name": "labelSize",
         "type": "CheckboxVariantProps[\"labelSize\"]",
-        "description": "Sets the size of the label text.",
+        "description": "Controls the font size of the label text.",
         "kind": "input"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the checkbox.",
+        "description": "Marks the control as required for form validation.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "CheckmarkVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the checkmark box.",
+        "description": "Border-radius preset applied to the checkmark box.",
         "kind": "input"
       },
       {
         "name": "tabIndex",
         "type": "number",
-        "description": "Sets the tab index of the checkbox.",
+        "description": "Tab index of the native checkbox input.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the checkbox loses focus or its value changes.\nConsumed by the signal forms `Field` directive to mark the field as touched.",
+        "description": "Emitted when the checkbox loses focus or its value changes.",
         "kind": "output"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the checkbox label container via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the label container via `tailwind-merge`.",
         "kind": "input"
       }
     ]

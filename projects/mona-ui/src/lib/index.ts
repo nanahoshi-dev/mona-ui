@@ -13,6 +13,7 @@ export { SelectionMode } from "./models/SelectionMode";
 
 export * from "./buttons/chip/component/chip.component";
 export * from "./buttons/chip/directives/chip-prefix-template.directive";
+export { ChipVariantProps } from "./buttons/chip/styles/chip.styles";
 
 export * from "./buttons/dropdown-button/components/dropdown-button/dropdown-button.component";
 export * from "./buttons/dropdown-button/components/dropdown-button-checkbox-item/dropdown-button-checkbox-item.component";
