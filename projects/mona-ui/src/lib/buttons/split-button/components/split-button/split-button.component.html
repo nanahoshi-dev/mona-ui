@@ -51,6 +51,7 @@
     [target]="menuButton"
     [trigger]="'click'"
     [id]="menuId"
+    [minWidth]="popupWidth() || undefined"
     #popupMenu>
     @if (groupTemplate()) {
         <ng-template monaPopupMenuGroupTemplate let-group>

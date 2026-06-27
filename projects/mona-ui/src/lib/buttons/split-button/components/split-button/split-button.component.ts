@@ -54,7 +54,7 @@ import {
         PopupMenuTextTemplateDirective,
         LucideChevronDown
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "classes()",
         "[class.mona-split-button]": "true"
@@ -115,45 +115,46 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     });
 
     /**
-     * @description Accessible label for the main action button.
+     * @description Accessible name for the main action button.
      * Falls back to `"{text} splitbutton"` when empty.
      * @default ""
      */
-    public readonly ariaLabel = input<string>("");
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
 
     /**
-     * @description ID of an element that labels the main action button.
-     * Takes precedence over `ariaLabel` when set.
+     * @description ID of an external element that provides the accessible name for the main action button.
+     * Takes precedence over `ariaLabel` when both are set.
      * @default ""
      */
-    public readonly ariaLabelledby = input<string>("");
+    public readonly ariaLabelledby = input<string>("", { alias: "aria-labelledby" });
 
     /**
-     * @description Emits when the main action button is clicked.
+     * @description Emitted when the main action button is clicked.
      */
     public readonly buttonClick = output<MouseEvent>();
 
     /**
-     * @description Sets the disabled state of both the main button and the menu toggle button.
+     * @description Renders the component with reduced visual emphasis
+     * and removes pointer interaction from both the main button and the menu toggle button.
      * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the visual look of the button.
+     * @description Visual style preset applied to the button.
      * @default "default"
      */
     public readonly look = input<SplitButtonVariantProps["look"]>("default");
 
     /**
-     * @description Accessible label for the menu toggle button.
-     * Override to localize the label for non-English applications.
+     * @description Accessible name for the menu toggle button.
+     * Override to provide a localized label for non-English applications.
      * @default "Show menu options"
      */
     public readonly menuButtonAriaLabel = input("Show menu options");
 
     /**
-     * @description Emits when a menu item inside the popup is clicked.
+     * @description Emitted when a menu item in the popup is clicked.
      */
     public readonly menuItemClick = output<PopupMenuItemClickEvent>();
 
@@ -165,20 +166,20 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
     public readonly popupWidth = input(0);
 
     /**
-     * @description Sets the border radius of the button.
+     * @description Border-radius preset applied to the button.
      * @default "medium"
      */
     public readonly rounded = input<SplitButtonVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the size of the button.
+     * @description Size preset controlling the button's dimensions.
      * @default "medium"
      */
     public readonly size = input<SplitButtonVariantProps["size"]>("medium");
 
     /**
-     * @description Text displayed in the main action button.
-     * Ignored when `monaSplitButtonTextTemplate` is provided.
+     * @description Primary text content displayed in the main action button.
+     * Ignored when a `monaSplitButtonTextTemplate` is provided.
      * @default ""
      */
     public readonly text = input("");
@@ -191,7 +192,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
 
     public constructor() {
         afterNextRender({
-            read: () => this.setKeyboardEvents()
+            read: () => this.#setKeyboardEvents()
         });
     }
 
@@ -207,7 +208,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         this.menuOpen.set(true);
     }
 
-    private closeMenu(): void {
+    #closeMenu(): void {
         const popupMenu = this.popupMenuRef();
         if (popupMenu && this.menuOpen()) {
             popupMenu.closeMenu();
@@ -215,14 +216,14 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         }
     }
 
-    private openMenuViaKeyboard(): void {
+    #openMenuViaKeyboard(): void {
         const popupMenu = this.popupMenuRef();
         if (popupMenu && !this.menuOpen()) {
             popupMenu.openMenuViaKeyboard();
         }
     }
 
-    private setKeyboardEvents(): void {
+    #setKeyboardEvents(): void {
         const menuButtonElement = this.menuButtonRef()?.nativeElement;
         if (!menuButtonElement) {
             return;
@@ -236,11 +237,11 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
                     case " ":
                     case "Enter":
                         event.preventDefault();
-                        this.openMenuViaKeyboard();
+                        this.#openMenuViaKeyboard();
                         break;
                     case "Escape":
                         if (this.menuOpen()) {
-                            this.closeMenu();
+                            this.#closeMenu();
                         }
                         break;
                 }

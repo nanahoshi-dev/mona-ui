@@ -31,6 +31,7 @@ Add the components you need to your standalone component's `imports` array.
 **Minimal example — a button with two menu items:**
 
 ```html
+
 <mona-split-button text="Save" (buttonClick)="onSave()">
     <mona-split-button-item label="Save as…" (menuClick)="onSaveAs($event)"></mona-split-button-item>
     <mona-split-button-item label="Export PDF" (menuClick)="onExport($event)"></mona-split-button-item>
@@ -40,9 +41,22 @@ Add the components you need to your standalone component's `imports` array.
 ```typescript
 import { MenuItemClickEvent } from "@mirei/mona-ui";
 
-protected onSave(): void { /* ... */ }
-protected onSaveAs(event: MenuItemClickEvent): void { /* ... */ }
-protected onExport(event: MenuItemClickEvent): void { /* ... */ }
+protected
+onSave()
+:
+void { /* ... */}
+protected
+onSaveAs(event
+:
+MenuItemClickEvent
+):
+void { /* ... */}
+protected
+onExport(event
+:
+MenuItemClickEvent
+):
+void { /* ... */}
 ```
 
 ## Anatomy & Structural Templates
@@ -66,18 +80,19 @@ mona-split-button
 
 All template directives target `ng-template` elements. Templates placed directly inside `mona-split-button` apply to all matching items globally; templates nested inside a specific item override only that item.
 
-| Directive attribute                  | Scope         | Template context                          |
-|--------------------------------------|---------------|-------------------------------------------|
-| `monaSplitButtonTextTemplate`        | Host button   | None                                      |
-| `monaSplitButtonMenuButtonTemplate`  | Toggle button | None                                      |
-| `monaSplitButtonMenuGroupTemplate`   | Global/Group  | `$implicit: string` (group title)         |
-| `monaSplitButtonMenuItemIconTemplate`    | Global/Item   | `$implicit` — menu item object (`label`, `disabled`) |
-| `monaSplitButtonMenuItemShortcutTemplate`| Global/Item   | `$implicit` — menu item object (`label`, `disabled`) |
-| `monaSplitButtonMenuItemTextTemplate`    | Global/Item   | `$implicit` — menu item object (`label`, `disabled`) |
+| Directive attribute                       | Scope         | Template context                                     |
+|-------------------------------------------|---------------|------------------------------------------------------|
+| `monaSplitButtonTextTemplate`             | Host button   | None                                                 |
+| `monaSplitButtonMenuButtonTemplate`       | Toggle button | None                                                 |
+| `monaSplitButtonMenuGroupTemplate`        | Global/Group  | `$implicit: string` (group title)                    |
+| `monaSplitButtonMenuItemIconTemplate`     | Global/Item   | `$implicit` — menu item object (`label`, `disabled`) |
+| `monaSplitButtonMenuItemShortcutTemplate` | Global/Item   | `$implicit` — menu item object (`label`, `disabled`) |
+| `monaSplitButtonMenuItemTextTemplate`     | Global/Item   | `$implicit` — menu item object (`label`, `disabled`) |
 
 **Customize the main button label:**
 
 ```html
+
 <mona-split-button>
     <ng-template monaSplitButtonTextTemplate>
         <span class="text-primary font-semibold">Publish</span>
@@ -88,6 +103,7 @@ All template directives target `ng-template` elements. Templates placed directly
 **Customize the menu toggle icon:**
 
 ```html
+
 <mona-split-button>
     <ng-template monaSplitButtonMenuButtonTemplate>
         <svg lucideEllipsis [size]="14"></svg>
@@ -98,6 +114,7 @@ All template directives target `ng-template` elements. Templates placed directly
 **Custom text per menu item:**
 
 ```html
+
 <mona-split-button>
     <mona-split-button-item label="Sign Out">
         <ng-template monaSplitButtonMenuItemTextTemplate let-item>
@@ -110,6 +127,7 @@ All template directives target `ng-template` elements. Templates placed directly
 **Global icon template (applies to all items):**
 
 ```html
+
 <mona-split-button>
     <ng-template monaSplitButtonMenuItemIconTemplate let-item>
         <svg lucideChevronRight [size]="12"></svg>
@@ -126,6 +144,7 @@ All template directives target `ng-template` elements. Templates placed directly
 Use `mona-split-button-group` to add a labeled section header. Use `mona-split-button-separator` between sections.
 
 ```html
+
 <mona-split-button text="Actions">
     <mona-split-button-group title="Account">
         <mona-split-button-item label="Profile"></mona-split-button-item>
@@ -141,6 +160,7 @@ Use `mona-split-button-group` to add a labeled section header. Use `mona-split-b
 `mona-split-button-checkbox-item` renders a toggleable item. Bind `[checked]` for the initial state and listen to `(checkedChange)` for updates.
 
 ```html
+
 <mona-split-button text="Settings">
     <mona-split-button-checkbox-item
         label="Enable Notifications"
@@ -160,6 +180,7 @@ Use `mona-split-button-group` to add a labeled section header. Use `mona-split-b
 `mona-split-button-radio-group` renders a set of mutually exclusive options. Use `[(value)]` for two-way binding, or `[value]` + `(valueChange)` for one-way binding.
 
 ```html
+
 <mona-split-button text="View">
     <mona-split-button-radio-group
         title="Layout"
@@ -176,6 +197,7 @@ Use `mona-split-button-group` to add a labeled section header. Use `mona-split-b
 `mona-split-button-item` can contain child items, which render as a submenu:
 
 ```html
+
 <mona-split-button text="Manage">
     <mona-split-button-item label="Team">
         <mona-split-button-item label="Add Member"></mona-split-button-item>
@@ -204,9 +226,9 @@ Both the whole component and individual items can be disabled independently:
 
 The popup menu anchors to the left edge of the main button (`bottomleft` / `topleft`) with a 2px vertical offset. The `popupWidth` input sets the minimum width of the popup in pixels; `0` means no minimum width.
 
-### `ariaLabel` fallback
+### `aria-label` fallback
 
-When `ariaLabel` is empty, the main button's `aria-label` is computed as `"{text} splitbutton"`. Explicitly set `[ariaLabel]` when the button's text alone is not descriptive enough, or when the text is provided via `monaSplitButtonTextTemplate` rather than the `text` input.
+When `[aria-label]` is empty, the main button's `aria-label` is computed as `"{text} splitbutton"`. Explicitly set `[aria-label]` when the button's text alone is not descriptive enough, or when the text is provided via `monaSplitButtonTextTemplate` rather than the `text` input.
 
 ### Handling menu item events
 
@@ -216,26 +238,28 @@ When `ariaLabel` is empty, the main button's `aria-label` is computed as `"{text
 
 ### Keyboard navigation
 
-| Key | Target | Action |
-|-----|--------|--------|
-| `Tab` | Any button | Move focus between the main button and the menu toggle |
-| `Enter` / `Space` | Main button | Trigger the primary action (`buttonClick`) |
-| `ArrowDown` / `ArrowUp` / `Enter` / `Space` | Menu toggle | Open the popup menu |
-| `Escape` | Menu toggle (while open) | Close the popup and return focus to the menu toggle |
+| Key                                         | Target                   | Action                                                 |
+|---------------------------------------------|--------------------------|--------------------------------------------------------|
+| `Tab`                                       | Any button               | Move focus between the main button and the menu toggle |
+| `Enter` / `Space`                           | Main button              | Trigger the primary action (`buttonClick`)             |
+| `ArrowDown` / `ArrowUp` / `Enter` / `Space` | Menu toggle              | Open the popup menu                                    |
+| `Escape`                                    | Menu toggle (while open) | Close the popup and return focus to the menu toggle    |
 
-> TODO(owner-review): Document the keyboard map inside the popup menu (arrow key navigation, Enter to select, Escape to close inner submenus). Verify against runtime.
+> TODO (owner-review): Document the keyboard map inside the popup menu (arrow key navigation, Enter to select, Escape to close inner submenus). Verify against runtime.
 
 ### ARIA
 
 The menu toggle button carries:
+
 - `aria-haspopup="menu"` — tells AT that it controls a menu popup
 - `aria-expanded` — reflects the open/closed state of the popup
 - `aria-controls` — references the popup element by ID
 - `aria-label` — defaults to `"Show menu options"`; override with `[menuButtonAriaLabel]` to localize
 
 The main button carries:
-- `aria-label` — computed from the `ariaLabel` input or falls back to `"{text} splitbutton"`
-- `aria-labelledby` — forwarded from the `ariaLabelledby` input; takes precedence over `aria-label` when set
+
+- `aria-label` — computed from the `[aria-label]` input or falls back to `"{text} splitbutton"`
+- `aria-labelledby` — forwarded from the `[aria-labelledby]` input; takes precedence over `aria-label` when set
 
 ## API
 
@@ -243,20 +267,27 @@ The main button carries:
 
 **Selector:** `mona-split-button`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `aria-label` | input | `string` | `''` | Optional | Accessible label for the main action button. Falls back to `"{text} splitbutton"` when empty. |
-| `ariaLabelledby` | input | `string` | `''` | Optional | ID of an element that labels the main action button. Takes precedence over `aria-label` when set. |
-| `class` | input | `string` | `''` | Optional | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state of both the main button and the menu toggle button. |
-| `look` | input | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Optional | Sets the visual look of the button. |
-| `menuButtonAriaLabel` | input | `string` | `'Show menu options'` | Optional | Accessible label for the menu toggle button. Override to localize for non-English applications. |
-| `popupWidth` | input | `number` | `0` | Optional | Minimum width of the popup menu in pixels. `0` means no minimum width. |
-| `rounded` | input | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Optional | Sets the border radius of the button. |
-| `size` | input | `'large' \| 'medium' \| 'small'` | `'medium'` | Optional | Sets the size of the button. |
-| `text` | input | `string` | `''` | Optional | Text displayed in the main action button. Ignored when `monaSplitButtonTextTemplate` is provided. |
-| `buttonClick` | output | `MouseEvent` | — | — | Emits when the main action button is clicked. |
-| `menuItemClick` | output | `MenuItemClickEvent` | — | — | Emits when any item inside the popup is clicked. |
+#### Inputs
+
+| Name                  | Type                                                                                                           | Default               | Description                                                                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`          | `string`                                                                                                       | `''`                  | Accessible name for the main action button. Falls back to `"{text} splitbutton"` when empty.                                                 |
+| `aria-labelledby`     | `string`                                                                                                       | `''`                  | ID of an external element that provides the accessible name for the main action button. Takes precedence over `aria-label` when both are set. |
+| `class`               | `string`                                                                                                       | `''`                  | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                    |
+| `disabled`            | `boolean`                                                                                                      | `false`               | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button.     |
+| `look`                | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'`           | Visual style preset applied to the button.                                                                                                   |
+| `menuButtonAriaLabel` | `string`                                                                                                       | `'Show menu options'` | Accessible name for the menu toggle button. Override to provide a localized label for non-English applications.                              |
+| `popupWidth`          | `number`                                                                                                       | `0`                   | Minimum width of the popup menu in pixels. A value of `0` means no minimum width is applied.                                                 |
+| `rounded`             | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'`                                                           | `'medium'`            | Border-radius preset applied to the button.                                                                                                  |
+| `size`                | `'large' \| 'medium' \| 'small'`                                                                               | `'medium'`            | Size preset controlling the button's dimensions.                                                                                             |
+| `text`                | `string`                                                                                                       | `''`                  | Primary text content displayed in the main action button. Ignored when a `monaSplitButtonTextTemplate` is provided.                          |
+
+#### Outputs
+
+| Name            | Type                 | Description                                       |
+|-----------------|----------------------|---------------------------------------------------|
+| `buttonClick`   | `MouseEvent`         | Emitted when the main action button is clicked.   |
+| `menuItemClick` | `MenuItemClickEvent` | Emitted when a menu item in the popup is clicked. |
 
 ---
 
@@ -264,11 +295,18 @@ The main button carries:
 
 **Selector:** `mona-split-button-item`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state of the menu item. |
-| `label` | input | `string` | `''` | Optional | The text of the menu item. |
-| `menuClick` | output | `MenuItemClickEvent` | — | — | Emits when the item is selected by mouse or keyboard. |
+#### Inputs
+
+| Name       | Type      | Default | Description                                                                         |
+|------------|-----------|---------|-------------------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and removes pointer interaction. |
+| `label`    | `string`  | `''`    | Text label displayed in the menu item.                                              |
+
+#### Outputs
+
+| Name        | Type                 | Description                                             |
+|-------------|----------------------|---------------------------------------------------------|
+| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
 
 ---
 
@@ -276,9 +314,11 @@ The main button carries:
 
 **Selector:** `mona-split-button-group`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `title` | input | `string` | `''` | Optional | Sets the title of the group, shown as a section header. |
+#### Inputs
+
+| Name    | Type     | Default | Description                                                      |
+|---------|----------|---------|------------------------------------------------------------------|
+| `title` | `string` | —       | Section header text displayed above the group's items. Required. |
 
 ---
 
@@ -286,13 +326,20 @@ The main button carries:
 
 **Selector:** `mona-split-button-checkbox-item`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `checked` | input | `boolean` | `false` | Optional | Sets the checked state of the menu item. |
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state of the menu item. |
-| `label` | input | `string` | `''` | Optional | The text of the menu item. |
-| `checkedChange` | output | `boolean` | — | — | Emits when the checked state changes. |
-| `menuClick` | output | `MenuItemClickEvent` | — | — | Emits when the item is selected by mouse or keyboard. |
+#### Inputs
+
+| Name       | Type      | Default | Description                                                                         |
+|------------|-----------|---------|-------------------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false` | Whether the menu item is checked.                                                   |
+| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and removes pointer interaction. |
+| `label`    | `string`  | `''`    | Text label displayed in the menu item.                                              |
+
+#### Outputs
+
+| Name            | Type                 | Description                                             |
+|-----------------|----------------------|---------------------------------------------------------|
+| `checkedChange` | `boolean`            | Emitted when the checked state changes.                 |
+| `menuClick`     | `MenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
 
 ---
 
@@ -300,10 +347,12 @@ The main button carries:
 
 **Selector:** `mona-split-button-radio-group`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `title` | input | `string` | `''` | Optional | The title of the radio group, shown as a section header. |
-| `value` | model | `string` | — | Optional | The value of the currently selected radio item. Supports two-way binding via `[(value)]`. |
+#### Inputs
+
+| Name    | Type     | Default | Description                                                                                                                               |
+|---------|----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| `title` | `string` | `''`    | Section header text displayed above the radio group's items.                                                                              |
+| `value` | `string` | `''`    | Two-way bindable value of the currently selected radio item. Use `[(value)]` to bind two-way, or `[value]` + `(valueChange)` for one-way. |
 
 ---
 
@@ -311,12 +360,19 @@ The main button carries:
 
 **Selector:** `mona-split-button-radio-item`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
-| `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state of the menu item. |
-| `label` | input | `string` | `''` | Optional | The text of the radio item. |
-| `value` | input | `string` | `''` | Optional | The value emitted when this item is selected. Matched against the parent `SplitButtonRadioGroupComponent`'s `value`. |
-| `menuClick` | output | `MenuItemClickEvent` | — | — | Emits when the item is selected by mouse or keyboard. |
+#### Inputs
+
+| Name       | Type      | Default | Description                                                                                                               |
+|------------|-----------|---------|---------------------------------------------------------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and removes pointer interaction.                                       |
+| `label`    | `string`  | `''`    | Text label displayed in the menu item.                                                                                    |
+| `value`    | `string`  | —       | Value emitted when this item is selected. Matched against the parent `mona-split-button-radio-group`'s `value`. Required. |
+
+#### Outputs
+
+| Name        | Type                 | Description                                             |
+|-------------|----------------------|---------------------------------------------------------|
+| `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by keyboard or mouse. |
 
 ---
 
@@ -330,12 +386,14 @@ No inputs or outputs. Renders a horizontal visual divider between menu sections.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] @description and @default added to all public inputs/outputs
-- [x] menuButtonAriaLabel input added and bound in template (replaces hardcoded English string)
-- [x] PopupMenuItem not exported — documented key context fields inline instead
-- [x] menuItemClick output type is MenuItemClickEvent (public alias for PopupMenuItemClickEvent)
+- [x] @description and @default kept in sync with source JSDoc (updated to canonical vocabulary)
+- [x] ariaLabel input name corrected — consumers use [ariaLabel], not [aria-label] (no alias on this component)
+- [x] SplitButtonGroupComponent.title and SplitButtonRadioItemComponent.value marked Required (input.required<string>())
+- [x] SplitButtonRadioGroupComponent.value documented as two-way bindable model
+- [x] menuItemClick and buttonClick output type verified: MenuItemClickEvent is the public alias exported from @mirei/mona-ui
+- [x] Kind and Required columns removed from API tables; tables split into Inputs / Outputs per doc guidelines
 - [x] No internal or unexported APIs exposed
+- [x] ChangeDetectionStrategy.OnPush confirmed on all components
 -->
 
 <!-- TODO(owner-review): Verify the complete keyboard navigation map inside the popup menu (arrow key traversal, Enter to select, Escape to close submenus). Document once confirmed against runtime behavior. -->
-<!-- TODO(owner-review): ChangeDetectionStrategy.Eager is used on SplitButtonComponent. CLAUDE.md requires OnPush. Evaluate whether Eager is intentional for the overlay interaction model and update accordingly. -->
