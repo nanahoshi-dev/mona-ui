@@ -70,12 +70,12 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                     <ng-template monaPagerNumericButtonsTemplate let-totalPages="totalPages">
                         <div class="flex items-center h-full px-2">
                             <mona-slider
-                                [min]="1"
-                                [max]="totalPages"
+                                [minValue]="1"
+                                [maxValue]="totalPages"
                                 [showTicks]="false"
                                 [showLabels]="false"
-                                [ngModel]="page()"
-                                (ngModelChange)="onSliderChange($event)">
+                                [value]="page()"
+                                (valueChange)="onSliderChange($event)">
                             </mona-slider>
                         </div>
                     </ng-template>
@@ -207,12 +207,12 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                 <ng-template monaPagerNumericButtonsTemplate let-totalPages="totalPages">
                     <div class="flex items-center h-full px-2">
                         <mona-slider
-                            [min]="1"
-                            [max]="totalPages"
+                            [minValue]="1"
+                            [maxValue]="totalPages"
                             [showTicks]="false"
                             [showLabels]="false"
-                            [ngModel]="page()"
-                            (ngModelChange)="onSliderChange($event)">
+                            [value]="page()"
+                            (valueChange)="onSliderChange($event)">
                         </mona-slider>
                     </div>
                 </ng-template>
@@ -391,12 +391,12 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
                     <ng-template monaPagerNumericButtonsTemplate let-totalPages="totalPages">
                         <div class="flex items-center h-full px-2">
                             <mona-slider
-                                [min]="1"
-                                [max]="totalPages"
+                                [minValue]="1"
+                                [maxValue]="totalPages"
                                 [showTicks]="false"
                                 [showLabels]="false"
-                                [ngModel]="page()"
-                                (ngModelChange)="onSliderChange($event)">
+                                [value]="page()"
+                                (valueChange)="onSliderChange($event)">
                             </mona-slider>
                         </div>
                     </ng-template>

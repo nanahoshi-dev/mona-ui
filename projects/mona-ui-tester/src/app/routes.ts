@@ -245,6 +245,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "range-slider",
+                loadComponent: () =>
+                    import("./docs/components/range-slider-doc/range-slider-doc.component").then(
+                        m => m.RangeSliderDocComponent
+                    )
+            },
+            {
                 path: "scroll-view",
                 loadComponent: () =>
                     import("./docs/components/scroll-view-doc/scroll-view-doc.component").then(

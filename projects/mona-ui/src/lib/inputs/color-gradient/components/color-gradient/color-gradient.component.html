@@ -17,28 +17,28 @@
 <div class="flex items-center gap-2">
     <div class="flex flex-1 flex-col gap-1 mr-2">
         <mona-slider
-            [min]="0"
-            [max]="360"
+            [minValue]="0"
+            [maxValue]="360"
             [trackBackground]="'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)'"
             [selectionBackground]="'transparent'"
             [handleClasses]="sliderHandleClasses()"
             [trackSize]="sliderHeight"
             [rounded]="rounded()"
-            [ngModel]="hsv().h"
-            (ngModelChange)="hueValue$.next($event)"
-            (blur)="onSliderBlur()"></mona-slider>
+            [value]="hsv().h ?? 0"
+            (valueChange)="hueValue$.next($event)"
+            (touch)="onSliderBlur()"></mona-slider>
         @if (opacity()) {
             <mona-slider
-                [min]="0"
-                [max]="255"
+                [minValue]="0"
+                [maxValue]="255"
                 [trackBackground]="alphaSliderBackground()"
                 [selectionBackground]="'transparent'"
                 [handleClasses]="sliderHandleClasses()"
                 [trackSize]="sliderHeight"
                 [rounded]="rounded()"
-                [ngModel]="alpha()"
-                (ngModelChange)="onAlphaChange($event)"
-                (blur)="onSliderBlur()"></mona-slider>
+                [value]="alpha()"
+                (valueChange)="onAlphaChange($event)"
+                (touch)="onSliderBlur()"></mona-slider>
         }
     </div>
     @for (preview of colorPreviews(); track preview.type) {

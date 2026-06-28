@@ -56,24 +56,47 @@
     [class]="sliderHandleClasses()"
     [attr.data-orientation]="orientation()"
     [attr.data-dragging]="dragging()"
-    [attr.data-focused]="handleFocused()"
-    [style]="handleStyle()"
-    [style.left.%]="orientation() === 'horizontal' ? handlePosition() : undefined"
-    [style.bottom.%]="orientation() === 'vertical' ? handlePosition() : undefined"
+    [attr.data-focused]="primaryHandleFocused()"
+    [style]="primaryHandleStyle()"
+    [style.left.%]="orientation() === 'horizontal' ? primaryHandlePosition() : undefined"
+    [style.bottom.%]="orientation() === 'vertical' ? primaryHandlePosition() : undefined"
     [attr.tabindex]="effectiveDisabled() ? -1 : 0"
     [attr.role]="'slider'"
     [attr.aria-valuemin]="minValue()"
     [attr.aria-valuemax]="maxValue()"
-    [attr.aria-valuenow]="normalizedValue()"
-    [attr.aria-valuetext]="ariaValueText() ? ariaValueText()!(normalizedValue()) : null"
+    [attr.aria-valuenow]="normalizedValue()[0]"
+    [attr.aria-valuetext]="ariaValueText() ? ariaValueText()!(normalizedValue()[0]) : null"
     [attr.aria-orientation]="orientation()"
     [attr.aria-disabled]="effectiveDisabled() || null"
     [attr.aria-invalid]="invalid() || null"
-    [attr.aria-label]="ariaLabel()"
-    [attr.aria-labelledby]="ariaLabelledBy()"
+    [attr.aria-label]="ariaLabelStart()"
     #sliderHandle>
     @if (handleTemplate()) {
         <ng-container
-            *ngTemplateOutlet="handleTemplate() ?? null; context: { $implicit: normalizedValue() }"></ng-container>
+            *ngTemplateOutlet="handleTemplate() ?? null; context: { $implicit: normalizedValue()[0] }"></ng-container>
+    }
+</div>
+<div
+    [class]="sliderHandleClasses()"
+    [attr.data-orientation]="orientation()"
+    [attr.data-dragging]="dragging()"
+    [attr.data-focused]="secondaryHandleFocused()"
+    [style]="secondaryHandleStyle()"
+    [style.left.%]="orientation() === 'horizontal' ? secondaryHandlePosition() : undefined"
+    [style.bottom.%]="orientation() === 'vertical' ? secondaryHandlePosition() : undefined"
+    [attr.tabindex]="effectiveDisabled() ? -1 : 0"
+    [attr.role]="'slider'"
+    [attr.aria-valuemin]="minValue()"
+    [attr.aria-valuemax]="maxValue()"
+    [attr.aria-valuenow]="normalizedValue()[1]"
+    [attr.aria-valuetext]="ariaValueText() ? ariaValueText()!(normalizedValue()[1]) : null"
+    [attr.aria-orientation]="orientation()"
+    [attr.aria-disabled]="effectiveDisabled() || null"
+    [attr.aria-invalid]="invalid() || null"
+    [attr.aria-label]="ariaLabelEnd()"
+    #secondarySliderHandle>
+    @if (handleTemplate()) {
+        <ng-container
+            *ngTemplateOutlet="handleTemplate() ?? null; context: { $implicit: normalizedValue()[1] }"></ng-container>
     }
 </div>

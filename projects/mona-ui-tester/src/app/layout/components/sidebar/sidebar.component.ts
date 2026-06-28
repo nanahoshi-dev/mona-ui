@@ -61,6 +61,7 @@ export class SidebarComponent {
                 { text: "Popup", path: "/popup" },
                 { text: "Progress Bar", path: "/progress-bar" },
                 { text: "Radio Button", path: "/radio-button" },
+                { text: "Range Slider", path: "/range-slider" },
                 { text: "Scroll View", path: "/scroll-view" },
                 { text: "Slider", path: "/slider" },
                 { text: "Split Button", path: "/split-button" },

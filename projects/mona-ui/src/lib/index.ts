@@ -207,6 +207,7 @@ export * from "./inputs/radio-button/components/radio-button/radio-button.compon
 export * from "./inputs/slider/directives/slider-tick-value-template.directive";
 export * from "./inputs/slider/directives/slider-handle-template.directive";
 export * from "./inputs/slider/components/slider/slider.component";
+export * from "./inputs/slider/components/range-slider/range-slider.component";
 
 export * from "./inputs/switch/directives/switch-handle-content-template.directive";
 export * from "./inputs/switch/directives/switch-off-label-template.directive";

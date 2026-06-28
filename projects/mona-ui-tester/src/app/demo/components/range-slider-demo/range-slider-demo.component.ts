@@ -1,25 +1,25 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField } from "@angular/forms/signals";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faMoon, faStar, faSun } from "@fortawesome/free-solid-svg-icons";
-import { SliderComponent, SliderHandleTemplateDirective, SliderTickValueTemplateDirective } from "mona-ui";
+import { RangeSliderComponent, SliderHandleTemplateDirective, SliderTickValueTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 @Component({
-    selector: "app-slider-demo",
+    selector: "app-range-slider-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./slider-demo.component.html",
+    templateUrl: "./range-slider-demo.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> {
+export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderComponent> {
     readonly #injector = createFeatureInjector({
         handleTemplate: {
             name: "Handle Template",
-            description: "This template allows you to customize the handle displayed on the slider.",
+            description: "This template allows you to customize the handles displayed on the range slider.",
             active: false
         },
         labelTemplate: {
@@ -28,7 +28,8 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             active: false
         }
     });
-    protected readonly config = signal<ComponentConfig<SliderComponent>>({
+    protected readonly RangeSliderWrapperComponent = RangeSliderWrapperComponent;
+    protected readonly config = signal<ComponentConfig<RangeSliderComponent>>({
         inputs: {
             disabled: {
                 type: "boolean",
@@ -67,6 +68,10 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "full"
             },
+            shiftMultiplier: {
+                type: "number",
+                value: 10
+            },
             selectionBackground: {
                 type: "color",
                 value: "var(--color-primary)"
@@ -94,23 +99,18 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             trackSize: {
                 type: "string",
                 value: ""
-            },
-            value: {
-                type: "number",
-                value: 4
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
     });
     protected readonly featureInjector = this.#injector;
-    protected readonly metadata = this.getMetadata("SliderComponent");
+    protected readonly metadata = this.getMetadata("RangeSliderComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
-    protected readonly SliderWrapperComponent = SliderWrapperComponent;
 }
 
 @Component({
     imports: [
-        SliderComponent,
+        RangeSliderComponent,
         FormField,
         SliderTickValueTemplateDirective,
         FaIconComponent,
@@ -119,42 +119,46 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
-        <mona-slider
-            [labelPosition]="labelPosition()"
-            [labelStep]="labelStep()"
-            [largeTickStep]="largeTickStep()"
-            [maxValue]="maxValue()"
-            [minValue]="minValue()"
-            [orientation]="orientation()"
-            [rounded]="rounded()"
-            [selectionBackground]="selectionBackground()"
-            [showLabels]="showLabels()"
-            [showTicks]="showTicks()"
-            [smallTickStep]="smallTickStep()"
-            [step]="step()"
-            [trackBackground]="trackBackground()"
-            [trackSize]="trackSize()"
-            [formField]="$any(form.value)"
-            [style]="size()">
-            @if (featureData && featureData["labelTemplate"].active) {
-                <ng-template monaSliderTickValueTemplate let-value>
-                    @if (value < 8 || value > 20) {
-                        <fa-icon [icon]="moonIcon" style="color: mediumpurple;"></fa-icon>
-                    } @else {
-                        <fa-icon [icon]="sunIcon" style="color: #fafd0f;"></fa-icon>
-                    }
-                </ng-template>
-            }
-            @if (featureData && featureData["handleTemplate"].active) {
-                <ng-template monaSliderHandleTemplate let-value>
-                    <fa-icon [icon]="starIcon" style="color: darkgoldenrod;" [title]="value"></fa-icon>
-                </ng-template>
-            }
-        </mona-slider>
+        <div class="flex flex-col gap-4">
+            <span>Range: {{ form.value().value()[0] }} - {{ form.value().value()[1] }}</span>
+            <mona-range-slider
+                [labelPosition]="labelPosition()"
+                [labelStep]="labelStep()"
+                [largeTickStep]="largeTickStep()"
+                [maxValue]="maxValue()"
+                [minValue]="minValue()"
+                [orientation]="orientation()"
+                [rounded]="rounded()"
+                [selectionBackground]="selectionBackground()"
+                [shiftMultiplier]="shiftMultiplier()"
+                [showLabels]="showLabels()"
+                [showTicks]="showTicks()"
+                [smallTickStep]="smallTickStep()"
+                [step]="step()"
+                [trackBackground]="trackBackground()"
+                [trackSize]="trackSize()"
+                [formField]="$any(form.value)"
+                [style]="size()">
+                @if (featureData && featureData["labelTemplate"].active) {
+                    <ng-template monaSliderTickValueTemplate let-value>
+                        @if (value < 8 || value > 20) {
+                            <fa-icon [icon]="moonIcon" style="color: mediumpurple;"></fa-icon>
+                        } @else {
+                            <fa-icon [icon]="sunIcon" style="color: #fafd0f;"></fa-icon>
+                        }
+                    </ng-template>
+                }
+                @if (featureData && featureData["handleTemplate"].active) {
+                    <ng-template monaSliderHandleTemplate let-value>
+                        <fa-icon [icon]="starIcon" style="color: darkgoldenrod;" [title]="value"></fa-icon>
+                    </ng-template>
+                }
+            </mona-range-slider>
+        </div>
     `
 })
-export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderComponent> {
-    readonly #formModel = signal<SliderFormModel>({ value: 4 });
+export class RangeSliderWrapperComponent implements ComponentInputsAsSignal<RangeSliderComponent> {
+    readonly #formModel = signal<RangeSliderFormModel>({ value: [4, 16] });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
@@ -166,27 +170,23 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     protected readonly starIcon = faStar;
     protected readonly sunIcon = faSun;
     public readonly disabled = input(false);
-    public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
+    public readonly labelPosition = input<ReturnType<RangeSliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);
-    public readonly largeTickStep = input<ReturnType<SliderComponent["largeTickStep"]>>(null); // Large step can be null
+    public readonly largeTickStep = input<ReturnType<RangeSliderComponent["largeTickStep"]>>(null);
     public readonly maxValue = input(23);
     public readonly minValue = input(0);
-    public readonly orientation = input<ReturnType<SliderComponent["orientation"]>>("horizontal");
-    public readonly rounded = input<ReturnType<SliderComponent["rounded"]>>("full");
-    public readonly selectionBackground = input<ReturnType<SliderComponent["selectionBackground"]>>("transparent");
+    public readonly orientation = input<ReturnType<RangeSliderComponent["orientation"]>>("horizontal");
+    public readonly rounded = input<ReturnType<RangeSliderComponent["rounded"]>>("full");
+    public readonly selectionBackground = input<ReturnType<RangeSliderComponent["selectionBackground"]>>("transparent");
+    public readonly shiftMultiplier = input(10);
     public readonly showLabels = input(false);
     public readonly showTicks = input(false);
     public readonly smallTickStep = input(1);
     public readonly step = input(1);
-    public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>("transparent");
+    public readonly trackBackground = input<ReturnType<RangeSliderComponent["trackBackground"]>>("transparent");
     public readonly trackSize = input<string | number>();
-    public readonly value = model(0);
-
-    public constructor() {
-        effect(() => this.form.value().value.set(this.value()));
-    }
 }
 
-interface SliderFormModel {
-    value: number;
+interface RangeSliderFormModel {
+    value: [number, number];
 }
