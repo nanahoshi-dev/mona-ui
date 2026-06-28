@@ -5836,33 +5836,63 @@
     "selector": "\"mona-switch\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "description": "Accessible name for the host element. Describe what the component represents.\nWhen empty, assistive technology announces the role without a label.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "description": "ID of an external element that provides the accessible name for the host element.",
+        "kind": "input"
+      },
+      {
+        "name": "checked",
+        "type": "boolean",
+        "description": "Whether the control is checked.",
+        "kind": "model"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the switch.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "offLabel",
         "type": "string",
-        "description": "Sets the off label of the switch.",
+        "description": "Label displayed inside the switch track when it is in the off state.",
         "kind": "input"
       },
       {
         "name": "onLabel",
         "type": "string",
-        "description": "Sets the on label of the switch.",
+        "description": "Label displayed inside the switch track when it is in the on state.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "SwitchVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the switch.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "SwitchVariantProps[\"size\"]",
-        "description": "Sets the size of the switch.",
+        "description": "Size preset controlling the component's dimensions.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the switch loses focus or its value changes.",
+        "kind": "output"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]

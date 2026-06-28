@@ -1,27 +1,27 @@
 <span [class]="labelClasses()">
-    @if (active() && !onLabelTemplate()) {
+    @if (checked() && !onLabelTemplate()) {
         <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">{{ onLabel() }}</span>
     }
-    @if (active() && onLabelTemplate()) {
+    @if (checked() && onLabelTemplate()) {
         <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">
-            <ng-container [ngTemplateOutlet]="onLabelTemplate()??null"></ng-container>
+            <ng-container [ngTemplateOutlet]="onLabelTemplate() ?? null"></ng-container>
         </span>
     }
 </span>
 <span [class]="labelClasses()">
-    @if (!active() && !offLabelTemplate()) {
+    @if (!checked() && !offLabelTemplate()) {
         <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">{{ offLabel() }}</span>
     }
-    @if (!active() && offLabelTemplate()) {
+    @if (!checked() && offLabelTemplate()) {
         <span animate.enter="mona-switch-label-enter" animate.leave="mona-switch-label-leave">
-            <ng-container [ngTemplateOutlet]="offLabelTemplate()??null"></ng-container>
+            <ng-container [ngTemplateOutlet]="offLabelTemplate() ?? null"></ng-container>
         </span>
     }
 </span>
-<div [class]="handleClasses()"
-     [attr.data-active]="active()">
+<div [class]="handleClasses()" [attr.data-active]="checked()">
     @if (handleContentTemplate()) {
-        <ng-container [ngTemplateOutlet]="handleContentTemplate()??null"
-                      [ngTemplateOutletContext]="{$implicit: active()}"></ng-container>
+        <ng-container
+            [ngTemplateOutlet]="handleContentTemplate() ?? null"
+            [ngTemplateOutletContext]="{ $implicit: checked() }"></ng-container>
     }
 </div>

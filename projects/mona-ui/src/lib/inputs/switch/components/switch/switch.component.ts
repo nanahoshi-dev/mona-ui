@@ -1,24 +1,22 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    ChangeDetectionStrategy,
+    afterNextRender,
     Component,
     computed,
     contentChild,
     DestroyRef,
     ElementRef,
-    forwardRef,
     inject,
     input,
-    OnInit,
-    signal,
+    model,
+    output,
     TemplateRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import type { FormCheckboxControl } from "@angular/forms/signals";
 import { filter, fromEvent, merge, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { SwitchHandleContentTemplateDirective } from "../../directives/switch-handle-content-template.directive";
 import { SwitchOffLabelTemplateDirective } from "../../directives/switch-off-label-template.directive";
 import { SwitchOnLabelTemplateDirective } from "../../directives/switch-on-label-template.directive";
@@ -36,11 +34,11 @@ import {
     styles: [
         `
             .mona-switch-label-enter {
-                animation: mona-switch-label-fade-in 200ms ease-out;
+                animation: mona-switch-label-fade-in 300ms ease-out;
             }
 
             .mona-switch-label-leave {
-                animation: mona-switch-label-fade-out 200ms ease-out;
+                animation: mona-switch-label-fade-out 300ms ease-out;
             }
 
             @keyframes mona-switch-label-fade-in {
@@ -71,40 +69,30 @@ import {
             }
         `
     ],
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => SwitchComponent),
-            multi: true
-        }
-    ],
     imports: [NgTemplateOutlet],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[attr.role]": "'switch'",
-        "[attr.aria-checked]": "active()",
-        "[attr.aria-disabled]": "disabled() ? true : undefined",
+        "[attr.aria-checked]": "checked()",
+        "[attr.aria-disabled]": "disabled() || undefined",
+        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.tabindex]": "disabled() ? -1 : 0",
-        "[attr.data-active]": "active()",
+        "[attr.data-active]": "checked()",
         "[attr.data-disabled]": "disabled()",
         "[class]": "classes()",
         "(blur)": "onBlur()"
     }
 })
-export class SwitchComponent implements OnInit, ControlValueAccessor, SwitchVariantInputs {
+export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<boolean> | null = null;
-    #propagateTouched: Action | null = null;
-
-    protected readonly active = signal(false);
     protected readonly classes = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const classes = switchThemeVariants(theme)({ rounded, size });
-        return twMerge(classes);
+        return twMerge(classes, this.userClass());
     });
     protected readonly handleClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -125,71 +113,92 @@ export class SwitchComponent implements OnInit, ControlValueAccessor, SwitchVari
     protected readonly onLabelTemplate = contentChild(SwitchOnLabelTemplateDirective, { read: TemplateRef });
 
     /**
-     * @description Sets the disabled state of the switch.
+     * @description Accessible name for the host element. Describe what the component represents.
+     * When empty, assistive technology announces the role without a label.
+     * @default null
+     */
+    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+
+    /**
+     * @description ID of an external element that provides the accessible name for the host element.
+     * @default null
+     */
+    public readonly ariaLabelledBy = input<string | null>(null, { alias: "aria-labelledby" });
+
+    /**
+     * @description Whether the control is checked.
+     * @default false
+     */
+    public readonly checked = model(false);
+
+    /**
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the off label of the switch.
+     * @description Label displayed inside the switch track when it is in the off state.
+     * @default ""
      */
     public readonly offLabel = input("");
 
     /**
-     * @description Sets the on label of the switch.
+     * @description Label displayed inside the switch track when it is in the on state.
+     * @default ""
      */
     public readonly onLabel = input("");
 
     /**
-     * @description Sets the border radius of the switch.
+     * @description Border-radius preset applied to the component.
+     * @default "full"
      */
     public readonly rounded = input<SwitchVariantProps["rounded"]>("full");
 
     /**
-     * @description Sets the size of the switch.
+     * @description Size preset controlling the component's dimensions.
+     * @default "medium"
      */
     public readonly size = input<SwitchVariantProps["size"]>("medium");
 
-    public ngOnInit(): void {
-        this.setEventListeners();
-    }
+    /**
+     * @description Emitted when the switch loses focus or its value changes.
+     */
+    public readonly touch = output();
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
+    public readonly userClass = input<string>("", { alias: "class" });
 
-    public registerOnTouched(fn: any) {
-        this.#propagateTouched = fn;
-    }
-
-    public writeValue(obj: boolean): void {
-        if (obj !== undefined) {
-            this.active.set(obj);
-        }
+    public constructor() {
+        afterNextRender({
+            read: () => this.#setEventListeners()
+        });
     }
 
     protected onBlur(): void {
-        this.#propagateTouched?.();
+        this.touch.emit();
     }
 
-    private toggleState(): void {
-        if (this.disabled()) {
-            return;
-        }
-        this.active.set(!this.active());
-        this.#propagateChange?.(this.active());
-    }
-
-    private setEventListeners(): void {
+    #setEventListeners(): void {
         const host = this.#hostElementRef.nativeElement;
-
         const click$ = fromEvent<MouseEvent>(host, "click");
         const keydown$ = fromEvent<KeyboardEvent>(host, "keydown").pipe(
             filter(event => event.key === " " || event.key === "Enter"),
             tap(event => event.preventDefault()) // Prevent page scroll on Space
         );
-
         merge(click$, keydown$)
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => this.toggleState());
+            .subscribe(() => this.#toggleState());
+    }
+
+    #toggleState(): void {
+        if (this.disabled()) {
+            return;
+        }
+        this.checked.set(!this.checked());
+        this.touch.emit();
     }
 }
