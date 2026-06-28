@@ -2232,19 +2232,19 @@
       {
         "name": "rounded",
         "type": "InputVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the input.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "InputVariantProps[\"size\"]",
-        "description": "Sets the size of the input.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the input element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -3258,7 +3258,7 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button.",
+        "description": "Renders the component with reduced visual emphasis\r\nand removes pointer interaction from both the main button and the menu toggle button.",
         "kind": "input"
       },
       {
@@ -5874,92 +5874,110 @@
       {
         "name": "clearButton",
         "type": "boolean",
-        "description": "Displays a button to clear the input value.",
+        "description": "Displays a clear button that resets the value to empty.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the text box.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "input"
       },
       {
         "name": "inputAttributes",
         "type": "AttributeConfig",
-        "description": "Sets the attributes for the input element.",
+        "description": "Additional HTML attributes applied directly to the inner `<input>` element.",
         "kind": "input"
       },
       {
         "name": "inputBlur",
         "type": "FocusEvent",
-        "description": "Emits an event when the input loses focus.",
+        "description": "Emitted when the inner input loses focus.",
         "kind": "output"
       },
       {
         "name": "inputFocus",
         "type": "FocusEvent",
-        "description": "Emits an event when the input gains focus.",
+        "description": "Emitted when the inner input gains focus.",
         "kind": "output"
       },
       {
         "name": "inputClass",
         "type": "string | string[]",
-        "description": "Sets the class for the input element.",
+        "description": "Additional CSS classes applied to the inner `<input>` element.",
         "kind": "input"
       },
       {
         "name": "inputStyle",
         "type": "string | Partial<CSSStyleDeclaration> | null",
-        "description": "Sets the style for the input element.\nCan be a string or a partial CSSStyleDeclaration.",
+        "description": "Inline styles applied to the inner `<input>` element.\nAccepts a style string or a `CSSStyleDeclaration` partial.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "placeholder",
         "type": "string",
-        "description": "Sets the placeholder text for the input.",
+        "description": "Placeholder text shown when no value has been entered.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "Sets the readonly state of the text box.",
+        "description": "Prevents value changes while preserving the component's visual state.",
         "kind": "input"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the text box.",
+        "description": "Marks the text box as required.\nTriggers the invalid state when the value is empty and the field has been touched.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "TextBoxVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the text box.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "TextBoxVariantProps[\"size\"]",
-        "description": "Sets the size of the text box.",
+        "description": "Size preset controlling the component's dimensions.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the text box is interacted with — on blur, value change, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "type",
         "type": "InputType",
-        "description": "Sets the type of the input element.\nDefaults to \"text\".",
+        "description": "Sets the `type` attribute of the inner `<input>` element.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "string",
-        "description": "Sets the value of the text box.",
+        "description": "Two-way bindable current value of the text box.",
         "kind": "model"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "Additional CSS classes merged onto the text box container element via `tailwind-merge`.",
-        "kind": "input"
       }
     ]
   },

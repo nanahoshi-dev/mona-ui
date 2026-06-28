@@ -66,12 +66,12 @@ export const inputVariants = cva(
 
         placeholder:text-muted-foreground
 
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        disabled:pointer-events-none
+        disabled:cursor-not-allowed
+        disabled:opacity-50
 
-        focus-within:ring-2 focus-within:ring-primary/40
-        focus-within:border-primary
+        focus-visible:ring-2 focus-visible:ring-primary/40
+        focus-visible:border-primary
 
         [&.ng-touched.ng-invalid]:border-error
         [&.ng-touched.ng-invalid]:ring-error/40

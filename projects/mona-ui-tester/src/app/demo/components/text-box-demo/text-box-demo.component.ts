@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, effect, inject, input, model, signal } from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideList, LucideSearch } from "@lucide/angular";
 import {
     DropdownButtonComponent,
@@ -42,9 +43,6 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
     });
     protected readonly TextBoxWrapperComponent = TextBoxWrapperComponent;
     protected readonly config = signal<ComponentConfig<TextBoxComponent>>({
-        code: `
-
-        `,
         inputs: {
             clearButton: {
                 type: "boolean",
@@ -67,6 +65,10 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
                 value: ""
             },
             readonly: {
+                type: "boolean",
+                value: false
+            },
+            required: {
                 type: "boolean",
                 value: false
             },
@@ -108,59 +110,79 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
         ReactiveFormsModule,
         DropdownButtonTextTemplateDirective,
         LucideSearch,
-        LucideList
+        LucideList,
+        FormField
     ],
     template: `
         @let featureData = features();
-        <mona-text-box
-            [clearButton]="clearButton()"
-            [disabled]="disabled()"
-            [size]="size()"
-            [inputClass]="inputClass()"
-            [inputStyle]="inputStyle()"
-            [placeholder]="placeholder()"
-            [readonly]="readonly()"
-            [rounded]="rounded()"
-            [type]="type()"
-            [value]="value()"
-            (inputBlur)="onInputBlur($event)"
-            (inputFocus)="onInputFocus($event)"
-            class="w-48">
-            @if (featureData && featureData["prefixTemplate"].active) {
-                <ng-template monaTextBoxPrefixTemplate>
-                    <svg lucideSearch [size]="20" class="pl-1"></svg>
-                </ng-template>
-            }
-            @if (featureData && featureData["suffixTemplate"].active) {
-                <ng-template monaTextBoxSuffixTemplate>
-                    <mona-dropdown-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
-                        <ng-template monaDropdownButtonTextTemplate>
-                            <svg lucideList [size]="16"></svg>
-                        </ng-template>
-                        <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
-                        <mona-dropdown-button-item label="Menu Item 2"></mona-dropdown-button-item>
-                    </mona-dropdown-button>
-                </ng-template>
-            }
-        </mona-text-box>
+        <div class="flex flex-col gap-2">
+            <span>Value: {{ form.text().value() }}</span>
+            <mona-text-box
+                [clearButton]="clearButton()"
+                [size]="size()"
+                [inputClass]="inputClass()"
+                [inputStyle]="inputStyle()"
+                [placeholder]="placeholder()"
+                [rounded]="rounded()"
+                [type]="type()"
+                [formField]="form.text"
+                (inputBlur)="onInputBlur($event)"
+                (inputFocus)="onInputFocus($event)"
+                class="w-48">
+                @if (featureData && featureData["prefixTemplate"].active) {
+                    <ng-template monaTextBoxPrefixTemplate>
+                        <svg lucideSearch [size]="20" class="pl-1"></svg>
+                    </ng-template>
+                }
+                @if (featureData && featureData["suffixTemplate"].active) {
+                    <ng-template monaTextBoxSuffixTemplate>
+                        <mona-dropdown-button look="ghost" [iconOnly]="true" [rounded]="'none'" class="h-full">
+                            <ng-template monaDropdownButtonTextTemplate>
+                                <svg lucideList [size]="16"></svg>
+                            </ng-template>
+                            <mona-dropdown-button-item label="Menu Item 1"></mona-dropdown-button-item>
+                            <mona-dropdown-button-item label="Menu Item 2"></mona-dropdown-button-item>
+                        </mona-dropdown-button>
+                    </ng-template>
+                }
+            </mona-text-box>
+        </div>
     `
 })
 export class TextBoxWrapperComponent implements ComponentInputsAsSignal<TextBoxComponent> {
+    readonly #formModel = signal<FormModel>({ text: "" });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.text, { when: () => this.disabled() });
+        readonly(schema.text, { when: () => this.readonly() });
+        required(schema.text, { when: () => this.required() });
+    });
     public readonly clearButton = input(false);
     public readonly disabled = input(false);
     public readonly inputClass = input<string | string[]>("");
     public readonly inputStyle = input<string | Partial<CSSStyleDeclaration> | null>("");
     public readonly placeholder = input("");
     public readonly readonly = input(false);
+    public readonly required = input(false);
     public readonly rounded = input<ReturnType<TextBoxComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<TextBoxComponent["size"]>>("medium");
     public readonly type = input<ReturnType<TextBoxComponent["type"]>>("text");
     public readonly value = model<string>("");
-    public readonly onInputBlur = (event: FocusEvent) => {
+
+    public constructor() {
+        effect(() => {
+            this.form.text().value.set(this.value());
+        });
+    }
+
+    protected readonly onInputBlur = (event: FocusEvent) => {
         console.log("Input blurred:", event);
     };
-    public readonly onInputFocus = (event: FocusEvent) => {
+    protected readonly onInputFocus = (event: FocusEvent) => {
         console.log("Input focused:", event);
     };
+}
+
+interface FormModel {
+    text: string;
 }

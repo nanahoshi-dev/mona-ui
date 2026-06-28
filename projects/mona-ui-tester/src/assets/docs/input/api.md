@@ -49,38 +49,50 @@ Always pair `monaTextBox` with an accessible label — either a `<label for>`, o
 
 ### `rounded` presets
 
-| `rounded` | Shape                      |
-|-----------|----------------------------|
-| `none`    | No rounding                |
-| `small`   | `rounded-sm`               |
-| `medium`  | `rounded-md` (default)     |
-| `large`   | `rounded-lg`               |
-| `full`    | `rounded-full` + `px-4`    |
+| `rounded` | Shape                           |
+|-----------|---------------------------------|
+| `none`    | No rounding                     |
+| `small`   | Slight rounding                 |
+| `medium`  | Moderate rounding (default)     |
+| `large`   | Strong rounding                 |
+| `full`    | Pill shape; horizontal padding increased |
 
 ### `size` presets
 
-| `size`   | Height | Font size        |
-|----------|--------|------------------|
-| `small`  | `h-8`  | `text-xs`        |
-| `medium` | `h-9`  | `text-sm` (default) |
-| `large`  | `h-10` | `text-md`        |
+| `size`   | Height | Font size           |
+|----------|--------|---------------------|
+| `small`  | 32px   | Extra-small         |
+| `medium` | 36px   | Small (default)     |
+| `large`  | 40px   | Medium              |
 
 ### Visual states
 
-| State           | Applied styles                                              |
-|-----------------|-------------------------------------------------------------|
-| Default         | `bg-input-background border-input-border`                   |
-| Focused         | `ring-2 ring-primary/40` + `border-primary`                 |
-| Disabled        | `opacity-50 pointer-events-none cursor-not-allowed`         |
-| Invalid (forms) | `border-error ring-error/40` when `ng-touched ng-invalid`   |
+| State           | Appearance                                                        |
+|-----------------|-------------------------------------------------------------------|
+| Default         | Mona UI themed border and background                              |
+| Focused         | Focus ring visible for keyboard-initiated focus                   |
+| Disabled        | Reduced visual emphasis; pointer interaction removed. Use the native `disabled` attribute. |
+| Invalid (forms) | Error-colored border when the input is touched and invalid        |
 
 ### Custom classes
 
-Use the `class` input to extend styles. Classes are merged via `tailwind-merge`, so Tailwind utility conflicts resolve predictably:
+Use the `class` input to extend styles. Classes are merged predictably, so Tailwind utility conflicts resolve in favor of the consumer's classes:
 
 ```html
 <input type="text" monaTextBox class="w-full" />
 ```
+
+## Accessibility Notes
+
+The directive applies to a native `<input>` element, so browser keyboard interaction, tab order, and form semantics are preserved by default.
+
+The directive does not add an accessible name. The consumer must provide one using one of the following:
+
+- A `<label for="id">` element linked to the input via `id`
+- An `aria-label` attribute directly on the `<input>` element
+- An `aria-labelledby` attribute pointing to an external label element
+
+The focus ring appears only for keyboard-initiated focus, matching browser `focus-visible` behavior.
 
 ## API
 
@@ -88,11 +100,13 @@ Use the `class` input to extend styles. Classes are merged via `tailwind-merge`,
 
 **Selector:** `input[monaTextBox]`
 
-| Name      | Kind  | Type                                                    | Default    | Required | Description |
-|-----------|-------|---------------------------------------------------------|------------|----------|-------------|
-| `class`   | input | `string`                                                | `''`       | Optional | Additional CSS classes merged onto the input element via `tailwind-merge`. |
-| `rounded` | input | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Optional | Border-radius preset for the input. |
-| `size`    | input | `'small' \| 'medium' \| 'large'`                        | `'medium'` | Optional | Size preset controlling height and font size. |
+#### Inputs
+
+| Name      | Type                                                    | Default    | Description |
+|-----------|-------------------------------------------------------- |------------|-------------|
+| `class`   | `string`                                                | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset applied to the component. |
+| `size`    | `'small' \| 'medium' \| 'large'`                        | `'medium'` | Size preset controlling the component's dimensions. |
 
 `TextBoxDirective` has no outputs. Listen to native events (`(focus)`, `(blur)`, `(change)`, `(input)`) directly on the host element.
 
@@ -100,8 +114,10 @@ Use the `class` input to extend styles. Classes are merged via `tailwind-merge`,
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] userClass @description and @default added to source
-- [x] standalone: true removed from prefix/suffix template directives (CLAUDE.md compliance)
+- [x] API table columns match required format: Name, Type, Default, Description (no Kind, no Required)
+- [x] Visual states updated: Disabled now uses native :disabled (not data-[disabled='true']), Focused reflects focus-visible behavior
+- [x] Tailwind class names removed from visual states and rounded preset tables
+- [x] Accessibility Notes section added: native <input> semantics preserved, consumer label responsibility stated
 - [x] Basic examples compile against the public API surface
 - [x] No internal or unexported APIs exposed
 -->

@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { TextBoxComponent, TextBoxDirective } from "mona-ui";
+import { disabled, form, FormField } from "@angular/forms/signals";
+import { TextBoxDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -33,11 +34,22 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
 }
 
 @Component({
-    imports: [TextBoxDirective],
+    imports: [TextBoxDirective, FormField],
     changeDetection: ChangeDetectionStrategy.Eager,
-    template: ` <input type="email" [rounded]="rounded()" [size]="size()" monaTextBox /> `
+    template: `
+        <div class="flex flex-col gap-2">
+            <span>Value: {{ form.text().value() }}</span>
+            <input type="text" [rounded]="rounded()" [size]="size()" [formField]="form.text" monaTextBox />
+        </div>
+    `
 })
 export class InputWrapperComponent implements ComponentInputsAsSignal<TextBoxDirective> {
+    readonly #formModel = signal<FormModel>({ text: "" });
+    protected readonly form = form(this.#formModel);
     public readonly rounded = input<ReturnType<TextBoxDirective["rounded"]>>("medium");
     public readonly size = input<ReturnType<TextBoxDirective["size"]>>("medium");
+}
+
+interface FormModel {
+    text: string;
 }

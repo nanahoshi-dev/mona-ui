@@ -11,6 +11,7 @@
     [type]="type()"
     [class]="inputClass()"
     [style]="inputStyle()"
+    [attr.aria-invalid]="invalidInput() ? 'true' : null"
     [monaAttributeBinder]="inputAttributes()"
     [ngModel]="value()"
     (ngModelChange)="onValueChange($event)"
@@ -25,7 +26,6 @@
         size="small"
         class="p-0 mr-2"
         aria-label="Clear"
-        [tabindex]="-1"
         (click)="onClearClick()">
         <svg lucideX class="opacity-50 size-4 hover:opacity-90"></svg>
     </button>

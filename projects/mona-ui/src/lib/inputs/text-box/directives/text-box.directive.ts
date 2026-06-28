@@ -25,16 +25,18 @@ export class TextBoxDirective implements InputVariantInput {
     });
 
     /**
-     * @description Sets the border radius of the input.
+     * @description Border-radius preset applied to the component.
+     * @default "medium"
      */
     public readonly rounded = input<InputVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the size of the input.
+     * @description Size preset controlling the component's dimensions.
+     * @default "medium"
      */
     public readonly size = input<InputVariantProps["size"]>("medium");
     /**
-     * @description Additional CSS classes merged onto the input element via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input<string>("", { alias: "class" });
