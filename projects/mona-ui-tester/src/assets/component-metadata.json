@@ -2220,13 +2220,13 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the textarea as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the textarea as invalid, triggering error border and ring styling.",
         "kind": "input"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "",
+        "description": "Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
         "kind": "input"
       },
       {
@@ -5578,13 +5578,13 @@
         "kind": "output"
       },
       {
-        "name": "max",
+        "name": "maxValue",
         "type": "number | null",
         "description": "Maximum value that can be entered.",
         "kind": "input"
       },
       {
-        "name": "min",
+        "name": "minValue",
         "type": "number | null",
         "description": "Minimum value that can be entered.",
         "kind": "input"
@@ -5605,6 +5605,12 @@
         "name": "required",
         "type": "boolean",
         "description": "Sets whether the input is required.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5638,10 +5644,28 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the numeric text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the numeric text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "number | null",
+        "description": "Two-way bindable current value of the numeric text box.",
+        "kind": "model"
       }
     ]
   },

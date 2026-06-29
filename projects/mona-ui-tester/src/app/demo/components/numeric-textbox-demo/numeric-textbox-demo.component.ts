@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
-import { ReactiveFormsModule } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHash } from "@lucide/angular";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -50,12 +50,12 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
                 type: "function",
                 value: (value: number | null) => (value == null ? "" : `$ ${value.toString()}`)
             },
-            max: {
+            maxValue: {
                 type: "number",
                 value: 100,
                 nullable: true
             },
-            min: {
+            minValue: {
                 type: "number",
                 value: 0,
                 nullable: true
@@ -100,33 +100,35 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
 }
 
 @Component({
-    imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, ReactiveFormsModule, LucideHash],
+    imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, LucideHash, FormField],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
-        <mona-numeric-text-box
-            [decimals]="decimals()"
-            [disabled]="disabled()"
-            [formatter]="formatterFn()"
-            [max]="max()"
-            [min]="min()"
-            [nullable]="nullable()"
-            [readonly]="readonly()"
-            [required]="required()"
-            [rounded]="rounded()"
-            [size]="size()"
-            [spinners]="spinners()"
-            [step]="step()"
-            class="w-40">
-            @if (featureData && featureData["prefixTemplate"].active) {
-                <ng-template monaNumericTextBoxPrefixTemplate>
-                    <svg lucideHash [size]="16" class="mx-0.5"></svg>
-                </ng-template>
-            }
-        </mona-numeric-text-box>
+        <div class="flex flex-col gap-2">
+            <span>Value: {{ form.amount().value() }}</span>
+            <mona-numeric-text-box
+                [decimals]="decimals()"
+                [formatter]="formatterFn()"
+                [maxValue]="maxValue()"
+                [minValue]="minValue()"
+                [nullable]="nullable()"
+                [rounded]="rounded()"
+                [size]="size()"
+                [spinners]="spinners()"
+                [step]="step()"
+                [formField]="form.amount"
+                class="w-40">
+                @if (featureData && featureData["prefixTemplate"].active) {
+                    <ng-template monaNumericTextBoxPrefixTemplate>
+                        <svg lucideHash [size]="16" class="mx-0.5"></svg>
+                    </ng-template>
+                }
+            </mona-numeric-text-box>
+        </div>
     `
 })
 export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<NumericTextBoxComponent> {
+    readonly #formModel = signal<FormModel>({ amount: null });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly formatterFn = computed(() => {
         const featureData = this.features();
@@ -134,11 +136,16 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
             ? (value: number | null) => (value == null ? "" : `$ ${value}`)
             : null;
     });
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.amount, { when: () => this.disabled() });
+        readonly(schema.amount, { when: () => this.readonly() });
+        required(schema.amount, { when: () => this.required() });
+    });
     public readonly decimals = input(0);
     public readonly disabled = input(false);
     public readonly formatter = input<ReturnType<NumericTextBoxComponent["formatter"]>>(this.formatterFn());
-    public readonly max = input<number | null>(null);
-    public readonly min = input<number | null>(null);
+    public readonly maxValue = input<number | null>(null);
+    public readonly minValue = input<number | null>(null);
     public readonly nullable = input(false);
     public readonly readonly = input(false);
     public readonly required = input(false);
@@ -146,4 +153,15 @@ export class NumericTextboxWrapperComponent implements ComponentInputsAsSignal<N
     public readonly size = input<ReturnType<NumericTextBoxComponent["size"]>>("medium");
     public readonly spinners = input(true);
     public readonly step = input(1);
+    public readonly value = model<number | null>(null);
+
+    public constructor() {
+        effect(() => {
+            this.form.amount().value.set(this.value());
+        });
+    }
+}
+
+interface FormModel {
+    amount: number | null;
 }

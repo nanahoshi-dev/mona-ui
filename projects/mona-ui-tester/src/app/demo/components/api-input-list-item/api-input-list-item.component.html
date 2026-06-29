@@ -102,8 +102,8 @@
                         [ngModel]="entry().value"
                         [style.width.px]="150"
                         size="small"
-                        [min]="entry().min ?? null"
-                        [max]="entry().max ?? null"
+                        [minValue]="entry().min ?? null"
+                        [maxValue]="entry().max ?? null"
                         [nullable]="entry().nullable ?? false"
                         (ngModelChange)="onValueChange(entry().name, $event)"></mona-numeric-text-box>
                 }

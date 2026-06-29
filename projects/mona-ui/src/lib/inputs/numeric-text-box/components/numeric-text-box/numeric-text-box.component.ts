@@ -8,9 +8,9 @@ import {
     contentChildren,
     DestroyRef,
     ElementRef,
-    forwardRef,
     inject,
     input,
+    model,
     output,
     Signal,
     signal,
@@ -18,7 +18,8 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { FormsModule } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronDown, LucideChevronUp } from "@lucide/angular";
 import {
     concatMap,
@@ -54,31 +55,20 @@ type Sign = "-" | "+";
     selector: "mona-numeric-text-box",
     templateUrl: "./numeric-text-box.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => NumericTextBoxComponent),
-            multi: true
-        }
-    ],
     imports: [NgTemplateOutlet, TextBoxDirective, FormsModule, ButtonDirective, LucideChevronUp, LucideChevronDown],
     host: {
         "[class]": "classes()",
-        "[attr.role]": "'spinbutton'",
-        "[attr.data-disabled]": "disabled()",
-        "[attr.data-readonly]": "readonly()",
-        "[attr.aria-disabled]": "disabled()",
-        "[attr.aria-readonly]": "readonly()",
-        "[attr.aria-required]": "required()"
+        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-invalid]": "invalidInput() || null",
+        "[attr.data-readonly]": "readonly() || null",
+        "[attr.data-required]": "required() || null"
     }
 })
-export class NumericTextBoxComponent implements ControlValueAccessor, NumericTextboxVariantInputs {
+export class NumericTextBoxComponent implements NumericTextboxVariantInputs, FormValueControl<number | null> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<number | null> | null = null;
-    #propagateTouched: Action | null = null;
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
     protected readonly classes = computed(() => {
@@ -99,13 +89,14 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     });
     protected readonly focused = signal(false);
     protected readonly formattedValue = computed(() => {
-        const value = this.value();
-        const focused = this.focused();
-        if (focused && !this.readonly()) {
+        if (this.focused() && !this.readonly()) {
             return this.rawInputValue();
         }
-        return this.formatValueForDisplay(value);
+        return this.formatValueForDisplay(this.value());
     });
+    protected readonly invalidInput = computed(
+        () => this.invalid() || (this.required() && this.value() == null && this.touched())
+    );
     protected readonly keydown$ = new Subject<KeyboardEvent>();
     protected readonly rawInputValue = signal("");
     protected readonly spinButtonClasses = computed(() => {
@@ -122,7 +113,6 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     protected readonly prefixTemplateList = contentChildren(NumericTextBoxPrefixTemplateDirective, {
         read: TemplateRef
     });
-    protected readonly value = signal<number | null>(null);
     protected readonly valueChange$ = new Subject<string>();
     protected readonly valueTextBoxRef: Signal<ElementRef<HTMLInputElement>> = viewChild.required("valueTextBox");
     protected readonly wheel$ = new Subject<WheelEvent>();
@@ -166,12 +156,12 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     /**
      * @description Maximum value that can be entered.
      */
-    public readonly max = input<number | null>(null);
+    public readonly maxValue = input<number | null>(null);
 
     /**
      * @description Minimum value that can be entered.
      */
-    public readonly min = input<number | null>(null);
+    public readonly minValue = input<number | null>(null);
 
     /**
      * @description Sets whether the input can be empty.
@@ -187,6 +177,13 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
      * @description Sets whether the input is required.
      */
     public readonly required = input(false);
+
+    /**
+     * @description Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
 
     /**
      * @description Sets the border radius of the input.
@@ -212,12 +209,37 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
      * @description Tab index of the input.
      */
     public readonly tabindex = input(0);
+
+    /**
+     * @description Emitted when the numeric text box is interacted with on blur, value change, or spinner update.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output();
+
+    /**
+     * @description Sets the touched state of the numeric text box. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description Two-way bindable current value of the numeric text box.
+     * @default null
+     */
+    public readonly value = model<number | null>(null);
 
     public constructor() {
         afterNextRender({
             read: () => {
                 this.setSubscriptions();
+                this.rawInputValue.set(this.formatValueForDisplay(this.value()));
                 this.#focusMonitor
                     .monitor(this.#hostElementRef, true)
                     .pipe(takeUntilDestroyed(this.#destroyRef))
@@ -267,14 +289,14 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     public decrease(): void {
         const value = this.value();
         if (value == null) {
-            this.valueChange$.next("0");
+            this.applyRawValue("0");
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "-");
-            const min = this.min();
+            const min = this.minValue();
             if (min != null && result < min) {
                 result = min;
             }
-            this.valueChange$.next(result.toString());
+            this.applyRawValue(result.toString());
         }
         this.focus();
     }
@@ -289,14 +311,14 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     public increase(): void {
         const value = this.value();
         if (value == null) {
-            this.valueChange$.next("0");
+            this.applyRawValue("0");
         } else {
             let result = NumericTextBoxComponent.calculate(value, this.step(), "+");
-            const max = this.max();
+            const max = this.maxValue();
             if (max != null && result > max) {
                 result = max;
             }
-            this.valueChange$.next(result.toString());
+            this.applyRawValue(result.toString());
         }
         this.focus();
     }
@@ -306,49 +328,38 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
         if (relatedTarget && this.#hostElementRef.nativeElement.contains(relatedTarget)) {
             return;
         }
-        this.#propagateTouched?.();
-        this.correctValue();
+        const corrected = this.correctValue();
+        if (!corrected) {
+            this.touch.emit();
+        }
         this.rawInputValue.set(this.formatValueForDisplay(this.value()));
         this.inputBlur.emit(event);
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public writeValue(obj: number | null | undefined) {
-        const value = obj == null ? null : Number(obj);
-        this.value.set(value);
-        const displayValue = this.formatValueForDisplay(value);
-        this.rawInputValue.set(displayValue);
-        this.valueChange$.next(displayValue);
-    }
-
-    private correctValue(): void {
+    private correctValue(): boolean {
         const value = this.value();
-        const min = this.min();
-        const max = this.max();
+        const min = this.minValue();
+        const max = this.maxValue();
 
         if (value == null) {
             if (this.nullable()) {
-                this.valueChange$.next("");
+                this.applyRawValue("");
             } else if (min != null) {
-                this.valueChange$.next(min.toString());
+                this.applyRawValue(min.toString());
             } else {
-                this.valueChange$.next("0");
+                this.applyRawValue("0");
             }
-            return;
+            return true;
         }
         if (min != null && value < min) {
-            this.valueChange$.next(min.toString());
+            this.applyRawValue(min.toString());
+            return true;
         }
         if (max != null && value > max) {
-            this.valueChange$.next(max.toString());
+            this.applyRawValue(max.toString());
+            return true;
         }
+        return false;
     }
 
     private formatValueForDisplay(value: number | null): string {
@@ -364,6 +375,11 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
             return value.toFixed(decimals);
         }
         return value.toString();
+    }
+
+    protected applyRawValue(text: string): void {
+        this.rawInputValue.set(text);
+        this.valueChange$.next(text);
     }
 
     private setBeforeInputSubscription(): void {
@@ -419,7 +435,7 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
         this.keydown$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.readonly())
+                filter(() => !this.readonly() && !this.disabled())
             )
             .subscribe((event: KeyboardEvent) => {
                 if (event.key === "ArrowUp") {
@@ -438,7 +454,7 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
     private setSpinSubscription(): void {
         this.spin$
             .pipe(
-                filter(() => !this.readonly()),
+                filter(() => !this.readonly() && !this.disabled()),
                 switchMap(sign =>
                     of(sign).pipe(
                         tap(sign => (sign === "-" ? this.decrease() : this.increase())),
@@ -468,26 +484,10 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
 
     private setValueChangeSubscription(): void {
         this.valueChange$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                distinctUntilChanged(),
-                tap(text => this.rawInputValue.set(text)),
-                map(v => (v === "" || v === "-" ? v : v.toString().replace(/,/g, ""))),
-                filter(v => v === "" || v === "-" || v == null || NumericTextBoxComponent.isNumeric(v)),
-                map(v => {
-                    if (v == null || v === "" || v === "-") {
-                        return null;
-                    }
-                    return parseFloat(v.toString());
-                })
-            )
+            .pipe(takeUntilDestroyed(this.#destroyRef), distinctUntilChanged(), map(v => this.parseValue(v)))
             .subscribe(value => {
-                const previousValue = this.value();
                 this.value.set(value);
-
-                if (previousValue !== this.value()) {
-                    this.#propagateChange?.(this.value());
-                }
+                this.touch.emit();
             });
     }
 
@@ -495,7 +495,7 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
         this.wheel$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.readonly())
+                filter(() => !this.readonly() && !this.disabled())
             )
             .subscribe((event: WheelEvent) => {
                 event.preventDefault();
@@ -505,5 +505,20 @@ export class NumericTextBoxComponent implements ControlValueAccessor, NumericTex
                     this.decrease();
                 }
             });
+    }
+
+    private parseValue(value: string | null | undefined): number | null {
+        const normalizedValue = value == null ? "" : value;
+        this.rawInputValue.set(normalizedValue);
+        if (normalizedValue === "" || normalizedValue === "-") {
+            return null;
+        }
+
+        const sanitizedValue = normalizedValue.replace(/,/g, "");
+        if (!NumericTextBoxComponent.isNumeric(sanitizedValue)) {
+            return this.value();
+        }
+
+        return parseFloat(sanitizedValue);
     }
 }

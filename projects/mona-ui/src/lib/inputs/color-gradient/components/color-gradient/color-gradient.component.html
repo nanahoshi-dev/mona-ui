@@ -60,8 +60,8 @@
                 @for (input of colorInputs(); track input.key) {
                     <mona-numeric-text-box
                         [ngModel]="input.value"
-                        [min]="input.min"
-                        [max]="input.max"
+                        [minValue]="input.min"
+                        [maxValue]="input.max"
                         [decimals]="0"
                         [spinners]="false"
                         [nullable]="false"
