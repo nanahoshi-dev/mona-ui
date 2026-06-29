@@ -10,8 +10,7 @@ export const placeholderBaseVariants = cva(
 
 export const placeholderTextVariants = cva(
     `
-        text-foreground
-        uppercase select-none
-        opacity-50
+        text-muted-foreground
+        uppercase
     `
 );

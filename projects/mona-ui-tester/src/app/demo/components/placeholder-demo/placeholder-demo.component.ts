@@ -15,14 +15,12 @@ import { NgComponentOutlet } from "@angular/common";
 export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderComponent> {
     readonly #injector = createFeatureInjector({
         content: {
-            code: ``,
             active: false,
             hasCode: false,
             name: "Content",
             description: "Actual content instead of placeholder."
         },
         customContent: {
-            code: ``,
             active: true,
             hasCode: false,
             name: "Custom Content",
@@ -30,15 +28,6 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
         }
     });
     protected readonly config = signal<ComponentConfig<PlaceholderComponent>>({
-        code: `
-            @if (contentVisible()) {
-                <div class="text-foreground">This is the actual content replacing the placeholder.</div>
-            } @else {
-                <mona-placeholder [text]="text()"> <!-- text input will take precedence over custom content -->
-                    <div class="text-foreground italic">Custom Placeholder Content</div>
-                </mona-placeholder>
-            }
-        `,
         inputs: {
             text: {
                 type: "string",
@@ -61,18 +50,14 @@ export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderC
             @if (featureData["content"].active) {
                 <div class="text-foreground">This is the actual content replacing the placeholder.</div>
             } @else {
-                <mona-placeholder [text]="text()">
+                <mona-placeholder [text]="text()" class="select-none">
                     @if (featureData["customContent"].active) {
                         <div class="text-foreground italic">Custom Placeholder Content</div>
                     }
                 </mona-placeholder>
             }
         </div>
-    `,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    host: {
-        class: "w-full flex items-center justify-center"
-    }
+    `
 })
 class PlaceholderWrapperComponent implements ComponentInputsAsSignal<PlaceholderComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;

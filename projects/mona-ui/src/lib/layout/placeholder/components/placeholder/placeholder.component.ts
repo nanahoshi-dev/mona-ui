@@ -1,16 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
+import { twMerge } from "tailwind-merge";
+import { ThemeService } from "../../../../theme/services/theme.service";
 import {
     placeholderBaseThemeVariants,
     placeholderTextThemeVariants,
     PlaceholderVariantInput
 } from "../styles/placeholder.styles";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { twMerge } from "tailwind-merge";
 
 @Component({
     selector: "mona-placeholder",
     templateUrl: "./placeholder.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()"
     }
