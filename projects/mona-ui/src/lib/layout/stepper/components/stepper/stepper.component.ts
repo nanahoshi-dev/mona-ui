@@ -38,11 +38,10 @@ import {
 @Component({
     selector: "mona-stepper",
     templateUrl: "./stepper.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet, StepperIndicatorDirective],
     host: {
         role: "group",
-        "aria-label": "Progress",
+        "[attr.aria-label]": "ariaLabel()",
         "[class]": "baseClass()",
         "[style]": "hostStyles()"
     }
@@ -144,6 +143,12 @@ export class StepperComponent implements StepperVariantInput {
     });
 
     /**
+     * @description Sets the accessible label for the stepper group.
+     * @default "Progress"
+     */
+    public readonly ariaLabel = input("Progress", { alias: "aria-label" });
+
+    /**
      * @description Sets the flow of the stepper.
      * If set to true, the user will only be able to navigate to the previous or the next step.
      * @default true
@@ -154,6 +159,12 @@ export class StepperComponent implements StepperVariantInput {
      * @description Sets the orientation of the stepper.
      */
     public readonly orientation = input<StepperVariantProps["orientation"]>("horizontal");
+
+    /**
+     * @description Sets the accessible label for the progress bar element.
+     * @default "Step progress"
+     */
+    public readonly progressAriaLabel = input("Step progress");
 
     /**
      * @description Sets the roundness of the stepper steps.
@@ -190,6 +201,20 @@ export class StepperComponent implements StepperVariantInput {
         return active != null && step.index <= active.index;
     }
 
+    protected isStepLocked(step: StepItem): boolean {
+        if (step.options.disabled) {
+            return true;
+        }
+        if (!this.linear()) {
+            return false;
+        }
+        const active = this.activeStep();
+        if (!active) {
+            return false;
+        }
+        return Math.abs(step.index - active.index) > 1;
+    }
+
     protected onIndicatorFocus(step: StepItem): void {
         this.setHighlightedStep(step.index);
     }
@@ -199,20 +224,28 @@ export class StepperComponent implements StepperVariantInput {
     }
 
     private moveHighlight(offset: number): void {
+        const steps = this.viewSteps();
         const current = this.highlightedStep();
         const linear = this.linear();
         const activeStep = this.activeStep();
-        if (linear && activeStep) {
-            const target = current + offset;
-            const minIndex = Math.max(activeStep.index - 1, 0);
-            const maxIndex = Math.min(activeStep.index + 1, this.viewSteps().length - 1);
-            this.setHighlightedStep(Math.min(Math.max(target, minIndex), maxIndex));
-        } else {
-            this.setHighlightedStep(current + offset);
+        const stepCount = steps.length;
+        let target = current + offset;
+        const minIndex = linear && activeStep ? Math.max(activeStep.index - 1, 0) : 0;
+        const maxIndex = linear && activeStep ? Math.min(activeStep.index + 1, stepCount - 1) : stepCount - 1;
+        target = Math.min(Math.max(target, minIndex), maxIndex);
+        // Skip over disabled steps in the direction of travel.
+        while (target >= 0 && target < stepCount && steps.elementAt(target)?.options.disabled) {
+            target += offset;
+        }
+        if (target >= 0 && target < stepCount) {
+            this.setHighlightedStep(target);
         }
     }
 
     private setActiveStep(step: StepItem): void {
+        if (step.options.disabled) {
+            return;
+        }
         const linear = this.linear();
         const activeStep = this.activeStep();
         const isPreviousStep = activeStep && activeStep.index - 1 === step.index;

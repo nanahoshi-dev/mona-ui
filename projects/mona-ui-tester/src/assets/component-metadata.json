@@ -5436,13 +5436,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "",
+        "description": "Emitted when the color gradient is interacted with on blur or value adjustment.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "value",
-        "type": "string | null",
-        "description": "",
+        "type": "string | null | undefined",
+        "description": "Two-way bindable current color value.\nWhen undefined, the component keeps its default internal color state.",
         "kind": "model"
       }
     ]
@@ -6667,6 +6667,12 @@
         "name": "orientation",
         "type": "StepperVariantProps[\"orientation\"]",
         "description": "Sets the orientation of the stepper.",
+        "kind": "input"
+      },
+      {
+        "name": "progressAriaLabel",
+        "type": "string",
+        "description": "Sets the accessible label for the progress bar element.",
         "kind": "input"
       },
       {

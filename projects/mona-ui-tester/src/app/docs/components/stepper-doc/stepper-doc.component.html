@@ -1,10 +1,5 @@
-<app-section id="stepper" [header]="'Stepper'" headerType="H1">
-    <p>A stepper is a UI control that guides users through a sequence of steps, typically used for multi-step processes or workflows.
-        It provides a clear and structured way to navigate through different stages, ensuring a smooth and intuitive user experience.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-stepper-demo></app-stepper-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/stepper/intro.md"></app-markdown-doc>
+
+<app-stepper-demo></app-stepper-demo>
+
+<app-markdown-doc src="docs/stepper/api.md" parentSectionId="stepper"></app-markdown-doc>

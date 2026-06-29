@@ -1,27 +1,49 @@
-<ol [class]="listClass()" role="tablist" [attr.aria-orientation]="orientation()">
-    @for (step of viewSteps(); track $index) {
+<ol [class]="listClass()">
+    @for (step of viewSteps(); track step.index) {
         @let active = isStepActive(step);
+        @let locked = isStepLocked(step);
         @let focused = step.index === highlightedStep();
         @let options = step.options;
         @let index = step.index;
         @let currentIndex = activeStep()?.index ?? -1;
-        <li [class]="listItemClass()" [style]="trackItemStyles()" role="presentation">
+        @let disabled = !!options.disabled;
+        <li
+            [class]="listItemClass()"
+            [class.cursor-pointer]="!locked"
+            [class.cursor-not-allowed]="locked"
+            [style]="trackItemStyles()"
+            role="presentation"
+            (click)="onStepClick(step)">
             @if (stepTemplate()) {
-                <ng-container
-                    [ngTemplateOutlet]="stepTemplate()"
-                    [ngTemplateOutletContext]="{ $implicit: options, index, active, currentIndex }"></ng-container>
+                <span
+                    role="button"
+                    [attr.aria-current]="step.index === activeStep()?.index ? 'step' : undefined"
+                    [attr.aria-disabled]="locked ? true : undefined"
+                    [attr.aria-label]="options.label"
+                    [attr.tabindex]="focused ? 0 : -1"
+                    (focus)="onIndicatorFocus(step)">
+                    <ng-container
+                        [ngTemplateOutlet]="stepTemplate()"
+                        [ngTemplateOutletContext]="{
+                            $implicit: options,
+                            index,
+                            active,
+                            currentIndex,
+                            disabled
+                        }"></ng-container>
+                </span>
             } @else {
                 <span
                     monaStepperIndicator
                     [rounded]="rounded()"
                     [active]="active"
                     [focused]="focused"
-                    role="tab"
-                    [attr.aria-selected]="step.index === activeStep()?.index"
+                    role="button"
+                    [attr.aria-current]="step.index === activeStep()?.index ? 'step' : undefined"
+                    [attr.aria-disabled]="locked ? true : undefined"
                     [attr.aria-label]="options.label"
-                    (focus)="onIndicatorFocus(step)"
-                    (click)="onStepClick(step)"
-                    [attr.tabindex]="focused ? 0 : -1">
+                    [attr.tabindex]="focused ? 0 : -1"
+                    (focus)="onIndicatorFocus(step)">
                     @if (indicatorTemplate()) {
                         <ng-container
                             [ngTemplateOutlet]="indicatorTemplate()"
@@ -29,7 +51,8 @@
                                 $implicit: options,
                                 index,
                                 active,
-                                currentIndex
+                                currentIndex,
+                                disabled
                             }"></ng-container>
                     } @else {
                         {{ step.index + 1 }}
@@ -39,7 +62,13 @@
             @if (labelTemplate()) {
                 <ng-container
                     [ngTemplateOutlet]="labelTemplate()"
-                    [ngTemplateOutletContext]="{ $implicit: options, index, active, currentIndex }"></ng-container>
+                    [ngTemplateOutletContext]="{
+                        $implicit: options,
+                        index,
+                        active,
+                        currentIndex,
+                        disabled
+                    }"></ng-container>
             } @else {
                 <span aria-hidden="true">{{ options.label }}</span>
             }
@@ -53,6 +82,6 @@
     [attr.aria-valuenow]="step()"
     [attr.aria-valuemin]="0"
     [attr.aria-valuemax]="progressMax()"
-    aria-label="Step progress">
+    [attr.aria-label]="progressAriaLabel()">
     <div [class]="trackLineClass()" [style]="trackInnerStyles()"></div>
 </div>

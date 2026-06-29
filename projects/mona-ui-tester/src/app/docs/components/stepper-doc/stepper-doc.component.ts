@@ -1,14 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
-import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
 import { StepperDemoComponent } from "../../../demo/components/stepper-demo/stepper-demo.component";
-import { SectionComponent } from "../../../layout/components/section/section.component";
+import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-stepper-doc",
-    imports: [CodeViewerComponent, SectionComponent, StepperDemoComponent],
+    imports: [StepperDemoComponent, MarkdownDocComponent],
     templateUrl: "./stepper-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StepperDocComponent {
-    protected readonly importCode = `import { StepperComponent } from "mona-ui";`;
-}
+export class StepperDocComponent {}

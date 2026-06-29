@@ -45,7 +45,7 @@ export const stepperStepListItemVariants = cva(
     `
         flex items-center
         grow-1 shrink-0 basis-auto
-        z-1 cursor-pointer
+        z-1
     `,
     {
         variants: {

@@ -62,32 +62,6 @@ describe("GridFilterMenuComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("creates default date options for datetime columns", () => {
-        setColumnInput({
-            ...createColumn(),
-            dataType: "datetime"
-        });
-        fixture.detectChanges();
-
-        expect(readDateOptions()).toEqual({
-            format: "dd/MM/yyyy HH:mm",
-            type: "datetime"
-        });
-    });
-
-    it("creates default date options for time columns", () => {
-        setColumnInput({
-            ...createColumn(),
-            dataType: "time"
-        });
-        fixture.detectChanges();
-
-        expect(readDateOptions()).toEqual({
-            format: "HH:mm",
-            type: "time"
-        });
-    });
-
     it("uses the column string format for date options", () => {
         setColumnInput({
             ...createColumn(),

@@ -29,64 +29,22 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent> {
     readonly #injector = createFeatureInjector({
         indicatorTemplate: {
-            code: `
-
-            `,
             active: false,
             name: "Indicator Template",
             description: "Use a custom template for the step indicator."
         },
         labelTemplate: {
-            code: `
-                <mona-stepper>
-                    <ng-template
-                        monaStepperLabelTemplate
-                        let-dataItem
-                        let-active="active"
-                        let-index="index"
-                        let-currentIndex="currentIndex">
-                        <div class="flex items-center">
-                            @if (index < currentIndex || currentIndex === 5) {
-                                <span class="text-lime-600 font-bold">{{ dataItem.label }}</span>
-                            } @else {
-                                {{ dataItem.label }}
-                            }
-                        </div>
-                    </ng-template>
-                </mona-stepper>
-            `,
             active: false,
             name: "Label Template",
             description: "Use a custom template for the step label."
         },
         stepTemplate: {
-            code: `
-                <mona-stepper>
-                    <ng-template monaStepperStepTemplate let-step let-index="index" let-active="active">
-                        @let icon = active ? "✦" : "✧";
-                        @let color = active ? ("" | randomColor) : "";
-                        <span class="text-[3em] -mt-3 h-16 flex items-center justify-center" [style.color]="color">{{
-                            icon
-                        }}</span>
-                    </ng-template>
-                </mona-stepper>
-            `,
             active: false,
             name: "Step Template",
             description: "Use a custom template for the step content."
         }
     });
     protected readonly config = signal<ComponentConfig<StepperComponent>>({
-        code: `
-            <mona-stepper
-                [linear]="linear()"
-                [orientation]="orientation()"
-                [rounded]="rounded()"
-                [step]="step()"
-                (stepChange)="onStepChange($event)"
-                [steps]="steps()">
-            </mona-stepper>
-        `,
         inputs: {
             linear: {
                 type: "boolean",
@@ -204,9 +162,12 @@ export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent
                 <ng-template monaStepperStepTemplate let-step let-index="index" let-active="active">
                     @let icon = active ? "✦" : "✧";
                     @let color = active ? ("" | randomColor) : "";
-                    <span class="text-[3em] -mt-3 h-16 flex items-center justify-center" [style.color]="color">{{
-                        icon
-                    }}</span>
+                    @let marginClass = orientation() === "vertical" ? "-ml-0.75" : "-mt-5";
+                    <span
+                        class="text-[3em] {{ marginClass }} h-16 flex items-center justify-center"
+                        [style.color]="color">
+                        {{ icon }}
+                    </span>
                 </ng-template>
             }
         </mona-stepper>

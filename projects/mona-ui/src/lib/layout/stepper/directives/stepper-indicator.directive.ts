@@ -9,6 +9,7 @@ import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../style
     }
 })
 export class StepperIndicatorDirective {
+    #wasFocused = false;
     readonly #host = inject(ElementRef);
     readonly #themeService = inject(ThemeService);
     protected readonly stepIndicatorClass = computed(() => {
@@ -25,9 +26,11 @@ export class StepperIndicatorDirective {
     public constructor() {
         afterRenderEffect({
             read: () => {
-                if (this.focused()) {
+                const focused = this.focused();
+                if (focused && !this.#wasFocused) {
                     this.#host.nativeElement.focus();
                 }
+                this.#wasFocused = focused;
             }
         });
     }

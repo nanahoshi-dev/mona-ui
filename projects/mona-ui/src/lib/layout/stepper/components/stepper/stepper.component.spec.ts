@@ -102,13 +102,13 @@ function getStepperElement(fixture: ComponentFixture<unknown>): HTMLElement {
 
 function getIndicators(fixture: ComponentFixture<unknown>): HTMLElement[] {
     return fixture.debugElement
-        .queryAll(By.css("span[monaStepperIndicator]"))
+        .queryAll(By.css("[role='button']"))
         .map(de => de.nativeElement as HTMLElement);
 }
 
 function getLabelSpans(fixture: ComponentFixture<unknown>): HTMLElement[] {
     return fixture.debugElement
-        .queryAll(By.css("li > span:not([monaStepperIndicator])"))
+        .queryAll(By.css("li > span:not([role='button'])"))
         .map(de => de.nativeElement as HTMLElement);
 }
 
@@ -155,8 +155,8 @@ describe("StepperComponent", () => {
                 expect(fixture.debugElement.query(By.css("[role='progressbar']"))).toBeTruthy();
             });
 
-            it("should render a tablist element", () => {
-                expect(fixture.debugElement.query(By.css("ol[role='tablist']"))).toBeTruthy();
+            it("should render an ordered list for steps", () => {
+                expect(fixture.debugElement.query(By.css("ol"))).toBeTruthy();
             });
         });
 
@@ -164,14 +164,9 @@ describe("StepperComponent", () => {
         // Default Values
         // =====================================================================
         describe("default values", () => {
-            it("should have step 0 selected by default", () => {
+            it("should have step 0 marked as current by default", () => {
                 const indicators = getIndicators(fixture);
-                expect(indicators[0].getAttribute("aria-selected")).toBe("true");
-            });
-
-            it("should have orientation set to 'horizontal' by default", () => {
-                const ol = fixture.debugElement.query(By.css("ol")).nativeElement;
-                expect(ol.getAttribute("aria-orientation")).toBe("horizontal");
+                expect(indicators[0].getAttribute("aria-current")).toBe("step");
             });
 
             it("should have progressbar aria-valuenow=0 by default", () => {
@@ -250,43 +245,43 @@ describe("StepperComponent", () => {
             await waitForStable(fixture);
         });
 
-        it("should mark only step 0 as aria-selected=true by default", () => {
+        it("should mark only step 0 as aria-current='step' by default", () => {
             const indicators = getIndicators(fixture);
-            expect(indicators[0].getAttribute("aria-selected")).toBe("true");
-            expect(indicators[1].getAttribute("aria-selected")).toBe("false");
-            expect(indicators[2].getAttribute("aria-selected")).toBe("false");
+            expect(indicators[0].getAttribute("aria-current")).toBe("step");
+            expect(indicators[1].getAttribute("aria-current")).toBeNull();
+            expect(indicators[2].getAttribute("aria-current")).toBeNull();
         });
 
-        it("should update aria-selected when step changes to 1", async () => {
+        it("should update aria-current when step changes to 1", async () => {
             component.step.set(1);
             await waitForStable(fixture);
             const indicators = getIndicators(fixture);
-            expect(indicators[0].getAttribute("aria-selected")).toBe("false");
-            expect(indicators[1].getAttribute("aria-selected")).toBe("true");
-            expect(indicators[2].getAttribute("aria-selected")).toBe("false");
+            expect(indicators[0].getAttribute("aria-current")).toBeNull();
+            expect(indicators[1].getAttribute("aria-current")).toBe("step");
+            expect(indicators[2].getAttribute("aria-current")).toBeNull();
         });
 
-        it("should have exactly one aria-selected=true when step changes to last step", async () => {
+        it("should have exactly one aria-current='step' when step changes to last step", async () => {
             component.step.set(2);
             await waitForStable(fixture);
             const indicators = getIndicators(fixture);
-            const selected = indicators.filter(el => el.getAttribute("aria-selected") === "true");
-            expect(selected.length).toBe(1);
-            expect(indicators[2].getAttribute("aria-selected")).toBe("true");
+            const current = indicators.filter(el => el.getAttribute("aria-current") === "step");
+            expect(current.length).toBe(1);
+            expect(indicators[2].getAttribute("aria-current")).toBe("step");
         });
 
         it("should clamp step below 0 to the first step", async () => {
             component.step.set(-5);
             await waitForStable(fixture);
             const indicators = getIndicators(fixture);
-            expect(indicators[0].getAttribute("aria-selected")).toBe("true");
+            expect(indicators[0].getAttribute("aria-current")).toBe("step");
         });
 
         it("should clamp step above max to the last step", async () => {
             component.step.set(999);
             await waitForStable(fixture);
             const indicators = getIndicators(fixture);
-            expect(indicators[2].getAttribute("aria-selected")).toBe("true");
+            expect(indicators[2].getAttribute("aria-current")).toBe("step");
         });
 
         it("should update progressbar aria-valuenow when step changes", async () => {
@@ -317,18 +312,6 @@ describe("StepperComponent", () => {
             fixture = TestBed.createComponent(TestStepperHostComponent);
             component = fixture.componentInstance;
             await waitForStable(fixture);
-        });
-
-        it("should set aria-orientation='horizontal' on the tablist by default", () => {
-            const ol = fixture.debugElement.query(By.css("ol")).nativeElement;
-            expect(ol.getAttribute("aria-orientation")).toBe("horizontal");
-        });
-
-        it("should update aria-orientation to 'vertical' when orientation changes", async () => {
-            component.orientation.set("vertical");
-            await waitForStable(fixture);
-            const ol = fixture.debugElement.query(By.css("ol")).nativeElement;
-            expect(ol.getAttribute("aria-orientation")).toBe("vertical");
         });
 
         it("should use ArrowDown to advance highlight in vertical mode", async () => {
@@ -536,7 +519,7 @@ describe("StepperComponent", () => {
                 dispatchKeydown(stepper, "Enter");
                 await waitForStable(fixture);
 
-                expect(getIndicators(fixture)[1].getAttribute("aria-selected")).toBe("true");
+                expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBe("step");
             });
 
             it("should activate the highlighted step on Space", async () => {
@@ -546,13 +529,12 @@ describe("StepperComponent", () => {
                 dispatchKeydown(stepper, " ");
                 await waitForStable(fixture);
 
-                expect(getIndicators(fixture)[1].getAttribute("aria-selected")).toBe("true");
+                expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBe("step");
             });
 
             it("should not activate a non-adjacent step on Enter in linear mode", async () => {
-                // Home moved highlight to 0, End moved it to 2 — but activating from 0 in linear mode
-                // should only allow ±1. End key moves highlight to 2, but pressing Enter on step 2
-                // should not activate it when active step is 0 (more than 1 away).
+                // End key moves highlight to 2, but activating from 0 in linear mode
+                // should not allow it (more than 1 away).
                 dispatchKeydown(stepper, "End");
                 await waitForStable(fixture);
 
@@ -560,8 +542,8 @@ describe("StepperComponent", () => {
                 await waitForStable(fixture);
 
                 // Step 0 should still be the active step
-                expect(getIndicators(fixture)[0].getAttribute("aria-selected")).toBe("true");
-                expect(getIndicators(fixture)[2].getAttribute("aria-selected")).toBe("false");
+                expect(getIndicators(fixture)[0].getAttribute("aria-current")).toBe("step");
+                expect(getIndicators(fixture)[2].getAttribute("aria-current")).toBeNull();
             });
         });
 
@@ -618,7 +600,7 @@ describe("StepperComponent", () => {
             it("should activate the next step when clicking it", async () => {
                 getIndicators(fixture)[1].click();
                 await waitForStable(fixture);
-                expect(getIndicators(fixture)[1].getAttribute("aria-selected")).toBe("true");
+                expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBe("step");
             });
 
             it("should activate the previous step when clicking it", async () => {
@@ -627,14 +609,21 @@ describe("StepperComponent", () => {
 
                 getIndicators(fixture)[0].click();
                 await waitForStable(fixture);
-                expect(getIndicators(fixture)[0].getAttribute("aria-selected")).toBe("true");
+                expect(getIndicators(fixture)[0].getAttribute("aria-current")).toBe("step");
             });
 
             it("should not activate a non-adjacent step", async () => {
                 getIndicators(fixture)[2].click();
                 await waitForStable(fixture);
-                expect(getIndicators(fixture)[0].getAttribute("aria-selected")).toBe("true");
-                expect(getIndicators(fixture)[2].getAttribute("aria-selected")).toBe("false");
+                expect(getIndicators(fixture)[0].getAttribute("aria-current")).toBe("step");
+                expect(getIndicators(fixture)[2].getAttribute("aria-current")).toBeNull();
+            });
+
+            it("should activate step when clicking the label span", async () => {
+                const labels = getLabelSpans(fixture);
+                labels[1].click();
+                await waitForStable(fixture);
+                expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBe("step");
             });
         });
 
@@ -656,16 +645,16 @@ describe("StepperComponent", () => {
             it("should allow clicking any step", async () => {
                 getIndicators(fixture)[2].click();
                 await waitForStable(fixture);
-                expect(getIndicators(fixture)[2].getAttribute("aria-selected")).toBe("true");
+                expect(getIndicators(fixture)[2].getAttribute("aria-current")).toBe("step");
             });
 
             it("should allow jumping from step 0 to step 2 directly", async () => {
                 getIndicators(fixture)[2].click();
                 await waitForStable(fixture);
                 const indicators = getIndicators(fixture);
-                expect(indicators[0].getAttribute("aria-selected")).toBe("false");
-                expect(indicators[1].getAttribute("aria-selected")).toBe("false");
-                expect(indicators[2].getAttribute("aria-selected")).toBe("true");
+                expect(indicators[0].getAttribute("aria-current")).toBeNull();
+                expect(indicators[1].getAttribute("aria-current")).toBeNull();
+                expect(indicators[2].getAttribute("aria-current")).toBe("step");
             });
 
             it("should allow clicking a non-adjacent previous step", async () => {
@@ -674,7 +663,7 @@ describe("StepperComponent", () => {
 
                 getIndicators(fixture)[0].click();
                 await waitForStable(fixture);
-                expect(getIndicators(fixture)[0].getAttribute("aria-selected")).toBe("true");
+                expect(getIndicators(fixture)[0].getAttribute("aria-current")).toBe("step");
             });
         });
     });
@@ -710,21 +699,6 @@ describe("StepperComponent", () => {
         });
 
         // =====================================================================
-        // Tablist (ol)
-        // =====================================================================
-        describe("tablist (ol)", () => {
-            it("should have role='tablist'", () => {
-                expect(fixture.debugElement.query(By.css("ol")).nativeElement.getAttribute("role")).toBe("tablist");
-            });
-
-            it("should have aria-orientation", () => {
-                expect(
-                    fixture.debugElement.query(By.css("ol")).nativeElement.getAttribute("aria-orientation")
-                ).toBeTruthy();
-            });
-        });
-
-        // =====================================================================
         // List Items (li)
         // =====================================================================
         describe("list items (li)", () => {
@@ -736,12 +710,12 @@ describe("StepperComponent", () => {
         });
 
         // =====================================================================
-        // Indicators (span[monaStepperIndicator])
+        // Indicators (span[role="button"])
         // =====================================================================
         describe("indicators", () => {
-            it("should have role='tab' on all indicators", () => {
+            it("should have role='button' on all indicators", () => {
                 getIndicators(fixture).forEach(el => {
-                    expect(el.getAttribute("role")).toBe("tab");
+                    expect(el.getAttribute("role")).toBe("button");
                 });
             });
 
@@ -752,20 +726,26 @@ describe("StepperComponent", () => {
                 expect(indicators[2].getAttribute("aria-label")).toBe("Step 3");
             });
 
-            it("should have exactly one aria-selected=true at any time (step 0)", () => {
-                const selected = getIndicators(fixture).filter(
-                    el => el.getAttribute("aria-selected") === "true"
-                );
-                expect(selected.length).toBe(1);
+            it("should set aria-current='step' on the active indicator only (step 0)", () => {
+                const indicators = getIndicators(fixture);
+                const current = indicators.filter(el => el.getAttribute("aria-current") === "step");
+                expect(current.length).toBe(1);
+                expect(indicators[0].getAttribute("aria-current")).toBe("step");
             });
 
-            it("should have exactly one aria-selected=true at any time (step 2)", async () => {
+            it("should set aria-current='step' on the active indicator only (step 2)", async () => {
                 component.step.set(2);
                 await waitForStable(fixture);
-                const selected = getIndicators(fixture).filter(
-                    el => el.getAttribute("aria-selected") === "true"
-                );
-                expect(selected.length).toBe(1);
+                const indicators = getIndicators(fixture);
+                const current = indicators.filter(el => el.getAttribute("aria-current") === "step");
+                expect(current.length).toBe(1);
+                expect(indicators[2].getAttribute("aria-current")).toBe("step");
+            });
+
+            it("should not set aria-current on inactive indicators", () => {
+                const indicators = getIndicators(fixture);
+                expect(indicators[1].getAttribute("aria-current")).toBeNull();
+                expect(indicators[2].getAttribute("aria-current")).toBeNull();
             });
 
             it("should use roving tabindex: highlighted has 0, others have -1 (default step 0)", () => {
@@ -824,6 +804,44 @@ describe("StepperComponent", () => {
                 expect(pb.getAttribute("aria-label")).toBe("Step progress");
             });
         });
+
+        // =====================================================================
+        // Linear Mode — aria-disabled
+        // =====================================================================
+        describe("linear mode aria-disabled", () => {
+            it("should set aria-disabled=true on steps more than 1 away from active step", () => {
+                // active=0, so step 2 is 2 away → locked
+                const indicators = getIndicators(fixture);
+                expect(indicators[0].getAttribute("aria-disabled")).toBeNull();
+                expect(indicators[1].getAttribute("aria-disabled")).toBeNull();
+                expect(indicators[2].getAttribute("aria-disabled")).toBe("true");
+            });
+
+            it("should update aria-disabled when active step changes", async () => {
+                component.step.set(1);
+                await waitForStable(fixture);
+                // active=1: step 0 (diff=1) and step 2 (diff=1) are adjacent, step 1 is active
+                const indicators = getIndicators(fixture);
+                expect(indicators[0].getAttribute("aria-disabled")).toBeNull();
+                expect(indicators[1].getAttribute("aria-disabled")).toBeNull();
+                expect(indicators[2].getAttribute("aria-disabled")).toBeNull();
+            });
+
+            it("should not set aria-disabled in non-linear mode", async () => {
+                component.linear.set(false);
+                await waitForStable(fixture);
+                const indicators = getIndicators(fixture);
+                indicators.forEach(el => {
+                    expect(el.getAttribute("aria-disabled")).toBeNull();
+                });
+            });
+
+            it("should not set aria-disabled on the adjacent steps in linear mode", () => {
+                // active=0: step 1 is +1, not locked
+                const indicators = getIndicators(fixture);
+                expect(indicators[1].getAttribute("aria-disabled")).toBeNull();
+            });
+        });
     });
 
     // =========================================================================
@@ -864,6 +882,64 @@ describe("StepperComponent", () => {
                 dispatchKeydown(stepper, "Home");
                 dispatchKeydown(stepper, "End");
             }).not.toThrow();
+        });
+    });
+
+    // =========================================================================
+    // Disabled Steps (N-1)
+    // =========================================================================
+    describe("disabled steps", () => {
+        let fixture: ComponentFixture<TestNonLinearStepperHostComponent>;
+        let component: TestNonLinearStepperHostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [TestNonLinearStepperHostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(TestNonLinearStepperHostComponent);
+            component = fixture.componentInstance;
+            component.steps.set([{ label: "Step 1" }, { label: "Step 2", disabled: true }, { label: "Step 3" }]);
+            await waitForStable(fixture);
+        });
+
+        it("should set aria-disabled=true on a disabled step", () => {
+            const indicators = getIndicators(fixture);
+            expect(indicators[1].getAttribute("aria-disabled")).toBe("true");
+        });
+
+        it("should not set aria-disabled on non-disabled steps", () => {
+            const indicators = getIndicators(fixture);
+            expect(indicators[0].getAttribute("aria-disabled")).toBeNull();
+            expect(indicators[2].getAttribute("aria-disabled")).toBeNull();
+        });
+
+        it("should not activate a disabled step on click", async () => {
+            getIndicators(fixture)[1].click();
+            await waitForStable(fixture);
+            expect(getIndicators(fixture)[0].getAttribute("aria-current")).toBe("step");
+            expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBeNull();
+        });
+
+        it("should not activate a disabled step via keyboard Enter", async () => {
+            // moveHighlight skips disabled step 1 and lands on step 2.
+            // Pressing Enter then activates step 2 — the disabled step 1 must never become current.
+            const stepper = getStepperElement(fixture);
+            dispatchKeydown(stepper, "ArrowRight");
+            await waitForStable(fixture);
+            dispatchKeydown(stepper, "Enter");
+            await waitForStable(fixture);
+            expect(getIndicators(fixture)[1].getAttribute("aria-current")).toBeNull();
+        });
+
+        it("should skip disabled steps when using ArrowRight in non-linear mode", async () => {
+            // step 1 is disabled; ArrowRight from step 0 should skip to step 2
+            const stepper = getStepperElement(fixture);
+            dispatchKeydown(stepper, "ArrowRight");
+            await waitForStable(fixture);
+            const indicators = getIndicators(fixture);
+            // Highlight should be on step 2 (index 2), skipping the disabled step 1
+            expect(indicators[2].getAttribute("tabindex")).toBe("0");
         });
     });
 
@@ -962,12 +1038,27 @@ describe("StepperComponent", () => {
                 expect(steps[1].nativeElement.textContent?.trim()).toBe("step-1");
             });
 
-            it("should not render default indicator spans", () => {
-                expect(getIndicators(fixture).length).toBe(0);
+            it("should still have a focusable role=button element per step", () => {
+                const buttons = fixture.debugElement.queryAll(By.css("[role='button']"));
+                expect(buttons.length).toBe(2);
+                buttons.forEach(btn => {
+                    expect(btn.nativeElement.getAttribute("tabindex")).not.toBeNull();
+                });
             });
 
             it("should still render default label spans", () => {
                 expect(getLabelSpans(fixture).length).toBe(2);
+            });
+
+            it("keyboard navigation should work when stepTemplate is provided", async () => {
+                const stepper = fixture.debugElement.query(By.directive(StepperComponent))
+                    .nativeElement as HTMLElement;
+                dispatchKeydown(stepper, "ArrowRight");
+                await waitForStable(fixture);
+                const buttons = fixture.debugElement
+                    .queryAll(By.css("[role='button']"))
+                    .map(de => de.nativeElement as HTMLElement);
+                expect(buttons[1].getAttribute("tabindex")).toBe("0");
             });
         });
     });
