@@ -34,8 +34,9 @@
     } @else if (view() === 'gradient') {
         <mona-color-gradient [opacity]="opacity()"
                              [rounded]="rounded()"
-                             [ngModel]="color()"
-                             (ngModelChange)="onColorGradientValueChange($event)"
+                             [value]="color()"
+                             (valueChange)="onColorGradientValueChange($event)"
+                             (touch)="onColorGradientTouch()"
                              class="border border-input-border bg-background shadow-lg"
                              (apply)="onColorGradientApply()"
                              (cancel)="onColorGradientCancel()"></mona-color-gradient>

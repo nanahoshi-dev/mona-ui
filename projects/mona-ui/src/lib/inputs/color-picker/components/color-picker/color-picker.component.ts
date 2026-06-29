@@ -184,9 +184,16 @@ export class ColorPickerComponent implements OnInit, ControlValueAccessor, Color
         this.popupRef?.close();
     }
 
-    protected onColorGradientValueChange(value: string | null): void {
+    protected onColorGradientValueChange(value: string | null | undefined): void {
+        if (value === undefined) {
+            return;
+        }
         this.color.set(value);
         this.#propagateChange?.(value);
+    }
+
+    protected onColorGradientTouch(): void {
+        this.#propagateTouched();
     }
 
     protected onColorPaletteValueChange(value: string | null): void {

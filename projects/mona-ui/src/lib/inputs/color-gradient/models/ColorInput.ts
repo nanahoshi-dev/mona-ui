@@ -4,5 +4,5 @@ export interface ColorInput {
     value: number | null;
     min: number;
     max: number;
-    change: (value: number) => void;
+    change: (value: number | null) => void;
 }

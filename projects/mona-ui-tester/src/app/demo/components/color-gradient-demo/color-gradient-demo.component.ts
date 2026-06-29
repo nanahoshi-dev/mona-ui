@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { disabled, form, FormField } from "@angular/forms/signals";
 import { ColorGradientComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -22,7 +23,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
                 [rounded]="rounded()"
                 [showButtons]="showButtons()"
                 [showHexInput]="showHexInput()"
-                [showRgbInput]="showRgbInput()"
+                [showColorInputs]="showColorInputs()"
                 class="bg-accent-dark border border-border">
             </mona-color-gradient>
         `,
@@ -53,7 +54,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
                 type: "boolean",
                 value: true
             },
-            showRgbInput: {
+            showColorInputs: {
                 type: "boolean",
                 value: true
             }
@@ -64,27 +65,37 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
 }
 
 @Component({
-    imports: [ColorGradientComponent],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ColorGradientComponent, FormField],
     template: `
-        <mona-color-gradient
-            [disabled]="disabled()"
-            [format]="format()"
-            [opacity]="opacity()"
-            [rounded]="rounded()"
-            [showButtons]="showButtons()"
-            [showHexInput]="showHexInput()"
-            [showRgbInput]="showRgbInput()"
-            class="bg-accent-dark border border-border">
-        </mona-color-gradient>
+        <div class="flex flex-col gap-2">
+            <span>Color: {{ form.color().value() }}</span>
+            <mona-color-gradient
+                [format]="format()"
+                [formField]="form.color"
+                [opacity]="opacity()"
+                [rounded]="rounded()"
+                [showButtons]="showButtons()"
+                [showHexInput]="showHexInput()"
+                [showColorInputs]="showColorInputs()"
+                class="bg-accent-dark border border-border">
+            </mona-color-gradient>
+        </div>
     `
 })
 export class ColorGradientWrapperComponent implements ComponentInputsAsSignal<ColorGradientComponent> {
+    readonly #formModel = signal<ColorGradientFormModel>({ color: "" });
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.color, { when: () => this.disabled() });
+    });
     public readonly disabled = input<ReturnType<ColorGradientComponent["disabled"]>>(false);
     public readonly format = input<ReturnType<ColorGradientComponent["format"]>>("hex");
     public readonly opacity = input<ReturnType<ColorGradientComponent["opacity"]>>(true);
     public readonly rounded = input<ReturnType<ColorGradientComponent["rounded"]>>("medium");
     public readonly showButtons = input<ReturnType<ColorGradientComponent["showButtons"]>>(true);
     public readonly showHexInput = input<ReturnType<ColorGradientComponent["showHexInput"]>>(true);
-    public readonly showRgbInput = input<ReturnType<ColorGradientComponent["showRgbInput"]>>(true);
+    public readonly showColorInputs = input<ReturnType<ColorGradientComponent["showColorInputs"]>>(true);
+}
+
+interface ColorGradientFormModel {
+    color: string;
 }

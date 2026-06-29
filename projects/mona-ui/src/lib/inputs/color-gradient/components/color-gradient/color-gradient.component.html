@@ -10,6 +10,7 @@
         [attr.aria-valuemax]="100"
         [attr.aria-valuenow]="hsv().s"
         [attr.aria-valuetext]="'Saturation ' + hsv().s + '%, Value ' + hsv().v + '%'"
+        [attr.aria-disabled]="disabled() || null"
         (keydown)="onHsvHandleKeyDown($event)"
         (blur)="onHsvHandleBlur()"
         #hsvPointer></div>
@@ -46,20 +47,25 @@
             [class]="colorPreviewClasses()"
             [class.cursor-pointer]="$index === 1"
             [style.background-color]="preview.color"
-            [title]="preview.title"
-            (click)="preview.onClick?.()"></div>
+            [attr.title]="$index === 1 ? preview.title : null"
+            [attr.aria-label]="$index === 1 ? preview.title : null"
+            [attr.aria-hidden]="$index === 0 ? 'true' : null"
+            [attr.role]="$index === 1 ? 'button' : null"
+            [attr.tabindex]="$index === 1 ? 0 : null"
+            (click)="preview.onClick?.()"
+            (keydown)="onPreviousColorKeyDown($event, preview.onClick)"></div>
     }
-    <button monaButton look="ghost" size="small" (click)="onClearClick()">
+    <button monaButton look="ghost" size="small" aria-label="Clear color" (click)="onClearClick()">
         <i class="ri-blur-off-line"></i>
     </button>
 </div>
 <div class="flex flex-col gap-2">
-    @if (showRgbInput()) {
+    @if (showColorInputs()) {
         <div class="flex gap-2">
             <div class="flex gap-1">
                 @for (input of colorInputs(); track input.key) {
                     <mona-numeric-text-box
-                        [ngModel]="input.value"
+                        [value]="input.value"
                         [minValue]="input.min"
                         [maxValue]="input.max"
                         [decimals]="0"
@@ -68,7 +74,7 @@
                         [rounded]="rounded()"
                         [size]="'small'"
                         class="w-18"
-                        (ngModelChange)="input.change($event)"
+                        (valueChange)="input.change($event)"
                         (inputBlur)="onNumericInputBlur()">
                         <ng-template monaNumericTextBoxPrefixTemplate>
                             <ng-container
@@ -84,7 +90,7 @@
                     look="ghost"
                     [rounded]="rounded()"
                     size="small"
-                    title="Switch color mode"
+                    aria-label="Switch color mode"
                     (click)="onSwitchColorModeClick()">
                     <i class="ri-expand-up-down-line"></i>
                 </button>
@@ -94,8 +100,8 @@
     @if (showHexInput()) {
         <mona-text-box
             [rounded]="rounded()"
-            [ngModel]="hex()"
-            (ngModelChange)="onHexChange($event)"
+            [value]="hex()"
+            (valueChange)="onHexChange($event)"
             (inputBlur)="onHexInputBlur()"
             (inputFocus)="onHexInputFocus()"
             class="w-full">
@@ -105,7 +111,7 @@
                     [ngTemplateOutletContext]="{ $implicit: 'HEX', classes: 'w-auto px-2' }"></ng-container>
             </ng-template>
             <ng-template monaTextBoxSuffixTemplate>
-                <mona-dropdown-button look="ghost" title="Copy color" class="h-full">
+                <mona-dropdown-button look="ghost" aria-label="Copy color" class="h-full">
                     <svg lucideCopy [size]="12"></svg>
                     <mona-dropdown-button-item
                         label="Copy as HEX"

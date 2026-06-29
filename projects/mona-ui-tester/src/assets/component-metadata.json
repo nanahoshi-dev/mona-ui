@@ -5428,9 +5428,9 @@
         "kind": "input"
       },
       {
-        "name": "showRgbInput",
+        "name": "showColorInputs",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the RGB input.",
+        "description": "Specifies whether the color picker should display the channel inputs (RGB or HSV).",
         "kind": "input"
       },
       {
@@ -5442,7 +5442,7 @@
       {
         "name": "value",
         "type": "string | null | undefined",
-        "description": "Two-way bindable current color value.\nWhen undefined, the component keeps its default internal color state.",
+        "description": "Two-way bindable current color value.\nWhen undefined, the component keeps its default internal color state (white, #ffffffff).",
         "kind": "model"
       }
     ]

@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const colorGradientBaseVariants = cva(
     `
-        flex flex-col min-w-7.5
+        flex flex-col min-w-64
         p-2 gap-2
         select-none
 
@@ -40,9 +40,9 @@ export const colorGradientHsvRectangleHandleVariants = cva(
         outline outline-background
         shadow-md
 
-        focus:ring-2
-        focus:ring-primary/40
-        focus:ring-offset-2
+        focus-visible:ring-2
+        focus-visible:ring-primary/40
+        focus-visible:ring-offset-2
     `,
     {
         variants: {

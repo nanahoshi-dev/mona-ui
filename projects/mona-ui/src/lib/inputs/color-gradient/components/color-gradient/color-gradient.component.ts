@@ -1,31 +1,32 @@
 import { Clipboard } from "@angular/cdk/clipboard";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    AfterViewInit,
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
     ElementRef,
-    forwardRef,
+    effect,
     inject,
+    Injector,
     input,
+    model,
     NgZone,
-    OnInit,
     output,
     Signal,
     signal,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { LucideCopy } from "@lucide/angular";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownButtonItemComponent } from "../../../../buttons/dropdown-button/components/dropdown-button-item/dropdown-button-item.component";
 import { DropdownButtonComponent } from "../../../../buttons/dropdown-button/components/dropdown-button/dropdown-button.component";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { ColorMode, ColorOutputFormat } from "../../../models/ColorMode";
 import { Channel, HSLA, HSV, HSVA, HSVChannel, RGB, RGBA, RGBChannel } from "../../../models/ColorSpaces";
 import { NumericTextBoxComponent } from "../../../numeric-text-box/components/numeric-text-box/numeric-text-box.component";
@@ -57,16 +58,7 @@ import {
 @Component({
     selector: "mona-color-gradient",
     templateUrl: "./color-gradient.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => ColorGradientComponent),
-            multi: true
-        }
-    ],
     imports: [
-        FormsModule,
         NumericTextBoxComponent,
         NumericTextBoxPrefixTemplateDirective,
         ButtonDirective,
@@ -84,14 +76,16 @@ import {
         "[attr.data-disabled]": "disabled()"
     }
 })
-export class ColorGradientComponent implements OnInit, AfterViewInit, ControlValueAccessor, ColorGradientVariantInputs {
+export class ColorGradientComponent implements ColorGradientVariantInputs, FormValueControl<string | null | undefined> {
     readonly #clipboard = inject(Clipboard);
     readonly #destroyRef = inject(DestroyRef);
+    readonly #injector = inject(Injector);
     readonly #themeService = inject(ThemeService);
     readonly #valueChange$ = new Subject<string | null>();
-    readonly #zone: NgZone = inject(NgZone);
-    #propagateChange: Action<string | null> = () => {};
-    #propagateTouched: Action = () => {};
+    readonly #viewReady = signal(false);
+    readonly #zone = inject(NgZone);
+    #internalValueUpdatePending = false;
+    #lastInternalValue: string | null | undefined = undefined;
     protected readonly alpha = signal(255);
     protected readonly alphaInputColor = computed(() => {
         const rgb = this.rgb();
@@ -115,7 +109,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
                 value: this.alpha(),
                 min: 0,
                 max: 255,
-                change: (value: number) => this.onAlphaChange(value)
+                change: (value: number | null) => this.onAlphaChange(value)
             });
         }
         return baseInputs;
@@ -175,11 +169,10 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
     protected readonly rgb = signal<RGB>({ r: 255, g: 255, b: 255 });
     protected readonly selectedColor = computed(() => {
         const rgb = this.rgb();
-        const { red, green, blue } = { red: rgb.r, green: rgb.g, blue: rgb.b };
-        if (red == null || green == null || blue == null) {
+        if (rgb.r == null || rgb.g == null || rgb.b == null) {
             return "";
         }
-        return `rgba(${red}, ${green}, ${blue}, ${this.alpha() / 255})`;
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${this.alpha() / 255})`;
     });
     protected readonly sliderHandleClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -201,11 +194,13 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
 
     /**
      * @description Sets the disabled state of the color gradient.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
      * @description Specifies the format of the color output.
+     * @default "hex"
      */
     public readonly format = input<ColorOutputFormat>("hex");
 
@@ -217,6 +212,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
 
     /**
      * @description Specifies the rounded variant of the color picker.
+     * @default "medium"
      */
     public readonly rounded = input<ColorGradientVariantProps["rounded"]>("medium");
 
@@ -235,20 +231,42 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
     public readonly showHexInput = input<boolean>(true);
 
     /**
-     * @description Specifies whether the color picker should display the RGB input.
+     * @description Specifies whether the color picker should display the channel inputs (RGB or HSV).
      * @default true
      */
-    public readonly showRgbInput = input<boolean>(true);
+    public readonly showColorInputs = input<boolean>(true);
 
-    public ngAfterViewInit() {
-        this.setSubscriptions();
+    /**
+     * @description Emitted when the color gradient is interacted with on blur or value adjustment.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Two-way bindable current color value.
+     * When undefined, the component keeps its default internal color state (white, #ffffffff).
+     * @default undefined
+     */
+    public readonly value = model<string | null | undefined>(undefined);
+
+    public constructor() {
+        afterNextRender({
+            read: () => {
+                this.lastSelectedColor.set(this.hex());
+                this.setSubscriptions();
+                this.#viewReady.set(true);
+            }
+        });
+        effect(() => {
+            if (!this.#viewReady()) {
+                return;
+            }
+            const value = this.value();
+            untracked(() => this.syncValue(value));
+        });
     }
 
-    public ngOnInit(): void {
-        this.lastSelectedColor.set(this.hex());
-    }
-
-    public onAlphaChange(value: number): void {
+    protected onAlphaChange(value: number | null): void {
         if (value == null) {
             return;
         }
@@ -260,25 +278,25 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         }
     }
 
-    public onApply(): void {
+    protected onApply(): void {
         this.lastSelectedColor.set(this.hex());
         this.emitValue();
         this.apply.emit();
     }
 
-    public onCancel(): void {
+    protected onCancel(): void {
         this.hexInputValue.set(this.lastSelectedColor());
         this.cancel.emit();
     }
 
-    public onClearClick(): void {
+    protected onClearClick(): void {
         this.clear();
         if (!this.showButtons()) {
             this.emitValue(null);
         }
     }
 
-    public onCopyColorSelect(mode: "hex" | "rgb"): void {
+    protected onCopyColorSelect(mode: "hex" | "rgb"): void {
         if (mode === "hex") {
             this.#clipboard.copy(this.hex());
         } else if (mode === "rgb") {
@@ -288,7 +306,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         }
     }
 
-    public onHexChange(value: string): void {
+    protected onHexChange(value: string): void {
         this.hexInputValue.set(value);
         if (!isValidHex(value)) {
             return;
@@ -305,16 +323,17 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         }
     }
 
-    public onHexInputBlur(): void {
+    protected onHexInputBlur(): void {
+        this.hexFocused.set(false);
         this.updateHexInputValue();
-        this.#propagateTouched();
+        this.touch.emit();
     }
 
-    public onHexInputFocus(): void {
+    protected onHexInputFocus(): void {
         this.hexFocused.set(true);
     }
 
-    public onHsvChange(value: number, channel: HSVChannel): void {
+    protected onHsvChange(value: number | null, channel: HSVChannel): void {
         if (value == null) {
             return;
         }
@@ -335,11 +354,11 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         }
     }
 
-    public onHsvHandleBlur(): void {
-        this.#propagateTouched();
+    protected onHsvHandleBlur(): void {
+        this.touch.emit();
     }
 
-    public onHsvHandleKeyDown(event: KeyboardEvent): void {
+    protected onHsvHandleKeyDown(event: KeyboardEvent): void {
         if (this.disabled()) {
             return;
         }
@@ -347,52 +366,46 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         const step = event.shiftKey ? 10 : 1;
         const largeStep = 25;
         let handled = false;
+        const currentHsv = this.hsv();
+        const currentSaturation = currentHsv.s ?? 0;
+        const currentValue = currentHsv.v ?? 0;
 
-        const currentLeft = this.hsvHandleLeft();
-        const currentTop = this.hsvHandleTop();
-        const containerRect = this.hsvRectangle().nativeElement.getBoundingClientRect();
-        const handleRect = this.hsvHandle().nativeElement.getBoundingClientRect();
-        const maxLeft = containerRect.width - handleRect.width / 2;
-        const maxTop = containerRect.height - handleRect.height / 2;
-        const minLeft = -handleRect.width / 2;
-        const minTop = -handleRect.height / 2;
-
-        let newLeft = currentLeft;
-        let newTop = currentTop;
+        let newSaturation = currentSaturation;
+        let newValue = currentValue;
 
         switch (event.key) {
             case "ArrowLeft":
-                newLeft = Math.max(minLeft, currentLeft - step);
+                newSaturation = this.getValidChannelValue(currentSaturation - step, "s");
                 handled = true;
                 break;
             case "ArrowRight":
-                newLeft = Math.min(maxLeft, currentLeft + step);
+                newSaturation = this.getValidChannelValue(currentSaturation + step, "s");
                 handled = true;
                 break;
             case "ArrowUp":
-                newTop = Math.max(minTop, currentTop - step);
+                newValue = this.getValidChannelValue(currentValue + step, "v");
                 handled = true;
                 break;
             case "ArrowDown":
-                newTop = Math.min(maxTop, currentTop + step);
+                newValue = this.getValidChannelValue(currentValue - step, "v");
                 handled = true;
                 break;
             case "Home":
-                newLeft = minLeft;
-                newTop = minTop;
+                newSaturation = 0;
+                newValue = 100;
                 handled = true;
                 break;
             case "End":
-                newLeft = maxLeft;
-                newTop = maxTop;
+                newSaturation = 100;
+                newValue = 0;
                 handled = true;
                 break;
             case "PageUp":
-                newTop = Math.max(minTop, currentTop - largeStep);
+                newValue = this.getValidChannelValue(currentValue + largeStep, "v");
                 handled = true;
                 break;
             case "PageDown":
-                newTop = Math.min(maxTop, currentTop + largeStep);
+                newValue = this.getValidChannelValue(currentValue - largeStep, "v");
                 handled = true;
                 break;
         }
@@ -400,22 +413,29 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         if (handled) {
             event.preventDefault();
             event.stopPropagation();
-            this.hsvHandleLeft.set(newLeft);
-            this.hsvHandleTop.set(newTop);
-            this.updateHsvValues();
+            this.updateHsvValues(newSaturation, newValue);
+            this.hsvHandleLeft.set(this.getPositionFromSaturation(newSaturation));
+            this.hsvHandleTop.set(this.getPositionFromValue(newValue));
             this.updateHexInputValue();
         }
     }
 
-    public onNumericInputBlur(): void {
-        this.#propagateTouched();
+    protected onNumericInputBlur(): void {
+        this.touch.emit();
     }
 
-    public onResetColorClick(): void {
+    protected onPreviousColorKeyDown(event: KeyboardEvent, handler?: () => void): void {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handler?.();
+        }
+    }
+
+    protected onResetColorClick(): void {
         this.onHexChange(this.lastSelectedColor());
     }
 
-    public onRgbChange(value: number, channel: RGBChannel): void {
+    protected onRgbChange(value: number | null, channel: RGBChannel): void {
         if (value == null) {
             return;
         }
@@ -436,32 +456,16 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         }
     }
 
-    public onSliderBlur(): void {
-        this.#propagateTouched();
+    protected onSliderBlur(): void {
+        this.touch.emit();
     }
 
-    public onSwitchColorModeClick(): void {
+    protected onSwitchColorModeClick(): void {
         this.colorMode.set(this.colorMode() === "rgb" ? "hsv" : "rgb");
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public writeValue(value: string): void {
-        if (!this.hsvRectangle() || !this.hsvHandle()) {
-            return;
-        }
-        if (value == null) {
-            this.clear();
-            return;
-        }
-        this.loadColorFromString(value);
-        this.lastSelectedColor.set(this.hex());
+    private afterNextRender(callback: () => void): void {
+        afterNextRender(callback, { injector: this.#injector });
     }
 
     private clear(): void {
@@ -479,7 +483,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             value: this.hsv().h,
             min: 0,
             max: 360,
-            change: (value: number) => this.onHsvChange(value, "h")
+            change: (value: number | null) => this.onHsvChange(value, "h")
         };
         const saturation: ColorInput = {
             key: "s",
@@ -487,7 +491,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             value: this.hsv().s,
             min: 0,
             max: 100,
-            change: (value: number) => this.onHsvChange(value, "s")
+            change: (value: number | null) => this.onHsvChange(value, "s")
         };
         const value: ColorInput = {
             key: "v",
@@ -495,7 +499,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             value: this.hsv().v,
             min: 0,
             max: 100,
-            change: (value: number) => this.onHsvChange(value, "v")
+            change: (value: number | null) => this.onHsvChange(value, "v")
         };
         return [hue, saturation, value];
     }
@@ -507,7 +511,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             value: this.rgb().r,
             min: 0,
             max: 255,
-            change: (value: number) => this.onRgbChange(value, "r")
+            change: (value: number | null) => this.onRgbChange(value, "r")
         };
         const green: ColorInput = {
             key: "g",
@@ -515,7 +519,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             value: this.rgb().g,
             min: 0,
             max: 255,
-            change: (value: number) => this.onRgbChange(value, "g")
+            change: (value: number | null) => this.onRgbChange(value, "g")
         };
         const blue: ColorInput = {
             key: "b",
@@ -523,7 +527,7 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
             value: this.rgb().b,
             min: 0,
             max: 255,
-            change: (value: number) => this.onRgbChange(value, "b")
+            change: (value: number | null) => this.onRgbChange(value, "b")
         };
         return [red, green, blue];
     }
@@ -537,26 +541,19 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         const rgb = this.rgb();
         const alpha = this.alpha();
 
-        const { red, green, blue } = { red: rgb.r, green: rgb.g, blue: rgb.b };
-        if (red == null || green == null || blue == null || alpha == null) {
+        if (rgb.r == null || rgb.g == null || rgb.b == null || alpha == null) {
             this.#valueChange$.next(null);
             return;
         }
 
         if (format === "hex") {
-            this.#valueChange$.next(rgba2hex(red, green, blue, alpha));
+            this.#valueChange$.next(rgba2hex(rgb.r, rgb.g, rgb.b, alpha));
         } else if (format === "rgb") {
-            this.#valueChange$.next(`rgba(${red}, ${green}, ${blue}, ${alpha / 255})`);
+            this.#valueChange$.next(`rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha / 255})`);
         } else if (format === "hsl") {
-            const hsl = rgba2hsla(red, green, blue, alpha);
+            const hsl = rgba2hsla(rgb.r, rgb.g, rgb.b, alpha);
             this.#valueChange$.next(`hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${alpha / 255})`);
         }
-    }
-
-    private getSaturationFromPosition(): number {
-        const minVal = this.hsvHandle().nativeElement.offsetLeft + this.hsvHandle().nativeElement.offsetWidth / 2;
-        const maxVal = this.hsvRectangle().nativeElement.offsetWidth;
-        return Math.ceil((minVal / maxVal) * 100);
     }
 
     private getPositionFromSaturation(saturation: number | null): number {
@@ -577,6 +574,12 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         return minVal - this.hsvHandle().nativeElement.offsetHeight / 2;
     }
 
+    private getSaturationFromPosition(left: number): number {
+        const minVal = left + this.hsvHandle().nativeElement.offsetWidth / 2;
+        const maxVal = this.hsvRectangle().nativeElement.offsetWidth;
+        return this.getValidChannelValue(Math.ceil((minVal / maxVal) * 100), "s");
+    }
+
     private getValidChannelValue(value: number, channel: Channel): number {
         if (channel === "r" || channel === "g" || channel === "b" || channel === "a") {
             return Math.min(255, Math.max(0, value));
@@ -590,10 +593,10 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         return value;
     }
 
-    private getValueFromPosition(): number {
-        const minVal = this.hsvHandle().nativeElement.offsetTop + this.hsvHandle().nativeElement.offsetHeight / 2;
+    private getValueFromPosition(top: number): number {
+        const minVal = top + this.hsvHandle().nativeElement.offsetHeight / 2;
         const maxVal = this.hsvRectangle().nativeElement.offsetHeight;
-        return Math.round(Math.abs(100 - (minVal / maxVal) * 100));
+        return this.getValidChannelValue(Math.round(100 - (minVal / maxVal) * 100), "v");
     }
 
     private loadColorFromString(color: string): void {
@@ -633,47 +636,78 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         this.updateHsv(hsva);
         this.updateRgb(rgba);
         this.alpha.set(rgba.a ?? 255);
-        this.hexInputValue.set(this.hex());
-        window.setTimeout(() => {
+        this.updateHexInputValue();
+        this.afterNextRender(() => {
             this.hsvHandleLeft.set(this.getPositionFromSaturation(hsva.s));
             this.hsvHandleTop.set(this.getPositionFromValue(hsva.v));
         });
     }
 
     private setHsvRectPointerEvents(): void {
-        const mouseDown$ = fromEvent<MouseEvent>(this.hsvHandle().nativeElement, "mousedown").pipe(
+        const pointerDown$ = fromEvent<PointerEvent>(this.hsvHandle().nativeElement, "pointerdown").pipe(
             takeUntilDestroyed(this.#destroyRef)
         );
-        const mouseMove$ = fromEvent<MouseEvent>(document, "mousemove").pipe(takeUntilDestroyed(this.#destroyRef));
-        const mouseUp$ = fromEvent<MouseEvent>(document, "mouseup").pipe(takeUntilDestroyed(this.#destroyRef));
-        mouseDown$.pipe(switchMap(() => mouseMove$.pipe(takeUntil(mouseUp$)))).subscribe((event: MouseEvent) => {
-            this.#zone.run(() => {
-                this.updateHsvRectPointerPosition(event);
-                this.updateHsvValues();
-                this.updateHexInputValue();
-            });
-        });
-        fromEvent<MouseEvent>(this.hsvRectangle().nativeElement, "click")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe((event: MouseEvent) => {
-                this.updateHsvRectPointerPosition(event);
-                window.setTimeout(() => {
-                    this.updateHsvValues();
+        const pointerMove$ = fromEvent<PointerEvent>(document, "pointermove").pipe(
+            takeUntilDestroyed(this.#destroyRef)
+        );
+        const pointerUp$ = fromEvent<PointerEvent>(document, "pointerup").pipe(takeUntilDestroyed(this.#destroyRef));
+        pointerDown$
+            .pipe(switchMap(() => pointerMove$.pipe(takeUntil(pointerUp$))))
+            .subscribe((event: PointerEvent) => {
+                this.#zone.run(() => {
+                    const position = this.updateHsvRectPointerPosition(event);
+                    this.updateHsvValues(
+                        this.getSaturationFromPosition(position.left),
+                        this.getValueFromPosition(position.top)
+                    );
                     this.updateHexInputValue();
                 });
+            });
+        fromEvent<PointerEvent>(this.hsvRectangle().nativeElement, "click")
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe((event: PointerEvent) => {
+                const position = this.updateHsvRectPointerPosition(event);
+                this.updateHsvValues(
+                    this.getSaturationFromPosition(position.left),
+                    this.getValueFromPosition(position.top)
+                );
+                this.updateHexInputValue();
             });
     }
 
     private setSubscriptions(): void {
         this.hueValue$.pipe(distinctUntilChanged(), takeUntilDestroyed(this.#destroyRef)).subscribe((value: number) => {
             this.hsv.update(c => ({ ...c, h: Math.round(value) }));
-            this.updateHsvValues();
+            this.updateRgbFromHsv();
             this.updateHexInputValue();
         });
         this.setHsvRectPointerEvents();
         this.#valueChange$
             .pipe(takeUntilDestroyed(this.#destroyRef), distinctUntilChanged())
-            .subscribe((value: string | null) => this.#propagateChange(value));
+            .subscribe((value: string | null) => {
+                this.#internalValueUpdatePending = true;
+                this.#lastInternalValue = value;
+                this.value.set(value);
+            });
+    }
+
+    private syncValue(value: string | null | undefined): void {
+        if (value === undefined) {
+            return;
+        }
+        if (this.#internalValueUpdatePending && value === this.#lastInternalValue) {
+            this.#internalValueUpdatePending = false;
+            this.#lastInternalValue = undefined;
+            return;
+        }
+        this.#internalValueUpdatePending = false;
+        this.#lastInternalValue = undefined;
+        if (value === null) {
+            this.clear();
+            return;
+        }
+        this.loadColorFromString(value);
+        this.lastSelectedColor.set(this.hex());
     }
 
     private updateHexInputValue(): void {
@@ -682,55 +716,32 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
         this.hexInputValue.set(hex);
     }
 
-    private updateHsvRectPointerPosition(event: MouseEvent): void {
+    private updateHsv(hsv: HSV): void {
+        this.hsv.update(c => ({ ...c, h: hsv.h, s: hsv.s, v: hsv.v }));
+    }
+
+    private updateHsvRectPointerPosition(event: PointerEvent): HsvHandlePosition {
         const containerRect = this.hsvRectangle().nativeElement.getBoundingClientRect();
         const pointerRect = this.hsvHandle().nativeElement.getBoundingClientRect();
         const left = event.clientX - containerRect.left - pointerRect.width / 2;
         const top = event.clientY - containerRect.top - pointerRect.height / 2;
 
-        let newLeft;
-        if (left < -pointerRect.width / 2) {
-            newLeft = -pointerRect.width / 2;
-        } else if (left > containerRect.width - pointerRect.width / 2) {
-            newLeft = containerRect.width - pointerRect.width / 2;
-        } else {
-            newLeft = left;
-        }
-
-        let newTop;
-        if (top < -pointerRect.height / 2) {
-            newTop = -pointerRect.height / 2;
-        } else if (top > containerRect.height - pointerRect.height / 2) {
-            newTop = containerRect.height - pointerRect.height / 2;
-        } else {
-            newTop = top;
-        }
+        const newLeft = Math.min(Math.max(left, -pointerRect.width / 2), containerRect.width - pointerRect.width / 2);
+        const newTop = Math.min(Math.max(top, -pointerRect.height / 2), containerRect.height - pointerRect.height / 2);
 
         this.hsvHandleLeft.set(newLeft);
         this.hsvHandleTop.set(newTop);
+        return { left: newLeft, top: newTop };
     }
 
-    private updateHsv(hsv: HSV): void {
-        this.hsv.update(c => ({ ...c, h: hsv.h, s: hsv.s, v: hsv.v }));
-    }
-
-    private updateHsvValues(): void {
-        const saturation = this.getSaturationFromPosition();
-        const value = this.getValueFromPosition();
-        const hue = this.hsv().h;
-        if (hue === null) {
-            this.hsv.update(c => ({ ...c, h: 0 }));
-        }
-
-        this.hsv.update(c => ({ ...c, s: saturation, v: value }));
-        const rgb = hsva2rgba(this.hsv().h, saturation, value, this.alpha());
-        if (this.rgb().r === rgb.r && this.rgb().g === rgb.g && this.rgb().b === rgb.b) {
-            return;
-        }
-        this.rgb.update(c => ({ ...c, r: rgb.r, g: rgb.g, b: rgb.b }));
-        if (!this.showButtons()) {
-            this.emitValue();
-        }
+    private updateHsvValues(saturation: number, value: number): void {
+        this.hsv.update(c => ({
+            ...c,
+            h: c.h ?? 0,
+            s: this.getValidChannelValue(saturation, "s"),
+            v: this.getValidChannelValue(value, "v")
+        }));
+        this.updateRgbFromHsv();
     }
 
     private updateOtherNullChannels(channel: keyof RGBA | keyof HSV): void {
@@ -746,4 +757,24 @@ export class ColorGradientComponent implements OnInit, AfterViewInit, ControlVal
     private updateRgb(rgba: RGB): void {
         this.rgb.update(c => ({ ...c, r: rgba.r, g: rgba.g, b: rgba.b }));
     }
+
+    private updateRgbFromHsv(): void {
+        const hsv = this.hsv();
+        const hue = hsv.h ?? 0;
+        const saturation = hsv.s ?? 0;
+        const value = hsv.v ?? 0;
+        const rgb = hsva2rgba(hue, saturation, value, this.alpha());
+        if (this.rgb().r === rgb.r && this.rgb().g === rgb.g && this.rgb().b === rgb.b) {
+            return;
+        }
+        this.rgb.update(c => ({ ...c, r: rgb.r, g: rgb.g, b: rgb.b }));
+        if (!this.showButtons()) {
+            this.emitValue();
+        }
+    }
+}
+
+interface HsvHandlePosition {
+    readonly left: number;
+    readonly top: number;
 }
