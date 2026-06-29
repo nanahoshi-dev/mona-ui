@@ -6426,7 +6426,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.\nBind this input with the public `class` alias.",
         "kind": "input"
       }
     ]

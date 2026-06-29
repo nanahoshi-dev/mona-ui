@@ -1,13 +1,4 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    DestroyRef,
-    ElementRef,
-    computed,
-    inject,
-    input,
-    signal
-} from "@angular/core";
+import { Component, DestroyRef, ElementRef, computed, inject, input, signal } from "@angular/core";
 import { MarkdownComponent } from "ngx-markdown";
 import type { SectionItem } from "../../models/SectionItem";
 import { PageService } from "../../services/page.service";
@@ -15,8 +6,7 @@ import { PageService } from "../../services/page.service";
 @Component({
     selector: "app-markdown-doc",
     imports: [MarkdownComponent],
-    template: `<markdown [src]="assetUrl()" (ready)="onReady()" class="block"></markdown>`,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    template: `<markdown [src]="assetUrl()" (ready)="onReady()" class="block"></markdown>`
 })
 export class MarkdownDocComponent {
     readonly #destroyRef = inject(DestroyRef);
@@ -46,12 +36,20 @@ export class MarkdownDocComponent {
         const headings = Array.from(
             this.#elementRef.nativeElement.querySelectorAll("h1,h2,h3,h4,h5,h6")
         ) as HTMLHeadingElement[];
+        headings.forEach(heading => heading.removeAttribute("id"));
+        const ownerDocument = this.#elementRef.nativeElement.ownerDocument as Document;
+
+        const existingIds = new Set(
+            (Array.from(ownerDocument.querySelectorAll("[id]")) as HTMLElement[])
+                .map(element => element.id)
+                .filter(id => id.length > 0)
+        );
 
         let localRootId: string | null = null;
         const items: SectionItem[] = headings.map((el, i) => {
             const level = parseInt(el.tagName[1], 10);
             const text = el.textContent?.trim() ?? `heading-${i}`;
-            const id = this.#slugify(text);
+            const id = this.#createUniqueId(text, existingIds);
             el.id = id;
 
             const isH1 = level === 1;
@@ -73,12 +71,28 @@ export class MarkdownDocComponent {
         this.#pageService.setSections(items);
     }
 
+    #createUniqueId(text: string, existingIds: Set<string>): string {
+        const baseId = this.#slugify(text);
+        let candidateId = baseId;
+        let suffix = 2;
+
+        while (existingIds.has(candidateId)) {
+            candidateId = `${baseId}-${suffix}`;
+            suffix++;
+        }
+
+        existingIds.add(candidateId);
+        return candidateId;
+    }
+
     #slugify(text: string): string {
-        return text
+        const slug = text
             .toLowerCase()
             .trim()
             .replace(/[^\w\s-]/g, "")
             .replace(/[\s_-]+/g, "-")
             .replace(/^-+|-+$/g, "");
+
+        return slug.length > 0 ? slug : "section";
     }
 }

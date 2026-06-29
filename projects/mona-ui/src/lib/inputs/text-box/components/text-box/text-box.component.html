@@ -19,14 +19,9 @@
     (focus)="inputFocus.emit($event)"
     #input />
 
-@if (clearButton() && value().length !== 0) {
-    <button
-        monaButton
-        look="link"
-        size="small"
-        class="p-0 mr-2"
-        aria-label="Clear"
-        (click)="onClearClick()">
+@let textBoxValue = value();
+@if (clearButton() && textBoxValue && textBoxValue.length !== 0) {
+    <button monaButton look="link" size="small" class="p-0 mr-2" aria-label="Clear" (click)="onClearClick()">
         <svg lucideX class="opacity-50 size-4 hover:opacity-90"></svg>
     </button>
 }

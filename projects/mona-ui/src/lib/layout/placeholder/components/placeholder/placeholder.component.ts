@@ -36,6 +36,7 @@ export class PlaceholderComponent implements PlaceholderVariantInput {
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * Bind this input with the public `class` alias.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });

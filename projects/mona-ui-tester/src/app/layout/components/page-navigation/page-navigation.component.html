@@ -5,21 +5,20 @@
     </h3>
 
     <!-- TOC Navigation Links List -->
-    <ul class="relative border-l border-border flex flex-col gap-1">
-        @for (item of sections(); track item.id()) {
-            @if (item.parentId() != null) {
-                <li [attr.data-depth]="item.depth()" [style.padding-left.px]="(item.depth() - 1) * 12">
-                    <a class="block pl-4 py-1.5 text-sm font-medium transition-all cursor-pointer border-l -ml-[1px]"
-                       [class.text-primary]="activeFragment() === item.id()"
-                       [class.border-primary]="activeFragment() === item.id()"
-                       [class.font-semibold]="activeFragment() === item.id()"
-                       [class.text-muted-foreground]="activeFragment() !== item.id()"
-                       [class.border-transparent]="activeFragment() !== item.id()"
-                       href="{{currentRoute()}}#{{item.id()}}">
-                        {{ item.header() }}
-                    </a>
-                </li>
-            }
+    <ul class="relative flex flex-col gap-1 border-s border-border">
+        @for (item of visibleSections(); track item.id()) {
+            <li [attr.data-depth]="item.depth()">
+                <a class="block border-s-2 -ms-[1px] py-1.5 pe-3 ps-4 text-sm font-medium transition-colors cursor-pointer"
+                   [attr.aria-current]="activeSectionId() === item.id() ? 'location' : null"
+                   [class.border-primary]="activeSectionId() === item.id()"
+                   [class.border-transparent]="activeSectionId() !== item.id()"
+                   [class.font-semibold]="activeSectionId() === item.id()"
+                   [class.text-muted-foreground]="activeSectionId() !== item.id()"
+                   [class.text-primary]="activeSectionId() === item.id()"
+                   href="{{currentRoute()}}#{{item.id()}}">
+                    <span class="block" [style.padding-left.px]="(item.depth() - 1) * 12">{{ item.header() }}</span>
+                </a>
+            </li>
         }
     </ul>
 </div>
