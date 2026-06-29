@@ -6,6 +6,8 @@ export const calendarBaseVariants = cva(
         bg-background text-foreground
         border border-input-border
         shadow-sm select-none
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {

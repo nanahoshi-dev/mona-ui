@@ -3940,13 +3940,19 @@
         "kind": "input"
       },
       {
-        "name": "max",
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "maxDate",
         "type": "Date | null",
         "description": "Sets the maximum date that can be selected.",
         "kind": "input"
       },
       {
-        "name": "min",
+        "name": "minDate",
         "type": "Date | null",
         "description": "Sets the minimum date that can be selected.",
         "kind": "input"
@@ -3970,10 +3976,34 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the calendar value is changed by user interaction.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Adds custom CSS classes to the calendar host element.",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Date | Date[] | null",
+        "description": "The current value of the calendar.",
+        "kind": "model"
       },
       {
         "name": "weekNumber",

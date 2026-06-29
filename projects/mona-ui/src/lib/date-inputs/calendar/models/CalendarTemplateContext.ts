@@ -19,7 +19,7 @@ export interface MonthCellTemplateContext {
 
 export interface YearCellTemplateContext {
     /**
-     * @description The year of a decade.
+     * @description The month number (1–12) represented by this cell.
      */
     $implicit: number;
 

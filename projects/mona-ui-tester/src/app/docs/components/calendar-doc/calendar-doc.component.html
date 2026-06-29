@@ -1,10 +1,5 @@
-<app-section id="calendar" [header]="'Calendar'" headerType="H1">
-    <p>Displays a calendar.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-calendar-demo></app-calendar-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/calendar/intro.md"></app-markdown-doc>
 
+<app-calendar-demo></app-calendar-demo>
+
+<app-markdown-doc src="docs/calendar/api.md" parentSectionId="calendar"></app-markdown-doc>

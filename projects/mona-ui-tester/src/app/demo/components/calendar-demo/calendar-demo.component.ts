@@ -1,8 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { metadata } from "@angular/forms/signals";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { DateTime } from "luxon";
 import {
     CalendarComponent,
@@ -42,24 +40,31 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
             disabledDates: {
                 type: "dropdown",
                 value: [[DateTime.now().minus({ day: 2 }).toJSDate()], (date: Date) => date.getDay() === 0],
-                defaultValue: null
+                defaultValue: null,
+                clearable: true
             },
             firstDay: {
                 type: "dropdown",
                 value: ["sunday", "monday"],
                 defaultValue: "monday"
             },
-            max: {
+            maxDate: {
                 type: "dropdown",
                 value: [DateTime.now().plus({ day: 5 }).toJSDate()],
-                defaultValue: null
+                defaultValue: null,
+                clearable: true
             },
-            min: {
+            minDate: {
                 type: "dropdown",
                 value: [DateTime.now().minus({ day: 10 }).toJSDate()],
-                defaultValue: null
+                defaultValue: null,
+                clearable: true
             },
             readonly: {
+                type: "boolean",
+                value: false
+            },
+            required: {
                 type: "boolean",
                 value: false
             },
@@ -89,70 +94,75 @@ export class CalendarDemoComponent extends AbstractDemoComponent<CalendarCompone
 @Component({
     imports: [
         CalendarComponent,
-        ReactiveFormsModule,
         CalendarMonthCellTemplateDirective,
         CalendarYearCellTemplateDirective,
-        CalendarDecadeCellTemplateDirective
+        CalendarDecadeCellTemplateDirective,
+        FormField
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
         @let featureData = features();
-        <span>{{ formValueText() }}</span>
-        <form [formGroup]="formGroup">
-            <mona-calendar
-                [disabled]="disabled()"
-                [disabledDates]="disabledDates()"
-                [firstDay]="firstDay()"
-                [formControl]="formGroup.controls.value"
-                [max]="max()"
-                [min]="min()"
-                [readonly]="readonly()"
-                [rounded]="rounded()"
-                [selection]="selection()"
-                [weekNumber]="weekNumber()">
-                @if (featureData && featureData["decadeCellTemplate"].active) {
-                    <ng-template monaCalendarDecadeCellTemplate let-year>
-                        <span class="text-amber-700 italic">{{ year }}</span>
-                    </ng-template>
-                }
-                @if (featureData && featureData["monthCellTemplate"].active) {
-                    <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
-                        <span [class.text-violet-600]="day % 2 === 0" [class.text-blue-500]="day % 2 !== 0">
-                            {{ day }}
-                        </span>
-                    </ng-template>
-                }
-                @if (featureData && featureData["yearCellTemplate"].active) {
-                    <ng-template monaCalendarYearCellTemplate let-month let-text="text">
-                        <span
-                            >{{ text }} |
-                            <span class="text-green-500">{{ month }}</span>
-                        </span>
-                    </ng-template>
-                }
-            </mona-calendar>
-        </form>
+        <span>Date: {{ formValueText() }}</span>
+        <mona-calendar
+            [disabledDates]="disabledDates()"
+            [formField]="form.date"
+            [firstDay]="firstDay()"
+            [maxDate]="maxDate()"
+            [minDate]="minDate()"
+            [rounded]="rounded()"
+            [selection]="selection()"
+            [weekNumber]="weekNumber()">
+            @if (featureData && featureData["decadeCellTemplate"].active) {
+                <ng-template monaCalendarDecadeCellTemplate let-year>
+                    <span class="text-amber-700 italic">{{ year }}</span>
+                </ng-template>
+            }
+            @if (featureData && featureData["monthCellTemplate"].active) {
+                <ng-template monaCalendarMonthCellTemplate let-day let-date="date">
+                    <span [class.text-violet-600]="day % 2 === 0" [class.text-blue-500]="day % 2 !== 0">
+                        {{ day }}
+                    </span>
+                </ng-template>
+            }
+            @if (featureData && featureData["yearCellTemplate"].active) {
+                <ng-template monaCalendarYearCellTemplate let-month let-text="text">
+                    <span
+                        >{{ text }} |
+                        <span class="text-green-500">{{ month }}</span>
+                    </span>
+                </ng-template>
+            }
+        </mona-calendar>
     `
 })
 export class CalendarWrapperComponent implements ComponentInputsAsSignal<CalendarComponent> {
-    readonly #formGroup = new FormGroup({
-        value: new FormControl<Date | Date[] | null>(null)
-    });
-    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+    readonly #formModel = signal<CalendarFormModel>({ date: null });
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly formGroup = this.#formGroup;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.date, { when: () => this.disabled() });
+        readonly(schema.date, { when: () => this.readonly() });
+        required(schema.date, { when: () => this.required() });
+    });
     protected readonly formValueText = computed(() => {
-        const value = this.#formValue();
+        const value = this.form.date().value();
         const valueList = Array.isArray(value) ? value : [value];
-        return valueList.map(v => (v ? DateTime.fromJSDate(v).toFormat("yyyy-MM-dd HH:mm:ss") : "null")).join(", ");
+        return valueList
+            .filter((v): v is Date => v != null)
+            .map(v => DateTime.fromJSDate(v).toFormat("yyyy-MM-dd HH:mm:ss"))
+            .join(", ");
     });
     public readonly disabled = model<ReturnType<CalendarComponent["disabled"]>>(false);
     public readonly disabledDates = input<ReturnType<CalendarComponent["disabledDates"]>>([]);
     public readonly firstDay = input<ReturnType<CalendarComponent["firstDay"]>>("monday");
-    public readonly max = input<ReturnType<CalendarComponent["max"]>>(null);
-    public readonly min = input<ReturnType<CalendarComponent["min"]>>(null);
+    public readonly maxDate = input<ReturnType<CalendarComponent["maxDate"]>>(null);
+    public readonly minDate = input<ReturnType<CalendarComponent["minDate"]>>(null);
     public readonly readonly = input<ReturnType<CalendarComponent["readonly"]>>(false);
+    public readonly required = input<ReturnType<CalendarComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<CalendarComponent["rounded"]>>("none");
     public readonly selection = input<ReturnType<CalendarComponent["selection"]>>("single");
     public readonly weekNumber = input<ReturnType<CalendarComponent["weekNumber"]>>(false);
+}
+
+interface CalendarFormModel {
+    date: Date | Date[] | null;
 }

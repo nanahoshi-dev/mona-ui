@@ -85,7 +85,7 @@ export class MonthDayDirective {
     public readonly value = input.required<Date | Date[] | null>();
 
     protected onClick(event: MouseEvent) {
-        if (this.disabled()) {
+        if (this.dayDisabled()) {
             return;
         }
         event.preventDefault();

@@ -1,16 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { CalendarDemoComponent } from "../../../demo/components/calendar-demo/calendar-demo.component";
-import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
-import { SectionComponent } from "../../../layout/components/section/section.component";
+import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-calendar-doc",
-    imports: [CodeViewerComponent, SectionComponent, CalendarDemoComponent],
+    imports: [CalendarDemoComponent, MarkdownDocComponent],
     templateUrl: "./calendar-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CalendarDocComponent {
-    protected readonly importCode = `
-        import { CalendarComponent } from "mona-ui";
-    `;
-}
+export class CalendarDocComponent {}

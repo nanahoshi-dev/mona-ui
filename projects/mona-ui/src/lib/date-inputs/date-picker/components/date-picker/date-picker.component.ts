@@ -338,8 +338,9 @@ export class DatePickerComponent
         this.value.set(date ?? null);
     }
 
-    protected onCalendarValueChange(date: Date | null): void {
-        this.setCurrentDate(date);
+    protected onCalendarValueChange(date: Date | Date[] | null): void {
+        const singleDate = Array.isArray(date) ? null : date;
+        this.setCurrentDate(singleDate);
         this.#dropdownService.popupRef()?.close();
     }
 

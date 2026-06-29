@@ -8,16 +8,16 @@ import {
     DestroyRef,
     effect,
     ElementRef,
-    forwardRef,
     inject,
     input,
+    linkedSignal,
     model,
-    OnInit,
+    output,
     signal,
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronLeft, LucideChevronRight } from "@lucide/angular";
 import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { DateTime, DurationObjectUnits } from "luxon";
@@ -27,7 +27,6 @@ import { ButtonDirective } from "../../../../buttons/button/directives/button.di
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
 import { TakeFirstPipe } from "../../../../pipes/take-first.pipe";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarView } from "../../../models/CalendarView";
@@ -57,13 +56,6 @@ import { compareDates } from "../../utils/compareDates";
     selector: "mona-calendar",
     templateUrl: "./calendar.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => CalendarComponent),
-            multi: true
-        }
-    ],
     imports: [
         ButtonDirective,
         DatePipe,
@@ -78,12 +70,14 @@ import { compareDates } from "../../utils/compareDates";
     host: {
         role: "application",
         "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-required]": "required() || null",
         "[attr.tabindex]": "disabled() ? -1 : 0",
-        "[class]": "baseClass()",
-        "(blur)": "onBlur()"
+        "[class]": "baseClass()"
     }
 })
-export class CalendarComponent implements OnInit, ControlValueAccessor, CalendarVariantInput {
+export class CalendarComponent implements CalendarVariantInput, FormValueControl<Date | Date[] | null> {
     readonly #calendarService = inject(CalendarService, { optional: true });
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -118,14 +112,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             dictionary.add(i.toJSDate(), i.day);
         }
 
-        if (firstDayOfWeek === 0 && monthEndWeekday === 7) {
-            for (let i = 0; i < 7; i++) {
-                dictionary.add(
-                    lastDayOfMonth.plus({ days: i + 1 }).toJSDate(),
-                    lastDayOfMonth.plus({ days: i + 1 }).day
-                );
-            }
-        } else if (firstDayOfWeek === 1 && monthEndWeekday === 7) {
+        if (monthEndWeekday === 7) {
             for (let i = 0; i < 7; i++) {
                 dictionary.add(
                     lastDayOfMonth.plus({ days: i + 1 }).toJSDate(),
@@ -138,10 +125,26 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             e => e.value
         );
     });
+    readonly #outputValue = computed(() => {
+        const selection = this.selection();
+        const selectedDates = this.selectedDates();
+        if (selection === "single") {
+            return lastOrDefault(selectedDates);
+        } else if (selection === "multiple") {
+            return selectedDates;
+        } else if (selection === "range") {
+            if (selectedDates.length === 1) {
+                return [selectedDates[0], selectedDates[0]];
+            }
+            if (selectedDates.length > 1) {
+                return [selectedDates[0], selectedDates[selectedDates.length - 1]];
+            }
+            return [];
+        }
+        return [];
+    });
     readonly #rangeChange$ = new Subject<Date>();
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<Date | Date[] | null> | null = null;
-    #propagateTouched: Action | null = null;
     protected readonly ariaLabel = computed(() => {
         const view = this.calendarView();
         const navigatedDate = this.navigatedDate();
@@ -191,6 +194,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const theme = this.#themeService.theme();
         return calendarHeaderThemeVariants(theme)({});
     });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && this.isEmptyValue())
+    );
     protected readonly monthBounds = computed(() => {
         const navigatedDate = this.navigatedDate();
         const firstDayOfMonth = DateTime.fromJSDate(navigatedDate).startOf("month");
@@ -248,29 +254,28 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 return "Previous decade";
         }
     });
-    protected readonly selectedDates = signal<Date[]>([]);
+    protected readonly selectedDates = linkedSignal<Date[]>(() => {
+        const v = this.value();
+        const selection = this.selection();
+        if (v == null) {
+            return [];
+        }
+        if (selection === "range" && Array.isArray(v) && v.length >= 2) {
+            const date1 = DateTime.fromJSDate(v[0]);
+            const date2 = DateTime.fromJSDate(v[v.length - 1]);
+            const startDate = date1 <= date2 ? date1 : date2;
+            const endDate = date1 <= date2 ? date2 : date1;
+            const totalDays = endDate.diff(startDate, "days").days + 1;
+            return range(0, totalDays)
+                .select(i => startDate.plus({ days: i }).toJSDate())
+                .toArray();
+        }
+        return Array.isArray(v) ? v : [v];
+    });
     protected readonly timezone = DateTime.local().zoneName ?? undefined;
     protected readonly todayButtonLabel = computed(() => {
         const today = DateTime.now();
         return `Go to today, ${today.toFormat("MMMM d, yyyy")}`;
-    });
-    protected readonly value = computed(() => {
-        const selection = this.selection();
-        const selectedDates = this.selectedDates();
-        if (selection === "single") {
-            return lastOrDefault(selectedDates);
-        } else if (selection === "multiple") {
-            return selectedDates;
-        } else if (selection === "range") {
-            if (selectedDates.length === 1) {
-                return [selectedDates[0], selectedDates[0]];
-            }
-            if (selectedDates.length > 1) {
-                return [selectedDates[0], selectedDates[selectedDates.length - 1]];
-            }
-            return [];
-        }
-        return [];
     });
     protected readonly viewSwitchButtonLabel = computed(() => {
         const view = this.calendarView();
@@ -321,14 +326,21 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     public readonly firstDay = input<FirstDayOfWeek>("monday");
 
     /**
+     * @description Marks the calendar as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Sets the maximum date that can be selected.
      */
-    public readonly max = input<Date | null>();
+    public readonly maxDate = input<Date | null>();
 
     /**
      * @description Sets the minimum date that can be selected.
      */
-    public readonly min = input<Date | null>();
+    public readonly minDate = input<Date | null>();
 
     /**
      * @description Sets the readonly state of the calendar.
@@ -348,7 +360,36 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
      */
     public readonly selection = input<CalendarSelection>("single");
 
+    /**
+     * @description Emitted when the calendar value is changed by user interaction.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets whether the calendar is required. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false);
+
+    /**
+     * @description Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
+    /**
+     * @description Adds custom CSS classes to the calendar host element.
+     */
     public readonly userClass = input<string>("", { alias: "class" });
+
+    /**
+     * @description The current value of the calendar.
+     * @default null
+     */
+    public readonly value = model<Date | Date[] | null>(null);
 
     /**
      * @description Enables the display of week numbers in the calendar.
@@ -365,8 +406,8 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             }
         });
         effect(() => {
-            const min = this.min();
-            const max = this.max();
+            const min = this.minDate();
+            const max = this.maxDate();
             this.disabledDates();
             untracked(() => {
                 const navigationDate = this.navigatedDate();
@@ -378,48 +419,25 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 }
             });
         });
+        effect(() => {
+            const v = this.value();
+            untracked(() => {
+                if (v != null) {
+                    const lastDate = Array.isArray(v) ? (lastOrDefault(v) ?? DateTime.now().toJSDate()) : v;
+                    this.navigatedDate.set(lastDate);
+                }
+            });
+        });
         toObservable(this.calendarView)
             .pipe(skip(1))
             .subscribe(() => this.focusActiveCell());
     }
 
-    public ngOnInit(): void {
-        this.setDateValues();
-        const date = lastOrDefault(this.selectedDates()) ?? DateTime.now().toJSDate();
-        if (Array.isArray(date)) {
-            this.setCurrentDate(lastOrDefault(date));
-            return;
-        }
-        this.navigatedDate.set(date);
-    }
-
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(date: Date | Date[] | null | undefined): void {
-        this.selectedDates.set(this.getDateArray(date ?? null));
-        const navigatedDate = Array.isArray(date)
-            ? (lastOrDefault(date) ?? DateTime.now().toJSDate())
-            : (date ?? DateTime.now().toJSDate());
-        this.navigatedDate.set(navigatedDate);
-        this.setDateValues();
-    }
-
-    protected onBlur(): void {
-        this.#propagateTouched?.();
-    }
-
     protected onDayClick(date: Date, event: MouseEvent): void {
         event.preventDefault();
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         const selection = this.selection();
         if (selection === "single") {
             this.handleSingleSelection(date);
@@ -434,7 +452,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
             this.navigatedDate.set(date);
         }
         this.focusActiveCell();
-        this.#propagateChange?.(this.value());
+        this.commitUserSelection();
     }
 
     protected onMonthClick(month: number): void {
@@ -460,6 +478,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     }
 
     protected onTodayButtonClick(): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         const currentDate = DateTime.now();
         const navigatedDate = DateTime.fromJSDate(this.navigatedDate()).set({
             year: currentDate.year,
@@ -469,7 +490,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         this.navigatedDate.set(navigatedDate.toJSDate());
         this.setCurrentDate(navigatedDate.toJSDate());
         this.calendarView.set("month");
-        this.#propagateChange?.(this.value());
+        this.commitUserSelection();
     }
 
     protected onViewChangeClick(view: CalendarView): void {
@@ -496,6 +517,11 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         this.navigatedDate.set(newDate);
     }
 
+    private commitUserSelection(): void {
+        this.value.set(this.#outputValue());
+        this.touch.emit();
+    }
+
     private focusActiveCell(): void {
         rxTimeout(this.#destroyRef, () => {
             const calendarView = this.calendarView();
@@ -513,7 +539,10 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
     }
 
     private getDateArray(date: Date | Date[] | null): Date[] {
-        return Array.isArray(date) ? date : [date ?? DateTime.now().toJSDate()];
+        if (date == null) {
+            return [];
+        }
+        return Array.isArray(date) ? date : [date];
     }
 
     private getDatesForMultipleSelection(date: Date): Date[] {
@@ -543,8 +572,9 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         const isShift = event.shiftKey;
         const selection = this.selection();
 
-        if (selection === "multiple" && (isCtrlOrCmd || isShift)) {
+        if (!this.readonly() && selection === "multiple" && (isCtrlOrCmd || isShift)) {
             if (this.handleMultipleSelectionKeyboard(event, isCtrlOrCmd, isShift)) {
+                this.commitUserSelection();
                 this.focusActiveCell();
                 return;
             }
@@ -596,6 +626,10 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                 }
                 event.preventDefault();
                 const previousView = this.calendarView();
+                if (this.readonly() && previousView === "month") {
+                    shouldFocusCell = true;
+                    break;
+                }
                 if (isCtrlOrCmd && selection === "multiple") {
                     this.toggleFocusedDateInSelection();
                 } else if (isShift && selection === "multiple") {
@@ -604,7 +638,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
                     this.selectFocusedItem();
                 }
                 if (previousView === "month" && this.calendarView() === "month") {
-                    this.#propagateChange?.(this.value());
+                    this.commitUserSelection();
                 }
                 shouldFocusCell = true;
                 break;
@@ -704,7 +738,7 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     private handleSingleSelection(date: Date): void {
         const value = this.selectedDates();
-        if (value) {
+        if (value.length > 0) {
             const date1 = DateTime.fromJSDate(date);
             const valueItem = lastOrDefault(value) ?? DateTime.now().toJSDate();
             const newDate = DateTime.fromJSDate(valueItem)
@@ -720,8 +754,8 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     private isDateDisabled(date: Date): boolean {
         const disabledDates = this.disabledDates();
-        const max = this.max();
-        const min = this.min();
+        const max = this.maxDate();
+        const min = this.minDate();
 
         let isDisabledByInput = false;
         if (typeof disabledDates === "function") {
@@ -731,6 +765,11 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
         }
 
         return isDisabledByInput || compareDates(date, max, ">") || compareDates(date, min, "<");
+    }
+
+    private isEmptyValue(): boolean {
+        const value = this.value();
+        return value == null || (Array.isArray(value) && value.length === 0);
     }
 
     private navigateByDaysOrCells(offset: number, view: CalendarView): void {
@@ -923,16 +962,6 @@ export class CalendarComponent implements OnInit, ControlValueAccessor, Calendar
 
     private setCurrentDate(date: Date | Date[] | null): void {
         this.selectedDates.set(this.getDateArray(date));
-    }
-
-    private setDateValues(): void {
-        const value = this.selectedDates();
-        if (value && Array.isArray(value)) {
-            this.setCurrentDate(lastOrDefault(value));
-            return;
-        }
-        const newNavigatedDate = value ?? DateTime.now().toJSDate();
-        this.navigatedDate.set(newNavigatedDate);
     }
 
     private setRangeChangeSubscription(): void {
