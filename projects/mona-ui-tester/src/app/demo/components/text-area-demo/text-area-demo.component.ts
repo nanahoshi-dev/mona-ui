@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { form, FormField, required } from "@angular/forms/signals";
 import { TextAreaDirective } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -28,10 +29,24 @@ export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirecti
 }
 
 @Component({
-    template: ` <textarea monaTextArea [rounded]="rounded()" class="w-144 h-32 resize-none"></textarea> `,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [TextAreaDirective]
+    template: `
+        <div class="flex flex-col gap-4">
+            <span>Text: {{ form.longText().value() }}</span>
+            <textarea
+                monaTextArea
+                [formField]="form.longText"
+                [rounded]="rounded()"
+                class="w-144 h-32 resize-none"></textarea>
+        </div>
+    `,
+    imports: [TextAreaDirective, FormField]
 })
 export class TextAreaWrapperComponent implements ComponentInputsAsSignal<TextAreaDirective> {
+    readonly #formModel = signal<TextAreaFormModel>({ longText: "" });
+    protected readonly form = form(this.#formModel);
     public readonly rounded = input<ReturnType<TextAreaDirective["rounded"]>>("medium");
+}
+
+interface TextAreaFormModel {
+    longText: string;
 }

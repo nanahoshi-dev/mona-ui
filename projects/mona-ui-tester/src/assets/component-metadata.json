@@ -2218,9 +2218,21 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the textarea as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
