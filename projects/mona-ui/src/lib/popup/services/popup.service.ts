@@ -10,8 +10,8 @@ import {
     PositionStrategy
 } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
-import { CdkScrollable, ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scrolling";
-import { DestroyRef, DOCUMENT, inject, Injectable, Injector, TemplateRef } from "@angular/core";
+import { ScrollDispatcher, type ScrollDispatcherTarget } from "@angular/cdk/scrolling";
+import { DestroyRef, DOCUMENT, ElementRef, inject, Injectable, Injector, TemplateRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
@@ -173,6 +173,14 @@ export class PopupService {
         return strategy;
     }
 
+    private createScrollDispatcherTarget(element: HTMLElement): ScrollDispatcherTarget {
+        const elementRef = new ElementRef(element);
+        return {
+            elementScrolled: () => fromEvent<Event>(element, "scroll", { passive: true }),
+            getElementRef: () => elementRef
+        };
+    }
+
     private createSingleElementPopup(settings: PopupSettings): PopupRef {
         const overlayRef = this.createOverlay(settings);
         const popupReference = new PopupReference(overlayRef);
@@ -214,13 +222,57 @@ export class PopupService {
         return connectionPosition(anchorPoint, popupPoint);
     }
 
-    private getScrollableContainers(anchor: FlexibleConnectedPositionStrategyOrigin): ScrollDispatcherTarget[] {
-        const scrollables: ScrollDispatcherTarget[] = [];
-        if (anchor instanceof HTMLElement) {
-            const ancestorScrollables = this.#scrollDispatcher.getAncestorScrollContainers(anchor);
-            scrollables.push(...ancestorScrollables);
+    private getScrollableAncestorElements(anchorElement: HTMLElement): HTMLElement[] {
+        const scrollables: HTMLElement[] = [];
+        let element = anchorElement.parentElement;
+        while (element) {
+            if (this.isScrollableElement(element)) {
+                scrollables.push(element);
+            }
+            element = element.parentElement;
         }
         return scrollables;
+    }
+
+    private getScrollableContainers(anchor: FlexibleConnectedPositionStrategyOrigin): ScrollDispatcherTarget[] {
+        const anchorElement = this.getAnchorElement(anchor);
+        if (!anchorElement) {
+            return [];
+        }
+
+        const scrollablesByElement = new Map<HTMLElement, ScrollDispatcherTarget>();
+        const addScrollable = (scrollable: ScrollDispatcherTarget): void => {
+            scrollablesByElement.set(scrollable.getElementRef().nativeElement, scrollable);
+        };
+
+        this.#scrollDispatcher
+            .getAncestorScrollContainers(anchorElement)
+            .forEach(scrollable => addScrollable(scrollable));
+        this.getScrollableAncestorElements(anchorElement)
+            .map(element => this.createScrollDispatcherTarget(element))
+            .forEach(scrollable => addScrollable(scrollable));
+
+        return Array.from(scrollablesByElement.values());
+    }
+
+    private isScrollableElement(element: HTMLElement): boolean {
+        const defaultView = this.#document.defaultView;
+        if (!defaultView) {
+            return false;
+        }
+
+        const style = defaultView.getComputedStyle(element);
+        const canScrollVertically =
+            (this.isScrollableOverflow(style.overflowY) || this.isScrollableOverflow(style.overflow)) &&
+            element.scrollHeight > element.clientHeight;
+        const canScrollHorizontally =
+            (this.isScrollableOverflow(style.overflowX) || this.isScrollableOverflow(style.overflow)) &&
+            element.scrollWidth > element.clientWidth;
+        return canScrollVertically || canScrollHorizontally;
+    }
+
+    private isScrollableOverflow(value: string): boolean {
+        return value === "auto" || value === "scroll" || value === "overlay";
     }
 
     private handleFocusRestoration(settings: PopupSettings, originallyFocusedElement?: HTMLElement | null): void {
@@ -561,17 +613,13 @@ export class PopupService {
             .subscribe(updatePosition);
         subscriptions.push(resizeSubscription);
 
-        const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        if (resolvedAnchor instanceof HTMLElement) {
-            const scrollableContainers = this.getScrollableContainers(resolvedAnchor);
-            scrollableContainers.forEach(scrollable => {
-                const containerScrollSubscription = scrollable
-                    .elementScrolled()
-                    .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
-                    .subscribe(updatePosition);
-                subscriptions.push(containerScrollSubscription);
-            });
-        }
+        this.getScrollableContainers(this.resolveAnchor(settings.anchor)).forEach(scrollable => {
+            const containerScrollSubscription = scrollable
+                .elementScrolled()
+                .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
+                .subscribe(updatePosition);
+            subscriptions.push(containerScrollSubscription);
+        });
         popupReference.closed.pipe(take(1)).subscribe(() => {
             subscriptions.forEach(sub => sub.unsubscribe());
         });

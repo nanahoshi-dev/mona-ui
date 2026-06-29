@@ -1,11 +1,12 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    AfterViewInit,
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
     DestroyRef,
+    DOCUMENT,
     ElementRef,
     inject,
     input,
@@ -99,20 +100,35 @@ import {
         .slide-out-to-right {
             animation: slideOutToRight 0.5s ease-out both;
         }
+        @media (prefers-reduced-motion: reduce) {
+            .slide-in-from-right,
+            .slide-out-to-left,
+            .slide-in-from-left,
+            .slide-out-to-right {
+                animation-duration: 1ms;
+            }
+        }
     `,
     host: {
         "[class]": "baseClass()",
         "[attr.tabindex]": "0",
         "[style.height]": "scrollViewHeight()",
-        "[style.width]": "scrollViewWidth()"
+        "[style.width]": "scrollViewWidth()",
+        "[attr.role]": "'region'",
+        "[attr.aria-roledescription]": "'carousel'",
+        "[attr.aria-label]": "ariaLabel()"
     }
 })
-export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInput {
+export class ScrollViewComponent implements ScrollViewVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #viewIndex = computed(() => {
         const infinite = this.infinite();
         const index = this.index();
         const viewData = this.viewData();
+        if (viewData.length === 0) {
+            return 0;
+        }
         return infinite ? index % viewData.length : index;
     });
     readonly #directionFromIndex = toSignal(
@@ -142,6 +158,7 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
+    #scrollMouseUpHandler = () => this.onPagerScrollEnd();
 
     protected readonly animationDuration = computed(() => {
         const animate = this.animate();
@@ -194,7 +211,6 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
         return scrollViewPagerListContainerThemeVariants(theme)();
     });
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
-    protected readonly pagerPosition = signal("0");
     protected readonly rightArrowClass = computed(() => {
         const theme = this.#themeService.theme();
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== this.itemCount() - 1);
@@ -214,6 +230,17 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     });
     protected readonly viewIndex = this.#viewIndex;
 
+    protected readonly ariaLabel = computed(() => {
+        const index = this.viewIndex();
+        const count = this.itemCount();
+        return count > 0 ? `Page ${index + 1} of ${count}` : undefined;
+    });
+
+    /**
+     * @description Sets whether page transitions are animated.
+     * Pass a boolean for default duration (500ms) or a number for custom duration in milliseconds.
+     * @default true
+     */
     public readonly animate = input<boolean | number>(true);
 
     /**
@@ -269,49 +296,54 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     public readonly pagerRounded = input<ScrollViewVariantProps["pagerRounded"]>("medium");
 
     /**
-     * @description Represents the rounded property for a ScrollView component.
-     *
-     * The variable `rounded` determines the border radius style to be applied
-     * to the ScrollView. The value "medium" is used as the default rounding level.
-     *
+     * @description Sets the border radius of the scroll view.
+     * @default "medium"
      */
     public readonly rounded = input<ScrollViewVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Sets custom CSS classes on the component host element. Merged with base classes via tailwind-merge.
+     */
     public readonly userClass = input("", { alias: "class" });
 
     /**
-     * @description Represents the width of an element or component. The value can be specified
-     * either as a string (e.g., to include units like "px", "%", "em") or as a number
-     * (e.g., for unitless numerical values).
-     *
-     * This variable is required and must be provided when initializing
-     * or configuring the input.
+     * @description Sets the width of the scroll view.
      */
     public readonly width = input.required<string | number>();
 
     public constructor() {
-        this.#destroyRef.onDestroy(() => this.#resizeObserver?.disconnect());
+        this.#destroyRef.onDestroy(() => {
+            this.#scroll$.complete();
+            this.#resizeObserver?.disconnect();
+            this.#document.removeEventListener("mouseup", this.#scrollMouseUpHandler);
+        });
+        afterNextRender(() => {
+            this.setPagerListResizeObserver();
+            this.setSubscriptions();
+            this.scrollActivePageIntoView();
+        });
     }
 
-    public ngAfterViewInit(): void {
-        this.setPagerListResizeObserver();
-        this.setSubscriptions();
-        this.scrollActivePageIntoView();
-    }
-
-    public onArrowClick(direction: ScrollDirection): void {
+    protected onArrowClick(direction: ScrollDirection): void {
         this.navigate(direction, this.infinite());
-        this.scrollActivePageIntoView();
     }
 
-    public onPageClick(index: number, element: HTMLLIElement): void {
+    protected onPageClick(index: number, element: HTMLButtonElement): void {
         this.index.set(index);
         element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
 
-    public onPagerScroll(element: HTMLUListElement, direction: ScrollDirection, type: "single" | "continuous"): void {
+    protected onPagerScroll(
+        element: HTMLUListElement,
+        direction: ScrollDirection,
+        type: "single" | "continuous"
+    ): void {
+        if (type === "continuous") {
+            this.#document.addEventListener("mouseup", this.#scrollMouseUpHandler, { once: true });
+        }
         const timeFunction = type === "single" ? timer : interval;
         timeFunction(60)
-            .pipe(takeUntil(this.#scroll$))
+            .pipe(takeUntil(this.#scroll$), takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
                 let left: number = 0;
                 switch (direction) {
@@ -327,7 +359,8 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
             });
     }
 
-    public onPagerScrollEnd(): void {
+    protected onPagerScrollEnd(): void {
+        this.#document.removeEventListener("mouseup", this.#scrollMouseUpHandler);
         this.#scroll$.next();
         this.#scroll$.complete();
         this.#scroll$ = new Subject<void>();
@@ -345,15 +378,22 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     private navigateLeft(infinite: boolean): void {
         const currentIndex = this.index();
         const dataLength = this.viewData().length;
+        if (dataLength === 0) {
+            return;
+        }
         if (infinite) {
             this.index.set((currentIndex - 1 + dataLength) % dataLength);
         } else {
             this.index.set(Math.max(0, currentIndex - 1));
         }
     }
+
     private navigateRight(infinite: boolean): void {
         const currentIndex = this.index();
         const dataLength = this.viewData().length;
+        if (dataLength === 0) {
+            return;
+        }
         if (infinite) {
             this.index.set((currentIndex + 1) % dataLength);
         } else {
@@ -363,7 +403,7 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
 
     private scrollActivePageIntoView(): void {
         asyncScheduler.schedule(() => {
-            const element = this.#hostElementRef.nativeElement.querySelector("li[data-active-page='true']");
+            const element = this.#hostElementRef.nativeElement.querySelector("button[data-active-page='true']");
             if (element) {
                 element.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
             }
@@ -371,18 +411,17 @@ export class ScrollViewComponent implements AfterViewInit, ScrollViewVariantInpu
     }
 
     private setPagerListResizeObserver(): void {
-        asyncScheduler.schedule(() => {
-            const pagerListElementRef = this.pagerListElementRef();
-            if (pagerListElementRef) {
-                const element = pagerListElementRef.nativeElement;
-                this.pagerArrowVisible.set(element.scrollWidth > element.clientWidth);
-                this.#resizeObserver = new ResizeObserver(() => {
-                    const scrollWidth = element.scrollWidth;
-                    const clientWidth = element.clientWidth;
-                    this.pagerArrowVisible.set(scrollWidth > clientWidth);
-                });
-            }
-        });
+        const pagerListElementRef = this.pagerListElementRef();
+        if (pagerListElementRef) {
+            const element = pagerListElementRef.nativeElement;
+            this.pagerArrowVisible.set(element.scrollWidth > element.clientWidth);
+            this.#resizeObserver = new ResizeObserver(() => {
+                const scrollWidth = element.scrollWidth;
+                const clientWidth = element.clientWidth;
+                this.pagerArrowVisible.set(scrollWidth > clientWidth);
+            });
+            this.#resizeObserver.observe(element);
+        }
     }
 
     private setSubscriptions(): void {

@@ -242,9 +242,12 @@ export * from "./layout/placeholder/components/placeholder/placeholder.component
 
 /** Scroll View */
 export * from "./layout/scroll-view/components/scroll-view/scroll-view.component";
+export * from "./layout/scroll-view/directives/scroll-view-active-page.directive";
+export * from "./layout/scroll-view/models/PagerOverlay";
 
 /** Stepper */
-export { StepOptions } from "./layout/stepper/models/Step";
+export type { StepOptions, StepItem } from "./layout/stepper/models/Step";
+export type { StepperTemplateContext } from "./layout/stepper/models/StepperTemplateContext";
 export * from "./layout/stepper/directives/stepper-indicator-template.directive";
 export * from "./layout/stepper/directives/stepper-label-template.directive";
 export * from "./layout/stepper/directives/stepper-step-template.directive";

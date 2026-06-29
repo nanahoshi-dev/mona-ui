@@ -3,7 +3,7 @@ import { ThemeService } from "../../../theme/services/theme.service";
 import { scrollViewPagerListItemThemeVariants, ScrollViewVariantProps } from "../styles/scroll-view.styles";
 
 @Directive({
-    selector: "li[monaScrollViewActivePage]",
+    selector: "button[monaScrollViewActivePage]",
     host: {
         "[class]": "pageItemClass()"
     }

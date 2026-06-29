@@ -88,7 +88,7 @@ export const scrollViewPagerListContainerVariants = cva(
 
 export const scrollViewPagerListVariants = cva(
     `
-        flex items-center
+        flex items-center gap-2
         list-none overflow-hidden
         flex-nowrap px-1 py-3
     `

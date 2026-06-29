@@ -2263,7 +2263,7 @@
   },
   "ScrollViewActivePageDirective": {
     "name": "ScrollViewActivePageDirective",
-    "selector": "\"li[monaScrollViewActivePage]\"",
+    "selector": "\"button[monaScrollViewActivePage]\"",
     "inputs": [
       {
         "name": "active",
@@ -5382,13 +5382,13 @@
       {
         "name": "apply",
         "type": "void",
-        "description": "Emits when the Apply button is clicked.\r\nThe `Apply` button is only displayed when `showButtons` is set to true.",
+        "description": "Emits when the Apply button is clicked.\nThe `Apply` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
         "name": "cancel",
         "type": "void",
-        "description": "Emits when the Cancel button is clicked.\r\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
+        "description": "Emits when the Cancel button is clicked.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
@@ -5418,7 +5418,7 @@
       {
         "name": "showButtons",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the buttons.\r\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\r\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
+        "description": "Specifies whether the color picker should display the buttons.\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
         "kind": "input"
       },
       {
@@ -5432,6 +5432,18 @@
         "type": "boolean",
         "description": "Specifies whether the color picker should display the RGB input.",
         "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "value",
+        "type": "string | null",
+        "description": "",
+        "kind": "model"
       }
     ]
   },
@@ -6438,7 +6450,7 @@
       {
         "name": "animate",
         "type": "boolean | number",
-        "description": "",
+        "description": "Sets whether page transitions are animated.\nPass a boolean for default duration (500ms) or a number for custom duration in milliseconds.",
         "kind": "input"
       },
       {
@@ -6456,7 +6468,7 @@
       {
         "name": "height",
         "type": "string | number",
-        "description": "Sets the height of the scroll view.\r\nThis property is required.",
+        "description": "Sets the height of the scroll view.\nThis property is required.",
         "kind": "input"
       },
       {
@@ -6498,19 +6510,19 @@
       {
         "name": "rounded",
         "type": "ScrollViewVariantProps[\"rounded\"]",
-        "description": "Represents the rounded property for a ScrollView component.\r\n\r\nThe variable `rounded` determines the border radius style to be applied\r\nto the ScrollView. The value \"medium\" is used as the default rounding level.",
+        "description": "Sets the border radius of the scroll view.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Sets custom CSS classes on the component host element. Merged with base classes via tailwind-merge.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "Represents the width of an element or component. The value can be specified\r\neither as a string (e.g., to include units like \"px\", \"%\", \"em\") or as a number\r\n(e.g., for unitless numerical values).\r\n\r\nThis variable is required and must be provided when initializing\r\nor configuring the input.",
+        "description": "Sets the width of the scroll view.",
         "kind": "input"
       }
     ]
@@ -6639,6 +6651,12 @@
     "name": "StepperComponent",
     "selector": "\"mona-stepper\"",
     "inputs": [
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Sets the accessible label for the stepper group.",
+        "kind": "input"
+      },
       {
         "name": "linear",
         "type": "boolean",
