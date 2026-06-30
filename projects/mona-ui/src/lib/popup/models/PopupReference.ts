@@ -16,10 +16,13 @@ export class PopupReference implements PopupRefParams {
     public readonly positionChanges$ = new Subject<ConnectionPositionPair>();
     public componentRef?: ComponentRef<any>;
     public wrapperComponentRef?: ComponentRef<any>;
+    public readonly popupRef: PopupRef;
     #closed = false;
     #closing = false;
 
-    public constructor(public readonly overlayReference: OverlayRef) {}
+    public constructor(public readonly overlayReference: OverlayRef) {
+        this.popupRef = new PopupRef(this);
+    }
 
     public close<R>(result?: R, delay?: number): void {
         if (this.#closing) {
@@ -86,9 +89,5 @@ export class PopupReference implements PopupRefParams {
 
     public get overlayRef(): OverlayRef {
         return this.overlayReference;
-    }
-
-    public get popupRef(): PopupRef {
-        return new PopupRef(this);
     }
 }

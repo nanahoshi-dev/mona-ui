@@ -1,9 +1,5 @@
-<app-section id="popup" [header]="'Popup'" headerType="H1">
-    <p>Displays a popup that is attached to another element or a point.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-popup-demo></app-popup-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/popup/intro.md"></app-markdown-doc>
+
+<app-popup-demo></app-popup-demo>
+
+<app-markdown-doc src="docs/popup/api.md" parentSectionId="popup"></app-markdown-doc>

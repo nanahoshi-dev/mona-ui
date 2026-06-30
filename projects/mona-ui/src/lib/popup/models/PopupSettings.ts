@@ -156,8 +156,18 @@ export interface PopupSettings<T = unknown, C = void> {
      */
     positions?: Array<ConnectedPosition | ConnectionPositionPair>;
 
+    /**
+     * Optional callback invoked when the popup is about to close.
+     * Return `true` to cancel the close. Takes priority over `PopupCloseEvent.preventDefault()`.
+     * @type {(event: PopupCloseEvent) => boolean}
+     */
     preventClose?: Action<PopupCloseEvent, boolean>;
 
+    /**
+     * Additional Angular providers made available within the popup's injector.
+     * Use this to inject services or values that the popup content component needs.
+     * @type {StaticProvider[]}
+     */
     providers?: StaticProvider[];
 
     /**
@@ -176,6 +186,12 @@ export interface PopupSettings<T = unknown, C = void> {
      */
     width?: number | string;
 
+    /**
+     * Whether the CDK overlay should push the popup into the visible viewport when it would
+     * otherwise overflow the screen edges.
+     * Default: true.
+     * @type {boolean}
+     */
     withPush?: boolean;
 
     /**

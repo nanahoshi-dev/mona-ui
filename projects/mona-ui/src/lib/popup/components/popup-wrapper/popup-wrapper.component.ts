@@ -1,11 +1,13 @@
 import { ComponentType } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     ComponentRef,
     computed,
     DestroyRef,
+    DOCUMENT,
     ElementRef,
     inject,
     Injector,
@@ -145,6 +147,7 @@ import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSetting
 })
 export class PopupWrapperComponent implements OnInit {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
     readonly #popupReference = inject(PopupReferenceInjectionToken);
     readonly #popupSettings = inject<PopupSettings>(PopupSettingsInjectionToken);
     #closeEvent: PopupCloseEvent | null = null;
@@ -162,26 +165,34 @@ export class PopupWrapperComponent implements OnInit {
     public readonly visible = signal(true);
     public readonly wrapperClass = signal("");
 
-    public ngOnInit(): void {
-        if (this.#popupSettings.popupWrapperClass != null) {
-            if (this.#popupSettings.popupWrapperClass instanceof Array) {
-                this.wrapperClass.set(this.#popupSettings.popupWrapperClass.join(" "));
-            } else {
-                this.wrapperClass.set(this.#popupSettings.popupWrapperClass);
+    public constructor() {
+        afterNextRender({
+            read: () => {
+                if (this.#popupSettings.popupWrapperClass != null) {
+                    if (this.#popupSettings.popupWrapperClass instanceof Array) {
+                        this.wrapperClass.set(this.#popupSettings.popupWrapperClass.join(" "));
+                    } else {
+                        this.wrapperClass.set(this.#popupSettings.popupWrapperClass);
+                    }
+                }
+                this.#popupReference.closeStart$
+                    .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
+                    .subscribe(event => {
+                        this.#closeEvent = event;
+                        const animationElement = this.animationElement().nativeElement;
+                        this.visible.set(false);
+                        if (!this.leaveAnimationClasses()) {
+                            this.#completeClose();
+                            return;
+                        }
+                        this.#document.defaultView?.setTimeout(() => this.#startFallbackTimer(animationElement));
+                    });
             }
-        }
-        this.#popupReference.closeStart$.pipe(take(1), takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
-            this.#closeEvent = event;
-            const animationElement = this.animationElement().nativeElement;
-            this.visible.set(false);
-            if (!this.leaveAnimationClasses()) {
-                this.#completeClose();
-                return;
-            }
-            window.setTimeout(() => this.#startFallbackTimer(animationElement));
         });
         this.#destroyRef.onDestroy(() => this.#clearFallbackTimer());
     }
+
+    public ngOnInit(): void {}
 
     public attachContent(
         content: TemplateRef<unknown> | ComponentType<unknown>,
@@ -219,7 +230,7 @@ export class PopupWrapperComponent implements OnInit {
         if (this.#fallbackTimer == null) {
             return;
         }
-        window.clearTimeout(this.#fallbackTimer);
+        this.#document.defaultView?.clearTimeout(this.#fallbackTimer);
         this.#fallbackTimer = null;
     }
 
@@ -276,12 +287,17 @@ export class PopupWrapperComponent implements OnInit {
             return;
         }
 
-        const duration = this.#getLongestCssTime(window.getComputedStyle(animationElement));
+        const win = this.#document.defaultView;
+        if (!win) {
+            this.#completeClose();
+            return;
+        }
+        const duration = this.#getLongestCssTime(win.getComputedStyle(animationElement));
         if (duration <= 0) {
             this.#completeClose();
             return;
         }
 
-        this.#fallbackTimer = window.setTimeout(() => this.#completeClose(), duration + 50);
+        this.#fallbackTimer = win.setTimeout(() => this.#completeClose(), duration + 50);
     }
 }

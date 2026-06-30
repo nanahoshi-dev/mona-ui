@@ -38,8 +38,10 @@ export class PopupRef {
     }
 
     /**
-     * @description Emitted when the popup is about to close.
-     * This is intended for internal use only.
+     * @description Emitted when the popup begins closing, before the leave animation completes.
+     * Subscribe to this to react at the moment the close sequence starts — for example, to begin
+     * coordinating a transition in the consuming component. The `closed` observable fires after
+     * the leave animation finishes.
      */
     public get closeStart(): Observable<PopupCloseEvent> {
         return this.#options.closeStart$;

@@ -1,14 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
-import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
 import { PopupDemoComponent } from "../../../demo/components/popup-demo/popup-demo.component";
-import { SectionComponent } from "../../../layout/components/section/section.component";
+import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-popup-doc",
-    imports: [CodeViewerComponent, SectionComponent, PopupDemoComponent],
+    imports: [PopupDemoComponent, MarkdownDocComponent],
     templateUrl: "./popup-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PopupDocComponent {
-    protected readonly importCode = `import { PopupComponent } from "mona-ui";`;
-}
+export class PopupDocComponent {}

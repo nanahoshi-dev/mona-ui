@@ -7,7 +7,6 @@ import {
     AfterViewInit,
     ChangeDetectionStrategy,
     Component,
-    contentChild,
     DestroyRef,
     DOCUMENT,
     effect,
@@ -22,6 +21,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, Subject, take, takeUntil } from "rxjs";
+import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { Action } from "../../../utils/Action";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupOffset } from "../../models/PopupOffset";
@@ -191,6 +191,19 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     public readonly withPush = input<boolean>(true);
 
     /**
+     * @description Whether to close the popup when the user scrolls within a scrollable container.
+     */
+    public readonly closeOnScroll = input(false);
+
+    /**
+     * @description Controls focus restoration when the popup closes.
+     * - `true`: always restore focus to the anchor element.
+     * - `false`: never restore focus (recommended for tooltips).
+     * - `"auto"`: restore focus only if the anchor was focused when the popup opened.
+     */
+    public readonly restoreFocus = input<boolean | "auto">("auto");
+
+    /**
      * @description Whether the popup should track scroll events and reposition itself.
      */
     public readonly withScrollTracking = input<boolean>(true);
@@ -204,7 +217,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        window.setTimeout(() => this.setupEventListeners());
+        rxTimeout(this.#destroyRef, () => this.setupEventListeners());
     }
 
     public ngOnDestroy(): void {
@@ -262,6 +275,10 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     this.#popupOpened = false;
                     return;
                 }
+                if (this.popupRef !== null) {
+                    this.popupRef.close();
+                    return;
+                }
                 const popupSettings: PopupSettings = {
                     anchor,
                     anchorConnectionPoint: this.anchorConnectionPoint(),
@@ -271,6 +288,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     closeOnEscape: this.closeOnEscape(),
                     closeOnMouseLeave: this.closeOnMouseLeave(),
                     closeOnOutsideClick: this.closeOnOutsideClick(),
+                    closeOnScroll: this.closeOnScroll(),
                     content: this.contentTemplate(),
                     data: this.data(),
                     hasBackdrop: this.hasBackdrop(),
@@ -287,6 +305,7 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     positions: this.positions(),
                     preventClose: this.preventClose(),
                     providers: this.providers(),
+                    restoreFocus: this.restoreFocus(),
                     width,
                     withPush: this.withPush(),
                     withScrollTracking: this.withScrollTracking()
@@ -298,10 +317,18 @@ export class PopupComponent<T = unknown> implements OnDestroy, AfterViewInit {
                     if (result instanceof PopupCloseEvent) {
                         if (!result.originalEvent) {
                             this.#popupOpened = false;
-                        } else if (result instanceof PointerEvent && result.type === trigger) {
+                        } else if (
+                            result.originalEvent instanceof PointerEvent &&
+                            result.originalEvent.type === trigger
+                        ) {
                             this.#popupOpened =
-                                target instanceof HTMLElement && target.contains(result.target as HTMLElement);
-                        } else if (result instanceof PointerEvent && pointAnchor && result.type !== trigger) {
+                                target instanceof HTMLElement &&
+                                target.contains(result.originalEvent.target as HTMLElement);
+                        } else if (
+                            result.originalEvent instanceof PointerEvent &&
+                            pointAnchor &&
+                            result.originalEvent.type !== trigger
+                        ) {
                             this.#popupOpened = false;
                         }
                     }

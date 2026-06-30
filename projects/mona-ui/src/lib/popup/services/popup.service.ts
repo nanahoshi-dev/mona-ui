@@ -156,7 +156,10 @@ export class PopupService {
         }
 
         const resolvedAnchor = this.resolveAnchor(settings.anchor);
-        const position = this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
+        const position =
+            settings.positions?.length
+                ? settings.positions
+                : this.getPosition(settings.anchorConnectionPoint, settings.popupConnectionPoint);
         const strategy = this.#overlay
             .position()
             .flexibleConnectedTo(resolvedAnchor)
@@ -403,7 +406,7 @@ export class PopupService {
             return;
         }
 
-        fromEvent<KeyboardEvent>(document, "keydown")
+        fromEvent<KeyboardEvent>(this.#document, "keydown")
             .pipe(
                 filter(() => popupReference.overlayRef.hasAttached()),
                 filter(event => event.key === "Escape"),
@@ -565,10 +568,11 @@ export class PopupService {
         };
 
         if (scrollableContainers.length === 0) {
+            const win = this.#document.defaultView!;
             const globalScrollSubscription = merge(
-                fromEvent(window, "scroll", { passive: true }),
-                fromEvent(window, "resize", { passive: true }),
-                fromEvent(document, "scroll", { passive: true })
+                fromEvent(win, "scroll", { passive: true }),
+                fromEvent(win, "resize", { passive: true }),
+                fromEvent(this.#document, "scroll", { passive: true })
             )
                 .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
                 .subscribe(event => handleScrollClose(event));
@@ -603,12 +607,13 @@ export class PopupService {
             }
         };
 
-        const windowScrollSubscription = fromEvent(window, "scroll", { passive: true })
+        const win = this.#document.defaultView!;
+        const windowScrollSubscription = fromEvent(win, "scroll", { passive: true })
             .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(updatePosition);
         subscriptions.push(windowScrollSubscription);
 
-        const resizeSubscription = fromEvent(window, "resize", { passive: true })
+        const resizeSubscription = fromEvent(win, "resize", { passive: true })
             .pipe(takeUntil(popupReference.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(updatePosition);
         subscriptions.push(resizeSubscription);

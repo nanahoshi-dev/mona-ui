@@ -1,5 +1,6 @@
 import { Component, ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { Overlay } from "@angular/cdk/overlay";
 import { PopupRef } from "../models/PopupRef";
 
 import { PopupService } from "./popup.service";
@@ -77,6 +78,109 @@ describe("PopupService", () => {
 
         expect(updatePositionSpy).toHaveBeenCalledTimes(1);
     });
+
+    it("should close the popup when Escape is pressed", () => {
+        const anchor = createAnchor();
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent
+        });
+
+        let closed = false;
+        popupRef.closed.subscribe(() => (closed = true));
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+        expect(closed).toBe(true);
+        popupRef = null;
+    });
+
+    it("should not close the popup on Escape when closeOnEscape is false", () => {
+        const anchor = createAnchor();
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent,
+            closeOnEscape: false
+        });
+
+        let closed = false;
+        popupRef.closed.subscribe(() => (closed = true));
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+        expect(closed).toBe(false);
+    });
+
+    it("should close the popup on an outside click", () => {
+        const anchor = createAnchor();
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent
+        });
+
+        let closed = false;
+        popupRef.closed.subscribe(() => (closed = true));
+
+        const outsideElement = document.createElement("div");
+        document.body.append(outsideElement);
+        testElements.push(outsideElement);
+        outsideElement.dispatchEvent(new PointerEvent("click", { bubbles: true }));
+
+        expect(closed).toBe(true);
+        popupRef = null;
+    });
+
+    it("should not close the popup when clicking the anchor element", () => {
+        const anchor = createAnchor();
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent
+        });
+
+        let closed = false;
+        popupRef.closed.subscribe(() => (closed = true));
+
+        anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
+
+        expect(closed).toBe(false);
+    });
+
+    it("should use custom positions array when provided", () => {
+        const anchor = createAnchor();
+        const customPositions = [
+            { originX: "start" as const, originY: "top" as const, overlayX: "end" as const, overlayY: "bottom" as const }
+        ];
+
+        const overlay = TestBed.inject(Overlay);
+        const flexStrategyBuilder = overlay.position().flexibleConnectedTo(anchor);
+        const withPositionsSpy = vi.spyOn(flexStrategyBuilder, "withPositions");
+        vi.spyOn(overlay.position(), "flexibleConnectedTo").mockReturnValue(flexStrategyBuilder);
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            content: PopupTestContentComponent,
+            positions: customPositions
+        });
+
+        expect(withPositionsSpy).toHaveBeenCalledWith(customPositions);
+    });
+
+    function createAnchor(): HTMLElement {
+        const anchor = document.createElement("button");
+        anchor.textContent = "Open popup";
+        document.body.append(anchor);
+        testElements.push(anchor);
+        return anchor;
+    }
 
     function createScrollableAnchor(): { anchor: HTMLElement; scrollContainer: HTMLElement } {
         const scrollContainer = document.createElement("div");

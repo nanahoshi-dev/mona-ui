@@ -66,6 +66,10 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
                 type: "boolean",
                 value: false
             },
+            closeOnScroll: {
+                type: "boolean",
+                value: false
+            },
             data: {
                 type: "object",
                 value: {}
@@ -141,6 +145,11 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
                 type: "object",
                 value: []
             },
+            restoreFocus: {
+                type: "dropdown",
+                value: [true, false, "auto"] as (boolean | "auto")[],
+                defaultValue: "auto"
+            },
             trigger: {
                 type: "dropdown",
                 value: ["click", "contextmenu", "pointerover"],
@@ -179,6 +188,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             [closeOnEscape]="closeOnEscape()"
             [closeOnMouseLeave]="closeOnMouseLeave()"
             [closeOnOutsideClick]="closeOnOutsideClick()"
+            [closeOnScroll]="closeOnScroll()"
             [data]="data()"
             [hasBackdrop]="hasBackdrop()"
             [height]="height()"
@@ -194,6 +204,7 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             [positions]="positions()"
             [preventClose]="preventClose()"
             [providers]="providers()"
+            [restoreFocus]="restoreFocus()"
             [trigger]="trigger()"
             [width]="width()"
             [withPush]="withPush()"
@@ -216,6 +227,7 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
     public readonly closeOnEscape = input<ReturnType<PopupComponent["closeOnEscape"]>>(true);
     public readonly closeOnMouseLeave = input<ReturnType<PopupComponent["closeOnMouseLeave"]>>(false);
     public readonly closeOnOutsideClick = input<ReturnType<PopupComponent["closeOnOutsideClick"]>>(true);
+    public readonly closeOnScroll = input<ReturnType<PopupComponent["closeOnScroll"]>>(false);
     public readonly data = input<ReturnType<PopupComponent["data"]>>({});
     public readonly hasBackdrop = input<ReturnType<PopupComponent["hasBackdrop"]>>(false);
     public readonly height = input<ReturnType<PopupComponent["height"]>>("auto");
@@ -233,6 +245,7 @@ export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupCompo
         return false;
     });
     public readonly providers = input<ReturnType<PopupComponent["providers"]>>([]);
+    public readonly restoreFocus = input<ReturnType<PopupComponent["restoreFocus"]>>("auto");
     public readonly trigger = input<ReturnType<PopupComponent["trigger"]>>("click");
     public readonly width = input<ReturnType<PopupComponent["width"]>>("auto");
     public readonly withPush = input<ReturnType<PopupComponent["withPush"]>>(false);

@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const popupMenuBaseVariants = cva(`w-full h-full overflow-hidden shadow-md`, {
+export const popupMenuBaseVariants = cva(`w-full h-full overflow-hidden`, {
     variants: {
         rounded: {
             small: "rounded-sm",
@@ -17,7 +17,7 @@ export const popupMenuContainerVariants = cva(
         bg-background text-foreground
         border border-border
         outline-none
-        p-1
+        p-1 shadow-md
     `,
     {
         variants: {

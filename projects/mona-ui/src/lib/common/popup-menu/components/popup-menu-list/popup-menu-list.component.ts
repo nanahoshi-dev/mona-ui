@@ -39,7 +39,6 @@ import {
     selector: "mona-popup-menu-list",
     imports: [NgTemplateOutlet, LucideChevronRight, LucideCheck],
     templateUrl: "./popup-menu-list.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClasses()"
     }
