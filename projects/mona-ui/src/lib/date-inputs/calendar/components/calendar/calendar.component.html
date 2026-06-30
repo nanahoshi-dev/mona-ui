@@ -78,6 +78,7 @@
     <div
         [class]="monthGridClass()"
         [attr.aria-labelledby]="gridId + '-heading'"
+        (pointerleave)="onMonthGridPointerLeave()"
         [style.grid-template-columns]="`repeat(${columnCount}, 32px)`">
         @for (row of monthDictChunked(); track $index) {
             @if (weekNumber()) {
@@ -89,6 +90,7 @@
             }
             @for (entry of row; track entry.key) {
                 <div
+                    (dayPointerEnter)="onDayPointerEnter($event)"
                     (daySelect)="onDayClick($event.date, $event.event)"
                     monaMonthDay
                     [disabled]="disabled()"
@@ -97,6 +99,7 @@
                     [max]="maxDate()"
                     [monthBounds]="[monthBounds().start, monthBounds().end]"
                     [navigatedDate]="navigatedDate()"
+                    [rangePreview]="rangePreviewDates()"
                     [rounded]="rounded()"
                     [value]="selectedDates()"
                     [entry]="entry">

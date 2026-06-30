@@ -120,6 +120,65 @@ describe("CalendarComponent signal forms", () => {
         expect(component.form.date().touched()).toBe(true);
     });
 
+    it("previews a forward range from the pending start date to the hovered day", async () => {
+        const fixture = await createFixture();
+        const component = fixture.componentInstance;
+        component.selection.set("range");
+        component.form.date().value.set(null);
+        await waitForStable(fixture);
+
+        clickDay(fixture, 16);
+        dispatchDayPointerEnter(fixture, 18);
+        await waitForStable(fixture);
+
+        expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-16"]);
+        expectRangePreview(fixture, 16, false);
+        expectRangePreview(fixture, 17, true);
+        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
+    });
+
+    it("previews a backward range from the pending start date to the hovered day", async () => {
+        const fixture = await createFixture();
+        const component = fixture.componentInstance;
+        component.selection.set("range");
+        component.form.date().value.set(null);
+        await waitForStable(fixture);
+
+        clickDay(fixture, 18);
+        dispatchDayPointerEnter(fixture, 16);
+        await waitForStable(fixture);
+
+        expectRangePreview(fixture, 17, true);
+        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
+    });
+
+    it("commits the final range selection and clears the hover preview", async () => {
+        const fixture = await createFixture();
+        const component = fixture.componentInstance;
+        component.selection.set("range");
+        component.form.date().value.set(null);
+        await waitForStable(fixture);
+
+        clickDay(fixture, 16);
+        dispatchDayPointerEnter(fixture, 18);
+        clickDay(fixture, 18);
+        await waitForStable(fixture);
+
+        expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-18"]);
+        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBe("true");
+        expectRangePreview(fixture, 17, false);
+    });
+
+    it("does not apply range preview outside range selection mode", async () => {
+        const fixture = await createFixture();
+
+        clickDay(fixture, 16);
+        dispatchDayPointerEnter(fixture, 18);
+        await waitForStable(fixture);
+
+        expectRangePreview(fixture, 17, false);
+    });
+
     it("does not change value from mouse or keyboard selection when readonly", async () => {
         const fixture = await createFixture();
         const component = fixture.componentInstance;
@@ -218,6 +277,21 @@ function dispatchCalendarKey(
         new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...options })
     );
     fixture.detectChanges();
+}
+
+function dispatchDayPointerEnter(fixture: ComponentFixture<unknown>, day: number): void {
+    getDay(fixture, day).dispatchEvent(new Event("pointerenter", { cancelable: true }));
+    fixture.detectChanges();
+}
+
+function expectRangePreview(fixture: ComponentFixture<unknown>, day: number, previewed: boolean): void {
+    const dayElement = getDay(fixture, day);
+    expect(dayElement.getAttribute("data-range-preview")).toBe(previewed ? "true" : null);
+    if (previewed) {
+        expect(dayElement.className).toContain("bg-primary/20");
+    } else {
+        expect(dayElement.className).not.toContain("bg-primary/20");
+    }
 }
 
 function getCalendar(fixture: ComponentFixture<unknown>): HTMLElement {

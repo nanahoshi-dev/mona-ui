@@ -21,7 +21,7 @@ import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronLeft, LucideChevronRight } from "@lucide/angular";
 import { any, Dictionary, index, lastOrDefault, range, select } from "@mirei/ts-collections";
 import { DateTime, DurationObjectUnits } from "luxon";
-import { bufferCount, fromEvent, skip, Subject, tap } from "rxjs";
+import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { rxTimeout } from "../../../../common/utils/rxTimeout";
@@ -143,7 +143,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
         return [];
     });
-    readonly #rangeChange$ = new Subject<Date>();
     readonly #themeService = inject(ThemeService);
     protected readonly ariaLabel = computed(() => {
         const view = this.calendarView();
@@ -253,6 +252,18 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             case "decade":
                 return "Previous decade";
         }
+    });
+    protected readonly pendingRangeStart = signal<Date | null>(null);
+    protected readonly rangePreviewDate = signal<Date | null>(null);
+    protected readonly rangePreviewDates = computed(() => {
+        if (this.selection() !== "range") {
+            return [];
+        }
+        const pendingRangeStart = this.pendingRangeStart();
+        if (!pendingRangeStart) {
+            return [];
+        }
+        return this.getInclusiveDateRange(pendingRangeStart, this.rangePreviewDate() ?? this.navigatedDate());
     });
     protected readonly selectedDates = linkedSignal<Date[]>(() => {
         const v = this.value();
@@ -401,7 +412,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         afterNextRender({
             read: () => {
                 this.setupKeyboardNavigation();
-                this.setRangeChangeSubscription();
                 this.focusActiveCell();
             }
         });
@@ -448,11 +458,18 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 this.handleSingleSelection(date);
             }
         } else if (selection === "range") {
-            this.#rangeChange$.next(date);
+            this.handleRangeSelection(date);
             this.navigatedDate.set(date);
         }
         this.focusActiveCell();
         this.commitUserSelection();
+    }
+
+    protected onDayPointerEnter(date: Date): void {
+        if (this.disabled() || this.readonly() || this.selection() !== "range" || this.pendingRangeStart() == null) {
+            return;
+        }
+        this.rangePreviewDate.set(date);
     }
 
     protected onMonthClick(month: number): void {
@@ -460,7 +477,12 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         this.calendarView.set("month");
     }
 
+    protected onMonthGridPointerLeave(): void {
+        this.rangePreviewDate.set(null);
+    }
+
     protected onNavigationClick(direction: "prev" | "next"): void {
+        this.rangePreviewDate.set(null);
         const date = DateTime.fromJSDate(this.navigatedDate());
         let unit: DurationObjectUnits;
         switch (this.calendarView()) {
@@ -487,6 +509,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             month: currentDate.month,
             day: currentDate.day
         });
+        this.clearPendingRange();
         this.navigatedDate.set(navigatedDate.toJSDate());
         this.setCurrentDate(navigatedDate.toJSDate());
         this.calendarView.set("month");
@@ -515,6 +538,11 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             this.setCurrentDate([...currentSelection, newDate]);
         }
         this.navigatedDate.set(newDate);
+    }
+
+    private clearPendingRange(): void {
+        this.pendingRangeStart.set(null);
+        this.rangePreviewDate.set(null);
     }
 
     private commitUserSelection(): void {
@@ -552,6 +580,17 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         const totalDays = DateTime.fromJSDate(endDate).diff(DateTime.fromJSDate(startDate), "days").days + 1;
         return range(0, totalDays)
             .select(i => DateTime.fromJSDate(startDate).plus({ days: i }).toJSDate())
+            .toArray();
+    }
+
+    private getInclusiveDateRange(date1: Date, date2: Date): Date[] {
+        const dateTime1 = DateTime.fromJSDate(date1);
+        const dateTime2 = DateTime.fromJSDate(date2);
+        const startDate = dateTime1 <= dateTime2 ? dateTime1 : dateTime2;
+        const endDate = dateTime1 <= dateTime2 ? dateTime2 : dateTime1;
+        const totalDays = endDate.diff(startDate, "days").days + 1;
+        return range(0, totalDays)
+            .select(i => startDate.plus({ days: i }).toJSDate())
             .toArray();
     }
 
@@ -682,6 +721,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     }
 
     private handleMultipleSelection(date: Date, rangedSelection: boolean): void {
+        this.clearPendingRange();
         const value = this.selectedDates();
         if (value.length === 0) {
             this.setCurrentDate([date]);
@@ -736,7 +776,22 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return false;
     }
 
+    private handleRangeSelection(date: Date): void {
+        const pendingRangeStart = this.pendingRangeStart();
+        if (pendingRangeStart == null) {
+            this.pendingRangeStart.set(date);
+            this.rangePreviewDate.set(null);
+            this.setCurrentDate([date]);
+            return;
+        }
+
+        this.setCurrentDate(this.getInclusiveDateRange(pendingRangeStart, date));
+        this.pendingRangeStart.set(null);
+        this.rangePreviewDate.set(null);
+    }
+
     private handleSingleSelection(date: Date): void {
+        this.clearPendingRange();
         const value = this.selectedDates();
         if (value.length > 0) {
             const date1 = DateTime.fromJSDate(date);
@@ -792,6 +847,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         if (view === "month" && this.isDateDisabled(newDate)) {
             return;
         }
+        this.rangePreviewDate.set(null);
         this.navigatedDate.set(newDate);
     }
 
@@ -825,6 +881,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 }
             }
         }
+        this.rangePreviewDate.set(null);
         this.navigatedDate.set(newDate);
     }
 
@@ -848,10 +905,12 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         if (view === "month" && this.isDateDisabled(newDate)) {
             return;
         }
+        this.rangePreviewDate.set(null);
         this.navigatedDate.set(newDate);
     }
 
     private navigatePeriodKeyboard(direction: "prev" | "next"): void {
+        this.rangePreviewDate.set(null);
         this.onNavigationClick(direction);
     }
 
@@ -882,6 +941,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
 
+        this.rangePreviewDate.set(null);
         this.navigatedDate.set(newDate);
     }
 
@@ -913,6 +973,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                 break;
         }
 
+        this.rangePreviewDate.set(null);
         this.navigatedDate.set(newDate);
     }
 
@@ -921,6 +982,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         if (this.isDateDisabled(today)) {
             return;
         }
+        this.rangePreviewDate.set(null);
         this.navigatedDate.set(today);
         this.calendarView.set("month");
     }
@@ -938,7 +1000,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
                     } else if (selection === "multiple") {
                         this.handleSingleSelection(currentDate);
                     } else if (selection === "range") {
-                        this.#rangeChange$.next(currentDate);
+                        this.handleRangeSelection(currentDate);
                     }
                 }
                 break;
@@ -962,28 +1024,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
 
     private setCurrentDate(date: Date | Date[] | null): void {
         this.selectedDates.set(this.getDateArray(date));
-    }
-
-    private setRangeChangeSubscription(): void {
-        this.#rangeChange$
-            .pipe(
-                takeUntilDestroyed(this.#destroyRef),
-                tap(date => this.selectedDates.set([date])),
-                bufferCount(2, 2),
-                tap(([date1, date2]) => {
-                    const dateTime1 = DateTime.fromJSDate(date1);
-                    const dateTime2 = DateTime.fromJSDate(date2);
-                    const startDate = dateTime1.diff(dateTime2, "days").days < 0 ? dateTime1 : dateTime2;
-                    const endDate = dateTime1.diff(dateTime2, "days").days < 0 ? dateTime2 : dateTime1;
-                    const totalDays = endDate.diff(startDate, "days").days + 1;
-                    const selectedDates = range(0, totalDays)
-                        .select(i => startDate.plus({ days: i }).toJSDate())
-                        .toArray();
-                    this.setCurrentDate(selectedDates);
-                    this.navigatedDate.set(date2);
-                })
-            )
-            .subscribe();
     }
 
     private setupKeyboardNavigation(): void {

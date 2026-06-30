@@ -56,6 +56,9 @@ export const calendarMonthViewDayVariants = cva(
             outside: {
                 true: "opacity-50"
             },
+            rangePreview: {
+                true: "bg-primary/20 hover:bg-primary/30"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-sm",

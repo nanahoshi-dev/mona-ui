@@ -12,8 +12,10 @@ import { compareDates } from "../utils/compareDates";
         "[attr.aria-selected]": "selected() ? 'true' : null",
         "[attr.aria-current]": "isToday() ? 'date' : null",
         "[attr.aria-disabled]": "dayDisabled() ? 'true' : null",
+        "[attr.data-range-preview]": "rangePreviewed() ? 'true' : null",
         "[class]": "baseClass()",
-        "(click)": "onClick($event)"
+        "(click)": "onClick($event)",
+        "(pointerenter)": "onPointerEnter()"
     }
 })
 export class MonthDayDirective {
@@ -23,10 +25,19 @@ export class MonthDayDirective {
         const disabled = this.dayDisabled();
         const focused = this.focused();
         const outside = this.outside();
+        const rangePreview = this.rangePreviewed();
         const rounded = this.rounded();
         const selected = this.selected();
         const today = this.isToday();
-        return calendarMonthViewDayThemeVariants(theme)({ disabled, focused, outside, rounded, selected, today });
+        return calendarMonthViewDayThemeVariants(theme)({
+            disabled,
+            focused,
+            outside,
+            rangePreview,
+            rounded,
+            selected,
+            today
+        });
     });
     protected readonly dayDisabled = computed(() => {
         const disabled = this.disabled();
@@ -65,6 +76,10 @@ export class MonthDayDirective {
         const monthEnd = this.monthBounds()[1];
         return compareDates(entry.key, monthStart, "<") || compareDates(entry.key, monthEnd, ">");
     });
+    protected readonly rangePreviewed = computed(() => {
+        const entry = this.entry();
+        return !this.selected() && exactly(this.rangePreview(), 1, d => compareDates(entry.key, d, "=="));
+    });
     protected readonly selected = computed(() => {
         const entry = this.entry();
         const value = this.value();
@@ -73,6 +88,7 @@ export class MonthDayDirective {
         }
         return compareDates(entry.key, value, "==");
     });
+    public readonly dayPointerEnter = output<Date>();
     public readonly daySelect = output<{ date: Date; event: MouseEvent }>();
     public readonly disabled = input.required<boolean>();
     public readonly disabledDates = input.required<DateDisabledType>();
@@ -81,6 +97,7 @@ export class MonthDayDirective {
     public readonly min = input.required<Date | null | undefined>();
     public readonly monthBounds = input.required<[Date, Date]>();
     public readonly navigatedDate = input.required<Date>();
+    public readonly rangePreview = input.required<Date[]>();
     public readonly rounded = input.required<CalendarVariantProps["rounded"]>();
     public readonly value = input.required<Date | Date[] | null>();
 
@@ -90,5 +107,12 @@ export class MonthDayDirective {
         }
         event.preventDefault();
         this.daySelect.emit({ date: this.entry().key, event });
+    }
+
+    protected onPointerEnter() {
+        if (this.dayDisabled()) {
+            return;
+        }
+        this.dayPointerEnter.emit(this.entry().key);
     }
 }

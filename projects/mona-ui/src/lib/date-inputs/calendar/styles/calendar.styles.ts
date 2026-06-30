@@ -136,7 +136,10 @@ export type CalendarVariantInput = CalendarBaseVariantInput &
     CalendarHeaderVariantInput &
     CalendarDecadeViewGridVariantInput &
     Omit<CalendarDecadeViewCellVariantInput, "focused"> &
-    Omit<CalendarMonthViewDayVariantInput, "disabled" | "focused" | "outside" | "selected" | "today"> &
+    Omit<
+        CalendarMonthViewDayVariantInput,
+        "disabled" | "focused" | "outside" | "rangePreview" | "selected" | "today"
+    > &
     CalendarMonthViewGridVariantInput &
     CalendarMonthViewGridHeaderVariantInput &
     CalendarYearViewGridVariantInput &
