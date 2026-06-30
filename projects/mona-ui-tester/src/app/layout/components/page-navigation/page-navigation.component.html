@@ -1,22 +1,24 @@
-<div class="flex flex-col select-none">
-    <!-- TOC Title -->
-    <h3 class="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4 px-1">
-        On this page
-    </h3>
-
-    <!-- TOC Navigation Links List -->
-    <ul class="relative flex flex-col gap-1 border-s border-border">
+<div class="select-none">
+    <ul class="flex flex-col">
         @for (item of visibleSections(); track item.id()) {
-            <li [attr.data-depth]="item.depth()">
-                <a class="block border-s-2 -ms-[1px] py-1.5 pe-3 ps-4 text-sm font-medium transition-colors cursor-pointer"
-                   [attr.aria-current]="activeSectionId() === item.id() ? 'location' : null"
-                   [class.border-primary]="activeSectionId() === item.id()"
-                   [class.border-transparent]="activeSectionId() !== item.id()"
-                   [class.font-semibold]="activeSectionId() === item.id()"
-                   [class.text-muted-foreground]="activeSectionId() !== item.id()"
-                   [class.text-primary]="activeSectionId() === item.id()"
-                   href="{{currentRoute()}}#{{item.id()}}">
-                    <span class="block" [style.padding-left.px]="(item.depth() - 1) * 12">{{ item.header() }}</span>
+            <li class="relative grid grid-cols-[0.75rem_minmax(0,1fr)] gap-4 items-center">
+                <span class="absolute bottom-0 left-1 top-0 w-px bg-border" aria-hidden="true"></span>
+                <span
+                    class="relative z-10 size-2 rounded-full border bg-background transition-colors"
+                    aria-hidden="true"
+                    [class.border-border]="activeSectionId() !== item.id()"
+                    [style.background-color]="activeSectionId() === item.id() ? 'var(--color-primary)' : null"
+                    [style.border-color]="activeSectionId() === item.id() ? 'var(--color-primary)' : null"></span>
+                <a
+                    class="block py-1.5 text-sm leading-6 transition-colors cursor-pointer"
+                    [attr.aria-current]="activeSectionId() === item.id() ? 'location' : null"
+                    [class.font-semibold]="activeSectionId() === item.id()"
+                    [class.font-medium]="activeSectionId() !== item.id()"
+                    [class.text-muted-foreground]="activeSectionId() !== item.id()"
+                    [style.color]="activeSectionId() === item.id() ? 'var(--color-primary)' : null"
+                    (click)="navigateToSection($event, item.id())"
+                    href="{{ currentRoute() }}#{{ item.id() }}">
+                    <span class="block">{{ item.header() }}</span>
                 </a>
             </li>
         }

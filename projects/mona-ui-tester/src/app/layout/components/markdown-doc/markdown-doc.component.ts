@@ -67,6 +67,8 @@ export class MarkdownDocComponent {
             };
         });
 
+        this.#rewriteFragmentLinks();
+
         this.#registeredItems.set(items);
         this.#pageService.setSections(items);
     }
@@ -83,6 +85,22 @@ export class MarkdownDocComponent {
 
         existingIds.add(candidateId);
         return candidateId;
+    }
+
+    /**
+     * Rewrites same-page anchor links (e.g. `<a href="#some-heading">`) to include the current
+     * pathname. Without this, a bare `#fragment` href resolves against the document's `<base href>`
+     * instead of the current route, navigating to the site root instead of staying on this page.
+     */
+    #rewriteFragmentLinks(): void {
+        const pathname = this.#elementRef.nativeElement.ownerDocument.defaultView?.location.pathname ?? "";
+        const fragmentLinks = Array.from(
+            this.#elementRef.nativeElement.querySelectorAll('a[href^="#"]')
+        ) as HTMLAnchorElement[];
+        fragmentLinks.forEach(link => {
+            const hash = link.getAttribute("href") ?? "";
+            link.setAttribute("href", `${pathname}${hash}`);
+        });
     }
 
     #slugify(text: string): string {

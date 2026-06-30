@@ -5,6 +5,8 @@ import { ActivatedRoute, NavigationEnd, Router } from "@angular/router";
 import { filter, fromEvent, map, startWith, Subscription } from "rxjs";
 import { PageService } from "../../services/page.service";
 
+const SECTION_SCROLL_OFFSET = 24;
+
 @Component({
     selector: "app-page-navigation",
     imports: [],
@@ -36,7 +38,7 @@ export class PageNavigationComponent {
     });
     protected readonly sections = this.#pageService.sections;
     protected readonly visibleSections = computed(() =>
-        Array.from(this.sections()).filter(section => section.parentId() != null)
+        Array.from(this.sections()).filter(section => section.parentId() != null && section.depth() === 1)
     );
 
     public constructor() {
@@ -47,10 +49,28 @@ export class PageNavigationComponent {
         effect(() => {
             this.currentRoute();
             this.visibleSections();
-            queueMicrotask(() => this.#bindScrollSpy());
+            queueMicrotask(() => {
+                this.#bindScrollSpy();
+
+                const fragment = this.#route.snapshot.fragment;
+                if (fragment != null) {
+                    this.#scrollToSection(fragment, "auto");
+                }
+            });
         });
 
         this.#destroyRef.onDestroy(() => this.#scrollSubscription?.unsubscribe());
+    }
+
+    protected navigateToSection(event: MouseEvent, sectionId: string): void {
+        event.preventDefault();
+
+        this.activeSectionId.set(sectionId);
+        this.#scrollToSection(sectionId, "instant");
+        void this.#router.navigate([], {
+            fragment: sectionId,
+            relativeTo: this.#route
+        });
     }
 
     #bindScrollSpy(): void {
@@ -87,8 +107,25 @@ export class PageNavigationComponent {
         };
 
         syncActiveSection();
-        this.#scrollSubscription = fromEvent(scrollContainer, "scroll").subscribe(() =>
-            syncActiveSection()
-        );
+        this.#scrollSubscription = fromEvent(scrollContainer, "scroll").subscribe(() => syncActiveSection());
+    }
+
+    #scrollToSection(sectionId: string, behavior: ScrollBehavior): void {
+        const scrollContainer = this.#document.querySelector("[data-page-scroll-container]");
+        const section = this.#document.getElementById(sectionId);
+        if (!(scrollContainer instanceof HTMLElement) || !(section instanceof HTMLElement)) {
+            return;
+        }
+
+        const targetScrollTop =
+            scrollContainer.scrollTop +
+            section.getBoundingClientRect().top -
+            scrollContainer.getBoundingClientRect().top -
+            SECTION_SCROLL_OFFSET;
+
+        scrollContainer.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior
+        });
     }
 }
