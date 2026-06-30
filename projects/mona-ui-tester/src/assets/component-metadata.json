@@ -1078,6 +1078,12 @@
     "selector": "\"[monaMonthDay]\"",
     "inputs": [
       {
+        "name": "dayPointerEnter",
+        "type": "Date",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "daySelect",
         "type": "{ date: Date; event: MouseEvent }",
         "description": "",
@@ -1122,6 +1128,12 @@
       {
         "name": "navigatedDate",
         "type": "Date",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rangePreview",
+        "type": "Date[]",
         "description": "",
         "kind": "input"
       },
@@ -7458,7 +7470,7 @@
       {
         "name": "hide",
         "type": "PopoverHideEvent",
-        "description": "Emits when the popover is about to be closed.\r\nThis event is preventable.",
+        "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -7482,7 +7494,7 @@
       {
         "name": "show",
         "type": "PopoverShowEvent",
-        "description": "Emits when the popover is about to be shown.\r\nThis event is preventable.",
+        "description": "Emits when the popover is about to be shown.\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -7505,8 +7517,8 @@
       },
       {
         "name": "trigger",
-        "type": "string",
-        "description": "The trigger event for showing the popover.\r\nCan be a suitable pointer event like \"click\" or \"pointerenter\";",
+        "type": "PopoverTrigger",
+        "description": "The trigger that opens/closes the popover.\n\"click\" toggles on click, \"hover\" opens on pointer enter and closes on\npointer leave, \"none\" disables automatic triggering (use `open()`/`close()`\ninstead). Any other DOM event name is also accepted and used as-is.",
         "kind": "input"
       }
     ]

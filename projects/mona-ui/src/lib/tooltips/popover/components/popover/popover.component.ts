@@ -9,14 +9,13 @@ import {
     ElementRef,
     inject,
     input,
-    linkedSignal,
-    OnInit,
     output,
+    Renderer2,
     TemplateRef,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent, map, Subscription, take, takeUntil, tap } from "rxjs";
+import { filter, fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { Position } from "../../../../models/Position";
@@ -30,6 +29,7 @@ import { PopoverTitleTemplateDirective } from "../../directives/popover-title-te
 import { PopoverHideEvent } from "../../models/PopoverHideEvent";
 import { PopoverShowEvent } from "../../models/PopoverShowEvent";
 import { PopoverShownEvent } from "../../models/PopoverShownEvent";
+import { PopoverTrigger } from "../../models/PopoverTrigger";
 import {
     popoverArrowThemeVariants,
     popoverBaseThemeVariants,
@@ -46,9 +46,10 @@ import {
     exportAs: "monaPopover",
     imports: [NgTemplateOutlet]
 })
-export class PopoverComponent implements OnInit, PopoverVariantInputs {
+export class PopoverComponent implements PopoverVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #popupService = inject(PopupService);
+    readonly #renderer = inject(Renderer2);
     readonly #themeService = inject(ThemeService);
     #subscription: Subscription | null = null;
     protected readonly arrowClasses = computed(() => {
@@ -64,10 +65,7 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
         const theme = this.#themeService.theme();
         return popoverContentThemeVariants(theme)();
     });
-    protected readonly currentArrowPosition = linkedSignal({
-        source: () => this.position(),
-        computation: () => this.position()
-    });
+    protected readonly currentArrowPosition = computed(() => this.position());
     protected readonly footerTemplateRef = contentChild(PopoverFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -77,6 +75,9 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
         const variants = popoverHeaderThemeVariants(theme)({ rounded });
         return twMerge(variants, padding);
     });
+    protected readonly headerId = computed(() =>
+        this.title() || this.titleTemplateRef() ? `${this.uid}-title` : null
+    );
     protected readonly titleTemplateRef = contentChild(PopoverTitleTemplateDirective, { read: TemplateRef });
     protected readonly templateRef = viewChild.required(TemplateRef);
     protected readonly uid = v4();
@@ -130,10 +131,12 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
     public readonly title = input("");
 
     /**
-     * @description The trigger event for showing the popover.
-     * Can be a suitable pointer event like "click" or "pointerenter";
+     * @description The trigger that opens/closes the popover.
+     * "click" toggles on click, "hover" opens on pointer enter and closes on
+     * pointer leave, "none" disables automatic triggering (use `open()`/`close()`
+     * instead). Any other DOM event name is also accepted and used as-is.
      */
-    public readonly trigger = input("click");
+    public readonly trigger = input<PopoverTrigger>("click");
 
     public constructor() {
         effect(() => {
@@ -141,62 +144,48 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
                 this.#subscription.unsubscribe();
                 this.#subscription = null;
             }
-            this.setSubscriptions();
+            this.#setSubscriptions();
         });
     }
 
     public close(): void {
         if (this.popupRef) {
             this.popupRef.close();
-            this.popupRef = null;
         }
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
     }
 
     public open(): void {
         if (this.popupRef) {
             return;
         }
-        this.createPopover();
+        this.#createPopover();
     }
 
-    private closePopup(): void {
-        if (!this.popupRef) {
-            return;
-        }
-        const hideEvent = new PopoverHideEvent(this.popoverTargetElement, this.popupRef);
-        this.hide.emit(hideEvent);
-        if (hideEvent.isDefaultPrevented()) {
-            return;
-        }
-        this.close();
-    }
-
-    private createPopover(): void {
+    #createPopover(): void {
         const position = this.position();
         const connectionPoints = getPositionConnectionPoints(position);
         const offset = getOffsetForPosition(position, this.displayArrow());
         const anchor = this.target();
         const content = this.templateRef();
+        const targetElement = this.#popoverTargetElement;
 
-        this.currentArrowPosition.set(this.position());
         this.popupRef = this.#popupService.create({
             anchor,
             anchorConnectionPoint: connectionPoints.anchor,
             animation: fadePopupAnimation,
+            closeOnMouseLeave: this.trigger() === "hover",
             closeOnOutsideClick: true,
             content,
             hasBackdrop: false,
             offset,
             popupConnectionPoint: connectionPoints.popup,
-            restoreFocus: false,
             withPush: true
         });
+        this.#renderer.setAttribute(targetElement, "aria-haspopup", "dialog");
+        this.#renderer.setAttribute(targetElement, "aria-controls", this.uid);
+        this.#renderer.setAttribute(targetElement, "aria-expanded", "true");
         this.popupRef.beforeClose.pipe(takeUntil(this.popupRef.closed)).subscribe(event => {
-            const hideEvent = new PopoverHideEvent(this.popoverTargetElement, this.popupRef as PopupRef);
+            const hideEvent = new PopoverHideEvent(this.#popoverTargetElement, this.popupRef as PopupRef);
             this.hide.emit(hideEvent);
             if (hideEvent.isDefaultPrevented()) {
                 event.preventDefault();
@@ -205,41 +194,58 @@ export class PopoverComponent implements OnInit, PopoverVariantInputs {
         });
         this.popupRef.closed.pipe(take(1)).subscribe(() => {
             this.popupRef = null;
+            this.#renderer.setAttribute(targetElement, "aria-expanded", "false");
             this.hidden.emit();
         });
     }
 
-    private setSubscriptions(): void {
-        this.#subscription = fromEvent<PointerEvent>(this.popoverTargetElement, this.trigger())
+    #openViaTrigger(): void {
+        const showEvent = new PopoverShowEvent(this.#popoverTargetElement);
+        this.show.emit(showEvent);
+        if (showEvent.isDefaultPrevented()) {
+            return;
+        }
+        this.#createPopover();
+        if (this.popupRef) {
+            const shownEvent = new PopoverShownEvent(this.#popoverTargetElement, this.popupRef);
+            this.shown.emit(shownEvent);
+        }
+    }
+
+    #setSubscriptions(): void {
+        const trigger = this.trigger();
+        if (trigger === "none") {
+            return;
+        }
+
+        if (trigger === "hover") {
+            this.#subscription = fromEvent<PointerEvent>(this.#popoverTargetElement, "pointerenter")
+                .pipe(
+                    filter(() => !this.popupRef),
+                    tap(() => this.#openViaTrigger()),
+                    takeUntilDestroyed(this.#destroyRef)
+                )
+                .subscribe();
+            return;
+        }
+
+        this.#subscription = fromEvent<Event>(this.#popoverTargetElement, trigger)
             .pipe(
-                map(event => {
-                    event.preventDefault();
+                tap(event => event.preventDefault()),
+                filter(() => {
                     if (this.popupRef) {
-                        this.closePopup();
+                        this.close();
                         return false;
                     }
                     return true;
                 }),
-                filter(result => result),
-                map(() => {
-                    const showEvent = new PopoverShowEvent(this.popoverTargetElement);
-                    this.show.emit(showEvent);
-                    return !showEvent.isDefaultPrevented();
-                }),
-                filter(result => result),
-                tap(() => {
-                    this.createPopover();
-                    if (this.popupRef) {
-                        const shownEvent = new PopoverShownEvent(this.popoverTargetElement, this.popupRef);
-                        this.shown.emit(shownEvent);
-                    }
-                }),
+                tap(() => this.#openViaTrigger()),
                 takeUntilDestroyed(this.#destroyRef)
             )
             .subscribe();
     }
 
-    private get popoverTargetElement(): HTMLElement {
+    get #popoverTargetElement(): HTMLElement {
         const target = this.target();
         return target instanceof ElementRef ? target.nativeElement : (target as HTMLElement);
     }

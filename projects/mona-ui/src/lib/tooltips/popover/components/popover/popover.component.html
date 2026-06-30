@@ -1,8 +1,8 @@
 <ng-template>
-    <div [class]="baseClasses()" [attr.data-uid]="uid">
+    <div [class]="baseClasses()" [id]="uid" role="dialog" [attr.aria-labelledby]="headerId()" [attr.data-uid]="uid">
         <div>
             @if (title() || titleTemplateRef()) {
-                <div [class]="headerClasses()">
+                <div [class]="headerClasses()" [id]="headerId()">
                     @if (titleTemplateRef()) {
                         <ng-container [ngTemplateOutlet]="titleTemplateRef()"></ng-container>
                     } @else {

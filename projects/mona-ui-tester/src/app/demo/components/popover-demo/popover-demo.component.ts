@@ -21,39 +21,17 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent> {
     readonly #injector = createFeatureInjector({
         footerTemplate: {
-            code: `
-                <ng-template monaPopoverFooterTemplate>
-                    <div class="p-2 border-t flex border-t-border">
-                        <p class="italic text-xs flex-1 select-none">Photo by Lorenzo Castellino</p>
-                        <p class="text-xs select-none">
-                            See at
-                            <a
-                                class="text-primary"
-                                target="_blank"
-                                href="https://www.pexels.com/photo/scenic-riverside-in-arashiyama-kyoto-japan-33145847/"
-                                >Pexels</a
-                            >
-                        </p>
-                    </div>
-                </ng-template>
-            `,
             description: `This template is used to customize the footer of the popover.`,
             name: "Footer Template",
             active: false
         },
         titleTemplate: {
-            code: `
-
-            `,
             description: `This template is used to customize the title of the popover.`,
             name: "Title Template",
             active: false
         }
     });
     protected readonly config = signal<ComponentConfig<PopoverComponent>>({
-        code: `
-
-        `,
         inputs: {
             displayArrow: {
                 type: "boolean",
@@ -74,7 +52,7 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
             },
             trigger: {
                 type: "dropdown",
-                value: ["click", "contextmenu", "pointerenter"],
+                value: ["click", "hover", "contextmenu", "none"],
                 defaultValue: "click"
             },
             title: {
