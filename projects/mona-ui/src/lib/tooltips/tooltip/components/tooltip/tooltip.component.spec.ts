@@ -98,6 +98,7 @@ function dispatchFocusOut(element: HTMLElement): void {
 // =============================================================================
 
 let mockClosedSubject: Subject<void>;
+let mockOpenedSubject: Subject<void>;
 let mockPositionSubject: Subject<ConnectionPositionPair>;
 let mockPopupRef: {
     close: ReturnType<typeof vi.fn>;
@@ -109,6 +110,7 @@ let mockPopupService: { create: ReturnType<typeof vi.fn> };
 
 function createFreshMockPopupRef(): typeof mockPopupRef {
     const closedSubject = new Subject<void>();
+    const openedSubject = new Subject<void>();
     const positionSubject = new Subject<ConnectionPositionPair>();
     const ref = {
         close: vi.fn(() => {
@@ -117,9 +119,10 @@ function createFreshMockPopupRef(): typeof mockPopupRef {
         }),
         closed: closedSubject.asObservable(),
         positionChanges: positionSubject.asObservable(),
-        opened: new Subject<void>().asObservable()
+        opened: openedSubject.asObservable()
     };
     mockClosedSubject = closedSubject;
+    mockOpenedSubject = openedSubject;
     mockPositionSubject = positionSubject;
     return ref;
 }
@@ -249,7 +252,9 @@ describe("TooltipComponent", () => {
             await waitForStable(fixture);
             const createArgs = mockPopupService.create.mock.calls[0][0];
             expect(createArgs.closeOnEscape).toBe(true);
-            expect(createArgs.closeOnMouseLeave).toBe(true);
+            // The component closes via its own pointerleave/focusout handlers, not PopupService's
+            // internal mouse-leave handling.
+            expect(createArgs.closeOnMouseLeave).toBe(false);
             expect(createArgs.closeOnOutsideClick).toBe(true);
             expect(createArgs.hasBackdrop).toBe(false);
             expect(createArgs.restoreFocus).toBe(false);
@@ -295,6 +300,22 @@ describe("TooltipComponent", () => {
         it("should not throw when no elements match the selector", async () => {
             // The selector '.tip-target' matches on creation; if elements are removed at runtime there's no error
             expect(() => fixture.detectChanges()).not.toThrow();
+        });
+
+        it("should attach tooltip behavior to elements matching the selector added after initial render", async () => {
+            const newButton = document.createElement("button");
+            newButton.className = "tip-target";
+            fixture.nativeElement.appendChild(newButton);
+
+            // Let the MutationObserver microtask fire and re-attach listeners.
+            await Promise.resolve();
+            await waitForStable(fixture);
+
+            dispatchPointerEnter(newButton);
+            await waitForStable(fixture);
+            expect(mockPopupService.create).toHaveBeenCalledTimes(1);
+            const createArgs = mockPopupService.create.mock.calls[0][0];
+            expect(createArgs.anchor).toBe(newButton);
         });
     });
 
@@ -451,6 +472,16 @@ describe("TooltipComponent", () => {
 
             vi.advanceTimersByTime(300);
             await waitForStable(fixture);
+            expect(mockPopupService.create).not.toHaveBeenCalled();
+        });
+
+        it("should not create tooltip after showDelay elapses if the fixture was destroyed first", async () => {
+            const anchor = getAnchorButton(fixture);
+            dispatchPointerEnter(anchor);
+            await waitForStable(fixture);
+
+            fixture.destroy();
+            vi.advanceTimersByTime(500);
             expect(mockPopupService.create).not.toHaveBeenCalled();
         });
     });
@@ -714,6 +745,16 @@ describe("TooltipComponent", () => {
         it("should not throw when component is destroyed without tooltip shown", () => {
             expect(() => fixture.destroy()).not.toThrow();
         });
+
+        it("should close the popup when the component is destroyed while a tooltip is open", async () => {
+            const anchor = getAnchorButton(fixture);
+            dispatchPointerEnter(anchor);
+            await waitForStable(fixture);
+            expect(mockPopupService.create).toHaveBeenCalledTimes(1);
+
+            fixture.destroy();
+            expect(mockPopupRef.close).toHaveBeenCalled();
+        });
     });
 
     // =========================================================================
@@ -762,6 +803,54 @@ describe("TooltipComponent", () => {
             component.rounded.set("large");
             await waitForStable(fixture);
             expect(component.rounded()).toBe("large");
+        });
+    });
+
+    // =========================================================================
+    // shown / hidden outputs
+    // =========================================================================
+    describe("shown / hidden outputs", () => {
+        let fixture: ComponentFixture<TestConfigurableTooltipHost>;
+
+        beforeEach(async () => {
+            mockPopupRef = createFreshMockPopupRef();
+            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
+            await TestBed.configureTestingModule({
+                imports: [TestConfigurableTooltipHost],
+                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(TestConfigurableTooltipHost);
+            await waitForStable(fixture);
+        });
+
+        it("should emit shown when the popup opens", async () => {
+            const shownSpy = vi.fn();
+            getTooltipComponent(fixture).shown.subscribe(shownSpy);
+
+            const anchor = getAnchorButton(fixture);
+            dispatchPointerEnter(anchor);
+            await waitForStable(fixture);
+
+            mockOpenedSubject.next();
+            await waitForStable(fixture);
+
+            expect(shownSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("should emit hidden when the popup closes", async () => {
+            const hiddenSpy = vi.fn();
+            getTooltipComponent(fixture).hidden.subscribe(hiddenSpy);
+
+            const anchor = getAnchorButton(fixture);
+            dispatchPointerEnter(anchor);
+            await waitForStable(fixture);
+
+            mockClosedSubject.next();
+            mockClosedSubject.complete();
+            await waitForStable(fixture);
+
+            expect(hiddenSpy).toHaveBeenCalledTimes(1);
         });
     });
 });

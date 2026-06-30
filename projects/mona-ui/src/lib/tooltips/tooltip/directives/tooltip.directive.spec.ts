@@ -1,4 +1,4 @@
-import { Component, signal } from "@angular/core";
+import { Component, createComponent, EnvironmentInjector, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideNoopAnimations } from "@angular/platform-browser/animations";
@@ -65,6 +65,11 @@ class TestContentModeHost {
 })
 class TestNoTitleHost {}
 
+@Component({
+    template: ``
+})
+class ProbeComponent {}
+
 // =============================================================================
 // Helper Functions
 // =============================================================================
@@ -96,6 +101,7 @@ function dispatchFocusOut(element: HTMLElement): void {
 // =============================================================================
 
 let mockClosedSubject: Subject<void>;
+let mockOpenedSubject: Subject<void>;
 let mockPositionSubject: Subject<ConnectionPositionPair>;
 let mockPopupRef: {
     close: ReturnType<typeof vi.fn>;
@@ -107,6 +113,7 @@ let mockPopupService: { create: ReturnType<typeof vi.fn> };
 
 function createFreshMockPopupRef(): typeof mockPopupRef {
     const closedSubject = new Subject<void>();
+    const openedSubject = new Subject<void>();
     const positionSubject = new Subject<ConnectionPositionPair>();
     const ref = {
         close: vi.fn(() => {
@@ -115,10 +122,11 @@ function createFreshMockPopupRef(): typeof mockPopupRef {
         }),
         closed: closedSubject.asObservable(),
         positionChanges: positionSubject.asObservable(),
-        opened: new Subject<void>().asObservable()
+        opened: openedSubject.asObservable()
     };
     // Store references so tests can use them
     mockClosedSubject = closedSubject;
+    mockOpenedSubject = openedSubject;
     mockPositionSubject = positionSubject;
     return ref;
 }
@@ -315,7 +323,9 @@ describe("TooltipDirective", () => {
             await waitForStable(fixture);
             const createArgs = mockPopupService.create.mock.calls[0][0];
             expect(createArgs.closeOnEscape).toBe(true);
-            expect(createArgs.closeOnMouseLeave).toBe(true);
+            // The directive closes via its own pointerleave/focusout handlers, not PopupService's
+            // internal mouse-leave handling.
+            expect(createArgs.closeOnMouseLeave).toBe(false);
             expect(createArgs.closeOnOutsideClick).toBe(true);
             expect(createArgs.hasBackdrop).toBe(false);
             expect(createArgs.restoreFocus).toBe(false);
@@ -426,6 +436,25 @@ describe("TooltipDirective", () => {
             dispatchFocusIn(itemA);
             await waitForStable(fixture);
             expect(mockPopupService.create).toHaveBeenCalledTimes(1);
+        });
+
+        it("should attach tooltip behavior to elements added to the host after initial render", async () => {
+            const container = fixture.debugElement.query(By.directive(TooltipDirective))
+                .nativeElement as HTMLElement;
+            const itemC = document.createElement("span");
+            itemC.setAttribute("title", "Tip C");
+            itemC.className = "item-c";
+            container.appendChild(itemC);
+
+            // Let the MutationObserver microtask fire and re-attach listeners.
+            await Promise.resolve();
+            await waitForStable(fixture);
+
+            dispatchPointerEnter(itemC);
+            await waitForStable(fixture);
+            expect(mockPopupService.create).toHaveBeenCalledTimes(1);
+            const createArgs = mockPopupService.create.mock.calls[0][0];
+            expect(createArgs.anchor).toBe(itemC);
         });
     });
 
@@ -543,6 +572,16 @@ describe("TooltipDirective", () => {
 
             vi.advanceTimersByTime(300);
             await waitForStable(fixture);
+            expect(mockPopupService.create).not.toHaveBeenCalled();
+        });
+
+        it("should not create tooltip after showDelay elapses if the fixture was destroyed first", async () => {
+            const button = getHostButton(fixture);
+            dispatchPointerEnter(button);
+            await waitForStable(fixture);
+
+            fixture.destroy();
+            vi.advanceTimersByTime(500);
             expect(mockPopupService.create).not.toHaveBeenCalled();
         });
     });
@@ -848,12 +887,78 @@ describe("TooltipDirective", () => {
             expect(mockPopupService.create).toHaveBeenCalledTimes(1);
 
             fixture.destroy();
-            // The afterRenderEffect cleanup and takeUntilDestroyed should clean up
-            // No error should be thrown
+            expect(mockPopupRef.close).toHaveBeenCalled();
         });
 
         it("should not throw when destroying without tooltip shown", () => {
             expect(() => fixture.destroy()).not.toThrow();
+        });
+    });
+
+    // =========================================================================
+    // Dynamically created tooltip template component cleanup
+    // =========================================================================
+    describe("component cleanup", () => {
+        let fixture: ComponentFixture<TestConfigurableHost>;
+        let destroySpy: ReturnType<typeof vi.spyOn>;
+
+        beforeEach(async () => {
+            mockPopupRef = createFreshMockPopupRef();
+            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
+
+            await TestBed.configureTestingModule({
+                imports: [TestConfigurableHost],
+                providers: [
+                    provideNoopAnimations(),
+                    { provide: PopupService, useValue: mockPopupService }
+                ]
+            }).compileComponents();
+
+            // Probe a real ComponentRef instance to find the runtime prototype that
+            // every dynamically created component's ComponentRef shares, so calls to
+            // `destroy()` on the directive's internally-created component can be observed.
+            const environmentInjector = TestBed.inject(EnvironmentInjector);
+            const probe = createComponent(ProbeComponent, { environmentInjector });
+            destroySpy = vi.spyOn(Object.getPrototypeOf(probe), "destroy");
+            probe.destroy();
+            destroySpy.mockClear();
+
+            fixture = TestBed.createComponent(TestConfigurableHost);
+            await waitForStable(fixture);
+        });
+
+        afterEach(() => {
+            destroySpy.mockRestore();
+        });
+
+        it("should destroy the dynamically created tooltip template component when the popup closes", async () => {
+            const button = getHostButton(fixture);
+            dispatchPointerEnter(button);
+            await waitForStable(fixture);
+
+            const callsBeforeClose = destroySpy.mock.calls.length;
+
+            mockClosedSubject.next();
+            mockClosedSubject.complete();
+            await waitForStable(fixture);
+
+            expect(destroySpy.mock.calls.length).toBeGreaterThan(callsBeforeClose);
+        });
+
+        it("should destroy the dynamically created tooltip template component when the directive is destroyed", async () => {
+            const button = getHostButton(fixture);
+            dispatchPointerEnter(button);
+            await waitForStable(fixture);
+
+            const callsBeforeDestroy = destroySpy.mock.calls.length;
+
+            fixture.destroy();
+            // The closed$ subscription created in #createTooltip is not tied to the
+            // directive's DestroyRef, so it still fires once popupRef.close() resolves.
+            mockClosedSubject.next();
+            mockClosedSubject.complete();
+
+            expect(destroySpy.mock.calls.length).toBeGreaterThan(callsBeforeDestroy);
         });
     });
 
@@ -967,6 +1072,60 @@ describe("TooltipDirective", () => {
             dispatchFocusOut(button);
             await waitForStable(fixture);
             expect(mockPopupRef.close).toHaveBeenCalled();
+        });
+    });
+
+    // =========================================================================
+    // shown / hidden outputs
+    // =========================================================================
+    describe("shown / hidden outputs", () => {
+        let fixture: ComponentFixture<TestConfigurableHost>;
+
+        beforeEach(async () => {
+            mockPopupRef = createFreshMockPopupRef();
+            mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
+
+            await TestBed.configureTestingModule({
+                imports: [TestConfigurableHost],
+                providers: [
+                    provideNoopAnimations(),
+                    { provide: PopupService, useValue: mockPopupService }
+                ]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(TestConfigurableHost);
+            await waitForStable(fixture);
+        });
+
+        it("should emit shown when the popup opens", async () => {
+            const directiveDebug = fixture.debugElement.query(By.directive(TooltipDirective));
+            const shownSpy = vi.fn();
+            directiveDebug.injector.get(TooltipDirective).shown.subscribe(shownSpy);
+
+            const button = getHostButton(fixture);
+            dispatchPointerEnter(button);
+            await waitForStable(fixture);
+
+            mockOpenedSubject.next();
+            await waitForStable(fixture);
+
+            expect(shownSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("should emit hidden when the popup closes", async () => {
+            const directiveDebug = fixture.debugElement.query(By.directive(TooltipDirective));
+            const hiddenSpy = vi.fn();
+            directiveDebug.injector.get(TooltipDirective).hidden.subscribe(hiddenSpy);
+
+            const button = getHostButton(fixture);
+            dispatchPointerEnter(button);
+            await waitForStable(fixture);
+
+            mockClosedSubject.next();
+            mockClosedSubject.complete();
+            await waitForStable(fixture);
+
+            expect(hiddenSpy).toHaveBeenCalledTimes(1);
         });
     });
 });

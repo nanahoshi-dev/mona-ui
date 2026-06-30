@@ -11,6 +11,7 @@ import {
     inject,
     input,
     linkedSignal,
+    output,
     Renderer2,
     signal,
     TemplateRef,
@@ -51,13 +52,17 @@ export class TooltipDirective implements TooltipVariantInputs {
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
     #currentAnchor: HTMLElement | null = null;
+    #hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    #mutationObserver: MutationObserver | null = null;
     #popupRef: PopupRef | null = null;
+    #showTimeoutId: ReturnType<typeof setTimeout> | null = null;
     #subscription: Subscription | null = null;
     #tooltipId = createElementControlId();
     protected readonly originalTitle = signal("");
 
     /**
      * @description Whether the tooltip is disabled. When disabled, the tooltip will not be shown.
+     * @default false
      */
     public readonly disabled = input<boolean>(false);
 
@@ -65,11 +70,13 @@ export class TooltipDirective implements TooltipVariantInputs {
      * @description The filter to select elements that will have tooltips.
      * It can be a CSS selector that matches elements within the host element.
      * Only applies when `mode` is set to `content`.
+     * @default "[title]"
      */
     public readonly filter = input<string>("[title]");
 
     /**
      * @description The delay in milliseconds before hiding the tooltip.
+     * @default 0
      */
     public readonly hideDelay = input<number>(0);
 
@@ -77,16 +84,19 @@ export class TooltipDirective implements TooltipVariantInputs {
      * @description The mode of the tooltip.
      * "host" mode receives the tooltip from the host element's title attribute.
      * "content" mode uses the title attribute of elements matching the filter.
+     * @default "host"
      */
     public readonly mode = input<"host" | "content">("host");
 
     /**
      * @description The position of the tooltip relative to the target element.
+     * @default "top"
      */
     public readonly position = input<Position>("top");
 
     /**
      * @description The border radius of the tooltip.
+     * @default "medium"
      */
     public readonly rounded = input<TooltipVariantProps["rounded"]>("medium", {
         alias: "tooltipRounded"
@@ -94,22 +104,49 @@ export class TooltipDirective implements TooltipVariantInputs {
 
     /**
      * @description The delay in milliseconds before showing the tooltip after the trigger event.
+     * @default 0
      */
     public readonly showDelay = input<number>(0);
+
+    /**
+     * @description Emitted when the tooltip popup is hidden.
+     */
+    public readonly hidden = output<void>();
+
+    /**
+     * @description Emitted when the tooltip popup is shown.
+     */
+    public readonly shown = output<void>();
 
     public constructor() {
         afterRenderEffect({
             read: () => {
                 this.mode();
                 this.position();
-                if (this.#subscription) {
-                    this.#subscription.unsubscribe();
-                    this.#subscription = null;
-                }
                 this.#currentAnchor = null;
                 this.#popupRef?.close();
-                this.#setSubscription();
+                this.#refreshSubscription();
+                this.#mutationObserver?.disconnect();
+                this.#mutationObserver = null;
+                if (this.mode() === "content") {
+                    this.#mutationObserver = new MutationObserver(() => this.#refreshSubscription());
+                    this.#mutationObserver.observe(this.#host.nativeElement, { childList: true, subtree: true });
+                }
             }
+        });
+
+        this.#destroyRef.onDestroy(() => {
+            if (this.#showTimeoutId != null) {
+                clearTimeout(this.#showTimeoutId);
+                this.#showTimeoutId = null;
+            }
+            if (this.#hideTimeoutId != null) {
+                clearTimeout(this.#hideTimeoutId);
+                this.#hideTimeoutId = null;
+            }
+            this.#mutationObserver?.disconnect();
+            this.#mutationObserver = null;
+            this.#popupRef?.close();
         });
     }
 
@@ -140,6 +177,8 @@ export class TooltipDirective implements TooltipVariantInputs {
 
         this.#renderer.setAttribute(anchor, "aria-describedby", this.#tooltipId);
 
+        popupRef.opened.pipe(take(1)).subscribe(() => this.shown.emit());
+
         popupRef.positionChanges
             .pipe(takeUntil(popupRef.closed), takeUntilDestroyed(this.#destroyRef))
             .subscribe(connectionPair => {
@@ -153,6 +192,8 @@ export class TooltipDirective implements TooltipVariantInputs {
             }
             this.#renderer.removeAttribute(anchor, "aria-describedby");
             this.#renderer.setAttribute(anchor, "title", text);
+            component.destroy();
+            this.hidden.emit();
         });
     }
 
@@ -177,7 +218,8 @@ export class TooltipDirective implements TooltipVariantInputs {
         const hideDelay = this.hideDelay();
         if (hideDelay > 0) {
             const popupRef = this.#popupRef;
-            setTimeout(() => {
+            this.#hideTimeoutId = setTimeout(() => {
+                this.#hideTimeoutId = null;
                 if (this.#popupRef === popupRef) {
                     popupRef.close();
                 }
@@ -203,7 +245,8 @@ export class TooltipDirective implements TooltipVariantInputs {
         if (title) {
             const showDelay = this.showDelay();
             if (showDelay > 0) {
-                setTimeout(() => {
+                this.#showTimeoutId = setTimeout(() => {
+                    this.#showTimeoutId = null;
                     if (!this.#popupRef || this.#currentAnchor !== targetElement) {
                         this.#createTooltip(title, targetElement);
                     }
@@ -212,6 +255,14 @@ export class TooltipDirective implements TooltipVariantInputs {
                 this.#createTooltip(title, targetElement);
             }
         }
+    }
+
+    #refreshSubscription(): void {
+        if (this.#subscription) {
+            this.#subscription.unsubscribe();
+            this.#subscription = null;
+        }
+        this.#setSubscription();
     }
 
     #setSubscription(): void {
