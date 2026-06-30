@@ -81,10 +81,15 @@ export class ContextMenuComponent implements ContextMenuVariantInput {
     });
 
     /**
-     * @description ARIA label for the context menu.
+     * @description Reserved for an ARIA label on the context menu.
+     * Not currently applied to the target element or the rendered menu.
      */
     public readonly ariaLabel = input<string>("");
 
+    /**
+     * @description The menu items to render. When provided, these take precedence over
+     * content-projected `mona-contextmenu-item` (and related) components.
+     */
     public readonly items = input<Iterable<PopupMenuItem>>([]);
 
     /**

@@ -218,10 +218,6 @@ export class PopupMenuListComponent implements OnInit {
         const firstItem = this.#navigationItems().firstOrDefault();
         if (firstItem) {
             this.activeMenuItem.set(firstItem);
-            const target = this.#host.nativeElement.querySelector('[data-active="true"]');
-            if (target) {
-                target.focus();
-            }
         }
         return firstItem;
     }
@@ -292,10 +288,6 @@ export class PopupMenuListComponent implements OnInit {
         const lastItem = this.#navigationItems().lastOrDefault();
         if (lastItem) {
             this.activeMenuItem.set(lastItem);
-            const target = this.#host.nativeElement.querySelector('[data-active="true"]');
-            if (target) {
-                target.focus();
-            }
         }
     }
 
@@ -327,10 +319,6 @@ export class PopupMenuListComponent implements OnInit {
         const firstItem = this.#navigationItems().firstOrDefault();
         if (firstItem) {
             this.activeMenuItem.set(firstItem);
-            const target = this.#host.nativeElement.querySelector('[data-active="true"]');
-            if (target) {
-                target.focus();
-            }
         }
     }
 
@@ -382,8 +370,8 @@ export class PopupMenuListComponent implements OnInit {
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 tap(e => {
-                    e.preventDefault();
                     if (isNavigationKey(e.key)) {
+                        e.preventDefault();
                         this.#typeaheadKey$.next("");
                         this.handleNavigationKey(e);
                     } else if (isTypeaheadKey(e.key)) {

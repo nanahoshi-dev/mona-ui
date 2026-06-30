@@ -6876,13 +6876,13 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "ARIA label for the context menu.",
+        "description": "Reserved for an ARIA label on the context menu.\r\nNot currently applied to the target element or the rendered menu.",
         "kind": "input"
       },
       {
         "name": "items",
         "type": "Iterable<PopupMenuItem>",
-        "description": "",
+        "description": "The menu items to render. When provided, these take precedence over\r\ncontent-projected `mona-contextmenu-item` (and related) components.",
         "kind": "input"
       },
       {

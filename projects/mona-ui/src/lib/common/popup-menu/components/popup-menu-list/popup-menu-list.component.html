@@ -29,15 +29,15 @@
                 @let textTemplate = item.textTemplate?.() ?? popupTextTemplate() ?? null;
                 <div
                     role="menuitem"
+                    [id]="item.uid"
                     (pointerenter)="pointerEnter$.next({ event: $event, item: item })"
                     (pointerleave)="pointerLeave$.next({ event: $event, item: item })"
                     (click)="onItemClick($event, item)"
                     [attr.data-active]="item === activeMenuItem()"
-                    [attr.aria-current]="item === activeMenuItem() ? 'true' : null"
                     [attr.aria-disabled]="item.disabled"
                     [attr.aria-expanded]="item.items.length > 0 && item === activeMenuItem() && !!popupRef"
                     [attr.aria-haspopup]="item.items.length > 0 ? 'menu' : null"
-                    [attr.aria-label]="item.label"
+                    [attr.aria-label]="item.label || null"
                     [attr.data-disabled]="item.disabled"
                     [class]="menuItemClasses()">
                     @if (iconAreaVisible()) {
