@@ -33,7 +33,7 @@ export class SplitterPaneStyleDirective {
         if (typeof size !== "string") {
             return null;
         }
-        const match = size.trim().match(/^([0-9]*\\.?[0-9]+)fr$/i);
+        const match = size.trim().match(/^([0-9]*\.?[0-9]+)fr$/i);
         if (match === null) {
             return null;
         }
@@ -56,13 +56,13 @@ export class SplitterPaneStyleDirective {
         if (pane.collapsible() && pane.collapsed()) {
             return "0";
         }
-        if (pane.uid === this.#autoSizedPane()?.uid) {
-            return "1";
-        }
         const size = this.getPaneSize(pane);
         const fractionalWeight = this.getFractionalWeight(size);
         if (fractionalWeight !== null) {
             return fractionalWeight.toString();
+        }
+        if (pane.uid === this.#autoSizedPane()?.uid) {
+            return "1";
         }
         return size === null ? "1" : "0";
     }

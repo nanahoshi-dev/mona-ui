@@ -6576,7 +6576,7 @@
       {
         "name": "orientation",
         "type": "SplitterVariantProps[\"orientation\"]",
-        "description": "",
+        "description": "The layout direction of the splitter panes.",
         "kind": "input"
       }
     ]

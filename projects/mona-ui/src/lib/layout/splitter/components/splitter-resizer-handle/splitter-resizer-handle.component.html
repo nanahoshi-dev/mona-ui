@@ -4,6 +4,7 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
+            aria-label="Collapse previous pane"
             (click)="collapsePrevious.emit($event)"
             (pointerdown)="onPointerDown($event)">
             <svg lucideChevronLeft [size]="12"></svg>
@@ -17,6 +18,7 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
+            aria-label="Collapse next pane"
             (click)="collapseNext.emit($event)"
             (pointerdown)="onPointerDown($event)">
             <svg lucideChevronRight [size]="12"></svg>
@@ -28,6 +30,7 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
+            aria-label="Collapse pane above"
             (click)="collapsePrevious.emit($event)"
             (pointerdown)="onPointerDown($event)">
             <svg lucideChevronUp [size]="12"></svg>
@@ -41,6 +44,7 @@
             monaButton
             look="secondary"
             [rounded]="'none'"
+            aria-label="Collapse pane below"
             (click)="collapseNext.emit($event)"
             (pointerdown)="onPointerDown($event)">
             <svg lucideChevronDown [size]="12"></svg>

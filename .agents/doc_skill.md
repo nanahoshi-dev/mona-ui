@@ -6,13 +6,13 @@ Target library:
 
 * Package: `@mirei/mona-ui`
 * Framework: Angular 22
-* Component library source: `projects/mona-ui/src/lib`
-* Demo/tester app: `projects/mona-ui-tester/src/app`
-* Existing component docs: `projects/mona-ui-tester/src/app/docs/components`
-* Existing component demos: `projects/mona-ui-tester/src/app/demo/components`
-* Public package surface: `projects/mona-ui/src/lib/index.ts`, re-exported by `projects/mona-ui/src/public-api.ts`
-* Generated component metadata: `projects/mona-ui-tester/src/assets/component-metadata.json`
-* Metadata generator: `projects/mona-ui-tester/scripts/extract-metadata.ts`
+* Component library source: `../projects/mona-ui/src/lib`
+* Demo/tester app: `../projects/mona-ui-tester/src/app`
+* Existing component docs: `../projects/mona-ui-tester/src/app/docs/components`
+* Existing component demos: `../projects/mona-ui-tester/src/app/demo/components`
+* Public package surface: `../projects/mona-ui/src/lib/index.ts`, re-exported by `../projects/mona-ui/src/public-api.ts`
+* Generated component metadata: `../projects/mona-ui-tester/src/assets/component-metadata.json`
+* Metadata generator: `../projects/mona-ui-tester/scripts/extract-metadata.ts`
 
 Requested documentation scope:
 `<COMPONENT_OR_COMPONENT_FAMILY_HERE>`
@@ -29,11 +29,9 @@ Examples:
 * `tooltip` and `tooltip-directive`
 
 Primary objective:
-Create useful first-pass written documentation for the requested component(s), integrated into the existing tester/docs app, without inventing unsupported behavior and without exposing implementation details as public API.
+Create useful first-pass written documentation for the requested component (s), integrated into the existing tester/docs app, without inventing unsupported behavior and without exposing implementation details as public API.
 
-This is not a redesign task.
-This is not a refactor task.
-This is a documentation task with small supporting code changes only when required for documentation quality.
+This is not a redesign task. This is not a refactor task. This is a documentation task with small supporting code changes only when required for documentation quality.
 
 The final documentation must be useful to two audiences:
 
@@ -46,14 +44,14 @@ Before editing anything, inspect these files and directories:
 
 1. Repository instructions:
 
-    * `AGENTS.md`
-    * `CLAUDE.md`
+    * `../AGENTS.md`
+    * `../CLAUDE.md`
     * `.eslint.config.mjs`
-    * `package.json`
+    * `../package.json`
 
 2. Library source for the requested component:
 
-    * Relevant folder(s) under `projects/mona-ui/src/lib`
+    * Relevant folder (s) under `../projects/mona-ui/src/lib`
     * Component/directive `.ts` files
     * Template files
     * Style files
@@ -64,8 +62,8 @@ Before editing anything, inspect these files and directories:
 
 3. Public API:
 
-    * `projects/mona-ui/src/lib/index.ts`
-    * `projects/mona-ui/src/public-api.ts`
+    * `../projects/mona-ui/src/lib/index.ts`
+    * `../projects/mona-ui/src/public-api.ts`
     * Any barrel exports in the component folder
 
 4. Existing tester/demo implementation:
@@ -73,12 +71,12 @@ Before editing anything, inspect these files and directories:
     * Existing doc component under `projects/mona-ui-tester/src/app/docs/components/<component>-doc`
     * Existing demo component under `projects/mona-ui-tester/src/app/demo/components/<component>-demo`
     * Any shared demo helpers such as code viewer, demo container, event viewer, API input list item, section components, or configuration helpers
-    * `projects/mona-ui-tester/src/app/routes.ts`
+    * `../projects/mona-ui-tester/src/app/routes.ts`
 
 5. Generated metadata:
 
-    * `projects/mona-ui-tester/src/assets/component-metadata.json`
-    * `projects/mona-ui-tester/scripts/extract-metadata.ts`
+    * `../projects/mona-ui-tester/src/assets/component-metadata.json`
+    * `../projects/mona-ui-tester/scripts/extract-metadata.ts`
 
 Documentation rules:
 
@@ -152,11 +150,7 @@ For each requested component, update or create the relevant documentation page u
 
 Use the existing doc component structure where possible.
 
-Do not introduce a new documentation framework.
-Do not add dependencies.
-Do not restructure the whole docs app.
-Do not remove existing demos.
-Do not duplicate interactive demos with long prose. Explain what the demo cannot fully communicate.
+Do not introduce a new documentation framework. Do not add dependencies. Do not restructure the whole docs app. Do not remove existing demos. Do not duplicate interactive demos with long prose. Explain what the demo cannot fully communicate.
 
 ---
 
@@ -791,5 +785,4 @@ Hard refusal rules:
 Start with the requested scope only:
 `<COMPONENT_OR_COMPONENT_FAMILY_HERE>`
 
-First, inspect the repository and produce a concise implementation plan.
-Then apply the documentation changes.
+First, inspect the repository and produce a concise implementation plan. Then apply the documentation changes.

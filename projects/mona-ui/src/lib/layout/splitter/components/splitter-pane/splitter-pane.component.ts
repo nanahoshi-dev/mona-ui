@@ -1,9 +1,8 @@
-import { Component, input, model, TemplateRef, viewChild, ChangeDetectionStrategy } from "@angular/core";
+import { Component, input, model, TemplateRef, viewChild } from "@angular/core";
 import { v4 } from "uuid";
 
 @Component({
     selector: "mona-splitter-pane",
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <ng-template>
             <ng-content></ng-content>
@@ -11,8 +10,6 @@ import { v4 } from "uuid";
     `
 })
 export class SplitterPaneComponent {
-    public readonly template = viewChild.required(TemplateRef);
-
     /**
      * @description Whether the pane is collapsible.
      */
@@ -42,6 +39,8 @@ export class SplitterPaneComponent {
      * @description The size of the pane.
      */
     public readonly size = model<string | number>("");
+
+    public readonly template = viewChild.required(TemplateRef);
 
     public readonly uid = v4();
 }

@@ -1,10 +1,5 @@
-<app-section id="splitter" [header]="'Splitter'" headerType="H1">
-    <p>A splitter is a UI control that allows users to resize and rearrange content areas by dragging the splitter bar.
-        It provides a flexible and interactive way to manage layout and content organization within a user interface.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-splitter-demo></app-splitter-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/splitter/intro.md"></app-markdown-doc>
+
+<app-splitter-demo></app-splitter-demo>
+
+<app-markdown-doc src="docs/splitter/api.md" parentSectionId="splitter"></app-markdown-doc>

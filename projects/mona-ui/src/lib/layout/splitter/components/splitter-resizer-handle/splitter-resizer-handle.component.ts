@@ -8,7 +8,6 @@ import { splitterResizerHandleThemeVariants, SplitterVariantProps } from "../../
     selector: "mona-splitter-resizer-handle",
     imports: [ButtonDirective, LucideChevronLeft, LucideChevronRight, LucideChevronUp, LucideChevronDown],
     templateUrl: "./splitter-resizer-handle.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()"
     }

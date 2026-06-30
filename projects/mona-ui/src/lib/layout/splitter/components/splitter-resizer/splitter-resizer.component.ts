@@ -1,5 +1,7 @@
+import { Directionality } from "@angular/cdk/bidi";
 import {
     afterNextRender,
+    afterRenderEffect,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -27,21 +29,29 @@ interface PaneElementData {
 @Component({
     selector: "mona-splitter-resizer",
     templateUrl: "./splitter-resizer.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [SplitterResizerHandleComponent],
     host: {
         "[class]": "baseClass()",
         "[style.cursor]": "resizable() ? (orientation()==='horizontal' ? 'ew-resize' : 'ns-resize') : 'auto'",
         "(dblclick)": "toggleCollapse()",
-        tabindex: "0"
+        role: "separator",
+        "[attr.aria-orientation]": "orientation()",
+        "[attr.aria-valuemax]": "ariaValueMax()",
+        "[attr.aria-valuemin]": "ariaValueMin()",
+        "[attr.aria-valuenow]": "ariaValueNow()",
+        "[attr.tabindex]": "isInert() ? -1 : 0"
     }
 })
 export class SplitterResizerComponent {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #directionality = inject(Directionality);
     readonly #hostElementRef = inject(ElementRef);
     readonly #paneSizeMemory = new WeakMap<SplitterPaneComponent, number>();
     readonly #splitter = inject(SplitterComponent);
     readonly #themeService = inject(ThemeService);
+    protected readonly ariaValueMax = signal(0);
+    protected readonly ariaValueMin = signal(0);
+    protected readonly ariaValueNow = signal(0);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
@@ -49,6 +59,9 @@ export class SplitterResizerComponent {
         return splitterResizerThemeVariants(theme)({ orientation, resizing });
     });
     protected readonly hovered = signal(false);
+    protected readonly isInert = computed(() => {
+        return !this.resizable() && this.getCollapsibleTargetPane() === null;
+    });
     protected readonly nextCollapseControlsVisible = computed(() => {
         return this.hovered() && this.nextPane().collapsible() && !this.nextPane().collapsed();
     });
@@ -66,8 +79,18 @@ export class SplitterResizerComponent {
     public constructor() {
         afterNextRender({
             read: () => {
+                this.setHoverEvents();
                 this.setPointerEvents();
                 this.setKeyboardEvents();
+            }
+        });
+        afterRenderEffect({
+            read: () => {
+                this.previousPane().size();
+                this.previousPane().collapsed();
+                this.nextPane().size();
+                this.nextPane().collapsed();
+                this.updateAriaSeparatorValues();
             }
         });
     }
@@ -372,12 +395,13 @@ export class SplitterResizerComponent {
         const orientation = this.orientation();
 
         if (orientation === "horizontal") {
+            const isRtl = this.#directionality.value === "rtl";
             if (key === "ArrowLeft") {
-                this.collapsePane("previous");
+                this.collapsePane(isRtl ? "next" : "previous");
                 return true;
             }
             if (key === "ArrowRight") {
-                this.collapsePane("next");
+                this.collapsePane(isRtl ? "previous" : "next");
                 return true;
             }
         } else {
@@ -405,7 +429,7 @@ export class SplitterResizerComponent {
             return true;
         }
 
-        if (event.ctrlKey && event.metaKey) {
+        if (event.altKey) {
             return this.handleCollapserKeys(key);
         }
         return this.handleResizerKeys(key);
@@ -420,12 +444,13 @@ export class SplitterResizerComponent {
             return false;
         }
         if (orientation === "horizontal") {
+            const isRtl = this.#directionality.value === "rtl";
             if (key === "ArrowLeft") {
-                this.nudgeSplitter(-step);
+                this.nudgeSplitter(isRtl ? step : -step);
                 return true;
             }
             if (key === "ArrowRight") {
-                this.nudgeSplitter(step);
+                this.nudgeSplitter(isRtl ? -step : step);
                 return true;
             }
         } else {
@@ -492,6 +517,18 @@ export class SplitterResizerComponent {
         }
     }
 
+    private setHoverEvents(): void {
+        const host = this.#hostElementRef.nativeElement;
+        const pointerEnter$ = fromEvent<PointerEvent>(host, "pointerenter").pipe(map(() => true));
+        const pointerLeave$ = fromEvent<PointerEvent>(host, "pointerleave").pipe(map(() => false));
+
+        merge(pointerEnter$, pointerLeave$)
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe(isHovered => {
+                this.hovered.set(isHovered);
+            });
+    }
+
     private setKeyboardEvents(): void {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(takeUntilDestroyed(this.#destroyRef))
@@ -521,16 +558,6 @@ export class SplitterResizerComponent {
             })
         );
 
-        const host = this.#hostElementRef.nativeElement;
-        const pointerEnter$ = fromEvent<PointerEvent>(host, "pointerenter").pipe(map(() => true));
-        const pointerLeave$ = fromEvent<PointerEvent>(host, "pointerleave").pipe(map(() => false));
-
-        merge(pointerEnter$, pointerLeave$)
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(isHovered => {
-                this.hovered.set(isHovered);
-            });
-
         fromEvent<PointerEvent>(document, "pointermove")
             .pipe(skipUntil(pointerDown$), takeUntil(pointerUp$))
             .subscribe(event => {
@@ -558,6 +585,21 @@ export class SplitterResizerComponent {
             this.#paneSizeMemory.set(targetPane, targetSize);
             this.collapseAndRedistribute(targetPane, targetSize, neighbors.leading, neighbors.trailing);
         }
+    }
+
+    private updateAriaSeparatorValues(): void {
+        const [previousRect, nextRect] = this.getPaneRectangles();
+        const orientation = this.orientation();
+        const previousSize = orientation === "horizontal" ? previousRect.width : previousRect.height;
+        const nextSize = orientation === "horizontal" ? nextRect.width : nextRect.height;
+        const total = previousSize + nextSize;
+        const previousMin = this.getMinSize(this.previousPane());
+        const nextMin = this.getMinSize(this.nextPane());
+        const previousMaxRaw = this.getMaxSize(this.previousPane());
+        const previousMax = Math.min(previousMaxRaw, total - nextMin);
+        this.ariaValueMax.set(Math.round(Number.isFinite(previousMax) ? previousMax : total));
+        this.ariaValueMin.set(Math.round(previousMin));
+        this.ariaValueNow.set(Math.round(previousSize));
     }
 
     private updateHorizontalPaneSizes(event: PointerEvent): void {

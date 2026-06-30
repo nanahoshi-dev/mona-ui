@@ -1,14 +1,10 @@
-import { ChangeDetectionStrategy, Component } from "@angular/core";
-import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
+import { Component } from "@angular/core";
 import { SplitterDemoComponent } from "../../../demo/components/splitter-demo/splitter-demo.component";
-import { SectionComponent } from "../../../layout/components/section/section.component";
+import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-splitter-doc",
-    imports: [CodeViewerComponent, SectionComponent, SplitterDemoComponent],
-    templateUrl: "./splitter-doc.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [SplitterDemoComponent, MarkdownDocComponent],
+    templateUrl: "./splitter-doc.component.html"
 })
-export class SplitterDocComponent {
-    protected readonly importCode = `import { SplitterComponent } from "mona-ui";`;
-}
+export class SplitterDocComponent {}
