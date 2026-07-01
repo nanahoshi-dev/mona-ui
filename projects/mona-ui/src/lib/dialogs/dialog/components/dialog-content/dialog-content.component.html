@@ -1,10 +1,11 @@
 @let dialogIcon = icon();
+@let data = dialogData();
 
 <div [class]="contentContainerClass()">
     @if (dialogIcon) {
         <div [class]="iconContainerClass()">
-            @if (dialogData.iconTemplate) {
-                <ng-container [ngTemplateOutlet]="dialogData.iconTemplate"></ng-container>
+            @if (data.iconTemplate) {
+                <ng-container [ngTemplateOutlet]="data.iconTemplate"></ng-container>
             } @else {
                 <div [class]="iconClass()">
                     <span aria-hidden="true"></span>
@@ -15,14 +16,14 @@
     }
     <div [class]="bodyClass()">
         <div [class]="headerClass()">
-            <div [class]="titleContainerClass()">
-                @if (dialogData.titleTemplate) {
-                    <ng-container [ngTemplateOutlet]="dialogData.titleTemplate"></ng-container>
+            <div [id]="headerId" [class]="titleContainerClass()">
+                @if (data.titleTemplate) {
+                    <ng-container [ngTemplateOutlet]="data.titleTemplate"></ng-container>
                 } @else {
-                    <h2 [id]="headerId" [class]="titleClass()">{{ dialogData.title }}</h2>
+                    <h2 [class]="titleClass()">{{ data.title }}</h2>
                 }
             </div>
-            @if (dialogData.closable) {
+            @if (data.closable) {
                 <div [class]="closeButtonContainerClass()">
                     <button
                         monaButton
@@ -37,38 +38,38 @@
             }
         </div>
 
-        @let descriptionTemplateId = dialogData.descriptionTemplate ? descriptionId : undefined;
+        @let descriptionTemplateId = data.descriptionTemplate ? descriptionId : undefined;
         <div class="p-1" [attr.id]="descriptionTemplateId">
-            @if (dialogData.descriptionTemplate) {
-                <ng-container [ngTemplateOutlet]="dialogData.descriptionTemplate"></ng-container>
-            } @else if (dialogData.description) {
-                <p [id]="descriptionId" [class]="descriptionClass()">{{ dialogData.description }}</p>
+            @if (data.descriptionTemplate) {
+                <ng-container [ngTemplateOutlet]="data.descriptionTemplate"></ng-container>
+            } @else if (data.description) {
+                <p [id]="descriptionId" [class]="descriptionClass()">{{ data.description }}</p>
             }
         </div>
 
         <div [class]="contentClass()">
-            @if (dialogData.content) {
-                <ng-container [ngTemplateOutlet]="dialogData.content"></ng-container>
-            } @else if (dialogData.text) {
-                <p class="select-none">{{ dialogData.text }}</p>
+            @if (data.content) {
+                <ng-container [ngTemplateOutlet]="data.content"></ng-container>
+            } @else if (data.text) {
+                <p class="select-none">{{ data.text }}</p>
             }
         </div>
     </div>
 </div>
 
-@if (dialogData.footerTemplate || (dialogData.actions | monaAny)) {
-    @if (dialogData.footerTemplate) {
-        <ng-container [ngTemplateOutlet]="dialogData.footerTemplate"></ng-container>
+@if (data.footerTemplate || (data.actions | monaAny)) {
+    @if (data.footerTemplate) {
+        <ng-container [ngTemplateOutlet]="data.footerTemplate"></ng-container>
     } @else {
         <div [class]="footerClass()">
-            @for (action of dialogData.actions; track $index) {
+            @for (action of data.actions; track $index) {
                 <button
                     monaButton
                     type="button"
                     [class]="action.cssClass || ''"
                     [iconOnly]="action.iconOnly || false"
                     [look]="action.look"
-                    [rounded]="action.rounded || dialogData.rounded"
+                    [rounded]="action.rounded || data.rounded"
                     (click)="onActionClick(action)">
                     {{ action.text }}
                 </button>

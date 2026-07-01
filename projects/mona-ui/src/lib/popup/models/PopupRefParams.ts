@@ -12,7 +12,7 @@ export interface PopupRefParams {
 
     get closed$(): Observable<PopupCloseEvent>;
 
-    get component(): ComponentRef<any> | null;
+    get component(): ComponentRef<unknown> | null;
 
     get opened$(): Observable<void>;
 

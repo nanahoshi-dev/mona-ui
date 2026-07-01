@@ -4,6 +4,7 @@ import {
     Component,
     contentChild,
     DestroyRef,
+    effect,
     ElementRef,
     inject,
     input,
@@ -12,7 +13,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take, takeUntil } from "rxjs";
-import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
+import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/PopupCloseEvent";
 import { DialogContentTemplateDirective } from "../../directives/dialog-content-template.directive";
 import { DialogDescriptionTemplateDirective } from "../../directives/dialog-description-template.directive";
 import { DialogFooterTemplateDirective } from "../../directives/dialog-footer-template.directive";
@@ -20,6 +21,7 @@ import { DialogIconTemplateDirective } from "../../directives/dialog-icon-templa
 import { DialogTitleTemplateDirective } from "../../directives/dialog-title-template.directive";
 import { ActionsLayout } from "../../models/ActionsLayout";
 import { DialogAction } from "../../models/DialogAction";
+import { DialogActionEvent } from "../../models/DialogActionEvent";
 import { DialogRef } from "../../models/DialogRef";
 import { DialogService } from "../../services/dialog.service";
 import { DialogVariantInput, DialogVariantProps } from "../../styles/dialog.styles";
@@ -44,12 +46,14 @@ export class DialogComponent implements DialogVariantInput {
     private readonly titleTemplate = contentChild(DialogTitleTemplateDirective, { read: TemplateRef });
 
     /**
-     * @description Emits when the user clicks on an action button.
+     * @description Emitted when the user clicks an action button. Call `event.preventDefault()` on the emitted
+     * `DialogActionEvent` to keep the dialog open.
      */
-    public readonly action = output<DialogAction>();
+    public readonly action = output<DialogActionEvent>();
 
     /**
      * @description Sets the actions of the dialog.
+     * @default []
      */
     public readonly actions = input<Iterable<DialogAction>>([]);
 
@@ -88,7 +92,8 @@ export class DialogComponent implements DialogVariantInput {
     public readonly description = input<string>();
 
     /**
-     * @description Sets the element that should receive focus when the dialog is opened.
+     * @description Sets the element that should receive focus when the dialog is opened. When omitted, focus
+     * moves to the first focusable element automatically.
      */
     public readonly focusedElement = input<HTMLElement | ElementRef<HTMLElement> | string | null>();
 
@@ -124,21 +129,23 @@ export class DialogComponent implements DialogVariantInput {
 
     /**
      * @description Sets whether the dialog should have an overlay behind it.
+     * @default true
      */
     public readonly modal = input(true);
 
     /**
-     * @description Sets the border radius of the dialog.
+     * @description Border-radius preset applied to the component.
+     * @default "medium"
      */
     public readonly rounded = input<DialogVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the text of the dialog.
+     * @description Primary text content displayed by the component.
      */
     public readonly text = input<string>();
 
     /**
-     * @description Sets the title of the dialog.
+     * @description Title text displayed in the component header or trigger.
      */
     public readonly title = input<string>();
 
@@ -148,7 +155,9 @@ export class DialogComponent implements DialogVariantInput {
     public readonly top = input<number>();
 
     /**
-     * @description Sets the type of the dialog.
+     * @description Visual severity type of the dialog, controlling its icon and semantic role. Set to `null` to
+     * render the dialog without an icon.
+     * @default "info"
      */
     public readonly type = input<DialogVariantProps["type"] | null>("info");
 
@@ -160,6 +169,20 @@ export class DialogComponent implements DialogVariantInput {
     public constructor() {
         afterNextRender({
             read: () => this.#openDialog()
+        });
+        effect(() => {
+            const actions = this.actions() ? [...this.actions()] : undefined;
+            const update = {
+                actions,
+                actionsLayout: this.actionsLayout(),
+                closable: this.closable(),
+                description: this.description(),
+                rounded: this.rounded(),
+                text: this.text(),
+                title: this.title(),
+                type: this.type()
+            };
+            this.#dialogRef?.update(update);
         });
         this.#destroyRef.onDestroy(() => this.#dialogRef?.close());
     }
@@ -194,10 +217,15 @@ export class DialogComponent implements DialogVariantInput {
         });
 
         this.#dialogRef.result.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(result => {
-            if (!result.viaClose) {
-                this.action.emit(result.action);
+            if (result.viaClose) {
+                this.#dialogRef?.close(new PopupCloseEvent({ via: PopupCloseSource.CloseButton }));
+                return;
             }
-            this.#dialogRef?.close();
+            const event = new DialogActionEvent(result.action);
+            this.action.emit(event);
+            if (!event.isDefaultPrevented()) {
+                this.#dialogRef?.close();
+            }
         });
 
         this.#dialogRef.close$.pipe(takeUntil(this.#dialogRef.popupRef.closed)).subscribe(event => {

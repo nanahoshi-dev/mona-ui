@@ -4,6 +4,7 @@ import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../popup/models/PopupRef";
 import { DialogRefParams } from "./DialogRefParams";
 import { DialogResult } from "./DialogResult";
+import { DialogSettings } from "./DialogSettings";
 
 export class DialogRef<R = unknown> implements DialogRefParams<R> {
     #options: DialogRefParams<R>;
@@ -13,6 +14,14 @@ export class DialogRef<R = unknown> implements DialogRefParams<R> {
 
     public close(result?: R): void {
         this.#options.close(result);
+    }
+
+    /**
+     * @description Updates the dialog's content and appearance in place without closing and reopening it.
+     * Only the fields provided are changed; anything omitted keeps its current value.
+     */
+    public update(data: Partial<DialogSettings>): void {
+        this.#options.update(data);
     }
 
     public get close$(): Observable<PopupCloseEvent<R>> {

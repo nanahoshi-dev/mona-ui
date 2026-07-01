@@ -60,7 +60,7 @@ export class PopupRef {
      * @description Reference to the component hosted in the popup.
      * This is `null` if the popup does not contain a component.
      */
-    public get component(): ComponentRef<any> | null {
+    public get component(): ComponentRef<unknown> | null {
         return this.#options.component;
     }
 

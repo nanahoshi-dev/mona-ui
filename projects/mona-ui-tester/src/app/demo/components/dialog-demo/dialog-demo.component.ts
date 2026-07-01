@@ -8,6 +8,7 @@ import {
     DialogFooterTemplateDirective,
     DialogTitleTemplateDirective,
     DialogAction,
+    DialogActionEvent,
     PopupCloseEvent,
     DialogService,
     DialogRef,
@@ -305,8 +306,8 @@ class DialogWrapperComponent implements ComponentInputsAsSignal<DialogComponent>
     public readonly type = input<ReturnType<DialogComponent["type"]>>("info");
     public readonly width = input<ReturnType<DialogComponent["width"]>>(300);
 
-    protected onAction(action: DialogAction): void {
-        console.log("Dialog result:", action);
+    protected onAction(event: DialogActionEvent): void {
+        console.log("Dialog result:", event.action);
         // this.dialogVisible.set(false);
     }
 

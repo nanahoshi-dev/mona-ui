@@ -28,7 +28,8 @@ export class PopupReference implements PopupRefParams {
         if (this.#closing) {
             return;
         }
-        const beforeCloseEvent = new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
+        const beforeCloseEvent =
+            result instanceof PopupCloseEvent ? result : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
         this.beforeClosed$.next(beforeCloseEvent);
 
         if (beforeCloseEvent.isDefaultPrevented()) {
@@ -36,19 +37,15 @@ export class PopupReference implements PopupRefParams {
         }
         this.#closing = true;
         this.closeStart$.next(beforeCloseEvent);
-        const event =
-            result instanceof PopupCloseEvent
-                ? result
-                : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
 
         if (delay != null) {
             if (delay > 0) {
-                asyncScheduler.schedule(() => this.completeClose(event), delay);
+                asyncScheduler.schedule(() => this.completeClose(beforeCloseEvent), delay);
             } else {
-                this.completeClose(event);
+                this.completeClose(beforeCloseEvent);
             }
         } else if (this.wrapperComponentRef == null) {
-            this.completeClose(event);
+            this.completeClose(beforeCloseEvent);
         }
     }
 

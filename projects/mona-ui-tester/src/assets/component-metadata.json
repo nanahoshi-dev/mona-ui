@@ -4601,8 +4601,8 @@
     "inputs": [
       {
         "name": "action",
-        "type": "DialogAction",
-        "description": "Emits when the user clicks on an action button.",
+        "type": "DialogActionEvent",
+        "description": "Emitted when the user clicks an action button. Call `event.preventDefault()` on the emitted\r\n`DialogActionEvent` to keep the dialog open.",
         "kind": "output"
       },
       {
@@ -4650,7 +4650,7 @@
       {
         "name": "focusedElement",
         "type": "HTMLElement | ElementRef<HTMLElement> | string | null",
-        "description": "Sets the element that should receive focus when the dialog is opened.",
+        "description": "Sets the element that should receive focus when the dialog is opened. When omitted, focus\r\nmoves to the first focusable element automatically.",
         "kind": "input"
       },
       {
@@ -4698,19 +4698,19 @@
       {
         "name": "rounded",
         "type": "DialogVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the dialog.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "text",
         "type": "string",
-        "description": "Sets the text of the dialog.",
+        "description": "Primary text content displayed by the component.",
         "kind": "input"
       },
       {
         "name": "title",
         "type": "string",
-        "description": "Sets the title of the dialog.",
+        "description": "Title text displayed in the component header or trigger.",
         "kind": "input"
       },
       {
@@ -4722,7 +4722,7 @@
       {
         "name": "type",
         "type": "DialogVariantProps[\"type\"] | null",
-        "description": "Sets the type of the dialog.",
+        "description": "Visual severity type of the dialog, controlling its icon and semantic role. Set to `null` to\r\nrender the dialog without an icon.",
         "kind": "input"
       },
       {

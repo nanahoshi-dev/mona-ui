@@ -400,30 +400,33 @@ export * from "./tree-view/directives/tree-view-selectable.directive";
 export * from "./tree-view/directives/tree-view-node-template.directive";
 export * from "./common/tree/models/NodeMoveSnapshot";
 
-/** Window */
+/** Dialog */
 export * from "./dialogs/dialog/models/DialogAction";
+export * from "./dialogs/dialog/models/DialogActionEvent";
 export * from "./dialogs/dialog/models/DialogRef";
 export * from "./dialogs/dialog/models/DialogResult";
 export * from "./dialogs/dialog/models/DialogSettings";
 export * from "./dialogs/dialog/services/dialog.service";
-export { WindowRef } from "./dialogs/window/models/WindowRef";
-export * from "./dialogs/window/models/WindowSettings";
-export * from "./dialogs/window/services/window.service";
 
 export * from "./dialogs/dialog/directives/dialog-content-template.directive";
 export * from "./dialogs/dialog/directives/dialog-description-template.directive";
 export * from "./dialogs/dialog/directives/dialog-footer-template.directive";
+export * from "./dialogs/dialog/directives/dialog-icon-template.directive";
 export * from "./dialogs/dialog/directives/dialog-title-template.directive";
+
+export * from "./dialogs/dialog/components/dialog/dialog.component";
+
+/** Window */
+export { WindowRef } from "./dialogs/window/models/WindowRef";
+export * from "./dialogs/window/models/WindowSettings";
+export * from "./dialogs/window/services/window.service";
 
 export * from "./dialogs/window/directives/window-action-template.directive";
 export * from "./dialogs/window/directives/window-content-template.directive";
 export * from "./dialogs/window/directives/window-footer-template.directive";
 export * from "./dialogs/window/directives/window-title-template.directive";
-export * from "./dialogs/dialog/directives/dialog-title-template.directive";
-export * from "./dialogs/dialog/directives/dialog-content-template.directive";
-export * from "./dialogs/dialog/directives/dialog-footer-template.directive";
+
 export * from "./dialogs/window/components/window/window.component";
-export * from "./dialogs/dialog/components/dialog/dialog.component";
 
 /** Pipes */
 export * from "./pipes/slice.pipe";

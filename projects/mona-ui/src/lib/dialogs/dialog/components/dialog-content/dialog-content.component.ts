@@ -44,7 +44,7 @@ type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; 
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
-        "[attr.aria-describedby]": "descriptionId",
+        "[attr.aria-describedby]": "describedById()",
         "[attr.aria-labelledby]": "headerId",
         "[attr.role]": "role()"
     },
@@ -59,15 +59,17 @@ export class DialogContentComponent {
         success: { color: "var(--color-success)", icon: LucideCircleCheckBig },
         warning: { color: "var(--color-warning)", icon: LucideOctagonAlert }
     };
+    readonly #injectedData = inject<DialogInjectorData>(PopupDataInjectionToken);
     readonly #themeService = inject(ThemeService);
+    readonly #trapFocus = inject(CdkTrapFocus);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const rounded = this.dialogData.rounded;
+        const rounded = this.dialogData().rounded;
         return dialogBaseThemeVariants(theme)({ rounded });
     });
     protected readonly bodyClass = computed(() => {
         const theme = this.#themeService.theme();
-        const hasIcon = this.dialogData.type != null;
+        const hasIcon = this.dialogData().type != null;
         return dialogBodyThemeVariants(theme)({ hasIcon });
     });
     protected readonly closeButtonContainerClass = computed(() => {
@@ -82,16 +84,21 @@ export class DialogContentComponent {
         const theme = this.#themeService.theme();
         return dialogContentContainerThemeVariants(theme)();
     });
+    protected readonly describedById = computed(() => {
+        const data = this.dialogData();
+        return data.descriptionTemplate || data.description ? this.descriptionId : null;
+    });
     protected readonly descriptionClass = computed(() => {
         const theme = this.#themeService.theme();
         return dialogDescriptionThemeVariants(theme)();
     });
     protected readonly descriptionId = createElementControlId();
-    protected readonly dialogData = inject<DialogInjectorData>(PopupDataInjectionToken);
+    protected readonly dialogData = computed(() => this.dialogReference.data());
+    protected readonly dialogReference = this.#injectedData.dialogReference;
     protected readonly footerClass = computed(() => {
         const theme = this.#themeService.theme();
-        const layout = this.dialogData.actionsLayout;
-        const rounded = this.dialogData.rounded;
+        const layout = this.dialogData().actionsLayout;
+        const rounded = this.dialogData().rounded;
         return dialogFooterThemeVariants(theme)({ layout, rounded });
     });
     protected readonly headerClass = computed(() => {
@@ -100,12 +107,12 @@ export class DialogContentComponent {
     });
     protected readonly headerId = createElementControlId();
     protected readonly icon = computed(() => {
-        const { type } = this.dialogData;
+        const { type } = this.dialogData();
         return type ? this.#iconMap[type] : undefined;
     });
     protected readonly iconClass = computed(() => {
         const theme = this.#themeService.theme();
-        const type = this.dialogData.type;
+        const type = this.dialogData().type;
         return dialogIconThemeVariants(theme)({ type });
     });
     protected readonly iconContainerClass = computed(() => {
@@ -113,7 +120,7 @@ export class DialogContentComponent {
         return dialogIconContainerThemeVariants(theme)();
     });
     protected readonly role = computed(() => {
-        const type = this.dialogData.type;
+        const type = this.dialogData().type;
         return type === "confirm" || type === "error" || type === "warning" ? "alertdialog" : "dialog";
     });
     protected readonly titleClass = computed(() => {
@@ -126,6 +133,7 @@ export class DialogContentComponent {
     });
 
     public constructor() {
+        this.#trapFocus.autoCapture = true;
         afterNextRender({
             read: () => {
                 this.focusElement();
@@ -134,20 +142,20 @@ export class DialogContentComponent {
     }
 
     public onActionClick(action: DialogAction): void {
-        this.dialogData.dialogReference.dialogResult$.next({
+        this.dialogReference.dialogResult$.next({
             action,
             viaClose: false
         });
     }
 
     public onCloseClick(): void {
-        this.dialogData.dialogReference.dialogResult$.next({
+        this.dialogReference.dialogResult$.next({
             viaClose: true
         });
     }
 
     private focusElement(): void {
-        const element = this.dialogData.focusedElement;
+        const element = this.dialogData().focusedElement;
         if (!element) {
             return;
         }

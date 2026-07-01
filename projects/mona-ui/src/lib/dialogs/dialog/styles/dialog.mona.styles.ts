@@ -32,7 +32,7 @@ export const dialogContentContainerVariants = cva(
 export const dialogBodyVariants = cva(
     `
         flex flex-col gap-0 pb-2
-        w-full h-full pr-4
+        w-full h-full pr-2
     `,
     {
         variants: {

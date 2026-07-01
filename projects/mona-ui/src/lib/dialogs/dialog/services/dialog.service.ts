@@ -17,7 +17,7 @@ export class DialogService {
 
     public show(settings: DialogSettings): DialogRef {
         const injectorData = createDialogInjectorData(settings);
-        const dialogReference = new DialogReference({});
+        const dialogReference = new DialogReference({}, injectorData);
         injectorData.dialogReference = dialogReference;
         const popupRef = this.#popupService.create({
             anchor: this.#document.body,

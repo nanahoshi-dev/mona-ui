@@ -1,17 +1,24 @@
-import { ComponentRef } from "@angular/core";
+import { ComponentRef, signal, WritableSignal } from "@angular/core";
 import { map, Observable, Subject } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "../../../popup/models/PopupCloseEvent";
 import { PopupRef } from "../../../popup/models/PopupRef";
+import { DialogInjectorData } from "./DialogInjectorData";
 import { DialogRef } from "./DialogRef";
 import { DialogReferenceOptions } from "./DialogReferenceOptions";
 import { DialogRefParams } from "./DialogRefParams";
 import { DialogResult } from "./DialogResult";
+import { DialogSettings } from "./DialogSettings";
 
 export class DialogReference<R = unknown> implements DialogRefParams<R> {
+    public readonly data: WritableSignal<DialogInjectorData>;
     public readonly dialogResult$ = new Subject<DialogResult>();
     readonly #dialogRef: DialogRef<R>;
-    public constructor(private readonly options: DialogReferenceOptions) {
+    public constructor(
+        private readonly options: DialogReferenceOptions,
+        initialData: DialogInjectorData
+    ) {
         this.#dialogRef = new DialogRef<R>(this);
+        this.data = signal(initialData);
     }
 
     public close(result?: R): void {
@@ -26,6 +33,10 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
         this.options.popupRef = popupRef;
     }
 
+    public update(data: Partial<DialogSettings>): void {
+        this.data.update(current => ({ ...current, ...data }));
+    }
+
     public get close$(): Observable<PopupCloseEvent<R>> {
         return this.#popupRefOrThrow.beforeClose.pipe(map(event => event as PopupCloseEvent<R>));
     }
@@ -35,10 +46,11 @@ export class DialogReference<R = unknown> implements DialogRefParams<R> {
     }
 
     public get component(): ComponentRef<unknown> | null {
-        return (
-            (this.#popupRefOrThrow.component as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance
-                .componentRef ?? null
-        );
+        const popupComponent = this.#popupRefOrThrow.component;
+        if (!popupComponent) {
+            return null;
+        }
+        return (popupComponent as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance.componentRef ?? null;
     }
 
     public get dialogRef(): DialogRef<R> {
