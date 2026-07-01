@@ -1,4 +1,4 @@
-import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
     afterRenderEffect,
     ChangeDetectionStrategy,
@@ -36,6 +36,8 @@ import { DropDownListValueTemplateDirective } from "../../../dropdowns/drop-down
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { SlicePipe } from "../../../pipes/slice.pipe";
 import { ThemeService } from "../../../theme/services/theme.service";
+import { NavigationKeys } from "../../../common/utils/navigation.utils";
+import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
 import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-navigation-buttons-template.directive";
 import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-numeric-buttons-template.directive";
@@ -49,10 +51,14 @@ import {
     pagerBaseThemeVariants,
     pagerInfoThemeVariants,
     pagerInputThemeVariants,
+    pagerListItemThemeVariants,
     pagerListThemeVariants,
     type PagerVariantInputs,
     type PagerVariantProps
 } from "../../styles/pager.styles";
+
+const PAGER_FOCUSABLE_ATTRIBUTE = "data-mona-pager-focusable";
+const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
 
 @Component({
     selector: "mona-pager",
@@ -60,10 +66,10 @@ import {
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ButtonDirective,
-        NgClass,
         NumericTextBoxComponent,
         FormsModule,
         DropdownListComponent,
+        PagerFocusableDirective,
         SlicePipe,
         DropDownVirtualScrollDirective,
         NgTemplateOutlet,
@@ -75,16 +81,19 @@ import {
         LucideChevronsRight
     ],
     host: {
-        "[class]": "baseClasses()"
+        "[attr.tabindex]": "navigable() ? 0 : null",
+        "[class]": "baseClasses()",
+        "(keydown)": "onKeydown($event)"
     }
 })
 export class PagerComponent implements PagerVariantInputs {
+    readonly #document = inject(DOCUMENT);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #infoVisible = signal(true);
-    readonly #skip = linkedSignal({
-        source: () => this.skip(),
-        computation: skip => skip
-    });
+    readonly #innerNavigationActive = signal(false);
+    readonly #managedFocusTargets = new Set<HTMLElement>();
+    readonly #originalTabIndices = new WeakMap<HTMLElement, string | null>();
+    readonly #skip = linkedSignal(() => this.skip());
     readonly #themeService = inject(ThemeService);
     #widthObserver: ResizeObserver | null = null;
     #previousPageSize = 10;
@@ -96,6 +105,7 @@ export class PagerComponent implements PagerVariantInputs {
         const classes = pagerBaseThemeVariants(theme)({ rounded });
         return twMerge(classes, userClasses);
     });
+    protected readonly firstPageLabel = "First page";
     protected readonly firstPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "first");
@@ -126,10 +136,10 @@ export class PagerComponent implements PagerVariantInputs {
         const theme = this.#themeService.theme();
         return pagerInputThemeVariants(theme)();
     });
-    protected readonly inputValue = linkedSignal({
-        source: () => this.page(),
-        computation: page => page
-    });
+    protected readonly inputValue = linkedSignal(() => this.page());
+    protected readonly jumpNextLabel = computed(() => `Jump forward ${this.visiblePages()} pages`);
+    protected readonly jumpPreviousLabel = computed(() => `Jump back ${this.visiblePages()} pages`);
+    protected readonly lastPageLabel = "Last page";
     protected readonly lastPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "last");
@@ -143,6 +153,7 @@ export class PagerComponent implements PagerVariantInputs {
         const visiblePages = this.visiblePages();
         return pages.length > visiblePages && pages[pages.length - 1].page - pages[pages.length - 2].page > 1;
     });
+    protected readonly nextPageLabel = "Next page";
     protected readonly nextPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "next");
@@ -183,108 +194,115 @@ export class PagerComponent implements PagerVariantInputs {
             totalPages: this.pageCount()
         } as InfoTemplateContext;
     });
-    protected readonly pagerPageSize = linkedSignal({
-        source: () => this.pageSize(),
-        computation: pageSize => pageSize
-    });
+    protected readonly pagerPageSize = linkedSignal(() => this.pageSize());
     protected readonly pages = computed(() => {
         return this.preparePages(this.page(), this.visiblePages(), this.pageCount());
     });
     protected readonly previousJumperVisible = computed(
         () => this.pages().length > this.visiblePages() && this.pages()[1].page - 1 > 1
     );
+    protected readonly previousPageLabel = "Previous page";
     protected readonly previousPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "previous");
     });
 
     /**
-     * @description Whether to show the first and last page buttons.
+     * @description Shows the first and last page navigation buttons.
      * @default true
      */
     public readonly firstLast = input(true);
 
     /**
-     * @description The event emitted when the page changes.
-     * @default () => {}
+     * @description Enables keyboard navigation on the pager wrapper and its inner controls.
+     * @default true
+     */
+    public readonly navigable = input(true);
+
+    /**
+     * @description Emitted when the current page changes.
      */
     public readonly pageChange = output<PageChangeEvent>();
 
     /**
-     * @description Whether to show the page input.
+     * @description Shows a numeric input for jumping directly to a page.
      * @default false
      */
     public readonly pageInput = input(false);
 
     /**
-     * @description The page size.
+     * @description Number of items displayed per page.
      * @default 5
      */
     public readonly pageSize = input(5);
 
     /**
-     * @description The event emitted when the page size changes.
-     * @default () => {}
+     * @description Emitted when the page size changes. Cancelable via `preventDefault()` on the event.
      */
     public readonly pageSizeChange = output<PageSizeChangeEvent>();
 
     /**
-     * @description The page size values.
+     * @description Page-size options shown in the page-size dropdown. Set to `false` or an empty array to hide the dropdown.
      * @default [5, 10, 20, 50, 100]
      */
     public readonly pageSizeValues = input<number[] | boolean>([5, 10, 20, 50, 100]);
 
     /**
-     * @description Whether to show the previous and next page buttons.
+     * @description Shows the previous and next page navigation buttons.
      * @default true
      */
     public readonly previousNext = input(true);
 
     /**
-     * @description Whether to make the pager responsive.
+     * @description Collapses sections of the pager as the host element narrows.
      * @default true
      */
     public readonly responsive = input(true);
 
     /**
-     * @description The rounded of the pager.
+     * @description Border-radius preset applied to the component.
      * @default "medium"
      */
     public readonly rounded = input<PagerVariantProps["rounded"]>("medium");
 
     /**
-     * @description Whether to show the info section.
+     * @description Displays the summary of the current page range and total item count.
      * @default true
      */
     public readonly showInfo = input(true);
 
     /**
-     * @description The size of the pager.
+     * @description Size preset controlling the component's dimensions.
      * @default "medium"
      */
     public readonly size = input<PagerVariantProps["size"]>("medium");
 
     /**
-     * @description The skip of the pager.
+     * @description Number of items to skip before the current page. Determines the current page together with `pageSize`.
      * @default 0
      */
     public readonly skip = input(0);
 
     /**
-     * @description The total of the pager.
+     * @description Total number of items in the paged collection.
      * @default 0
      */
     public readonly total = input(0);
 
     /**
-     * @description The type of the pager.
+     * @description Visual mode of the pager: numeric page buttons, or a page-jump input.
      * @default "numeric"
      */
     public readonly type = input<PagerType>("numeric");
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClasses = input<string>("", { alias: "class" });
 
     /**
-     * @description The visible pages of the pager.
+     * @description Number of numeric page buttons shown at once before collapsing into jump controls.
      * @default 5
      */
     public readonly visiblePages = input(5);
@@ -293,6 +311,15 @@ export class PagerComponent implements PagerVariantInputs {
         effect(() => {
             const pageSize = this.pageSize();
             untracked(() => (this.#previousPageSize = pageSize));
+        });
+        effect(() => {
+            const navigable = this.navigable();
+            if (!navigable) {
+                untracked(() => {
+                    this.#innerNavigationActive.set(false);
+                    this.restoreManagedFocusTargets();
+                });
+            }
         });
         effect(() => {
             const page = this.page();
@@ -318,32 +345,91 @@ export class PagerComponent implements PagerVariantInputs {
                 this.#widthObserver = null;
             }
         });
+        afterRenderEffect(() => {
+            this.navigable();
+            this.#innerNavigationActive();
+            this.firstLast();
+            this.page();
+            this.pageCount();
+            this.pageInput();
+            this.pageInputVisible();
+            this.pageListVisible();
+            this.pageSizeDropdownData();
+            this.pages();
+            this.previousNext();
+            this.type();
+            untracked(() => this.syncFocusableTabIndexes());
+        });
         inject(DestroyRef).onDestroy(() => this.#widthObserver?.disconnect());
     }
 
-    public onJumpNextClick(): void {
+    protected onJumpNextClick(): void {
         const page = Math.min(this.page() + this.visiblePages(), this.pageCount());
         this.setPage(page);
     }
 
-    public onJumpPreviousClick(): void {
+    protected onJumpPreviousClick(): void {
         const page = Math.max(this.page() - this.visiblePages(), 1);
         this.setPage(page);
     }
 
-    public onNextPageClick(): void {
+    protected onKeydown(event: KeyboardEvent): void {
+        if (!this.navigable()) {
+            return;
+        }
+
+        if (event.key === NavigationKeys.Home) {
+            event.preventDefault();
+            this.setKeyboardPage(1);
+            return;
+        }
+
+        if (event.key === NavigationKeys.End) {
+            event.preventDefault();
+            this.setKeyboardPage(this.pageCount());
+            return;
+        }
+
+        if (this.#innerNavigationActive()) {
+            this.handleInnerNavigationKeydown(event);
+            return;
+        }
+
+        if (event.target !== this.#hostElementRef.nativeElement) {
+            return;
+        }
+
+        switch (event.key) {
+            case NavigationKeys.Enter:
+                event.preventDefault();
+                this.activateInnerNavigation();
+                break;
+            case NavigationKeys.ArrowLeft:
+            case NavigationKeys.PageUp:
+                event.preventDefault();
+                this.setKeyboardPage(this.page() - 1);
+                break;
+            case NavigationKeys.ArrowRight:
+            case NavigationKeys.PageDown:
+                event.preventDefault();
+                this.setKeyboardPage(this.page() + 1);
+                break;
+        }
+    }
+
+    protected onNextPageClick(): void {
         const page = Math.min(this.page() + 1, this.pageCount());
         this.setPage(page);
     }
 
-    public onPageClick(page: number): void {
+    protected onPageClick(page: number): void {
         if (page === this.page()) {
             return;
         }
         this.setPage(page);
     }
 
-    public onPageInputBlur(): void {
+    protected onPageInputBlur(): void {
         if (this.inputValue() === null || this.inputValue() === this.page()) {
             this.inputValue.set(this.page());
             return;
@@ -356,15 +442,12 @@ export class PagerComponent implements PagerVariantInputs {
         this.setPage(this.inputValue());
     }
 
-    public onPageSizeValueChange(value: number): void {
+    protected onPageSizeValueChange(value: number): void {
         if (value === this.pagerPageSize()) {
             return;
         }
         const event = new PageSizeChangeEvent(value, this.pagerPageSize());
         const pageSizeDropdownList = this.pageSizeDropdownList();
-        if (pageSizeDropdownList) {
-            pageSizeDropdownList.setValue(this.#previousPageSize);
-        }
 
         this.pageSizeChange.emit(event);
         if (event.isDefaultPrevented()) {
@@ -382,9 +465,101 @@ export class PagerComponent implements PagerVariantInputs {
         this.setPage(1);
     }
 
-    public onPreviousPageClick(): void {
+    protected onPreviousPageClick(): void {
         const page = Math.max(this.page() - 1, 1);
         this.setPage(page);
+    }
+
+    protected pageItemClasses(active: boolean): string {
+        return pagerListItemThemeVariants(this.#themeService.theme())({ active });
+    }
+
+    private activateInnerNavigation(): void {
+        const targets = this.getFocusableTargets();
+        if (targets.length === 0) {
+            return;
+        }
+        this.#innerNavigationActive.set(true);
+        targets[0].focus();
+    }
+
+    private focusNextTarget(backwards: boolean): void {
+        const targets = this.getFocusableTargets();
+        if (targets.length === 0) {
+            return;
+        }
+
+        const activeElement = this.#document.activeElement as HTMLElement | null;
+        const currentIndex = activeElement
+            ? targets.findIndex(target => target === activeElement || target.contains(activeElement))
+            : -1;
+        const nextIndex =
+            currentIndex === -1 ? 0 : (currentIndex + (backwards ? -1 : 1) + targets.length) % targets.length;
+
+        targets[nextIndex].focus();
+    }
+
+    private getFocusableTargets(): HTMLElement[] {
+        const host = this.#hostElementRef.nativeElement;
+        const markedElements = Array.from(host.querySelectorAll<HTMLElement>(`[${PAGER_FOCUSABLE_ATTRIBUTE}="true"]`));
+        const targets: HTMLElement[] = [];
+        const seen = new Set<HTMLElement>();
+
+        for (const element of markedElements) {
+            const target = this.resolveFocusableTarget(element);
+            if (!target || seen.has(target) || this.isElementDisabled(target) || this.isElementHidden(target)) {
+                continue;
+            }
+            seen.add(target);
+            targets.push(target);
+        }
+
+        return targets;
+    }
+
+    private handleInnerNavigationKeydown(event: KeyboardEvent): void {
+        if (event.key === NavigationKeys.Escape) {
+            event.preventDefault();
+            this.#innerNavigationActive.set(false);
+            this.#hostElementRef.nativeElement.focus();
+            return;
+        }
+
+        if (event.key === "Tab") {
+            event.preventDefault();
+            this.focusNextTarget(event.shiftKey);
+        }
+    }
+
+    private isElementDisabled(element: HTMLElement): boolean {
+        if (
+            (element instanceof HTMLButtonElement ||
+                element instanceof HTMLInputElement ||
+                element instanceof HTMLSelectElement ||
+                element instanceof HTMLTextAreaElement) &&
+            element.disabled
+        ) {
+            return true;
+        }
+
+        return element.getAttribute("aria-disabled") === "true" || element.hasAttribute("disabled");
+    }
+
+    private isElementHidden(element: HTMLElement): boolean {
+        if (element.closest("[hidden]") || element.getAttribute("aria-hidden") === "true") {
+            return true;
+        }
+
+        const style = this.#document.defaultView?.getComputedStyle(element);
+        return style?.display === "none" || style?.visibility === "hidden";
+    }
+
+    private overrideTabIndex(element: HTMLElement): void {
+        if (!this.#originalTabIndices.has(element)) {
+            this.#originalTabIndices.set(element, element.getAttribute("tabindex"));
+        }
+        element.setAttribute("tabindex", "-1");
+        this.#managedFocusTargets.add(element);
     }
 
     private preparePages(currentPage: number, visiblePages: number, maxPages: number): Page[] {
@@ -418,7 +593,63 @@ export class PagerComponent implements PagerVariantInputs {
         return pages;
     }
 
+    private resolveFocusableTarget(element: HTMLElement): HTMLElement | null {
+        if (element.matches(FOCUSABLE_TARGET_SELECTOR)) {
+            return element;
+        }
+
+        return (
+            Array.from(element.querySelectorAll<HTMLElement>(FOCUSABLE_TARGET_SELECTOR)).find(
+                target => !this.isElementDisabled(target) && !this.isElementHidden(target)
+            ) ?? null
+        );
+    }
+
+    private restoreManagedFocusTarget(element: HTMLElement): void {
+        const originalTabIndex = this.#originalTabIndices.get(element);
+        if (originalTabIndex == null) {
+            element.removeAttribute("tabindex");
+        } else {
+            element.setAttribute("tabindex", originalTabIndex);
+        }
+        this.#managedFocusTargets.delete(element);
+    }
+
+    private restoreManagedFocusTargets(): void {
+        for (const element of Array.from(this.#managedFocusTargets)) {
+            this.restoreManagedFocusTarget(element);
+        }
+    }
+
+    private setKeyboardPage(page: number): void {
+        const pageCount = this.pageCount();
+        if (pageCount < 1) {
+            return;
+        }
+
+        this.setPage(Math.min(Math.max(page, 1), pageCount));
+    }
+
     private setPage(page: number): void {
         this.#skip.set((page - 1) * this.pagerPageSize());
+    }
+
+    private syncFocusableTabIndexes(): void {
+        const focusableTargets = this.getFocusableTargets();
+        const currentTargets = new Set(focusableTargets);
+
+        for (const element of Array.from(this.#managedFocusTargets)) {
+            if (!this.navigable() || !currentTargets.has(element)) {
+                this.restoreManagedFocusTarget(element);
+            }
+        }
+
+        if (!this.navigable()) {
+            return;
+        }
+
+        for (const target of focusableTargets) {
+            this.overrideTabIndex(target);
+        }
     }
 }

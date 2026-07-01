@@ -2580,97 +2580,103 @@
       {
         "name": "firstLast",
         "type": "boolean",
-        "description": "Whether to show the first and last page buttons.",
+        "description": "Shows the first and last page navigation buttons.",
+        "kind": "input"
+      },
+      {
+        "name": "navigable",
+        "type": "boolean",
+        "description": "Enables keyboard navigation on the pager wrapper and its inner controls.",
         "kind": "input"
       },
       {
         "name": "pageChange",
         "type": "PageChangeEvent",
-        "description": "The event emitted when the page changes.",
+        "description": "Emitted when the current page changes.",
         "kind": "output"
       },
       {
         "name": "pageInput",
         "type": "boolean",
-        "description": "Whether to show the page input.",
+        "description": "Shows a numeric input for jumping directly to a page.",
         "kind": "input"
       },
       {
         "name": "pageSize",
         "type": "number",
-        "description": "The page size.",
+        "description": "Number of items displayed per page.",
         "kind": "input"
       },
       {
         "name": "pageSizeChange",
         "type": "PageSizeChangeEvent",
-        "description": "The event emitted when the page size changes.",
+        "description": "Emitted when the page size changes. Cancelable via `preventDefault()` on the event.",
         "kind": "output"
       },
       {
         "name": "pageSizeValues",
         "type": "number[] | boolean",
-        "description": "The page size values.",
+        "description": "Page-size options shown in the page-size dropdown. Set to `false` or an empty array to hide the dropdown.",
         "kind": "input"
       },
       {
         "name": "previousNext",
         "type": "boolean",
-        "description": "Whether to show the previous and next page buttons.",
+        "description": "Shows the previous and next page navigation buttons.",
         "kind": "input"
       },
       {
         "name": "responsive",
         "type": "boolean",
-        "description": "Whether to make the pager responsive.",
+        "description": "Collapses sections of the pager as the host element narrows.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "PagerVariantProps[\"rounded\"]",
-        "description": "The rounded of the pager.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "showInfo",
         "type": "boolean",
-        "description": "Whether to show the info section.",
+        "description": "Displays the summary of the current page range and total item count.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "PagerVariantProps[\"size\"]",
-        "description": "The size of the pager.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "skip",
         "type": "number",
-        "description": "The skip of the pager.",
+        "description": "Number of items to skip before the current page. Determines the current page together with `pageSize`.",
         "kind": "input"
       },
       {
         "name": "total",
         "type": "number",
-        "description": "The total of the pager.",
+        "description": "Total number of items in the paged collection.",
         "kind": "input"
       },
       {
         "name": "type",
         "type": "PagerType",
-        "description": "The type of the pager.",
+        "description": "Visual mode of the pager: numeric page buttons, or a page-jump input.",
         "kind": "input"
       },
       {
         "name": "userClasses",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "visiblePages",
         "type": "number",
-        "description": "The visible pages of the pager.",
+        "description": "Number of numeric page buttons shown at once before collapsing into jump controls.",
         "kind": "input"
       }
     ]

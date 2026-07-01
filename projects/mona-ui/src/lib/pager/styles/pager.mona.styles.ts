@@ -56,3 +56,15 @@ export const pagerListVariants = cva(
         [&_li]:justify-center
     `
 );
+
+export const pagerListItemVariants = cva("", {
+    variants: {
+        active: {
+            true: "font-semibold",
+            false: ""
+        }
+    },
+    defaultVariants: {
+        active: false
+    }
+});

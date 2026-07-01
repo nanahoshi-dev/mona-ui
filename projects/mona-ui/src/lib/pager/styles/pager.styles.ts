@@ -3,6 +3,7 @@ import {
     pagerBaseVariants as monaPagerBaseVariants,
     pagerInfoVariants as monaPagerInfoVariants,
     pagerInputVariants as monaPagerInputVariants,
+    pagerListItemVariants as monaPagerListItemVariants,
     pagerListVariants as monaPagerListVariants
 } from "../styles/pager.mona.styles";
 import { ThemeStyle } from "../../theme/models/Theme";
@@ -41,6 +42,15 @@ export const pagerListThemeVariants = (theme: ThemeStyle) => {
             return monaPagerListVariants;
         default:
             return monaPagerListVariants;
+    }
+};
+
+export const pagerListItemThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaPagerListItemVariants;
+        default:
+            return monaPagerListItemVariants;
     }
 };
 

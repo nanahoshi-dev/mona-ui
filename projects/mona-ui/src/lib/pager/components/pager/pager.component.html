@@ -18,13 +18,16 @@
                     [ngTemplateOutletContext]="{ totalPages: pageCount() }"></ng-container>
             } @else {
                 @if (pages().length !== 0) {
-                    <li [ngClass]="{ 'mona-pager-active': page() === 1 }">
+                    <li [class]="pageItemClasses(page() === 1)">
                         <button
+                            monaPagerFocusable
                             monaButton
                             look="ghost"
                             [rounded]="rounded()"
                             [size]="size()"
                             [selected]="page() === 1"
+                            [attr.aria-label]="'Page 1'"
+                            [attr.aria-current]="page() === 1 ? 'page' : null"
                             (click)="onPageClick(1)">
                             1
                         </button>
@@ -33,10 +36,12 @@
                 @if (previousJumperVisible()) {
                     <li>
                         <button
+                            monaPagerFocusable
                             monaButton
                             look="ghost"
                             [rounded]="rounded()"
                             [size]="size()"
+                            [attr.aria-label]="jumpPreviousLabel()"
                             (click)="onJumpPreviousClick()">
                             <svg lucideEllipsis [size]="iconSize()"></svg>
                         </button>
@@ -44,13 +49,16 @@
                 }
 
                 @for (pageItem of pages() | monaSlice: 1 : pages().length - 1; track $index) {
-                    <li [attr.data-page]="pageItem.page" [ngClass]="{ 'mona-pager-active': page() === pageItem.page }">
+                    <li [attr.data-page]="pageItem.page" [class]="pageItemClasses(page() === pageItem.page)">
                         <button
+                            monaPagerFocusable
                             monaButton
                             look="ghost"
                             [rounded]="rounded()"
                             [size]="size()"
                             [selected]="page() === pageItem.page"
+                            [attr.aria-label]="'Page ' + pageItem.text"
+                            [attr.aria-current]="page() === pageItem.page ? 'page' : null"
                             (click)="onPageClick(pageItem.page)">
                             {{ pageItem.text }}
                         </button>
@@ -60,10 +68,12 @@
                 @if (nextJumperVisible()) {
                     <li>
                         <button
+                            monaPagerFocusable
                             monaButton
                             look="ghost"
                             [rounded]="rounded()"
                             [size]="size()"
+                            [attr.aria-label]="jumpNextLabel()"
                             (click)="onJumpNextClick()">
                             <svg lucideEllipsis [size]="iconSize()"></svg>
                         </button>
@@ -71,13 +81,16 @@
                 }
 
                 @if (pages().length > 1) {
-                    <li [ngClass]="{ 'mona-pager-active': page() === pageCount() }">
+                    <li [class]="pageItemClasses(page() === pageCount())">
                         <button
+                            monaPagerFocusable
                             monaButton
                             look="ghost"
                             [rounded]="rounded()"
                             [size]="size()"
                             [selected]="page() === pageCount()"
+                            [attr.aria-label]="'Page ' + pageCount()"
+                            [attr.aria-current]="page() === pageCount() ? 'page' : null"
                             (click)="onPageClick(pageCount())">
                             {{ pageCount() }}
                         </button>
@@ -96,6 +109,7 @@
             @if (pageInputVisible() && pageInput()) {
                 <li>
                     <mona-numeric-text-box
+                        monaPagerFocusable
                         [spinners]="false"
                         [minValue]="1"
                         [maxValue]="pageCount()"
@@ -116,6 +130,7 @@
                         </ng-container>
                     } @else {
                         <mona-dropdown-list
+                            monaPagerFocusable
                             [data]="pageSizeDropdownData()"
                             [ngModel]="pageSize()"
                             [rounded]="rounded()"
@@ -154,6 +169,7 @@
                 <li class="flex items-center gap-2 mx-2">
                     <span>Page</span>
                     <mona-numeric-text-box
+                        monaPagerFocusable
                         [spinners]="false"
                         [minValue]="1"
                         [maxValue]="pageCount()"
@@ -195,6 +211,7 @@
         @if (pageCount() !== 0) {
             <li>
                 <mona-dropdown-list
+                    monaPagerFocusable
                     [data]="pageList()"
                     [ngModel]="page()"
                     [rounded]="rounded()"
@@ -214,7 +231,7 @@
 }
 
 <ng-template #firstPageButton>
-    <li class="mona-pager-first-page">
+    <li>
         @let firstPageTemplate = firstPageNavigationTemplate();
         @if (firstPageTemplate) {
             <ng-container
@@ -227,10 +244,12 @@
             </ng-container>
         } @else {
             <button
+                monaPagerFocusable
                 monaButton
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
+                [attr.aria-label]="firstPageLabel"
                 (click)="onPageClick(1)"
                 [disabled]="page() === 1">
                 <svg lucideChevronsLeft [size]="iconSize()"></svg>
@@ -240,7 +259,7 @@
 </ng-template>
 
 <ng-template #previousPageButton>
-    <li class="mona-pager-previous-page">
+    <li>
         @let previousPageTemplate = previousPageNavigationTemplate();
         @if (previousPageTemplate) {
             <ng-container
@@ -253,11 +272,13 @@
             </ng-container>
         } @else {
             <button
+                monaPagerFocusable
                 monaButton
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
                 [disabled]="page() <= 1"
+                [attr.aria-label]="previousPageLabel"
                 (click)="onPreviousPageClick()">
                 <svg lucideChevronLeft [size]="iconSize()"></svg>
             </button>
@@ -266,7 +287,7 @@
 </ng-template>
 
 <ng-template #nextPageButton>
-    <li class="mona-pager-next-page">
+    <li>
         @let nextPageTemplate = nextPageNavigationTemplate();
         @if (nextPageTemplate) {
             <ng-container
@@ -279,11 +300,13 @@
             </ng-container>
         } @else {
             <button
+                monaPagerFocusable
                 monaButton
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
                 [disabled]="page() < 1 || page() === pageCount()"
+                [attr.aria-label]="nextPageLabel"
                 (click)="onNextPageClick()">
                 <svg lucideChevronRight [size]="iconSize()"></svg>
             </button>
@@ -292,7 +315,7 @@
 </ng-template>
 
 <ng-template #lastPageButton>
-    <li class="mona-pager-last-page">
+    <li>
         @let lastPageTemplate = lastPageNavigationTemplate();
         @if (lastPageTemplate) {
             <ng-container
@@ -305,10 +328,12 @@
             </ng-container>
         } @else {
             <button
+                monaPagerFocusable
                 monaButton
                 look="ghost"
                 [rounded]="rounded()"
                 [size]="size()"
+                [attr.aria-label]="lastPageLabel"
                 (click)="onPageClick(pageCount())"
                 [disabled]="page() === pageCount()">
                 <svg lucideChevronsRight [size]="iconSize()"></svg>
