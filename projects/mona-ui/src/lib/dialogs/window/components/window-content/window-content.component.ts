@@ -70,6 +70,7 @@ export class WindowContentComponent implements WindowContentVariantInput {
     readonly #sizeBeforeMaximize = signal({ width: 0, height: 0, top: 0, left: 0 });
     readonly #sizeBeforeMinimize = signal(0);
     readonly #themeService = inject(ThemeService);
+    readonly #trapFocus = inject(CdkTrapFocus);
     readonly #viewContainerRef = inject(ViewContainerRef);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -122,6 +123,8 @@ export class WindowContentComponent implements WindowContentVariantInput {
     protected readonly windowData = inject<WindowInjectorData>(PopupDataInjectionToken);
 
     public constructor() {
+        this.#trapFocus.autoCapture = true;
+        this.#trapFocus.enabled = this.windowData.modal ?? false;
         if (this.windowData.content instanceof TemplateRef) {
             this.contentType.set("template");
         } else if (this.windowData.content) {

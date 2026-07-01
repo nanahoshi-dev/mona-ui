@@ -21,6 +21,10 @@ export class WindowRef<R = unknown> implements WindowRefParams<R> {
         this.#options.close(result);
     }
 
+    public closeWithDelay(delay: number, result?: R): void {
+        this.#options.closeWithDelay(delay, result);
+    }
+
     public move(params: { top?: number; left?: number }): void {
         this.#options.move(params);
     }

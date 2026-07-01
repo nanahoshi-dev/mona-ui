@@ -5,7 +5,7 @@ export const createWindowInjectorData = (settings: Partial<WindowSettings>): Omi
     return {
         actionTemplate: settings.actionTemplate,
         closable: settings.closable ?? true,
-        closeOnEscape: settings.closeOnEscape ?? false,
+        closeOnEscape: settings.closeOnEscape ?? true,
         content: settings.content,
         draggable: settings.draggable ?? false,
         focusedElement: settings.focusedElement,

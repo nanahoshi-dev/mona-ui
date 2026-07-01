@@ -14,6 +14,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { take } from "rxjs";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { WindowActionTemplateDirective } from "../../directives/window-action-template.directive";
 import { WindowContentTemplateDirective } from "../../directives/window-content-template.directive";
@@ -50,6 +51,11 @@ export class WindowComponent implements WindowVariantInput {
      * @description Emits when the window is about to be closed.
      */
     public readonly close = output<PopupCloseEvent>();
+
+    /**
+     * @description Emitted after the window has fully closed (post-animation). Preventing this event has no effect.
+     */
+    public readonly closed = output<void>();
 
     /**
      * @description Sets whether the window should close when the escape key is pressed.
@@ -107,6 +113,7 @@ export class WindowComponent implements WindowVariantInput {
 
     /**
      * @description Sets whether the user can maximize the window.
+     * @default true
      */
     public readonly maximizable = input<boolean>();
 
@@ -122,16 +129,19 @@ export class WindowComponent implements WindowVariantInput {
 
     /**
      * @description Sets whether the user can minimize the window.
+     * @default true
      */
     public readonly minimizable = input<boolean>();
 
     /**
      * @description Sets whether the window should have an overlay behind it.
+     * @default false
      */
     public readonly modal = input<boolean>();
 
     /**
      * @description Sets whether the user can resize the window.
+     * @default false
      */
     public readonly resizable = input<boolean>();
 
@@ -232,6 +242,9 @@ export class WindowComponent implements WindowVariantInput {
         }
         this.#windowRef.popupRef.beforeClose.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
             this.close.emit(event);
+        });
+        this.#windowRef.closed$.pipe(take(1), takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
+            this.closed.emit();
         });
     }
 

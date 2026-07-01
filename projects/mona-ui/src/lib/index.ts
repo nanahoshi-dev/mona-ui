@@ -418,6 +418,9 @@ export * from "./dialogs/dialog/components/dialog/dialog.component";
 
 /** Window */
 export { WindowRef } from "./dialogs/window/models/WindowRef";
+export * from "./dialogs/window/models/MoveEvent";
+export * from "./dialogs/window/models/ResizeEvent";
+export * from "./dialogs/window/models/WindowActionTemplateContext";
 export * from "./dialogs/window/models/WindowSettings";
 export * from "./dialogs/window/services/window.service";
 

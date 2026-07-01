@@ -8,6 +8,7 @@ import { ResizeEvent } from "./ResizeEvent";
 export interface WindowRefParams<R = unknown> {
     close: (result?: R) => void;
     center: () => void;
+    closeWithDelay: (delay: number, result?: R) => void;
     move: (params: { top?: number; left?: number }) => void;
     resize: (params: { width?: number; height?: number; center?: boolean }) => void;
 

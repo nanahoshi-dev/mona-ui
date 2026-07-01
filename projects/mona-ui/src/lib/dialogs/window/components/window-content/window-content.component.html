@@ -4,12 +4,14 @@
         monaWindowDragHandler
         (dblclick)="onMaximizeClick()"
         [draggable]="windowData.draggable"
-        [windowRef]="windowData.windowReference">
-        <div [class]="titleContainerClass()">
+        [windowRef]="windowData.windowReference"
+        [attr.tabindex]="windowData.draggable ? 0 : null"
+        [attr.aria-label]="windowData.draggable ? 'Move window. Use arrow keys to move.' : null">
+        <div [id]="headerId" [class]="titleContainerClass()">
             @if (windowData.titleTemplate) {
                 <ng-container [ngTemplateOutlet]="windowData.titleTemplate"></ng-container>
             } @else {
-                <span [id]="headerId" [class]="titleClass()">{{ windowData.title ?? "" }}</span>
+                <span [class]="titleClass()">{{ windowData.title ?? "" }}</span>
             }
         </div>
         <div [class]="titleBarActionClass()">
@@ -93,6 +95,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="north"
+            tabindex="0"
+            aria-label="Resize window from the top. Use arrow keys to resize."
             [class]="'north' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -102,6 +106,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="south"
+            tabindex="0"
+            aria-label="Resize window from the bottom. Use arrow keys to resize."
             [class]="'south' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -111,6 +117,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="east"
+            tabindex="0"
+            aria-label="Resize window from the right. Use arrow keys to resize."
             [class]="'east' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -120,6 +128,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="west"
+            tabindex="0"
+            aria-label="Resize window from the left. Use arrow keys to resize."
             [class]="'west' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -129,6 +139,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="northeast"
+            tabindex="0"
+            aria-label="Resize window from the top-right corner. Use arrow keys to resize."
             [class]="'northeast' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -138,6 +150,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="northwest"
+            tabindex="0"
+            aria-label="Resize window from the top-left corner. Use arrow keys to resize."
             [class]="'northwest' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -147,6 +161,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="southeast"
+            tabindex="0"
+            aria-label="Resize window from the bottom-right corner. Use arrow keys to resize."
             [class]="'southeast' | monaResizePosition"></div>
         <div
             monaWindowResizeHandler
@@ -156,6 +172,8 @@
             [maxHeight]="windowData.maxHeight"
             [windowRef]="windowData.windowReference"
             direction="southwest"
+            tabindex="0"
+            aria-label="Resize window from the bottom-left corner. Use arrow keys to resize."
             [class]="'southwest' | monaResizePosition"></div>
     }
 </div>
