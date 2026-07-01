@@ -1,14 +1,5 @@
-<app-section id="window" [header]="'Window'" headerType="H1">
-    <p>
-        Displays a floating, draggable, and resizable window. Use the declarative <code>&lt;mona-window&gt;</code>
-        element for windows tied to a component's template, or inject <code>WindowService</code> and call
-        <code>open()</code> to create windows programmatically. Windows support minimize/maximize actions, custom
-        title/content/footer/action templates, and an optional modal overlay.
-    </p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-window-demo></app-window-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/window/intro.md"></app-markdown-doc>
+
+<app-window-demo></app-window-demo>
+
+<app-markdown-doc src="docs/window/api.md" parentSectionId="window"></app-markdown-doc>

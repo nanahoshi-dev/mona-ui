@@ -1,15 +1,5 @@
-<app-section id="dialog" [header]="'Dialog'" headerType="H1">
-    <p>
-        Displays a modal or non-modal dialog. Use the declarative <code>&lt;mona-dialog&gt;</code> element for
-        dialogs driven by a template's own state (e.g. an <code>&#64;if</code> block), or inject
-        <code>DialogService</code> and call <code>show()</code> to open a dialog imperatively from a component or
-        service. Both approaches support the same <code>type</code> (info/success/warning/error/confirm),
-        <code>rounded</code>, and <code>actionsLayout</code> variants.
-    </p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-dialog-demo></app-dialog-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/dialog/intro.md"></app-markdown-doc>
+
+<app-dialog-demo></app-dialog-demo>
+
+<app-markdown-doc src="docs/dialog/api.md" parentSectionId="dialog"></app-markdown-doc>

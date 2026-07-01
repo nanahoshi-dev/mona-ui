@@ -4750,6 +4750,12 @@
         "kind": "output"
       },
       {
+        "name": "closed",
+        "type": "void",
+        "description": "Emitted after the window has fully closed (post-animation). Preventing this event has no effect.",
+        "kind": "output"
+      },
+      {
         "name": "closeOnEscape",
         "type": "boolean",
         "description": "Sets whether the window should close when the escape key is pressed.",
