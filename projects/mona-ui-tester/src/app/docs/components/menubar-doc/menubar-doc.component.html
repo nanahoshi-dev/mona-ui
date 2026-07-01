@@ -1,10 +1,5 @@
-<app-section id="menubar" [header]="'Menubar'" headerType="H1">
-    <p>A menubar is a graphical control element that presents a persistent, horizontal list of drop-down menus,
-        providing users with consistent access to an application's essential functions.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-menubar-demo></app-menubar-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/menubar/intro.md"></app-markdown-doc>
+
+<app-menubar-demo></app-menubar-demo>
+
+<app-markdown-doc src="docs/menubar/api.md" parentSectionId="menubar"></app-markdown-doc>

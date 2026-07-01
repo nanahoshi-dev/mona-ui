@@ -111,8 +111,15 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      */
     public readonly anchorConnectionPoint = input<ConnectionPoint | null>();
 
+    /**
+     * @description The event that is emitted when the popup menu is closed.
+     */
     public readonly close = output<PopupMenuCloseEvent>();
 
+    /**
+     * @description The items to render in the popup menu.
+     * If provided, it will override the menu items defined by projected menu item components.
+     */
     public readonly items = input<Iterable<PopupMenuItem | MenuItem>>([]);
 
     /**
@@ -120,6 +127,9 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      */
     public readonly menuClick = output<PopupMenuItemClickEvent>();
 
+    /**
+     * @description The id of the popup menu's root element.
+     */
     public readonly menuId = input<string>("", { alias: "id" });
 
     /**
@@ -139,6 +149,9 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      */
     public readonly offset = input<PopupOffset>();
 
+    /**
+     * @description The event that is emitted when the popup menu is opened.
+     */
     public readonly open = output<void>();
 
     /**

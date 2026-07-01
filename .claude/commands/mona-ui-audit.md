@@ -33,7 +33,7 @@ Examples:
 Before doing anything else, read the audit framework:
 
 ```
-.ai/component-audit.md
+.agents/component-audit.md
 ```
 
 This file defines the audit role, severity rules, evaluation pillars, false-positive guardrails, and the required output format. You must follow it exactly.

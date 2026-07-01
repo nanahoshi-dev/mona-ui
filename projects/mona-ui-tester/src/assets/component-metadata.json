@@ -3690,13 +3690,13 @@
       {
         "name": "close",
         "type": "PopupMenuCloseEvent",
-        "description": "",
+        "description": "The event that is emitted when the popup menu is closed.",
         "kind": "output"
       },
       {
         "name": "items",
         "type": "Iterable<PopupMenuItem | MenuItem>",
-        "description": "",
+        "description": "The items to render in the popup menu.\r\nIf provided, it will override the menu items defined by projected menu item components.",
         "kind": "input"
       },
       {
@@ -3708,7 +3708,7 @@
       {
         "name": "menuId",
         "type": "string",
-        "description": "",
+        "description": "The id of the popup menu's root element.",
         "kind": "input"
       },
       {
@@ -3732,7 +3732,7 @@
       {
         "name": "open",
         "type": "void",
-        "description": "",
+        "description": "The event that is emitted when the popup menu is opened.",
         "kind": "output"
       },
       {
@@ -7284,7 +7284,7 @@
       {
         "name": "userClasses",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes to apply to the menubar, merged with the computed theme classes.",
         "kind": "input"
       }
     ]

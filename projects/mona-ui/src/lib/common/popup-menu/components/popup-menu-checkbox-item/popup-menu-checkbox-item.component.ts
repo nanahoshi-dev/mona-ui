@@ -8,13 +8,10 @@ import {
     inject,
     input,
     linkedSignal,
-    model,
     OnInit,
-    output,
-    signal
+    output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { readonly } from "@angular/forms/signals";
 import { Subject, tap } from "rxjs";
 import { v4 } from "uuid";
 import {
@@ -43,7 +40,6 @@ export class PopupMenuCheckboxItemComponent implements PopupMenuConfig, OnInit {
     readonly #checked = linkedSignal(() => this.checked());
     readonly #click$ = new Subject<PopupMenuItemClickEvent>();
     readonly #destroyRef = inject(DestroyRef);
-    // protected readonly items = contentChildren(PopupMenuToken, { descendants: false });
     protected readonly shortcutTemplateConfig = contentChild(PopupMenuShortcutTemplateToken, {
         descendants: false
     });

@@ -5,20 +5,22 @@
     @for (item of menuList(); track item; let i = $index) {
         @let menuIconTemplate = item.iconTemplate() ?? iconTemplate() ?? null;
         @let menuTextTemplate = item.textTemplate() ?? textTemplate() ?? null;
-        @let menuId = menuIdList()[i];
+        @let menuId = item.uid + "-menu";
         <li
             [class]="listItemClasses()"
             [attr.data-disabled]="item.disabled()"
             [attr.data-active]="currentPopupMenu() != null && currentPopupMenu()===item.popupMenu"
             [attr.data-mid]="item.uid"
-            [attr.tabindex]="item.disabled() ? -1 : 0"
+            [attr.tabindex]="item.disabled() ? -1 : (i === activeIndex() ? 0 : -1)"
             [attr.role]="'menuitem'"
             [attr.aria-haspopup]="'menu'"
-            [attr.aria-expanded]="currentPopupMenu() === item.popupMenu ? 'true' : 'false'"
-            [attr.aria-controls]="menuId"
+            [attr.aria-expanded]="currentPopupMenu() != null && currentPopupMenu() === item.popupMenu ? 'true' : 'false'"
+            [attr.aria-controls]="currentPopupMenu() != null && currentPopupMenu() === item.popupMenu ? menuId : null"
             [attr.aria-disabled]="item.disabled()"
-            (pointerenter)="onMenuPointerEnter(listItemElement, popupMenu)"
-            (keydown)="onMenuKeyDown($event, popupMenu)"
+            (pointerenter)="onMenuPointerEnter(item, listItemElement, popupMenu)"
+            (keydown)="onMenuKeyDown($event, item, popupMenu)"
+            (click)="onMenuClick($event, item)"
+            (focus)="onMenuFocus(i)"
             (blur)="onMenuBlur($event)"
             #listItemElement>
             @if (menuIconTemplate) {

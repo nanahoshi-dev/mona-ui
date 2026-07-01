@@ -1,5 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
@@ -11,7 +12,6 @@ import {
     ElementRef,
     inject,
     input,
-    OnInit,
     output,
     signal,
     TemplateRef,
@@ -29,7 +29,6 @@ import { PopupMenuShortcutTemplateDirective } from "../../../../common/popup-men
 import { PopupMenuTextTemplateDirective } from "../../../../common/popup-menu/directives/popup-menu-text-template.directive";
 import { PopupMenuNavigationEvent } from "../../../../common/popup-menu/models/PopupMenuNavigationEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { createElementControlId } from "../../../../utils/createElementControlId";
 import { MenuGroupTemplateDirective } from "../../../directives/menu-group-template.directive";
 import { MenuIconTemplateDirective } from "../../../directives/menu-icon-template.directive";
 import { MenuItemIconTemplateDirective } from "../../../directives/menu-item-icon-template.directive";
@@ -63,11 +62,12 @@ import { MenuComponent } from "../menu/menu.component";
         "[attr.data-disabled]": "disabled()"
     }
 })
-export class MenubarComponent implements MenubarVariantInput, OnInit {
+export class MenubarComponent implements MenubarVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
+    protected readonly activeIndex = signal(0);
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -94,9 +94,6 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         return menubarListItemThemeVariants(theme)({ rounded });
-    });
-    protected readonly menuIdList = computed(() => {
-        return this.menuList().map(() => createElementControlId());
     });
     protected readonly menuItemIconTemplate = contentChild(MenuItemIconTemplateDirective, {
         read: TemplateRef,
@@ -147,6 +144,10 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
      * @description Sets the rounded style of the menubar.
      */
     public readonly rounded = input<MenubarVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Additional CSS classes to apply to the menubar, merged with the computed theme classes.
+     */
     public readonly userClasses = input("", { alias: "class" });
 
     public constructor() {
@@ -166,10 +167,19 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
                 this.currentPopupElement.set(null);
             });
         });
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
+        effect(() => {
+            const menuList = this.menuList();
+            untracked(() => {
+                const currentItem = menuList[this.activeIndex()];
+                if (!currentItem || currentItem.disabled()) {
+                    const fallbackIndex = menuList.findIndex(m => !m.disabled());
+                    this.activeIndex.set(fallbackIndex >= 0 ? fallbackIndex : 0);
+                }
+            });
+        });
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
     }
 
     protected onMenuBlur(event: FocusEvent): void {
@@ -182,11 +192,22 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         }
     }
 
+    protected onMenuClick(event: MouseEvent, item: MenuComponent): void {
+        if (this.disabled() || item.disabled()) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+    }
+
+    protected onMenuFocus(index: number): void {
+        this.activeIndex.set(index);
+    }
+
     protected onMenuItemClick(event: MenuItemClickEvent): void {
         this.menuItemClick.emit(event);
     }
 
-    protected onMenuKeyDown(event: KeyboardEvent, popupMenu: PopupMenuComponent): void {
+    protected onMenuKeyDown(event: KeyboardEvent, item: MenuComponent, popupMenu: PopupMenuComponent): void {
         if (this.disabled()) {
             return;
         }
@@ -195,7 +216,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
             case "Enter":
             case " ":
                 event.preventDefault();
-                if (popupMenu) {
+                if (popupMenu && !item.disabled()) {
                     popupMenu.openMenuViaKeyboard();
                 }
                 break;
@@ -209,7 +230,7 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
                 break;
             case "ArrowDown":
                 event.preventDefault();
-                if (popupMenu && !this.currentPopupMenu()) {
+                if (popupMenu && !item.disabled() && !this.currentPopupMenu()) {
                     popupMenu.openMenuViaKeyboard();
                 }
                 break;
@@ -228,6 +249,17 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         }
     }
 
+    protected onMenuPointerEnter(item: MenuComponent, element: HTMLLIElement, popupMenu: PopupMenuComponent): void {
+        if (this.disabled() || item.disabled() || this.currentPopupMenu() === popupMenu || !this.currentPopupMenu()) {
+            return;
+        }
+        this.currentPopupMenu()?.clearFocusRestoration();
+        this.currentPopupMenu()?.closeMenu();
+        this.currentPopupMenu.set(popupMenu);
+        this.currentPopupElement.set(element);
+        this.currentPopupMenu()!.openMenu(false);
+    }
+
     protected onPopupMenuClose(): void {
         this.currentPopupMenu.set(null);
         this.currentPopupElement.set(null);
@@ -239,17 +271,6 @@ export class MenubarComponent implements MenubarVariantInput, OnInit {
         }
         this.currentPopupMenu.set(popupMenu);
         this.currentPopupElement.set(element);
-    }
-
-    protected onMenuPointerEnter(element: HTMLLIElement, popupMenu: PopupMenuComponent): void {
-        if (this.currentPopupMenu() === popupMenu || !this.currentPopupMenu()) {
-            return;
-        }
-        this.currentPopupMenu()?.clearFocusRestoration();
-        this.currentPopupMenu()?.closeMenu();
-        this.currentPopupMenu.set(popupMenu);
-        this.currentPopupElement.set(element);
-        this.currentPopupMenu()!.openMenu(false);
     }
 
     private closeCurrentMenu(): void {
