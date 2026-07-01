@@ -186,7 +186,7 @@ export class PopupService {
 
     private createSingleElementPopup(settings: PopupSettings): PopupRef {
         const overlayRef = this.createOverlay(settings);
-        const popupReference = new PopupReference(overlayRef);
+        const popupReference = new PopupReference(overlayRef, settings.preventClose);
         const originallyFocusedElement = this.captureOriginalFocus(settings);
         const injector = this.createInjector(settings, popupReference);
 
@@ -342,11 +342,10 @@ export class PopupService {
                     via: PopupCloseSource.BackdropClick
                 });
 
-                if (this.shouldPreventClose(settings.preventClose, event)) {
+                if (!popupReference.close(event)) {
                     return;
                 }
 
-                popupReference.close(event);
                 backdropSubject.next();
                 backdropSubject.complete();
             });
@@ -419,12 +418,6 @@ export class PopupService {
                     originalEvent: event,
                     via: PopupCloseSource.Escape
                 });
-                popupReference.beforeClosed$.next(closeEvent);
-
-                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
-                    return;
-                }
-
                 popupReference.popupRef.close(closeEvent);
             });
     }
@@ -486,12 +479,6 @@ export class PopupService {
                     originalEvent: event,
                     via: PopupCloseSource.MouseLeave
                 });
-                popupReference.beforeClosed$.next(closeEvent);
-
-                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
-                    return;
-                }
-
                 popupReference.close(closeEvent);
             });
     }
@@ -514,12 +501,6 @@ export class PopupService {
                     originalEvent: event,
                     via: PopupCloseSource.OutsideClick
                 });
-                popupReference.beforeClosed$.next(closeEvent);
-
-                if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
-                    return;
-                }
-
                 popupReference.close(closeEvent);
             });
     }
@@ -559,11 +540,6 @@ export class PopupService {
                 originalEvent: originalEvent ?? new Event("scroll"),
                 via: PopupCloseSource.Scroll
             });
-            popupReference.beforeClosed$.next(closeEvent);
-
-            if (this.shouldPreventClose(settings.preventClose, closeEvent)) {
-                return;
-            }
             popupReference.close(closeEvent, 0);
         };
 
@@ -642,15 +618,5 @@ export class PopupService {
         const isAnchorClick = anchorElement && anchorElement.contains(eventTarget);
         const isRelevantEventType = this.#outsideEventsToClose.includes(event.type);
         return isAnchorClick || !isRelevantEventType;
-    }
-
-    private shouldPreventClose(
-        preventClose: ((event: PopupCloseEvent) => boolean) | undefined,
-        event: PopupCloseEvent
-    ): boolean {
-        if (!preventClose) {
-            return event.isDefaultPrevented();
-        }
-        return preventClose(event) || event.isDefaultPrevented();
     }
 }
