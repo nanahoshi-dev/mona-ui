@@ -12,7 +12,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take, takeUntil } from "rxjs";
-import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
+import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/PopupCloseEvent";
 import { DialogContentTemplateDirective } from "../../directives/dialog-content-template.directive";
 import { DialogDescriptionTemplateDirective } from "../../directives/dialog-description-template.directive";
 import { DialogFooterTemplateDirective } from "../../directives/dialog-footer-template.directive";
@@ -194,9 +194,11 @@ export class DialogComponent implements DialogVariantInput {
         });
 
         this.#dialogRef.result.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(result => {
-            if (!result.viaClose) {
-                this.action.emit(result.action);
+            if (result.viaClose) {
+                this.#dialogRef?.close(new PopupCloseEvent({ via: PopupCloseSource.CloseButton }));
+                return;
             }
+            this.action.emit(result.action);
             this.#dialogRef?.close();
         });
 

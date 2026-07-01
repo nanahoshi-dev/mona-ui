@@ -1,6 +1,7 @@
 import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentRef } from "@angular/core";
 import { asyncScheduler, Observable, ReplaySubject, Subject } from "rxjs";
+import { Action } from "../../utils/Action";
 import { PopupCloseEvent, PopupCloseSource } from "./PopupCloseEvent";
 import { PopupRef } from "./PopupRef";
 import { PopupRefParams } from "./PopupRefParams";
@@ -20,36 +21,48 @@ export class PopupReference implements PopupRefParams {
     #closed = false;
     #closing = false;
 
-    public constructor(public readonly overlayReference: OverlayRef) {
+    public constructor(
+        public readonly overlayReference: OverlayRef,
+        private readonly preventClose?: Action<PopupCloseEvent, boolean>
+    ) {
         this.popupRef = new PopupRef(this);
     }
 
-    public close<R>(result?: R, delay?: number): void {
+    /**
+     * Emits {@link beforeClosed$} exactly once and, unless the close is prevented (either by the
+     * `preventClose` callback passed to the popup or by a subscriber calling `preventDefault()`
+     * on the event), proceeds to close the popup.
+     * @returns `true` if the close proceeded, `false` if it was prevented.
+     */
+    public close<R>(result?: R, delay?: number): boolean {
         if (this.#closing) {
-            return;
+            return false;
         }
-        const beforeCloseEvent = new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
-        this.beforeClosed$.next(beforeCloseEvent);
-
-        if (beforeCloseEvent.isDefaultPrevented()) {
-            return;
-        }
-        this.#closing = true;
-        this.closeStart$.next(beforeCloseEvent);
-        const event =
+        const beforeCloseEvent =
             result instanceof PopupCloseEvent
                 ? result
                 : new PopupCloseEvent({ result, via: PopupCloseSource.Programmatic });
+        this.beforeClosed$.next(beforeCloseEvent);
+
+        const prevented = this.preventClose
+            ? this.preventClose(beforeCloseEvent) || beforeCloseEvent.isDefaultPrevented()
+            : beforeCloseEvent.isDefaultPrevented();
+        if (prevented) {
+            return false;
+        }
+        this.#closing = true;
+        this.closeStart$.next(beforeCloseEvent);
 
         if (delay != null) {
             if (delay > 0) {
-                asyncScheduler.schedule(() => this.completeClose(event), delay);
+                asyncScheduler.schedule(() => this.completeClose(beforeCloseEvent), delay);
             } else {
-                this.completeClose(event);
+                this.completeClose(beforeCloseEvent);
             }
         } else if (this.wrapperComponentRef == null) {
-            this.completeClose(event);
+            this.completeClose(beforeCloseEvent);
         }
+        return true;
     }
 
     public notifyOpen(): void {
