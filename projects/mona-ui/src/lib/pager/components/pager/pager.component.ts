@@ -20,21 +20,31 @@ import {
     viewChild
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import {
-    faAngleDoubleLeft,
-    faAngleDoubleRight,
-    faAngleLeft,
-    faAngleRight,
-    faEllipsis
-} from "@fortawesome/free-solid-svg-icons";
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideChevronsLeft,
+    LucideChevronsRight,
+    LucideEllipsis
+} from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
+import { twMerge } from "tailwind-merge";
+import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
+import { DropDownVirtualScrollDirective } from "../../../dropdowns/directives/drop-down-virtual-scroll.directive";
+import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
 import { DropDownListValueTemplateDirective } from "../../../dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
+import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
+import { SlicePipe } from "../../../pipes/slice.pipe";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
 import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-navigation-buttons-template.directive";
 import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-numeric-buttons-template.directive";
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { InfoTemplateContext } from "../../models/InfoTemplateContext";
+import { Page } from "../../models/Page";
+import { PageChangeEvent } from "../../models/PageChangeEvent";
+import { PagerType } from "../../models/PagerType";
+import { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
 import {
     pagerBaseThemeVariants,
     pagerInfoThemeVariants,
@@ -43,17 +53,6 @@ import {
     type PagerVariantInputs,
     type PagerVariantProps
 } from "../../styles/pager.styles";
-import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
-import { DropDownVirtualScrollDirective } from "../../../dropdowns/directives/drop-down-virtual-scroll.directive";
-import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
-import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
-import { SlicePipe } from "../../../pipes/slice.pipe";
-import { Page } from "../../models/Page";
-import { PageChangeEvent } from "../../models/PageChangeEvent";
-import { PagerType } from "../../models/PagerType";
-import { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
-import { ThemeService } from "../../../theme/services/theme.service";
 
 @Component({
     selector: "mona-pager",
@@ -61,7 +60,6 @@ import { ThemeService } from "../../../theme/services/theme.service";
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ButtonDirective,
-        FontAwesomeModule,
         NgClass,
         NumericTextBoxComponent,
         FormsModule,
@@ -69,7 +67,12 @@ import { ThemeService } from "../../../theme/services/theme.service";
         SlicePipe,
         DropDownVirtualScrollDirective,
         NgTemplateOutlet,
-        DropDownListValueTemplateDirective
+        DropDownListValueTemplateDirective,
+        LucideEllipsis,
+        LucideChevronsLeft,
+        LucideChevronLeft,
+        LucideChevronRight,
+        LucideChevronsRight
     ],
     host: {
         "[class]": "baseClasses()"
@@ -93,10 +96,22 @@ export class PagerComponent implements PagerVariantInputs {
         const classes = pagerBaseThemeVariants(theme)({ rounded });
         return twMerge(classes, userClasses);
     });
-    protected readonly ellipsisIcon = faEllipsis;
     protected readonly firstPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "first");
+    });
+    protected readonly iconSize = computed(() => {
+        const size = this.size();
+        switch (size) {
+            case "small":
+                return 18;
+            case "medium":
+                return 20;
+            case "large":
+                return 22;
+            default:
+                return 20;
+        }
     });
     protected readonly infoClasses = computed(() => {
         const theme = this.#themeService.theme();
@@ -115,17 +130,14 @@ export class PagerComponent implements PagerVariantInputs {
         source: () => this.page(),
         computation: page => page
     });
-    protected readonly firstPageIcon = faAngleDoubleLeft;
     protected readonly lastPageNavigationTemplate = computed(() => {
         const navigationTemplates = this.navigationButtonsTemplateList();
         return navigationTemplates.find(t => t.type() === "last");
     });
-    protected readonly lastPageIcon = faAngleDoubleRight;
     protected readonly listClasses = computed(() => {
         const theme = this.#themeService.theme();
         return pagerListThemeVariants(theme)();
     });
-    protected readonly nextIcon = faAngleRight;
     protected readonly nextJumperVisible = computed(() => {
         const pages = this.pages();
         const visiblePages = this.visiblePages();
@@ -178,7 +190,6 @@ export class PagerComponent implements PagerVariantInputs {
     protected readonly pages = computed(() => {
         return this.preparePages(this.page(), this.visiblePages(), this.pageCount());
     });
-    protected readonly previousIcon = faAngleLeft;
     protected readonly previousJumperVisible = computed(
         () => this.pages().length > this.visiblePages() && this.pages()[1].page - 1 > 1
     );
