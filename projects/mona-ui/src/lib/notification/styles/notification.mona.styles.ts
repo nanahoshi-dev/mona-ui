@@ -30,7 +30,7 @@ export const notificationContainerBaseVariants = cva(`p-2 z-40000`, {
 
 export const notificationActionVariants = cva(
     `
-        absolute top-1 right-1
+        absolute top-0 right-0
         flex items-start h-auto
         [&>svg.lucide]:cursor-pointer
         [&>svg.lucide]:-mt-1

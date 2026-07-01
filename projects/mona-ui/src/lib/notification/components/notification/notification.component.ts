@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ChangeDetectionStrategy,
@@ -13,6 +13,7 @@ import {
     viewChild,
     ViewContainerRef
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideBadgeInfo, LucideCircleCheckBig, LucideOctagonAlert, LucideOctagonX, LucideX } from "@lucide/angular";
 import { asyncScheduler, interval, takeWhile } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
@@ -43,14 +44,25 @@ import {
         LucideOctagonAlert,
         LucideX
     ],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: {
+        "(pointerenter)": "onInteractionStart()",
+        "(pointerleave)": "onInteractionEnd()",
+        "(focusin)": "onInteractionStart()",
+        "(focusout)": "onInteractionEnd()"
+    }
 })
 export class NotificationComponent {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #document = inject(DOCUMENT);
+    readonly #isUrgent = computed(() => this.type() === "error" || this.type() === "warning");
+    readonly #paused = signal(false);
     readonly #themeService = inject(ThemeService);
     protected readonly actionClass = computed(() => {
         const theme = this.#themeService.theme();
         return notificationActionThemeVariants(theme)();
     });
+    protected readonly ariaLive = computed(() => (this.#isUrgent() ? "assertive" : "polite"));
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         return notificationBaseThemeVariants(theme)();
@@ -85,14 +97,18 @@ export class NotificationComponent {
     protected readonly progressColor = computed(() => {
         const type = this.type();
         const propertyName = `--color-${type}`;
-        return getComputedStyle(document.documentElement).getPropertyValue(propertyName);
+        return getComputedStyle(this.#document.documentElement).getPropertyValue(propertyName);
     });
     protected readonly progressValue = signal(100);
+    protected readonly role = computed(() => (this.#isUrgent() ? "alert" : "status"));
     protected readonly textClass = computed(() => {
         const theme = this.#themeService.theme();
         return notificationTextThemeVariants(theme)();
     });
     protected readonly type = computed(() => this.data().options.type ?? "info");
+    /**
+     * @description The notification's internal state, created and managed by `NotificationService`. Not intended to be provided directly by consumers.
+     */
     public readonly data = input.required<NotificationData>();
 
     public constructor() {
@@ -106,11 +122,19 @@ export class NotificationComponent {
                 }
             }
         });
-        inject(DestroyRef).onDestroy(() => this.data().componentDestroy$.next(this.data().options.id as string));
+        this.#destroyRef.onDestroy(() => this.data().componentDestroy$.next(this.data().options.id as string));
     }
 
     public close(): void {
         this.data().componentDestroy$.next(this.data().options.id as string);
+    }
+
+    protected onInteractionEnd(): void {
+        this.#paused.set(false);
+    }
+
+    protected onInteractionStart(): void {
+        this.#paused.set(true);
     }
 
     #setupProgressBar(): void {
@@ -118,11 +142,17 @@ export class NotificationComponent {
         if (duration == null) {
             return;
         }
-        const progressInterval = duration / 100;
+        const progressInterval = Math.max(duration, 100) / 100;
         interval(progressInterval)
-            .pipe(takeWhile(() => this.progressValue() > 0))
+            .pipe(
+                takeWhile(() => this.progressValue() > 0),
+                takeUntilDestroyed(this.#destroyRef)
+            )
             .subscribe({
                 next: () => {
+                    if (this.#paused()) {
+                        return;
+                    }
                     this.progressValue.set(this.progressValue() - 1);
                     if (this.progressValue() === 0) {
                         asyncScheduler.schedule(() => {

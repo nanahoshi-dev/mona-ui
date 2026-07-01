@@ -9,7 +9,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Prefer EcmaScript private fields (not methods) over TypeScript private properties (not methods)
 - Utilize Immutable data structures and enumerable functions from https://phrolovia.github.io/ts-collections/.
 - Use `@mirei/ts-collections` imports directly (for example `range`, `ImmutableSet`, `sequenceEqual`) as seen in both `projects/mona-ui/src/lib` and `projects/mona-ui-tester/src/app`.
-- Abide by the ESLint rules in `.eslint.config.mjs` strictly.
+- Abide by the ESLint rules in `eslint.config.mjs` strictly.
 
 ## Angular Best Practices
 
@@ -69,3 +69,4 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 - Use `vitest` for unit tests
 - When running tests, only run the tests related to the changed files
+- Use @.agents/testing-rules-enhanced.md for better test guidelines.

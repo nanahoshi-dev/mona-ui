@@ -57,35 +57,32 @@ export class NotificationService {
     }
 
     public show(options: NotificationOptions): NotificationRef {
-        if (!options.id) {
-            options.id = `Notification_${v4()}`;
-        }
-        if (!options.position) {
-            options.position = "topright";
-        }
-        if (!options.type) {
-            options.type = "info";
-        }
-        if (!options.title) {
-            options.title = getDefaultTitle(options.type);
-        }
-        const containerData: NotificationContainerData | undefined = this.notificationContainerMap.get(
-            options.position
-        );
-        if (containerData?.notifications.has(options.id)) {
-            const existing = containerData.notifications.get(options.id)!;
+        const position = options.position ?? "topright";
+        const type = options.type ?? "info";
+        const resolvedOptions: NotificationOptions = {
+            ...options,
+            id: options.id ?? `Notification_${v4()}`,
+            position,
+            type,
+            title: options.title ?? getDefaultTitle(type),
+            closable: options.closable ?? (options.duration == null ? true : undefined)
+        };
+        const containerData: NotificationContainerData | undefined =
+            this.notificationContainerMap.get(position);
+        if (containerData?.notifications.has(resolvedOptions.id as string)) {
+            const existing = containerData.notifications.get(resolvedOptions.id as string)!;
             return {
                 afterHide: existing.afterHide$.asObservable(),
                 get content() {
                     return existing.contentComponentRef();
                 },
-                hide: () => this.hide(options.id as string)
+                hide: () => this.hide(resolvedOptions.id as string)
             };
         }
-        if (this.notificationContainerSubscriptions[options.position as NotificationPosition]) {
-            return this.createNotification(options);
+        if (this.notificationContainerSubscriptions[position]) {
+            return this.createNotification(resolvedOptions);
         } else {
-            return this.createNotificationContainer(options);
+            return this.createNotificationContainer(resolvedOptions);
         }
     }
 

@@ -1,7 +1,12 @@
 @let width = typeof data().options.width === "string" ? data().options.width : `${data().options.width}px`;
 @let height = typeof data().options.height === "string" ? data().options.height : `${data().options.height}px`;
 
-<div [class]="baseClass()" [style.width]="width" [style.height]="height" role="alert" aria-live="assertive">
+<div
+    [class]="baseClass()"
+    [style.width]="width"
+    [style.height]="height"
+    [attr.role]="role()"
+    [attr.aria-live]="ariaLive()">
     @if (contentTemplate() || contentComponent()) {
         @if (contentTemplate()) {
             <ng-container [ngTemplateOutlet]="contentTemplate()"></ng-container>
@@ -59,8 +64,7 @@
                 [iconOnly]="true"
                 [title]="data().options.closeTitle || 'Close'"
                 [attr.aria-label]="data().options.closeTitle || 'Close'"
-                (click)="close()"
-                class="w-4 h-4 p-2">
+                (click)="close()">
                 <svg lucideX [size]="14" aria-hidden="true"></svg>
             </button>
         </div>

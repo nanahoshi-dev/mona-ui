@@ -24,14 +24,12 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class NotificationDemoComponent extends AbstractDemoComponent<never> {
     readonly #injector = createFeatureInjector({
         notificationConfiguration: {
-            code: ``,
             active: true,
             name: "Notification Options",
             description: "Configure the notification component.",
             subFeatures: {
                 appendTo: {
                     type: "dropdown",
-                    code: ``,
                     active: false,
                     name: "Append To",
                     description: "The target element to append the notification to.",
@@ -40,14 +38,12 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                 },
                 closable: {
                     type: "boolean",
-                    code: ``,
                     active: true,
                     name: "Closable",
                     description: "Whether the notification is closable."
                 },
                 closeTitle: {
                     type: "string",
-                    code: ``,
                     active: true,
                     name: "Close Title",
                     description: "The title of the close button.",
@@ -57,14 +53,12 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                     type: "dropdown",
                     dropdownValue: "string",
                     dropdownDataSource: ["string", "template", "component"],
-                    code: ``,
                     active: false,
                     name: "Content",
                     description: "The content of the notification."
                 },
                 contentText: {
                     type: "string",
-                    code: ``,
                     active: false,
                     name: "Content Text",
                     description: "The text content of the notification.",
@@ -72,7 +66,6 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                 },
                 duration: {
                     type: "number",
-                    code: ``,
                     active: true,
                     name: "Duration",
                     description: "The duration of the notification.",
@@ -81,7 +74,6 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                 },
                 height: {
                     type: "number",
-                    code: ``,
                     active: true,
                     name: "Height",
                     description: "The height of the notification."
@@ -90,21 +82,18 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                     type: "dropdown",
                     dropdownValue: "topright",
                     dropdownDataSource: ["top", "topleft", "topright", "bottom", "bottomleft", "bottomright"],
-                    code: ``,
                     active: true,
                     name: "Position",
                     description: "The position of the notification."
                 },
                 progressBar: {
                     type: "boolean",
-                    code: ``,
                     active: true,
                     name: "Progress Bar",
                     description: "Show a progress bar for the notification."
                 },
                 title: {
                     type: "string",
-                    code: ``,
                     active: true,
                     name: "Title",
                     description: "The title of the notification."
@@ -113,7 +102,6 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                     type: "dropdown",
                     dropdownValue: "success",
                     dropdownDataSource: ["success", "warning", "error", "info"],
-                    code: ``,
                     active: true,
                     name: "Type",
                     description: "The type of the notification."
@@ -121,7 +109,6 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
                 width: {
                     type: "number",
                     numericValue: undefined,
-                    code: ``,
                     active: true,
                     name: "Width",
                     description: "The width of the notification."
@@ -141,7 +128,6 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
 
 @Component({
     imports: [ButtonDirective, PlaceholderComponent],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <button monaButton (click)="showNotification()">Show Notification</button>
         <button monaButton look="error" (click)="hideAll()">Hide All Notifications</button>
@@ -171,7 +157,7 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
                 ? (this.#config()["contentText"].stringValue ?? "")
                 : contentType === "template"
                   ? this.contentTemplate()
-                  : TextBoxComponent; //TODO: Create a simple test component
+                  : NotificationPlaceholderComponent;
         const appendTo = this.#config()["appendTo"].dropdownValue === "body" ? undefined : this.scopedContainer();
         this.notificationRef = this.#notificationService.show({
             appendTo,
@@ -192,3 +178,9 @@ class NotificationWrapperComponent implements ComponentInputsAsSignal<unknown> {
         this.#notificationService.hideAll();
     }
 }
+
+@Component({
+    imports: [PlaceholderComponent],
+    template: ` <mona-placeholder [text]="'Notification Placeholder Component'" class="mt-4"></mona-placeholder> `
+})
+export class NotificationPlaceholderComponent {}

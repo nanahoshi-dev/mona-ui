@@ -2568,7 +2568,7 @@
       {
         "name": "data",
         "type": "NotificationData",
-        "description": "",
+        "description": "The notification's internal state, created and managed by `NotificationService`. Not intended to be provided directly by consumers.",
         "kind": "input"
       }
     ]
