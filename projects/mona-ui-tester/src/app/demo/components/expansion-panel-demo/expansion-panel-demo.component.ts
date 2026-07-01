@@ -55,6 +55,10 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
 
         `,
         inputs: {
+            disabled: {
+                type: "boolean",
+                value: false
+            },
             expanded: {
                 type: "boolean",
                 value: false
@@ -91,7 +95,11 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     template: `
         @let featureData = features();
         @for (country of countryData; track $index) {
-            <mona-expansion-panel [expanded]="expanded()" [rounded]="rounded()" [title]="title() || country.name">
+            <mona-expansion-panel
+                [disabled]="disabled()"
+                [expanded]="expanded()"
+                [rounded]="rounded()"
+                [title]="title() || country.name">
                 <p class="w-full h-full p-2 text-justify">{{ country.description }}</p>
                 @if (featureData["titleTemplate"].active) {
                     <ng-template monaExpansionPanelTitleTemplate>
@@ -169,6 +177,7 @@ class ExpansionPanelWrapperComponent implements ComponentInputsAsSignal<Expansio
     ];
     protected readonly features = inject(FeatureConfigHandler).data;
 
+    public readonly disabled = input(false);
     public readonly expanded = model(false);
     public readonly rounded = input<ReturnType<ExpansionPanelComponent["rounded"]>>("medium");
     public readonly title = input("");

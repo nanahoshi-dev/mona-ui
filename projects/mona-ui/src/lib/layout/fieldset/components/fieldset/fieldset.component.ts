@@ -24,14 +24,14 @@ export class FieldsetComponent implements FieldsetVariantInput {
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const variantClass = fieldsetBaseThemeVariants(theme)();
-        const userClass = this.userClass();
-        return twMerge(variantClass, userClass);
+        return fieldsetBaseThemeVariants(theme)();
     });
     protected readonly fieldsetClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return fieldsetThemeVariants(theme)({ rounded });
+        const disabled = this.disabled();
+        const userClass = this.userClass();
+        return twMerge(fieldsetThemeVariants(theme)({ rounded, disabled }), userClass);
     });
     protected readonly legendClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -45,11 +45,24 @@ export class FieldsetComponent implements FieldsetVariantInput {
     });
 
     /**
+     * @description Whether the fieldset and its projected form controls are disabled.
+     * Reflected as the native `disabled` attribute on the rendered `<fieldset>`.
+     * @default false
+     */
+    public readonly disabled = input(false);
+
+    /**
      * @description The legend text of the fieldset. Shown in the top border as a labelled notch.
      * Ignored when `monaFieldsetLegendTemplate` is provided.
      * @default ""
      */
     public readonly legend = input("");
+
+    /**
+     * @description The `name` attribute reflected onto the rendered `<fieldset>` element.
+     * @default undefined
+     */
+    public readonly name = input<string | undefined>(undefined);
 
     /**
      * @description Border-radius preset applied to the fieldset and its legend.
@@ -58,7 +71,7 @@ export class FieldsetComponent implements FieldsetVariantInput {
     public readonly rounded = input<FieldsetVariantProps["rounded"]>("medium");
 
     /**
-     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @description Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`.
      * @default ""
      */
     public readonly userClass = input("", { alias: "class" });

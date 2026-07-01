@@ -4,8 +4,6 @@
 
 When multiple panels are stacked directly adjacent to one another, the component's border styles stitch the group into a visually continuous block: non-last panels suppress their bottom border and bottom radius, and non-first panels suppress their top radius. No wrapper component is required.
 
-The component manages ARIA disclosure semantics automatically: `aria-expanded` on the header, `aria-controls` referencing the content region's unique `id`, `aria-hidden` on collapsed content, and the `inert` attribute to block focus from entering a collapsed region.
-
 **Use `ExpansionPanelComponent` when you need to:**
 
 - Collapse optional detail content inside a form, settings page, or record view
@@ -57,9 +55,17 @@ Add `ExpansionPanelComponent` to your standalone component's `imports` array.
 
 When panels are stacked, border-radius is only visible on the first panel's top corners and the last panel's bottom corners. The `rounded` value must be consistent across all panels in a stack for the stitching to look correct.
 
+### Disabled state
+
+Set `disabled` to suppress click and keyboard toggling on the header. The header renders with reduced visual emphasis and no longer participates in tab order.
+
 ### Content animation
 
 The content region uses `grid-rows-[0fr]` (collapsed) → `grid-rows-[1fr]` (expanded) with a 300 ms ease-out CSS transition. No JavaScript is involved in the animation.
+
+### Custom classes
+
+Pass `userClass` to merge additional CSS classes onto the host element.
 
 ### Template slots
 
@@ -113,17 +119,37 @@ Three `ng-template` directives customize the header:
 </mona-expansion-panel>
 ```
 
+## Accessibility Notes
+
+The header toggles via mouse click and via `Enter` or `Space` while it has focus; both keys call `preventDefault()` so `Space` does not scroll the page.
+
+| Attribute       | When present                  | Value                                  |
+|-----------------|--------------------------------|-----------------------------------------|
+| `role`          | Always                         | `"button"`                              |
+| `tabindex`      | Always                         | `0`, or `-1` when `disabled` is `true`  |
+| `aria-expanded` | Always                          | Reflects the current `expanded` state   |
+| `aria-controls` | Always                          | The content region's generated `id`     |
+| `aria-disabled` | When `disabled` is `true`       | `"true"`                                |
+| `aria-hidden`   | On the content region, always   | `"true"` when collapsed, `"false"` when expanded |
+| `inert`         | On the content region, when collapsed | Present (blocks focus from entering) |
+
+TODO(owner-review): confirm whether the header should remain a `role="button"` `<div>` or move to a native `<button>` element; the current implementation supports the ARIA disclosure pattern either way.
+
 ## API
 
 ### `ExpansionPanelComponent`
 
 **Selector:** `mona-expansion-panel`
 
-| Name       | Kind  | Type                                              | Default    | Required | Description |
-|------------|-------|---------------------------------------------------|------------|----------|-------------|
-| `expanded` | model | `boolean`                                         | `false`    | Optional | Controls whether the panel is expanded. Use `[(expanded)]` for two-way binding or `[expanded]` for one-way. Changing this programmatically animates the content region. |
-| `rounded`  | input | `'none' \| 'small' \| 'medium' \| 'large'`        | `'medium'` | Optional | Border-radius preset. When stacking panels, use the same value for all panels in the group. |
-| `title`    | input | `string`                                          | `''`       | Optional | Text shown in the header title area. Ignored when `monaExpansionPanelTitleTemplate` is provided. |
+#### Inputs
+
+| Name        | Type                                        | Default    | Description |
+|-------------|----------------------------------------------|------------|-------------|
+| `disabled`  | `boolean`                                    | `false`    | Suppresses click and keyboard toggling on the header. |
+| `expanded`  | `boolean`                                    | `false`    | Two-way bindable. Controls whether the panel is expanded. Use `[(expanded)]` for two-way binding or `[expanded]` for one-way. Changing this programmatically animates the content region. |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'`   | `'medium'` | Border-radius preset. When stacking panels, use the same value for all panels in the group. |
+| `title`     | `string`                                     | `''`       | Text shown in the header title area. Ignored when `monaExpansionPanelTitleTemplate` is provided. |
+| `userClass` | `string`                                     | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
 
 `ExpansionPanelComponent` has no event outputs. Observe `[(expanded)]` to react to state changes.
 
@@ -170,7 +196,9 @@ import {
 - [x] Icon template context ($implicit: expanded()) verified in template source
 - [x] Actions click-propagation caveat verified in demo source
 - [x] Stacking border stitching verified in CVA base styles (not-last / not-first selectors)
+- [x] disabled and userClass inputs verified against source and component-metadata.json
+- [x] Accessibility attribute table verified against template source (role, tabindex, aria-expanded, aria-controls, aria-disabled, aria-hidden, inert)
+- [x] Keyboard activation (Enter/Space + preventDefault) verified against component source and spec
 - [x] No internal or unexported APIs exposed
 -->
 
-<!-- TODO(owner-review): The header uses <div role="button"> with manually wired keyboard events (fromEvent via afterNextRender). A native <button> element would provide the same ARIA semantics, built-in keyboard activation, and remove the need for ElementRef + afterNextRender setup. Consider migrating if the template layout permits it. -->

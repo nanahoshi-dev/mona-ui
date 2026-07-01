@@ -1,11 +1,13 @@
 <div
-    #header
     [class]="headerClass()"
     role="button"
-    tabindex="0"
+    [attr.tabindex]="disabled() ? -1 : 0"
     [attr.aria-expanded]="expanded()"
     [attr.aria-controls]="contentId"
-    (click)="expanded.set(!expanded())">
+    [attr.aria-disabled]="disabled() ? 'true' : undefined"
+    (click)="toggle()"
+    (keydown.enter)="$event.preventDefault(); toggle()"
+    (keydown.space)="$event.preventDefault(); toggle()">
     <div [class]="headerTitleClass()">
         @if (titleTemplate()) {
             <ng-container [ngTemplateOutlet]="titleTemplate()"></ng-container>

@@ -20,7 +20,14 @@ export const fieldsetVariants = cva(
                 large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
+            },
+            disabled: {
+                true: "pointer-events-none opacity-50 cursor-not-allowed select-none",
+                false: ""
             }
+        },
+        defaultVariants: {
+            disabled: false
         }
     }
 );

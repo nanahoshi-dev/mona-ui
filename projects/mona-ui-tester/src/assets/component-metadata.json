@@ -6448,6 +6448,12 @@
     "selector": "\"mona-expansion-panel\"",
     "inputs": [
       {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables header interaction, suppressing click and keyboard toggling.",
+        "kind": "input"
+      },
+      {
         "name": "expanded",
         "type": "boolean",
         "description": "Sets whether the expansion panel is expanded or collapsed.",
@@ -6464,6 +6470,12 @@
         "type": "string",
         "description": "Sets the title of the expansion panel.",
         "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
       }
     ]
   },
@@ -6472,9 +6484,21 @@
     "selector": "\"mona-fieldset\"",
     "inputs": [
       {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Whether the fieldset and its projected form controls are disabled.\r\nReflected as the native `disabled` attribute on the rendered `<fieldset>`.",
+        "kind": "input"
+      },
+      {
         "name": "legend",
         "type": "string",
         "description": "The legend text of the fieldset. Shown in the top border as a labelled notch.\r\nIgnored when `monaFieldsetLegendTemplate` is provided.",
+        "kind": "input"
+      },
+      {
+        "name": "name",
+        "type": "string | undefined",
+        "description": "The `name` attribute reflected onto the rendered `<fieldset>` element.",
         "kind": "input"
       },
       {
@@ -6486,7 +6510,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "description": "Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`.",
         "kind": "input"
       }
     ]

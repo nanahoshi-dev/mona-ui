@@ -68,10 +68,18 @@ When a plain `legend` string is supplied, the legend notch is styled with `bg-ba
 
 ### Custom class
 
-Pass additional classes via the `class` attribute; they are merged onto the host element via `tailwind-merge`:
+Pass additional classes via the `class` attribute; they are merged onto the rendered `<fieldset>` element via `tailwind-merge`, so they can override the default border, background, or rounding:
 
 ```html
-<mona-fieldset legend="Preferences" class="w-full max-w-md"></mona-fieldset>
+<mona-fieldset legend="Preferences" class="border-primary"></mona-fieldset>
+```
+
+### Disabled state
+
+Set `disabled` to disable the rendered `<fieldset>` and all projected form controls, and to apply a reduced-emphasis visual style:
+
+```html
+<mona-fieldset legend="Preferences" [disabled]="true"></mona-fieldset>
 ```
 
 ## API
@@ -80,11 +88,13 @@ Pass additional classes via the `class` attribute; they are merged onto the host
 
 **Selector:** `mona-fieldset`
 
-| Name      | Kind  | Type                                                    | Default    | Required | Description |
-|-----------|-------|---------------------------------------------------------|------------|----------|-------------|
-| `class`   | input | `string`                                                | `''`       | Optional | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `legend`  | input | `string`                                                | `''`       | Optional | Text displayed in the legend notch. Ignored when `monaFieldsetLegendTemplate` is provided. When both are empty, no `<legend>` element is rendered. |
-| `rounded` | input | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Optional | Border-radius preset applied to both the fieldset border and the legend notch. |
+| Name       | Type                                                  | Default     | Description |
+|------------|-------------------------------------------------------|-------------|-------------|
+| `class`    | `string`                                              | `''`        | Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`. |
+| `disabled` | `boolean`                                             | `false`     | Disables the rendered `<fieldset>` and all projected form controls, and applies a reduced-emphasis visual style. |
+| `legend`   | `string`                                              | `''`        | Text displayed in the legend notch. Ignored when `monaFieldsetLegendTemplate` is provided. When both are empty, no `<legend>` element is rendered. |
+| `name`     | `string \| undefined`                                 | `undefined` | The `name` attribute reflected onto the rendered `<fieldset>` element. |
+| `rounded`  | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`  | `'medium'`  | Border-radius preset applied to both the fieldset border and the legend notch. |
 
 `FieldsetComponent` has no model inputs and no event outputs.
 
@@ -107,4 +117,6 @@ import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@mirei/mona-
 - [x] @description and @default added to userClass; @default added to legend
 - [x] legendVisible computed logic verified — hides <legend> when both legend and template are absent
 - [x] No internal or unexported APIs exposed
+- [x] disabled and name inputs added to fieldset.component.ts and documented
+- [x] class merge target corrected to the rendered <fieldset> element (was previously the host element)
 -->

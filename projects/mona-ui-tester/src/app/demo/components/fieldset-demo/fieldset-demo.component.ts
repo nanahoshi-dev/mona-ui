@@ -32,6 +32,10 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
                 type: "dropdown",
                 value: ["none", "small", "medium", "large", "full"],
                 defaultValue: "medium"
+            },
+            disabled: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -46,7 +50,7 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
     imports: [FieldsetComponent, FieldsetLegendTemplateDirective],
     template: `
         @let featureData = features();
-        <mona-fieldset [legend]="legend()" [rounded]="rounded()">
+        <mona-fieldset [legend]="legend()" [rounded]="rounded()" [disabled]="disabled()">
             <p class="p-2">This is a fieldset content.</p>
             @if (featureData["legendTemplate"].active) {
                 <ng-template monaFieldsetLegendTemplate>
@@ -62,6 +66,7 @@ export class FieldsetDemoComponent extends AbstractDemoComponent<FieldsetCompone
 })
 class FieldsetWrapperComponent implements ComponentInputsAsSignal<FieldsetComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly disabled = input<ReturnType<FieldsetComponent["disabled"]>>(false);
     public readonly legend = input<ReturnType<FieldsetComponent["legend"]>>("");
     public readonly rounded = input<ReturnType<FieldsetComponent["rounded"]>>("medium");
 }

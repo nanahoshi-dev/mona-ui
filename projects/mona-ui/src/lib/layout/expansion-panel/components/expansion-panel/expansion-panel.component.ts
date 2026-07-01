@@ -1,18 +1,14 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
     ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
     contentChildren,
-    DestroyRef,
-    ElementRef,
     inject,
     input,
     model,
-    TemplateRef,
-    viewChild
+    TemplateRef
 } from "@angular/core";
 import { LucideMinus, LucidePlus } from "@lucide/angular";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
@@ -28,9 +24,8 @@ import {
     ExpansionPanelVariantProps
 } from "../../styles/expansion-panel.styles";
 import { ExpansionPanelIconTemplateDirective } from "../../directives/expansion-panel-icon-template.directive";
-import { fromEvent } from "rxjs";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { createElementControlId } from "../../../../utils/createElementControlId";
+import { twMerge } from "tailwind-merge";
 
 @Component({
     selector: "mona-expansion-panel",
@@ -43,7 +38,6 @@ import { createElementControlId } from "../../../../utils/createElementControlId
     }
 })
 export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
-    readonly #destroyRef = inject(DestroyRef);
     readonly #themeService = inject(ThemeService);
     protected readonly actionsTemplateList = contentChildren(ExpansionPanelActionsTemplateDirective, {
         read: TemplateRef
@@ -51,7 +45,8 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return expansionPanelBaseThemeVariants(theme)({ rounded });
+        const variantClass = expansionPanelBaseThemeVariants(theme)({ rounded });
+        return twMerge(variantClass, this.userClass());
     });
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -62,9 +57,9 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         const collapsed = !this.expanded();
-        return expansionPanelHeaderThemeVariants(theme)({ collapsed });
+        const disabled = this.disabled();
+        return expansionPanelHeaderThemeVariants(theme)({ collapsed, disabled });
     });
-    protected readonly headerRef = viewChild.required<ElementRef<HTMLElement>>("header");
     protected readonly headerTitleClass = computed(() => {
         const theme = this.#themeService.theme();
         return expansionPanelHeaderTitleThemeVariants(theme)();
@@ -76,6 +71,12 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     });
     protected readonly iconTemplate = contentChild(ExpansionPanelIconTemplateDirective, { read: TemplateRef });
     protected readonly titleTemplate = contentChild(ExpansionPanelTitleTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Disables header interaction, suppressing click and keyboard toggling.
+     * @default false
+     */
+    public readonly disabled = input(false);
 
     /**
      * @description Sets whether the expansion panel is expanded or collapsed.
@@ -95,19 +96,16 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
      */
     public readonly title = input("");
 
-    public constructor() {
-        afterNextRender({ read: () => this.setKeyboardEvents() });
-    }
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
+    public readonly userClass = input("");
 
-    private setKeyboardEvents(): void {
-        const headerElement = this.headerRef().nativeElement;
-        fromEvent<KeyboardEvent>(headerElement, "keydown")
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    this.expanded.update(expanded => !expanded);
-                }
-            });
+    protected toggle(): void {
+        if (this.disabled()) {
+            return;
+        }
+        this.expanded.update(expanded => !expanded);
     }
 }

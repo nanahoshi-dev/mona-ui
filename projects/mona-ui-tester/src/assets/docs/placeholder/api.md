@@ -1,9 +1,9 @@
-## Overview
+## Overview & Usage Guidelines
 
-`PlaceholderComponent` fills its parent container (`w-full h-full`) and centers its content using flexbox. It has two display modes:
+`PlaceholderComponent` fills its parent container and centers its content. It has two display modes:
 
-- **Text mode** — set the `text` input to render a styled, uppercase, muted label inside a `<span>`.
-- **Projected content mode** — project any content via `<ng-content>` when `text` is empty.
+- **Text mode** — set the `text` input to render a muted, uppercase label inside a `<span>`.
+- **Projected content mode** — project any content when `text` is empty.
 
 When both are provided, `text` takes precedence and projected content is not rendered.
 
@@ -54,15 +54,11 @@ Add `PlaceholderComponent` to your standalone component's `imports` array.
 
 > **Sizing:** `PlaceholderComponent` fills its parent with `w-full h-full`. The parent element must have an explicit height for the placeholder to be visible. Setting height via a `class` on the parent or via the component's `class` input both work.
 
-## Appearance & Styling
+## Public Customization
 
-### Text mode styling
+The `text` label renders in a muted theme color and in uppercase. It is not interactive and is not announced as a heading.
 
-The `text` label is rendered in a `<span>` with `text-foreground opacity-50 uppercase select-none`. It is not interactive and is not announced as a heading.
-
-### Custom class
-
-Pass additional Tailwind or custom classes to the host element via the `class` attribute. They are merged via `tailwind-merge`:
+Pass additional Tailwind or custom classes to the host element via the `class` input. They are merged with the component's base classes using `tailwind-merge`, so consumer classes can override the defaults predictably:
 
 ```html
 <!-- Give the placeholder its own height rather than relying on a parent wrapper -->
@@ -70,16 +66,34 @@ Pass additional Tailwind or custom classes to the host element via the `class` a
 </mona-placeholder>
 ```
 
-## API
+`PlaceholderComponent` does not expose a label template or other structural customization point. To render anything beyond a single text label, use projected content mode instead of the `text` input.
+
+## Examples
+
+**Reserving space for a loading region:**
+
+```html
+<mona-placeholder text="Loading..." class="h-40"></mona-placeholder>
+```
+
+## Accessibility Notes
+
+`PlaceholderComponent` does not render any ARIA roles or attributes, and the text label is not focusable. It is appropriate for static, non-urgent presentational content.
+
+If the placeholder communicates a state change that screen reader users must be notified of (for example, swapping from a loading placeholder to "No results"), the consumer is responsible for adding an appropriate live region (such as `aria-live`) around the placeholder, since the component does not provide one.
+
+## API Matrix
 
 ### `PlaceholderComponent`
 
 **Selector:** `mona-placeholder`
 
-| Name    | Kind  | Type     | Default | Required | Description |
-|---------|-------|----------|---------|----------|-------------|
-| `class` | input | `string` | `''`    | Optional | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `text`  | input | `string` | `''`    | Optional | Text displayed as an uppercase muted label inside the placeholder. When non-empty, projected content is suppressed. |
+#### Inputs
+
+| Name    | Type     | Default | Description |
+|---------|----------|---------|-------------|
+| `class` | `string` | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `text`  | `string` | `''`    | Text displayed as an uppercase muted label inside the placeholder. When non-empty, projected content is suppressed. |
 
 `PlaceholderComponent` has no model inputs and no event outputs.
 
@@ -87,10 +101,8 @@ Pass additional Tailwind or custom classes to the host element via the `class` a
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] @description and @default added to userClass
-- [x] text priority over projected content verified in template source
-- [x] w-full h-full sizing behavior verified in CVA base styles
+- [x] Basic example compiles successfully
 - [x] No internal or unexported APIs exposed
+- [x] Accessibility claims verified against source (no ARIA roles/attributes rendered)
+- [x] Styling section includes only public customization points (class merging); internal Tailwind/CVA class names removed
 -->
-
-<!-- TODO(owner-review): The text label renders at opacity-50. Verify that the resolved contrast ratio of `color-mix(text-foreground at 50%)` against `--color-background` meets WCAG AA minimum (4.5:1) across all supported themes. -->

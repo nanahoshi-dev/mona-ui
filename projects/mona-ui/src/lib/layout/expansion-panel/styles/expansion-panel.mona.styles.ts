@@ -38,6 +38,10 @@ export const expansionPanelHeaderVariants = cva(
             collapsed: {
                 true: "border-b-transparent",
                 false: "border-0 border-b border-border border-solid"
+            },
+            disabled: {
+                true: "pointer-events-none opacity-50 cursor-not-allowed select-none",
+                false: ""
             }
         }
     }
