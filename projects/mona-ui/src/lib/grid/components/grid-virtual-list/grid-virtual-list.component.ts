@@ -213,7 +213,7 @@ export class GridVirtualListComponent {
         const viewport = this.viewport();
         viewport.scrolledIndexChange.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             const bottomOffset = viewport.measureScrollOffset("bottom");
-            const itemHeight = this.gridService.virtualScrollOptions().height;
+            const itemHeight = this.gridService.virtualScrollOptions().height ?? 32;
             const threshold = this.gridService.scrollEndThreshold();
             if (bottomOffset <= threshold * itemHeight) {
                 this.gridService.scrollEnd$.next();

@@ -44,6 +44,17 @@ export class ListService<TData> {
         operator: "contains"
     });
     public readonly focus$ = new Subject<void>();
+    public readonly focusableItem = computed(() => {
+        const highlighted = this.highlightedItem();
+        if (highlighted) {
+            return highlighted;
+        }
+        const selected = this.selectedListItems().lastOrDefault();
+        if (selected) {
+            return selected;
+        }
+        return this.viewItems().firstOrDefault(i => !i.header && !this.isDisabled(i));
+    });
     public readonly groupBy = signal<ListKeySelector<TData>>(null);
     public readonly groupableOptions = signal<GroupableOptions<TData, any>>({
         enabled: false,

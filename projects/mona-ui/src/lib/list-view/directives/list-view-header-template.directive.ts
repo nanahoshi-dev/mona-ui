@@ -1,7 +1,6 @@
 import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaListViewHeaderTemplate]",
-    standalone: true
+    selector: "ng-template[monaListViewHeaderTemplate]"
 })
 export class ListViewHeaderTemplateDirective {}

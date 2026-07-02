@@ -57,7 +57,7 @@ import { ListItemComponent } from "../list-item/list-item.component";
     templateUrl: "./list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        "[attr.tabindex]": "0",
+        "[attr.tabindex]": "hostTabIndex()",
         "[class]": "classes()",
         "[style.height]": "listHeight()",
         "[style.max-height]": "listMaxHeight()",
@@ -83,6 +83,7 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly hostTabIndex = computed(() => (this.listService.focusableItem() ? -1 : 0));
     protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly innerListClasses = computed(() => {
         const classes = listInnerListVariants();
@@ -141,7 +142,7 @@ export class ListComponent<TData> implements OnInit {
             .viewItems()
             .where(i => !!i.header)
             .count();
-        const itemHeight = this.listService.virtualScrollOptions().height;
+        const itemHeight = this.listService.virtualScrollOptions().height ?? 28;
         const height = items * itemHeight + headerItems * 2;
         return `${height}px`;
     });
@@ -298,7 +299,7 @@ export class ListComponent<TData> implements OnInit {
             }
         } else if (this.listService.virtualScrollOptions().enabled) {
             const index = this.listService.viewItems().toList().indexOf(item);
-            const itemHeight = this.listService.virtualScrollOptions().height;
+            const itemHeight = this.listService.virtualScrollOptions().height ?? 28;
             const rect = this.#hostElementRef.nativeElement.getBoundingClientRect();
             const offset = itemHeight * index - rect.height / 2;
             asyncScheduler.schedule(() => {
@@ -375,6 +376,7 @@ export class ListComponent<TData> implements OnInit {
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
+                filter(event => event.key !== "Tab"),
                 filter(() => this.listService.navigableOptions().enabled),
                 tap(event => {
                     const navigableOptions = this.listService.navigableOptions();
@@ -405,9 +407,15 @@ export class ListComponent<TData> implements OnInit {
             this.#hostElementRef.nativeElement.focus();
             this.setInitialSelectionOrFocus();
         });
-        fromEvent(this.#hostElementRef.nativeElement, "focus")
+        fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
             .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(() => this.setInitialSelectionOrFocus());
+            .subscribe(event => {
+                const previous = event.relatedTarget as HTMLElement | null;
+                if (previous && this.#hostElementRef.nativeElement.contains(previous)) {
+                    return;
+                }
+                this.setInitialSelectionOrFocus();
+            });
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focusout")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(event => {

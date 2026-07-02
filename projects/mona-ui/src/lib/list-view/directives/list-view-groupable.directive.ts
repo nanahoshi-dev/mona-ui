@@ -4,8 +4,7 @@ import { ListKeySelector } from "../../common/list/models/ListSelectors";
 import { ListService } from "../../common/list/services/list.service";
 
 @Directive({
-    selector: "mona-list-view[monaListViewGroupable]",
-    standalone: true
+    selector: "mona-list-view[monaListViewGroupable]"
 })
 export class ListViewGroupableDirective<T, K = T> {
     readonly #defaultOptions: GroupableOptions<T, K> = {

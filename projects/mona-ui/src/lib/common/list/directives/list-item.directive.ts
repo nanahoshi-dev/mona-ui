@@ -19,6 +19,7 @@ import { ListService } from "../services/list.service";
         "[attr.data-highlighted]": "highlighted()",
         "[attr.data-selected]": "selected()",
         "[attr.role]": "'option'",
+        "[attr.tabindex]": "rovingTabIndex()",
         "[class]": "textClasses()"
     }
 })
@@ -30,6 +31,7 @@ export class ListItemDirective<TData> {
         const positionInfo = this.#listService.getItemPosition(this.item());
         return positionInfo?.position ?? null;
     });
+    protected readonly rovingTabIndex = computed(() => (this.#listService.focusableItem() === this.item() ? 0 : -1));
     protected readonly selected = computed(() => this.#listService.isSelected(this.item()));
     protected readonly setSize = computed(() => {
         const positionInfo = this.#listService.getItemPosition(this.item());

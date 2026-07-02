@@ -3,8 +3,7 @@ import { PagerSettings } from "../../common/list/models/PagerSettings";
 import { ListService } from "../../common/list/services/list.service";
 
 @Directive({
-    selector: "mona-list-view[monaListViewPageable]",
-    standalone: true
+    selector: "mona-list-view[monaListViewPageable]"
 })
 export class ListViewPageableDirective {
     readonly #defaultOptions: PagerSettings = {

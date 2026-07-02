@@ -2484,7 +2484,7 @@
       {
         "name": "items",
         "type": "Iterable<T>",
-        "description": "The items to display in the list.",
+        "description": "Collection of items to render.",
         "kind": "input"
       },
       {
@@ -2502,31 +2502,31 @@
       {
         "name": "rounded",
         "type": "ListViewVariantProps[\"rounded\"]",
-        "description": "Sets the rounding of the list.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "scrollBottom",
         "type": "Event",
-        "description": "Emits when the list has scrolled to the bottom.",
+        "description": "Emitted when the list is scrolled to the bottom.",
         "kind": "output"
       },
       {
         "name": "size",
         "type": "ListViewVariantProps[\"size\"]",
-        "description": "Sets the size of the list.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "ListKeySelector<T, string> | undefined",
-        "description": "Sets the field to display in the list.",
+        "description": "Property name or accessor used to derive the display text from a data item.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {

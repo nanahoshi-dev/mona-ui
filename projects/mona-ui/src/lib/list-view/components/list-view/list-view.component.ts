@@ -18,7 +18,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableSet } from "@mirei/ts-collections";
-import { filter, fromEvent } from "rxjs";
+import { filter, fromEvent, Subscription } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListComponent } from "../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
@@ -67,7 +67,7 @@ import { ThemeService } from "../../../theme/services/theme.service";
         "[attr.tabindex]": "-1"
     }
 })
-export class ListViewComponent<T = any> implements ListViewVariantInputs {
+export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #scrollBottomEnabled = computed(() => {
@@ -75,6 +75,7 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs {
         return !pageableOptions.enabled;
     });
     readonly #themeService = inject(ThemeService);
+    #scrollSubscription: Subscription | null = null;
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -120,59 +121,73 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs {
 
     /**
      * @description Sets the classes of the inner UL element.
+     * @default ""
      */
     public readonly listClass = input<string>("");
 
     /**
      * @description Sets the classes of the list items.
+     * @default ""
      */
     public readonly listItemClass = input("");
 
     /**
      * @description Sets the style of the list items.
+     * @default {}
      */
     public readonly listItemStyle = input<Partial<CSSStyleDeclaration>>({});
 
     /**
      * @description Sets the style of the list.
+     * @default {}
      */
     public readonly listStyle = input<Partial<CSSStyleDeclaration>>({});
 
     /**
-     * @description The items to display in the list.
+     * @description Collection of items to render.
+     * @default []
      */
     public readonly items = input<Iterable<T>>([]);
 
     /**
      * @description Sets the maximum height of the list.
+     * @default ""
      */
     public readonly maxHeight = input<string | number>("");
 
     /**
      * @description Sets the maximum width of the list.
+     * @default ""
      */
     public readonly maxWidth = input<string | number>("");
 
     /**
-     * @description Sets the rounding of the list.
+     * @description Border-radius preset applied to the component.
+     * @default medium
      */
     public readonly rounded = input<ListViewVariantProps["rounded"]>("medium");
 
     /**
-     * @description Emits when the list has scrolled to the bottom.
+     * @description Emitted when the list is scrolled to the bottom.
      */
     public readonly scrollBottom = output<Event>();
 
     /**
-     * @description Sets the size of the list.
+     * @description Size preset controlling the component's dimensions.
+     * @default medium
      */
     public readonly size = input<ListViewVariantProps["size"]>("medium");
 
     /**
-     * @description Sets the field to display in the list.
+     * @description Property name or accessor used to derive the display text from a data item.
+     * @default ""
      */
     public readonly textField = input<ListKeySelector<T, string> | undefined>("");
 
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -207,10 +222,11 @@ export class ListViewComponent<T = any> implements ListViewVariantInputs {
         } else {
             element = this.#hostElementRef.nativeElement.querySelector("mona-list > ul");
         }
+        this.#scrollSubscription?.unsubscribe();
         if (!element) {
             return;
         }
-        fromEvent<Event>(element, "scroll")
+        this.#scrollSubscription = fromEvent<Event>(element, "scroll")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
                 filter(event => {

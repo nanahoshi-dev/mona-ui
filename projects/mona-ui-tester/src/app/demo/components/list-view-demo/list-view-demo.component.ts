@@ -25,7 +25,6 @@ import {
     ListViewVirtualScrollDirective,
     NavigableOptions,
     type PagerSettings,
-    type GridSelectableOptions,
     SlicePipe,
     VirtualScrollOptions
 } from "mona-ui";
@@ -381,7 +380,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         ListViewPageableDirective,
         SlicePipe
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
@@ -562,7 +560,7 @@ class ListViewWrapperComponent implements ComponentInputsAsSignal<ListViewCompon
         return options;
     });
     protected readonly scrollBottomItemCount = signal(20);
-    protected readonly selectedKeys = signal<number[]>([5]);
+    protected readonly selectedKeys = signal<number[]>([]);
     protected readonly selection = computed<SelectableOptions>(() => {
         const features = this.features();
         const subFeatures = features["selection"]?.subFeatures || {};

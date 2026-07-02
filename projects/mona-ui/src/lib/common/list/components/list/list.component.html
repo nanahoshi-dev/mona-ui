@@ -55,7 +55,6 @@
             [style]="listItemStyle()"
             [id]="item.uid"
             [attr.data-uid]="item.uid"
-            [attr.tabindex]="0"
             (click)="onListItemClick(item)"
             monaListItem [item]="item">
             <mona-list-item [item]="item" [template]="itemTemplate()" (checked)="onListItemCheck(item)"></mona-list-item>

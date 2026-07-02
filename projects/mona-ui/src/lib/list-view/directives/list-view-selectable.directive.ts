@@ -5,8 +5,7 @@ import { SelectableOptions } from "../../common/list/models/SelectableOptions";
 import { ListService } from "../../common/list/services/list.service";
 
 @Directive({
-    selector: "mona-list-view[monaListViewSelectable]",
-    standalone: true
+    selector: "mona-list-view[monaListViewSelectable]"
 })
 export class ListViewSelectableDirective<T, K = unknown> {
     readonly #defaultOptions: SelectableOptions = {

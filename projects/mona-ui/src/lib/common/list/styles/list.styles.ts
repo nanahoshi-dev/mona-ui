@@ -55,7 +55,7 @@ export const listItemContentVariants = cva(
                 false: ""
             },
             selected: {
-                true: "bg-primary text-primary-foreground",
+                true: "bg-primary text-primary-foreground inset-ring-1 inset-ring-primary-foreground/40",
                 false: ""
             },
             disabled: {
@@ -69,6 +69,7 @@ export const listItemContentVariants = cva(
                 checkboxes: false,
                 class: `
                     bg-primary text-primary-foreground rounded-none
+                    inset-ring-1 inset-ring-primary-foreground/40
                     hover:bg-primary hover:text-primary-foreground
                     focus:bg-primary focus:text-primary-foreground
                 `
@@ -79,6 +80,7 @@ export const listItemContentVariants = cva(
                 checkboxes: false,
                 class: `
                     bg-primary text-primary-foreground rounded-none
+                    inset-ring-1 inset-ring-primary-foreground/40
                     hover:bg-primary hover:text-primary-foreground
                     focus:bg-primary focus:text-primary-foreground
                 `

@@ -3,8 +3,7 @@ import { NavigableOptions } from "../../common/list/models/NavigableOptions";
 import { ListService } from "../../common/list/services/list.service";
 
 @Directive({
-    selector: "mona-list-view[monaListViewNavigable]",
-    standalone: true
+    selector: "mona-list-view[monaListViewNavigable]"
 })
 export class ListViewNavigableDirective<T> {
     readonly #defaultOptions: NavigableOptions = {
