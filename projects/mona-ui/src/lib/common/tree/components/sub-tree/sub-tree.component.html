@@ -6,6 +6,7 @@
     (cdkDropListDropped)="onNodeDrop($event)">
     @for (node of visibleNodes(); track node.uid) {
         <li
+            [attr.id]="node.uid | treeNodeElementId"
             [attr.data-uid]="node.uid"
             [class]="listItemClass()"
             [tabindex]="-1"

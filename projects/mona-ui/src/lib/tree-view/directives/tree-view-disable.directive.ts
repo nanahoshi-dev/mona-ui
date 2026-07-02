@@ -15,17 +15,20 @@ export class TreeViewDisableDirective<T, K = T> {
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     /**
-     * @description The key selector used to determine the node's disable state.'
+     * @description Property name or accessor used to derive a node's disable key from its data. Falls back to the node's data when unset.
+     * @default ""
      */
     public readonly disableBy = input<NodeKeySelector<T, K> | undefined>("");
 
     /**
-     * @description The keys of the nodes that are disabled.
+     * @description Keys of the currently disabled nodes.
+     * @default []
      */
     public readonly disabledKeys = input<Iterable<K>>([]);
 
     /**
-     * @description Options for the disable behavior.
+     * @description Configures whether disabling a node also disables its children. Merged over `{ disableChildren: true, enabled: true }` when applied bare.
+     * @default ""
      */
     public readonly options = input<Partial<DisableOptions> | "">("", {
         alias: "monaTreeViewDisable"

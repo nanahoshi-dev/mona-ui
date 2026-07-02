@@ -3,6 +3,7 @@ import {
     afterNextRender,
     ChangeDetectionStrategy,
     Component,
+    computed,
     contentChild,
     DestroyRef,
     effect,
@@ -44,85 +45,77 @@ export class TreeViewComponent<T> implements ITreeView<T> {
         TemplateRef<TreeViewNodeTemplateContext<T>>
     >(TreeViewNodeTemplateDirective, { read: TemplateRef });
     protected readonly treeService = inject(TreeService<T>);
+    protected readonly filterAriaLabel = computed<string>(() => {
+        const ariaLabel = this.ariaLabel();
+        return ariaLabel ? `Filter ${ariaLabel}` : "Filter tree";
+    });
 
     /**
-     * @description Whether to animate the tree.
-     * If true, the tree will animate when expanding or collapsing nodes.
+     * @description Enables CSS transitions when nodes expand or collapse.
+     * @default true
      */
     public readonly animate = input<boolean>(true);
 
     /**
-     * @description The accessible label for the tree.
-     * Should describe the purpose of the tree to screen reader users.
+     * @description Accessible name for the tree. Describe what the tree represents. When empty, assistive technology announces the role without a label.
+     * @default ""
      */
     public readonly ariaLabel = input<string>("");
 
     /**
-     * @description The children selector for the tree.
-     * It can be either of the following:
-     * - A string representing the property name of the children.
-     * - A function that returns the children of a node.
-     * - A function that returns an observable that emits the children of a node.
+     * @description Property name or accessor used to derive a node's children from a data item. Accepts a property name, a function returning the children, or a function returning an observable of the children.
+     * @default ""
      */
     public readonly children = input<ChildrenSelector<T>>("");
 
     /**
-     * @description The data for the tree.
+     * @description Collection of items to render.
+     * @default []
      */
     public readonly data = input<Iterable<T>>([]);
 
     /**
-     * @description The predicate to determine if a node has children.
-     * Required if the children selector is set to a function that returns an observable.
+     * @description Predicate that determines whether a node has children. Required when the children selector returns an observable.
+     * @default null
      */
     public readonly hasChildren = input<Predicate<T> | null>(null);
 
     /**
-     * @description The field that represents the unique identifier of a node.
-     * This is required if the data structure is set to `flat`.
+     * @description Property name that holds a node's unique identifier. Required when `mode` is set to `"flat"`.
+     * @default ""
      */
     public readonly idField = input<string>("");
 
     /**
-     * @description The data structure of the tree.
-     * It can be either of the following:
-     * - `flat`: The tree is a flat list of nodes.
-     * - `hierarchical`: The tree is a hierarchical structure.
-     * If the data structure is set to `flat`, the following fields are required:
-     * - idField
-     * - parentIdField
-     * If the data structure is set to `hierarchical`, the following fields are required:
-     * - children
-     * - hasChildren
+     * @description Shape of the source data: `"hierarchical"` for nested items via `children`, or `"flat"` for a flat list linked by `idField` and `parentIdField`.
+     * @default "hierarchical"
      */
     public readonly mode = input<DataStructure>("hierarchical");
 
     /**
-     * @description Emits when the tree-view loses focus.
+     * @description Emitted when the tree-view loses focus.
      */
     public readonly blur = output<FocusEvent>();
 
     /**
-     * @description Emits when the tree-view gains focus.
+     * @description Emitted when the tree-view gains focus.
      */
     public readonly focus = output<FocusEvent>();
 
     /**
-     * @description The node click event emitter.
+     * @description Emitted when a node is clicked.
      */
     public readonly nodeClick = output<NodeClickEvent<T>>();
 
     /**
-     * @description The field that represents the parent identifier of a node.
-     * This is required if the data structure is set to `flat`.
+     * @description Property name that holds a node's parent identifier. Required when `mode` is set to `"flat"`.
+     * @default ""
      */
     public readonly parentIdField = input<string>("");
 
     /**
-     * @description The text field for the tree.
-     * It can be either of the following:
-     * - A string representing the property name of the text.
-     * - A function that returns the text of a node.
+     * @description Property name or accessor used to derive the display text from a data item.
+     * @default ""
      */
     public readonly textField = input<string | Selector<T, string>>("");
 

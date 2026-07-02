@@ -18,6 +18,7 @@ import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";
 import { NodeDropEventSansTree } from "../../models/NodeDropEvent";
 import { TreeNode } from "../../models/TreeNode";
+import { TreeNodeElementIdPipe } from "../../pipes/tree-node-element-id.pipe";
 import { TreeService } from "../../services/tree.service";
 import {
     subTreeListItemThemeVariants,
@@ -31,7 +32,15 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 @Component({
     selector: "mona-sub-tree",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [TreeNodeComponent, FormsModule, CdkDropList, CdkDrag, CdkDragPreview, CheckBoxComponent],
+    imports: [
+        TreeNodeComponent,
+        FormsModule,
+        CdkDropList,
+        CdkDrag,
+        CdkDragPreview,
+        CheckBoxComponent,
+        TreeNodeElementIdPipe
+    ],
     templateUrl: "./sub-tree.component.html",
     styles: [
         `

@@ -30,14 +30,14 @@ describe("ListViewComponent", () => {
 
     it("should update the page and skip in the list service on page change", () => {
         const listService = (component as any).listService as ListService<unknown>;
-        component.onPageChange({ page: 3, skip: 20, take: 10 });
+        (component as any).onPageChange({ page: 3, skip: 20, take: 10 });
         expect(listService.pageState()).toEqual(expect.objectContaining({ page: 3, skip: 20 }));
     });
 
     it("should reset the page and skip and apply the new page size on page size change", () => {
         const listService = (component as any).listService as ListService<unknown>;
         listService.pageState.set({ page: 3, skip: 20, take: 10 });
-        component.onPageSizeChange(new PageSizeChangeEvent(25, 10));
+        (component as any).onPageSizeChange(new PageSizeChangeEvent(25, 10));
         expect(listService.pageState()).toEqual({ page: 1, skip: 0, take: 25 });
     });
 

@@ -19,7 +19,8 @@ export class TreeViewFilterableDirective<T> {
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     /**
-     * @description The filter value.
+     * @description Current filter text used to narrow the visible nodes.
+     * @default ""
      */
     public readonly filter = input<string>("");
 
@@ -29,12 +30,14 @@ export class TreeViewFilterableDirective<T> {
     public readonly filterChange = output<FilterChangeEvent>();
 
     /**
-     * @description The placeholder text for the filter input.
+     * @description Placeholder text shown in the filter input.
+     * @default ""
      */
     public readonly filterPlaceholder = input<string>("");
 
     /**
-     * @description Options for the filterable behavior.
+     * @description Configures the filter operator, case sensitivity, and debounce delay. Merged over `{ enabled: true, operator: "contains", caseSensitive: false, debounce: 0 }` when applied bare.
+     * @default ""
      */
     public readonly options = input<Partial<FilterableOptions> | "">("", {
         alias: "monaTreeViewFilterable"

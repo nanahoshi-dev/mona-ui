@@ -408,7 +408,6 @@ export * from "./tree-view/directives/tree-view-expandable.directive";
 export * from "./tree-view/directives/tree-view-filterable.directive";
 export * from "./tree-view/directives/tree-view-node-template.directive";
 export * from "./tree-view/directives/tree-view-selectable.directive";
-export * from "./tree-view/directives/tree-view-node-template.directive";
 export * from "./common/tree/models/NodeMoveSnapshot";
 
 /** Dialog */

@@ -22,12 +22,14 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     readonly #treeService: TreeService<T> = inject(TreeService);
 
     /**
-     * @description The key selector used to determine the node's check state.
+     * @description Property name or accessor used to derive a node's check key from its data. Falls back to the node's data when unset.
+     * @default ""
      */
     public readonly checkBy = input<NodeKeySelector<T, K> | undefined>("");
 
     /**
-     * @description The keys of the nodes that are checked.
+     * @description Keys of the currently checked nodes.
+     * @default []
      */
     public readonly checkedKeys = input<Iterable<K>>([]);
 
@@ -37,7 +39,8 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     public readonly checkedKeysChange = output<Array<K>>();
 
     /**
-     * @description A predicate function that determines whether a node has a checkbox.
+     * @description Predicate that determines whether a node displays a checkbox. When unset, every node displays a checkbox.
+     * @default null
      */
     public readonly hasCheckbox = input<((data: T, uid: string) => boolean) | null>(null);
 
@@ -47,7 +50,8 @@ export class TreeViewCheckableDirective<T, K = T> implements OnInit {
     public readonly nodeCheck = output<NodeCheckEvent<T>>();
 
     /**
-     * @description Options for the checkable behavior.
+     * @description Configures check mode and whether checking a node also checks its children or parents. Merged over `{ checkChildren: true, checkParents: true, enabled: true, mode: "multiple" }` when applied bare.
+     * @default ""
      */
     public readonly options = input<Partial<CheckableOptions> | "">("", {
         alias: "monaTreeViewCheckable"

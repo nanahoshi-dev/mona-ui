@@ -44,6 +44,7 @@ import { TreeNodeExpandEvent } from "../models/TreeNodeExpandEvent";
 import { TreeNodeSelectEvent } from "../models/TreeNodeSelectEvent";
 import { TreeSelectableOptions } from "../models/TreeSelectableOptions";
 import { ChildrenSelector, NodeKeySelector } from "../models/TreeSelectors";
+import { getTreeNodeElementId } from "../utils/getTreeNodeElementId";
 
 @Injectable()
 export class TreeService<T> {
@@ -229,6 +230,10 @@ export class TreeService<T> {
     public getNodeByUid(uid: string): TreeNode<T> | null {
         const nodeDictionary = this.#nodeDictionary();
         return nodeDictionary.get(uid) ?? null;
+    }
+
+    public getNodeElementId(uid: string): string {
+        return getTreeNodeElementId(uid);
     }
 
     public getNodeText(node: TreeNode<T>): string {

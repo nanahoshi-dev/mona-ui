@@ -41,7 +41,8 @@ export class TreeViewDragAndDropDirective<T> {
     public readonly nodeDrop = output<NodeDropEvent<T>>();
 
     /**
-     * @description Options for the draggable behavior.
+     * @description Configures whether dragging nodes to reorder or reparent them is enabled. Merged over `{ enabled: true }` when applied bare.
+     * @default ""
      */
     public readonly options = input<Partial<DraggableOptions> | "">("", {
         alias: "monaTreeViewDragAndDrop"

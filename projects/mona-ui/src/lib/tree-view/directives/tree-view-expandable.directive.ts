@@ -17,11 +17,37 @@ export class TreeViewExpandableDirective<T, K = T> {
     };
     readonly #destroyRef = inject(DestroyRef);
     readonly #treeService: TreeService<T> = inject(TreeService);
+    /**
+     * @description Emitted when a node is collapsed.
+     */
     public readonly collapse = output<NodeItem<T>>();
+
+    /**
+     * @description Emitted when a node is expanded.
+     */
     public readonly expand = output<NodeItem<T>>();
+
+    /**
+     * @description Property name or accessor used to derive a node's expand key from its data. Falls back to the node's data when unset.
+     * @default ""
+     */
     public readonly expandBy = input<NodeKeySelector<T, K> | undefined>("");
+
+    /**
+     * @description Keys of the currently expanded nodes.
+     * @default []
+     */
     public readonly expandedKeys = input<Iterable<K>>([]);
+
+    /**
+     * @description Emitted when the expanded keys change.
+     */
     public readonly expandedKeysChange = output<Array<K>>();
+
+    /**
+     * @description Configures whether expanding and collapsing nodes is enabled. Merged over `{ enabled: true }` when applied bare.
+     * @default ""
+     */
     public readonly options = input<Partial<ExpandableOptions> | "">("", {
         alias: "monaTreeViewExpandable"
     });

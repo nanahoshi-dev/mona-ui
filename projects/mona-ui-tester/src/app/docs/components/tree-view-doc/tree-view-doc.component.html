@@ -1,12 +1,842 @@
 <app-section id="treeView" [header]="'Tree View'" headerType="H1">
     <p>
-        A tree view is a UI control that displays a hierarchical structure of data, typically used to represent
-        relationships between items. It allows users to expand and collapse branches to navigate through the hierarchy.
+        <code>TreeViewComponent</code> (selector <code>mona-tree-view</code>) renders hierarchical or flat parent-child
+        data as an expandable, keyboard-navigable list of nodes.
     </p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
+
     <app-section id="demo" [header]="'Demo'" headerType="H2">
         <app-tree-view-demo></app-tree-view-demo>
     </app-section>
+
+    <app-section id="overview" [header]="'Overview & Component Selection'" headerType="H2">
+        <p>
+            Use Tree View to let a consumer browse or act on data that has parent-child relationships, such as a file
+            system, a category tree, or an org chart. The data can be shaped as nested items (hierarchical mode) or
+            as a flat list linked by an id and a parent id (flat mode).
+        </p>
+        <p>
+            Selection, checking, disabling, expand/collapse control, filtering, and drag-and-drop reordering are all
+            opt-in. None of these behaviors are active until the corresponding attribute directive
+            (<code>monaTreeViewSelectable</code>, <code>monaTreeViewCheckable</code>, <code>monaTreeViewDisable</code>,
+            <code>monaTreeViewExpandable</code>, <code>monaTreeViewFilterable</code>,
+            <code>monaTreeViewDragAndDrop</code>) is applied to the <code>mona-tree-view</code> host element.
+        </p>
+        <p>
+            Use Grid when data is naturally tabular rather than hierarchical. Use Dropdown List, Combo Box, or Multi
+            Select when the consumer is choosing from a flat collection of options rather than navigating a
+            hierarchy.
+        </p>
+    </app-section>
+
+    <app-section id="usage" [header]="'Import & Quick Start'" headerType="H2">
+        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
+        <p>
+            <code>textField</code> and either <code>children</code> (hierarchical mode) or <code>idField</code> /
+            <code>parentIdField</code> (flat mode) are required for the tree to render nodes from <code>data</code>.
+        </p>
+        <app-code-viewer [code]="quickStartTsCode" language="typescript"></app-code-viewer>
+        <app-code-viewer [code]="quickStartHtmlCode" language="html"></app-code-viewer>
+    </app-section>
+
+    <app-section id="anatomy" [header]="'Anatomy & Structural Templates'" headerType="H2">
+        <p>Consumers interact with the following selectors directly:</p>
+        <ul class="list-disc pl-5">
+            <li><code>mona-tree-view</code> &ndash; the root component.</li>
+            <li>
+                <code>ng-template[monaTreeViewNodeTemplate]</code> &ndash; replaces the default node label with
+                projected content. The template context exposes <code>$implicit</code> (the node's data item) and
+                <code>element</code> (the node's host <code>HTMLElement</code>).
+            </li>
+            <li>
+                <code>mona-tree-view[monaTreeViewSelectable]</code>,
+                <code>mona-tree-view[monaTreeViewCheckable]</code>, <code>mona-tree-view[monaTreeViewDisable]</code>,
+                <code>mona-tree-view[monaTreeViewExpandable]</code>,
+                <code>mona-tree-view[monaTreeViewFilterable]</code>,
+                <code>mona-tree-view[monaTreeViewDragAndDrop]</code> &ndash; attribute directives applied to the
+                <code>mona-tree-view</code> host element to enable each behavior.
+            </li>
+        </ul>
+        <app-code-viewer [code]="nodeTemplateCode" language="html"></app-code-viewer>
+        <p>
+            TODO(owner-review): the template context type <code>TreeViewNodeTemplateContext&lt;T&gt;</code> is not
+            exported from <code>mona-ui</code>, so consumers cannot explicitly annotate a
+            <code>TemplateRef&lt;TreeViewNodeTemplateContext&lt;T&gt;&gt;</code> variable.
+        </p>
+    </app-section>
+
+    <app-section id="examples" [header]="'Examples'" headerType="H2">
+        <app-section id="flatData" [header]="'Flat data'" headerType="H3">
+            <p>
+                Set <code>mode="flat"</code> and provide <code>idField</code> and <code>parentIdField</code> instead
+                of <code>children</code> when the source data is a flat list linked by id references.
+            </p>
+            <app-code-viewer [code]="flatDataCode" language="typescript"></app-code-viewer>
+            <app-code-viewer [code]="flatDataHtmlCode" language="html"></app-code-viewer>
+        </app-section>
+
+        <app-section id="selection" [header]="'Selection'" headerType="H3">
+            <p>
+                Apply <code>monaTreeViewSelectable</code> to track which node is selected. Single mode is the
+                default; pass <code>{{ '{' }} mode: 'multiple' {{ '}' }}</code> to allow multiple selected nodes.
+            </p>
+            <app-code-viewer [code]="selectableCode" language="html"></app-code-viewer>
+        </app-section>
+
+        <app-section id="checking" [header]="'Checking'" headerType="H3">
+            <p>
+                Apply <code>monaTreeViewCheckable</code> to render checkboxes on nodes. Checking a parent also checks
+                its children, and a parent shows an indeterminate state when only some of its children are checked,
+                unless configured otherwise through the directive's <code>options</code> input.
+            </p>
+            <app-code-viewer [code]="checkableCode" language="html"></app-code-viewer>
+        </app-section>
+
+        <app-section id="disabling" [header]="'Disabling nodes'" headerType="H3">
+            <p>
+                Apply <code>monaTreeViewDisable</code> and pass the keys of the nodes to disable. Disabling a node
+                also disables its descendants by default.
+            </p>
+            <app-code-viewer [code]="disableCode" language="html"></app-code-viewer>
+        </app-section>
+
+        <app-section id="expandCollapse" [header]="'Controlled expand/collapse'" headerType="H3">
+            <p>
+                Apply <code>monaTreeViewExpandable</code> and bind <code>expandedKeys</code> two-way to control which
+                nodes are expanded from outside the component.
+            </p>
+            <app-code-viewer [code]="expandableCode" language="html"></app-code-viewer>
+        </app-section>
+
+        <app-section id="filtering" [header]="'Filtering'" headerType="H3">
+            <p>
+                Apply <code>monaTreeViewFilterable</code> to narrow the visible nodes by text. The tree itself does
+                not render a filter input; wire <code>filter</code> to a consumer-provided control, or place
+                <code>monaTreeViewFilterable</code> without further configuration to enable the tree's own filter
+                region.
+            </p>
+            <app-code-viewer [code]="filterableCode" language="html"></app-code-viewer>
+        </app-section>
+
+        <app-section id="dragAndDrop" [header]="'Drag and drop reordering'" headerType="H3">
+            <p>
+                Apply <code>monaTreeViewDragAndDrop</code> to let the consumer reorder or reparent nodes by dragging.
+                Dropping a node does not mutate the array passed to <code>data</code>; use the exported
+                <code>moveTreeNode</code> (hierarchical data) or <code>moveFlatTreeNode</code> (flat data) helper
+                inside the <code>nodeDrop</code> handler to compute an updated array and pass it back through
+                <code>data</code>.
+            </p>
+            <app-code-viewer [code]="dragAndDropHtmlCode" language="html"></app-code-viewer>
+            <app-code-viewer [code]="dragAndDropCode" language="typescript"></app-code-viewer>
+        </app-section>
+
+        <app-section id="lazyLoading" [header]="'Lazy-loaded children'" headerType="H3">
+            <p>
+                Pass a function returning an <code>Observable</code> as <code>children</code> to load a node's
+                children on first expand instead of upfront. Provide <code>hasChildren</code> so unexpanded nodes can
+                render an expand affordance before their children are fetched.
+            </p>
+            <app-code-viewer [code]="lazyLoadingHtmlCode" language="html"></app-code-viewer>
+            <app-code-viewer [code]="lazyLoadingCode" language="typescript"></app-code-viewer>
+        </app-section>
+    </app-section>
+
+    <app-section id="technicalNotes" [header]="'Technical & Behavior Notes'" headerType="H2">
+        <ul class="list-disc pl-5">
+            <li>
+                <code>nodeSelect</code>, <code>nodeCheck</code>, <code>nodeClick</code>, <code>nodeDragStart</code>,
+                <code>nodeDragEnd</code>, <code>nodeDrop</code>, and <code>filterChange</code> emit an event object
+                with <code>preventDefault()</code> and <code>isDefaultPrevented()</code>. Calling
+                <code>preventDefault()</code> in a handler stops the corresponding state change (selection, check,
+                drag, drop, or filter) from being applied.
+            </li>
+            <li>
+                Switching <code>mode</code> requires providing the matching fields: <code>children</code> for
+                <code>"hierarchical"</code>, or <code>idField</code> and <code>parentIdField</code> for
+                <code>"flat"</code>. The two field sets are independent inputs and are not cross-validated.
+            </li>
+            <li>
+                <code>TreeViewComponent</code> exposes <code>moveNode(source, target, position)</code> and
+                <code>undoMoveNode(snapshot)</code> for moving nodes in the tree's internal structure directly,
+                without going through <code>data</code>. The <code>nodeDrop</code> event's <code>treeView</code>
+                property refers to the emitting <code>TreeViewComponent</code> instance.
+                TODO(owner-review): the interface type behind <code>treeView</code> is not exported from
+                <code>mona-ui</code>, so consumers cannot explicitly type a variable holding it.
+            </li>
+        </ul>
+    </app-section>
+
+    <app-section id="accessibility" [header]="'Accessibility & Forms Integration'" headerType="H2">
+        <app-section id="keyboardMap" [header]="'Keyboard Map'" headerType="H3">
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Key</th>
+                        <th class="py-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>ArrowUp</code></td>
+                        <td class="py-2">Move to the previous visible node.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>ArrowDown</code></td>
+                        <td class="py-2">Move to the next visible node.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>ArrowLeft</code></td>
+                        <td class="py-2">Collapse the active node if it is expanded and expandable.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>ArrowRight</code></td>
+                        <td class="py-2">Expand the active node if it is collapsed and expandable.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>Home</code></td>
+                        <td class="py-2">Move to the first visible node.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>End</code></td>
+                        <td class="py-2">Move to the last visible node.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>Enter</code></td>
+                        <td class="py-2">Toggle the selected state of the active node, when selectable.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>Space</code></td>
+                        <td class="py-2">Toggle the checked state of the active node, when checkable.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="ariaRoles" [header]="'ARIA Roles'" headerType="H3">
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Element</th>
+                        <th class="py-2 pr-4">Attribute</th>
+                        <th class="py-2 pr-4">When present</th>
+                        <th class="py-2">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Tree host</td>
+                        <td class="py-2 pr-4"><code>role</code></td>
+                        <td class="py-2 pr-4">Always</td>
+                        <td class="py-2"><code>tree</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Tree host</td>
+                        <td class="py-2 pr-4"><code>aria-label</code></td>
+                        <td class="py-2 pr-4">When the <code>ariaLabel</code> input is set</td>
+                        <td class="py-2">The <code>ariaLabel</code> value</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Tree host</td>
+                        <td class="py-2 pr-4"><code>aria-multiselectable</code></td>
+                        <td class="py-2 pr-4">When selectable with <code>mode: "multiple"</code></td>
+                        <td class="py-2"><code>true</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Tree host</td>
+                        <td class="py-2 pr-4"><code>aria-activedescendant</code></td>
+                        <td class="py-2 pr-4">While a node is active</td>
+                        <td class="py-2">The active node's element id</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>role</code></td>
+                        <td class="py-2 pr-4">Always</td>
+                        <td class="py-2"><code>treeitem</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-level</code>, <code>aria-setsize</code>,
+                            <code>aria-posinset</code></td>
+                        <td class="py-2 pr-4">Always</td>
+                        <td class="py-2">The node's depth and position among its siblings</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-expanded</code></td>
+                        <td class="py-2 pr-4">When the node has children and is expandable</td>
+                        <td class="py-2"><code>true</code> / <code>false</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-selected</code></td>
+                        <td class="py-2 pr-4">When selectable is enabled</td>
+                        <td class="py-2"><code>true</code> / <code>false</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-disabled</code></td>
+                        <td class="py-2 pr-4">When the node is disabled</td>
+                        <td class="py-2"><code>true</code></td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4">Node</td>
+                        <td class="py-2 pr-4"><code>aria-checked</code></td>
+                        <td class="py-2 pr-4">When the node is checkable</td>
+                        <td class="py-2"><code>true</code> / <code>false</code> / <code>mixed</code></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
+                Provide <code>ariaLabel</code> when surrounding content does not already identify the tree's
+                purpose.
+            </p>
+        </app-section>
+
+        <app-section id="focusBehavior" [header]="'Focus Behavior'" headerType="H3">
+            <p>
+                The tree host is the only tab stop; individual nodes are not part of the page's tab order. Arrow-key
+                navigation moves an internal active node pointer, reflected through
+                <code>aria-activedescendant</code> on the tree host, instead of moving DOM focus between nodes. When
+                the tree regains focus, it restores the previously active node, or activates the first node if none
+                was active yet.
+            </p>
+        </app-section>
+
+        <app-section id="formInteraction" [header]="'Form Interaction'" headerType="H3">
+            <p>
+                Tree View does not implement <code>ControlValueAccessor</code> or the signal forms
+                <code>FormValueControl</code> / <code>FormCheckboxControl</code> interfaces. It cannot be bound with
+                <code>[(ngModel)]</code>, <code>[formControl]</code>, <code>formControlName</code>, or
+                <code>[formField]</code>. Track selection or check state through the <code>selectedKeys</code> /
+                <code>checkedKeys</code> models, or the <code>selectionChange</code> / <code>nodeSelect</code> /
+                <code>nodeCheck</code> outputs, exposed by the selectable and checkable directives.
+            </p>
+        </app-section>
+    </app-section>
+
+    <app-section id="api" [header]="'API'" headerType="H2">
+        <app-section id="apiTreeView" [header]="'TreeViewComponent'" headerType="H3">
+            <p>Selector: <code>mona-tree-view</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>animate</code></td>
+                        <td class="py-2 pr-4"><code>boolean</code></td>
+                        <td class="py-2 pr-4"><code>true</code></td>
+                        <td class="py-2">Enables CSS transitions when nodes expand or collapse.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>ariaLabel</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">Accessible name for the tree.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>children</code></td>
+                        <td class="py-2 pr-4"><code>ChildrenSelector&lt;T&gt;</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property name, or a function returning a node's children (synchronously or as an
+                            <code>Observable</code>). Used in hierarchical mode.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>data</code></td>
+                        <td class="py-2 pr-4"><code>Iterable&lt;T&gt;</code></td>
+                        <td class="py-2 pr-4"><code>[]</code></td>
+                        <td class="py-2">Collection of items to render.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>hasChildren</code></td>
+                        <td class="py-2 pr-4"><code>Predicate&lt;T&gt; | null</code></td>
+                        <td class="py-2 pr-4"><code>null</code></td>
+                        <td class="py-2">
+                            Predicate that determines whether a node has children. Required when
+                            <code>children</code> returns an <code>Observable</code>.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>idField</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property holding a node's unique identifier. Required when <code>mode</code> is
+                            <code>"flat"</code>.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>mode</code></td>
+                        <td class="py-2 pr-4"><code>"flat" | "hierarchical"</code></td>
+                        <td class="py-2 pr-4"><code>"hierarchical"</code></td>
+                        <td class="py-2">Shape of the source data.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>parentIdField</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property holding a node's parent identifier. Required when <code>mode</code> is
+                            <code>"flat"</code>.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>textField</code></td>
+                        <td class="py-2 pr-4"><code>string | Selector&lt;T, string&gt;</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">Property name, or accessor, used to derive a node's display text.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>blur</code></td>
+                        <td class="py-2 pr-4"><code>FocusEvent</code></td>
+                        <td class="py-2">Emitted when the tree loses focus.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>focus</code></td>
+                        <td class="py-2 pr-4"><code>FocusEvent</code></td>
+                        <td class="py-2">Emitted when the tree gains focus.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeClick</code></td>
+                        <td class="py-2 pr-4"><code>NodeClickEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted when a node is clicked. Cancelable.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Public methods:</p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Signature</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>moveNode</code></td>
+                        <td class="py-2 pr-4">
+                            <code>(source: NodeItem&lt;T&gt;, target: NodeItem&lt;T&gt;, position: "before" | "after"
+                                | "inside" | "outside") =&gt; NodeMoveSnapshot | null</code>
+                        </td>
+                        <td class="py-2">
+                            Moves a node in the tree's internal structure. Returns a snapshot usable with
+                            <code>undoMoveNode</code>, or <code>null</code> when the move was not applied.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>undoMoveNode</code></td>
+                        <td class="py-2 pr-4"><code>(snapshot: NodeMoveSnapshot) =&gt; void</code></td>
+                        <td class="py-2">Reverts a move previously performed by <code>moveNode</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="apiSelectable" [header]="'TreeViewSelectableDirective'" headerType="H3">
+            <p>Selector: <code>mona-tree-view[monaTreeViewSelectable]</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewSelectable</code>)</td>
+                        <td class="py-2 pr-4"><code>Partial&lt;TreeSelectableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Selection mode, toggleability, and whether only leaf nodes are selectable. Merged over
+                            <code>{{ '{' }} childrenOnly: false, enabled: true, mode: "single", toggleable: false
+                            {{ '}' }}</code> when applied bare.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>selectBy</code></td>
+                        <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property name, or accessor, used to derive a node's selection key. Falls back to the
+                            node's data when unset.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>selectedKeys</code></td>
+                        <td class="py-2 pr-4"><code>Iterable&lt;K&gt;</code></td>
+                        <td class="py-2 pr-4"><code>[]</code></td>
+                        <td class="py-2">
+                            Keys of the selected nodes. Two-way bindable through <code>selectedKeysChange</code>.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeSelect</code></td>
+                        <td class="py-2 pr-4"><code>NodeSelectEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted before a node's selected state changes. Cancelable.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>selectedKeysChange</code></td>
+                        <td class="py-2 pr-4"><code>Array&lt;K&gt;</code></td>
+                        <td class="py-2">Emitted when the selected keys change.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>selectionChange</code></td>
+                        <td class="py-2 pr-4"><code>NodeItem&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted after a node's selected state changes.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="apiCheckable" [header]="'TreeViewCheckableDirective'" headerType="H3">
+            <p>Selector: <code>mona-tree-view[monaTreeViewCheckable]</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>checkBy</code></td>
+                        <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property name, or accessor, used to derive a node's check key. Falls back to the node's
+                            data when unset.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>checkedKeys</code></td>
+                        <td class="py-2 pr-4"><code>Iterable&lt;K&gt;</code></td>
+                        <td class="py-2 pr-4"><code>[]</code></td>
+                        <td class="py-2">
+                            Keys of the checked nodes. Two-way bindable through <code>checkedKeysChange</code>.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>hasCheckbox</code></td>
+                        <td class="py-2 pr-4"><code>((data: T, uid: string) =&gt; boolean) | null</code></td>
+                        <td class="py-2 pr-4"><code>null</code></td>
+                        <td class="py-2">
+                            Predicate that determines whether a node displays a checkbox. Every node displays one
+                            when unset.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewCheckable</code>)</td>
+                        <td class="py-2 pr-4"><code>Partial&lt;CheckableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Check mode and whether checking a node also checks its children or parents. Merged over
+                            <code>{{ '{' }} checkChildren: true, checkParents: true, enabled: true, mode: "multiple"
+                            {{ '}' }}</code> when applied bare.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>checkedKeysChange</code></td>
+                        <td class="py-2 pr-4"><code>Array&lt;K&gt;</code></td>
+                        <td class="py-2">Emitted when the checked keys change.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeCheck</code></td>
+                        <td class="py-2 pr-4"><code>NodeCheckEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted before a node's checked state changes. Cancelable.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="apiDisable" [header]="'TreeViewDisableDirective'" headerType="H3">
+            <p>Selector: <code>mona-tree-view[monaTreeViewDisable]</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>disableBy</code></td>
+                        <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property name, or accessor, used to derive a node's disable key. Falls back to the
+                            node's data when unset.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>disabledKeys</code></td>
+                        <td class="py-2 pr-4"><code>Iterable&lt;K&gt;</code></td>
+                        <td class="py-2 pr-4"><code>[]</code></td>
+                        <td class="py-2">Keys of the disabled nodes.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewDisable</code>)</td>
+                        <td class="py-2 pr-4"><code>Partial&lt;DisableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Whether disabling a node also disables its children. Merged over
+                            <code>{{ '{' }} disableChildren: true, enabled: true {{ '}' }}</code> when applied bare.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>No outputs.</p>
+        </app-section>
+
+        <app-section id="apiExpandable" [header]="'TreeViewExpandableDirective'" headerType="H3">
+            <p>Selector: <code>mona-tree-view[monaTreeViewExpandable]</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>expandBy</code></td>
+                        <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Property name, or accessor, used to derive a node's expand key. Falls back to the
+                            node's data when unset.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>expandedKeys</code></td>
+                        <td class="py-2 pr-4"><code>Iterable&lt;K&gt;</code></td>
+                        <td class="py-2 pr-4"><code>[]</code></td>
+                        <td class="py-2">
+                            Keys of the expanded nodes. Two-way bindable through <code>expandedKeysChange</code>.
+                        </td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewExpandable</code>)</td>
+                        <td class="py-2 pr-4"><code>Partial&lt;ExpandableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Whether expanding and collapsing nodes is enabled. Merged over
+                            <code>{{ '{' }} enabled: true {{ '}' }}</code> when applied bare.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>collapse</code></td>
+                        <td class="py-2 pr-4"><code>NodeItem&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted when a node is collapsed.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>expand</code></td>
+                        <td class="py-2 pr-4"><code>NodeItem&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted when a node is expanded.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>expandedKeysChange</code></td>
+                        <td class="py-2 pr-4"><code>Array&lt;K&gt;</code></td>
+                        <td class="py-2">Emitted when the expanded keys change.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="apiFilterable" [header]="'TreeViewFilterableDirective'" headerType="H3">
+            <p>Selector: <code>mona-tree-view[monaTreeViewFilterable]</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>filter</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">Current filter text used to narrow the visible nodes.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>filterPlaceholder</code></td>
+                        <td class="py-2 pr-4"><code>string</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">Placeholder text shown in the tree's own filter input.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewFilterable</code>)</td>
+                        <td class="py-2 pr-4"><code>Partial&lt;FilterableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Filter operator, case sensitivity, and debounce delay. Merged over
+                            <code>{{ '{' }} enabled: true, operator: "contains", caseSensitive: false, debounce: 0
+                            {{ '}' }}</code> when applied bare.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>filterChange</code></td>
+                        <td class="py-2 pr-4"><code>FilterChangeEvent</code></td>
+                        <td class="py-2">Emitted when the filter value changes. Cancelable.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="apiDragAndDrop" [header]="'TreeViewDragAndDropDirective'" headerType="H3">
+            <p>Selector: <code>mona-tree-view[monaTreeViewDragAndDrop]</code></p>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2 pr-4">Default</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewDragAndDrop</code>)</td>
+                        <td class="py-2 pr-4"><code>Partial&lt;DraggableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>""</code></td>
+                        <td class="py-2">
+                            Whether dragging nodes to reorder or reparent them is enabled. Merged over
+                            <code>{{ '{' }} enabled: true {{ '}' }}</code> when applied bare.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="border-b border-border text-left">
+                        <th class="py-2 pr-4">Name</th>
+                        <th class="py-2 pr-4">Type</th>
+                        <th class="py-2">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeDrag</code></td>
+                        <td class="py-2 pr-4"><code>NodeDragEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted while a node is being dragged.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeDragEnd</code></td>
+                        <td class="py-2 pr-4"><code>NodeDragEndEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted when a node drag ends. Cancelable.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeDragStart</code></td>
+                        <td class="py-2 pr-4"><code>NodeDragStartEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted when a node drag starts. Cancelable.</td>
+                    </tr>
+                    <tr class="border-b border-border">
+                        <td class="py-2 pr-4"><code>nodeDrop</code></td>
+                        <td class="py-2 pr-4"><code>NodeDropEvent&lt;T&gt;</code></td>
+                        <td class="py-2">Emitted when a node is dropped. Cancelable.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </app-section>
+
+        <app-section id="apiTypes" [header]="'Exported Types'" headerType="H3">
+            <p>
+                <code>NodeItem&lt;T&gt;</code>, <code>NodeMoveSnapshot</code>, <code>TreeSelectableOptions</code>,
+                <code>CheckableOptions</code>, <code>DisableOptions</code>, <code>ExpandableOptions</code>,
+                <code>DraggableOptions</code>, <code>FilterableOptions</code>, <code>ChildrenSelector&lt;T&gt;</code>,
+                <code>NodeKeySelector&lt;T, K&gt;</code>, <code>NodeClickEvent&lt;T&gt;</code>,
+                <code>NodeSelectEvent&lt;T&gt;</code>, <code>NodeCheckEvent&lt;T&gt;</code>,
+                <code>NodeDragEvent&lt;T&gt;</code>, <code>NodeDragStartEvent&lt;T&gt;</code>,
+                <code>NodeDragEndEvent&lt;T&gt;</code>, <code>NodeDropEvent&lt;T&gt;</code>, and
+                <code>FilterChangeEvent</code> are exported from <code>mona-ui</code>.
+            </p>
+            <p>
+                TODO(owner-review): <code>DataStructure</code> (the <code>mode</code> input's type) and the
+                interface behind <code>NodeDropEvent.treeView</code> are used in public signatures but are not
+                exported from <code>mona-ui</code>.
+            </p>
+        </app-section>
+    </app-section>
+
+    <!--
+        Review Checklist:
+        - [ ] API tables cross-checked against generated metadata (component-metadata.json)
+        - [ ] All provided code examples compile against the public API (not run through the Angular compiler in this pass)
+        - [ ] Keyboard map and ARIA table verified against tree.component.ts / sub-tree.component.html
+        - [ ] Form integration claim verified (no CVA, no signal forms interfaces implemented)
+        - [ ] No implementation-only details exposed as public contract
+        - [ ] Unclear behavior marked with TODO(owner-review): DataStructure export, NodeDropEvent.treeView type export, TreeViewNodeTemplateContext export
+    -->
 </app-section>

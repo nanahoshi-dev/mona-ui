@@ -28,12 +28,14 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
     public readonly nodeSelect = output<NodeSelectEvent<T>>();
 
     /**
-     * @description The key selector used to determine the node's select state.'
+     * @description Property name or accessor used to derive a node's selection key from its data. Falls back to the node's data when unset.
+     * @default ""
      */
     public readonly selectBy = input<NodeKeySelector<T, K> | undefined>("");
 
     /**
-     * @description The keys of the nodes that are selected.
+     * @description Keys of the currently selected nodes.
+     * @default []
      */
     public readonly selectedKeys = input<Iterable<K>>([]);
 
@@ -48,7 +50,8 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
     public readonly selectionChange = output<NodeItem<T>>();
 
     /**
-     * @description Options for the selectable behavior.
+     * @description Configures selection mode, toggleability, and whether only child nodes are selectable. Merged over `{ childrenOnly: false, enabled: true, mode: "single", toggleable: false }` when applied bare.
+     * @default ""
      */
     public readonly options = input<Partial<TreeSelectableOptions> | "">("", {
         alias: "monaTreeViewSelectable"

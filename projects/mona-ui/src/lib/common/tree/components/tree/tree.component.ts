@@ -36,7 +36,8 @@ import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.componen
         "[attr.role]": "'tree'",
         "[attr.tabindex]": "0",
         "[attr.aria-label]": "ariaLabel() || null",
-        "[attr.aria-multiselectable]": "treeService.selectableOptions().mode === 'multiple' || null"
+        "[attr.aria-multiselectable]": "treeService.selectableOptions().mode === 'multiple' || null",
+        "[attr.aria-activedescendant]": "activeDescendantId()"
     }
 })
 export class TreeComponent<T> {
@@ -46,6 +47,10 @@ export class TreeComponent<T> {
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
+    protected readonly activeDescendantId = computed<string | null>(() => {
+        const node = this.treeService.navigatedNode();
+        return node === null ? null : this.treeService.getNodeElementId(node.uid);
+    });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         return treeBaseThemeVariants(theme)();

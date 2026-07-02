@@ -1,4 +1,12 @@
-import { Component, computed, effect, ElementRef, inject, Signal, ChangeDetectionStrategy } from "@angular/core";
+import {
+    afterRenderEffect,
+    ChangeDetectionStrategy,
+    Component,
+    computed,
+    ElementRef,
+    inject,
+    Signal
+} from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "../../../../theme/services/theme.service";
@@ -69,9 +77,11 @@ export class TreeDropHintComponent<T> {
     });
 
     public constructor() {
-        effect(() => {
-            const styles = this.dropHintStyles();
-            Object.assign(this.#hostElementRef.nativeElement.style, styles);
+        afterRenderEffect({
+            write: () => {
+                const styles = this.dropHintStyles();
+                Object.assign(this.#hostElementRef.nativeElement.style, styles);
+            }
         });
     }
 }

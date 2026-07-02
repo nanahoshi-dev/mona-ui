@@ -130,6 +130,7 @@ export class TreeNodeComponent<T> {
         if (nodeClickEvent.isDefaultPrevented()) {
             return;
         }
+        this.treeService.navigatedNode.set(node);
         const selectableOptions = this.treeService.selectableOptions();
         if (!selectableOptions.enabled) {
             return;
