@@ -271,7 +271,12 @@ export * from "./layout/tabs/components/tab/tab.component";
 
 /** List Box */
 export * from "./list-box/models/ListBoxActionClickEvent";
+export * from "./list-box/models/ListBoxClearEvent";
+export * from "./list-box/models/ListBoxItemTemplateContext";
+export * from "./list-box/models/ListBoxMoveEvent";
+export * from "./list-box/models/ListBoxRemoveEvent";
 export * from "./list-box/models/ListBoxSelectionEvent";
+export * from "./list-box/models/ListBoxTransferEvent";
 export * from "./list-box/models/ToolbarOptions";
 export * from "./list-box/directives/list-box-footer-template.directive";
 export * from "./list-box/directives/list-box-header-template.directive";

@@ -148,6 +148,12 @@ export class ListComponent<TData> implements OnInit {
     });
     protected readonly virtualScrollViewport = viewChild(CdkVirtualScrollViewport);
 
+    /**
+     * @description Accessible name for the list's `listbox` element. Describe what the list represents.
+     * @default ""
+     */
+    public readonly ariaLabel = input<string>("");
+
     public readonly data = input<Iterable<TData> | null | undefined>(null);
     public readonly focusOnMount = input(true);
     public readonly height = input<ListSizeInputType>(undefined);

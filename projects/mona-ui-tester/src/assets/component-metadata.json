@@ -2364,85 +2364,97 @@
       {
         "name": "actionClick",
         "type": "ListBoxActionEvent",
-        "description": "The event emitted when an action button is clicked.",
+        "description": "Emitted when a toolbar action button is clicked, carrying the action's details.",
         "kind": "output"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes.",
+        "kind": "input"
       },
       {
         "name": "connectedList",
         "type": "ListBoxComponent<T, K> | null",
-        "description": "The connected list box for transferring items.",
+        "description": "The other list box to transfer items to and from using the toolbar actions.",
         "kind": "input"
       },
       {
         "name": "height",
         "type": "string | number",
-        "description": "Sets the height of the list box.",
+        "description": "Sets the height of the component.",
         "kind": "input"
       },
       {
         "name": "items",
         "type": "Iterable<T>",
-        "description": "The items of the list box.",
+        "description": "Collection of items to render.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ListBoxVariantProps[\"rounded\"]",
-        "description": "The border radius of the list box.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "selectBy",
         "type": "ListKeySelector<T, K>",
-        "description": "The selector to extract the key from an item.\r\nIt can be a string representing the property name or a function that takes an item and returns its key.",
+        "description": "Property name or accessor used to derive the key from a data item, used to identify selected items.",
         "kind": "input"
       },
       {
         "name": "selectedKeys",
         "type": "Iterable<K>",
-        "description": "The keys of the selected items.",
+        "description": "Keys of the currently selected items.",
         "kind": "input"
       },
       {
         "name": "selectedKeysChange",
         "type": "K[]",
-        "description": "The event emitted when the selected keys change.",
+        "description": "Emitted with the updated keys whenever the selection changes.",
         "kind": "output"
       },
       {
         "name": "selectionChange",
         "type": "ListBoxSelectionEvent",
-        "description": "The event emitted when the selection changes.\r\nIt contains the selected and deselected items.",
+        "description": "Emitted with the selected and deselected items whenever the selection changes.",
         "kind": "output"
       },
       {
         "name": "selectionMode",
         "type": "SelectionMode",
-        "description": "The selection mode of the list box.",
+        "description": "Allows multiple items to be selected simultaneously when set to `\"multiple\"`.",
+        "kind": "input"
+      },
+      {
+        "name": "singleSelectionToggleable",
+        "type": "boolean",
+        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "ListBoxVariantProps[\"size\"]",
-        "description": "Sets the size of the list box.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "ListKeySelector<T, string>",
-        "description": "The selector to extract the text from an item.\r\nIt can be a string representing the property name or a function that takes an item and returns its text.",
+        "description": "Property name or accessor used to derive the display text from a data item.",
         "kind": "input"
       },
       {
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
-        "description": "Sets the toolbar options of the list box.\r\nIt can be a boolean to enable/disable the toolbar or an object to customize the toolbar.",
+        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\nwhich actions are shown and where the toolbar is positioned.",
         "kind": "input"
       },
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the list box.",
+        "description": "Sets the width of the component.",
         "kind": "input"
       }
     ]
@@ -2451,6 +2463,12 @@
     "name": "ListViewComponent",
     "selector": "\"mona-list-view\"",
     "inputs": [
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible name for the list view's `listbox` element. Describe what the list represents.",
+        "kind": "input"
+      },
       {
         "name": "height",
         "type": "string | number",
@@ -3549,6 +3567,12 @@
     "name": "ListComponent",
     "selector": "\"mona-list\"",
     "inputs": [
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible name for the list's `listbox` element. Describe what the list represents.",
+        "kind": "input"
+      },
       {
         "name": "data",
         "type": "Iterable<TData> | null | undefined",

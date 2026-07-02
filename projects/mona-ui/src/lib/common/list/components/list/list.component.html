@@ -14,7 +14,9 @@
     @if (listService.viewItems().length !== 0) {
         <cdk-virtual-scroll-viewport [itemSize]="listService.virtualScrollOptions().height"
                                      [style.height]="viewportHeight()">
-            <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1" [id]="listId()" role="listbox">
+            <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1" [id]="listId()" role="listbox"
+                [attr.aria-label]="ariaLabel() || null"
+                [attr.aria-multiselectable]="listService.selectableOptions().mode === 'multiple' || null">
                 <ng-container *cdkVirtualFor="let item of listService.viewItems()">
                     <ng-container [ngTemplateOutlet]="listItemTemplate"
                                   [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
@@ -28,7 +30,9 @@
     }
 } @else {
     @if (listService.viewItems().length !== 0) {
-        <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1" [id]="listId()" role="listbox">
+        <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1" [id]="listId()" role="listbox"
+            [attr.aria-label]="ariaLabel() || null"
+            [attr.aria-multiselectable]="listService.selectableOptions().mode === 'multiple' || null">
             @for (item of listService.viewItems(); track item.uid) {
                 <ng-container [ngTemplateOutlet]="listItemTemplate"
                               [ngTemplateOutletContext]="{$implicit: item}"></ng-container>

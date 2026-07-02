@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -16,29 +15,43 @@ import {
     TemplateRef,
     untracked
 } from "@angular/core";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import {
-    faAngleDown,
-    faAngleLeft,
-    faAngleRight,
-    faAnglesLeft,
-    faAnglesRight,
-    faAngleUp,
-    faTimes,
-    faTrash
-} from "@fortawesome/free-solid-svg-icons";
+    LucideChevronDown,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideChevronsLeft,
+    LucideChevronsRight,
+    LucideChevronUp,
+    LucideTrash2,
+    LucideX
+} from "@lucide/angular";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
+import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
+import { ListKeySelector } from "../../../common/list/models/ListSelectors";
+import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
+import { ListService } from "../../../common/list/services/list.service";
 import { ListViewComponent } from "../../../list-view/components/list-view/list-view.component";
+import { ListViewFooterTemplateDirective } from "../../../list-view/directives/list-view-footer-template.directive";
+import { ListViewHeaderTemplateDirective } from "../../../list-view/directives/list-view-header-template.directive";
 import { ListViewItemTemplateDirective } from "../../../list-view/directives/list-view-item-template.directive";
 import { ListViewNavigableDirective } from "../../../list-view/directives/list-view-navigable.directive";
 import { ListViewNoDataTemplateDirective } from "../../../list-view/directives/list-view-no-data-template.directive";
 import { ListViewSelectableDirective } from "../../../list-view/directives/list-view-selectable.directive";
+import { SelectionMode } from "../../../models/SelectionMode";
 import { ContainsPipe } from "../../../pipes/contains.pipe";
+import { ThemeService } from "../../../theme/services/theme.service";
+import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";
+import { ListBoxHeaderTemplateDirective } from "../../directives/list-box-header-template.directive";
 import { ListBoxItemTemplateDirective } from "../../directives/list-box-item-template.directive";
 import { ListBoxNoDataTemplateDirective } from "../../directives/list-box-no-data-template.directive";
 import { ListBoxActionEvent } from "../../models/ListBoxActionClickEvent";
+import { ListBoxClearEvent } from "../../models/ListBoxClearEvent";
+import { ListBoxMoveEvent } from "../../models/ListBoxMoveEvent";
+import { ListBoxRemoveEvent } from "../../models/ListBoxRemoveEvent";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
+import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
 import {
     listBoxBaseThemeVariants,
@@ -46,26 +59,10 @@ import {
     ListBoxVariantInputs,
     ListBoxVariantProps
 } from "../../styles/list-box.styles";
-import { ThemeService } from "../../../theme/services/theme.service";
-import { ListBoxMoveEvent } from "../../models/ListBoxMoveEvent";
-import { ListBoxRemoveEvent } from "../../models/ListBoxRemoveEvent";
-import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
-import { ListBoxClearEvent } from "../../models/ListBoxClearEvent";
-import { SelectionMode } from "../../../models/SelectionMode";
-import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
-import { ListKeySelector } from "../../../common/list/models/ListSelectors";
-import { ListService } from "../../../common/list/services/list.service";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
-import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";
-import { ListBoxHeaderTemplateDirective } from "../../directives/list-box-header-template.directive";
-import { ListViewFooterTemplateDirective } from "../../../list-view/directives/list-view-footer-template.directive";
-import { ListViewHeaderTemplateDirective } from "../../../list-view/directives/list-view-header-template.directive";
 
 @Component({
     selector: "mona-list-box",
     templateUrl: "./list-box.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [ListService],
     imports: [
         ListViewComponent,
@@ -73,12 +70,19 @@ import { ListViewHeaderTemplateDirective } from "../../../list-view/directives/l
         ListViewItemTemplateDirective,
         NgTemplateOutlet,
         ButtonDirective,
-        FontAwesomeModule,
         ContainsPipe,
         ListViewNavigableDirective,
         ListViewNoDataTemplateDirective,
         ListViewFooterTemplateDirective,
-        ListViewHeaderTemplateDirective
+        ListViewHeaderTemplateDirective,
+        LucideChevronUp,
+        LucideChevronDown,
+        LucideChevronLeft,
+        LucideChevronRight,
+        LucideChevronsLeft,
+        LucideChevronsRight,
+        LucideX,
+        LucideTrash2
     ],
     host: {
         "[class]": "baseClasses()",
@@ -86,14 +90,19 @@ import { ListViewHeaderTemplateDirective } from "../../../list-view/directives/l
         "[style.width]": "listWidth()"
     }
 })
-export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInputs {
+export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVariantInputs {
     readonly #dataStateChange$ = new Subject<void>();
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService = inject<ListService<T>>(ListService);
     readonly #notifySelectionChange$ = new ReplaySubject<boolean>(1);
     readonly #themeService = inject(ThemeService);
-    protected readonly activeListBox: Signal<ListBoxComponent<T, K> | null> = computed(() => {
+    /**
+     * The list box (`this` or the connected list box) that currently holds the selection; falling back to `this`
+     * when neither side has a selection. Used by actions that make sense to run on `this` even with no selection
+     * (e.g., "transfer all"). For actions that require a real selection to proceed, use {@link getSelectedListBox} instead.
+     */
+    protected readonly activeListBox: Signal<ListBoxComponent<T, K>> = computed(() => {
         const selectedItems = this.selectedItems();
         if (selectedItems.any()) {
             return this;
@@ -114,7 +123,6 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         const reversed = position === "left" || position === "top";
         return listBoxBaseThemeVariants(theme)({ direction, reversed, rounded, size });
     });
-    protected readonly clearIcon = faTimes;
     protected readonly footerTemplate = contentChild(ListBoxFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListBoxHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(ListBoxItemTemplateDirective, { read: TemplateRef });
@@ -126,22 +134,15 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         const width = this.width();
         return typeof width === "number" ? `${width}px` : width;
     });
-    protected readonly moveDownIcon = faAngleDown;
-    protected readonly moveUpIcon = faAngleUp;
     protected readonly noDataTemplate = contentChild(ListBoxNoDataTemplateDirective, { read: TemplateRef });
-    protected readonly removeIcon = faTrash;
     protected readonly selectableOptions = computed<SelectableOptions>(() => {
         const enabled = true;
         const mode = this.selectionMode();
         if (mode === "multiple") {
             return { enabled, mode };
         }
-        return { enabled, mode, toggleable: true };
+        return { enabled, mode, toggleable: this.singleSelectionToggleable() };
     });
-    protected readonly transferAllFromIcon = faAnglesLeft;
-    protected readonly transferAllToIcon = faAnglesRight;
-    protected readonly transferFromIcon = faAngleLeft;
-    protected readonly transferToIcon = faAngleRight;
     protected readonly toolbarClasses = computed(() => {
         const theme = this.#themeService.theme();
         const toolbarOptions = this.toolbarOptions();
@@ -158,52 +159,61 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
     });
 
     /**
-     * @description The event emitted when an action button is clicked.
+     * @description Emitted when a toolbar action button is clicked, carrying the action's details.
      */
     public readonly actionClick = output<ListBoxActionEvent>();
 
     /**
-     * @description The connected list box for transferring items.
+     * @description Accessible name for the list box's `listbox` element. Describe what the list represents,
+     * which matters in particular when connecting two list boxes.
+     * @default ""
+     */
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
+
+    /**
+     * @description The other list box to transfer items to and from using the toolbar actions.
+     * @default null
      */
     public readonly connectedList = input<ListBoxComponent<T, K> | null>(null);
 
     /**
-     * @description Sets the height of the list box.
+     * @description Sets the height of the component.
      * @default 100%
      */
     public readonly height = input<string | number>("100%");
 
     /**
-     * @description The items of the list box.
+     * @description Collection of items to render.
+     * @default []
      */
     public readonly items = input<Iterable<T>>([]);
     public readonly listBoxItems = signal(ImmutableList.create<T>());
 
     /**
-     * @description The border radius of the list box.
+     * @description Border-radius preset applied to the component.
      * @default medium
      */
     public readonly rounded = input<ListBoxVariantProps["rounded"]>("medium");
 
     /**
-     * @description The selector to extract the key from an item.
-     * It can be a string representing the property name or a function that takes an item and returns its key.
+     * @description Property name or accessor used to derive the key from a data item, used to identify selected items.
+     * @default ""
      */
     public readonly selectBy = input<ListKeySelector<T, K>>("");
 
     /**
-     * @description The keys of the selected items.
+     * @description Keys of the currently selected items.
+     * @default []
      */
     public readonly selectedKeys = input<Iterable<K>>([]);
 
     /**
-     * @description The event emitted when the selected keys change.
+     * @description Emitted with the updated keys whenever the selection changes.
      */
     public readonly selectedKeysChange = output<K[]>();
 
     /**
-     * @description The event emitted when the selection changes.
-     * It contains the selected and deselected items.
+     * @description Emitted with the selected and deselected items whenever the selection changes.
      */
     public readonly selectionChange = output<ListBoxSelectionEvent>();
     public readonly selectedItems = computed(() => {
@@ -213,31 +223,39 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
     public readonly selectedItems$ = toObservable(this.selectedItems);
 
     /**
-     * @description The selection mode of the list box.
+     * @description Allows multiple items to be selected simultaneously when set to `"multiple"`.
+     * @default single
      */
     public readonly selectionMode = input<SelectionMode>("single");
 
     /**
-     * @description Sets the size of the list box.
+     * @description Allows an already-selected item to be deselected by clicking it again while `selectionMode`
+     * is `"single"`. Has no effect when `selectionMode` is `"multiple"`.
+     * @default true
+     */
+    public readonly singleSelectionToggleable = input(true);
+
+    /**
+     * @description Size preset controlling the component's dimensions.
      * @default medium
      */
     public readonly size = input<ListBoxVariantProps["size"]>("medium");
 
     /**
-     * @description The selector to extract the text from an item.
-     * It can be a string representing the property name or a function that takes an item and returns its text.
+     * @description Property name or accessor used to derive the display text from a data item.
+     * @default ""
      */
     public readonly textField = input<ListKeySelector<T, string>>("");
 
     /**
-     * @description Sets the toolbar options of the list box.
-     * It can be a boolean to enable/disable the toolbar or an object to customize the toolbar.
+     * @description Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize
+     * which actions are shown and where the toolbar is positioned.
      * @default true
      */
     public readonly toolbar = input<boolean | Partial<ToolbarOptions>>(true);
 
     /**
-     * @description Sets the width of the list box.
+     * @description Sets the width of the component.
      * @default 100%
      */
     public readonly width = input<string | number>("100%");
@@ -247,24 +265,33 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
             const items = this.items();
             untracked(() => this.listBoxItems.set(ImmutableList.create(items)));
         });
-        effect(() => {
+        effect(onCleanup => {
             const connectedList = this.connectedList();
             if (!connectedList) {
                 return;
             }
-            connectedList.selectionChange.subscribe(() => {
+            const subscription = connectedList.selectionChange.subscribe(() => {
                 untracked(() => this.clearSelections());
             });
+            onCleanup(() => subscription.unsubscribe());
         });
         afterNextRender({
             read: () => this.setSubscriptions()
         });
     }
 
+    /**
+     * @description Clears the current selection without emitting `selectionChange`. Call {@link notifySelectionChange}
+     * afterward if the resulting selection change should be emitted.
+     */
     public clearSelections(): void {
         this.#listService.clearSelections();
     }
 
+    /**
+     * @description Emits `selectionChange` for any selection changes made since the last notification
+     * (e.g., after programmatically calling {@link clearSelections}).
+     */
     public notifySelectionChange(): void {
         this.#notifySelectionChange$.next(true);
     }
@@ -289,7 +316,7 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
     }
 
     protected onMoveClick(direction: Extract<ToolbarAction, "moveDown" | "moveUp">, event: MouseEvent): void {
-        const activeListBox = this.getActiveListBox();
+        const activeListBox = this.getSelectedListBox();
         if (!activeListBox) {
             return;
         }
@@ -406,12 +433,17 @@ export class ListBoxComponent<T = any, K = unknown> implements ListBoxVariantInp
         );
     }
 
-    private getActiveListBox(): ListBoxComponent<T, K> | null {
+    /**
+     * The list box (`this` or the connected list box, recursively) that currently has a real selection
+     * or `null` if neither side has one. Unlike {@link activeListBox}, this does not fall back to `this`,
+     * since move actions need to know an actual selected index to operate on.
+     */
+    private getSelectedListBox(): ListBoxComponent<T, K> | null {
         if (this.selectedItems().any()) {
             return this;
         }
         if (this.connectedList() != null) {
-            return this.connectedList()!.getActiveListBox();
+            return this.connectedList()!.getSelectedListBox();
         }
         return null;
     }

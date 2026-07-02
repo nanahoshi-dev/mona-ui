@@ -1,3 +1,3 @@
-export interface ListBoxItemTemplateContext<T = any> {
+export interface ListBoxItemTemplateContext<T = unknown> {
     $implicit: T;
 }

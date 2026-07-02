@@ -114,6 +114,12 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
     protected readonly viewItems = computed(() => this.listItems());
 
     /**
+     * @description Accessible name for the list view's `listbox` element. Describe what the list represents.
+     * @default ""
+     */
+    public readonly ariaLabel = input<string>("", { alias: "aria-label" });
+
+    /**
      * @description Sets the height of the list view.
      * @default 100%
      */
@@ -206,11 +212,11 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
         });
     }
 
-    public onPageChange(event: PageChangeEvent): void {
+    protected onPageChange(event: PageChangeEvent): void {
         this.listService.pageState.update(s => ({ ...s, page: event.page, skip: event.skip }));
     }
 
-    public onPageSizeChange(event: PageSizeChangeEvent): void {
+    protected onPageSizeChange(event: PageSizeChangeEvent): void {
         this.listService.pageState.update(s => ({ ...s, page: 1, skip: 0, take: event.newPageSize }));
     }
 

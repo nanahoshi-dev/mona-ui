@@ -23,23 +23,17 @@ import { ImmutableSet, toImmutableSet } from "@mirei/ts-collections";
 @Component({
     selector: "app-list-box-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./list-box-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./list-box-demo.component.html"
 })
 export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent> {
     readonly #injector = createFeatureInjector({
         connectedLists: {
             active: true,
-            code: `
-                <mona-list-box [connectedList]="list2"></mona-list-box>
-                <mona-list-box #list2></mona-list-box>
-            `,
             name: "Connected Lists",
             description: "Display connected lists"
         },
         customizedToolbar: {
             active: false,
-            code: ``,
             codeVisible: false,
             hasCode: false,
             name: "Customized Toolbar",
@@ -124,66 +118,26 @@ export class ListBoxDemoComponent extends AbstractDemoComponent<ListBoxComponent
         },
         footerTemplate: {
             active: false,
-            code: `
-                <mona-list-box>
-                    <ng-template monaListBoxFooterTemplate>
-                        <div class="px-3 py-2 border-t border-input-border text-sm text-muted-foreground">
-                            Total items: {{ viewItems().length }}
-                        </div>
-                    </ng-template>
-                </mona-list-box>
-            `,
             name: "Footer Template",
             description: "Display footer template"
         },
         headerTemplate: {
             active: false,
-            code: `
-                <mona-list-box>
-                    <ng-template monaListBoxHeaderTemplate>
-                        <div class="px-3 py-2 border-b border-input-border font-medium">Food Items</div>
-                    </ng-template>
-                </mona-list-box>
-            `,
             name: "Header Template",
             description: "Display header template"
         },
         itemTemplate: {
             active: false,
-            code: `
-                 <mona-list-box>
-                    <ng-template monaListBoxItemTemplate>
-                        <div class="flex flex-row w-full">
-                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
-                            <span class="flex-1 flex items-center {{ color }}">{{ item.text }}</span>
-                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
-                                item.price | currency
-                            }}</span>
-                        </div>
-                    </ng-template>
-                </mona-list-box>
-            `,
             name: "Item Template",
             description: "Display item template"
         },
         noDataTemplate: {
             active: false,
-            code: `
-                 <mona-list-box>
-                    <ng-template monaListBoxNoDataTemplate>
-                        <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <svg lucideBox></svg>
-                            <span>List box has no items.</span>
-                        </div>
-                    </ng-template>
-                </mona-list-box>
-            `,
             name: "No Data Template",
             description: "This template sets the view when the list box is empty."
         }
     });
     protected readonly config = signal<ComponentConfig<ListBoxComponent>>({
-        code: ``,
         inputs: {
             connectedList: {
                 type: "object"
@@ -326,11 +280,10 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         return features["connectedLists"].active;
     });
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly firstListSelectedKeys = signal(ImmutableSet.create<unknown>([2, 4]));
+    protected readonly firstListSelectedKeys = signal(ImmutableSet.create<unknown>([]));
     protected readonly secondListBox = viewChild<ListBoxComponent<(typeof dropdownFoodData)[0]>>("secondList");
     protected readonly secondListBoxItems = signal(ImmutableSet.create<(typeof dropdownFoodData)[0]>());
     protected readonly secondListSelectedKeys = signal(ImmutableSet.create<unknown>([]));
-    protected readonly thirdListBoxItems = signal(ImmutableSet.create<(typeof dropdownFoodData)[0]>());
     protected readonly toolbarCustomizations = computed(() => {
         const toolbar = this.toolbar();
         const features = this.features();
@@ -380,15 +333,10 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
 
     protected onActionClick(
         event: ListBoxActionEvent<(typeof dropdownFoodData)[0]>,
-        listBox: "first" | "second" | "third"
+        listBox: "first" | "second"
     ): void {
         if (event.action === "moveDown" || event.action === "moveUp") {
-            const dataToProcess =
-                listBox === "first"
-                    ? this.#listData
-                    : listBox === "second"
-                      ? this.secondListBoxItems
-                      : this.thirdListBoxItems;
+            const dataToProcess = listBox === "first" ? this.#listData : this.secondListBoxItems;
             dataToProcess.update(data => {
                 const newData = [...data];
                 return toImmutableSet(
@@ -399,8 +347,7 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
             if (listBox === "first") {
                 this.secondListBoxItems.update(set => set.addAll(event.selectedItems));
                 this.#listData.update(set => set.removeAll(event.selectedItems));
-            } else if (listBox === "second") {
-                this.thirdListBoxItems.update(set => set.addAll(event.selectedItems));
+            } else {
                 this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
             }
         } else if (event.action === "transferFrom") {
@@ -412,8 +359,7 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
             if (listBox === "first") {
                 this.secondListBoxItems.update(set => set.addAll(this.#listData()));
                 this.#listData.update(set => set.clear());
-            } else if (listBox === "second") {
-                this.thirdListBoxItems.update(set => set.addAll(this.secondListBoxItems()));
+            } else {
                 this.secondListBoxItems.update(set => set.clear());
             }
         } else if (event.action === "transferAllFrom") {
@@ -424,21 +370,21 @@ class ListBoxWrapperComponent implements ComponentInputsAsSignal<ListBoxComponen
         } else if (event.action === "remove") {
             if (listBox === "first") {
                 this.#listData.update(set => set.removeAll(event.selectedItems));
-            } else if (listBox === "second") {
+            } else {
                 this.secondListBoxItems.update(set => set.removeAll(event.selectedItems));
             }
         }
     }
 
-    protected onSelectedKeysChange(keys: unknown[], listBox: "first" | "second" | "third"): void {
+    protected onSelectedKeysChange(keys: unknown[], listBox: "first" | "second"): void {
         if (listBox === "first") {
             this.firstListSelectedKeys.set(ImmutableSet.create(keys));
-        } else if (listBox === "second") {
+        } else {
             this.secondListSelectedKeys.set(ImmutableSet.create(keys));
         }
     }
 
-    protected onSelectionChange(event: ListBoxSelectionEvent, listBox: "first" | "second" | "third"): void {
+    protected onSelectionChange(event: ListBoxSelectionEvent, listBox: "first" | "second"): void {
         console.log(listBox, event);
     }
 }

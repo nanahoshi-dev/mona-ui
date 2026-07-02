@@ -1,8 +1,6 @@
-import { Directive, TemplateRef } from "@angular/core";
-import { ListBoxItemTemplateContext } from "../models/ListBoxItemTemplateContext";
+import { Directive } from "@angular/core";
 
 @Directive({
-    selector: "ng-template[monaListBoxItemTemplate]",
-    standalone: true
+    selector: "ng-template[monaListBoxItemTemplate]"
 })
 export class ListBoxItemTemplateDirective {}
