@@ -15,6 +15,10 @@ export const colorPickerBaseVariants = cva(
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
+        data-[readonly='true']:cursor-default
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-1
+        data-[invalid='true']:ring-error
 
         focus-within:ring-1 focus-within:ring-primary/40
 
@@ -22,6 +26,9 @@ export const colorPickerBaseVariants = cva(
     `,
     {
         variants: {
+            expanded: {
+                true: "ring-1 ring-primary/40"
+            },
             rounded: {
                 none: "rounded-none",
                 small: "rounded-sm",

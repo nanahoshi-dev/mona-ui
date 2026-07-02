@@ -84,8 +84,8 @@
             <mona-color-picker
                 size="small"
                 [disabled]="entry().disabled ?? false"
-                [ngModel]="entry().value"
-                (ngModelChange)="onValueChange(entry().name, $event)"></mona-color-picker>
+                [value]="entry().value"
+                (valueChange)="onValueChange(entry().name, $event)"></mona-color-picker>
         } @else {
             @switch (entry().configType) {
                 @case ("string") {

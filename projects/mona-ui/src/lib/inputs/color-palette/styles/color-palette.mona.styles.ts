@@ -6,12 +6,18 @@ export const colorPaletteBaseVariants = cva(
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
         data-[disabled='true']:pointer-events-none
+        data-[readonly='true']:cursor-default
+        data-[invalid='true']:border
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-1
+        data-[invalid='true']:ring-error
     `
 );
 
 export const colorPaletteItemVariants = cva(
     `
         cursor-pointer
+        data-[readonly='true']:cursor-default
         data-[selected='true']:border
         data-[selected='true']:border-border
         data-[selected='true']:outline

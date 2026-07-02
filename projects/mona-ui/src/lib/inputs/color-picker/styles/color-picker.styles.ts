@@ -31,4 +31,4 @@ type ColorPickerColorVariantProps = VariantProps<ReturnType<typeof colorPickerCo
 type ColorPickerColorVariantInput = VariantInputs<ColorPickerColorVariantProps>;
 
 export type ColorPickerVariantProps = ColorPickerBaseVariantProps & ColorPickerColorVariantProps;
-export type ColorPickerVariantInput = ColorPickerBaseVariantInput & ColorPickerColorVariantInput;
+export type ColorPickerVariantInput = Omit<ColorPickerBaseVariantInput, "expanded"> & ColorPickerColorVariantInput;

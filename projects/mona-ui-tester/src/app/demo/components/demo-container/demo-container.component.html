@@ -17,8 +17,8 @@
             <!--                </ng-template>-->
             <!--            </mona-dropdown-list>-->
             <mona-color-picker
-                [ngModel]="customColor()"
-                (ngModelChange)="customColor.set($event)"
+                [value]="customColor()"
+                (valueChange)="customColor.set($event)"
                 size="small"></mona-color-picker>
             <mona-dropdown-list
                 [data]="themeDropdownData()"

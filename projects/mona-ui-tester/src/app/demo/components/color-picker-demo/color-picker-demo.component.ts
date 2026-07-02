@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { ColorPickerComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { customColorPalette } from "../../utils/customColorPalette";
@@ -34,6 +35,14 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
                 value: 10
             },
             disabled: {
+                type: "boolean",
+                value: false
+            },
+            readonly: {
+                type: "boolean",
+                value: false
+            },
+            required: {
                 type: "boolean",
                 value: false
             },
@@ -75,32 +84,46 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
 }
 
 @Component({
-    imports: [ColorPickerComponent],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ColorPickerComponent, FormField],
     template: `
         @let customPaletteActive = features()["customPalette"] && features()["customPalette"].active;
-        <mona-color-picker
-            [closeOnSelect]="closeOnSelect()"
-            [columns]="columns()"
-            [disabled]="disabled()"
-            [opacity]="opacity()"
-            [palette]="customPaletteActive ? customPalette : palette()"
-            [rounded]="rounded()"
-            [showClearButton]="showClearButton()"
-            [size]="size()"
-            [view]="view()"></mona-color-picker>
+        <div class="flex flex-col items-center gap-4">
+            <span>Color: {{ form.color().value() }}</span>
+            <mona-color-picker
+                [closeOnSelect]="closeOnSelect()"
+                [columns]="columns()"
+                [formField]="form.color"
+                [opacity]="opacity()"
+                [palette]="customPaletteActive ? customPalette : palette()"
+                [rounded]="rounded()"
+                [showClearButton]="showClearButton()"
+                [size]="size()"
+                [view]="view()"></mona-color-picker>
+        </div>
     `
 })
 export class ColorPickerWrapperComponent implements ComponentInputsAsSignal<ColorPickerComponent> {
+    readonly #formModel = signal<ColorPickerFormModel>({ color: null });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.color, { when: () => this.disabled() });
+        readonly(schema.color, { when: () => this.readonly() });
+        required(schema.color, { when: () => this.required() });
+    });
     protected readonly customPalette = customColorPalette;
     public readonly closeOnSelect = input<ReturnType<ColorPickerComponent["closeOnSelect"]>>(true);
     public readonly columns = input<ReturnType<ColorPickerComponent["columns"]>>(10);
     public readonly disabled = input<ReturnType<ColorPickerComponent["disabled"]>>(false);
+    public readonly readonly = input<ReturnType<ColorPickerComponent["readonly"]>>(false);
+    public readonly required = input<ReturnType<ColorPickerComponent["required"]>>(false);
     public readonly opacity = input<ReturnType<ColorPickerComponent["opacity"]>>(true);
     public readonly palette = input<ReturnType<ColorPickerComponent["palette"]>>("flat");
     public readonly rounded = input<ReturnType<ColorPickerComponent["rounded"]>>("medium");
     public readonly showClearButton = input<ReturnType<ColorPickerComponent["showClearButton"]>>(false);
     public readonly size = input<ReturnType<ColorPickerComponent["size"]>>("medium");
     public readonly view = input<ReturnType<ColorPickerComponent["view"]>>("palette");
+}
+
+interface ColorPickerFormModel {
+    color: string | null;
 }

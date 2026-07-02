@@ -1,18 +1,7 @@
-import {
-    Component,
-    computed,
-    DOCUMENT,
-    forwardRef,
-    inject,
-    input,
-    signal,
-    Signal,
-    ChangeDetectionStrategy
-} from "@angular/core";
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { Component, computed, ElementRef, inject, input, model, output, signal, Signal } from "@angular/core";
+import type { FormValueControl } from "@angular/forms/signals";
 import { count } from "@mirei/ts-collections";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { ColorScheme } from "../../../models/ColorScheme";
 import { PaletteType } from "../../../models/PaletteType";
 import {
@@ -26,28 +15,25 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
 @Component({
     selector: "mona-color-palette",
     templateUrl: "./color-palette.component.html",
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => ColorPaletteComponent),
-            multi: true
-        }
-    ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         "[class]": "baseClasses()",
         "[style.grid-template-columns]": "'repeat('+colorScheme().columns+', minmax('+tileSize()+'px, 1fr))'",
         "[style.grid-auto-rows]": "tileSize()+'px'",
         "[attr.data-disabled]": "disabled()",
+        "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly()",
+        "[attr.data-required]": "required() || null",
         "[attr.role]": "'grid'",
-        "[attr.aria-label]": "'Color palette'"
+        "[attr.aria-label]": "'Color palette'",
+        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        "[attr.aria-readonly]": "readonly()",
+        "[attr.aria-required]": "required()"
     }
 })
-export class ColorPaletteComponent implements ControlValueAccessor, ColorPaletteVariantInput {
-    readonly #document = inject(DOCUMENT);
+export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValueControl<string | null> {
+    readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<string | null> | null = null;
-    #propagateTouched: Action = () => {};
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         return colorPaletteBaseThemeVariants(theme)();
@@ -75,58 +61,93 @@ export class ColorPaletteComponent implements ControlValueAccessor, ColorPalette
         const rounded = this.rounded();
         return colorPaletteItemThemeVariants(theme)({ rounded });
     });
-    protected readonly selectedColor = signal<string | null>(null);
+    protected readonly colorRows = computed(() => {
+        const { colors, columns } = this.colorScheme();
+        const rows: string[][] = [];
+        for (let i = 0; i < colors.length; i += columns) {
+            rows.push(colors.slice(i, i + columns));
+        }
+        return rows;
+    });
     protected readonly focusedColorIndex = signal<number>(-1);
+    protected readonly activeColorIndex = computed(() => (this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()));
+    protected readonly invalidState = computed(() => this.invalid() || (this.required() && this.touched() && !this.value()));
 
     /**
      * @description The number of columns in the color palette grid.
      * Only applicable when using a custom palette.
+     * @default 10
      */
     public readonly columns = input(10);
 
     /**
-     * @description Sets the disabled state of the color palette.
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description The type of color palette to use.
-     * This can be either "flat", "material", or "websafe",
-     * or a custom iterable of colors.
-     * If the provided palette is empty, it defaults to the flat color scheme.
+     * @description Marks the color palette as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
+     * @description The palette to display — one of the built-in `"flat"`, `"material"`, or `"websafe"` schemes, or a
+     * custom iterable of color strings. An empty custom palette falls back to the flat scheme.
+     * @default []
      */
     public readonly palette = input<PaletteType | Iterable<string>>([]);
 
     /**
-     * @description Sets the border radius of the color palette items.
+     * @description Prevents value changes while preserving the component's visual state. When bound to a signal
+     * form field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly readonly = input(false);
+
+    /**
+     * @description Border-radius preset applied to the color palette items.
+     * @default "none"
      */
     public readonly rounded = input<ColorPaletteVariantProps["rounded"]>("none");
 
     /**
+     * @description Sets whether the color palette is required. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false);
+
+    /**
      * @description The size of each tile in the color palette grid.
+     * @default 18
      */
     public readonly tileSize = input(18);
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
+    /**
+     * @description Emitted when the color palette is interacted with on blur or color selection.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
 
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
+    /**
+     * @description Sets the touched state of the color palette. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
 
-    public writeValue(obj: string | null): void {
-        const color = this.colorScheme().colors.find(c => c === obj) ?? null;
-        this.selectedColor.set(color);
-    }
+    /**
+     * @description Two-way bindable current color value.
+     * @default null
+     */
+    public readonly value = model<string | null>(null);
 
     protected focusColorTile(index: number): void {
         setTimeout(() => {
-            const colorTiles = this.#document.querySelectorAll("[data-color-index]");
-            colorTiles.forEach((tile, i) => {
-                tile.setAttribute("tabindex", i === index ? "0" : "-1");
-            });
-
+            const colorTiles = this.#elementRef.nativeElement.querySelectorAll("[data-color-index]");
             const targetTile = colorTiles[index] as HTMLElement;
             if (targetTile) {
                 targetTile.focus();
@@ -135,7 +156,7 @@ export class ColorPaletteComponent implements ControlValueAccessor, ColorPalette
     }
 
     protected onColorBlur(): void {
-        this.#propagateTouched();
+        this.touch.emit();
     }
 
     protected onColorFocus(index: number): void {
@@ -143,9 +164,13 @@ export class ColorPaletteComponent implements ControlValueAccessor, ColorPalette
     }
 
     protected onColorSelect(color: string): void {
-        const resultColor = this.selectedColor() === color ? null : color;
-        this.selectedColor.set(resultColor);
-        this.#propagateChange?.(resultColor);
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
+
+        const resultColor = this.value() === color ? null : color;
+        this.value.set(resultColor);
+        this.touch.emit();
     }
 
     protected onKeyDown(event: KeyboardEvent, colorIndex: number): void {
@@ -185,7 +210,9 @@ export class ColorPaletteComponent implements ControlValueAccessor, ColorPalette
                 break;
             case "Enter":
             case " ":
-                this.onColorSelect(colors[colorIndex]);
+                if (!this.readonly()) {
+                    this.onColorSelect(colors[colorIndex]);
+                }
                 handled = true;
                 break;
         }

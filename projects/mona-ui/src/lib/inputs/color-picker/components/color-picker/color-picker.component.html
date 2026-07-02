@@ -1,9 +1,9 @@
 @if (valueTemplate()) {
     <ng-container [ngTemplateOutlet]="valueTemplate()??null"
-                  [ngTemplateOutletContext]="{$implicit: color()}"></ng-container>
+                  [ngTemplateOutletContext]="{$implicit: value()}"></ng-container>
 } @else {
-    <div [style.background]="color()" [class]="colorClasses()">
-        @if (!color()) {
+    <div [style.background]="value()" [class]="colorClasses()">
+        @if (!value()) {
             <fa-icon [icon]="noColorIcon"></fa-icon>
         }
     </div>
@@ -16,10 +16,12 @@
 
 <ng-template #popupTemplate>
     @if (view() === 'palette') {
-        <div class="flex flex-col border border-input-border bg-background shadow-lg p-0.5 outline-none"
+        <div [id]="popupId"
+             class="flex flex-col border border-input-border bg-background shadow-lg p-0.5 outline-none"
              tabindex="0"
              role="dialog"
              aria-label="Color palette picker"
+             data-palette-container
              (keydown)="onPaletteContainerKeyDown($event)">
             @if (showClearButton()) {
                 <div class="flex items-center justify-end p-1">
@@ -28,17 +30,27 @@
                     </button>
                 </div>
             }
-            <mona-color-palette [palette]="palette()" [columns]="columns()" [ngModel]="color()"
-                                (ngModelChange)="onColorPaletteValueChange($event)"></mona-color-palette>
+            <mona-color-palette [palette]="palette()"
+                                [columns]="columns()"
+                                [readonly]="readonly()"
+                                [value]="value()"
+                                (valueChange)="onColorPaletteValueChange($event)"
+                                (touch)="onColorPaletteTouch()"></mona-color-palette>
         </div>
     } @else if (view() === 'gradient') {
-        <mona-color-gradient [opacity]="opacity()"
-                             [rounded]="rounded()"
-                             [value]="color()"
-                             (valueChange)="onColorGradientValueChange($event)"
-                             (touch)="onColorGradientTouch()"
-                             class="border border-input-border bg-background shadow-lg"
-                             (apply)="onColorGradientApply()"
-                             (cancel)="onColorGradientCancel()"></mona-color-gradient>
+        <div [id]="popupId"
+             class="border border-input-border bg-background shadow-lg"
+             tabindex="0"
+             role="dialog"
+             aria-label="Color gradient picker">
+            <mona-color-gradient [opacity]="opacity()"
+                                 [rounded]="rounded()"
+                                 [disabled]="disabled() || readonly()"
+                                 [value]="value()"
+                                 (valueChange)="onColorGradientValueChange($event)"
+                                 (touch)="onColorGradientTouch()"
+                                 (apply)="onColorGradientApply()"
+                                 (cancel)="onColorGradientCancel()"></mona-color-gradient>
+        </div>
     }
 </ng-template>

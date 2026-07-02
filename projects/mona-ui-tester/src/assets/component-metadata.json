@@ -5562,19 +5562,37 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the color palette.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the color palette as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "palette",
         "type": "PaletteType | Iterable<string>",
-        "description": "The type of color palette to use.\r\nThis can be either \"flat\", \"material\", or \"websafe\",\r\nor a custom iterable of colors.\r\nIf the provided palette is empty, it defaults to the flat color scheme.",
+        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\r\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Prevents value changes while preserving the component's visual state. When bound to a signal\r\nform field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "ColorPaletteVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the color palette items.",
+        "description": "Border-radius preset applied to the color palette items.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets whether the color palette is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5582,6 +5600,24 @@
         "type": "number",
         "description": "The size of each tile in the color palette grid.",
         "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the color palette is interacted with on blur or color selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the color palette. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string | null",
+        "description": "Two-way bindable current color value.",
+        "kind": "model"
       }
     ]
   },
@@ -5604,7 +5640,13 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the color picker.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the color picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5620,9 +5662,15 @@
         "kind": "input"
       },
       {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Prevents value changes while preserving the component's visual state. When bound to a signal\r\nform field via `[formField]`, this is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "ColorPickerVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the color picker.",
+        "description": "Border-radius preset applied to the color picker.",
         "kind": "input"
       },
       {
@@ -5634,7 +5682,7 @@
       {
         "name": "size",
         "type": "ColorPickerVariantProps[\"size\"]",
-        "description": "The size of the color picker.",
+        "description": "Size preset controlling the color picker's dimensions.",
         "kind": "input"
       },
       {
@@ -5642,6 +5690,30 @@
         "type": "ColorPickerView",
         "description": "The view mode of the color picker.\r\nThis can be either \"palette\" or \"gradient\".",
         "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets whether the color picker is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the color picker is interacted with on blur or color selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the color picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string | null",
+        "description": "Two-way bindable current color value.",
+        "kind": "model"
       }
     ]
   },

@@ -194,9 +194,15 @@ export * from "./inputs/check-box/components/check-box/check-box.component";
 export * from "./inputs/color-gradient/components/color-gradient/color-gradient.component";
 
 export * from "./inputs/color-palette/components/color-palette/color-palette.component";
+export * from "./inputs/color-palette/styles/color-palette.styles";
+export * from "./inputs/models/ColorScheme";
+export * from "./inputs/models/PaletteType";
 
 export * from "./inputs/color-picker/directives/color-picker-value-template.directive";
 export * from "./inputs/color-picker/components/color-picker/color-picker.component";
+export * from "./inputs/color-picker/models/ColorPickerValueTemplateContext";
+export * from "./inputs/color-picker/models/ColorPickerView";
+export * from "./inputs/color-picker/styles/color-picker.styles";
 
 export * from "./inputs/numeric-text-box/directives/numeric-text-box-prefix-template.directive";
 export * from "./inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";

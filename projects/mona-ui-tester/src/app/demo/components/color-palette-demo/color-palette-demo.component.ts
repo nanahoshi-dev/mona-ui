@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { ColorPaletteComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { customColorPalette } from "../../utils/customColorPalette";
@@ -16,21 +17,12 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPaletteComponent> {
     readonly #injector = createFeatureInjector({
         customPalette: {
-            code: ``,
             active: false,
             description: `A custom color palette that can be used to test the color palette component with a different set of colors.`,
             name: "Custom Palette"
         }
     });
     protected readonly config = signal<ComponentConfig<ColorPaletteComponent>>({
-        code: `
-            <mona-color-palette
-                [columns]="columns()"
-                [disabled]="disabled()"
-                [palette]="customPaletteActive ? customPalette : palette()"
-                [rounded]="rounded()"
-                [tileSize]="tileSize()"></mona-color-palette>
-        `,
         inputs: {
             columns: {
                 type: "number",
@@ -44,6 +36,14 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
                 type: "dropdown",
                 value: ["flat", "material", "websafe"],
                 defaultValue: "flat"
+            },
+            readonly: {
+                type: "boolean",
+                value: false
+            },
+            required: {
+                type: "boolean",
+                value: false
             },
             rounded: {
                 type: "dropdown",
@@ -64,24 +64,38 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
 }
 
 @Component({
-    imports: [ColorPaletteComponent],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ColorPaletteComponent, FormField],
     template: `
         @let customPaletteActive = features()["customPalette"] && features()["customPalette"].active;
-        <mona-color-palette
-            [columns]="columns()"
-            [disabled]="disabled()"
-            [palette]="customPaletteActive ? customPalette : palette()"
-            [rounded]="rounded()"
-            [tileSize]="tileSize()"></mona-color-palette>
+        <div class="flex flex-col gap-4">
+            <span>Color: {{ form.color().value() }}</span>
+            <mona-color-palette
+                [columns]="columns()"
+                [formField]="form.color"
+                [palette]="customPaletteActive ? customPalette : palette()"
+                [rounded]="rounded()"
+                [tileSize]="tileSize()"></mona-color-palette>
+        </div>
     `
 })
 export class ColorPaletteWrapperComponent implements ComponentInputsAsSignal<ColorPaletteComponent> {
+    readonly #formModel = signal<ColorPaletteFormModel>({ color: null });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.color, { when: () => this.disabled() });
+        readonly(schema.color, { when: () => this.readonly() });
+        required(schema.color, { when: () => this.required() });
+    });
     protected readonly customPalette = customColorPalette;
     public readonly columns = input<ReturnType<ColorPaletteComponent["columns"]>>(10);
     public readonly disabled = input<ReturnType<ColorPaletteComponent["disabled"]>>(false);
     public readonly palette = input<ReturnType<ColorPaletteComponent["palette"]>>("flat");
+    public readonly readonly = input<ReturnType<ColorPaletteComponent["readonly"]>>(false);
+    public readonly required = input<ReturnType<ColorPaletteComponent["required"]>>(false);
     public readonly rounded = input<ReturnType<ColorPaletteComponent["rounded"]>>("none");
     public readonly tileSize = input<ReturnType<ColorPaletteComponent["tileSize"]>>(24);
+}
+
+interface ColorPaletteFormModel {
+    color: string | null;
 }

@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { ColorPickerComponent } from "../../../inputs/color-picker/components/color-picker/color-picker.component";
 import { ColorPickerValueTemplateDirective } from "../../../inputs/color-picker/directives/color-picker-value-template.directive";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
     selector: "mona-editor-font-highlight",
-    imports: [ColorPickerComponent, ColorPickerValueTemplateDirective, FormsModule],
+    imports: [ColorPickerComponent, ColorPickerValueTemplateDirective],
     templateUrl: "./editor-font-highlight.component.html",
     styleUrl: "./editor-font-highlight.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,7 +29,7 @@ export class EditorFontHighlightComponent {
         }
     });
 
-    public onColorChange(color: string): void {
+    public onColorChange(color: string | null): void {
         if (color) {
             this.#editorService.editor.chain().focus().setHighlight({ color }).run();
             this.#lastColor = color;
