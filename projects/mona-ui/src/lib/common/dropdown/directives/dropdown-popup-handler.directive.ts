@@ -68,7 +68,7 @@ export class DropdownPopupHandlerDirective {
 
     private openPopup(settings: Partial<PopupSettings>): void {
         let popupRef = this.#dropdownService.popupRef();
-        if (popupRef || this.#host.readonly()) {
+        if (popupRef || this.#host.disabled() || this.#host.readonly()) {
             return;
         }
 

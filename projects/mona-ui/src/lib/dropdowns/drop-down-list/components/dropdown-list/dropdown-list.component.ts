@@ -14,19 +14,17 @@ import {
     linkedSignal,
     model,
     output,
-    signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { LucideChevronDown } from "@lucide/angular";
-import { asyncScheduler, combineLatest, delay, Subject } from "rxjs";
+import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -42,7 +40,6 @@ import { dropdownPopupThemeVariants } from "../../../../common/styles/dropdown-p
 import { isTypeaheadKey, setupTypeahead } from "../../../../common/utils/typeahead.util";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
@@ -72,16 +69,11 @@ import {
     selector: "mona-dropdown-list",
     templateUrl: "./dropdown-list.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
+    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     providers: [
         ListService,
         DropdownService,
         DropdownListService,
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => DropdownListComponent),
-            multi: true
-        },
         {
             provide: DropdownDataInputToken,
             useExisting: forwardRef(() => DropdownListComponent),
@@ -95,7 +87,6 @@ import {
     ],
     imports: [
         NgTemplateOutlet,
-        FormsModule,
         FontAwesomeModule,
         ListComponent,
         ListItemTemplateDirective,
@@ -115,10 +106,12 @@ import {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
-        "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-invalid]": "invalidState() ? true : undefined",
+        "[attr.aria-label]": "effectiveAriaLabel() || null",
         "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
+        "[attr.data-invalid]": "invalidState() || null",
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
         "[class]": "baseClass()",
@@ -126,19 +119,16 @@ import {
     }
 })
 export class DropdownListComponent<TData = unknown>
-    implements ControlValueAccessor, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
+    implements FormValueControl<TData | null>, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownListService = inject(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #navigatedValue = linkedSignal(() => this.#value());
+    readonly #navigatedValue = linkedSignal(() => this.value());
     readonly #listService = inject<ListService<TData>>(ListService);
     readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey = new Subject<string>();
-    readonly #value = signal<TData | null>(null);
-    #propagateChange: Action<TData | null> | null = null;
-    #propagateTouch: Action | null = null;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -153,12 +143,23 @@ export class DropdownListComponent<TData = unknown>
         const disabled = this.disabled();
         const expanded = this.expanded();
         const hasPrefix = this.prefixTemplate() != null;
+        const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = dropdownListInputThemeVariants(theme)({ disabled, expanded, hasPrefix, rounded, size });
+        const classes = dropdownListInputThemeVariants(theme)({
+            disabled,
+            expanded,
+            hasPrefix,
+            invalid,
+            rounded,
+            size
+        });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
+    protected readonly effectiveAriaLabel = computed(
+        () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
+    );
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
@@ -166,6 +167,9 @@ export class DropdownListComponent<TData = unknown>
     });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && this.value() == null)
+    );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
@@ -205,137 +209,174 @@ export class DropdownListComponent<TData = unknown>
     });
 
     /**
-     * @description Sets the aria-label attribute of the dropdown list component.
+     * @description Accessible name for the host element. Describe what the component represents.
+     * When empty, falls back to the placeholder text.
      * @default ""
      */
     public readonly ariaLabel = input("");
 
     /**
-     * @description Sets the aria-labelledby attribute of the dropdown list component.
+     * @description ID of an external element that provides the accessible name for the host element.
      * @default ""
      */
     public readonly ariaLabelledBy = input("");
 
     /**
-     * @description Emits when the popup is about to close. This event is preventable.
+     * @description Emitted when the popup is about to close. This event is preventable.
      */
     public readonly close = output<PopupCloseEvent>();
 
     /**
-     * @description Emits after the popup is closed.
+     * @description Emitted after the popup closes.
      */
     public readonly closed = output();
 
     /**
-     * @description The data items of the dropdown list component.
+     * @description Collection of items to render.
      * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 
     /**
-     * @description Sets the disabled state of the dropdown list component.
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
+     * @default false
      */
     public readonly disabled = model(false);
 
     /**
-     * @description A predicate function or the name of the field that determines whether an item is disabled.
+     * @description Predicate or field name used to determine whether an individual item is disabled.
+     * @default undefined
      */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
 
     /**
-     * @description Sets the loading state of the dropdown list component.
+     * @description Marks the field as invalid. Set automatically by the `FormField` directive when bound via `[formField]`.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
+     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
      * @default false
      */
     public readonly loading = input(false);
 
     /**
-     * @description Emits when the popup is about to open. This event is preventable.
+     * @description Emitted when the popup is about to open. This event is preventable.
      */
     public readonly open = output<PreventableEvent>();
 
     /**
-     * @description Emits after the popup is opened.
+     * @description Emitted after the popup opens.
      */
     public readonly opened = output();
 
     /**
-     * @description Placeholder text for the dropdown list when no item is selected.
+     * @description Placeholder text shown when no value is selected or entered.
+     * @default ""
      */
     public readonly placeholder = input("");
 
     /**
-     * @description Sets the class of the popup element.
+     * @description Additional CSS classes applied to the popup element.
      * @default ""
      */
     public readonly popupClass = input("");
 
     /**
-     * @description Sets the height of the popup element.
-     * @default 200
+     * @description Height of the popup element.
+     * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
 
     /**
-     * @description Sets the width of the popup element.
+     * @description Width of the popup element.
      * @default null
      */
     public readonly popupWidth = input<ListSizeInputType>(null);
 
     /**
-     * @description Sets the readonly state of the dropdown list component.
+     * @description Prevents value changes while preserving the component's visual state.
      * @default false
      */
     public readonly readonly = input(false);
 
     /**
-     * @description Sets the required state of the dropdown list component.
+     * @description Marks the field as required for form validation.
      * @default false
      */
     public readonly required = input(false);
 
     /**
-     * @description Sets the border radius of the dropdown list component.
+     * @description Border-radius preset applied to the component.
      * @default "medium"
      */
     public readonly rounded = input<DropDownListVariantProps["rounded"]>("medium");
 
     /**
-     * @description Whether to show the clear button when an item is selected.
+     * @description Shows a clear button that resets the selected value when clicked.
      * @default false
      */
     public readonly showClearButton = input(false);
 
     /**
-     * @description The size of the dropdown list component.
+     * @description Size preset controlling the component's dimensions.
      * @default "medium"
      */
     public readonly size = input<DropDownListVariantProps["size"]>("medium");
 
     /**
-     * @description Sets the text field of the dropdown list component.
-     * It can be null, string, or a function that takes an item and returns a string.
-     * If null, the item itself will be used as the text representation.
-     * @default null
+     * @description Property name or accessor used to derive the display text from a data item.
+     * If omitted, the item itself is used as the display text.
+     * @default undefined
      */
     public readonly textField = input<DropdownFieldSelectorType<TData>>();
+
+    /**
+     * @description Emitted when the control is interacted with via blur, selection, or clear.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Marks the control as touched. Set automatically by the `FormField` directive when bound via `[formField]`.
+     * @default false
+     */
+    public readonly touched = input(false);
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
-     * @description Sets the value field of the dropdown list component.
-     * It can be null, string, or a function that takes an item and returns a string.
-     * If null, the item itself will be used as the value representation.
-     * @default null
+     * @description Property name or accessor used to derive the value from a data item.
+     * If omitted, the item itself is used as the value.
+     * @default undefined
      */
     public readonly valueField = input<DropdownFieldSelectorType<TData>>();
 
+    /**
+     * @description Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.
+     * When `valueField` is set, this may hold the primitive field value instead of the full data item.
+     * @default null
+     */
+    public readonly value = model<TData | null>(null);
+
     public constructor() {
-        combineLatest([toObservable(this.valueField), toObservable(this.#value)])
-            .pipe(delay(0, asyncScheduler), takeUntilDestroyed())
-            .subscribe(([, value]) => {
+        effect(() => {
+            const value = this.value();
+            const valueField = this.valueField();
+            untracked(() => {
+                this.#listService.setValueField(valueField ?? "");
                 if (value != null) {
                     this.#listService.setSelectedDataItems([value]);
+                } else {
+                    this.#listService.clearSelections();
                 }
             });
+        });
         effect(() => {
             const popupTemplate = this.popupTemplate();
             untracked(() => this.#dropdownService.popupTemplate.set(popupTemplate));
@@ -358,33 +399,12 @@ export class DropdownListComponent<TData = unknown>
         });
     }
 
-    public registerOnChange(fn: Action<TData | null>): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: Action): void {
-        this.#propagateTouch = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
     public setValue(value: TData): void {
         this.updateValue(value);
     }
 
-    public writeValue(obj: TData): void {
-        this.updateValue(obj, false);
-        if (obj != null) {
-            this.#listService.setSelectedDataItems([obj]);
-        } else {
-            this.#listService.clearSelections();
-        }
-    }
-
     protected onBlur(): void {
-        this.#propagateTouch?.();
+        this.touch.emit();
     }
 
     protected onItemSelect(event: SelectionChangeEvent<TData>): void {
@@ -436,7 +456,7 @@ export class DropdownListComponent<TData = unknown>
         }
     }
 
-    private focus(): void {
+    public focus(): void {
         this.#hostElementRef.nativeElement?.focus();
     }
 
@@ -445,7 +465,7 @@ export class DropdownListComponent<TData = unknown>
             this.#dropdownService.triggerPopupOpen$.next({});
             return;
         }
-        if (this.expanded() && this.#value() !== this.#navigatedValue()) {
+        if (this.expanded() && this.value() !== this.#navigatedValue()) {
             this.updateValue(this.#navigatedValue(), true);
         }
         this.closePopup();
@@ -537,10 +557,12 @@ export class DropdownListComponent<TData = unknown>
     }
 
     private updateValue(value: TData | null, notify: boolean = true): void {
-        const oldValue = this.#value();
-        this.#value.set(value);
+        const oldValue = this.value();
+        if (oldValue !== value) {
+            this.value.set(value);
+        }
         if (notify && oldValue !== value) {
-            this.#propagateChange?.(value);
+            this.touch.emit();
         }
     }
 }

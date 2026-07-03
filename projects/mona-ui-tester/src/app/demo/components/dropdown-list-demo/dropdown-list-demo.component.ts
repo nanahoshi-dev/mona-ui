@@ -1,7 +1,6 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideUtensils } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
 import {
@@ -183,10 +182,9 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         DropDownGroupHeaderTemplateDirective,
         DropDownVirtualScrollDirective,
         CurrencyPipe,
-        FormsModule,
         DropDownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
-        ReactiveFormsModule,
+        FormField,
         LucideBox,
         LucideUtensils
     ],
@@ -195,96 +193,84 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
-        <form [formGroup]="formGroup">
-            <mona-dropdown-list
-                [data]="dropdownData()"
-                [disabled]="disabled()"
-                [itemDisabled]="itemDisabled()"
-                [loading]="loading()"
-                [placeholder]="placeholder()"
-                [popupClass]="popupClass()"
-                [popupHeight]="popupHeight()"
-                [popupWidth]="popupWidth()"
-                [readonly]="readonly()"
-                [required]="required()"
-                [rounded]="rounded()"
-                [showClearButton]="showClearButton()"
-                [size]="size()"
-                [textField]="textField()"
-                [valueField]="valueField()"
-                [formControlName]="'value'"
-                [monaDropDownGroupable]="grouping()"
-                [monaDropDownFilterable]="filtering()"
-                [monaDropDownVirtualScroll]="virtualization()"
-                [groupBy]="groupBy()"
-                (close)="onPopupClose($event)"
-                (open)="onPopupOpen($event)"
-                class="w-44">
-                @if (featureData["footerTemplate"].active) {
-                    <ng-template monaDropDownFooterTemplate>
-                        <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
-                            Total items: {{ dropdownData().length }}
-                        </div>
-                    </ng-template>
-                }
-                @if (groupingFeatures["groupHeaderTemplate"]?.active) {
-                    <ng-template monaDropDownGroupHeaderTemplate let-group>
-                        <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
-                    </ng-template>
-                }
-                @if (featureData["headerTemplate"].active) {
-                    <ng-template monaDropDownHeaderTemplate>
-                        <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
-                            Select your favorite food
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["itemTemplate"].active) {
-                    <ng-template monaDropDownItemTemplate let-item>
-                        <div class="flex flex-row w-full">
-                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
-                            <span class="flex-1 {{ color }}">{{ item.text }}</span>
-                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
-                                item.price | currency
-                            }}</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["noDataTemplate"].active) {
-                    <ng-template monaDropDownNoDataTemplate>
-                        <div
-                            class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <svg lucideBox></svg>
-                            <span>No items found</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["prefixTemplate"].active) {
-                    <ng-template monaDropdownPrefixTemplate>
-                        <svg
-                            lucideUtensils
-                            [size]="16"
-                            class="h-full aspect-square flex items-center justify-center"></svg>
-                    </ng-template>
-                }
-                @if (featureData["valueTemplate"].active) {
-                    <ng-template monaDropDownListValueTemplate let-item>
-                        @if (!item) {
-                            <span class="text-gray-500">Select an option...</span>
-                        } @else {
-                            <span class="text-pink-600 font-bold truncate">{{ item?.text }}</span>
-                        }
-                    </ng-template>
-                }
-            </mona-dropdown-list>
-        </form>
+        <mona-dropdown-list
+            [data]="dropdownData()"
+            [itemDisabled]="itemDisabled()"
+            [loading]="loading()"
+            [placeholder]="placeholder()"
+            [popupClass]="popupClass()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
+            [rounded]="rounded()"
+            [showClearButton]="showClearButton()"
+            [size]="size()"
+            [textField]="textField()"
+            [valueField]="valueField()"
+            [formField]="form.value"
+            [monaDropDownGroupable]="grouping()"
+            [monaDropDownFilterable]="filtering()"
+            [monaDropDownVirtualScroll]="virtualization()"
+            [groupBy]="groupBy()"
+            (close)="onPopupClose($event)"
+            (open)="onPopupOpen($event)"
+            class="w-44">
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaDropDownFooterTemplate>
+                    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                        Total items: {{ dropdownData().length }}
+                    </div>
+                </ng-template>
+            }
+            @if (groupingFeatures["groupHeaderTemplate"]?.active) {
+                <ng-template monaDropDownGroupHeaderTemplate let-group>
+                    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+                </ng-template>
+            }
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaDropDownHeaderTemplate>
+                    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                        Select your favorite food
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["itemTemplate"].active) {
+                <ng-template monaDropDownItemTemplate let-item>
+                    <div class="flex flex-row w-full">
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 {{ color }}">{{ item.text }}</span>
+                        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                            item.price | currency
+                        }}</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaDropDownNoDataTemplate>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <svg lucideBox></svg>
+                        <span>No items found</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["prefixTemplate"].active) {
+                <ng-template monaDropdownPrefixTemplate>
+                    <svg lucideUtensils [size]="16" class="h-full aspect-square flex items-center justify-center"></svg>
+                </ng-template>
+            }
+            @if (featureData["valueTemplate"].active) {
+                <ng-template monaDropDownListValueTemplate let-item>
+                    @if (!item) {
+                        <span class="text-gray-500">Select an option...</span>
+                    } @else {
+                        <span class="text-pink-600 font-bold truncate">{{ item?.text }}</span>
+                    }
+                </ng-template>
+            }
+        </mona-dropdown-list>
     `
 })
 export class DropdownListWrapperComponent implements ComponentInputsAsSignal<DropdownListComponent> {
-    readonly #formGroup = new FormGroup({
-        value: new FormControl<unknown>(null, { nonNullable: false, validators: [] })
-    });
-    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+    readonly #formModel = signal<DropdownListFormModel>({ value: null });
     protected readonly dropdownData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -302,6 +288,11 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
             .toArray();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.value, { when: () => this.disabled() });
+        readonly(schema.value, { when: () => this.readonly() });
+        required(schema.value, { when: () => this.required() });
+    });
     protected readonly filtering = computed(() => {
         const features = this.features();
         const subFeatures = features["filtering"]?.subFeatures || {};
@@ -313,9 +304,8 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
         };
         return filteringOptions;
     });
-    protected readonly formGroup = this.#formGroup;
     protected readonly formValueText = computed(() => {
-        const value = this.#formValue();
+        const value = this.form.value().value();
         const textField = this.textField();
         return getFormValueText(value, textField);
     });
@@ -360,10 +350,6 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     public readonly textField = input<ReturnType<DropdownListComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<DropdownListComponent["valueField"]>>("value");
 
-    public constructor() {
-        effect(() => console.log("Selected item: ", this.#formValue()));
-    }
-
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;
         if (preventClose) {
@@ -378,4 +364,8 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
             console.log("Dropdown List popup prevented from opening");
         }
     }
+}
+
+interface DropdownListFormModel {
+    value: (typeof dropdownFoodData)[number] | number | null;
 }

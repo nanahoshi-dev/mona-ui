@@ -127,13 +127,19 @@ export class DropdownListPopupHandlerDirective {
         fromEvent<MouseEvent>(this.#hostElementRef.nativeElement, "click")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(e => !this.#host.readonly() && !!e.target && (e.target as HTMLElement).tagName !== "INPUT")
+                filter(
+                    e =>
+                        !this.#host.disabled() &&
+                        !this.#host.readonly() &&
+                        !!e.target &&
+                        (e.target as HTMLElement).tagName !== "INPUT"
+                )
             )
             .subscribe(() => this.#dropdownService.triggerPopupToggle$.next({}));
         fromEvent<KeyboardEvent>(this.#hostElementRef.nativeElement, "keydown")
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                filter(() => !this.#host.readonly())
+                filter(() => !this.#host.disabled() && !this.#host.readonly())
             )
             .subscribe(e => this.handleKeyDown(e));
     }

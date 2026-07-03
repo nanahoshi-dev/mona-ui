@@ -12,9 +12,6 @@ export const dropdownListInputVariants = cva(
         hover:bg-accent hover:text-accent-foreground
         transition-[color,box-shadow,border] ease-in-out duration-300
         focus-within:ring-1 focus-within:ring-primary/40
-
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
     `,
     {
         variants: {
@@ -28,6 +25,10 @@ export const dropdownListInputVariants = cva(
             },
             hasPrefix: {
                 false: "ps-2"
+            },
+            invalid: {
+                true: "border-error ring-1 ring-error/40",
+                false: ""
             },
             rounded: {
                 none: "rounded-none",
