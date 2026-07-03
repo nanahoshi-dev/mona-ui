@@ -152,6 +152,13 @@ export class ChipComponent implements ChipVariantInputs {
     public readonly removeLabel = input<string>();
 
     /**
+     * @description Tab index for the remove button, independent of the chip host's own tabindex.
+     * Set to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.
+     * @default 0
+     */
+    public readonly removeTabIndex = input<number | string>(0);
+
+    /**
      * @description Border-radius preset applied to the chip.
      * @default "full"
      */

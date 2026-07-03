@@ -16,6 +16,7 @@
         [iconOnly]="true"
         [size]="'small'"
         [attr.aria-label]="removeAriaLabel"
+        [tabindex]="removeTabIndex()"
         [disabled]="disabled()"
         (click)="onRemoveClick($event)"
         [attr.data-chip-remove]="true">

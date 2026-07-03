@@ -10,6 +10,8 @@
             look="default"
             [tabindex]="-1"
             [removable]="true"
+            [removeTabIndex]="-1"
+            [disabled]="disabled()"
             [rounded]="rounded()"
             [size]="size()"
             (remove)="onSelectedItemRemove($event, pair.key!)">
@@ -28,6 +30,8 @@
             look="outline"
             [tabindex]="-1"
             [removable]="true"
+            [removeTabIndex]="-1"
+            [disabled]="disabled()"
             [rounded]="rounded()"
             [size]="size()"
             (remove)="onSelectedItemGroupRemove($event)">

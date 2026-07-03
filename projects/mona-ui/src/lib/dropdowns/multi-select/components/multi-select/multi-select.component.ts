@@ -130,7 +130,6 @@ export class MultiSelectComponent<TData = unknown>
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
-    #resizeObserver: ResizeObserver | null = null;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -291,7 +290,7 @@ export class MultiSelectComponent<TData = unknown>
 
     /**
      * @description Sets the height of the popup element.
-     * @default 200
+     * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
 
@@ -352,6 +351,10 @@ export class MultiSelectComponent<TData = unknown>
      */
     public readonly touched = input(false);
 
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -394,7 +397,6 @@ export class MultiSelectComponent<TData = unknown>
             const checkboxVisible = this.checkboxes();
             untracked(() => this.#listService.setSelectableOptions({ checkboxes: checkboxVisible }));
         });
-        inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
     public focus(): void {
@@ -520,12 +522,9 @@ export class MultiSelectComponent<TData = unknown>
         this.setEnterKeySubscription();
     }
 
-    private updateValue(value: TData[], notify: boolean = true): void {
-        const oldValue = this.value();
-        if (oldValue !== value) {
-            this.value.set(value);
-        }
-        if (oldValue !== value && notify) {
+    private updateValue(value: Iterable<TData>, notify: boolean = true): void {
+        this.value.set(value);
+        if (notify) {
             this.touch.emit();
         }
     }

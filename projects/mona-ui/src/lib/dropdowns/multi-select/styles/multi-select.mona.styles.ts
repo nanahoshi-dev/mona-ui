@@ -11,6 +11,8 @@ export const multiSelectBaseVariants = cva(
 
         [&.ng-touched.ng-invalid]:border-error
         [&.ng-touched.ng-invalid]:ring-error/40
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-1 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {
