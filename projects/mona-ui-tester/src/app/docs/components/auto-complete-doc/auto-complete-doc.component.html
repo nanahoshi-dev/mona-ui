@@ -1,11 +1,5 @@
-<app-section id="autoComplete" [header]="'Auto Complete'" headerType="H1">
-    <p>An auto complete is a UI control that displays a selected value by default and expands to reveal a list of
-        mutually exclusive options.
-        The user can select exactly one option from the list, which then collapses back into the selected state.</p>
-    <app-section id="usage" [header]="'Usage'" headerType="H2">
-        <app-code-viewer [code]="importCode" language="typescript"></app-code-viewer>
-    </app-section>
-    <app-section id="demo" [header]="'Demo'" headerType="H2">
-        <app-auto-complete-demo></app-auto-complete-demo>
-    </app-section>
-</app-section>
+<app-markdown-doc src="docs/auto-complete/intro.md"></app-markdown-doc>
+
+<app-auto-complete-demo></app-auto-complete-demo>
+
+<app-markdown-doc src="docs/auto-complete/api.md" parentSectionId="auto-complete"></app-markdown-doc>
