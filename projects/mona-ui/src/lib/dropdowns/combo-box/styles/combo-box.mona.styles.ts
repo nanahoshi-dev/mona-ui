@@ -2,14 +2,12 @@ import { cva } from "class-variance-authority";
 
 export const comboBoxBaseVariants = cva(
     `
-        flex border border-input-border outline-none
+        flex items-center
+        border border-input-border outline-none
         bg-background shadow-xs
         cursor-pointer
         focus-within:ring-1 focus-within:ring-primary/40
         transition-[color,box-shadow,border] ease-in-out duration-300
-
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
     `,
     {
         variants: {
@@ -18,6 +16,10 @@ export const comboBoxBaseVariants = cva(
             },
             focused: {
                 true: "ring-1 ring-primary/40"
+            },
+            invalid: {
+                true: "border-error ring-1 ring-error/40",
+                false: ""
             },
             rounded: {
                 none: "rounded-none",
@@ -35,6 +37,7 @@ export const comboBoxBaseVariants = cva(
         defaultVariants: {
             disabled: false,
             focused: false,
+            invalid: false,
             rounded: "medium",
             size: "medium"
         }
@@ -46,7 +49,8 @@ export const comboBoxTextInputVariants = cva(
         border-none outline-none
         bg-transparent shadow-none
         px-2 h-full w-full text-ellipsis
-        focus-within:ring-0
+        focus-within:ring-0 focus-within:shadow-none
+        focus-visible:ring-0 focus-visible:shadow-none
     `,
     {
         variants: {

@@ -45,14 +45,19 @@
 </div>
 
 @if (showClearButton() && selectedListItems().length !== 0 && !loading()) {
-    <mona-clear-button (clear)="onValueClear($event)"></mona-clear-button>
+    <mona-indicator-icon
+        preset="clear"
+        [class]="indicatorClass()"
+        [interactive]="true"
+        label="Clear"
+        (activate)="onValueClear($event)"></mona-indicator-icon>
 }
 
 @if (loading()) {
-    <mona-loading-indicator></mona-loading-indicator>
+    <mona-indicator-icon preset="loading" [class]="indicatorClass()" [size]="12"></mona-indicator-icon>
 }
 
-<svg lucideChevronDown class="opacity-50 flex-none me-2" [size]="18"></svg>
+<mona-indicator-icon preset="dropdown" [class]="indicatorClass()" [size]="18"></mona-indicator-icon>
 
 <span monaDropdownLiveRegion></span>
 

@@ -54,3 +54,13 @@ export const multiSelectItemContainerVariants = cva(
 );
 
 export const multiSelectAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);
+
+export const multiSelectIndicatorContainerVariants = cva(`self-center`, {
+    variants: {
+        size: {
+            small: "h-8",
+            medium: "h-9",
+            large: "h-10"
+        }
+    }
+});

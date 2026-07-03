@@ -14,17 +14,15 @@ import {
     linkedSignal,
     model,
     output,
-    signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { FormsModule } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ClearButtonComponent } from "../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../common/forms/directives/form-field-validation.directive";
 import { FilterChangeEvent } from "../../../common/filter-input/models/FilterChangeEvent";
 import { ListComponent } from "../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../common/list/directives/list-footer-template.directive";
@@ -36,13 +34,11 @@ import { ListSizeInputType } from "../../../common/list/models/ListSizeType";
 import { SelectableOptions } from "../../../common/list/models/SelectableOptions";
 import { SelectionChangeEvent } from "../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../common/list/services/list.service";
-import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../common/styles/dropdown-popup.styles";
 import { rxTimeout } from "../../../common/utils/rxTimeout";
 import { TextBoxDirective } from "../../../inputs/text-box/directives/text-box.directive";
 import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../theme/services/theme.service";
-import { Action } from "../../../utils/Action";
 import { createElementControlId } from "../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../utils/PreventableEvent";
 import { DropDownFooterTemplateDirective } from "../../directives/drop-down-footer-template.directive";
@@ -58,8 +54,8 @@ import { DropdownSuffixTemplateDirective } from "../../directives/dropdown-suffi
 import { DropdownDataInput, DropdownDataInputToken } from "../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../models/DropdownPopupInput";
+import { IndicatorIconComponent } from "../../../common/indicator-icon/components/indicator-icon/indicator-icon.component";
 import { DropdownService } from "../../../common/dropdown/services/dropdown.service";
-import { DropdownListService } from "../../services/dropdown-list.service";
 import {
     autoCompleteAffixContainerThemeVariants,
     autoCompleteBaseThemeVariants,
@@ -71,16 +67,10 @@ import {
 @Component({
     selector: "mona-auto-complete",
     templateUrl: "./auto-complete.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
+    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     providers: [
         ListService,
         DropdownService,
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => AutoCompleteComponent),
-            multi: true
-        },
         {
             provide: DropdownDataInputToken,
             useExisting: forwardRef(() => AutoCompleteComponent),
@@ -102,23 +92,24 @@ import {
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
         ListItemTemplateDirective,
-        LoadingIndicatorComponent,
         DropdownLiveRegionDirective,
-        ClearButtonComponent
+        IndicatorIconComponent
     ],
     host: {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-haspopup]": "'listbox'",
+        "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.data-disabled]": "disabled()",
+        "[attr.data-invalid]": "invalidState() || null",
         "[attr.tabindex]": "-1",
         "[class]": "baseClass()"
     }
 })
 export class AutoCompleteComponent<TData = unknown>
     implements
-        ControlValueAccessor,
+        FormValueControl<string | null>,
         AutoCompleteVariantInput,
         DropdownDataInput<TData>,
         DropdownPopupInput,
@@ -130,9 +121,6 @@ export class AutoCompleteComponent<TData = unknown>
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
-    readonly #value = signal<string | null>(null);
-    #propagateChange: Action<string | null> | null = null;
-    #propagateTouch: Action | null = null;
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
@@ -142,18 +130,30 @@ export class AutoCompleteComponent<TData = unknown>
         const theme = this.#themeService.theme();
         return autoCompleteAffixContainerThemeVariants(theme)();
     });
-    protected readonly autoCompleteValue = linkedSignal(() => this.#value() ?? "");
+    protected readonly autoCompleteValue = linkedSignal(() => this.value() ?? "");
     protected readonly autoCompleteValue$ = new Subject<string | null>();
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
+        const expanded = this.expanded();
         const focused = this.#popupRef() !== null;
+        const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = autoCompleteBaseThemeVariants(theme)({ disabled, focused, rounded, size });
+        const variantClass = autoCompleteBaseThemeVariants(theme)({
+            disabled,
+            expanded,
+            focused,
+            invalid,
+            rounded,
+            size
+        });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
+    protected readonly effectiveAriaLabel = computed(
+        () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
+    );
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
@@ -167,6 +167,9 @@ export class AutoCompleteComponent<TData = unknown>
         return autoCompleteTextInputThemeVariants(theme)({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.value())
+    );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
@@ -192,19 +195,19 @@ export class AutoCompleteComponent<TData = unknown>
      * Use this to associate error messages or help text with the input.
      * @default ""
      */
-    public readonly ariaDescribedBy = input("");
+    public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
      * @description Sets the aria-label attribute of the autocomplete component.
      * @default ""
      */
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
      * @description Sets the aria-labelledby attribute of the autocomplete component.
      * @default ""
      */
-    public readonly ariaLabelledBy = input("");
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -217,7 +220,8 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly closed = output();
 
     /**
-     * @description Sets the data of the autocomplete component.
+     * @description Collection of items to render.
+     * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 
@@ -229,8 +233,16 @@ export class AutoCompleteComponent<TData = unknown>
 
     /**
      * @description Sets the predicate function that determines whether an item is disabled.
+     * @default undefined
      */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
+
+    /**
+     * @description Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
 
     /**
      * @description Defines whether the first matching item should be highlighted while typing.
@@ -315,6 +327,24 @@ export class AutoCompleteComponent<TData = unknown>
      * @default null
      */
     public readonly textField = input<DropdownFieldSelectorType<TData>>(null);
+
+    /**
+     * @description Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -324,6 +354,13 @@ export class AutoCompleteComponent<TData = unknown>
      * @default null
      */
     public readonly valueField = input<DropdownFieldSelectorType<TData>>(null);
+
+    /**
+     * @description Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,
+     * enabling signal forms `[formField]` binding.
+     * @default null
+     */
+    public readonly value = model<string | null>(null);
 
     public constructor() {
         afterNextRender({
@@ -338,27 +375,9 @@ export class AutoCompleteComponent<TData = unknown>
         });
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouch = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(data: any): void {
-        this.updateValue(data, false);
-    }
-
     protected onInputBlur(): void {
-        if (this.#propagateTouch) {
-            this.#propagateTouch();
-        }
-        if (this.#value() !== this.autoCompleteValue() && !this.#popupRef()) {
+        this.touch.emit();
+        if (this.value() !== this.autoCompleteValue() && !this.#popupRef()) {
             this.updateValue(this.autoCompleteValue());
         }
     }
@@ -368,7 +387,7 @@ export class AutoCompleteComponent<TData = unknown>
         this.updateValue(itemText);
         this.autoCompleteValue.set(itemText);
         this.closePopup();
-        rxTimeout(this.#destroyRef, () => this.focus(), 300);
+        rxTimeout(this.#destroyRef, () => this.focus());
     }
 
     protected onValueClear(event: MouseEvent | KeyboardEvent): void {
@@ -393,7 +412,7 @@ export class AutoCompleteComponent<TData = unknown>
         this.#popupRef()?.close();
     }
 
-    private focus(): void {
+    public focus(): void {
         const input = this.#hostElementRef.nativeElement.querySelector("input");
         if (input) {
             input.focus();
@@ -487,7 +506,7 @@ export class AutoCompleteComponent<TData = unknown>
                     this.closePopup();
                     return;
                 }
-                if (this.#value() !== autoCompleteValue) {
+                if (this.value() !== autoCompleteValue) {
                     this.updateValue(autoCompleteValue);
                 }
                 this.closePopup();
@@ -541,11 +560,13 @@ export class AutoCompleteComponent<TData = unknown>
     }
 
     private updateValue(value: string | null, notify: boolean = true): void {
-        const oldValue = this.#value();
-        this.#value.set(value);
+        const oldValue = this.value();
         if (notify && oldValue !== value) {
             const notifyValue = value === "" || value == null ? null : value;
-            this.#propagateChange?.(notifyValue);
+            this.value.set(notifyValue);
+            this.touch.emit();
+            return;
         }
+        this.value.set(value);
     }
 }

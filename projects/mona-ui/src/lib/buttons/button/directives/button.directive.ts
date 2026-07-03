@@ -18,7 +18,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { LoadingIndicatorComponent } from "../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
+import { IndicatorIconComponent } from "../../../common/indicator-icon/components/indicator-icon/indicator-icon.component";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { ButtonService } from "../../services/button.service";
 import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "../styles/button.styles";
@@ -46,7 +46,7 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #injector = inject(Injector);
     readonly #renderer = inject(Renderer2);
     readonly #themeService = inject(ThemeService);
-    #loaderComponentRef: ComponentRef<LoadingIndicatorComponent> | null = null;
+    #loaderComponentRef: ComponentRef<IndicatorIconComponent> | null = null;
     #toggleSubscription: Subscription | null = null;
 
     protected readonly effectiveDisabled = computed(() => this.#buttonService?.groupDisabled() || this.disabled());
@@ -74,12 +74,12 @@ export class ButtonDirective implements ButtonVariantsInput {
         const size = this.effectiveSize();
         switch (size) {
             case "small":
-                return 14;
+                return 12;
             case "large":
-                return 20;
+                return 16;
             case "medium":
             default:
-                return 16;
+                return 14;
         }
     });
 
@@ -188,11 +188,13 @@ export class ButtonDirective implements ButtonVariantsInput {
             return;
         }
 
-        this.#loaderComponentRef = createComponent(LoadingIndicatorComponent, {
+        this.#loaderComponentRef = createComponent(IndicatorIconComponent, {
             environmentInjector: this.#appRef.injector,
             elementInjector: this.#injector
         });
+        this.#loaderComponentRef.setInput("preset", "loading");
         this.#loaderComponentRef.setInput("size", size);
+        this.#loaderComponentRef.setInput("class", "self-center h-auto");
         this.#appRef.attachView(this.#loaderComponentRef.hostView);
 
         const loaderElement = this.#loaderComponentRef.location.nativeElement;

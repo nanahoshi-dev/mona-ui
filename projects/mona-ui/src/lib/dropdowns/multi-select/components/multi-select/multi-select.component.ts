@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -13,20 +12,17 @@ import {
     input,
     model,
     output,
-    signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { LucideChevronDown } from "@lucide/angular";
+import { none } from "@mirei/ts-collections";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipComponent } from "../../../../buttons/chip/component/chip.component";
-import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
-import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -36,14 +32,11 @@ import { ListNoDataTemplateDirective } from "../../../../common/list/directives/
 import { ListItem } from "../../../../common/list/models/ListItem";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { ListService } from "../../../../common/list/services/list.service";
-import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
-import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { dropdownPopupThemeVariants, DropdownPopupVariantInput } from "../../../../common/styles/dropdown-popup.styles";
 import { restoreOverlayScroll } from "../../../../common/utils/restoreOverlayScroll";
 import { rxFromResize } from "../../../../common/utils/rxFromResize";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
@@ -58,12 +51,14 @@ import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-pr
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
+import { IndicatorIconComponent } from "../../../../common/indicator-icon/components/indicator-icon/indicator-icon.component";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
 import { MultiSelectService } from "../../services/multi-select.service";
 import {
     multiSelectAffixContainerThemeVariants,
     multiSelectBaseThemeVariants,
+    multiSelectIndicatorContainerThemeVariants,
     multiSelectItemContainerThemeVariants,
     MultiSelectVariantInput,
     MultiSelectVariantProps
@@ -75,13 +70,7 @@ import {
     providers: [
         ListService,
         DropdownService,
-        FormFieldValidationService,
         MultiSelectService,
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => MultiSelectComponent),
-            multi: true
-        },
         {
             provide: DropdownDataInputToken,
             useExisting: forwardRef(() => MultiSelectComponent),
@@ -93,7 +82,6 @@ import {
             multi: false
         }
     ],
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ChipComponent,
         NgTemplateOutlet,
@@ -104,12 +92,10 @@ import {
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        LoadingIndicatorComponent,
         DropdownLiveRegionDirective,
-        ClearButtonComponent,
-        LucideChevronDown
+        IndicatorIconComponent
     ],
-    hostDirectives: [FormFieldValidationDirective, DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
+    hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
@@ -117,20 +103,21 @@ import {
         "[attr.aria-disabled]": "disabled() ? true : undefined",
         "[attr.aria-expanded]": "expanded()",
         "[attr.aria-haspopup]": "'listbox'",
-        "[attr.aria-invalid]": "isInvalid() ? true : undefined",
+        "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
+        "[attr.data-invalid]": "invalidState() || null",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
     }
 })
 export class MultiSelectComponent<TData = unknown>
     implements
-        ControlValueAccessor,
+        FormValueControl<Iterable<TData>>,
         MultiSelectVariantInput,
         DropdownDataInput<TData>,
         DropdownPopupInput,
@@ -138,15 +125,11 @@ export class MultiSelectComponent<TData = unknown>
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
-    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #themeService = inject(ThemeService);
-    readonly #value = signal<TData[]>([]);
-    #propagateChange: Action<TData[]> | null = null;
-    #propagateTouch: Action | null = null;
     #resizeObserver: ResizeObserver | null = null;
 
     protected readonly activeDescendant = computed(() => {
@@ -173,7 +156,14 @@ export class MultiSelectComponent<TData = unknown>
         read: TemplateRef
     });
     protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly isInvalid = computed(() => this.#formFieldValidationService?.invalid() || false);
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && none(this.value()))
+    );
+    protected readonly indicatorClass = computed(() => {
+        const theme = this.#themeService.theme();
+        const size = this.size();
+        return multiSelectIndicatorContainerThemeVariants(theme)({ size });
+    });
     protected readonly itemContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -225,13 +215,13 @@ export class MultiSelectComponent<TData = unknown>
      * @description Sets the aria-label attribute of the multi select component.
      * @default ""
      */
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
      * @description Sets the aria-labelledby attribute of the multi select component.
      * @default ""
      */
-    public readonly ariaLabelledBy = input("");
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Sets whether the popup should close after selecting an item.
@@ -269,6 +259,13 @@ export class MultiSelectComponent<TData = unknown>
      * @description A predicate function or the name of the field that determines whether an item is disabled.
      */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
+
+    /**
+     * @description Marks the multi select as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
 
     /**
      * @description Sets the loading state of the multi select component.
@@ -341,6 +338,20 @@ export class MultiSelectComponent<TData = unknown>
      * @default null
      */
     public readonly textField = input<DropdownFieldSelectorType<TData>>();
+
+    /**
+     * @description Emitted when the multi select is interacted with on blur, selection, remove, or clear.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets the touched state of the multi select. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
@@ -350,6 +361,14 @@ export class MultiSelectComponent<TData = unknown>
      * @default null
      */
     public readonly valueField = input<DropdownFieldSelectorType<TData>>();
+
+    /**
+     * @description Two-way bindable current selected values. Implements `FormValueControl<Iterable<TData>>`,
+     * enabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be
+     * written into this model to restore matching selected items.
+     * @default []
+     */
+    public readonly value = model<Iterable<TData>>([]);
 
     public constructor() {
         afterNextRender({
@@ -365,9 +384,10 @@ export class MultiSelectComponent<TData = unknown>
         });
         effect(() => {
             const valueField = this.valueField();
+            const value = this.value();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                this.#listService.setSelectedDataItems(this.#value());
+                this.#listService.setSelectedDataItems(value);
             });
         });
         effect(() => {
@@ -377,14 +397,22 @@ export class MultiSelectComponent<TData = unknown>
         inject(DestroyRef).onDestroy(() => this.#resizeObserver?.disconnect());
     }
 
-    public onItemSelect(): void {
+    public focus(): void {
+        this.#hostElementRef.nativeElement.focus();
+    }
+
+    protected onBlur(): void {
+        this.touch.emit();
+    }
+
+    protected onItemSelect(): void {
         this.updateValue(this.selectedDataItems().toArray());
         if (this.autoClose()) {
             this.#popupRef()?.close();
         }
     }
 
-    public onSelectedItemRemove(event: Event, listItem: ListItem<TData>): void {
+    protected onSelectedItemRemove(event: Event, listItem: ListItem<TData>): void {
         event.stopImmediatePropagation();
         if (this.readonly() || this.disabled()) {
             return;
@@ -394,7 +422,7 @@ export class MultiSelectComponent<TData = unknown>
         this.focus();
     }
 
-    public onSelectedItemGroupRemove(event: Event): void {
+    protected onSelectedItemGroupRemove(event: Event): void {
         event.stopImmediatePropagation();
         if (this.readonly() || this.disabled()) {
             return;
@@ -408,29 +436,6 @@ export class MultiSelectComponent<TData = unknown>
         this.focus();
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouch = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(data: any[]): void {
-        this.updateValue(data ?? []);
-        if (data != null) {
-            this.#listService.setSelectedDataItems(data);
-        }
-    }
-
-    protected onBlur(): void {
-        this.#propagateTouch?.();
-    }
-
     protected onValueClear(event: Event): void {
         if (this.readonly() || (event instanceof KeyboardEvent && event.key !== "Enter" && event.key !== " ")) {
             return;
@@ -440,10 +445,6 @@ export class MultiSelectComponent<TData = unknown>
         this.updateValue([]);
         this.#listService.clearSelections();
         this.focus();
-    }
-
-    private focus(): void {
-        this.#hostElementRef.nativeElement.focus();
     }
 
     private handleEnterKey(): void {
@@ -520,10 +521,12 @@ export class MultiSelectComponent<TData = unknown>
     }
 
     private updateValue(value: TData[], notify: boolean = true): void {
-        const oldValue = this.#value();
-        this.#value.set(value);
+        const oldValue = this.value();
+        if (oldValue !== value) {
+            this.value.set(value);
+        }
         if (oldValue !== value && notify) {
-            this.#propagateChange?.(this.#value());
+            this.touch.emit();
         }
     }
 }

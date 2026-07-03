@@ -1,7 +1,6 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { ImmutableSet, range } from "@mirei/ts-collections";
 import {
@@ -143,7 +142,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
 
 @Component({
     imports: [
-        ReactiveFormsModule,
         ComboBoxComponent,
         DropDownVirtualScrollDirective,
         DropDownNoDataTemplateDirective,
@@ -156,26 +154,23 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         CurrencyPipe,
         DropDownItemTemplateDirective,
         LucideBox,
-        LucideSearch
+        LucideSearch,
+        FormField
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
-        <form [formGroup]="formGroup">
             <mona-combo-box
                 [allowCustomValue]="allowCustomValue()"
                 [data]="comboBoxData()"
-                [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
                 [loading]="loading()"
                 [placeholder]="placeholder()"
                 [popupClass]="popupClass()"
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
-                [readonly]="readonly()"
-                [required]="required()"
                 [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
                 [size]="size()"
@@ -184,7 +179,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                 [monaDropDownGroupable]="grouping()"
                 [monaDropDownFilterable]="filtering()"
                 [monaDropDownVirtualScroll]="virtualization()"
-                [formControl]="formGroup.controls.value"
+                [formField]="form.value"
                 [groupBy]="groupBy()"
                 (valueAdd)="onValueAdd($event)"
                 class="w-50">
@@ -233,7 +228,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
                     </ng-template>
                 }
             </mona-combo-box>
-        </form>
     `
 })
 class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxComponent> {
@@ -246,13 +240,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
             })
             .toImmutableSet()
     );
-    readonly #formGroup = new FormGroup({
-        value: new FormControl<(typeof dropdownFoodData)[1] | null>(null, {
-            nonNullable: false,
-            validators: []
-        })
-    });
-    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+    readonly #formModel = signal<ComboBoxFormModel>({ value: null });
     protected readonly comboBoxData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
         if (dataSet === "Empty") {
@@ -265,6 +253,11 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         return this.#comboBoxVirtualData();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.value, { when: () => this.disabled() });
+        readonly(schema.value, { when: () => this.readonly() });
+        required(schema.value, { when: () => this.required() });
+    });
     protected readonly filtering = computed(() => {
         const features = this.features();
         const subFeatures = features["filtering"]?.subFeatures || {};
@@ -276,9 +269,8 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
         };
         return filteringOptions;
     });
-    protected readonly formGroup = this.#formGroup;
     protected readonly formValueText = computed(() => {
-        const value = this.#formValue();
+        const value = this.form.value().value();
         const textField = this.textField();
         return getFormValueText(value, textField);
     });
@@ -324,12 +316,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
 
-    public constructor() {
-        effect(() => console.log("Selected item: ", this.#formValue()));
-    }
-
     protected onValueAdd(value: string): void {
-        console.log("Custom value added: ", value);
         const newItem: (typeof dropdownFoodData)[0] = {
             active: true,
             category: "Custom",
@@ -340,6 +327,10 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
             origin: "Unknown"
         };
         this.#comboBoxData.update(set => set.add(newItem));
-        this.#formGroup.controls.value.setValue(newItem);
+        this.form.value().value.set(newItem);
     }
+}
+
+interface ComboBoxFormModel {
+    value: (typeof dropdownFoodData)[0] | null;
 }

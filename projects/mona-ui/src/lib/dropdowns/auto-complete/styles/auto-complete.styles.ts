@@ -46,6 +46,6 @@ type AutoCompleteAffixContainerVariantInput = VariantInputs<AutoCompleteAffixCon
 export type AutoCompleteVariantProps = AutoCompleteBaseVariantProps &
     AutoCompleteTextInputVariantProps &
     AutoCompleteAffixContainerVariantProps;
-export type AutoCompleteVariantInput = Omit<AutoCompleteBaseVariantInput, "focused"> &
+export type AutoCompleteVariantInput = Omit<AutoCompleteBaseVariantInput, "expanded" | "focused" | "invalid"> &
     AutoCompleteTextInputVariantInput &
     AutoCompleteAffixContainerVariantInput;

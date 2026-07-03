@@ -1,7 +1,6 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
 import {
@@ -177,7 +176,6 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
 
 @Component({
     imports: [
-        ReactiveFormsModule,
         MultiSelectComponent,
         DropDownVirtualScrollDirective,
         DropDownFooterTemplateDirective,
@@ -192,26 +190,23 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         MultiSelectTagTemplateDirective,
         DropDownGroupableDirective,
         LucideBox,
-        LucideSearch
+        LucideSearch,
+        FormField
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let tagConfigData = tagConfig();
         <span>Selected Items: {{ formValueText() }}</span>
-        <form [formGroup]="formGroup">
             <mona-multi-select
                 [autoClose]="autoClose()"
                 [checkboxes]="checkboxes()"
                 [data]="multiSelectData()"
-                [disabled]="disabled()"
                 [itemDisabled]="itemDisabled()"
                 [loading]="loading()"
                 [popupClass]="popupClass()"
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
-                [readonly]="readonly()"
-                [required]="required()"
                 [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
                 [size]="size()"
@@ -221,7 +216,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                 [monaDropDownGroupable]="grouping()"
                 [monaDropDownVirtualScroll]="virtualization()"
                 [monaMultiSelectSummaryTag]="tagConfigData.count"
-                [formControlName]="'value'"
+                [formField]="form.value"
                 [groupBy]="groupBy()"
                 (close)="onPopupClose($event)"
                 (closed)="onPopupClosed()"
@@ -279,15 +274,16 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
                     </ng-template>
                 }
             </mona-multi-select>
-        </form>
     `
 })
 class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelectComponent> {
-    readonly #formGroup = new FormGroup({
-        value: new FormControl<unknown[]>([14], { nonNullable: true, validators: [] })
-    });
-    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+    readonly #formModel = signal<MultiSelectFormModel>({ value: [14] });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.value, { when: () => this.disabled() });
+        readonly(schema.value, { when: () => this.readonly() });
+        required(schema.value, { when: () => this.required() });
+    });
     protected readonly filtering = computed(() => {
         const features = this.features();
         const subFeatures = features["filtering"]?.subFeatures || {};
@@ -299,9 +295,8 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
         };
         return filteringOptions;
     });
-    protected readonly formGroup = this.#formGroup;
     protected readonly formValueText = computed(() => {
-        const value = this.#formValue();
+        const value = this.form.value().value();
         const textField = this.textField();
         if (!value) {
             return "";
@@ -401,4 +396,8 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     protected onPopupOpened(): void {
         console.log("Multi select popup opened");
     }
+}
+
+interface MultiSelectFormModel {
+    value: unknown[];
 }

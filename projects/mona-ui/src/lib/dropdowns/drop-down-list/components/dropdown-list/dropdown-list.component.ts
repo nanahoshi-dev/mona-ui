@@ -21,10 +21,8 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { LucideChevronDown } from "@lucide/angular";
 import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ClearButtonComponent } from "../../../../common/clear-button/components/clear-button/clear-button.component";
 import { ListComponent } from "../../../../common/list/components/list/list.component";
 import { ListFooterTemplateDirective } from "../../../../common/list/directives/list-footer-template.directive";
 import { ListGroupHeaderTemplateDirective } from "../../../../common/list/directives/list-group-header-template.directive";
@@ -35,7 +33,6 @@ import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { SelectableOptions } from "../../../../common/list/models/SelectableOptions";
 import { SelectionChangeEvent } from "../../../../common/list/models/SelectionChangeEvent";
 import { ListService } from "../../../../common/list/services/list.service";
-import { LoadingIndicatorComponent } from "../../../../common/loading-indicator/components/loading-indicator/loading-indicator.component";
 import { dropdownPopupThemeVariants } from "../../../../common/styles/dropdown-popup.styles";
 import { isTypeaheadKey, setupTypeahead } from "../../../../common/utils/typeahead.util";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
@@ -54,6 +51,7 @@ import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-pr
 import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
 import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
+import { IndicatorIconComponent } from "../../../../common/indicator-icon/components/indicator-icon/indicator-icon.component";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
 import { DropdownListService } from "../../../services/dropdown-list.service";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
@@ -94,10 +92,8 @@ import {
         ListFooterTemplateDirective,
         ListHeaderTemplateDirective,
         ListNoDataTemplateDirective,
-        LoadingIndicatorComponent,
         DropdownLiveRegionDirective,
-        ClearButtonComponent,
-        LucideChevronDown
+        IndicatorIconComponent
     ],
     host: {
         "[attr.aria-activedescendant]": "activeDescendant()",
@@ -213,13 +209,13 @@ export class DropdownListComponent<TData = unknown>
      * When empty, falls back to the placeholder text.
      * @default ""
      */
-    public readonly ariaLabel = input("");
+    public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
      * @description ID of an external element that provides the accessible name for the host element.
      * @default ""
      */
-    public readonly ariaLabelledBy = input("");
+    public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
      * @description Emitted when the popup is about to close. This event is preventable.

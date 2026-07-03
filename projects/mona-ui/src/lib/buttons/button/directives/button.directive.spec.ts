@@ -168,25 +168,25 @@ describe("ButtonDirective", () => {
         it("should create loading indicator element when loading=true", async () => {
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-loading-indicator");
+            const loader = buttonElement.querySelector("mona-indicator-icon");
             expect(loader).toBeTruthy();
         });
 
         it("should remove loading indicator when loading changes from true to false", async () => {
             component.loading.set(true);
             await waitForStable(fixture);
-            expect(buttonElement.querySelector("mona-loading-indicator")).toBeTruthy();
+            expect(buttonElement.querySelector("mona-indicator-icon")).toBeTruthy();
 
             component.loading.set(false);
             await waitForStable(fixture);
-            expect(buttonElement.querySelector("mona-loading-indicator")).toBeNull();
+            expect(buttonElement.querySelector("mona-indicator-icon")).toBeNull();
         });
 
         it("should set loader size=14 for size='small'", async () => {
             component.size.set("small");
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-loading-indicator");
+            const loader = buttonElement.querySelector("mona-indicator-icon");
             expect(loader).toBeTruthy();
         });
 
@@ -194,7 +194,7 @@ describe("ButtonDirective", () => {
             component.size.set("medium");
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-loading-indicator");
+            const loader = buttonElement.querySelector("mona-indicator-icon");
             expect(loader).toBeTruthy();
         });
 
@@ -202,7 +202,7 @@ describe("ButtonDirective", () => {
             component.size.set("large");
             component.loading.set(true);
             await waitForStable(fixture);
-            const loader = buttonElement.querySelector("mona-loading-indicator");
+            const loader = buttonElement.querySelector("mona-indicator-icon");
             expect(loader).toBeTruthy();
         });
     });
@@ -283,8 +283,8 @@ describe("ButtonDirective", () => {
     // ariaHasPopup Input Tests
     // =========================================================================
     describe("ariaHasPopup input", () => {
-        it("should set aria-haspopup='false' by default", () => {
-            expect(buttonElement.getAttribute("aria-haspopup")).toBe("false");
+        it("should omit aria-haspopup by default", () => {
+            expect(buttonElement.getAttribute("aria-haspopup")).toBeNull();
         });
 
         it("should set aria-haspopup to provided value", () => {

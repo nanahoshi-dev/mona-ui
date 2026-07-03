@@ -46,6 +46,6 @@ type ComboBoxAffixContainerVariantInput = VariantInputs<ComboBoxAffixContainerVa
 export type ComboBoxVariantProps = ComboBoxBaseVariantProps &
     ComboBoxTextInputVariantProps &
     ComboBoxAffixContainerVariantProps;
-export type ComboBoxVariantInput = Omit<ComboBoxBaseVariantInput, "focused"> &
+export type ComboBoxVariantInput = Omit<ComboBoxBaseVariantInput, "focused" | "invalid"> &
     ComboBoxTextInputVariantInput &
     ComboBoxAffixContainerVariantInput;

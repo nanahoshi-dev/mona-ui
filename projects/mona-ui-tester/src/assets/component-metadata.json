@@ -870,25 +870,25 @@
       {
         "name": "ariaHasPopup",
         "type": "string",
-        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\r\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
+        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\r\nWhen inside a `ButtonGroup`, the group's disabled state takes precedence.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\nWhen inside a `ButtonGroup`, the group's disabled state takes precedence.",
         "kind": "model"
       },
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\r\nProvide `aria-label` on the host when using icon-only buttons.",
+        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\nProvide `aria-label` on the host when using icon-only buttons.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\r\nSets `aria-busy=\"true\"` on the host.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\nSets `aria-busy=\"true\"` on the host.",
         "kind": "model"
       },
       {
@@ -900,31 +900,31 @@
       {
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Border-radius preset applied to the component.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
+        "description": "Border-radius preset applied to the component.\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input"
       },
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\r\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
+        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
         "kind": "model"
       },
       {
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
-        "description": "Size preset controlling the button's height and horizontal padding.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
+        "description": "Size preset controlling the button's height and horizontal padding.\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input"
       },
       {
         "name": "tabindex",
         "type": "number",
-        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.\r\nAccepts a numeric string and converts it to a number.",
+        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.\nAccepts a numeric string and converts it to a number.",
         "kind": "input"
       },
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\r\nMust use `[toggleable]=\"true\"` binding syntax, not bare attribute form.",
+        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\nMust use `[toggleable]=\"true\"` binding syntax, not bare attribute form.",
         "kind": "input"
       },
       {
@@ -1302,7 +1302,7 @@
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "Sets the aria-describedby attribute of the autocomplete input.\r\nUse this to associate error messages or help text with the input.",
+        "description": "Sets the aria-describedby attribute of the autocomplete input.\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
@@ -1332,7 +1332,7 @@
       {
         "name": "data",
         "type": "Iterable<TData>",
-        "description": "Sets the data of the autocomplete component.",
+        "description": "Collection of items to render.",
         "kind": "input"
       },
       {
@@ -1345,6 +1345,12 @@
         "name": "itemDisabled",
         "type": "DropdownFieldPredicateType<TData>",
         "description": "Sets the predicate function that determines whether an item is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -1428,20 +1434,38 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the autocomplete component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "string | null",
+        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\nenabling signal forms `[formField]` binding.",
+        "kind": "model"
       }
     ]
   },
@@ -3503,18 +3527,6 @@
       }
     ]
   },
-  "ClearButtonComponent": {
-    "name": "ClearButtonComponent",
-    "selector": "\"mona-clear-button\"",
-    "inputs": [
-      {
-        "name": "clear",
-        "type": "KeyboardEvent | MouseEvent",
-        "description": "",
-        "kind": "output"
-      }
-    ]
-  },
   "FilterInputComponent": {
     "name": "FilterInputComponent",
     "selector": "\"mona-filter-input\"",
@@ -3558,6 +3570,54 @@
       {
         "name": "size",
         "type": "ReturnType<TextBoxComponent[\"size\"]>",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "IndicatorIconComponent": {
+    "name": "IndicatorIconComponent",
+    "selector": "\"mona-indicator-icon\"",
+    "inputs": [
+      {
+        "name": "activate",
+        "type": "KeyboardEvent | MouseEvent",
+        "description": "",
+        "kind": "output"
+      },
+      {
+        "name": "icon",
+        "type": "LucideIconInput | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "interactive",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "preset",
+        "type": "IndicatorIconPreset | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }
@@ -3678,18 +3738,6 @@
       {
         "name": "template",
         "type": "TemplateRef<ListItemTemplateContext<TData>> | null",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "LoadingIndicatorComponent": {
-    "name": "LoadingIndicatorComponent",
-    "selector": "\"mona-loading-indicator\"",
-    "inputs": [
-      {
-        "name": "size",
-        "type": "number",
         "description": "",
         "kind": "input"
       }
@@ -4908,49 +4956,49 @@
       {
         "name": "allowCustomValue",
         "type": "boolean",
-        "description": "Whether to allow custom values to be entered in the combo box.",
+        "description": "Allows a custom value to be committed when it doesn't match any item in {@link data}.",
         "kind": "input"
       },
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "Sets the aria-describedby attribute of the combo box input.\r\nUse this to associate error messages or help text with the input.",
+        "description": "ID of an element that provides an extended description for the input.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Sets the aria-label attribute of the autocomplete component.",
+        "description": "Accessible name for the input. Describe what the combo box represents.\r\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledBy",
         "type": "string",
-        "description": "Sets the aria-labelledby attribute of the autocomplete component.",
+        "description": "ID of an external element that provides the accessible name for the input.",
         "kind": "input"
       },
       {
         "name": "close",
         "type": "PopupCloseEvent",
-        "description": "Emits when the popup is about to close. This event is preventable.",
+        "description": "Emitted when the popup is about to close. This event is preventable.",
         "kind": "output"
       },
       {
         "name": "closed",
         "type": "void",
-        "description": "Emits after the popup is closed.",
+        "description": "Emitted after the popup is closed.",
         "kind": "output"
       },
       {
         "name": "data",
         "type": "Iterable<TData>",
-        "description": "The data items of the dropdown list component.",
+        "description": "Collection of items to render.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the dropdown list component.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "model"
       },
       {
@@ -4960,27 +5008,33 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the combo box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the autocomplete component.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.",
         "kind": "input"
       },
       {
         "name": "open",
         "type": "PreventableEvent",
-        "description": "Emits when the popup is about to open. This event is preventable.",
+        "description": "Emitted when the popup is about to open. This event is preventable.",
         "kind": "output"
       },
       {
         "name": "opened",
         "type": "void",
-        "description": "Emits after the popup is opened.",
+        "description": "Emitted after the popup is opened.",
         "kind": "output"
       },
       {
         "name": "placeholder",
         "type": "string",
-        "description": "Sets the placeholder text to be shown when there is no value selected.",
+        "description": "Placeholder text shown when no value is selected or entered.",
         "kind": "input"
       },
       {
@@ -5004,7 +5058,7 @@
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "Sets the readonly state of the combo box component.",
+        "description": "Prevents value changes while preserving the component's visual state.",
         "kind": "input"
       },
       {
@@ -5016,44 +5070,62 @@
       {
         "name": "rounded",
         "type": "ComboBoxVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the combo box component.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "Whether to show the clear button when an item is selected.",
+        "description": "Displays a button that resets the value to empty when an item is selected.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "ComboBoxVariantProps[\"size\"]",
-        "description": "The size of the combo box component.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the combo box component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
+        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf not set, the item itself is used as the text representation.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the combo box is interacted with on blur, selection, clear, or committed input.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the combo box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "valueAdd",
         "type": "string",
-        "description": "Emits when user presses enter after typing in the combo box input.\r\nOnly emitted when {@link allowCustomValue} is true.",
+        "description": "Emitted with the entered text when the user presses Enter on unmatched input.\r\nOnly emitted when {@link allowCustomValue} is true.",
         "kind": "output"
       },
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the combo box component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
+        "description": "Property name or accessor used to derive the value from a data item.\r\nIf not set, the item itself is used as the value representation.",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "TData | null",
+        "description": "Two-way bindable current selected value. Implements `FormValueControl<TData | null>`,\r\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\r\nwritten into this model to restore a matching selected item.",
+        "kind": "model"
       }
     ]
   },
@@ -5064,134 +5136,158 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Sets the aria-label attribute of the dropdown list component.",
+        "description": "Accessible name for the host element. Describe what the component represents.\r\nWhen empty, falls back to the placeholder text.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledBy",
         "type": "string",
-        "description": "Sets the aria-labelledby attribute of the dropdown list component.",
+        "description": "ID of an external element that provides the accessible name for the host element.",
         "kind": "input"
       },
       {
         "name": "close",
         "type": "PopupCloseEvent",
-        "description": "Emits when the popup is about to close. This event is preventable.",
+        "description": "Emitted when the popup is about to close. This event is preventable.",
         "kind": "output"
       },
       {
         "name": "closed",
         "type": "void",
-        "description": "Emits after the popup is closed.",
+        "description": "Emitted after the popup closes.",
         "kind": "output"
       },
       {
         "name": "data",
         "type": "Iterable<TData>",
-        "description": "The data items of the dropdown list component.",
+        "description": "Collection of items to render.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the dropdown list component.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "model"
       },
       {
         "name": "itemDisabled",
         "type": "DropdownFieldPredicateType<TData>",
-        "description": "A predicate function or the name of the field that determines whether an item is disabled.",
+        "description": "Predicate or field name used to determine whether an individual item is disabled.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the field as invalid. Set automatically by the `FormField` directive when bound via `[formField]`.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the dropdown list component.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.",
         "kind": "input"
       },
       {
         "name": "open",
         "type": "PreventableEvent",
-        "description": "Emits when the popup is about to open. This event is preventable.",
+        "description": "Emitted when the popup is about to open. This event is preventable.",
         "kind": "output"
       },
       {
         "name": "opened",
         "type": "void",
-        "description": "Emits after the popup is opened.",
+        "description": "Emitted after the popup opens.",
         "kind": "output"
       },
       {
         "name": "placeholder",
         "type": "string",
-        "description": "Placeholder text for the dropdown list when no item is selected.",
+        "description": "Placeholder text shown when no value is selected or entered.",
         "kind": "input"
       },
       {
         "name": "popupClass",
         "type": "string",
-        "description": "Sets the class of the popup element.",
+        "description": "Additional CSS classes applied to the popup element.",
         "kind": "input"
       },
       {
         "name": "popupHeight",
         "type": "ListSizeInputType",
-        "description": "Sets the height of the popup element.",
+        "description": "Height of the popup element.",
         "kind": "input"
       },
       {
         "name": "popupWidth",
         "type": "ListSizeInputType",
-        "description": "Sets the width of the popup element.",
+        "description": "Width of the popup element.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "Sets the readonly state of the dropdown list component.",
+        "description": "Prevents value changes while preserving the component's visual state.",
         "kind": "input"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the dropdown list component.",
+        "description": "Marks the field as required for form validation.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "DropDownListVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the dropdown list component.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "Whether to show the clear button when an item is selected.",
+        "description": "Shows a clear button that resets the selected value when clicked.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "DropDownListVariantProps[\"size\"]",
-        "description": "The size of the dropdown list component.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
+        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf omitted, the item itself is used as the display text.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the control is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the control as touched. Set automatically by the `FormField` directive when bound via `[formField]`.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the dropdown list component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
+        "description": "Property name or accessor used to derive the value from a data item.\r\nIf omitted, the item itself is used as the value.",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "TData | null",
+        "description": "Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.\r\nWhen `valueField` is set, this may hold the primitive field value instead of the full data item.",
+        "kind": "model"
       }
     ]
   },
@@ -5302,6 +5398,12 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the multi select as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "loading",
         "type": "boolean",
         "description": "Sets the loading state of the multi select component.",
@@ -5374,6 +5476,18 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the multi select is interacted with on blur, selection, remove, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the multi select. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "",
@@ -5384,6 +5498,12 @@
         "type": "DropdownFieldSelectorType<TData>",
         "description": "Sets the value field of the multi select component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Iterable<TData>",
+        "description": "Two-way bindable current selected values. Implements `FormValueControl<Iterable<TData>>`,\r\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\r\nwritten into this model to restore matching selected items.",
+        "kind": "model"
       }
     ]
   },

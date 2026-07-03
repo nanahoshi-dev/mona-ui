@@ -1,7 +1,6 @@
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideCheck, LucideSearch, LucideTriangleAlert } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
 import {
@@ -159,7 +158,6 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 @Component({
     imports: [
         AutoCompleteComponent,
-        FormsModule,
         DropDownGroupableDirective,
         DropDownGroupHeaderTemplateDirective,
         DropDownVirtualScrollDirective,
@@ -171,7 +169,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         DropDownNoDataTemplateDirective,
         DropDownHeaderTemplateDirective,
         CurrencyPipe,
-        ReactiveFormsModule,
+        FormField,
         LucideBox,
         LucideSearch,
         LucideCheck,
@@ -181,11 +179,9 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     template: `
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
-        <span>Selected Value: {{ formValue() }}</span>
-        <form [formGroup]="formGroup">
+        <span>Selected Value: {{ form.value().value() }}</span>
             <mona-auto-complete
                 [data]="autoCompleteData()"
-                [disabled]="disabled()"
                 [highlightFirst]="highlightFirst()"
                 [itemDisabled]="itemDisabled()"
                 [loading]="loading()"
@@ -193,8 +189,6 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 [popupClass]="popupClass()"
                 [popupHeight]="popupHeight()"
                 [popupWidth]="popupWidth()"
-                [readonly]="readonly()"
-                [required]="required()"
                 [rounded]="rounded()"
                 [showClearButton]="showClearButton()"
                 [size]="size()"
@@ -204,7 +198,7 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                 [monaDropDownFilterable]="filtering()"
                 [monaDropDownVirtualScroll]="virtualization()"
                 [groupBy]="groupBy()"
-                [formControlName]="'value'"
+                [formField]="form.value"
                 (close)="onPopupClose($event)"
                 (open)="onPopupOpen($event)"
                 class="w-50">
@@ -270,13 +264,10 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
                     </ng-template>
                 }
             </mona-auto-complete>
-        </form>
     `
 })
 class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {
-    readonly #formGroup = new FormGroup({
-        value: new FormControl<string | null>(null, { nonNullable: false, validators: [] })
-    });
+    readonly #formModel = signal<AutoCompleteFormModel>({ value: null });
 
     protected readonly autoCompleteData = computed(() => {
         const dataSet = this.features()["dataSet"].dropdownValue;
@@ -295,6 +286,11 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
             .toArray();
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.value, { when: () => this.disabled() });
+        readonly(schema.value, { when: () => this.readonly() });
+        required(schema.value, { when: () => this.required() });
+    });
     protected readonly filtering = computed(() => {
         const features = this.features();
         const subFeatures = features["filtering"]?.subFeatures || {};
@@ -306,8 +302,6 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
         };
         return filteringOptions;
     });
-    protected readonly formGroup = this.#formGroup;
-    protected readonly formValue = toSignal(this.#formGroup.controls.value.valueChanges);
     protected readonly groupBy = computed(() => {
         const features = this.features();
         const subFeatures = features["grouping"]?.subFeatures || {};
@@ -351,10 +345,6 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
     public readonly textField = input<ReturnType<AutoCompleteComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<AutoCompleteComponent["valueField"]>>("value");
 
-    public constructor() {
-        effect(() => console.log("Selected item: ", this.formValue()));
-    }
-
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;
         if (preventClose) {
@@ -369,4 +359,8 @@ class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoComple
             console.log("Popup prevented from opening");
         }
     }
+}
+
+interface AutoCompleteFormModel {
+    value: string | null;
 }

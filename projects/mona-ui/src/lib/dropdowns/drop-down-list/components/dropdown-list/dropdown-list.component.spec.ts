@@ -25,6 +25,7 @@ const FOOD_ITEMS: readonly FoodItem[] = [
             [data]="data"
             textField="text"
             valueField="value"
+            [loading]="loading()"
             [showClearButton]="true"
             [formField]="form.value">
         </mona-dropdown-list>
@@ -35,6 +36,7 @@ class SignalFormDropdownListHostComponent {
     readonly #formModel = signal<DropdownListFormModel>({ value: 2 });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
+    public readonly loading = signal(false);
     public readonly readonlyState = signal(false);
     public readonly requiredState = signal(false);
     public readonly form = form(this.#formModel, schema => {
@@ -123,6 +125,24 @@ describe("DropdownListComponent", () => {
         expect(fixture.componentInstance.form.value().touched()).toBe(true);
     });
 
+    it("renders clear and toggle indicators when a value is selected and not loading", async () => {
+        const fixture = await createSignalFormFixture();
+
+        expect(getIndicator(fixture, "clear")).toBeTruthy();
+        expect(getIndicator(fixture, "loading")).toBeNull();
+        expect(getIndicator(fixture, "toggle")).toBeTruthy();
+    });
+
+    it("renders the loading indicator instead of the clear indicator while loading", async () => {
+        const fixture = await createSignalFormFixture();
+        fixture.componentInstance.loading.set(true);
+        await waitForStable(fixture);
+
+        expect(getIndicator(fixture, "clear")).toBeNull();
+        expect(getIndicator(fixture, "loading")).toBeTruthy();
+        expect(getIndicator(fixture, "toggle")).toBeTruthy();
+    });
+
     it("reflects required invalid state from signal forms", async () => {
         const fixture = await createSignalFormFixture();
         const field = fixture.componentInstance.form.value();
@@ -190,7 +210,12 @@ function getHost(fixture: ComponentFixture<unknown>): HTMLElement {
 }
 
 function getClearButton(fixture: ComponentFixture<unknown>): HTMLElement {
-    return fixture.nativeElement.querySelector("mona-clear-button [role='button']") as HTMLElement;
+    return fixture.nativeElement.querySelector("mona-indicator-icon[preset='clear']") as HTMLElement;
+}
+
+function getIndicator(fixture: ComponentFixture<unknown>, kind: "clear" | "loading" | "toggle"): HTMLElement | null {
+    const preset = kind === "toggle" ? "dropdown" : kind;
+    return fixture.nativeElement.querySelector(`mona-indicator-icon[preset='${preset}']`);
 }
 
 function getOptions(): HTMLElement[] {

@@ -4,33 +4,36 @@
     </span>
 }
 
-<input monaTextBox role="combobox"
-       [class]="inputClass()"
-       [disabled]="disabled()"
-       [id]="id"
-       [placeholder]="placeholder()"
-       [readonly]="readonly()"
-       [rounded]="rounded()"
-       [size]="size()"
-       [ngModel]="autoCompleteValue()"
-       [attr.aria-activedescendant]="activeDescendant()"
-       [attr.aria-autocomplete]="'list'"
-       [attr.aria-busy]="loading()"
-       [attr.aria-controls]="listId"
-       [attr.aria-describedby]="ariaDescribedBy() || undefined"
-       [attr.aria-expanded]="expanded()"
-       [attr.aria-haspopup]="'listbox'"
-       [attr.aria-label]="ariaLabel() || undefined"
-       [attr.aria-labelledby]="ariaLabelledBy() || undefined"
-       (ngModelChange)="autoCompleteValue$.next($event)"
-       (blur)="onInputBlur()">
+<input
+    monaTextBox
+    role="combobox"
+    [class]="inputClass()"
+    [disabled]="disabled()"
+    [id]="id"
+    [placeholder]="placeholder()"
+    [readonly]="readonly()"
+    [rounded]="rounded()"
+    [size]="size()"
+    [ngModel]="autoCompleteValue()"
+    [attr.aria-activedescendant]="activeDescendant()"
+    [attr.aria-autocomplete]="'list'"
+    [attr.aria-busy]="loading()"
+    [attr.aria-controls]="listId"
+    [attr.aria-describedby]="ariaDescribedBy() || undefined"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-haspopup]="'listbox'"
+    [attr.aria-invalid]="invalidState() || undefined"
+    [attr.aria-label]="effectiveAriaLabel() || undefined"
+    [attr.aria-labelledby]="ariaLabelledBy() || undefined"
+    (ngModelChange)="autoCompleteValue$.next($event)"
+    (blur)="onInputBlur()" />
 
 @if (showClearButton() && autoCompleteValue() && !loading()) {
-    <mona-clear-button (clear)="onValueClear($event)"></mona-clear-button>
+    <mona-indicator-icon preset="clear" [interactive]="true" label="Clear" (activate)="onValueClear($event)"></mona-indicator-icon>
 }
 
 @if (loading()) {
-    <mona-loading-indicator class="aspect-square"></mona-loading-indicator>
+    <mona-indicator-icon preset="loading" [size]="12"></mona-indicator-icon>
 }
 
 @if (suffixTemplate()) {
@@ -42,9 +45,8 @@
 <span monaDropdownLiveRegion></span>
 
 <ng-template #popupTemplate>
-    <div [class]="listPopupClass()" [attr.role]="'region'">
-        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="size()"
-                   [listId]="listId">
+    <div [class]="listPopupClass()">
+        <mona-list (itemSelect)="onItemSelect($event)" [focusOnMount]="false" [size]="size()" [listId]="listId">
             @if (footerTemplate()) {
                 <ng-template monaListFooterTemplate>
                     <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
@@ -52,8 +54,9 @@
             }
             @if (groupHeaderTemplate()) {
                 <ng-template monaListGroupHeaderTemplate let-group>
-                    <ng-container [ngTemplateOutlet]="groupHeaderTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="groupHeaderTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: group }"></ng-container>
                 </ng-template>
             }
             @if (headerTemplate()) {
@@ -63,8 +66,9 @@
             }
             @if (itemTemplate()) {
                 <ng-template monaListItemTemplate let-dataItem>
-                    <ng-container [ngTemplateOutlet]="itemTemplate()"
-                                  [ngTemplateOutletContext]="{$implicit: dataItem}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="itemTemplate()"
+                        [ngTemplateOutletContext]="{ $implicit: dataItem }"></ng-container>
                 </ng-template>
             }
             @if (noDataTemplate()) {

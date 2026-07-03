@@ -1,0 +1,11 @@
+<span #projectedContent class="contents">
+    <ng-content></ng-content>
+</span>
+
+@let renderedIcon = iconToRender();
+@if (!hasProjectedContent() && renderedIcon) {
+    <svg
+        [lucideIcon]="renderedIcon"
+        [size]="size()"
+        [class]="iconClass()"></svg>
+}

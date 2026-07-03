@@ -7,17 +7,21 @@ export const autoCompleteBaseVariants = cva(
         bg-background shadow-xs
         focus-within:ring-1 focus-within:ring-primary/40
         transition-[color,box-shadow,border] ease-in-out duration-300
-
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
     `,
     {
         variants: {
             disabled: {
                 true: "pointer-events-none opacity-50 cursor-not-allowed"
             },
+            expanded: {
+                true: "ring-1 ring-primary/40"
+            },
             focused: {
                 true: "ring-1 ring-primary/40"
+            },
+            invalid: {
+                true: "border-error ring-1 ring-error/40",
+                false: ""
             },
             rounded: {
                 none: "rounded-none",
@@ -31,6 +35,13 @@ export const autoCompleteBaseVariants = cva(
                 medium: "h-9 text-sm",
                 small: "h-8 text-xs"
             }
+        },
+        defaultVariants: {
+            disabled: false,
+            focused: false,
+            invalid: false,
+            rounded: "medium",
+            size: "medium"
         }
     }
 );
@@ -40,7 +51,7 @@ export const autoCompleteTextInputVariants = cva(
         border-none outline-none
         bg-transparent shadow-none
         px-2 h-full w-full text-ellipsis
-        focus-within:ring-0
+        focus-within:ring-0 focus-visible:ring-0
     `,
     {
         variants: {
