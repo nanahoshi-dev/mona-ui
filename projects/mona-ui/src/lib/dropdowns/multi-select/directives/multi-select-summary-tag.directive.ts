@@ -10,7 +10,9 @@ export class MultiSelectSummaryTagDirective<TData> {
     private readonly summaryTagTemplate = contentChild(MultiSelectSummaryTagTemplateDirective, { read: TemplateRef });
 
     /**
-     * @description Sets the number of tags to display before the summary tag is displayed.
+     * @description Number of selected item tags to display before collapsing the rest into a summary tag.
+     * A negative value shows every selected item as its own tag and never renders the summary tag.
+     * @default -1
      */
     public readonly tagCount = input(-1, { alias: "monaMultiSelectSummaryTag" });
 

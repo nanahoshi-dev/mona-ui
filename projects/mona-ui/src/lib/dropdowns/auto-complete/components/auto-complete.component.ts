@@ -191,20 +191,21 @@ export class AutoCompleteComponent<TData = unknown>
     protected readonly suffixTemplate = contentChild(DropdownSuffixTemplateDirective, { read: TemplateRef });
 
     /**
-     * @description Sets the aria-describedby attribute of the autocomplete input.
+     * @description ID of an element that provides an extended description for the input.
      * Use this to associate error messages or help text with the input.
      * @default ""
      */
     public readonly ariaDescribedBy = input("", { alias: "aria-describedby" });
 
     /**
-     * @description Sets the aria-label attribute of the autocomplete component.
+     * @description Accessible name for the input. Describe what the autocomplete represents.
+     * Falls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.
      * @default ""
      */
     public readonly ariaLabel = input("", { alias: "aria-label" });
 
     /**
-     * @description Sets the aria-labelledby attribute of the autocomplete component.
+     * @description ID of an external element that provides the accessible name for the input.
      * @default ""
      */
     public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
@@ -226,13 +227,13 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly data = input<Iterable<TData>>([]);
 
     /**
-     * @description Sets the disabled state of the autocomplete component.
+     * @description Renders the component with reduced visual emphasis and removes pointer interaction.
      * @default false
      */
     public readonly disabled = model(false);
 
     /**
-     * @description Sets the predicate function that determines whether an item is disabled.
+     * @description Predicate or field name used to determine whether an individual item is disabled.
      * @default undefined
      */
     public readonly itemDisabled = input<DropdownFieldPredicateType<TData>>();
@@ -251,7 +252,7 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly highlightFirst = input(true);
 
     /**
-     * @description Sets the loading state of the autocomplete component.
+     * @description Displays a loading indicator and prevents interaction while an operation is in progress.
      * @default false
      */
     public readonly loading = input(false);
@@ -267,63 +268,62 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly opened = output();
 
     /**
-     * @description Sets the placeholder text to be shown when there is no value selected.
+     * @description Placeholder text shown when no value is selected or entered.
      * @default ""
      */
     public readonly placeholder = input("");
 
     /**
-     * @description Sets the class of the popup element.
+     * @description Additional CSS classes applied to the popup element.
      * @default ""
      */
     public readonly popupClass = input("");
 
     /**
-     * @description Sets the height of the popup element.
+     * @description Height of the popup element.
      * @default null
      */
     public readonly popupHeight = input<ListSizeInputType>(null);
 
     /**
-     * @description Sets the width of the popup element.
+     * @description Width of the popup element.
      * @default null
      */
     public readonly popupWidth = input<ListSizeInputType>(null);
 
     /**
-     * @description Sets the readonly state of the autocomplete component.
+     * @description Prevents value changes while preserving the component's visual state.
      * @default false
      */
     public readonly readonly = input(false);
 
     /**
-     * @description Sets the required state of the autocomplete component.
+     * @description Marks the field as required for form validation.
      * @default false
      */
     public readonly required = input(false);
 
     /**
-     * @description Sets the border radius of the autocomplete component.
+     * @description Border-radius preset applied to the component.
      * @default "medium"
      */
     public readonly rounded = input<AutoCompleteVariantProps["rounded"]>("medium");
 
     /**
-     * @description Shows or hides the clear button.
+     * @description Displays a button that clears the current value when clicked.
      * @default true
      */
     public readonly showClearButton = input(true);
 
     /**
-     * @description Sets the size of the autocomplete component.
+     * @description Size preset controlling the component's dimensions.
      * @default "medium"
      */
     public readonly size = input<AutoCompleteVariantProps["size"]>("medium");
 
     /**
-     * @description Sets the text field of the autocomplete component.
-     * It can be null, string, or a function that takes an item and returns a string.
-     * If null, the item itself will be used as the text representation.
+     * @description Property name or accessor used to derive the display text from a data item.
+     * If null, the item itself is used as the display text.
      * @default null
      */
     public readonly textField = input<DropdownFieldSelectorType<TData>>(null);
@@ -348,9 +348,8 @@ export class AutoCompleteComponent<TData = unknown>
     public readonly userClass = input<string>("", { alias: "class" });
 
     /**
-     * @description Sets the value field of the autocomplete component.
-     * It can be null, string, or a function that takes an item and returns a string.
-     * If null, the item itself will be used as the value representation.
+     * @description Property name or accessor used to derive the value from a data item.
+     * If null, the item itself is used as the value.
      * @default null
      */
     public readonly valueField = input<DropdownFieldSelectorType<TData>>(null);

@@ -223,13 +223,13 @@ export class MultiSelectComponent<TData = unknown>
     public readonly ariaLabelledBy = input("", { alias: "aria-labelledby" });
 
     /**
-     * @description Sets whether the popup should close after selecting an item.
+     * @description Closes the popup automatically after an item is selected or deselected.
      * @default false
      */
     public readonly autoClose = input(false);
 
     /**
-     * @description Sets whether the checkbox should be visible.
+     * @description Renders a checkbox next to each item in the popup list to indicate its selected state.
      * @default false
      */
     public readonly checkboxes = input(false);
@@ -245,12 +245,14 @@ export class MultiSelectComponent<TData = unknown>
     public readonly closed = output();
 
     /**
-     * @description Sets the data of the multi select component.
+     * @description Collection of items rendered in the popup list.
+     * @default []
      */
     public readonly data = input<Iterable<TData>>([]);
 
     /**
-     * @description Sets the disabled state of the multi select component.
+     * @description Disables the component, preventing the popup from opening and blocking tag removal.
+     * @default false
      */
     public readonly disabled = model(false);
 
@@ -319,7 +321,7 @@ export class MultiSelectComponent<TData = unknown>
     public readonly rounded = input<MultiSelectVariantProps["rounded"]>("medium");
 
     /**
-     * @description Whether to show the clear button when an item is selected.
+     * @description Renders a button that clears all selected items when at least one item is selected.
      * @default false
      */
     public readonly showClearButton = input(false);

@@ -988,6 +988,12 @@
         "kind": "input"
       },
       {
+        "name": "removeTabIndex",
+        "type": "number | string",
+        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\r\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "ChipVariantProps[\"rounded\"]",
         "description": "Border-radius preset applied to the chip.",
@@ -1302,19 +1308,19 @@
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "Sets the aria-describedby attribute of the autocomplete input.\nUse this to associate error messages or help text with the input.",
+        "description": "ID of an element that provides an extended description for the input.\r\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Sets the aria-label attribute of the autocomplete component.",
+        "description": "Accessible name for the input. Describe what the autocomplete represents.\r\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledBy",
         "type": "string",
-        "description": "Sets the aria-labelledby attribute of the autocomplete component.",
+        "description": "ID of an external element that provides the accessible name for the input.",
         "kind": "input"
       },
       {
@@ -1338,19 +1344,19 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the autocomplete component.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
         "kind": "model"
       },
       {
         "name": "itemDisabled",
         "type": "DropdownFieldPredicateType<TData>",
-        "description": "Sets the predicate function that determines whether an item is disabled.",
+        "description": "Predicate or field name used to determine whether an individual item is disabled.",
         "kind": "input"
       },
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -1362,7 +1368,7 @@
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Sets the loading state of the autocomplete component.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.",
         "kind": "input"
       },
       {
@@ -1380,73 +1386,73 @@
       {
         "name": "placeholder",
         "type": "string",
-        "description": "Sets the placeholder text to be shown when there is no value selected.",
+        "description": "Placeholder text shown when no value is selected or entered.",
         "kind": "input"
       },
       {
         "name": "popupClass",
         "type": "string",
-        "description": "Sets the class of the popup element.",
+        "description": "Additional CSS classes applied to the popup element.",
         "kind": "input"
       },
       {
         "name": "popupHeight",
         "type": "ListSizeInputType",
-        "description": "Sets the height of the popup element.",
+        "description": "Height of the popup element.",
         "kind": "input"
       },
       {
         "name": "popupWidth",
         "type": "ListSizeInputType",
-        "description": "Sets the width of the popup element.",
+        "description": "Width of the popup element.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "Sets the readonly state of the autocomplete component.",
+        "description": "Prevents value changes while preserving the component's visual state.",
         "kind": "input"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the autocomplete component.",
+        "description": "Marks the field as required for form validation.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "AutoCompleteVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the autocomplete component.",
+        "description": "Border-radius preset applied to the component.",
         "kind": "input"
       },
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "Shows or hides the clear button.",
+        "description": "Displays a button that clears the current value when clicked.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "AutoCompleteVariantProps[\"size\"]",
-        "description": "Sets the size of the autocomplete component.",
+        "description": "Size preset controlling the component's dimensions.",
         "kind": "input"
       },
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf null, the item itself is used as the display text.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -1458,13 +1464,13 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the autocomplete component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "description": "Property name or accessor used to derive the value from a data item.\r\nIf null, the item itself is used as the value.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "string | null",
-        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\nenabling signal forms `[formField]` binding.",
+        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\r\nenabling signal forms `[formField]` binding.",
         "kind": "model"
       }
     ]
@@ -1560,7 +1566,7 @@
       {
         "name": "tagCount",
         "type": "number",
-        "description": "Sets the number of tags to display before the summary tag is displayed.",
+        "description": "Number of selected item tags to display before collapsing the rest into a summary tag.\r\nA negative value shows every selected item as its own tag and never renders the summary tag.",
         "kind": "input"
       }
     ]
@@ -5358,13 +5364,13 @@
       {
         "name": "autoClose",
         "type": "boolean",
-        "description": "Sets whether the popup should close after selecting an item.",
+        "description": "Closes the popup automatically after an item is selected or deselected.",
         "kind": "input"
       },
       {
         "name": "checkboxes",
         "type": "boolean",
-        "description": "Sets whether the checkbox should be visible.",
+        "description": "Renders a checkbox next to each item in the popup list to indicate its selected state.",
         "kind": "input"
       },
       {
@@ -5382,13 +5388,13 @@
       {
         "name": "data",
         "type": "Iterable<TData>",
-        "description": "Sets the data of the multi select component.",
+        "description": "Collection of items rendered in the popup list.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Sets the disabled state of the multi select component.",
+        "description": "Disables the component, preventing the popup from opening and blocking tag removal.",
         "kind": "model"
       },
       {
@@ -5460,7 +5466,7 @@
       {
         "name": "showClearButton",
         "type": "boolean",
-        "description": "Whether to show the clear button when an item is selected.",
+        "description": "Renders a button that clears all selected items when at least one item is selected.",
         "kind": "input"
       },
       {
@@ -5490,7 +5496,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       },
       {
