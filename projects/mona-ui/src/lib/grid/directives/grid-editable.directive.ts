@@ -1,5 +1,6 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
 import { EditableOptions } from "../models/EditableOptions";
+import { GridKeySelector } from "../models/GridKeySelector";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -7,9 +8,13 @@ import { GridService } from "../services/grid.service";
 })
 export class GridEditableDirective {
     readonly #gridService: GridService = inject(GridService);
-    public options = input<EditableOptions | "">("", {
+    public readonly options = input<EditableOptions | "">("", {
         alias: "monaGridEditable"
     });
+    /**
+     * @description Field name or selector used to keep edited row identity stable when data is rebound.
+     */
+    public readonly rowKey = input<GridKeySelector<unknown> | null>(null);
 
     public constructor() {
         effect(() => {
@@ -21,6 +26,10 @@ export class GridEditableDirective {
                     this.#gridService.setEditableOptions({ enabled: true, mode: "cell" });
                 }
             });
+        });
+        effect(() => {
+            const rowKey = this.rowKey();
+            untracked(() => this.#gridService.editableRowKey.set(rowKey));
         });
     }
 }

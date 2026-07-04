@@ -6,22 +6,22 @@
     @switch (column().dataType) {
         @case ("string") {
             <mona-text-box
-                [class]="editorClass"
+                [class]="editorInputClass()"
                 [inputAttributes]="{ autocomplete: 'off' }"
                 [rounded]="'none'"
                 (keydown.enter)="commit.emit()"
                 (keydown.escape)="onEditCancel()"
-                [ngModel]="value()"
-                (ngModelChange)="onValueChange($event)"
+                [value]="stringValue()"
+                (valueChange)="onValueChange($event)"
                 (inputBlur)="commit.emit()"
                 [size]="'small'"></mona-text-box>
         }
         @case ("number") {
             <mona-numeric-text-box
-                [class]="editorClass"
+                [class]="editorInputClass()"
                 [rounded]="'none'"
-                [ngModel]="value()"
-                (ngModelChange)="onValueChange($event)"
+                [value]="numberValue()"
+                (valueChange)="onValueChange($event)"
                 (keydown.enter)="commit.emit()"
                 (keydown.escape)="onEditCancel()"
                 (inputBlur)="commit.emit()"
@@ -29,17 +29,19 @@
         }
         @case ("boolean") {
             <mona-check-box
-                class="{{ editorClass }} ml-2"
+                class="{{ editorInputClass() }} ml-2"
                 [rounded]="'none'"
-                [ngModel]="value()"
-                (ngModelChange)="onCheckBoxValueChange($event)"
-                (inputBlur)="commit.emit()"
+                [checked]="booleanValue()"
+                (checkedChange)="onCheckBoxValueChange($event)"
+                (click)="onBooleanEditorClick()"
+                (focusout)="onBooleanEditorFocusOut($event)"
+                (pointerdown)="onBooleanEditorPointerDown()"
                 (keydown.escape)="onEditCancel()"
                 (keydown.enter)="commit.emit()"></mona-check-box>
         }
         @case ("date") {
             <mona-date-picker
-                [class]="editorClass"
+                [class]="editorInputClass()"
                 [rounded]="'none'"
                 [ngModel]="value()"
                 (ngModelChange)="onValueChange($event)"

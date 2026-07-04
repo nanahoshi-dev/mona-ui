@@ -11,13 +11,15 @@ import { gridListTableRowThemeVariants } from "../styles/grid.styles";
         "[attr.data-ruid]": "row().uid",
         "[attr.data-row-view-index]": "index()",
         "role": "row",
-        "[attr.aria-selected]": "selectable() ? selected() : null"
+        "[attr.aria-selected]": "selectable() ? selected() : null",
+        "[attr.aria-rowindex]": "ariaRowIndex()"
     },
     exportAs: "monaGridRow"
 })
 export class GridRowDirective {
     readonly #gridService = inject(GridService);
     readonly #themeService = inject(ThemeService);
+    protected readonly ariaRowIndex = computed(() => this.index() + this.#gridService.paginationState().skip + 2);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const selected = this.selected();

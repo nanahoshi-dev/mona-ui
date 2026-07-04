@@ -142,8 +142,14 @@
     "selector": "\"[monaGridColumnResizeHandler]\"",
     "inputs": [
       {
+        "name": "column",
+        "type": "Column",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "resizeEnd",
-        "type": "void",
+        "type": "ColumnResizeEvent",
         "description": "",
         "kind": "output"
       },
@@ -152,12 +158,6 @@
         "type": "void",
         "description": "",
         "kind": "output"
-      },
-      {
-        "name": "column",
-        "type": "Column",
-        "description": "",
-        "kind": "input"
       }
     ]
   },
@@ -217,6 +217,12 @@
         "name": "options",
         "type": "EditableOptions | \"\"",
         "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "rowKey",
+        "type": "GridKeySelector<unknown> | null",
+        "description": "Field name or selector used to keep edited row identity stable when data is rebound.",
         "kind": "input"
       }
     ]
@@ -316,8 +322,20 @@
     "selector": "\"td[monaGridLogicalCell], th[monaGridLogicalCell]\"",
     "inputs": [
       {
+        "name": "cellKind",
+        "type": "GridCellKind | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "colIndex",
         "type": "number",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "columnId",
+        "type": "string",
         "description": "",
         "kind": "input"
       },
@@ -358,10 +376,58 @@
         "kind": "input"
       },
       {
+        "name": "rowUid",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "section",
+        "type": "GridNavigationSection | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "toggle",
         "type": "void",
         "description": "",
         "kind": "output"
+      }
+    ]
+  },
+  "GridReorderableDirective": {
+    "name": "GridReorderableDirective",
+    "selector": "\"mona-grid[monaGridReorderable]\"",
+    "inputs": [
+      {
+        "name": "columnReorder",
+        "type": "ColumnReorderEvent",
+        "description": "Emitted when a column is dropped into a new position. Call `preventDefault()` on the event to cancel the reorder.",
+        "kind": "output"
+      },
+      {
+        "name": "options",
+        "type": "ReorderableOptions | \"\"",
+        "description": "Enables column reordering via drag and drop. Pass a `ReorderableOptions` object to configure it explicitly.",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridResizableDirective": {
+    "name": "GridResizableDirective",
+    "selector": "\"mona-grid[monaGridResizable]\"",
+    "inputs": [
+      {
+        "name": "columnResize",
+        "type": "ColumnResizeEvent",
+        "description": "Emitted when a column resize completes, with the column and its old and new widths.",
+        "kind": "output"
+      },
+      {
+        "name": "options",
+        "type": "ResizableOptions | \"\"",
+        "description": "Enables column resizing on the grid. Pass a `ResizableOptions` object to configure it explicitly.",
+        "kind": "input"
       }
     ]
   },
@@ -410,6 +476,30 @@
         "type": "unknown[]",
         "description": "",
         "kind": "output"
+      }
+    ]
+  },
+  "GridSortableDirective": {
+    "name": "GridSortableDirective",
+    "selector": "\"mona-grid[monaGridSortable]\"",
+    "inputs": [
+      {
+        "name": "columnSort",
+        "type": "ColumnSortEvent",
+        "description": "Emitted when a column header is activated to change its sort direction. Call `preventDefault()` on the event to cancel the sort.",
+        "kind": "output"
+      },
+      {
+        "name": "options",
+        "type": "SortableOptions | \"\"",
+        "description": "Enables column sorting on the grid. Pass a `SortableOptions` object to configure sort mode, unsort behavior, or sort-index display.",
+        "kind": "input"
+      },
+      {
+        "name": "sort",
+        "type": "SortDescriptor[]",
+        "description": "Current sort descriptors applied to the grid.",
+        "kind": "model"
       }
     ]
   },
@@ -1774,18 +1864,6 @@
         "kind": "input"
       },
       {
-        "name": "reorderable",
-        "type": "boolean",
-        "description": "Whether the columns of the grid can be reordered.",
-        "kind": "input"
-      },
-      {
-        "name": "resizable",
-        "type": "boolean",
-        "description": "Whether the columns of the grid can be resized.",
-        "kind": "input"
-      },
-      {
         "name": "resizeMethod",
         "type": "ResizeMethod",
         "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
@@ -1804,21 +1882,9 @@
         "kind": "input"
       },
       {
-        "name": "sort",
-        "type": "SortDescriptor[]",
-        "description": "Initial sort configuration to be applied to the grid when it is loaded.",
-        "kind": "model"
-      },
-      {
-        "name": "sortable",
-        "type": "boolean | SortableOptions",
-        "description": "Whether the grid is sortable.",
-        "kind": "input"
-      },
-      {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]

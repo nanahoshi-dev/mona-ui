@@ -1,0 +1,12 @@
+{
+    "version": "0.0.1",
+    "configurations": [
+        {
+            "name": "mona-ui-tester",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["ng", "serve", "mona-ui-tester", "--port", "0"],
+            "port": 0,
+            "autoPort": true
+        }
+    ]
+}

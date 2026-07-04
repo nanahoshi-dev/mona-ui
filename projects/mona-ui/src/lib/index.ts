@@ -175,7 +175,10 @@ export * from "./grid/directives/grid-groupable.directive";
 export * from "./grid/directives/grid-group-footer-template.directive";
 export * from "./grid/directives/grid-header-template.directive";
 export * from "./grid/directives/grid-no-data-template.directive";
+export * from "./grid/directives/grid-reorderable.directive";
+export * from "./grid/directives/grid-resizable.directive";
 export * from "./grid/directives/grid-selectable.directive";
+export * from "./grid/directives/grid-sortable.directive";
 export * from "./grid/directives/grid-state-persistence.directive";
 export * from "./grid/directives/grid-toolbar-template.directive";
 export * from "./grid/directives/grid-export.directive";
@@ -184,6 +187,11 @@ export * from "./grid/components/grid-command-column/grid-command-column.compone
 export * from "./grid/components/grid-column/grid-column.component";
 export * from "./grid/components/grid/grid.component";
 export type { EditableOptions } from "./grid/models/EditableOptions";
+export type { ReorderableOptions } from "./grid/models/ReorderableOptions";
+export type { ResizableOptions } from "./grid/models/ResizableOptions";
+export type { ColumnReorderEvent } from "./grid/models/ColumnReorderEvent";
+export type { ColumnResizeEvent } from "./grid/models/ColumnResizeEvent";
+export type { ColumnSortEvent } from "./grid/models/ColumnSortEvent";
 export * from "./grid/models/GridState";
 export type { ResizeMethod } from "./grid/models/ResizeMethod";
 

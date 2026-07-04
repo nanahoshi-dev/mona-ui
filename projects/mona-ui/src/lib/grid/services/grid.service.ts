@@ -10,6 +10,7 @@ import {
     select
 } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
+import { v4 } from "uuid";
 import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
 import { PopupMenuItem } from "../../common/popup-menu/models/PopupMenuItem";
 import { Query } from "../../query/core/Query";
@@ -21,6 +22,9 @@ import type { AggregateFunction } from "../models/AggregateFunction";
 import { CellEditEvent } from "../models/CellEditEvent";
 import type { Column, ColumnConfig } from "../models/Column";
 import { ColumnFilterState } from "../models/ColumnFilterState";
+import type { ColumnReorderEvent } from "../models/ColumnReorderEvent";
+import type { ColumnResizeEvent } from "../models/ColumnResizeEvent";
+import type { ColumnSortEvent } from "../models/ColumnSortEvent";
 import { ColumnSortState } from "../models/ColumnSortState";
 import { EditableOptions } from "../models/EditableOptions";
 import type { FilterableOptions } from "../models/FilterableOptions";
@@ -44,6 +48,8 @@ import { GridAddEvent } from "../models/GridAddEvent";
 import { GridCancelEvent } from "../models/GridCancelEvent";
 import { GridEditEvent } from "../models/GridEditEvent";
 import { PaginationState } from "../models/PaginationState";
+import type { ReorderableOptions } from "../models/ReorderableOptions";
+import type { ResizableOptions } from "../models/ResizableOptions";
 import { Row } from "../models/Row";
 import { RowEditEvent } from "../models/RowEditEvent";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
@@ -77,8 +83,12 @@ export class GridService {
     readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
     readonly #horizontalScrollLeft = signal(0);
     readonly #platformId = inject(PLATFORM_ID);
+    readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
+    readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
     readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
     readonly #scrollbarGutterWidth = signal(0);
+    readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
+    readonly #rowUidByKeyObject = new WeakMap<object, string>();
     readonly #textMeasureCache = new Map<string, number>();
     public readonly addRowData = this.#addRowData.asReadonly();
     public readonly addRowVisible = computed(() => this.#addRowData() != null);
@@ -109,6 +119,9 @@ export class GridService {
     public readonly cancel$ = new Subject<GridCancelEvent>();
     /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
     public readonly collapsedGroupKeys = signal(ImmutableSet.create<string>());
+    public readonly columnReorder$ = new Subject<ColumnReorderEvent>();
+    public readonly columnResize$ = new Subject<ColumnResizeEvent>();
+    public readonly columnSort$ = new Subject<ColumnSortEvent>();
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 36;
@@ -117,17 +130,13 @@ export class GridService {
         return ImmutableDictionary.create(pairs);
     });
     public readonly editContext = this.#editContext.asReadonly();
-    public readonly editPristine = this.#editStore.pristine;
     public readonly edit$ = new Subject<GridEditEvent>();
     public readonly editViewDict = computed(() => {
         const pairs = this.#editStore.view().map(item => new KeyValuePair(item.$rowId, item));
         return ImmutableDictionary.create(pairs);
     });
     public readonly editableOptions = signal<EditableOptions>({ enabled: false, mode: "cell" });
-    public readonly editingCellUid = computed(() => {
-        const context = this.#editContext();
-        return context?.mode === "cell" ? context.cellUid : null;
-    });
+    public readonly editableRowKey = signal<GridKeySelector<unknown> | null>(null);
     public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
     public readonly expandedKeys = signal(ImmutableSet.create());
     public readonly filterChange$ = new Subject<CompositeFilterDescriptor[]>();
@@ -168,6 +177,7 @@ export class GridService {
         this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
     public readonly hasFooter = computed(() => this.aggregateColumns().any());
+    public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
     public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly isInEditMode = computed(() => this.#editContext() != null);
     public readonly leftLockedStructuralWidth = computed(() => {
@@ -215,16 +225,18 @@ export class GridService {
         const columnListWidth = columns.aggregate((acc, c) => acc + this.getColumnWidth(c), 0);
         return this.normalizeRenderedWidth(groupColumnWidth * (groupColumnCount + 1) + columnListWidth);
     });
-    public readonly masterDetailTemplate = signal<TemplateRef<any> | null>(null);
+    public readonly masterDetailTemplate = signal<TemplateRef<unknown> | null>(null);
+    public readonly newRowFactory = signal<() => Record<PropertyKey, unknown>>(() => ({}));
     public readonly paginationState = signal<PaginationState>({ page: 1, skip: 0, take: 10 });
     public readonly remove$ = new Subject<GridRemoveEvent>();
+    public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
+    public readonly resizableOptions = this.#resizableOptions.asReadonly();
     public readonly rowEdit$ = new Subject<RowEditEvent>();
+    public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
     public readonly save$ = new Subject<GridSaveEvent>();
     public readonly scrollEnd$ = new Subject<void>();
     public readonly scrollEndThreshold = signal<number>(5);
     public readonly scrollbarGutterWidth = this.#scrollbarGutterWidth.asReadonly();
-    public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
-    public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
     public readonly selectBy = signal<GridKeySelector<unknown>>("");
     public readonly selectableOptions = signal<GridSelectableOptions>({ enabled: false, mode: "single" });
     public readonly selectedKeys = signal(ImmutableSet.create());
@@ -304,7 +316,6 @@ export class GridService {
             .where(column => !column.hidden)
             .toImmutableList()
     );
-    public readonly newRowFactory = signal<() => Record<PropertyKey, unknown>>(() => ({}));
 
     public constructor() {
         this.#scrollbarGutterWidth.set(this.measureFallbackScrollbarGutter());
@@ -373,7 +384,7 @@ export class GridService {
             .filter((column): column is Column => column != null);
         const orderedSet = new Set(orderedColumns);
         orderedColumns.push(...columns.filter(column => !orderedSet.has(column)));
-        this.columns.set(ImmutableList.create(this.withColumnIndexes(this.orderColumnsByLockBucket(orderedColumns))));
+        this.columns.set(ImmutableList.create(this.withColumnIndices(this.orderColumnsByLockBucket(orderedColumns))));
 
         this.loadSorts(state.sort.map(sort => ({ dir: sort.dir, field: sort.field })));
         this.loadGroupColumns(state.group);
@@ -811,7 +822,7 @@ export class GridService {
                 .filter((config): config is ColumnConfig => config != null),
             ...configs.filter(config => !currentConfigIds.has(config.id))
         ];
-        const nextColumns = this.withColumnIndexes(
+        const nextColumns = this.withColumnIndices(
             this.orderColumnsByLockBucket(
                 orderedConfigs.map(config => this.reconcileColumn(config, currentById.get(config.id)))
             )
@@ -844,7 +855,7 @@ export class GridService {
                 .where(column => !orderedIds.has(column.id))
                 .toArray()
         );
-        this.columns.set(ImmutableList.create(this.withColumnIndexes(this.orderColumnsByLockBucket(orderedColumns))));
+        this.columns.set(ImmutableList.create(this.withColumnIndices(this.orderColumnsByLockBucket(orderedColumns))));
     }
 
     public setColumnSortDirection(columnId: string, value: SortDirection | null): void {
@@ -871,8 +882,20 @@ export class GridService {
         this.groupableOptions.update(v => ({ ...v, ...options }));
     }
 
+    public setNewRowFactory(factory: () => Record<PropertyKey, unknown>): void {
+        this.newRowFactory.set(factory);
+    }
+
     public setPageState(state: Partial<PaginationState>): void {
         this.paginationState.update(v => ({ ...v, ...state }));
+    }
+
+    public setReorderableOptions(options: Partial<ReorderableOptions>): void {
+        this.#reorderableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setResizableOptions(options: Partial<ResizableOptions>): void {
+        this.#resizableOptions.update(v => ({ ...v, ...options }));
     }
 
     public setRowExpanded(row: Row, expanded: boolean): void {
@@ -880,12 +903,11 @@ export class GridService {
         this.expandedKeys.update(set => (expanded ? set.add(key) : set.remove(key)));
     }
 
-    public setRows(value: Iterable<any>): void {
-        this.rows.set(ImmutableSet.create(select(value, r => new Row(r))));
-    }
-
-    public setNewRowFactory(factory: () => Record<PropertyKey, unknown>): void {
-        this.newRowFactory.set(factory);
+    public setRows(
+        value: Iterable<Record<PropertyKey, unknown>>,
+        rowKey: GridKeySelector<unknown> | null = null
+    ): void {
+        this.rows.set(ImmutableSet.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
     }
 
     public setSelectableOptions(options: GridSelectableOptions): void {
@@ -1180,6 +1202,41 @@ export class GridService {
         return this.getRowDataItemSelectionKey(row.data);
     }
 
+    private getRowUid(data: Record<PropertyKey, unknown>, rowKey: GridKeySelector<unknown> | null): string {
+        const key = this.getRowUidKey(data, rowKey);
+        if (key != null) {
+            if (typeof key === "object" || typeof key === "function") {
+                const cachedKeyUid = this.#rowUidByKeyObject.get(key);
+                if (cachedKeyUid != null) {
+                    return cachedKeyUid;
+                }
+                const keyUid = v4();
+                this.#rowUidByKeyObject.set(key, keyUid);
+                return keyUid;
+            }
+            return `key:${typeof key}:${String(key)}`;
+        }
+
+        const cachedUid = this.#rowUidByData.get(data);
+        if (cachedUid != null) {
+            return cachedUid;
+        }
+
+        const uid = v4();
+        this.#rowUidByData.set(data, uid);
+        return uid;
+    }
+
+    private getRowUidKey(data: Record<PropertyKey, unknown>, rowKey: GridKeySelector<unknown> | null): unknown {
+        if (!rowKey) {
+            return null;
+        }
+        if (typeof rowKey === "string") {
+            return data[rowKey];
+        }
+        return rowKey(data);
+    }
+
     private groupRowsByColumn(rows: readonly Row[], column: Column): Array<[unknown, Row[]]> {
         const field = column.field;
         const isDate = column.dataType === "date";
@@ -1403,7 +1460,7 @@ export class GridService {
         );
     }
 
-    private withColumnIndexes(columns: readonly Column[]): Column[] {
+    private withColumnIndices(columns: readonly Column[]): Column[] {
         return columns.map((column, index) => ({ ...column, index }));
     }
 }

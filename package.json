@@ -23,7 +23,7 @@
         "build:watch": "ng build mona-ui --watch --configuration development",
         "build:metadata": "tsx projects/mona-ui-tester/scripts/extract-metadata.ts",
         "watch": "ng build mona-ui --watch --configuration development",
-        "test:lib": "ng test mona-ui --code-coverage --watch=false",
+        "test:lib": "ng test mona-ui --watch=false",
         "test:lib:watch": "ng test mona-ui --code-coverage --watch",
         "test:app": "ng test mona-ui-tester"
     },

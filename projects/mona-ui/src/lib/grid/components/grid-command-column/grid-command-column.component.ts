@@ -1,12 +1,4 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    contentChild,
-    computed,
-    forwardRef,
-    input,
-    TemplateRef
-} from "@angular/core";
+import { Component, contentChild, computed, forwardRef, input, TemplateRef } from "@angular/core";
 import { v4 } from "uuid";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
 import { Column } from "../../models/Column";
@@ -16,7 +8,6 @@ import type { GridColumnLockedPosition } from "../../models/GridColumnLockedPosi
 @Component({
     selector: "mona-grid-command-column",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [{ provide: GRID_COLUMN_DEFINITION, useExisting: forwardRef(() => GridCommandColumnComponent) }]
 })
 export class GridCommandColumnComponent implements GridColumnDefinition {

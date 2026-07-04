@@ -1,6 +1,6 @@
 import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, LOCALE_ID } from "@angular/core";
+import { Component, computed, ElementRef, inject, input, LOCALE_ID } from "@angular/core";
 import { ThemeService } from "../../../theme/services/theme.service";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
@@ -14,10 +14,11 @@ import {
 import { GridCommandCellComponent } from "../grid-command-cell/grid-command-cell.component";
 import { GridEditorComponent } from "../grid-editor/grid-editor.component";
 
+const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+
 @Component({
     selector: "mona-grid-cell",
     templateUrl: "./grid-cell.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [A11yModule, GridCommandCellComponent, GridEditorComponent, NgTemplateOutlet],
     host: {
         "[class]": "baseClass()"
@@ -103,11 +104,21 @@ export class GridCellComponent {
     public readonly column = input.required<Column>();
     public readonly row = input.required<Row>();
 
-    public startEdit(originalEvent?: Event): void {
+    public handleLogicalCellEnter(originalEvent?: Event): void {
         if (!this.gridService.editableOptions().enabled || !this.column().editable || this.column().kind !== "data") {
             return;
         }
-        this.gridService.startCellEdit(this.cellUid(), this.row(), this.column(), originalEvent);
+
+        const editableOptions = this.gridService.editableOptions();
+        if (editableOptions.mode === "cell") {
+            this.startEdit(originalEvent);
+            return;
+        }
+
+        const context = this.gridService.editContext();
+        if (context?.mode === "row" && context.rowUid === this.row().uid) {
+            this.focusInnerEditor();
+        }
     }
 
     protected onCellDoubleClick(event: MouseEvent): void {
@@ -119,22 +130,33 @@ export class GridCellComponent {
     }
 
     protected onEditCancel(): void {
-        this.gridService.cancelEdit();
-        const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
-        if (cellElement) {
-            cellElement.focus();
+        const context = this.gridService.editContext();
+        if (context?.mode === "cell") {
+            this.gridService.cancelEdit();
         }
+        this.focusHostCell();
     }
 
     protected onEditCommit(): void {
         const context = this.gridService.editContext();
         if (context && context.mode === "cell") {
             this.gridService.stopCellEdit();
-            const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
-            if (cellElement) {
-                cellElement.focus();
-            }
+            this.focusHostCell();
+            return;
         }
+        if (this.#elementRef.nativeElement.contains(this.#elementRef.nativeElement.ownerDocument.activeElement)) {
+            this.focusHostCell();
+        }
+    }
+
+    private focusHostCell(): void {
+        const cellElement = this.#elementRef.nativeElement.closest("td") as HTMLElement | null;
+        cellElement?.focus();
+    }
+
+    private focusInnerEditor(): void {
+        const target = this.#elementRef.nativeElement.querySelector(FOCUSABLE_TARGET_SELECTOR) as HTMLElement | null;
+        target?.focus();
     }
 
     private formatDateValue(value: unknown, format: string): unknown {
@@ -149,5 +171,12 @@ export class GridCellComponent {
             }
         }
         return value;
+    }
+
+    private startEdit(originalEvent?: Event): void {
+        if (!this.gridService.editableOptions().enabled || !this.column().editable || this.column().kind !== "data") {
+            return;
+        }
+        this.gridService.startCellEdit(this.cellUid(), this.row(), this.column(), originalEvent);
     }
 }

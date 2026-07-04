@@ -188,7 +188,7 @@ export class GridVirtualListComponent {
         fromEvent<FocusEvent>(this.#hostElementRef.nativeElement, "focus")
             .pipe(takeUntilDestroyed(this.#destroyRef))
             .subscribe(() => {
-                this.#gridNavigationService.focusFirstCell();
+                this.#gridNavigationService.focusActiveCellOrFirstHeader();
             });
     }
 

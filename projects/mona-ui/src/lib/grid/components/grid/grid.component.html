@@ -1,5 +1,8 @@
 @if (toolbarTemplate()) {
-    <div class="flex min-h-10 items-center gap-2 border-b border-border p-2">
+    <div
+        class="flex min-h-10 items-center gap-2 border-b border-border p-2"
+        #toolbarElement
+        (keydown)="onToolbarKeydown($event)">
         <ng-container
             [ngTemplateOutlet]="toolbarTemplate() ?? null"
             [ngTemplateOutletContext]="toolbarContext()"></ng-container>
@@ -117,8 +120,11 @@
                             [column]="column"
                             [lockedCellHeader]="true"
                             monaGridLogicalCell
+                            [cellKind]="'header'"
+                            [columnId]="column.id"
                             [rowIndex]="-1"
                             [colIndex]="colIndex"
+                            [section]="'header'"
                             [firstInRow]="colIndex === 0"
                             [lastInRow]="
                                 colIndex ===
@@ -174,16 +180,21 @@
                                     }
                                 </div>
                             </div>
-                            @if (dropColumn() === column && dragColumn() && reorderable() && !groupingInProgress()) {
+                            @if (
+                                dropColumn() === column &&
+                                dragColumn() &&
+                                gridService.reorderableOptions().enabled &&
+                                !groupingInProgress()
+                            ) {
                                 <span [class]="columnDropHintClass()"> </span>
                             }
-                            @if (resizable() && !columnDragging()) {
+                            @if (gridService.resizableOptions().enabled && !columnDragging()) {
                                 <div
                                     monaGridColumnResizeHandler
                                     [column]="column"
                                     [class]="columnResizerClass()"
                                     (resizeStart)="onColumnResizeStart()"
-                                    (resizeEnd)="resizing.set(false)"></div>
+                                    (resizeEnd)="onColumnResizeEnd($event)"></div>
                             }
                             <ng-template cdkDragPreview>
                                 <div [class]="columnDragPreviewClass()">

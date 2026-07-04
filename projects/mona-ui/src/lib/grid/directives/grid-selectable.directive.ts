@@ -1,6 +1,6 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { orderBy, select, sequenceEqual } from "@mirei/ts-collections";
+import { orderBy, sequenceEqual } from "@mirei/ts-collections";
 import { pairwise, startWith } from "rxjs";
 import { GridSelectableOptions } from "../models/GridSelectableOptions";
 import { GridService } from "../services/grid.service";

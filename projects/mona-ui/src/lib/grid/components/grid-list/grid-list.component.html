@@ -31,10 +31,13 @@
                             [lockedStructuralOffset]="0"
                             [masterDetailToggle]="true"
                             monaGridLogicalCell
+                            [cellKind]="'detail'"
                             [colIndex]="0"
                             [firstInRow]="true"
                             [lastInRow]="columns().length === 0"
                             [rowIndex]="rowIndex"
+                            [rowUid]="row.uid"
+                            [section]="'body'"
                             [style.width.px]="gridService.detailColumnWidth"
                             [attr.colspan]="1">
                             <span class="flex h-full w-full items-stretch justify-center">
@@ -54,14 +57,18 @@
                             [column]="column"
                             [dataCell]="true"
                             monaGridLogicalCell
+                            [cellKind]="column.kind"
                             [colIndex]="colIndex"
+                            [columnId]="column.id"
                             [rowIndex]="rowIndex"
+                            [rowUid]="row.uid"
+                            [section]="'body'"
                             [firstInRow]="colIndex === 0"
                             [lastInRow]="colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)"
                             [attr.colspan]="1"
                             [style.width.px]="column.calculatedWidth"
                             [style.min-width.px]="column.minWidth"
-                            (edit)="gridCell.startEdit()">
+                            (edit)="gridCell.handleLogicalCellEnter()">
                             <mona-grid-cell #gridCell [column]="column" [row]="row"></mona-grid-cell>
                         </td>
                     }
@@ -122,8 +129,10 @@
                         <td
                             monaGridCell
                             monaGridLogicalCell
+                            [cellKind]="'group'"
                             [rowIndex]="rowIndex"
                             [colIndex]="0"
+                            [section]="'body'"
                             [grouped]="true"
                             [groupHeader]="true"
                             [prevRowType]="prevRow?.type"
@@ -210,6 +219,9 @@
                                 [prevRowType]="prevRow?.type"
                                 [nextRowType]="nextRow?.type"
                                 [rowIndex]="rowIndex"
+                                [rowUid]="viewRow.row.uid"
+                                [section]="'body'"
+                                [cellKind]="'detail'"
                                 [colIndex]="0"
                                 [firstInRow]="true"
                                 [lastInRow]="columns().length === 0"
@@ -234,15 +246,19 @@
                                 [prevRowType]="prevRow?.type"
                                 [nextRowType]="nextRow?.type"
                                 monaGridLogicalCell
+                                [cellKind]="column.kind"
                                 [colIndex]="colIndex"
+                                [columnId]="column.id"
                                 [firstInRow]="colIndex === 0"
                                 [lastInRow]="
                                     colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
                                 "
                                 [rowIndex]="rowIndex"
+                                [rowUid]="viewRow.row.uid"
+                                [section]="'body'"
                                 [style.width.px]="column.calculatedWidth"
                                 [style.min-width.px]="column.minWidth"
-                                (edit)="gridCell.startEdit()">
+                                (edit)="gridCell.handleLogicalCellEnter()">
                                 <mona-grid-cell #gridCell [column]="column" [row]="viewRow.row"></mona-grid-cell>
                             </td>
                         }

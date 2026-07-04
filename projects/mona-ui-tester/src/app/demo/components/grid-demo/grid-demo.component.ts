@@ -8,7 +8,6 @@ import {
     inject,
     input,
     linkedSignal,
-    model,
     signal
 } from "@angular/core";
 import { LucideContainer } from "@lucide/angular";
@@ -46,7 +45,14 @@ import {
     GridNoDataTemplateDirective,
     GridStatePersistenceDirective,
     type GridState,
-    GridHeaderTemplateDirective
+    GridHeaderTemplateDirective,
+    GridSortableDirective,
+    GridReorderableDirective,
+    type ReorderableOptions,
+    ColumnReorderEvent,
+    type ResizableOptions,
+    GridResizableDirective,
+    type ColumnResizeEvent
 } from "mona-ui";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -193,6 +199,18 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             description: "Customize the template for when there is no data to display",
             active: false
         },
+        reordering: {
+            code: ``,
+            name: "Reordering",
+            description: "Enable column reordering for the grid",
+            active: false
+        },
+        resizing: {
+            code: ``,
+            name: "Column Resizing",
+            description: "Enable column resizing for the grid",
+            active: false
+        },
         selection: {
             code: ``,
             name: "Row Selection",
@@ -207,6 +225,34 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     type: "dropdown",
                     dropdownDataSource: ["single", "multiple"] as const,
                     dropdownValue: "single"
+                }
+            }
+        },
+        sorting: {
+            name: "Sorting",
+            description: "Enable sorting for the grid",
+            active: false,
+            subFeatures: {
+                allowUnsort: {
+                    code: ``,
+                    active: false,
+                    description: "Allow unsorting of columns",
+                    name: "Allow Unsort"
+                },
+                mode: {
+                    code: ``,
+                    active: false,
+                    description: "Sort mode",
+                    name: "Mode",
+                    type: "dropdown",
+                    dropdownDataSource: ["single", "multiple"] as const,
+                    dropdownValue: "single"
+                },
+                showIndices: {
+                    code: ``,
+                    active: false,
+                    description: "Show indices for sorted columns",
+                    name: "Show Indices"
                 }
             }
         },
@@ -273,14 +319,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 type: "iterable",
                 value: [10, 20, 30, 40, 50]
             },
-            reorderable: {
-                type: "boolean",
-                value: false
-            },
-            resizable: {
-                type: "boolean",
-                value: false
-            },
             resizeMethod: {
                 type: "dropdown",
                 value: ["auto", "fitView"],
@@ -294,14 +332,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                 type: "dropdown",
                 value: ["small", "medium", "large", "none"],
                 defaultValue: "medium"
-            },
-            sort: {
-                type: "iterable",
-                value: []
-            },
-            sortable: {
-                type: "boolean",
-                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -336,7 +366,10 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         GridStatePersistenceDirective,
         GridToolbarTemplateDirective,
         GridHeaderTemplateDirective,
-        LucideContainer
+        LucideContainer,
+        GridSortableDirective,
+        GridReorderableDirective,
+        GridResizableDirective
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -351,13 +384,9 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [data]="effectiveGridData"
             [pageSize]="pageSize()"
             [pageSizeValues]="pageSizeValues()"
-            [reorderable]="reorderable()"
-            [resizable]="resizable()"
             [resizeMethod]="resizeMethod()"
             [responsivePager]="responsivePager()"
             [rounded]="rounded()"
-            [sort]="sort()"
-            [sortable]="sortable()"
             [newRowFactory]="createGridRow"
             (cellEdit)="onCellEdit($event)"
             (rowEdit)="onRowEdit($event)"
@@ -371,7 +400,13 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [scrollEndThreshold]="infiniteScroll()?.scrollEndThreshold || 5"
             (scrollEnd)="onScrollEnd()"
             [monaGridGroupable]="groupable()"
+            [monaGridReorderable]="reordering()"
+            (columnReorder)="onColumnReorder($event)"
+            [monaGridResizable]="resizing()"
+            (columnResize)="onColumnResize($event)"
             [monaGridSelectable]="selection()"
+            rowKey="OrderID"
+            [monaGridSortable]="sorting()"
             monaGridExport
             #gridExport="monaGridExport"
             [monaGridStatePersistence]="statePersistence()"
@@ -597,6 +632,20 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         const features = this.features();
         return features["noDataTemplate"].active;
     });
+    protected readonly reordering = computed(() => {
+        const features = this.features();
+        const options: ReorderableOptions = {
+            enabled: features["reordering"].active ?? false
+        };
+        return options;
+    });
+    protected readonly resizing = computed(() => {
+        const features = this.features();
+        const options: ResizableOptions = {
+            enabled: features["resizing"].active ?? false
+        };
+        return options;
+    });
     protected readonly selection = computed(() => {
         const features = this.features();
         const subFeatures = features["selection"].subFeatures || {};
@@ -605,6 +654,16 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
             mode: subFeatures["mode"].dropdownValue ?? "single"
         };
         return selectableOptions;
+    });
+    protected readonly sorting = computed(() => {
+        const features = this.features();
+        const subFeatures = features["sorting"].subFeatures || {};
+        return {
+            enabled: features["sorting"].active ?? false,
+            allowUnsort: subFeatures["allowUnsort"].active ?? false,
+            mode: subFeatures["mode"].dropdownValue ?? "single",
+            showIndices: subFeatures["showIndices"].active ?? false
+        };
     });
     protected readonly state = signal<GridState | null>(null);
     protected readonly statePersistence = computed(() => {
@@ -638,13 +697,9 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     public readonly data = input<ReturnType<GridComponent<unknown>["data"]>>([]);
     public readonly pageSize = input<ReturnType<GridComponent<unknown>["pageSize"]>>(10);
     public readonly pageSizeValues = input<ReturnType<GridComponent<unknown>["pageSizeValues"]>>([10, 20, 30, 40, 50]);
-    public readonly reorderable = input<ReturnType<GridComponent<unknown>["reorderable"]>>(false);
-    public readonly resizable = input<ReturnType<GridComponent<unknown>["resizable"]>>(false);
     public readonly resizeMethod = input<ReturnType<GridComponent<unknown>["resizeMethod"]>>("fitView");
     public readonly rounded = input<ReturnType<GridComponent<unknown>["rounded"]>>("medium");
     public readonly responsivePager = input<ReturnType<GridComponent<unknown>["responsivePager"]>>(false);
-    public readonly sort = model<ReturnType<GridComponent<unknown>["sort"]>>([]);
-    public readonly sortable = input<ReturnType<GridComponent<unknown>["sortable"]>>(false);
 
     public constructor() {
         effect(() => {
@@ -674,6 +729,18 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
             gridData.splice(gridData.indexOf(event.rowData as typeof row), 1, row);
             this.setActiveGridData(gridData);
         }, 1000);
+    }
+
+    protected onColumnReorder(event: ColumnReorderEvent): void {
+        console.log("Column reordered:", event);
+        if (event.column.field === "OrderID") {
+            event.preventDefault();
+            console.log("Prevented reordering of OrderID column");
+        }
+    }
+
+    protected onColumnResize(event: ColumnResizeEvent): void {
+        console.log("Column resized:", event);
     }
 
     protected onFilterChange(event: CompositeFilterDescriptor[]): void {

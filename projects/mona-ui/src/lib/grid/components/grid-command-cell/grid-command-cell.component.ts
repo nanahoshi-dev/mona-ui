@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { LucideCheck, LucidePencil, LucideTrash2, LucideX } from "@lucide/angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
@@ -11,12 +11,13 @@ import { GridService } from "../../services/grid.service";
 @Component({
     selector: "mona-grid-command-cell",
     templateUrl: "./grid-command-cell.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ButtonDirective, NgTemplateOutlet, LucideCheck, LucideX, LucidePencil, LucideTrash2]
+    imports: [ButtonDirective, NgTemplateOutlet, LucideCheck, LucideX, LucidePencil, LucideTrash2],
+    host: {
+        class: "w-full"
+    }
 })
 export class GridCommandCellComponent {
     readonly #dialogService = inject(DialogService);
-    protected readonly gridService = inject(GridService);
     protected readonly commandContext = computed(() => ({
         $implicit: this.row()?.data ?? this.gridService.addRowData(),
         cancel: (event?: Event): void => this.cancel(event),
@@ -28,6 +29,7 @@ export class GridCommandCellComponent {
         rowData: this.row()?.data ?? this.gridService.addRowData(),
         save: (event?: Event): void => this.save(event)
     }));
+    protected readonly gridService = inject(GridService);
     protected readonly isEditing = computed(() => {
         const row = this.row();
         return this.newRow() || (row != null && this.gridService.editingRowUid() === row.uid);

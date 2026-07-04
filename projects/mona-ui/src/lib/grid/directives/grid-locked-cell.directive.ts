@@ -13,13 +13,22 @@ import { GridService } from "../services/grid.service";
         "[class.bg-inherit]": "bodyLocked()",
         "[style.box-shadow]":
             "rightEdge() ? '-2px 0 4px 0 rgba(0, 0, 0, 0.15)' : leftEdge() ? '2px 0 4px 0 rgba(0, 0, 0, 0.15)' : null",
-        "[style.clip-path]": "rightEdge() ? 'inset(0px 0px 2px -8px)' : leftEdge() ? 'inset(0px -8px 2px 0px)' : null"
+        "[style.clip-path]": "clipPath()"
     }
 })
 export class GridLockedCellDirective {
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #gridService = inject(GridService);
     protected readonly bodyLocked = computed(() => this.state() != null && !this.lockedCellHeader());
+    protected readonly clipPath = computed(() => {
+        const state = this.state();
+        const edgeOffset = state?.edge ? "1px" : "0px";
+        return state?.side === "right"
+            ? `inset(0px 0px ${edgeOffset} -8px)`
+            : state?.side === "left"
+              ? `inset(0px -8px ${edgeOffset} 0px)`
+              : null;
+    });
     protected readonly footerCell = this.#hostElementRef.nativeElement.hasAttribute("monaGridFooterTableCell");
     protected readonly headerLocked = computed(() => this.state() != null && this.lockedCellHeader());
     protected readonly leftEdge = computed(() => {

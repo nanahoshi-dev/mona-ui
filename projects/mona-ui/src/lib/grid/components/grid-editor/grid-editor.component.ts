@@ -1,12 +1,10 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     ElementRef,
     inject,
-    Injector,
     input,
     output,
     signal,
@@ -17,12 +15,13 @@ import { DatePickerComponent } from "../../../date-inputs/date-picker/components
 import { CheckBoxComponent } from "../../../inputs/check-box/components/check-box/check-box.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
+import { ThemeService } from "../../../theme/services/theme.service";
 import { Column } from "../../models/Column";
+import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } from "../../styles/grid.styles";
 
 @Component({
     selector: "mona-grid-editor",
     templateUrl: "./grid-editor.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         CheckBoxComponent,
         DatePickerComponent,
@@ -32,15 +31,20 @@ import { Column } from "../../models/Column";
         TextBoxComponent
     ],
     host: {
-        class: "w-full h-full border border-solid border-primary/40 flex items-center"
+        "[class]": "baseClass()"
     }
 })
 export class GridEditorComponent {
     readonly #datePopupOpen = signal(false);
     readonly #elementRef = inject(ElementRef<HTMLElement>);
-    readonly #injector = inject(Injector);
+    readonly #themeService = inject(ThemeService);
+    #ignoreNextBooleanFocusOut = false;
     private readonly numericTextBoxRef = viewChild(NumericTextBoxComponent);
     private readonly textBoxRef = viewChild(TextBoxComponent);
+    protected readonly baseClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridCellEditorBaseThemeVariants(theme)();
+    });
     protected readonly editTemplateContext = computed(() => ({
         $implicit: this.rowData(),
         column: this.column().field,
@@ -48,11 +52,16 @@ export class GridEditorComponent {
         setValue: (value: unknown): void => this.#emitValueChangeIfChanged(value),
         value: this.value()
     }));
-    protected readonly editorClass = `
-        w-full h-full border-transparent
-        data-[expanded='true']:border-primary
-        data-[expanded='true']:focus-within:border-primary/40
-    `;
+    protected readonly editorInputClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return gridCellEditorInputThemeVariants(theme)();
+    });
+    protected readonly booleanValue = computed(() => this.value() === true);
+    protected readonly numberValue = computed(() => this.#coerceNumberValue(this.value()));
+    protected readonly stringValue = computed(() => {
+        const value = this.value();
+        return value == null ? "" : String(value);
+    });
 
     /**
      * @description Controls whether the editor focuses its input after it renders.
@@ -67,17 +76,36 @@ export class GridEditorComponent {
     public readonly valueChange = output<unknown>();
 
     public constructor() {
-        afterNextRender(
-            {
-                read: () => this.#focusEditor()
-            },
-            { injector: this.#injector }
-        );
+        afterNextRender({
+            read: () => this.#focusEditor()
+        });
+    }
+
+    protected onBooleanEditorClick(): void {
+        this.#focusBooleanInput();
+    }
+
+    protected onBooleanEditorFocusOut(event: FocusEvent): void {
+        const relatedTarget = event.relatedTarget as HTMLElement | null;
+        const editorHost = event.currentTarget as HTMLElement;
+        if (relatedTarget && editorHost.contains(relatedTarget)) {
+            return;
+        }
+        if (this.#ignoreNextBooleanFocusOut) {
+            return;
+        }
+        this.commit.emit();
+    }
+
+    protected onBooleanEditorPointerDown(): void {
+        this.#ignoreNextBooleanFocusOut = true;
+        setTimeout(() => {
+            this.#ignoreNextBooleanFocusOut = false;
+        });
     }
 
     protected onCheckBoxValueChange(value: boolean): void {
         this.#emitValueChangeIfChanged(value);
-        this.commit.emit();
     }
 
     protected onDatePickerClose(): void {
@@ -117,11 +145,33 @@ export class GridEditorComponent {
         this.#emitValueChangeIfChanged(value);
     }
 
+    #coerceNumberValue(value: unknown): number | null {
+        if (typeof value === "number") {
+            return Number.isFinite(value) ? value : null;
+        }
+        if (typeof value !== "string") {
+            return null;
+        }
+        const normalizedValue = value.trim().replace(/,/g, "");
+        if (normalizedValue === "") {
+            return null;
+        }
+        const numberValue = Number(normalizedValue);
+        return Number.isFinite(numberValue) ? numberValue : null;
+    }
+
     #emitValueChangeIfChanged(value: unknown): void {
         if (this.#valuesEqual(value, this.value())) {
             return;
         }
         this.valueChange.emit(value);
+    }
+
+    #focusBooleanInput(): void {
+        const checkbox = this.#elementRef.nativeElement.querySelector(
+            'input[type="checkbox"]'
+        ) as HTMLInputElement | null;
+        checkbox?.focus();
     }
 
     #focusEditor(): void {
@@ -136,10 +186,7 @@ export class GridEditorComponent {
             inputElement?.focus();
         }
         if (type === "boolean") {
-            const checkbox = this.#elementRef.nativeElement.querySelector(
-                'input[type="checkbox"]'
-            ) as HTMLInputElement | null;
-            checkbox?.focus();
+            this.#focusBooleanInput();
         }
     }
 

@@ -19,8 +19,10 @@
             [masterDetailToggle]="true"
             [rowIndex]="-1"
             [colIndex]="0"
+            [cellKind]="'detail'"
             [firstInRow]="true"
             [lastInRow]="columns().length === 0"
+            [section]="'add'"
             [style.width.px]="gridService.detailColumnWidth"></td>
     }
     @for (column of columns(); track $index) {
@@ -31,8 +33,11 @@
             [column]="column"
             [dataCell]="true"
             monaGridLogicalCell
+            [cellKind]="column.kind"
             [colIndex]="colIndex"
+            [columnId]="column.id"
             [rowIndex]="-1"
+            [section]="'add'"
             [firstInRow]="colIndex === 0"
             [lastInRow]="colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)"
             [attr.colspan]="1"

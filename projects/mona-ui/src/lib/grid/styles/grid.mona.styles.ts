@@ -1,7 +1,6 @@
 import { cva } from "class-variance-authority";
 
 const gridRowHeightClass = "h-9";
-const gridBodyRowSeparatorClass = "shadow-[inset_0_-1px_0_0_var(--color-border)]";
 
 export const gridBaseVariants = cva(
     `
@@ -24,8 +23,9 @@ export const gridBaseVariants = cva(
 
 export const gridCellBaseVariants = cva(
     `
-        absolute inset-0 h-[calc(100%-1px)]
+        absolute inset-0
         flex w-full
+        border-b border-b-border
     `
 );
 
@@ -53,6 +53,16 @@ export const gridCellDirtyIndicatorVariants = cva(`
     border-t-[8px] border-l-[8px]
     border-t-destructive border-l-transparent
     pointer-events-none
+`);
+
+export const gridCellEditorBaseVariants = cva(`
+    w-full h-full border border-solid border-primary/40 flex items-center
+`);
+
+export const gridCellEditorInputVariants = cva(`
+    w-full h-full border-transparent
+    data-[expanded='true']:border-primary
+    data-[expanded='true']:focus-within:border-primary/40
 `);
 
 export const gridCellTextVariants = cva(`
@@ -178,7 +188,8 @@ export const gridHeaderTableCellVariants = cva(
         relative select-none
         text-left overflow-visible
         outline-none border-r border-r-border
-        focus:ring-1 focus:ring-inset focus:ring-primary/40
+        after:absolute after:inset-0 after:pointer-events-none
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/40
     `
 );
 
@@ -219,7 +230,7 @@ export const gridListTableVariants = cva(
     `
 );
 
-export const gridListTableRowVariants = cva(`${gridBodyRowSeparatorClass}`, {
+export const gridListTableRowVariants = cva(``, {
     variants: {
         selected: {
             true: `
@@ -237,7 +248,9 @@ export const gridListTableCellVariants = cva(
         ${gridRowHeightClass}
         outline-none z-1
         align-top
-        focus:ring-1 focus:ring-inset focus:ring-primary/40
+        after:content-[''] after:block
+        after:absolute after:inset-0 after:pointer-events-none
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/40
     `,
     {
         variants: {

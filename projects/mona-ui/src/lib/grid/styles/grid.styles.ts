@@ -6,6 +6,8 @@ import {
     gridCellBaseVariants as monaGridCellBaseVariants,
     gridCellContainerVariants as monaGridCellContainerVariants,
     gridCellDirtyIndicatorVariants as monaGridCellDirtyIndicatorVariants,
+    gridCellEditorBaseVariants as monaGridCellEditorBaseVariants,
+    gridCellEditorInputVariants as monaGridCellEditorInputVariants,
     gridCellTextVariants as monaGridCellTextVariants,
     gridColumnActionsVariants as monaGridColumnActionsVariants,
     gridColumnDragPreviewVariants as monaGridColumnDragPreviewVariants,
@@ -68,6 +70,24 @@ export const gridCellDirtyIndicatorThemeVariants = (theme: ThemeStyle) => {
             return monaGridCellDirtyIndicatorVariants;
         default:
             return monaGridCellDirtyIndicatorVariants;
+    }
+};
+
+export const gridCellEditorBaseThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridCellEditorBaseVariants;
+        default:
+            return monaGridCellEditorBaseVariants;
+    }
+};
+
+export const gridCellEditorInputThemeVariants = (theme: ThemeStyle) => {
+    switch (theme) {
+        case "mona":
+            return monaGridCellEditorInputVariants;
+        default:
+            return monaGridCellEditorInputVariants;
     }
 };
 
