@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 
 import { TabListComponent } from "./tab-list.component";
 
@@ -96,7 +97,7 @@ describe("TabListComponent", () => {
         });
 
         expect(preventDefaultSpy).toHaveBeenCalled();
-        expect(getElementByIdSpy).toHaveBeenCalledWith("tab1");
+        expect(getElementByIdSpy).toHaveBeenCalledWith("tab1-panel");
         expect(focusSpy).toHaveBeenCalled();
 
         getElementByIdSpy.mockRestore();
@@ -116,5 +117,124 @@ describe("TabListComponent", () => {
         });
 
         expect(preventDefaultSpy).not.toHaveBeenCalled();
+    });
+
+    it("should render tab id and aria-controls with -tab/-panel suffixes", () => {
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1']")).nativeElement;
+        expect(tabElement.id).toBe("tab1-tab");
+        expect(tabElement.getAttribute("aria-controls")).toBe("tab1-panel");
+    });
+
+    it("should skip disabled tabs with ArrowRight", () => {
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
+            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: true },
+            { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: false }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
+        fixture.detectChanges();
+        expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
+    });
+
+    it("should skip disabled tabs with ArrowLeft", () => {
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: false, title: "Tab 1", closable: true, disabled: false },
+            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: true },
+            { id: "tab3", index: 2, selected: true, title: "Tab 3", closable: true, disabled: false }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab3");
+        fixture.detectChanges();
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowLeft" });
+        fixture.detectChanges();
+        expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
+    });
+
+    it("should skip a disabled tab at Home", () => {
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: false, title: "Tab 1", closable: true, disabled: true },
+            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
+            { id: "tab3", index: 2, selected: true, title: "Tab 3", closable: true, disabled: false }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab3");
+        fixture.detectChanges();
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "Home" });
+        fixture.detectChanges();
+        expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
+    });
+
+    it("should skip a disabled tab at End", () => {
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
+            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
+            { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: true }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "End" });
+        fixture.detectChanges();
+        expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
+    });
+
+    it("should not close a disabled tab with Delete", () => {
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: true },
+            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+        const emitSpy = vi.spyOn(component.tabClose, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "Delete" });
+        fixture.detectChanges();
+        expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it("should not emit any selection when every tab is disabled", () => {
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: true },
+            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: true }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "Home" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "End" });
+        fixture.detectChanges();
+        expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it("should no-op keyboard navigation when the list-wide disabled input is set", () => {
+        fixture.componentRef.setInput("disabled", true);
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const emitSpy = vi.spyOn(component.tabSelect, "emit");
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
+        fixture.detectChanges();
+        expect(emitSpy).not.toHaveBeenCalled();
+
+        const tabElement: HTMLElement = fixture.debugElement.query(By.css("li[data-tab-id='tab1']")).nativeElement;
+        expect(tabElement.getAttribute("aria-disabled")).toBe("true");
+    });
+
+    it("should show the close button when closable is true regardless of per-tab closable value", () => {
+        fixture.componentRef.setInput("closable", true);
+        fixture.componentRef.setInput("tabList", [
+            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: false, disabled: false }
+        ]);
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+
+        const closeButton = fixture.debugElement.query(By.css("li[data-tab-id='tab1'] button"));
+        expect(closeButton).toBeTruthy();
     });
 });

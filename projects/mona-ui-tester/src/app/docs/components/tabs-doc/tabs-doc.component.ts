@@ -1,14 +1,11 @@
 import { ChangeDetectionStrategy, Component } from "@angular/core";
-import { CodeViewerComponent } from "../../../demo/components/code-viewer/code-viewer.component";
 import { TabsDemoComponent } from "../../../demo/components/tabs-demo/tabs-demo.component";
-import { SectionComponent } from "../../../layout/components/section/section.component";
+import { MarkdownDocComponent } from "../../../layout/components/markdown-doc/markdown-doc.component";
 
 @Component({
     selector: "app-tabs-doc",
-    imports: [CodeViewerComponent, SectionComponent, TabsDemoComponent],
+    imports: [TabsDemoComponent, MarkdownDocComponent],
     templateUrl: "./tabs-doc.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TabsDocComponent {
-    protected readonly importCode = `import { TabsComponent } from "mona-ui";`;
-}
+export class TabsDocComponent {}

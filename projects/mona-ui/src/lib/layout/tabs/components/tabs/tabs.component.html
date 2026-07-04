@@ -1,14 +1,28 @@
-<mona-tab-list [closable]="closable()" [rounded]="rounded()" [size]="size()" [tabList]="tabList()"
-               [selectedTabId]="selectedTabId()" (selectedTabIdChange)="selectedTabId.set($event)"
-               (tabClose)="tabClose.emit($event)" (tabSelect)="tabSelect.emit($event)"></mona-tab-list>
+<mona-tab-list
+    [closable]="closable()"
+    [disabled]="disabled()"
+    [rounded]="rounded()"
+    [size]="size()"
+    [tabList]="tabList()"
+    [selectedTabId]="selectedTabId()"
+    (selectedTabIdChange)="selectedTabId.set($event)"
+    (tabClose)="tabClose.emit($event)"
+    (tabSelect)="tabSelect.emit($event)"></mona-tab-list>
 <div [class]="contentClass()">
     @for (tab of tabList(); track tab) {
         @let selected = tab.id === selectedTabId();
         @let tabLoaded = keepTabContent() || selected;
         @let tabHidden = keepTabContent() && !selected;
         @if (tabLoaded) {
-            <div class="w-full h-full outline-none" [class.hidden]="tabHidden" role="tabpanel" [id]="tab.id" tabindex="0"
-                 (keydown)="handlePanelKeyDown($event)" [attr.aria-hidden]="tabHidden" [attr.aria-labelledby]="tab.id">
+            <div
+                class="w-full h-full outline-none"
+                [class.hidden]="tabHidden"
+                role="tabpanel"
+                [id]="tab.id + '-panel'"
+                tabindex="0"
+                (keydown)="handlePanelKeyDown($event)"
+                [attr.aria-hidden]="tabHidden"
+                [attr.aria-labelledby]="tab.id + '-tab'">
                 <ng-container [ngTemplateOutlet]="tab.contentTemplate"></ng-container>
             </div>
         }

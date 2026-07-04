@@ -7026,25 +7026,25 @@
       {
         "name": "closable",
         "type": "boolean",
-        "description": "Whether the tab is closable.\r\nIf true, a close button will be displayed for the tab.\r\nThis will take precedence over the `closable` prop on the `mona-tabs` component.",
+        "description": "Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the tab is disabled.\r\nIf true, the tab will be disabled and cannot be selected.\r\nThis will take precedence over the `disabled` prop on the `mona-tabs` component.",
+        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction.\r\nOverrides the parent `mona-tabs` component's `disabled` input.",
         "kind": "input"
       },
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Sets the selected state of the tab.",
+        "description": "Whether the tab is selected.",
         "kind": "model"
       },
       {
         "name": "title",
         "type": "string",
-        "description": "Sets the title of the tab.",
+        "description": "Title text displayed on the tab.",
         "kind": "input"
       }
     ]
@@ -7055,6 +7055,12 @@
     "inputs": [
       {
         "name": "closable",
+        "type": "boolean",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
         "type": "boolean",
         "description": "",
         "kind": "input"
@@ -7104,49 +7110,49 @@
       {
         "name": "closable",
         "type": "boolean",
-        "description": "Whether the tabs should be closable.\r\nIf true, a close button will be displayed for each tab.",
+        "description": "Displays a close button on each tab, unless overridden per tab.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the tabs should be disabled.",
+        "description": "Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction.",
         "kind": "input"
       },
       {
         "name": "keepTabContent",
         "type": "boolean",
-        "description": "Whether the tab content should be kept when the tab is closed.\r\nIf false, the tab content will be removed from the DOM when the tab is switched to a different tab.",
+        "description": "Keeps a tab's content in the DOM after it is deselected instead of removing it.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "TabsVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the tabs and tab content area.",
+        "description": "Border-radius preset applied to the tabs and the tab content area.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "TabsVariantProps[\"size\"]",
-        "description": "Sets the size of the tabs.",
+        "description": "Size preset controlling the tabs' dimensions.",
         "kind": "input"
       },
       {
         "name": "tabClose",
         "type": "TabCloseEvent",
-        "description": "Emitted when a tab is closed.",
+        "description": "Emitted with a {@link TabCloseEvent} when a tab is closed.",
         "kind": "output"
       },
       {
         "name": "tabSelect",
         "type": "TabSelectEvent",
-        "description": "Emitted when a tab is selected. This event is preventable.",
+        "description": "Emitted with a {@link TabSelectEvent} when a tab is selected. This event is preventable.",
         "kind": "output"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]

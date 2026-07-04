@@ -75,6 +75,7 @@ export class TabListComponent implements TabListVariantInput {
     protected readonly tabListItems = viewChildren(TabListItemDirective, { read: ElementRef });
 
     public readonly closable = input(false);
+    public readonly disabled = input(false);
     public readonly rounded = input.required<TabListVariantProps["rounded"]>();
     public readonly selectedTabId = model<string | null>(null);
     public readonly size = input.required<TabListVariantProps["size"]>();
@@ -142,6 +143,11 @@ export class TabListComponent implements TabListVariantInput {
         this.emitTabClose(tab, event);
     }
 
+    protected startContinuousScroll(event: PointerEvent, element: HTMLElement, direction: ScrollDirection): void {
+        (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+        this.startScrolling(element, direction, "continuous");
+    }
+
     protected startScrolling(element: HTMLElement, direction: ScrollDirection, type: "single" | "continuous"): void {
         this.#scrollIntent$.next({ element, direction, type });
     }
@@ -157,32 +163,40 @@ export class TabListComponent implements TabListVariantInput {
         if (!selectedTab) {
             return;
         }
-        const selectedIndex = tabs.indexOf(selectedTab);
+        if (event.key === "Tab") {
+            if (!event.shiftKey) {
+                this.handleTabKey(selectedTab, event);
+            }
+            return;
+        }
+
+        const listDisabled = this.disabled();
+        const enabledTabs = tabs.filter(t => !t.disabled && !listDisabled);
+        if (enabledTabs.length === 0) {
+            return;
+        }
+        const selectedEnabledIndex = enabledTabs.indexOf(selectedTab);
+        const selectedIndex = selectedEnabledIndex === -1 ? 0 : selectedEnabledIndex;
         let nextIndex = selectedIndex;
 
         switch (event.key) {
             case "ArrowLeft":
-                nextIndex = selectedIndex === 0 ? tabs.length - 1 : selectedIndex - 1;
-                this.activateTab(tabs[nextIndex], event);
+                nextIndex = selectedIndex === 0 ? enabledTabs.length - 1 : selectedIndex - 1;
+                this.activateTab(enabledTabs[nextIndex], event);
                 break;
             case "ArrowRight":
-                nextIndex = selectedIndex === tabs.length - 1 ? 0 : selectedIndex + 1;
-                this.activateTab(tabs[nextIndex], event);
+                nextIndex = selectedIndex === enabledTabs.length - 1 ? 0 : selectedIndex + 1;
+                this.activateTab(enabledTabs[nextIndex], event);
                 break;
             case "Home":
-                this.activateTab(tabs[0], event);
+                this.activateTab(enabledTabs[0], event);
                 break;
             case "End":
-                this.activateTab(tabs[tabs.length - 1], event);
-                break;
-            case "Tab":
-                if (!event.shiftKey) {
-                    this.handleTabKey(selectedTab, event);
-                }
+                this.activateTab(enabledTabs[enabledTabs.length - 1], event);
                 break;
             case "Delete":
             case "Backspace":
-                if (selectedTab.closable || (this.closable() && !selectedTab.closable)) {
+                if (!selectedTab.disabled && !listDisabled && (selectedTab.closable || this.closable())) {
                     this.emitTabClose(selectedTab, event);
                 }
                 break;
@@ -218,7 +232,7 @@ export class TabListComponent implements TabListVariantInput {
 
     private handleTabKey(tab: TabItem, event: KeyboardEvent): void {
         event.preventDefault();
-        const panelId = tab.id;
+        const panelId = tab.id + "-panel";
         const panel = document.getElementById(panelId);
         if (panel) {
             panel.focus();

@@ -36,26 +36,27 @@ export class TabComponent {
     protected readonly titleTemplate = contentChild(TabTitleTemplateDirective, { read: TemplateRef });
 
     /**
-     * @description Whether the tab is closable.
-     * If true, a close button will be displayed for the tab.
-     * This will take precedence over the `closable` prop on the `mona-tabs` component.
+     * @description Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.
+     * @default false
      */
     public readonly closable = input<boolean>(false);
 
     /**
-     * @description Whether the tab is disabled.
-     * If true, the tab will be disabled and cannot be selected.
-     * This will take precedence over the `disabled` prop on the `mona-tabs` component.
+     * @description Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction.
+     * Overrides the parent `mona-tabs` component's `disabled` input.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Sets the selected state of the tab.
+     * @description Whether the tab is selected.
+     * @default false
      */
     public readonly selected = model(false);
 
     /**
-     * @description Sets the title of the tab.
+     * @description Title text displayed on the tab.
+     * @default ""
      */
     public readonly title = input("");
 

@@ -53,9 +53,8 @@ export class TabsComponent implements TabsVariantInput {
         source: () => this.tabList(),
         computation: (tabList, previous) => {
             const previousId = previous?.value;
-            const previousTab = tabList.firstOrDefault(t => t.id === previousId);
-            if (previousTab?.selected) {
-                return previousId || null;
+            if (previousId && tabList.any(t => t.id === previousId)) {
+                return previousId;
             }
             return tabList.firstOrDefault()?.id ?? null;
         }
@@ -68,42 +67,49 @@ export class TabsComponent implements TabsVariantInput {
     });
 
     /**
-     * @description Whether the tabs should be closable.
-     * If true, a close button will be displayed for each tab.
+     * @description Displays a close button on each tab, unless overridden per tab.
+     * @default false
      */
     public readonly closable = input(false);
 
     /**
-     * @description Whether the tabs should be disabled.
+     * @description Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction.
+     * @default false
      */
     public readonly disabled = input(false);
 
     /**
-     * @description Whether the tab content should be kept when the tab is closed.
-     * If false, the tab content will be removed from the DOM when the tab is switched to a different tab.
+     * @description Keeps a tab's content in the DOM after it is deselected instead of removing it.
+     * @default true
      */
     public readonly keepTabContent = input(true);
 
     /**
-     * @description Sets the border radius of the tabs and tab content area.
+     * @description Border-radius preset applied to the tabs and the tab content area.
+     * @default "medium"
      */
     public readonly rounded = input<TabsVariantProps["rounded"]>("medium");
 
     /**
-     * @description Sets the size of the tabs.
+     * @description Size preset controlling the tabs' dimensions.
+     * @default "medium"
      */
     public readonly size = input<TabsVariantProps["size"]>("medium");
 
     /**
-     * @description Emitted when a tab is closed.
+     * @description Emitted with a {@link TabCloseEvent} when a tab is closed.
      */
     public readonly tabClose = output<TabCloseEvent>();
 
     /**
-     * @description Emitted when a tab is selected. This event is preventable.
+     * @description Emitted with a {@link TabSelectEvent} when a tab is selected. This event is preventable.
      */
     public readonly tabSelect = output<TabSelectEvent>();
 
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input("", { alias: "class" });
 
     protected handlePanelKeyDown(event: KeyboardEvent): void {
