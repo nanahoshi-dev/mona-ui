@@ -13,6 +13,9 @@ describe("GridToggleComponent", () => {
 
         fixture = TestBed.createComponent(GridToggleComponent);
         component = fixture.componentInstance;
+        fixture.componentRef.setInput("expanded", false);
+        fixture.componentRef.setInput("type", "group");
+        fixture.componentRef.setInput("width", 20);
         await fixture.whenStable();
     });
 

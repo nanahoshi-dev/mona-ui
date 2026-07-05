@@ -15,21 +15,12 @@ import {
     linkedSignal,
     model,
     output,
-    signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    AbstractControl,
-    ControlValueAccessor,
-    FormsModule,
-    NG_VALIDATORS,
-    NG_VALUE_ACCESSOR,
-    ValidationErrors,
-    Validator
-} from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { any } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
@@ -38,8 +29,6 @@ import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
-import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
-import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
@@ -48,7 +37,6 @@ import { TextBoxPrefixTemplateDirective } from "../../../../inputs/text-box/dire
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarComponent } from "../../../calendar/components/calendar/calendar.component";
@@ -73,25 +61,13 @@ import {
     providers: [
         DropdownService,
         CalendarService,
-        FormFieldValidationService,
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => DatePickerComponent),
-            multi: true
-        },
         {
             provide: DropdownPopupInputToken,
             useExisting: forwardRef(() => DatePickerComponent),
             multi: false
-        },
-        {
-            provide: NG_VALIDATORS,
-            useExisting: forwardRef(() => DatePickerComponent),
-            multi: true
         }
     ],
     imports: [
-        FormsModule,
         FontAwesomeModule,
         CalendarComponent,
         TextBoxComponent,
@@ -104,7 +80,7 @@ import {
         ButtonDirective,
         CdkTrapFocus
     ],
-    hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
+    hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
         "[attr.data-expanded]": "expanded()",
@@ -112,17 +88,18 @@ import {
     }
 })
 export class DatePickerComponent
-    implements ControlValueAccessor, Validator, DropdownPopupInput, DatePickerVariantInput, DatePopupVariantInput
+    implements
+        FormValueControl<Date | null>,
+        DropdownPopupInput,
+        DatePickerVariantInput,
+        DatePopupVariantInput
 {
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
-    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<Date | null> | null = null;
-    #propagateTouched: Action | null = null;
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
@@ -146,7 +123,7 @@ export class DatePickerComponent
         const controls = this.popupId;
         const expanded = this.#dropdownService.popupRef() != null;
         const hasPopup = "grid";
-        const invalid = this.#formFieldValidationService.invalid();
+        const invalid = this.invalid();
         return {
             "aria-autocomplete": "none",
             "aria-controls": controls,
@@ -157,7 +134,6 @@ export class DatePickerComponent
             role: "combobox"
         };
     });
-    protected readonly invalid = this.#formFieldValidationService.invalid.asReadonly();
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
@@ -169,9 +145,8 @@ export class DatePickerComponent
         return twMerge(variantClass, userClass);
     });
     protected readonly popupId = createElementControlId();
-    protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
+    protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DateInputPrefixTemplateDirective, { read: TemplateRef });
-    protected readonly value = signal<Date | null>(null);
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
 
     /**
@@ -187,7 +162,7 @@ export class DatePickerComponent
     /**
      * @description Sets the disabled state of the date picker.
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false);
 
     /**
      * @description Sets the disabled dates of the date picker.
@@ -206,14 +181,25 @@ export class DatePickerComponent
     public readonly format = input("dd/MM/yyyy");
 
     /**
+     * @description Marks the date picker as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Sets the maximum date of the date picker.
      */
-    public readonly max = input<Date | null>();
+    public readonly max = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
 
     /**
      * @description Sets the minimum date of the date picker.
      */
-    public readonly min = input<Date | null>();
+    public readonly min = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
 
     /**
      * @description Emits when the popup is about to open. This event is preventable.
@@ -261,6 +247,8 @@ export class DatePickerComponent
 
     /**
      * @description Sets the required state of the date picker.
+     * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
      */
     public readonly required = input(false);
 
@@ -278,7 +266,27 @@ export class DatePickerComponent
      * @description Sets the size of the date picker.
      */
     public readonly size = input<DatePickerVariantProps["size"]>("medium");
+
+    /**
+     * @description Emitted when the date picker is interacted with via blur, selection, or clear.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets the touched state of the date picker. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
     public readonly userClass = input("", { alias: "class" });
+
+    /**
+     * @description Two-way bindable current date value.
+     * @default null
+     */
+    public readonly value = model<Date | null>(null);
 
     /**
      * @description Enables the display of week numbers in the calendar.
@@ -299,45 +307,6 @@ export class DatePickerComponent
         });
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public validate(control: AbstractControl): ValidationErrors | null {
-        const value = control.value as Date | null;
-        if (!value) {
-            return null;
-        }
-
-        const min = this.min();
-        const max = this.max();
-        const disabledDates = this.disabledDates();
-
-        // Compare at day level only - min/max are inclusive
-        if (min && !this.compareDatesEqual(value, min) && value < min) {
-            return { minError: { minValue: min, value } };
-        }
-        if (max && !this.compareDatesEqual(value, max) && value > max) {
-            return { maxError: { maxValue: max, value } };
-        }
-        if (this.isDateDisabledByInput(value, disabledDates)) {
-            return { disabledDate: true };
-        }
-        return null;
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.value.set(date ?? null);
-    }
-
     protected onCalendarValueChange(date: Date | Date[] | null): void {
         const singleDate = Array.isArray(date) ? null : date;
         this.setCurrentDate(singleDate);
@@ -346,23 +315,24 @@ export class DatePickerComponent
 
     protected onDateInputBlur(): void {
         if (this.#dropdownService.popupRef()) {
-            this.#propagateTouched?.();
+            this.touch.emit();
             return;
         }
         if (!this.currentDateString() && this.value()) {
             this.setCurrentDate(null);
-            this.#propagateTouched?.();
+            this.touch.emit();
             return;
         }
 
         const dateTime = DateTime.fromFormat(this.currentDateString(), this.format());
         if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
-            this.#propagateTouched?.();
+            this.touch.emit();
             return;
         }
         if (dateTime.isValid) {
             const value = this.value();
             if (value && DateTime.fromJSDate(value).equals(dateTime)) {
+                this.touch.emit();
                 return;
             }
             this.setCurrentDate(dateTime.toJSDate());
@@ -370,12 +340,12 @@ export class DatePickerComponent
             this.setCurrentDate(null);
             this.currentDateString.set("");
         }
-        this.#propagateTouched?.();
+        this.touch.emit();
     }
 
     protected onDateInputButtonClick(): void {
         const popupRef = this.#dropdownService.popupRef();
-        if (!this.popupTemplate() || this.readonly()) {
+        if (!this.popupTemplate() || this.disabled() || this.readonly()) {
             return;
         }
         if (popupRef) {
@@ -411,7 +381,7 @@ export class DatePickerComponent
         return date1 === date2;
     }
 
-    private focus(): void {
+    public focus(): void {
         const input = this.#hostElementRef.nativeElement.querySelector("input");
         if (input && !this.readonly()) {
             input.focus();
@@ -457,7 +427,7 @@ export class DatePickerComponent
     private setCurrentDate(date: Date | null): void {
         const newDate = date ? new Date(date) : null;
         this.value.set(newDate);
-        this.#propagateChange?.(date);
+        this.touch.emit();
     }
 
     private setKeyboardSubscriptions(): void {

@@ -4219,12 +4219,12 @@
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the date picker.",
-        "kind": "model"
+        "kind": "input"
       },
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the date picker.\r\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date picker.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -4240,14 +4240,20 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "max",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "Sets the maximum date of the date picker.",
         "kind": "input"
       },
       {
         "name": "min",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "Sets the minimum date of the date picker.",
         "kind": "input"
       },
@@ -4302,7 +4308,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the date picker.",
+        "description": "Sets the required state of the date picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4324,10 +4330,28 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the date picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the date picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Date | null",
+        "description": "Two-way bindable current date value.",
+        "kind": "model"
       },
       {
         "name": "weekNumber",
@@ -4357,12 +4381,12 @@
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the date time picker.",
-        "kind": "model"
+        "kind": "input"
       },
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the date time picker.\r\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date time picker.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -4390,14 +4414,20 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "max",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "Sets the maximum date of the date time picker.",
         "kind": "input"
       },
       {
         "name": "min",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "Sets the minimum date of the date time picker.",
         "kind": "input"
       },
@@ -4458,7 +4488,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the date time picker.",
+        "description": "Sets the required state of the date time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4492,10 +4522,28 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the date time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Date | null",
+        "description": "Two-way bindable current date time value.",
+        "kind": "model"
       },
       {
         "name": "weekNumber",
@@ -4525,7 +4573,7 @@
         "name": "disabled",
         "type": "boolean",
         "description": "Sets the disabled state of the time picker.",
-        "kind": "model"
+        "kind": "input"
       },
       {
         "name": "format",
@@ -4546,14 +4594,20 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "max",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "Sets the maximum date of the time picker.",
         "kind": "input"
       },
       {
         "name": "min",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "Sets the minimum date of the time picker.",
         "kind": "input"
       },
@@ -4614,7 +4668,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the time picker.",
+        "description": "Sets the required state of the time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4648,10 +4702,28 @@
         "kind": "input"
       },
       {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Date | null",
+        "description": "Two-way bindable current time value.",
+        "kind": "model"
       }
     ]
   },
@@ -4669,7 +4741,7 @@
         "name": "disabled",
         "type": "boolean",
         "description": "",
-        "kind": "model"
+        "kind": "input"
       },
       {
         "name": "focusOnMount",
@@ -4696,14 +4768,20 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the time selector as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
         "name": "max",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "",
         "kind": "input"
       },
       {
         "name": "min",
-        "type": "Date | null",
+        "type": "Date | undefined",
         "description": "",
         "kind": "input"
       },
@@ -4711,6 +4789,18 @@
         "name": "minuteStep",
         "type": "number",
         "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Prevents value changes while preserving the component's visual state.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Sets whether the time selector is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4736,6 +4826,24 @@
         "type": "TimeSelectorVariantProps[\"size\"]",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the time selector is interacted with via blur or value selection.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Sets the touched state of the time selector. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "Date | null",
+        "description": "Two-way bindable current time value.",
+        "kind": "model"
       }
     ]
   },

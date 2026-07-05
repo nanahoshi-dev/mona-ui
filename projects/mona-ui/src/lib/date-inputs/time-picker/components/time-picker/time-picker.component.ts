@@ -20,15 +20,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    AbstractControl,
-    ControlValueAccessor,
-    FormsModule,
-    NG_VALIDATORS,
-    NG_VALUE_ACCESSOR,
-    ValidationErrors,
-    Validator
-} from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
@@ -36,8 +28,6 @@ import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
-import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
-import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { dropdownPopupThemeVariants } from "../../../../common/styles/dropdown-popup.styles";
@@ -46,7 +36,6 @@ import { TextBoxComponent } from "../../../../inputs/text-box/components/text-bo
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { HourFormat } from "../../../models/HourFormat";
@@ -63,25 +52,13 @@ import {
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         DropdownService,
-        FormFieldValidationService,
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => TimePickerComponent),
-            multi: true
-        },
         {
             provide: DropdownPopupInputToken,
             useExisting: forwardRef(() => TimePickerComponent),
             multi: false
-        },
-        {
-            provide: NG_VALIDATORS,
-            useExisting: forwardRef(() => TimePickerComponent),
-            multi: true
         }
     ],
     imports: [
-        FormsModule,
         ButtonDirective,
         FontAwesomeModule,
         TimeSelectorComponent,
@@ -89,7 +66,7 @@ import {
         TextBoxSuffixTemplateDirective,
         CdkTrapFocus
     ],
-    hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
+    hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
         "[attr.data-expanded]": "expanded()",
@@ -97,15 +74,12 @@ import {
         "(blur)": "onTimeInputBlur()"
     }
 })
-export class TimePickerComponent implements ControlValueAccessor, Validator, TimePickerVariantInput {
+export class TimePickerComponent implements FormValueControl<Date | null>, TimePickerVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
-    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
     readonly #themeService = inject(ThemeService);
-    #propagateChange: Action<Date | null> | null = null;
-    #propagateTouched: Action | null = null;
 
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -129,7 +103,7 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
         const controls = this.popupId;
         const expanded = this.#dropdownService.popupRef() != null;
         const hasPopup = "dialog";
-        const invalid = this.#formFieldValidationService.invalid();
+        const invalid = this.invalid();
         return {
             "aria-autocomplete": "none",
             "aria-controls": controls,
@@ -150,8 +124,7 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
         return twMerge(variantClass, userClass);
     });
     protected readonly popupId = createElementControlId();
-    protected readonly timePopupTemplateRef: Signal<TemplateRef<any>> = viewChild.required("timePopupTemplate");
-    protected readonly value = signal<Date | null>(null);
+    protected readonly timePopupTemplateRef: Signal<TemplateRef<unknown>> = viewChild.required("timePopupTemplate");
 
     /**
      * @description Emits when the popup is about to close. This event is preventable.
@@ -166,7 +139,7 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
     /**
      * @description Sets the disabled state of the time picker.
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false);
 
     /**
      * @description Sets the format of the time picker.
@@ -186,16 +159,27 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
     public readonly hourStep = input(1);
 
     /**
+     * @description Marks the time picker as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Sets the maximum date of the time picker.
      * @default null
      */
-    public readonly max = input<Date | null>(null);
+    public readonly max = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
 
     /**
      * @description Sets the minimum date of the time picker.
      * @default null
      */
-    public readonly min = input<Date | null>(null);
+    public readonly min = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
 
     /**
      * @description Sets the minute step of the time picker.
@@ -249,6 +233,8 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
 
     /**
      * @description Sets the required state of the time picker.
+     * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
      */
     public readonly required = input(false);
 
@@ -277,7 +263,27 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
      * @description Sets the size of the time picker.
      */
     public readonly size = input<TimePickerVariantProps["size"]>("medium");
+
+    /**
+     * @description Emitted when the time picker is interacted with via blur, selection, or clear.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
     public readonly userClass = input("", { alias: "class" });
+
+    /**
+     * @description Two-way bindable current time value.
+     * @default null
+     */
+    public readonly value = model<Date | null>(null);
 
     public constructor() {
         afterNextRender({
@@ -292,55 +298,23 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
         });
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public validate(control: AbstractControl): ValidationErrors | null {
-        const value = control.value as Date | null;
-        if (!value) {
-            return null;
-        }
-
-        const min = this.min();
-        const max = this.max();
-
-        if (min && this.isTimeBefore(value, min)) {
-            return { minError: { minValue: min, value } };
-        }
-        if (max && this.isTimeAfter(value, max)) {
-            return { maxError: { maxValue: max, value } };
-        }
-        return null;
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.value.set(date ?? null);
-        this.updateCurrentDateString(date, this.format());
-        this.setDateValues();
-    }
-
     protected onDateStringEdit(dateString: string): void {
         this.currentDateString.set(dateString);
     }
 
     protected onTimeInputBlur(): void {
         if (this.#dropdownService.popupRef()) {
+            this.touch.emit();
             return;
         }
         this.processTimeInput(this.currentDateString());
-        this.#propagateTouched?.();
+        this.touch.emit();
     }
 
     protected onTimeInputButtonClick(): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         this.openPopup();
     }
 
@@ -360,7 +334,7 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
         return date1 === date2;
     }
 
-    private focus(): void {
+    public focus(): void {
         const input = this.#hostElementRef.nativeElement.querySelector("input");
         if (input && !this.readonly()) {
             input.focus();
@@ -387,6 +361,9 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
     }
 
     private handleKeydown(e: KeyboardEvent): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         if (e.key === "ArrowDown" && e.altKey) {
             e.preventDefault();
             this.openPopup();
@@ -394,31 +371,10 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
         }
     }
 
-    private isTimeAfter(date: Date, maxDate: Date): boolean {
-        const dateTime = DateTime.fromJSDate(date);
-        const maxDateTime = DateTime.fromJSDate(maxDate);
-        return (
-            dateTime.hour > maxDateTime.hour ||
-            (dateTime.hour === maxDateTime.hour && dateTime.minute > maxDateTime.minute) ||
-            (dateTime.hour === maxDateTime.hour &&
-                dateTime.minute === maxDateTime.minute &&
-                dateTime.second > maxDateTime.second)
-        );
-    }
-
-    private isTimeBefore(date: Date, minDate: Date): boolean {
-        const dateTime = DateTime.fromJSDate(date);
-        const minDateTime = DateTime.fromJSDate(minDate);
-        return (
-            dateTime.hour < minDateTime.hour ||
-            (dateTime.hour === minDateTime.hour && dateTime.minute < minDateTime.minute) ||
-            (dateTime.hour === minDateTime.hour &&
-                dateTime.minute === minDateTime.minute &&
-                dateTime.second < minDateTime.second)
-        );
-    }
-
     private openPopup(): void {
+        if (this.#dropdownService.popupRef()) {
+            return;
+        }
         this.#dropdownService.triggerPopupOpen$.next({
             height: this.popupHeight() || "fit-content",
             width: this.popupWidth() || "auto"
@@ -446,7 +402,7 @@ export class TimePickerComponent implements ControlValueAccessor, Validator, Tim
     private setCurrentDate(date: Date | null): void {
         this.value.set(date);
         this.setCurrentDateString(date);
-        this.#propagateChange?.(date);
+        this.touch.emit();
     }
 
     private setCurrentDateString(date: Date | null): void {

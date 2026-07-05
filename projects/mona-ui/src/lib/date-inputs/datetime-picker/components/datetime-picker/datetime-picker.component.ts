@@ -21,15 +21,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    AbstractControl,
-    ControlValueAccessor,
-    FormsModule,
-    NG_VALIDATORS,
-    NG_VALUE_ACCESSOR,
-    ValidationErrors,
-    Validator
-} from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { any } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
@@ -39,8 +31,6 @@ import { ButtonGroupComponent } from "../../../../buttons/button-group/component
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { DropdownPopupHandlerDirective } from "../../../../common/dropdown/directives/dropdown-popup-handler.directive";
 import { DropdownService } from "../../../../common/dropdown/services/dropdown.service";
-import { FormFieldValidationDirective } from "../../../../common/forms/directives/form-field-validation.directive";
-import { FormFieldValidationService } from "../../../../common/forms/services/form-field-validation.service";
 import { ListSizeInputType } from "../../../../common/list/models/ListSizeType";
 import { AttributeConfig } from "../../../../common/models/AttributeConfig";
 import { DropdownPopupInput, DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
@@ -49,7 +39,6 @@ import { TextBoxPrefixTemplateDirective } from "../../../../inputs/text-box/dire
 import { TextBoxSuffixTemplateDirective } from "../../../../inputs/text-box/directives/text-box-suffix-template.directive";
 import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { CalendarComponent } from "../../../calendar/components/calendar/calendar.component";
@@ -58,8 +47,8 @@ import { CalendarMonthCellTemplateDirective } from "../../../calendar/directives
 import { CalendarYearCellTemplateDirective } from "../../../calendar/directives/calendar-year-cell-template.directive";
 import { FirstDayOfWeek } from "../../../calendar/models/FirstDayOfWeek";
 import { DateInputPrefixTemplateDirective } from "../../../directives/date-input-prefix-template.directive";
-import { HourFormat } from "../../../models/HourFormat";
 import { DateDisabledType } from "../../../models/DateDisabledType";
+import { HourFormat } from "../../../models/HourFormat";
 import { CalendarService } from "../../../services/calendar.service";
 import { TimeSelectorService } from "../../../services/time-selector.service";
 import { datePopupThemeVariants } from "../../../styles/date-popup.styles";
@@ -79,26 +68,14 @@ import {
     providers: [
         CalendarService,
         DropdownService,
-        FormFieldValidationService,
         TimeSelectorService,
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => DateTimePickerComponent),
-            multi: true
-        },
         {
             provide: DropdownPopupInputToken,
             useExisting: forwardRef(() => DateTimePickerComponent),
             multi: false
-        },
-        {
-            provide: NG_VALIDATORS,
-            useExisting: forwardRef(() => DateTimePickerComponent),
-            multi: true
         }
     ],
     imports: [
-        FormsModule,
         ButtonDirective,
         FontAwesomeModule,
         CalendarComponent,
@@ -113,7 +90,7 @@ import {
         NgTemplateOutlet,
         TextBoxPrefixTemplateDirective
     ],
-    hostDirectives: [DropdownPopupHandlerDirective, FormFieldValidationDirective],
+    hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
         "[attr.data-expanded]": "expanded()",
@@ -121,18 +98,14 @@ import {
         "(blur)": "onDateInputBlur()"
     }
 })
-export class DateTimePickerComponent implements ControlValueAccessor, Validator, DropdownPopupInput {
+export class DateTimePickerComponent implements FormValueControl<Date | null>, DropdownPopupInput {
     readonly #calendarService = inject(CalendarService);
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #dropdownService = inject(DropdownService);
-    readonly #formFieldValidationService = inject(FormFieldValidationService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
     readonly #themeService = inject(ThemeService);
     readonly #timeSelectorService = inject(TimeSelectorService);
-    readonly #value = signal<Date | null>(null);
-    #propagateChange: Action<Date | null> | null = null;
-    #propagateTouched: Action | null = null;
 
     protected readonly activeView = signal<ActiveView>("date");
     protected readonly baseClass = computed(() => {
@@ -145,7 +118,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         return twMerge(variantClass, userClass);
     });
     protected readonly currentDateString = linkedSignal(() => {
-        const value = this.#value();
+        const value = this.value();
         const format = this.format();
         if (!value) {
             return "";
@@ -166,7 +139,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         const controls = this.popupId;
         const expanded = this.#dropdownService.popupRef() != null;
         const hasPopup = "dialog";
-        const invalid = this.#formFieldValidationService.invalid();
+        const invalid = this.invalid();
         return {
             "aria-autocomplete": "none",
             "aria-controls": controls,
@@ -178,7 +151,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         };
     });
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
-    protected readonly navigatedDate = linkedSignal(() => this.#value() ?? new Date());
+    protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -188,7 +161,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         return twMerge(variantClass, userClass);
     });
     protected readonly popupId = createElementControlId();
-    protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("datePopupTemplate");
+    protected readonly popupTemplate = viewChild.required<TemplateRef<unknown>>("datePopupTemplate");
     protected readonly prefixTemplate = contentChild(DateInputPrefixTemplateDirective, { read: TemplateRef });
     protected readonly timePickerMax = computed(() => {
         const maxDate = this.max();
@@ -231,7 +204,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
     /**
      * @description Sets the disabled state of the date time picker.
      */
-    public readonly disabled = model(false);
+    public readonly disabled = input(false);
 
     /**
      * @description Sets the disabled dates of the date time picker.
@@ -262,14 +235,25 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
     public readonly hourStep = input(1);
 
     /**
+     * @description Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Sets the maximum date of the date time picker.
      */
-    public readonly max = input<Date | null>(null);
+    public readonly max = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
 
     /**
      * @description Sets the minimum date of the date time picker.
      */
-    public readonly min = input<Date | null>(null);
+    public readonly min = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
 
     /**
      * @description Sets the minute step of the time picker.
@@ -323,6 +307,8 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
 
     /**
      * @description Sets the required state of the date time picker.
+     * When bound to a signal form field via `[formField]`, this is written by the `FormField` directive.
+     * @default false
      */
     public readonly required = input(false);
 
@@ -350,7 +336,27 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
      * @description Sets the size of the date time picker.
      */
     public readonly size = input<DateTimePickerVariantProps["size"]>("medium");
+
+    /**
+     * @description Emitted when the date time picker is interacted with via blur, selection, or clear.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
     public readonly userClass = input("", { alias: "class" });
+
+    /**
+     * @description Two-way bindable current date time value.
+     * @default null
+     */
+    public readonly value = model<Date | null>(null);
 
     /**
      * @description Enables the display of week numbers in the calendar.
@@ -371,54 +377,16 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         });
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public validate(control: AbstractControl): ValidationErrors | null {
-        const value = control.value as Date | null;
-        if (!value) {
-            return null;
-        }
-
-        const min = this.min();
-        const max = this.max();
-        const disabledDates = this.disabledDates();
-
-        // Min/max are inclusive - only invalid if strictly outside the range
-        if (min && value.getTime() < min.getTime()) {
-            return { minError: { minValue: min, value } };
-        }
-        if (max && value.getTime() > max.getTime()) {
-            return { maxError: { maxValue: max, value } };
-        }
-        if (this.isDateDisabledByInput(value, disabledDates)) {
-            return { disabledDate: true };
-        }
-        return null;
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.#value.set(date ?? null);
-    }
-
     protected onCancelClick(): void {
-        this.navigatedDate.set(this.#value() ?? new Date());
+        this.navigatedDate.set(this.value() ?? new Date());
         this.#dropdownService.popupRef()?.close();
-        this.#propagateChange?.(this.#value());
+        this.touch.emit();
     }
 
-    protected onCalendarValueChange(date: Date | null): void {
-        if (date) {
-            const inRangeDate = this.updateDateIfNotInRange(date);
+    protected onCalendarValueChange(date: Date | Date[] | null): void {
+        const singleDate = Array.isArray(date) ? null : date;
+        if (singleDate) {
+            const inRangeDate = this.updateDateIfNotInRange(singleDate);
             this.navigatedDate.set(inRangeDate);
         }
         this.activeView.set("time");
@@ -426,23 +394,24 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
 
     protected onDateInputBlur(): void {
         if (this.#dropdownService.popupRef()) {
-            this.#propagateTouched?.();
+            this.touch.emit();
             return;
         }
-        if (!this.currentDateString() && this.#value()) {
+        if (!this.currentDateString() && this.value()) {
             this.setCurrentDate(null);
-            this.#propagateTouched?.();
+            this.touch.emit();
             return;
         }
 
         const dateTime = DateTime.fromFormat(this.currentDateString(), this.format());
-        if (this.dateStringEquals(this.#value(), dateTime.toJSDate())) {
-            this.#propagateTouched?.();
+        if (this.dateStringEquals(this.value(), dateTime.toJSDate())) {
+            this.touch.emit();
             return;
         }
         if (dateTime.isValid) {
-            const value = this.#value();
+            const value = this.value();
             if (value && DateTime.fromJSDate(value).equals(dateTime)) {
+                this.touch.emit();
                 return;
             }
             this.setCurrentDate(dateTime.toJSDate());
@@ -450,10 +419,13 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
             this.setCurrentDate(null);
             this.currentDateString.set("");
         }
-        this.#propagateTouched?.();
+        this.touch.emit();
     }
 
     protected onDateInputButtonClick(): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         if (this.#dropdownService.popupRef()) {
             this.closePopup();
         } else {
@@ -466,9 +438,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
     }
 
     protected onSetDateClick(): void {
-        this.#value.set(this.navigatedDate());
+        this.value.set(this.navigatedDate());
         this.#dropdownService.popupRef()?.close();
-        this.#propagateChange?.(this.#value());
+        this.touch.emit();
     }
 
     protected onTimeSelectorValueChange(date: Date | null): void {
@@ -496,7 +468,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         return date1 === date2;
     }
 
-    private focus(): void {
+    public focus(): void {
         const input = this.#hostElementRef.nativeElement.querySelector("input");
         if (input && !this.readonly()) {
             input.focus();
@@ -514,9 +486,9 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
     }
 
     private setCurrentDate(date: Date | null): void {
-        this.#value.set(date);
+        this.value.set(date);
         this.updateCurrentDateString(date, this.format());
-        this.#propagateChange?.(date);
+        this.touch.emit();
     }
 
     private closePopup(): void {
@@ -622,7 +594,7 @@ export class DateTimePickerComponent implements ControlValueAccessor, Validator,
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.focus();
             this.activeView.set("date");
-            this.navigatedDate.set(this.#value() ?? new Date());
+            this.navigatedDate.set(this.value() ?? new Date());
         });
     }
 

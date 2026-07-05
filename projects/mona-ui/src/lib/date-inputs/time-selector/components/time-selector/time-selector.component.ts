@@ -6,21 +6,22 @@ import {
     computed,
     DestroyRef,
     ElementRef,
-    forwardRef,
+    effect,
     inject,
     input,
     model,
+    output,
     signal,
+    untracked,
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import type { FormValueControl } from "@angular/forms/signals";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
 import { filter } from "rxjs/operators";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
 import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
 import { createElementControlId } from "../../../../utils/createElementControlId";
 import { PreventableEvent } from "../../../../utils/PreventableEvent";
 import { HourFormat } from "../../../models/HourFormat";
@@ -46,30 +47,27 @@ import {
     selector: "mona-time-selector",
     templateUrl: "./time-selector.component.html",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        {
-            provide: NG_VALUE_ACCESSOR,
-            useExisting: forwardRef(() => TimeSelectorComponent),
-            multi: true
-        }
-    ],
     imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
     host: {
         role: "group",
         "[attr.aria-label]": "ariaLabel()",
+        "[attr.aria-disabled]": "disabled()",
+        "[attr.aria-invalid]": "invalid() ? 'true' : null",
+        "[attr.aria-readonly]": "readonly()",
+        "[attr.aria-required]": "required()",
+        "[attr.data-invalid]": "invalid() || null",
+        "[attr.data-readonly]": "readonly() || null",
+        "[attr.data-required]": "required() || null",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
     }
 })
-export class TimeSelectorComponent implements ControlValueAccessor, TimeSelectorVariantInput {
+export class TimeSelectorComponent implements FormValueControl<Date | null>, TimeSelectorVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #themeService = inject(ThemeService);
     readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
-    readonly #value = signal<Date | null>(null);
-    #propagateChange: Action<Date | null> | null = null;
-    #propagateTouched: Action | null = null;
 
     protected readonly amMeridiemVisible = computed(() => {
         const min = this.min();
@@ -144,25 +142,70 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     });
 
     public readonly ariaLabel = input<string>("Time selector");
-    public readonly disabled = model(false);
+    public readonly disabled = input(false);
     public readonly focusOnMount = input(true);
     public readonly footer = input(true);
     public readonly hourFormat = input<HourFormat>("24");
     public readonly hourStep = input(1);
-    public readonly max = input<Date | null>(null);
-    public readonly min = input<Date | null>(null);
+
+    /**
+     * @description Marks the time selector as invalid. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    public readonly max = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
+    public readonly min = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
     public readonly minuteStep = input(1);
+
+    /**
+     * @description Prevents value changes while preserving the component's visual state.
+     * @default false
+     */
+    public readonly readonly = input(false);
+
+    /**
+     * @description Sets whether the time selector is required. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly required = input(false);
+
     public readonly rounded = input<TimePickerVariantProps["rounded"]>("medium");
     public readonly secondStep = input(1);
     public readonly showSeconds = input(false);
     public readonly size = input<TimeSelectorVariantProps["size"]>("medium");
+
+    /**
+     * @description Emitted when the time selector is interacted with via blur or value selection.
+     * The `FormField` directive listens to this to mark the field as touched.
+     */
+    public readonly touch = output<void>();
+
+    /**
+     * @description Sets the touched state of the time selector. When bound to a signal form field via `[formField]`,
+     * this is written by the `FormField` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
+
+    /**
+     * @description Two-way bindable current time value.
+     * @default null
+     */
+    public readonly value = model<Date | null>(null);
 
     public constructor() {
         afterNextRender({
             read: () => {
                 this.#height.set(this.#hostElementRef.nativeElement.offsetHeight);
                 this.setDateValues();
-                const value = this.#value();
+                const value = this.value();
                 if (value) {
                     const dt = DateTime.fromJSDate(value);
                     if (dt.isValid) {
@@ -177,6 +220,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
                 }
             }
         });
+        effect(() => {
+            const value = this.value();
+            untracked(() => this.setDateValues(value));
+        });
         toObservable(this.navigatedDate)
             .pipe(
                 takeUntilDestroyed(),
@@ -186,32 +233,25 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
             .subscribe();
     }
 
-    public registerOnChange(fn: any): void {
-        this.#propagateChange = fn;
-    }
-
-    public registerOnTouched(fn: any): void {
-        this.#propagateTouched = fn;
-    }
-
-    public setDisabledState(isDisabled: boolean): void {
-        this.disabled.set(isDisabled);
-    }
-
-    public writeValue(date: Date | null | undefined): void {
-        this.#value.set(date ?? null);
-        this.setDateValues();
+    public focus(): void {
+        this.focusList(this.focusedList());
     }
 
     protected onBlur(): void {
-        this.#propagateTouched?.();
+        this.touch.emit();
     }
 
     protected onHourChange(hour: number): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         this.navigatedDate.update(d => d.set({ hour }));
     }
 
     protected onMeridiemClick(meridiem: "AM" | "PM"): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         if (this.meridiem() === meridiem) {
             return;
         }
@@ -226,10 +266,16 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     protected onMinuteChange(minute: number): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         this.navigatedDate.update(date => date.set({ minute }));
     }
 
     protected onNowClick(event: Event): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         let now = DateTime.now();
         const min = this.minDate();
         const max = this.maxDate();
@@ -249,10 +295,16 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     protected onSecondChange(second: number): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         this.navigatedDate.update(date => date.set({ second }));
     }
 
     protected onSetTimeClick(): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         this.updateValue(this.navigatedDate().toJSDate(), true);
     }
 
@@ -286,6 +338,9 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     private handleKeydown(event: KeyboardEvent): void {
+        if (this.disabled() || this.readonly()) {
+            return;
+        }
         const preventableEvent = new PreventableEvent("calendarKeydown", event);
         this.#timeSelectorService?.keydown$.next(preventableEvent);
 
@@ -338,6 +393,10 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     private focusList(listType: TimeListType): void {
         const listRef = this.getListRef(listType);
         listRef?.nativeElement.focus();
+    }
+
+    private dateValuesEqual(date1: Date | null, date2: Date | null): boolean {
+        return date1?.getTime() === date2?.getTime();
     }
 
     private initializeNavigatedDate(date: Date | null): void {
@@ -421,8 +480,11 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
         }
     }
 
-    private setDateValues(): void {
-        this.initializeNavigatedDate(this.#value());
+    private setDateValues(value = this.value()): void {
+        const currentDate = this.navigatedDate().toJSDate();
+        if (!this.dateValuesEqual(currentDate, value)) {
+            this.initializeNavigatedDate(value);
+        }
         const meridiem = this.navigatedDate().hour >= 12 ? "PM" : "AM";
         this.meridiem.set(meridiem);
     }
@@ -437,9 +499,15 @@ export class TimeSelectorComponent implements ControlValueAccessor, TimeSelector
     }
 
     private updateValue(date: Date | null, notify: boolean): void {
-        this.#value.set(date);
+        if (this.dateValuesEqual(this.value(), date)) {
+            if (notify) {
+                this.touch.emit();
+            }
+            return;
+        }
+        this.value.set(date);
         if (notify) {
-            this.#propagateChange?.(date);
+            this.touch.emit();
         }
     }
 }

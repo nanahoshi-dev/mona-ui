@@ -77,7 +77,7 @@ describe("GridComponent", () => {
             let received: ColumnSortEvent | undefined;
             gridService.columnSort$.subscribe(event => (received = event));
 
-            component.onColumnSort(column);
+            component["onColumnSort"](column);
 
             expect(received?.column).toBe(column);
         });
@@ -88,7 +88,7 @@ describe("GridComponent", () => {
             const spy = vi.fn();
             gridService.columnSort$.subscribe(spy);
 
-            component.onColumnSort(column);
+            component["onColumnSort"](column);
 
             expect(spy).not.toHaveBeenCalled();
         });
@@ -99,7 +99,7 @@ describe("GridComponent", () => {
             const spy = vi.fn();
             gridService.columnSort$.subscribe(spy);
 
-            component.onColumnSort(column);
+            component["onColumnSort"](column);
 
             expect(spy).not.toHaveBeenCalled();
         });
@@ -112,7 +112,7 @@ describe("GridComponent", () => {
             let received: ColumnResizeEvent | undefined;
             gridService.columnResize$.subscribe(event => (received = event));
 
-            component.onColumnResizeEnd(resizeEvent);
+            component["onColumnResizeEnd"](resizeEvent);
 
             expect(received).toEqual(resizeEvent);
         });
@@ -133,9 +133,9 @@ describe("GridComponent", () => {
             const [colA, , colC] = setupColumns();
             gridService.setReorderableOptions({ enabled: true });
 
-            component.onColumnDragStart(createDragStart(colA));
-            component.onColumnMouseEnter(colC);
-            component.onColumnDrop();
+            component["onColumnDragStart"](createDragStart(colA));
+            component["onColumnMouseEnter"](colC);
+            component["onColumnDrop"]();
 
             const fields = gridService
                 .columns()
@@ -148,9 +148,9 @@ describe("GridComponent", () => {
             const [colA, , colC] = setupColumns();
             gridService.setReorderableOptions({ enabled: false });
 
-            component.onColumnDragStart(createDragStart(colA));
-            component.onColumnMouseEnter(colC);
-            component.onColumnDrop();
+            component["onColumnDragStart"](createDragStart(colA));
+            component["onColumnMouseEnter"](colC);
+            component["onColumnDrop"]();
 
             const fields = gridService
                 .columns()
@@ -164,9 +164,9 @@ describe("GridComponent", () => {
             gridService.setReorderableOptions({ enabled: true });
             gridService.columnReorder$.subscribe((event: ColumnReorderEvent) => event.preventDefault());
 
-            component.onColumnDragStart(createDragStart(colA));
-            component.onColumnMouseEnter(colC);
-            component.onColumnDrop();
+            component["onColumnDragStart"](createDragStart(colA));
+            component["onColumnMouseEnter"](colC);
+            component["onColumnDrop"]();
 
             const fields = gridService
                 .columns()

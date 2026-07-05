@@ -1,8 +1,10 @@
-import { TimeSelectorListDirective } from './time-selector-list.directive';
+import { TestBed } from "@angular/core/testing";
+import { TimeSelectorListDirective } from "./time-selector-list.directive";
 
-describe('TimeSelectorListDirective', () => {
-  it('should create an instance', () => {
-    const directive = new TimeSelectorListDirective();
-    expect(directive).toBeTruthy();
-  });
+describe("TimeSelectorListDirective", () => {
+    it("should create an instance", () => {
+        TestBed.configureTestingModule({});
+        const directive = TestBed.runInInjectionContext(() => new TimeSelectorListDirective());
+        expect(directive).toBeTruthy();
+    });
 });

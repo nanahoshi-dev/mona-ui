@@ -1,8 +1,10 @@
+import { TestBed } from '@angular/core/testing';
 import { DecadeYearDirective } from './decade-year.directive';
 
 describe('DecadeYearDirective', () => {
   it('should create an instance', () => {
-    const directive = new DecadeYearDirective();
+    TestBed.configureTestingModule({});
+    const directive = TestBed.runInInjectionContext(() => new DecadeYearDirective());
     expect(directive).toBeTruthy();
   });
 });

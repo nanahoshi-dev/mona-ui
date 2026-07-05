@@ -6,7 +6,8 @@ import { breadcrumbListItemThemeVariants, BreadcrumbListItemVariantInput } from 
 @Directive({
     selector: "button[monaBreadcrumbItem]",
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "[disabled]": "disabled()"
     }
 })
 export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {

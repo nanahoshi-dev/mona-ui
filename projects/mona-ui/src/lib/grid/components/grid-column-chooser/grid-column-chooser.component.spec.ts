@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { GridService } from "../../services/grid.service";
 
 import { GridColumnChooserComponent } from "./grid-column-chooser.component";
 
@@ -8,7 +9,8 @@ describe("GridColumnChooserComponent", () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [GridColumnChooserComponent]
+            imports: [GridColumnChooserComponent],
+            providers: [GridService]
         }).compileComponents();
 
         fixture = TestBed.createComponent(GridColumnChooserComponent);

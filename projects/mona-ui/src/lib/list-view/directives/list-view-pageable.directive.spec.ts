@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ListService } from "../../common/list/services/list.service";
 import { ListViewComponent } from "../components/list-view/list-view.component";
 import { ListViewPageableDirective } from "./list-view-pageable.directive";
@@ -28,7 +27,7 @@ describe("ListViewPageableDirective", () => {
     let component: TestComponent;
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TestComponent, BrowserAnimationsModule],
+            imports: [TestComponent],
             providers: [ListService]
         }).compileComponents();
         fixture = TestBed.createComponent(TestComponent);

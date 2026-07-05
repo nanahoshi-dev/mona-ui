@@ -20,7 +20,7 @@ describe("ContextMenuComponent", () => {
         fixture = TestBed.createComponent(ContextMenuComponent);
         component = fixture.componentInstance;
         document = TestBed.inject(DOCUMENT);
-        fixture.componentRef.setInput("target", document);
+        fixture.componentRef.setInput("target", document.documentElement);
         fixture.detectChanges();
     });
 

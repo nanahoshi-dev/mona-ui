@@ -1,15 +1,17 @@
 <mona-text-box
     (inputBlur)="onDateInputBlur()"
-    (ngModelChange)="onDateStringEdit($event)"
+    (valueChange)="onDateStringEdit($event)"
     [disabled]="disabled()"
-    [ngModel]="currentDateString()"
+    [value]="currentDateString()"
     [placeholder]="placeholder()"
     [readonly]="readonly() || readonlyInput()"
     [inputAttributes]="inputAttributes()"
+    [invalid]="invalid()"
     [required]="required()"
     [clearButton]="showClearButton()"
     [rounded]="rounded()"
-    [size]="size()">
+    [size]="size()"
+    [touched]="touched()">
     @if (prefixTemplate()) {
         <ng-template monaTextBoxPrefixTemplate>
             <ng-container [ngTemplateOutlet]="prefixTemplate()"></ng-container>
@@ -46,6 +48,7 @@
             [disabledDates]="disabledDates()"
             [minDate]="min()"
             [maxDate]="max()"
+            [readonly]="readonly()"
             [rounded]="rounded()"
             [weekNumber]="weekNumber()"
             [firstDay]="firstDay()"

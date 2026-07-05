@@ -166,7 +166,7 @@ describe("PopupMenuListComponent", () => {
 
         const activeId = menuElement(fixture).getAttribute("aria-activedescendant");
         expect(activeId).toBeTruthy();
-        expect(fixture.nativeElement.querySelector(`#${CSS.escape(activeId!)}`)).not.toBeNull();
+        expect(fixture.nativeElement.querySelector(`[id="${activeId}"]`)).not.toBeNull();
     });
 
     it("does not prevent default behavior for keys it does not handle, e.g. Tab (regression for C-2)", async () => {

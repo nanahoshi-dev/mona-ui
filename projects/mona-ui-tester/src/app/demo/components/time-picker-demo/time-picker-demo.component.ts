@@ -1,9 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { metadata } from "@angular/forms/signals";
-import { mode } from "@mirei/ts-collections";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
 import { DateTime } from "luxon";
 import { PreventableEvent, TimePickerComponent } from "mona-ui";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -124,46 +121,42 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
 }
 
 @Component({
-    imports: [TimePickerComponent, ReactiveFormsModule],
+    imports: [TimePickerComponent, FormField],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <span>Selected Time: {{ formValueText() }}</span>
-        <form [formGroup]="formGroup">
-            <mona-time-picker
-                [disabled]="disabled()"
-                [formControl]="formGroup.controls.value"
-                [format]="format()"
-                [hourFormat]="hourFormat()"
-                [hourStep]="hourStep()"
-                [max]="max()"
-                [min]="min()"
-                [minuteStep]="minuteStep()"
-                [popupHeight]="popupHeight()"
-                [popupWidth]="popupWidth()"
-                [readonly]="readonly()"
-                [readonlyInput]="readonlyInput()"
-                [required]="required()"
-                [rounded]="rounded()"
-                [secondStep]="secondStep()"
-                [showClearButton]="showClearButton()"
-                [showSeconds]="showSeconds()"
-                [size]="size()"
-                (close)="onPopupClose($event)"
-                (open)="onPopupOpen($event)"
-                class="w-32">
-            </mona-time-picker>
-        </form>
+        <mona-time-picker
+            [formField]="form.value"
+            [format]="format()"
+            [hourFormat]="hourFormat()"
+            [hourStep]="hourStep()"
+            [minuteStep]="minuteStep()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
+            [readonlyInput]="readonlyInput()"
+            [rounded]="rounded()"
+            [secondStep]="secondStep()"
+            [showClearButton]="showClearButton()"
+            [showSeconds]="showSeconds()"
+            [size]="size()"
+            (close)="onPopupClose($event)"
+            (open)="onPopupOpen($event)"
+            class="w-32">
+        </mona-time-picker>
     `
 })
 class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerComponent> {
-    readonly #formGroup = new FormGroup({
-        value: new FormControl<Date | null>(null, { nonNullable: false, validators: [] })
-    });
-    readonly #formValue = toSignal(this.#formGroup.controls.value.valueChanges);
+    readonly #formModel = signal<TimePickerFormModel>({ value: null });
     protected readonly features = inject(FeatureConfigHandler).data;
-    protected readonly formGroup = this.#formGroup;
+    protected readonly form = form(this.#formModel, schema => {
+        disabled(schema.value, { when: () => this.disabled() });
+        maxDate(schema.value, () => this.max());
+        minDate(schema.value, () => this.min());
+        readonly(schema.value, { when: () => this.readonly() });
+        required(schema.value, { when: () => this.required() });
+    });
     protected readonly formValueText = computed(() => {
-        const value = this.#formValue();
+        const value = this.form.value().value();
         const format = this.format();
         const hourMode = this.hourFormat();
         if (!value) {
@@ -175,12 +168,16 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
         }
         return dt.toFormat(format);
     });
-    public readonly disabled = model<ReturnType<TimePickerComponent["disabled"]>>(false);
+    public readonly disabled = input<ReturnType<TimePickerComponent["disabled"]>>(false);
     public readonly format = input<ReturnType<TimePickerComponent["format"]>>("HH:mm");
     public readonly hourFormat = input<ReturnType<TimePickerComponent["hourFormat"]>>("24");
     public readonly hourStep = input<ReturnType<TimePickerComponent["hourStep"]>>(1);
-    public readonly max = input<ReturnType<TimePickerComponent["max"]>>(null);
-    public readonly min = input<ReturnType<TimePickerComponent["min"]>>(null);
+    public readonly max = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
+    public readonly min = input<Date | undefined, unknown>(undefined, {
+        transform: value => (value instanceof Date ? value : undefined)
+    });
     public readonly minuteStep = input<ReturnType<TimePickerComponent["minuteStep"]>>(1);
     public readonly popupHeight = input<ReturnType<TimePickerComponent["popupHeight"]>>(null);
     public readonly popupWidth = input<ReturnType<TimePickerComponent["popupWidth"]>>(null);
@@ -207,4 +204,8 @@ class TimePickerWrapperComponent implements ComponentInputsAsSignal<TimePickerCo
             console.log("Time picker popup prevented from opening");
         }
     }
+}
+
+interface TimePickerFormModel {
+    value: Date | null;
 }

@@ -1,5 +1,5 @@
 import { Component, viewChild } from "@angular/core";
-import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { PopupService } from "../../services/popup.service";
 
 import { PopupComponent } from "./popup.component";
@@ -37,7 +37,7 @@ describe("PopupComponent", () => {
         expect(hostComponent).toBeTruthy();
     });
 
-    it("should open a popup when the trigger fires", fakeAsync(() => {
+    it("should open a popup when the trigger fires", () => {
         const anchor = hostFixture.nativeElement.querySelector("button") as HTMLButtonElement;
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
         hostFixture.detectChanges();
@@ -45,9 +45,9 @@ describe("PopupComponent", () => {
         const popupComponent = hostComponent.popupComponent();
         expect((popupComponent as any).popupRef).not.toBeNull();
         (popupComponent as any).popupRef?.close(undefined, 0);
-    }));
+    });
 
-    it("should close and not reopen when the trigger fires a second time while the popup is open", fakeAsync(() => {
+    it("should close and not reopen when the trigger fires a second time while the popup is open", async () => {
         const anchor = hostFixture.nativeElement.querySelector("button") as HTMLButtonElement;
 
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
@@ -57,17 +57,17 @@ describe("PopupComponent", () => {
         const firstRef = (popupComponent as any).popupRef;
         expect(firstRef).not.toBeNull();
 
-        let closed = false;
-        firstRef.closed.subscribe(() => (closed = true));
+        const closedPromise = new Promise<void>(resolve => firstRef.closed.subscribe(() => resolve()));
 
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
         hostFixture.detectChanges();
 
-        expect(closed).toBe(true);
-        expect((popupComponent as any).popupRef).toBeNull();
-    }));
+        await closedPromise;
 
-    it("should forward closeOnScroll to PopupService.create", fakeAsync(() => {
+        expect((popupComponent as any).popupRef).toBeNull();
+    });
+
+    it("should forward closeOnScroll to PopupService.create", () => {
         const service = TestBed.inject(PopupService);
         const createSpy = vi.spyOn(service, "create");
 
@@ -80,9 +80,9 @@ describe("PopupComponent", () => {
         expect(settings.closeOnScroll).toBe(false);
 
         (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
-    }));
+    });
 
-    it("should forward restoreFocus to PopupService.create", fakeAsync(() => {
+    it("should forward restoreFocus to PopupService.create", () => {
         const service = TestBed.inject(PopupService);
         const createSpy = vi.spyOn(service, "create");
 
@@ -95,9 +95,9 @@ describe("PopupComponent", () => {
         expect(settings.restoreFocus).toBe("auto");
 
         (hostComponent.popupComponent() as any).popupRef?.close(undefined, 0);
-    }));
+    });
 
-    it("should forward custom positions array to PopupService.create", fakeAsync(() => {
+    it("should forward custom positions array to PopupService.create", () => {
         const service = TestBed.inject(PopupService);
         const createSpy = vi.spyOn(service, "create");
         const customPositions = [{ originX: "start" as const, originY: "top" as const, overlayX: "end" as const, overlayY: "bottom" as const }];
@@ -130,5 +130,5 @@ describe("PopupComponent", () => {
         expect(settings.positions).toEqual(customPositions);
 
         fixture.destroy();
-    }));
+    });
 });

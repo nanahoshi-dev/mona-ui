@@ -1,4 +1,4 @@
-import { Component, ElementRef } from "@angular/core";
+import { ApplicationRef, Component, ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { Overlay } from "@angular/cdk/overlay";
 import { PopupRef } from "../models/PopupRef";
@@ -79,7 +79,7 @@ describe("PopupService", () => {
         expect(updatePositionSpy).toHaveBeenCalledTimes(1);
     });
 
-    it("should close the popup when Escape is pressed", () => {
+    it("should close the popup when Escape is pressed", async () => {
         const anchor = createAnchor();
 
         popupRef = service.create({
@@ -87,6 +87,7 @@ describe("PopupService", () => {
             animation: false,
             content: PopupTestContentComponent
         });
+        await TestBed.inject(ApplicationRef).tick();
 
         let closed = false;
         popupRef.closed.subscribe(() => (closed = true));
@@ -97,7 +98,7 @@ describe("PopupService", () => {
         popupRef = null;
     });
 
-    it("should not close the popup on Escape when closeOnEscape is false", () => {
+    it("should not close the popup on Escape when closeOnEscape is false", async () => {
         const anchor = createAnchor();
 
         popupRef = service.create({
@@ -106,6 +107,7 @@ describe("PopupService", () => {
             content: PopupTestContentComponent,
             closeOnEscape: false
         });
+        await TestBed.inject(ApplicationRef).tick();
 
         let closed = false;
         popupRef.closed.subscribe(() => (closed = true));
@@ -115,7 +117,7 @@ describe("PopupService", () => {
         expect(closed).toBe(false);
     });
 
-    it("should close the popup on an outside click", () => {
+    it("should close the popup on an outside click", async () => {
         const anchor = createAnchor();
 
         popupRef = service.create({
@@ -123,6 +125,7 @@ describe("PopupService", () => {
             animation: false,
             content: PopupTestContentComponent
         });
+        await TestBed.inject(ApplicationRef).tick();
 
         let closed = false;
         popupRef.closed.subscribe(() => (closed = true));

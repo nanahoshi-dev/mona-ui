@@ -13,7 +13,7 @@ import { ChipComponent } from "./chip.component";
 @Component({
     template: `
         <mona-chip
-            [ariaLabel]="ariaLabel()"
+            [aria-label]="ariaLabel() ?? ''"
             [disabled]="disabled()"
             [label]="label()"
             [look]="look()"

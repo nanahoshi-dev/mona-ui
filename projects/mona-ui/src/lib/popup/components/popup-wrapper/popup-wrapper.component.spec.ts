@@ -50,14 +50,10 @@ describe("PopupWrapperComponent", () => {
 
     it("should complete close when the animated wrapper finishes leaving", () => {
         const closeEvent = new PopupCloseEvent();
-        const animationEvent = new AnimationEvent("animationend");
         const target = document.createElement("div");
+        const animationEvent = { currentTarget: target, target } as unknown as AnimationEvent;
 
         closeStart$.next(closeEvent);
-        Object.defineProperties(animationEvent, {
-            currentTarget: { value: target },
-            target: { value: target }
-        });
         (component as unknown as PopupWrapperComponentTestApi).onNativeLeaveComplete(animationEvent);
 
         expect(completeClose).toHaveBeenCalledOnce();
@@ -66,13 +62,12 @@ describe("PopupWrapperComponent", () => {
 
     it("should ignore animation events from popup content children", () => {
         const closeEvent = new PopupCloseEvent();
-        const animationEvent = new AnimationEvent("animationend");
+        const animationEvent = {
+            currentTarget: document.createElement("div"),
+            target: document.createElement("span")
+        } as unknown as AnimationEvent;
 
         closeStart$.next(closeEvent);
-        Object.defineProperties(animationEvent, {
-            currentTarget: { value: document.createElement("div") },
-            target: { value: document.createElement("span") }
-        });
         (component as unknown as PopupWrapperComponentTestApi).onNativeLeaveComplete(animationEvent);
 
         expect(completeClose).not.toHaveBeenCalled();

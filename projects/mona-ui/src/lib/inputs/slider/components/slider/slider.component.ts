@@ -35,9 +35,9 @@ export class SliderComponent extends SliderBaseComponent implements FormValueCon
     /**
      * @description Accessible name for the host element. Describe what the component represents.
      * When empty, assistive technology announces the role without a label.
-     * @default null
+     * @default "Slider value"
      */
-    public readonly ariaLabel = input<string | null>(null, { alias: "aria-label" });
+    public readonly ariaLabel = input<string | null>("Slider value", { alias: "aria-label" });
 
     /**
      * @description ID of an external element that provides the accessible name for the host element.

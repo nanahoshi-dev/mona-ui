@@ -6,7 +6,9 @@ describe('MultiSelectService', () => {
   let service: MultiSelectService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [MultiSelectService]
+    });
     service = TestBed.inject(MultiSelectService);
   });
 

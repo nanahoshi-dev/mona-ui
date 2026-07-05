@@ -63,7 +63,7 @@ describe("BreadcrumbComponent", () => {
 
     describe("Rendering", () => {
         it("should render interactive spans for non-last items", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
             expect(items.length).toBe(2);
         });
 
@@ -90,7 +90,7 @@ describe("BreadcrumbComponent", () => {
         });
 
         it("should set aria-current='page' on the last item only", () => {
-            const interactiveItems = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
+            const interactiveItems = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
             for (const item of interactiveItems) {
                 expect(item.nativeElement.getAttribute("aria-current")).toBeNull();
             }
@@ -98,14 +98,14 @@ describe("BreadcrumbComponent", () => {
             expect(lastItem.nativeElement.getAttribute("aria-current")).toBe("page");
         });
 
-        it("should set aria-disabled='true' on disabled items", () => {
+        it("should set the disabled attribute on disabled items", () => {
             hostComponent.items.update(items =>
                 items.map((item, index) => (index === 0 ? { ...item, disabled: true } : item))
             );
             hostFixture.detectChanges();
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
-            expect(items[0].nativeElement.getAttribute("aria-disabled")).toBe("true");
-            expect(items[1].nativeElement.getAttribute("aria-disabled")).toBeNull();
+            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            expect(items[0].nativeElement.disabled).toBe(true);
+            expect(items[1].nativeElement.disabled).toBe(false);
         });
 
         it("should hide separator elements from accessibility tree", () => {
@@ -124,40 +124,29 @@ describe("BreadcrumbComponent", () => {
     });
 
     describe("Keyboard Navigation", () => {
-        it("should set tabindex='0' on non-disabled interactive items", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
+        it("should keep non-disabled interactive items focusable", () => {
+            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
             for (const item of items) {
-                expect(item.nativeElement.getAttribute("tabindex")).toBe("0");
+                item.nativeElement.focus();
+                expect(hostFixture.nativeElement.ownerDocument.activeElement).toBe(item.nativeElement);
             }
         });
 
-        it("should set tabindex='-1' on disabled items", () => {
+        it("should remove disabled items from the tab order", () => {
             hostComponent.items.update(items =>
                 items.map((item, index) => (index === 1 ? { ...item, disabled: true } : item))
             );
             hostFixture.detectChanges();
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
-            expect(items[1].nativeElement.getAttribute("tabindex")).toBe("-1");
+            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
+            items[1].nativeElement.focus();
+            expect(hostFixture.nativeElement.ownerDocument.activeElement).not.toBe(items[1].nativeElement);
         });
 
-        it("should emit itemClick on Enter key", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
-            items[0].nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-            hostFixture.detectChanges();
-            expect(hostComponent.clickedItems.length).toBe(1);
-        });
-
-        it("should emit itemClick on Space key", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
-            items[0].nativeElement.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
-            hostFixture.detectChanges();
-            expect(hostComponent.clickedItems.length).toBe(1);
-        });
     });
 
     describe("Click Behavior", () => {
         it("should emit itemClick on click", () => {
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
             items[0].nativeElement.click();
             hostFixture.detectChanges();
             expect(hostComponent.clickedItems.length).toBe(1);
@@ -168,7 +157,7 @@ describe("BreadcrumbComponent", () => {
                 items.map((item, index) => (index === 0 ? { ...item, disabled: true } : item))
             );
             hostFixture.detectChanges();
-            const items = hostFixture.debugElement.queryAll(By.css("span[monaBreadcrumbItem]"));
+            const items = hostFixture.debugElement.queryAll(By.css("button[monaBreadcrumbItem]"));
             items[0].nativeElement.click();
             hostFixture.detectChanges();
             expect(hostComponent.clickedItems.length).toBe(0);

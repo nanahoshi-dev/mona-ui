@@ -6,7 +6,9 @@ describe('DropdownListService', () => {
   let service: DropdownListService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [DropdownListService]
+    });
     service = TestBed.inject(DropdownListService);
   });
 

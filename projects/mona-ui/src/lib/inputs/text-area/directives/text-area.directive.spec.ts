@@ -4,7 +4,7 @@ import { ThemeService } from "../../../theme/services/theme.service";
 import { TextAreaDirective } from "./text-area.directive";
 
 @Component({
-    template: `<textarea monaTextArea [invalid]="invalid()" class="custom-class"></textarea>`,
+    template: `<textarea monaTextArea [invalid]="invalid()" [touched]="true" class="custom-class"></textarea>`,
     imports: [TextAreaDirective]
 })
 class TestHostComponent {
