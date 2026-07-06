@@ -65,6 +65,13 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     public readonly inputFocus = output<FocusEvent>();
 
     /**
+     * @description Marks the radio button as invalid. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Text label displayed alongside the radio button.
      * When provided, takes precedence over projected content.
      * When empty, projected content inside `<mona-radio-button>` is used.

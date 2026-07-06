@@ -79,6 +79,8 @@ import {
         "[attr.tabindex]": "disabled() ? -1 : 0",
         "[attr.data-active]": "checked()",
         "[attr.data-disabled]": "disabled()",
+        "[attr.data-invalid]": "invalidState() || null",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[class]": "classes()",
         "(blur)": "onBlur()"
     }
@@ -94,6 +96,9 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         const classes = switchThemeVariants(theme)({ rounded, size });
         return twMerge(classes, this.userClass());
     });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.checked())
+    );
     protected readonly handleClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
@@ -138,6 +143,13 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
     public readonly disabled = input(false);
 
     /**
+     * @description Marks the switch as invalid. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Label displayed inside the switch track when it is in the off state.
      * @default ""
      */
@@ -148,6 +160,12 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
      * @default ""
      */
     public readonly onLabel = input("");
+
+    /**
+     * @description Marks the switch as required for form validation.
+     * @default false
+     */
+    public readonly required = input(false);
 
     /**
      * @description Border-radius preset applied to the component.
@@ -165,6 +183,13 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
      * @description Emitted when the switch loses focus or its value changes.
      */
     public readonly touch = output();
+
+    /**
+     * @description Marks the switch as touched. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

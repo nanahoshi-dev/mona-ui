@@ -211,8 +211,38 @@
   },
   "GridEditableDirective": {
     "name": "GridEditableDirective",
-    "selector": "\"[monaGridEditable]\"",
+    "selector": "\"mona-grid[monaGridEditable]\"",
     "inputs": [
+      {
+        "name": "add",
+        "type": "GridAddEvent",
+        "description": "Emitted before the grid displays the new-row editor.",
+        "kind": "output"
+      },
+      {
+        "name": "cancel",
+        "type": "GridCancelEvent",
+        "description": "Emitted before an edit operation is canceled.",
+        "kind": "output"
+      },
+      {
+        "name": "cellEdit",
+        "type": "CellEditEvent",
+        "description": "Emitted when a cell is edited.",
+        "kind": "output"
+      },
+      {
+        "name": "edit",
+        "type": "GridEditEvent",
+        "description": "Emitted before a row enters edit mode.",
+        "kind": "output"
+      },
+      {
+        "name": "newRowFactory",
+        "type": "() => Record<PropertyKey, unknown>",
+        "description": "Creates the initial data object used by the add-row editor.",
+        "kind": "input"
+      },
       {
         "name": "options",
         "type": "EditableOptions | \"\"",
@@ -220,10 +250,28 @@
         "kind": "input"
       },
       {
+        "name": "remove",
+        "type": "GridRemoveEvent",
+        "description": "Emitted when a row remove command is triggered.",
+        "kind": "output"
+      },
+      {
+        "name": "rowEdit",
+        "type": "RowEditEvent",
+        "description": "Emitted when a row edit is committed (row mode only).",
+        "kind": "output"
+      },
+      {
         "name": "rowKey",
         "type": "GridKeySelector<unknown> | null",
         "description": "Field name or selector used to keep edited row identity stable when data is rebound.",
         "kind": "input"
+      },
+      {
+        "name": "save",
+        "type": "GridSaveEvent",
+        "description": "Emitted before an edited or new row is saved.",
+        "kind": "output"
       }
     ]
   },
@@ -1798,54 +1846,6 @@
     "selector": "\"mona-grid\"",
     "inputs": [
       {
-        "name": "add",
-        "type": "GridAddEvent",
-        "description": "Emitted before the grid displays the new-row editor.",
-        "kind": "output"
-      },
-      {
-        "name": "cancel",
-        "type": "GridCancelEvent",
-        "description": "Emitted before an edit operation is cancelled.",
-        "kind": "output"
-      },
-      {
-        "name": "cellEdit",
-        "type": "CellEditEvent",
-        "description": "Emitted when a cell is edited.",
-        "kind": "output"
-      },
-      {
-        "name": "edit",
-        "type": "GridEditEvent",
-        "description": "Emitted before a row enters edit mode.",
-        "kind": "output"
-      },
-      {
-        "name": "newRowFactory",
-        "type": "() => Record<PropertyKey, unknown>",
-        "description": "Creates the initial data object used by the add-row editor.",
-        "kind": "input"
-      },
-      {
-        "name": "remove",
-        "type": "GridRemoveEvent",
-        "description": "Emitted when a row remove command is triggered.",
-        "kind": "output"
-      },
-      {
-        "name": "rowEdit",
-        "type": "RowEditEvent",
-        "description": "Emitted when a row edit is committed (row mode only).",
-        "kind": "output"
-      },
-      {
-        "name": "save",
-        "type": "GridSaveEvent",
-        "description": "Emitted before an edited or new row is saved.",
-        "kind": "output"
-      },
-      {
         "name": "data",
         "type": "Iterable<T>",
         "description": "The row data to be displayed in the grid.",
@@ -1860,19 +1860,19 @@
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
+        "description": "The page sizes that the user can select from.\r\nThese values will be displayed in the page size dropdown.",
         "kind": "input"
       },
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
+        "description": "The method to be used to set initial column widths.\r\nIt can be the following values:\r\n- `fitView`: The columns will be resized to fit the available width.\r\n- `auto`: The columns will be resized based on the content.\r\n- A number representing the width of the columns. All columns except the columns with a specified width\r\nwill have the same width.",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
+        "description": "Whether the pager is responsive.\r\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input"
       },
       {
@@ -2128,14 +2128,8 @@
         "kind": "input"
       },
       {
-        "name": "rowData",
-        "type": "Record<PropertyKey, unknown>",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "value",
-        "type": "unknown",
+        "name": "session",
+        "type": "GridEditSession",
         "description": "",
         "kind": "input"
       },
@@ -2148,12 +2142,6 @@
       {
         "name": "commit",
         "type": "void",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "valueChange",
-        "type": "unknown",
         "description": "",
         "kind": "output"
       }
@@ -4596,7 +4584,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4668,7 +4656,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the time picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4704,13 +4692,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5728,6 +5716,12 @@
         "kind": "output"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
         "name": "label",
         "type": "string",
         "description": "Text label displayed alongside the checkbox. When provided, takes precedence over projected content.",
@@ -5770,6 +5764,12 @@
         "kind": "output"
       },
       {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the checkbox as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "Additional CSS classes merged onto the label container via `tailwind-merge`.",
@@ -5806,9 +5806,21 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
         "name": "opacity",
         "type": "boolean",
         "description": "Specifies whether the color picker should display the alpha slider.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Marks the color gradient as required for form validation.",
         "kind": "input"
       },
       {
@@ -5840,6 +5852,12 @@
         "type": "void",
         "description": "Emitted when the color gradient is interacted with on blur or value adjustment.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the color gradient as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
       },
       {
         "name": "value",
@@ -6182,6 +6200,12 @@
         "type": "FocusEvent",
         "description": "Emits when the input receives focus.",
         "kind": "output"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the radio button as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
       },
       {
         "name": "label",
@@ -6700,6 +6724,12 @@
         "kind": "input"
       },
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the switch as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
         "name": "offLabel",
         "type": "string",
         "description": "Label displayed inside the switch track when it is in the off state.",
@@ -6709,6 +6739,12 @@
         "name": "onLabel",
         "type": "string",
         "description": "Label displayed inside the switch track when it is in the on state.",
+        "kind": "input"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "description": "Marks the switch as required for form validation.",
         "kind": "input"
       },
       {
@@ -6728,6 +6764,12 @@
         "type": "void",
         "description": "Emitted when the switch loses focus or its value changes.",
         "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the switch as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
+        "kind": "input"
       },
       {
         "name": "userClass",

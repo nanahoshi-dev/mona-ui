@@ -18,6 +18,9 @@ export const switchVariants = cva(
         data-[active='true']:text-primary-foreground
 
         [&.ng-touched.ng-invalid]:border-error
+
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {

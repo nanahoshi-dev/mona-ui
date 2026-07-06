@@ -44,6 +44,9 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         const variantClasses = checkboxContainerLabelThemeVariants(theme)({ labelSize });
         return twMerge(variantClasses, classes);
     });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.checked())
+    );
 
     /**
      * @description Whether the control is checked.
@@ -77,6 +80,13 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
      * @description Emitted when the checkbox input gains focus.
      */
     public readonly inputFocus = output<FocusEvent>();
+
+    /**
+     * @description Marks the checkbox as invalid. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
 
     /**
      * @description Text label displayed alongside the checkbox. When provided, takes precedence over projected content.
@@ -118,6 +128,13 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
      * @description Emitted when the checkbox loses focus or its value changes.
      */
     public readonly touch = output<void>();
+
+    /**
+     * @description Marks the checkbox as touched. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
 
     /**
      * @description Additional CSS classes merged onto the label container via `tailwind-merge`.

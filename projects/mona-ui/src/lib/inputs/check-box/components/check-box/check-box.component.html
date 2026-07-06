@@ -12,6 +12,7 @@
         [tabindex]="disabled() ? -1 : tabIndex()"
         [class]="checkBoxClasses()"
         [attr.aria-checked]="indeterminate() ? 'mixed' : null"
+        [attr.aria-invalid]="invalidState() ? 'true' : null"
         [attr.aria-label]="label() || null"
         (change)="onInputChange($event)"
         (blur)="onInputBlur($event)"
@@ -19,7 +20,7 @@
         (ngModelChange)="onCheckedChange($event)"
         #checkBox />
 
-    <span [class]="checkMarkClasses()" aria-hidden="true">
+    <span [class]="checkMarkClasses()" [attr.data-invalid]="invalidState() || null" aria-hidden="true">
         @if (checked()) {
             <svg
                 xmlns="http://www.w3.org/2000/svg"

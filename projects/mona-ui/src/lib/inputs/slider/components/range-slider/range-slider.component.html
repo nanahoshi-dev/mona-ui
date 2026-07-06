@@ -69,6 +69,7 @@
     [attr.aria-orientation]="orientation()"
     [attr.aria-disabled]="effectiveDisabled() || null"
     [attr.aria-invalid]="invalid() || null"
+    [attr.data-invalid]="invalid() || null"
     [attr.aria-label]="ariaLabelStart()"
     #sliderHandle>
     @if (handleTemplate()) {
@@ -93,6 +94,7 @@
     [attr.aria-orientation]="orientation()"
     [attr.aria-disabled]="effectiveDisabled() || null"
     [attr.aria-invalid]="invalid() || null"
+    [attr.data-invalid]="invalid() || null"
     [attr.aria-label]="ariaLabelEnd()"
     #secondarySliderHandle>
     @if (handleTemplate()) {

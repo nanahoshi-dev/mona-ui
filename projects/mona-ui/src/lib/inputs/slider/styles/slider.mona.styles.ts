@@ -118,6 +118,9 @@ export const sliderHandleVariants = cva(
 
         data-[focused="true"]:ring-2
         data-[focused="true"]:ring-primary/40
+
+        data-[invalid="true"]:border-error
+        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/40
     `,
     {
         variants: {

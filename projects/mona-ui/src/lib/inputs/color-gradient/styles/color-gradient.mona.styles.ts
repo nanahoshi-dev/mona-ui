@@ -9,6 +9,11 @@ export const colorGradientBaseVariants = cva(
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
         data-[disabled='true']:pointer-events-none
+
+        data-[invalid='true']:border
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-1
+        data-[invalid='true']:ring-error
     `
 );
 

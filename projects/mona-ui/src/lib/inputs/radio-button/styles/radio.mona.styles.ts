@@ -22,6 +22,9 @@ export const radioButtonCircleVariants = cva(
         transition-colors duration-200
         peer-focus:ring-2 peer-focus:ring-primary/40
         peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
+
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {

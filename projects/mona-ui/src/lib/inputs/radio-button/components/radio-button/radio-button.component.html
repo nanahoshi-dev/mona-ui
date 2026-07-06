@@ -9,11 +9,12 @@
         [value]="radioValue()"
         [class]="radioButtonClasses()"
         [checked]="radioValue() === value()"
+        [attr.aria-invalid]="invalid() ? 'true' : null"
         (blur)="onBlur($event)"
         (click)="inputClick.emit($event)"
         (focus)="inputFocus.emit($event)"
         (change)="onSelectionChange()" />
-    <span [class]="radioButtonCircleClasses()">
+    <span [class]="radioButtonCircleClasses()" [attr.data-invalid]="invalid() || null">
         @if (radioValue() === value()) {
             <span [class]="radioButtonIndicatorClasses()"></span>
         }

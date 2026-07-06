@@ -73,7 +73,9 @@ import {
     ],
     host: {
         "[class]": "baseClasses()",
-        "[attr.data-disabled]": "disabled()"
+        "[attr.data-disabled]": "disabled()",
+        "[attr.data-invalid]": "invalidState() || null",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null"
     }
 })
 export class ColorGradientComponent implements ColorGradientVariantInputs, FormValueControl<string | null | undefined> {
@@ -165,6 +167,9 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         return colorGradientHsvRectangleHandleThemeVariants(theme)({ rounded });
     });
     protected readonly hueValue$ = new Subject<number>();
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.value())
+    );
     protected readonly lastSelectedColor = signal("");
     protected readonly rgb = signal<RGB>({ r: 255, g: 255, b: 255 });
     protected readonly selectedColor = computed(() => {
@@ -205,10 +210,23 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     public readonly format = input<ColorOutputFormat>("hex");
 
     /**
+     * @description Marks the color gradient as invalid. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly invalid = input(false);
+
+    /**
      * @description Specifies whether the color picker should display the alpha slider.
      * @default true
      */
     public readonly opacity = input<boolean>(true);
+
+    /**
+     * @description Marks the color gradient as required for form validation.
+     * @default false
+     */
+    public readonly required = input(false);
 
     /**
      * @description Specifies the rounded variant of the color picker.
@@ -241,6 +259,13 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
      * The `FormField` directive listens to this to mark the field as touched.
      */
     public readonly touch = output<void>();
+
+    /**
+     * @description Marks the color gradient as touched. When bound to a signal form field via `[field]`,
+     * this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
 
     /**
      * @description Two-way bindable current color value.
