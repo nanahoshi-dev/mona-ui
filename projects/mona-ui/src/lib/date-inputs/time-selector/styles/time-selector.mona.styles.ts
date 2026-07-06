@@ -3,6 +3,8 @@ import { cva } from "class-variance-authority";
 export const timeSelectorBaseVariants = cva(
     `
         flex flex-col w-full h-full overflow-hidden
+        data-[invalid='true']:border data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {

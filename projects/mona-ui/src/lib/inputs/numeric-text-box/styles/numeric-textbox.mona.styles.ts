@@ -19,7 +19,8 @@ export const numericTextboxVariants = cva(
         focus-within:ring-2 focus-within:ring-primary/40
         focus-within:border-primary
 
-        [&.ng-touched.ng-invalid]:border-error
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {

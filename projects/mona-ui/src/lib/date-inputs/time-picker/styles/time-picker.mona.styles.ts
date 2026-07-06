@@ -5,8 +5,8 @@ export const timePickerBaseVariants = cva(
         flex items-center w-full
         border border-border
         focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
         [&_mona-text-box]:h-full
         [&_mona-text-box]:border-none
     `,

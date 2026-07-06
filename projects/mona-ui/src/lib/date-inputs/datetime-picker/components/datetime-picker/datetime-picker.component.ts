@@ -93,7 +93,9 @@ import {
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.data-expanded]": "expanded()",
+        "[attr.data-invalid]": "invalidState() || null",
         "[class]": "baseClass()",
         "(blur)": "onDateInputBlur()"
     }
@@ -150,6 +152,9 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
             role: "group"
         };
     });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.value())
+    );
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {

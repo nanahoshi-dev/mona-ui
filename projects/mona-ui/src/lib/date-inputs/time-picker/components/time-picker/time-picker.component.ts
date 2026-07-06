@@ -69,7 +69,9 @@ import {
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.data-expanded]": "expanded()",
+        "[attr.data-invalid]": "invalidState() || null",
         "[class]": "baseClass()",
         "(blur)": "onTimeInputBlur()"
     }
@@ -114,6 +116,9 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
             role: "combobox"
         };
     });
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.value())
+    );
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
         const theme = this.#themeService.theme();
