@@ -8,11 +8,6 @@ export const multiSelectBaseVariants = cva(
         cursor-pointer
         focus-within:ring-1 focus-within:ring-primary/40
         transition-[color,box-shadow,border] ease-in-out duration-300
-
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
-        data-[invalid='true']:border-error
-        data-[invalid='true']:ring-1 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {
@@ -21,6 +16,10 @@ export const multiSelectBaseVariants = cva(
             },
             focused: {
                 true: "ring-1 ring-primary/40"
+            },
+            invalid: {
+                true: "border-error ring-1 ring-error/40",
+                false: ""
             },
             rounded: {
                 none: "rounded-none",

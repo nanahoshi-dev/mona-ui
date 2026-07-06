@@ -143,9 +143,10 @@ export class MultiSelectComponent<TData = unknown>
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const focused = this.#popupRef() != null;
+        const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = multiSelectBaseThemeVariants(theme)({ disabled, focused, rounded, size });
+        const variantClass = multiSelectBaseThemeVariants(theme)({ disabled, focused, invalid, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });

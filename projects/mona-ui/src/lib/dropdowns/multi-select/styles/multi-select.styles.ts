@@ -62,7 +62,7 @@ export type MultiSelectVariantProps = MultiSelectBaseVariantProps &
     MultiSelectItemContainerVariantProps &
     MultiSelectAffixContainerVariantProps &
     MultiSelectIndicatorContainerVariantProps;
-export type MultiSelectVariantInput = Omit<MultiSelectBaseVariantInput, "focused"> &
+export type MultiSelectVariantInput = Omit<MultiSelectBaseVariantInput, "focused" | "invalid"> &
     MultiSelectItemContainerVariantInput &
     MultiSelectAffixContainerVariantInput &
     MultiSelectIndicatorContainerVariantInput;
