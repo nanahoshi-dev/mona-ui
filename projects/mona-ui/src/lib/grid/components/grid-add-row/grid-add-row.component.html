@@ -1,4 +1,5 @@
 @if (gridService.addRowData(); as rowData) {
+    @let session = gridService.editSession();
     @for (_ of gridService.groupColumns(); track $index) {
         <td
             monaGridCell
@@ -45,14 +46,12 @@
             [style.min-width.px]="column.minWidth">
             @if (column.kind === "command") {
                 <mona-grid-command-cell [column]="column" [newRow]="true"></mona-grid-command-cell>
-            } @else if (column.editable) {
+            } @else if (column.editable && session) {
                 <mona-grid-editor
                     [column]="column"
                     [autoFocus]="isFirstEditableColumn(column)"
                     [isNew]="true"
-                    [rowData]="rowData"
-                    [value]="rowData[column.field]"
-                    (valueChange)="onValueChange(column, $event)"
+                    [session]="session"
                     (commit)="onCommit()"
                     (cancel)="onCancel()"></mona-grid-editor>
             } @else {

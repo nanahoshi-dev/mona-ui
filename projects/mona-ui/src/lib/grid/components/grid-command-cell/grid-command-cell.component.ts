@@ -1,9 +1,10 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input } from "@angular/core";
-import { LucideCheck, LucidePencil, LucideTrash2, LucideX } from "@lucide/angular";
+import { LucideCheck, LucideOctagonAlert, LucidePencil, LucideTrash2, LucideX } from "@lucide/angular";
 import { take } from "rxjs";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
 import { DialogService } from "../../../dialogs/dialog/services/dialog.service";
+import { TooltipComponent } from "../../../tooltips/tooltip/components/tooltip/tooltip.component";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";
@@ -11,13 +12,26 @@ import { GridService } from "../../services/grid.service";
 @Component({
     selector: "mona-grid-command-cell",
     templateUrl: "./grid-command-cell.component.html",
-    imports: [ButtonDirective, NgTemplateOutlet, LucideCheck, LucideX, LucidePencil, LucideTrash2],
+    imports: [
+        ButtonDirective,
+        NgTemplateOutlet,
+        LucideCheck,
+        LucideOctagonAlert,
+        LucideX,
+        LucidePencil,
+        LucideTrash2,
+        TooltipComponent
+    ],
     host: {
         class: "w-full"
     }
 })
 export class GridCommandCellComponent {
     readonly #dialogService = inject(DialogService);
+    protected readonly canEditRows = computed(() => {
+        const editableOptions = this.gridService.editableOptions();
+        return editableOptions.enabled === true && editableOptions.mode === "row";
+    });
     protected readonly commandContext = computed(() => ({
         $implicit: this.row()?.data ?? this.gridService.addRowData(),
         cancel: (event?: Event): void => this.cancel(event),
@@ -30,10 +44,29 @@ export class GridCommandCellComponent {
         save: (event?: Event): void => this.save(event)
     }));
     protected readonly gridService = inject(GridService);
+    protected readonly hasRowError = computed(() => this.rowErrorMessages().length > 0);
     protected readonly isEditing = computed(() => {
         const row = this.row();
-        return this.newRow() || (row != null && this.gridService.editingRowUid() === row.uid);
+        const context = this.gridService.editContext();
+        return this.newRow() || (row != null && context?.mode === "row" && context.rowUid === row.uid);
     });
+    protected readonly rowErrorMessages = computed(() => {
+        if (!this.isEditing()) {
+            return [];
+        }
+        const session = this.gridService.editSession();
+        if (session == null) {
+            return [];
+        }
+        return session
+            .form()
+            .errorSummary()
+            .map(error => error.message)
+            .filter((message): message is string => !!message);
+    });
+    protected readonly rowErrorTooltip = computed(
+        () => this.rowErrorMessages().join("\n") || "This row has validation errors."
+    );
 
     public readonly column = input.required<Column>();
     public readonly newRow = input(false);
@@ -50,6 +83,9 @@ export class GridCommandCellComponent {
 
     protected edit(event?: Event): void {
         event?.stopPropagation();
+        if (!this.canEditRows()) {
+            return;
+        }
         const row = this.row();
         if (row != null) {
             this.gridService.startRowEdit(row, event);

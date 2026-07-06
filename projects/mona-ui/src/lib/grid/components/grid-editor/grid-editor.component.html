@@ -1,56 +1,62 @@
 @if (column().editTemplate) {
     <ng-container
         [ngTemplateOutlet]="column().editTemplate"
-        [ngTemplateOutletContext]="editTemplateContext()"></ng-container>
+        [ngTemplateOutletContext]="{ $implicit: editTemplateContext() }"></ng-container>
 } @else {
-    @switch (column().dataType) {
-        @case ("string") {
-            <mona-text-box
-                [class]="editorInputClass()"
-                [inputAttributes]="{ autocomplete: 'off' }"
-                [rounded]="'none'"
-                (keydown.enter)="commit.emit()"
-                (keydown.escape)="onEditCancel()"
-                [value]="stringValue()"
-                (valueChange)="onValueChange($event)"
-                (inputBlur)="commit.emit()"
-                [size]="'small'"></mona-text-box>
+    <div class="relative flex items-center w-full h-full">
+        @switch (column().dataType) {
+            @case ("string") {
+                <mona-text-box
+                    [class]="editorInputClass()"
+                    [inputAttributes]="{ autocomplete: 'off' }"
+                    [rounded]="'none'"
+                    [formField]="$any(formField())"
+                    (keydown.enter)="commit.emit()"
+                    (keydown.escape)="onEditCancel()"
+                    (inputBlur)="commit.emit()"
+                    [size]="'small'"></mona-text-box>
+            }
+            @case ("number") {
+                <mona-numeric-text-box
+                    [class]="editorInputClass()"
+                    [rounded]="'none'"
+                    [formField]="$any(formField())"
+                    (keydown.enter)="commit.emit()"
+                    (keydown.escape)="onEditCancel()"
+                    (inputBlur)="commit.emit()"
+                    [size]="'small'"></mona-numeric-text-box>
+            }
+            @case ("boolean") {
+                <mona-check-box
+                    class="{{ editorInputClass() }} ml-2"
+                    [rounded]="'none'"
+                    [formField]="$any(formField())"
+                    (click)="onBooleanEditorClick()"
+                    (focusout)="onBooleanEditorFocusOut($event)"
+                    (pointerdown)="onBooleanEditorPointerDown()"
+                    (keydown.escape)="onEditCancel()"
+                    (keydown.enter)="commit.emit()"></mona-check-box>
+            }
+            @case ("date") {
+                <mona-date-picker
+                    [class]="editorInputClass()"
+                    [rounded]="'none'"
+                    [formField]="$any(formField())"
+                    (keydown.enter)="onDatePickerEnter($event)"
+                    (keydown.escape)="onEditCancel()"
+                    (focusout)="onDatePickerFocusOut($event)"
+                    (opened)="onDatePickerOpen()"
+                    (closed)="onDatePickerClose()"
+                    size="small"></mona-date-picker>
+            }
         }
-        @case ("number") {
-            <mona-numeric-text-box
-                [class]="editorInputClass()"
-                [rounded]="'none'"
-                [value]="numberValue()"
-                (valueChange)="onValueChange($event)"
-                (keydown.enter)="commit.emit()"
-                (keydown.escape)="onEditCancel()"
-                (inputBlur)="commit.emit()"
-                [size]="'small'"></mona-numeric-text-box>
+        @if (hasFieldError()) {
+            <span class="shrink-0 px-1 text-error" #fieldErrorIcon>
+                <svg lucideOctagonAlert [size]="12"></svg>
+            </span>
+            <mona-tooltip [target]="fieldErrorIcon">
+                <span class="p-1">{{ fieldErrorMessage() }}</span>
+            </mona-tooltip>
         }
-        @case ("boolean") {
-            <mona-check-box
-                class="{{ editorInputClass() }} ml-2"
-                [rounded]="'none'"
-                [checked]="booleanValue()"
-                (checkedChange)="onCheckBoxValueChange($event)"
-                (click)="onBooleanEditorClick()"
-                (focusout)="onBooleanEditorFocusOut($event)"
-                (pointerdown)="onBooleanEditorPointerDown()"
-                (keydown.escape)="onEditCancel()"
-                (keydown.enter)="commit.emit()"></mona-check-box>
-        }
-        @case ("date") {
-            <mona-date-picker
-                [class]="editorInputClass()"
-                [rounded]="'none'"
-                [ngModel]="value()"
-                (ngModelChange)="onValueChange($event)"
-                (keydown.enter)="onDatePickerEnter($event)"
-                (keydown.escape)="onEditCancel()"
-                (focusout)="onDatePickerFocusOut($event)"
-                (opened)="onDatePickerOpen()"
-                (closed)="onDatePickerClose()"
-                size="small"></mona-date-picker>
-        }
-    }
+    </div>
 }

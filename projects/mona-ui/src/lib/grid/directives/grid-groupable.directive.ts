@@ -51,8 +51,20 @@ export class GridGroupableDirective implements OnInit {
             return this.#gridService.getGroupDescriptors(groupColumns);
         })
     );
+    /**
+     * @description Emitted when the applied group descriptors change, whether from dragging a column into the group panel or from a group sort change.
+     */
     public readonly groupChange = output<GroupDescriptor[]>();
+
+    /**
+     * @description Current group descriptors applied to the grid.
+     * @default []
+     */
     public group = input<Iterable<GroupDescriptor>>([]);
+
+    /**
+     * @description Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display.
+     */
     public options = input<GroupableOptions | "" | undefined>(undefined, {
         alias: "monaGridGroupable"
     });

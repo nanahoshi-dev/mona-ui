@@ -1,4 +1,5 @@
 import { PreventableEvent } from "../../utils/PreventableEvent";
+import type { GridEditSession } from "./GridEditSession";
 
 export class CellEditEvent extends PreventableEvent {
     readonly #options: CellEditEventOptions;
@@ -22,6 +23,10 @@ export class CellEditEvent extends PreventableEvent {
     public get rowData(): Record<PropertyKey, unknown> {
         return this.#options.rowData;
     }
+
+    public get session(): GridEditSession {
+        return this.#options.session;
+    }
 }
 
 export interface CellEditEventOptions {
@@ -29,4 +34,5 @@ export interface CellEditEventOptions {
     newValue: unknown;
     oldValue: unknown;
     rowData: Record<PropertyKey, unknown>;
+    session: GridEditSession;
 }

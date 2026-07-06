@@ -21,14 +21,12 @@ import {
     inject,
     Injector,
     input,
-    output,
     PLATFORM_ID,
     signal,
     TemplateRef,
     untracked,
     viewChild
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { ButtonDirective } from "../../../buttons/button/directives/button.directive";
@@ -51,19 +49,12 @@ import { GridLockedCellDirective } from "../../directives/grid-locked-cell.direc
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { GridNoDataTemplateDirective } from "../../directives/grid-no-data-template.directive";
 import { GridToolbarTemplateDirective } from "../../directives/grid-toolbar-template.directive";
-import { CellEditEvent } from "../../models/CellEditEvent";
 import type { Column } from "../../models/Column";
 import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
-import { GridAddEvent } from "../../models/GridAddEvent";
-import { GridCancelEvent } from "../../models/GridCancelEvent";
-import { GridEditEvent } from "../../models/GridEditEvent";
-import { GridRemoveEvent } from "../../models/GridRemoveEvent";
-import { GridSaveEvent } from "../../models/GridSaveEvent";
 import { ResizeMethod } from "../../models/ResizeMethod";
-import { RowEditEvent } from "../../models/RowEditEvent";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridRowFlattenerService } from "../../services/grid-row-flattener.service";
@@ -251,52 +242,13 @@ export class GridComponent<T> implements GridVariantInput {
         addRowData: this.gridService.addRowData(),
         addRowVisible: this.gridService.addRowVisible(),
         cancelAdd: (): boolean => this.gridService.cancelAddRow(),
+        editSession: this.gridService.editSession(),
         saveAdd: (): boolean => this.gridService.saveAddRow(),
         startAdd: (): boolean => this.gridService.startAddRow()
     }));
     protected readonly toolbarElement = viewChild<ElementRef<HTMLDivElement>>("toolbarElement");
     protected readonly toolbarTemplate = contentChild(GridToolbarTemplateDirective, { read: TemplateRef });
     protected readonly uid = v4();
-
-    /**
-     * @description Emitted before the grid displays the new-row editor.
-     */
-    public readonly add = output<GridAddEvent>();
-
-    /**
-     * @description Emitted before an edit operation is cancelled.
-     */
-    public readonly cancel = output<GridCancelEvent>();
-
-    /**
-     * @description Emitted when a cell is edited.
-     */
-    public readonly cellEdit = output<CellEditEvent>();
-
-    /**
-     * @description Emitted before a row enters edit mode.
-     */
-    public readonly edit = output<GridEditEvent>();
-
-    /**
-     * @description Creates the initial data object used by the add-row editor.
-     */
-    public readonly newRowFactory = input<() => Record<PropertyKey, unknown>>(() => ({}));
-
-    /**
-     * @description Emitted when a row remove command is triggered.
-     */
-    public readonly remove = output<GridRemoveEvent>();
-
-    /**
-     * @description Emitted when a row edit is committed (row mode only).
-     */
-    public readonly rowEdit = output<RowEditEvent>();
-
-    /**
-     * @description Emitted before an edited or new row is saved.
-     */
-    public readonly save = output<GridSaveEvent>();
 
     /**
      * @description The row data to be displayed in the grid.
@@ -311,6 +263,7 @@ export class GridComponent<T> implements GridVariantInput {
     /**
      * @description The page sizes that the user can select from.
      * These values will be displayed in the page size dropdown.
+     * @default []
      */
     public readonly pageSizeValues = input<number[]>([]);
 
@@ -328,11 +281,13 @@ export class GridComponent<T> implements GridVariantInput {
     /**
      * @description Whether the pager is responsive.
      * If set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.
+     * @default true
      */
     public readonly responsivePager = input(true);
 
     /**
      * @description The border radius of the grid.
+     * @default "medium"
      */
     public readonly rounded = input<GridVariantProps["rounded"]>("medium");
 
@@ -346,7 +301,6 @@ export class GridComponent<T> implements GridVariantInput {
         this.setPageSizeEffect();
         this.setGridDetailEffect();
         this.setDataEffect();
-        this.setNewRowFactoryEffect();
         this.setFooterScrollElementEffect();
         this.setFitViewScrollbarSyncEffect();
         afterRenderEffect({
@@ -359,7 +313,6 @@ export class GridComponent<T> implements GridVariantInput {
                 this.setInitialCalculatedWidthOfColumns();
                 this.#fitViewInitialScrollbarGutterWidth.set(this.gridService.scrollbarGutterWidth());
                 this.gridWidthSet.set(true);
-                this.setSubscriptions();
                 this.setResizeObserver();
             }
         });
@@ -785,13 +738,6 @@ export class GridComponent<T> implements GridVariantInput {
         }
     }
 
-    private setNewRowFactoryEffect(): void {
-        effect(() => {
-            const factory = this.newRowFactory();
-            untracked(() => this.gridService.setNewRowFactory(factory));
-        });
-    }
-
     private setPageSizeEffect(): void {
         effect(() => {
             const pageSize = this.pageSize();
@@ -810,20 +756,6 @@ export class GridComponent<T> implements GridVariantInput {
             this.gridService.virtualGridMinBuffer.set(rect.height);
         });
         this.#resizeObserver.observe(this.#hostElementRef.nativeElement);
-    }
-
-    private setSubscriptions(): void {
-        this.gridService.add$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.add.emit(event));
-        this.gridService.cancel$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.cancel.emit(event));
-        this.gridService.cellEdit$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe((event: CellEditEvent) => this.cellEdit.emit(event));
-        this.gridService.edit$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.edit.emit(event));
-        this.gridService.remove$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.remove.emit(event));
-        this.gridService.rowEdit$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe((event: RowEditEvent) => this.rowEdit.emit(event));
-        this.gridService.save$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => this.save.emit(event));
     }
 
     private syncToolbarFocusTargets(): void {

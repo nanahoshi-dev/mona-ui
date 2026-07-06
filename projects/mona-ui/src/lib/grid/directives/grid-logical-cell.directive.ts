@@ -254,12 +254,18 @@ export class GridLogicalCellDirective {
             this.#focusFirstInnerTarget();
             return;
         }
+        if (this.#gridService.editableOptions().mode === "row") {
+            return;
+        }
         this.edit.emit();
     }
 
     #onF2Key(): void {
         if (this.resolvedCellKind() === "command") {
             this.#focusFirstInnerTarget();
+            return;
+        }
+        if (this.#gridService.editableOptions().mode === "row") {
             return;
         }
         this.edit.emit();

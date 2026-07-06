@@ -4,19 +4,25 @@ import {
     Component,
     computed,
     ElementRef,
+    effect,
     inject,
     input,
     output,
     signal,
+    untracked,
     viewChild
 } from "@angular/core";
-import { FormsModule } from "@angular/forms";
+import { FormField, type FieldTree } from "@angular/forms/signals";
+import { LucideOctagonAlert } from "@lucide/angular";
 import { DatePickerComponent } from "../../../date-inputs/date-picker/components/date-picker/date-picker.component";
 import { CheckBoxComponent } from "../../../inputs/check-box/components/check-box/check-box.component";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { TextBoxComponent } from "../../../inputs/text-box/components/text-box/text-box.component";
 import { ThemeService } from "../../../theme/services/theme.service";
+import { TooltipComponent } from "../../../tooltips/tooltip/components/tooltip/tooltip.component";
 import { Column } from "../../models/Column";
+import type { GridEditSession } from "../../models/GridEditSession";
+import type { GridEditTemplateContext } from "../../models/GridEditTemplateContext";
 import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } from "../../styles/grid.styles";
 
 @Component({
@@ -25,10 +31,12 @@ import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } fro
     imports: [
         CheckBoxComponent,
         DatePickerComponent,
-        FormsModule,
+        FormField,
+        LucideOctagonAlert,
         NgTemplateOutlet,
         NumericTextBoxComponent,
-        TextBoxComponent
+        TextBoxComponent,
+        TooltipComponent
     ],
     host: {
         "[class]": "baseClass()"
@@ -45,37 +53,66 @@ export class GridEditorComponent {
         const theme = this.#themeService.theme();
         return gridCellEditorBaseThemeVariants(theme)();
     });
-    protected readonly editTemplateContext = computed(() => ({
-        $implicit: this.rowData(),
+    protected readonly editTemplateContext = computed<GridEditTemplateContext>(() => ({
+        cancel: (): void => this.cancel.emit(),
         column: this.column().field,
+        commit: (): void => this.commit.emit(),
+        dataField: this.column().field,
+        dataItem: this.session().model(),
+        errors: this.formField()().errors(),
+        field: this.formField(),
+        form: this.session().form,
+        invalid: this.formField()().invalid(),
         isNew: this.isNew(),
-        setValue: (value: unknown): void => this.#emitValueChangeIfChanged(value),
-        value: this.value()
+        session: this.session(),
+        setValue: (value: unknown): void => this.#setFieldValue(value),
+        touched: this.formField()().touched(),
+        value: this.formField()().value()
     }));
     protected readonly editorInputClass = computed(() => {
         const theme = this.#themeService.theme();
         return gridCellEditorInputThemeVariants(theme)();
     });
-    protected readonly booleanValue = computed(() => this.value() === true);
-    protected readonly numberValue = computed(() => this.#coerceNumberValue(this.value()));
-    protected readonly stringValue = computed(() => {
-        const value = this.value();
-        return value == null ? "" : String(value);
+    protected readonly fieldErrorMessage = computed(() => {
+        const [firstError] = this.formField()().errors();
+        return firstError?.message ?? "Invalid value.";
+    });
+    protected readonly formField = computed<FieldTree<unknown>>(() => {
+        const field = this.session().form[this.column().field];
+        if (field == null) {
+            throw new Error(`No signal form field was found for grid column '${this.column().field}'.`);
+        }
+        return field as FieldTree<unknown>;
+    });
+    protected readonly hasFieldError = computed(() => {
+        const field = this.formField()();
+        return field.invalid() && field.touched();
     });
 
     /**
      * @description Controls whether the editor focuses its input after it renders.
      */
     public readonly autoFocus = input(true);
-    public readonly column = input.required<Column>();
-    public readonly isNew = input(false);
-    public readonly rowData = input.required<Record<PropertyKey, unknown>>();
-    public readonly value = input<unknown>();
     public readonly cancel = output<void>();
+    public readonly column = input.required<Column>();
     public readonly commit = output<void>();
-    public readonly valueChange = output<unknown>();
+    public readonly isNew = input(false);
+    public readonly session = input.required<GridEditSession>();
 
     public constructor() {
+        effect(() => {
+            const column = this.column();
+            if (column.dataType !== "number") {
+                return;
+            }
+            const field = this.formField();
+            const value = field().value();
+            const coercedValue = this.#coerceNumberValue(value);
+            if (Object.is(value, coercedValue)) {
+                return;
+            }
+            untracked(() => field().value.set(coercedValue));
+        });
         afterNextRender({
             read: () => this.#focusEditor()
         });
@@ -102,10 +139,6 @@ export class GridEditorComponent {
         setTimeout(() => {
             this.#ignoreNextBooleanFocusOut = false;
         });
-    }
-
-    protected onCheckBoxValueChange(value: boolean): void {
-        this.#emitValueChangeIfChanged(value);
     }
 
     protected onDatePickerClose(): void {
@@ -141,10 +174,6 @@ export class GridEditorComponent {
         }
     }
 
-    protected onValueChange(value: unknown): void {
-        this.#emitValueChangeIfChanged(value);
-    }
-
     #coerceNumberValue(value: unknown): number | null {
         if (typeof value === "number") {
             return Number.isFinite(value) ? value : null;
@@ -158,13 +187,6 @@ export class GridEditorComponent {
         }
         const numberValue = Number(normalizedValue);
         return Number.isFinite(numberValue) ? numberValue : null;
-    }
-
-    #emitValueChangeIfChanged(value: unknown): void {
-        if (this.#valuesEqual(value, this.value())) {
-            return;
-        }
-        this.valueChange.emit(value);
     }
 
     #focusBooleanInput(): void {
@@ -190,10 +212,7 @@ export class GridEditorComponent {
         }
     }
 
-    #valuesEqual(left: unknown, right: unknown): boolean {
-        if (left instanceof Date && right instanceof Date) {
-            return left.getTime() === right.getTime();
-        }
-        return Object.is(left, right);
+    #setFieldValue(value: unknown): void {
+        this.formField()().value.set(value);
     }
 }

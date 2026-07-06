@@ -282,13 +282,13 @@
       {
         "name": "filter",
         "type": "CompositeFilterDescriptor[]",
-        "description": "",
+        "description": "Current filter descriptors applied to the grid.",
         "kind": "model"
       },
       {
         "name": "options",
         "type": "FilterableOptions | \"\"",
-        "description": "",
+        "description": "Enables column filtering on the grid. Pass a `FilterableOptions` object to configure whether filters render in the header menu, a filter row, or both.",
         "kind": "input"
       }
     ]
@@ -324,19 +324,19 @@
       {
         "name": "groupChange",
         "type": "GroupDescriptor[]",
-        "description": "",
+        "description": "Emitted when the applied group descriptors change, whether from dragging a column into the group panel or from a group sort change.",
         "kind": "output"
       },
       {
         "name": "group",
         "type": "Iterable<GroupDescriptor>",
-        "description": "",
+        "description": "Current group descriptors applied to the grid.",
         "kind": "input"
       },
       {
         "name": "options",
         "type": "GroupableOptions | \"\" | undefined",
-        "description": "",
+        "description": "Enables column grouping on the grid. Pass a `GroupableOptions` object to configure group footer display.",
         "kind": "input"
       }
     ]
@@ -504,25 +504,25 @@
       {
         "name": "options",
         "type": "GridSelectableOptions | \"\"",
-        "description": "",
+        "description": "Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode.",
         "kind": "input"
       },
       {
         "name": "selectBy",
         "type": "string",
-        "description": "",
+        "description": "Field name or selector used to derive a row's selection key.",
         "kind": "input"
       },
       {
         "name": "selectedKeys",
         "type": "Iterable<unknown>",
-        "description": "",
+        "description": "Currently selected row keys.",
         "kind": "input"
       },
       {
         "name": "selectedKeysChange",
         "type": "unknown[]",
-        "description": "",
+        "description": "Emitted when the set of selected row keys changes.",
         "kind": "output"
       }
     ]
@@ -576,19 +576,19 @@
       {
         "name": "options",
         "type": "Partial<VirtualScrollOptions> | \"\" | undefined",
-        "description": "",
+        "description": "Enables row virtualization on the grid. Pass a `VirtualScrollOptions` object to configure the fixed row height.",
         "kind": "input"
       },
       {
         "name": "scrollEnd",
         "type": "void",
-        "description": "",
+        "description": "Emitted when the scroll position reaches the configured threshold from the bottom of the virtualized list.",
         "kind": "output"
       },
       {
         "name": "scrollEndThreshold",
         "type": "number",
-        "description": "",
+        "description": "Distance, in rows, from the bottom of the virtualized list at which `scrollEnd` is emitted.",
         "kind": "input"
       }
     ]
@@ -2116,10 +2116,22 @@
         "kind": "input"
       },
       {
+        "name": "cancel",
+        "type": "void",
+        "description": "",
+        "kind": "output"
+      },
+      {
         "name": "column",
         "type": "Column",
         "description": "",
         "kind": "input"
+      },
+      {
+        "name": "commit",
+        "type": "void",
+        "description": "",
+        "kind": "output"
       },
       {
         "name": "isNew",
@@ -2132,18 +2144,6 @@
         "type": "GridEditSession",
         "description": "",
         "kind": "input"
-      },
-      {
-        "name": "cancel",
-        "type": "void",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "commit",
-        "type": "void",
-        "description": "",
-        "kind": "output"
       }
     ]
   },

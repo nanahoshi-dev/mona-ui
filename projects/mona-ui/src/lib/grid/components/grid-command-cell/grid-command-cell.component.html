@@ -5,6 +5,14 @@
 } @else {
     <div class="flex h-full items-center gap-1 px-1">
         @if (isEditing()) {
+            @if (hasRowError()) {
+                <span class="shrink-0 px-1 text-error" #rowErrorIcon>
+                    <svg lucideOctagonAlert [size]="14"></svg>
+                </span>
+                <mona-tooltip [target]="rowErrorIcon">
+                    <span class="p-1 whitespace-pre-line">{{ rowErrorTooltip() }}</span>
+                </mona-tooltip>
+            }
             <button
                 monaButton
                 look="ghost"
@@ -30,18 +38,20 @@
                 <svg lucideX [size]="14"></svg>
             </button>
         } @else {
-            <button
-                monaButton
-                look="ghost"
-                size="small"
-                [iconOnly]="true"
-                aria-label="Edit row"
-                title="Edit"
-                class="w-6 h-6"
-                [tabindex]="-1"
-                (click)="edit($event)">
-                <svg lucidePencil [size]="14"></svg>
-            </button>
+            @if (canEditRows()) {
+                <button
+                    monaButton
+                    look="ghost"
+                    size="small"
+                    [iconOnly]="true"
+                    aria-label="Edit row"
+                    title="Edit"
+                    class="w-6 h-6"
+                    [tabindex]="-1"
+                    (click)="edit($event)">
+                    <svg lucidePencil [size]="14"></svg>
+                </button>
+            }
             <button
                 monaButton
                 look="ghost"

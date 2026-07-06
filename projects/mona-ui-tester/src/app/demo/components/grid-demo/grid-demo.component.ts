@@ -10,7 +10,8 @@ import {
     linkedSignal,
     signal
 } from "@angular/core";
-import { LucideContainer } from "@lucide/angular";
+import { FormField, validate, type SchemaPathTree } from "@angular/forms/signals";
+import { LucideContainer, LucideOctagonAlert, LucidePenLine } from "@lucide/angular";
 import { DateTime } from "luxon";
 import {
     CellEditEvent,
@@ -23,6 +24,7 @@ import {
     GridComponent,
     GridDetailTemplateDirective,
     GridEditableDirective,
+    GridEditTemplateDirective,
     GridGroupableDirective,
     GridSelectableDirective,
     GridSelectableOptions,
@@ -52,13 +54,26 @@ import {
     ColumnReorderEvent,
     type ResizableOptions,
     GridResizableDirective,
-    type ColumnResizeEvent
+    type ColumnResizeEvent,
+    type EditableOptions,
+    type GridEditFormContext,
+    type GridEditSchemaFactory,
+    type GridEditTemplateContext,
+    TextBoxComponent,
+    TextBoxSuffixTemplateDirective,
+    TooltipDirective,
+    TooltipComponent
 } from "mona-ui";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
+
+interface GridDemoEditRow extends Record<PropertyKey, unknown> {
+    Freight: number;
+    ShipName: string;
+}
 
 @Component({
     selector: "app-grid-demo",
@@ -116,6 +131,36 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             name: "Cell Template",
             description: "Customize the cell template for grid rows",
             active: false
+        },
+        editing: {
+            code: ``,
+            name: "Editing",
+            description: "Configure signal-form-backed grid editing",
+            active: true,
+            subFeatures: {
+                mode: {
+                    code: ``,
+                    name: "Mode",
+                    description: "Choose whether editing starts per cell or per row",
+                    active: true,
+                    type: "dropdown",
+                    dropdownDataSource: ["cell", "row"],
+                    dropdownDefaultValue: "row",
+                    dropdownValue: "row"
+                },
+                validation: {
+                    code: ``,
+                    name: "Validation",
+                    description: "Require a ship name and non-negative freight through the grid edit schema",
+                    active: true
+                },
+                customTemplate: {
+                    code: ``,
+                    name: "Custom Edit Template",
+                    description: "Render the Ship Name editor from the edit-template signal form context",
+                    active: true
+                }
+            }
         },
         export: {
             code: ``,
@@ -355,6 +400,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         JsonPipe,
         GridEditableDirective,
         GridCellTemplateDirective,
+        GridEditTemplateDirective,
         GridFooterTemplateDirective,
         GridGroupFooterTemplateDirective,
         GridExportDirective,
@@ -369,7 +415,12 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         LucideContainer,
         GridSortableDirective,
         GridReorderableDirective,
-        GridResizableDirective
+        GridResizableDirective,
+        FormField,
+        TextBoxComponent,
+        TextBoxSuffixTemplateDirective,
+        LucideOctagonAlert,
+        TooltipComponent
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -392,7 +443,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             (rowEdit)="onRowEdit($event)"
             (save)="onSave($event)"
             (remove)="onRemove($event)"
-            [monaGridEditable]="{ enabled: true, mode: 'row' }"
+            [monaGridEditable]="editableOptions()"
+            (edit)="onGridEditStart($event)"
             [monaGridFilterable]="filterable()"
             [filter]="filter()"
             (filterChange)="onFilterChange($event)"
@@ -475,14 +527,46 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                             <span class="block truncate font-medium"> {{ count }} rows in {{ groupValue }} </span>
                         </ng-template>
                     }
+                    @if (column.field === "ShipName" && editingCustomTemplate()) {
+                        <ng-template monaGridEditTemplate let-context>
+                            <div class="w-full h-full flex flex-col justify-center">
+                                <mona-text-box
+                                    [formField]="$any(context.field)"
+                                    [rounded]="'none'"
+                                    [size]="'small'"
+                                    (keydown.enter)="onCustomTextBoxEdit(context)"
+                                    (keydown.escape)="context.cancel()"
+                                    [inputAttributes]="{ autocomplete: 'off' }">
+                                    @if (context.invalid && context.touched) {
+                                        <ng-template monaTextBoxSuffixTemplate>
+                                            <span class="px-1" #alertIcon
+                                                ><svg lucideAlertOctagon [size]="12"></svg
+                                            ></span>
+                                            <mona-tooltip [target]="alertIcon">
+                                                <span class="p-1">{{
+                                                    context.errors[0]?.message || "Ship name is required"
+                                                }}</span>
+                                            </mona-tooltip>
+                                        </ng-template>
+                                    }
+                                </mona-text-box>
+                            </div>
+                        </ng-template>
+                    }
                 </mona-grid-column>
             }
             <mona-grid-command-column
-                [width]="80"
+                [width]="100"
                 [locked]="true"
                 [lockedPosition]="'right'"
-                [title]="'TEST'"
-                [removeConfirmation]="true"></mona-grid-command-column>
+                [title]="'Commands'"
+                [removeConfirmation]="true">
+                <!--                <ng-template monaGridCellTemplate let-edit="edit">-->
+                <!--                    <button monaButton [iconOnly]="true" size="small" look="clear" (click)="edit()">-->
+                <!--                        <svg lucideEdit3 [size]="14"></svg>-->
+                <!--                    </button>-->
+                <!--                </ng-template>-->
+            </mona-grid-command-column>
             @if (masterDetail()) {
                 <ng-template monaGridDetailTemplate let-dataItem>
                     <!--                    <pre class="h-full w-full p-2">{{ dataItem | json }}</pre>-->
@@ -546,15 +630,34 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return exportFeature ? exportFeature.active : false;
     });
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly editableOptions = computed<EditableOptions>(() => {
+        const features = this.features();
+        const editingFeature = features["editing"];
+        const editingSubFeatures = editingFeature.subFeatures || {};
+        const mode = editingSubFeatures["mode"].dropdownValue === "cell" ? "cell" : "row";
+        return {
+            enabled: editingFeature.active ?? true,
+            mode,
+            schema: editingSubFeatures["validation"].active
+                ? (this.createEditSchema as GridEditSchemaFactory)
+                : undefined
+        };
+    });
+    protected readonly editingCustomTemplate = computed(() => {
+        const features = this.features();
+        const editingFeature = features["editing"];
+        const editingSubFeatures = editingFeature.subFeatures || {};
+        return editingSubFeatures["customTemplate"].active ?? false;
+    });
     protected readonly filter = signal<CompositeFilterDescriptor[]>([
         {
             logic: "and",
             filters: [
-                {
-                    field: "ShipName",
-                    operator: "contains",
-                    value: "e"
-                }
+                // {
+                //     field: "ShipName",
+                //     operator: "contains",
+                //     value: "e"
+                // }
             ]
         }
     ]);
@@ -569,6 +672,22 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         return options;
     });
     protected readonly gridData = signal(generateRandomGridData(1000));
+    protected readonly createEditSchema =
+        (_context: GridEditFormContext) =>
+        (row: SchemaPathTree<GridDemoEditRow>): void => {
+            validate(row.ShipName, ({ value }) => {
+                const shipName = value();
+                return typeof shipName === "string" && shipName.trim() !== ""
+                    ? undefined
+                    : { kind: "required", message: "Ship name is required." };
+            });
+            validate(row.Freight, ({ value }) => {
+                const freight = value();
+                return typeof freight === "number" && freight >= 10
+                    ? undefined
+                    : { kind: "min", message: "Freight must be ten or greater." };
+            });
+        };
     protected readonly createGridRow = (): Record<PropertyKey, unknown> => {
         const gridData = this.getActiveGridData();
         const nextOrderId =
@@ -717,18 +836,20 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
 
     protected onCellEdit(event: CellEditEvent): void {
         console.log("Cell edited:", event);
-        window.setTimeout(() => {
-            const gridData = this.getActiveGridData();
-            const row = gridData.find(row => row === event.rowData);
-            if (!row) return;
-            const field = event.field as keyof typeof row;
-            if (row[field] === event.newValue) {
-                return;
-            }
-            row[field] = event.newValue;
-            gridData.splice(gridData.indexOf(event.rowData as typeof row), 1, row);
-            this.setActiveGridData(gridData);
-        }, 1000);
+        // window.setTimeout(() => {
+        //     const gridData = this.getActiveGridData();
+        //     const row = gridData.find(row => row === event.rowData);
+        //     if (!row) return;
+        //     const field = event.field as keyof typeof row;
+        //     if (row[field] === event.newValue) {
+        //         return;
+        //     }
+        //     row[field] = event.newValue;
+        //     gridData.splice(gridData.indexOf(event.rowData as typeof row), 1, row);
+        //     this.setActiveGridData(gridData);
+        // }, 1000);
+        console.log("Cell edited:");
+        event.session.form().reset(event.session.originalRowData ?? undefined);
     }
 
     protected onColumnReorder(event: ColumnReorderEvent): void {
@@ -743,9 +864,19 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         console.log("Column resized:", event);
     }
 
+    protected onCustomTextBoxEdit(context: GridEditTemplateContext): void {
+        console.log("Custom text box edited:", context);
+        context.setValue(context.value);
+        context.commit();
+    }
+
     protected onFilterChange(event: CompositeFilterDescriptor[]): void {
         console.log("Filter changed:", event);
         this.filter.set(event);
+    }
+
+    protected onGridEditStart(event: unknown): void {
+        console.log("Grid edit started:", event);
     }
 
     protected onRowEdit(event: RowEditEvent): void {

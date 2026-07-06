@@ -1,6 +1,10 @@
 import { TestBed } from "@angular/core/testing";
+import { validate, type FieldTree } from "@angular/forms/signals";
 import { ImmutableList } from "@mirei/ts-collections";
 import type { Column } from "../models/Column";
+import type { GridEditSchemaFactory } from "../models/GridEditFormContext";
+import type { GridEditSession } from "../models/GridEditSession";
+import type { GridSaveEvent } from "../models/GridSaveEvent";
 import { GridService } from "./grid.service";
 
 function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Column {
@@ -41,6 +45,23 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
 function createRowData(count: number, valueFactory: (index: number) => Record<string, unknown> = i => ({ id: i })): Record<string, unknown>[] {
     return Array.from({ length: count }, (_, i) => valueFactory(i));
 }
+
+function getSessionField(session: GridEditSession, field: string): FieldTree<unknown> {
+    const fieldTree = session.form[field];
+    if (fieldTree == null) {
+        throw new Error(`Expected form field: ${field}`);
+    }
+    return fieldTree as FieldTree<unknown>;
+}
+
+const requiredNameSchema: GridEditSchemaFactory = () => row => {
+    validate(row, ({ value }) => {
+        const name = value()["name"];
+        return typeof name === "string" && name.trim() !== ""
+            ? undefined
+            : { kind: "required", message: "Name is required." };
+    });
+};
 
 describe("GridService", () => {
     let service: GridService;
@@ -230,6 +251,101 @@ describe("GridService", () => {
             service.setPageState({ skip: 5 });
 
             expect(service.paginationState()).toEqual({ page: 1, skip: 5, take: 10 });
+        });
+    });
+
+    describe("editing", () => {
+        beforeEach(() => {
+            service.columns.set(
+                ImmutableList.create([createColumn({ field: "id" }), createColumn({ field: "name", editable: true })])
+            );
+            service.setRows([{ id: 1, name: "Jane" }]);
+        });
+
+        it("saves a signal-form-backed cell edit through the existing save event", () => {
+            const saveEvents: GridSaveEvent[] = [];
+            service.save$.subscribe(event => saveEvents.push(event));
+            service.setEditableOptions({ enabled: true, mode: "cell" });
+            const row = service.rows().firstOrDefault();
+            const column = service.columns().firstOrDefault(c => c.field === "name");
+            if (row == null || column == null) {
+                throw new Error("Expected row and column");
+            }
+
+            expect(service.startCellEdit(`${row.uid}_name`, row, column)).toBe(true);
+            const session = service.editSession();
+            if (session == null) {
+                throw new Error("Expected edit session");
+            }
+            getSessionField(session, "name")().value.set("Janet");
+
+            expect(service.stopCellEdit()).toBe(true);
+
+            expect(saveEvents).toHaveLength(1);
+            expect(saveEvents[0].operation).toBe("update");
+            expect(saveEvents[0].rowData["name"]).toBe("Janet");
+            expect(saveEvents[0].session).toBe(session);
+            expect(service.editSession()).toBeNull();
+        });
+
+        it("blocks row save and keeps the session open when signal-form validation fails", () => {
+            const saveEvents: GridSaveEvent[] = [];
+            service.save$.subscribe(event => saveEvents.push(event));
+            service.setEditableOptions({ enabled: true, mode: "row", schema: requiredNameSchema });
+            const row = service.rows().firstOrDefault();
+            if (row == null) {
+                throw new Error("Expected row");
+            }
+
+            expect(service.startRowEdit(row)).toBe(true);
+            const session = service.editSession();
+            if (session == null) {
+                throw new Error("Expected edit session");
+            }
+            getSessionField(session, "name")().value.set("");
+
+            expect(service.commitRowEdit()).toBe(false);
+
+            expect(saveEvents).toHaveLength(0);
+            expect(service.editSession()).toBe(session);
+            expect(session.form().touched()).toBe(true);
+            expect(session.form().invalid()).toBe(true);
+        });
+
+        it("creates and saves add rows through the same edit session", () => {
+            const saveEvents: GridSaveEvent[] = [];
+            service.save$.subscribe(event => saveEvents.push(event));
+            service.setEditableOptions({ enabled: true, mode: "row", schema: requiredNameSchema });
+            service.setNewRowFactory(() => ({ id: 2, name: "" }));
+
+            expect(service.startAddRow()).toBe(true);
+            const session = service.editSession();
+            if (session == null) {
+                throw new Error("Expected edit session");
+            }
+            getSessionField(session, "name")().value.set("New row");
+
+            expect(service.saveAddRow()).toBe(true);
+
+            expect(saveEvents).toHaveLength(1);
+            expect(saveEvents[0].operation).toBe("create");
+            expect(saveEvents[0].rowData["name"]).toBe("New row");
+            expect(saveEvents[0].session).toBe(session);
+            expect(service.editSession()).toBeNull();
+        });
+
+        it("enforces the configured edit mode at the service boundary", () => {
+            const row = service.rows().firstOrDefault();
+            const column = service.columns().firstOrDefault(c => c.field === "name");
+            if (row == null || column == null) {
+                throw new Error("Expected row and column");
+            }
+
+            service.setEditableOptions({ enabled: true, mode: "cell" });
+            expect(service.startRowEdit(row)).toBe(false);
+
+            service.setEditableOptions({ enabled: true, mode: "row" });
+            expect(service.startCellEdit(`${row.uid}_name`, row, column)).toBe(false);
         });
     });
 

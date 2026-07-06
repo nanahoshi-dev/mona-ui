@@ -14,13 +14,11 @@
         [attr.data-col-index]="column().index"
         [attr.aria-readonly]="!(gridService.editableOptions().enabled && column().editable)"
         (dblclick)="onCellDoubleClick($event)">
-        @if (isEditing()) {
+        @if (isEditing() && gridService.editSession(); as session) {
             <mona-grid-editor
                 [column]="column()"
                 [autoFocus]="shouldAutoFocusEditor()"
-                [rowData]="dataItem"
-                [value]="displayValue()"
-                (valueChange)="onCellValueChange($event)"
+                [session]="session"
                 (commit)="onEditCommit()"
                 (cancel)="onEditCancel()"></mona-grid-editor>
         } @else if (column().cellTemplate) {

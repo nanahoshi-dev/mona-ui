@@ -11,11 +11,29 @@ import { GridService } from "../services/grid.service";
 export class GridSelectableDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
+    /**
+     * @description Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode.
+     * @default ""
+     */
     public readonly options = input<GridSelectableOptions | "">("", {
         alias: "monaGridSelectable"
     });
+
+    /**
+     * @description Field name or selector used to derive a row's selection key.
+     * @default ""
+     */
     public readonly selectBy = input<string>("");
+
+    /**
+     * @description Currently selected row keys.
+     * @default []
+     */
     public readonly selectedKeys = input<Iterable<unknown>>([]);
+
+    /**
+     * @description Emitted when the set of selected row keys changes.
+     */
     public readonly selectedKeysChange = output<unknown[]>();
 
     public constructor() {

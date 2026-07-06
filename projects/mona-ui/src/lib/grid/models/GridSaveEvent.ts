@@ -1,6 +1,8 @@
 import { PreventableEvent } from "../../utils/PreventableEvent";
+import type { GridEditSession } from "./GridEditSession";
+import type { GridEditOperation } from "./GridEditOperation";
 
-export type GridSaveOperation = "create" | "update";
+export type GridSaveOperation = GridEditOperation;
 
 export class GridSaveEvent extends PreventableEvent {
     readonly #options: GridSaveEventOptions;
@@ -21,6 +23,10 @@ export class GridSaveEvent extends PreventableEvent {
     public get rowData(): Record<PropertyKey, unknown> {
         return this.#options.rowData;
     }
+
+    public get session(): GridEditSession {
+        return this.#options.session;
+    }
 }
 
 export interface GridSaveEventOptions {
@@ -28,4 +34,5 @@ export interface GridSaveEventOptions {
     originalEvent?: Event;
     originalRowData?: Record<PropertyKey, unknown> | null;
     rowData: Record<PropertyKey, unknown>;
+    session: GridEditSession;
 }

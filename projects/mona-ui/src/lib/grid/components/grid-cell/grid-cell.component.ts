@@ -118,11 +118,15 @@ export class GridCellComponent {
         const context = this.gridService.editContext();
         if (context?.mode === "row" && context.rowUid === this.row().uid) {
             this.focusInnerEditor();
+            return;
         }
+        this.gridService.startRowEdit(this.row(), originalEvent);
     }
 
     protected onCellDoubleClick(event: MouseEvent): void {
-        this.startEdit(event);
+        if (this.gridService.editableOptions().mode === "cell") {
+            this.startEdit(event);
+        }
     }
 
     protected onCellValueChange(value: unknown): void {
@@ -140,8 +144,9 @@ export class GridCellComponent {
     protected onEditCommit(): void {
         const context = this.gridService.editContext();
         if (context && context.mode === "cell") {
-            this.gridService.stopCellEdit();
-            this.focusHostCell();
+            if (this.gridService.stopCellEdit()) {
+                this.focusHostCell();
+            }
             return;
         }
         if (this.#elementRef.nativeElement.contains(this.#elementRef.nativeElement.ownerDocument.activeElement)) {

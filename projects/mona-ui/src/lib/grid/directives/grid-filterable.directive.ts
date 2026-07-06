@@ -25,9 +25,15 @@ export class GridFilterableDirective {
     readonly #gridService = inject(GridService);
 
     /**
-     * Initial filter configuration to be applied to the grid when it is loaded.
+     * @description Current filter descriptors applied to the grid.
+     * @default []
      */
     public readonly filter = model<CompositeFilterDescriptor[]>([]);
+
+    /**
+     * @description Enables column filtering on the grid. Pass a `FilterableOptions` object to configure whether filters render in the header menu, a filter row, or both.
+     * @default ""
+     */
     public readonly options = input<FilterableOptions | "">("", {
         alias: "monaGridFilterable"
     });
