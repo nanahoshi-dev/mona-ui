@@ -14,10 +14,3 @@ export * from "./list-view/directives/list-view-no-data-template.directive";
 export * from "./list-view/directives/list-view-pageable.directive";
 export * from "./list-view/directives/list-view-selectable.directive";
 export * from "./list-view/directives/list-view-virtual-scroll.directive";
-
-export * from "./common/list/models/GroupableOptions";
-export * from "./common/list/models/NavigableOptions";
-export * from "./common/list/models/PagerSettings";
-export type { SelectableOptions } from "./common/list/models/SelectableOptions";
-export type { ListKeySelector } from "./common/list/models/ListSelectors";
-export type { VirtualScrollOptions } from "./common/models/VirtualScrollOptions";

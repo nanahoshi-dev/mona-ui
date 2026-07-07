@@ -2,6 +2,7 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideCheck, LucideSearch, LucideTriangleAlert } from "@lucide/angular";
+import type { PreventableEvent } from "mona-ui/utils";
 import { range } from "@mirei/ts-collections";
 import {
     AutoCompleteComponent,
@@ -14,12 +15,9 @@ import {
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropdownSuffixTemplateDirective,
-    DropDownVirtualScrollDirective,
-    FilterableOptions,
-    GroupableOptions,
-    PreventableEvent,
-    VirtualScrollOptions
+    DropDownVirtualScrollDirective
 } from "mona-ui/auto-complete";
+import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -180,90 +178,85 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ form.value().value() }}</span>
-            <mona-auto-complete
-                [data]="autoCompleteData()"
-                [highlightFirst]="highlightFirst()"
-                [itemDisabled]="itemDisabled()"
-                [loading]="loading()"
-                [placeholder]="placeholder()"
-                [popupClass]="popupClass()"
-                [popupHeight]="popupHeight()"
-                [popupWidth]="popupWidth()"
-                [rounded]="rounded()"
-                [showClearButton]="showClearButton()"
-                [size]="size()"
-                [textField]="textField()"
-                [valueField]="valueField()"
-                [monaDropDownGroupable]="grouping()"
-                [monaDropDownFilterable]="filtering()"
-                [monaDropDownVirtualScroll]="virtualization()"
-                [groupBy]="groupBy()"
-                [formField]="form.value"
-                (close)="onPopupClose($event)"
-                (open)="onPopupOpen($event)"
-                class="w-50">
-                @if (featureData["footerTemplate"].active) {
-                    <ng-template monaDropDownFooterTemplate>
-                        <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
-                            Total items: {{ autoCompleteData().length }}
-                        </div>
-                    </ng-template>
-                }
-                @if (groupingFeatures["groupHeaderTemplate"]?.active) {
-                    <ng-template monaDropDownGroupHeaderTemplate let-group>
-                        <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
-                    </ng-template>
-                }
-                @if (featureData["headerTemplate"].active) {
-                    <ng-template monaDropDownHeaderTemplate>
-                        <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
-                            Select your favorite food
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["itemTemplate"].active) {
-                    <ng-template monaDropDownItemTemplate let-item>
-                        <div class="flex flex-row w-full">
-                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
-                            <span class="flex-1 {{ color }}">{{ item.text }}</span>
-                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
-                                item.price | currency
-                            }}</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["noDataTemplate"].active) {
-                    <ng-template monaDropDownNoDataTemplate>
-                        <div
-                            class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <svg lucideBox></svg>
-                            <span>No items found</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["prefixTemplate"].active) {
-                    <ng-template monaDropdownPrefixTemplate>
-                        <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
-                    </ng-template>
-                }
-                @if (featureData["suffixTemplate"].active) {
-                    <ng-template monaDropdownSuffixTemplate>
-                        @if (selectedItem()) {
-                            <svg
-                                lucideCheck
-                                [size]="16"
-                                class="h-full mx-1"
-                                [style.color]="'var(--color-success)'"></svg>
-                        } @else {
-                            <svg
-                                lucideTriangleAlert
-                                [size]="16"
-                                class="h-full mx-1"
-                                [style.color]="'var(--color-warning)'"></svg>
-                        }
-                    </ng-template>
-                }
-            </mona-auto-complete>
+        <mona-auto-complete
+            [data]="autoCompleteData()"
+            [highlightFirst]="highlightFirst()"
+            [itemDisabled]="itemDisabled()"
+            [loading]="loading()"
+            [placeholder]="placeholder()"
+            [popupClass]="popupClass()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
+            [rounded]="rounded()"
+            [showClearButton]="showClearButton()"
+            [size]="size()"
+            [textField]="textField()"
+            [valueField]="valueField()"
+            [monaDropDownGroupable]="grouping()"
+            [monaDropDownFilterable]="filtering()"
+            [monaDropDownVirtualScroll]="virtualization()"
+            [groupBy]="groupBy()"
+            [formField]="form.value"
+            (close)="onPopupClose($event)"
+            (open)="onPopupOpen($event)"
+            class="w-50">
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaDropDownFooterTemplate>
+                    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                        Total items: {{ autoCompleteData().length }}
+                    </div>
+                </ng-template>
+            }
+            @if (groupingFeatures["groupHeaderTemplate"]?.active) {
+                <ng-template monaDropDownGroupHeaderTemplate let-group>
+                    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+                </ng-template>
+            }
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaDropDownHeaderTemplate>
+                    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                        Select your favorite food
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["itemTemplate"].active) {
+                <ng-template monaDropDownItemTemplate let-item>
+                    <div class="flex flex-row w-full">
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 {{ color }}">{{ item.text }}</span>
+                        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                            item.price | currency
+                        }}</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaDropDownNoDataTemplate>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <svg lucideBox></svg>
+                        <span>No items found</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["prefixTemplate"].active) {
+                <ng-template monaDropdownPrefixTemplate>
+                    <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
+                </ng-template>
+            }
+            @if (featureData["suffixTemplate"].active) {
+                <ng-template monaDropdownSuffixTemplate>
+                    @if (selectedItem()) {
+                        <svg lucideCheck [size]="16" class="h-full mx-1" [style.color]="'var(--color-success)'"></svg>
+                    } @else {
+                        <svg
+                            lucideTriangleAlert
+                            [size]="16"
+                            class="h-full mx-1"
+                            [style.color]="'var(--color-warning)'"></svg>
+                    }
+                </ng-template>
+            }
+        </mona-auto-complete>
     `
 })
 class AutoCompleteWrapperComponent implements ComponentInputsAsSignal<AutoCompleteComponent> {

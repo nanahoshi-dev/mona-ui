@@ -22,4 +22,3 @@ export type { DialogVariantProps } from "./dialogs/dialog/styles/dialog.styles";
 export type { ButtonVariantProps } from "./buttons/button/styles/button.styles";
 export { PopupCloseEvent, PopupCloseSource } from "./popup/models/PopupCloseEvent";
 export type { PopupCloseEventOptions } from "./popup/models/PopupCloseEvent";
-export { PreventableEvent } from "./utils/PreventableEvent";

@@ -1,4 +1,4 @@
-export interface GridSelectableOptions {
+export interface SelectableOptions {
     enabled?: boolean;
     mode?: "single" | "multiple";
 }

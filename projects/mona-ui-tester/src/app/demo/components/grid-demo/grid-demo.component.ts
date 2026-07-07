@@ -10,61 +10,61 @@ import {
     linkedSignal,
     signal
 } from "@angular/core";
-import { FormField, validate, type SchemaPathTree } from "@angular/forms/signals";
-import { LucideContainer, LucideOctagonAlert, LucidePenLine } from "@lucide/angular";
+import { FormField, type SchemaPathTree, validate } from "@angular/forms/signals";
+import { LucideContainer, LucideOctagonAlert } from "@lucide/angular";
 import { DateTime } from "luxon";
+import { ButtonDirective } from "mona-ui/button";
+import { ChipComponent } from "mona-ui/chip";
+import { VirtualScrollOptions } from "mona-ui/common";
+import { type CompositeFilterDescriptor, DataType } from "mona-ui/filter";
 import {
+    type AggregateFunction,
     CellEditEvent,
+    ColumnReorderEvent,
+    type ColumnResizeEvent,
+    type EditableOptions,
+    type FilterableOptions,
     GridAddCommandDirective,
-    RowEditEvent,
     GridCellTemplateDirective,
-    GridCommandColumnComponent,
     GridColumnComponent,
+    type GridColumnLockedPosition,
+    GridCommandColumnComponent,
     GridComponent,
     GridDetailTemplateDirective,
     GridEditableDirective,
-    GridEditTemplateDirective,
-    GridGroupableDirective,
-    GridSelectableDirective,
-    GridSelectableOptions,
-    GridVirtualScrollDirective,
-    GridFooterTemplateDirective,
-    GridGroupFooterTemplateDirective,
-    GridRemoveEvent,
-    GridSaveEvent,
-    GridToolbarTemplateDirective,
-    GridExportDirective,
-    GridFilterableDirective,
-    type AggregateFunction,
-    type GridColumnLockedPosition,
-    type GridGroupableOptions,
-    type GridFilterableOptions,
-    GridNoDataTemplateDirective,
-    GridStatePersistenceDirective,
-    type GridState,
-    GridHeaderTemplateDirective,
-    GridSortableDirective,
-    GridReorderableDirective,
-    type ReorderableOptions,
-    ColumnReorderEvent,
-    type ResizableOptions,
-    GridResizableDirective,
-    type ColumnResizeEvent,
-    type EditableOptions,
     type GridEditFormContext,
     type GridEditSchemaFactory,
-    type GridEditTemplateContext
+    type GridEditTemplateContext,
+    GridEditTemplateDirective,
+    GridExportDirective,
+    GridFilterableDirective,
+    GridFooterTemplateDirective,
+    GridGroupableDirective,
+    GridGroupFooterTemplateDirective,
+    GridHeaderTemplateDirective,
+    GridNoDataTemplateDirective,
+    GridRemoveEvent,
+    GridReorderableDirective,
+    GridResizableDirective,
+    GridSaveEvent,
+    GridSelectableDirective,
+    GridSortableDirective,
+    type GridState,
+    GridStatePersistenceDirective,
+    GridToolbarTemplateDirective,
+    GridVirtualScrollDirective,
+    type GroupableOptions,
+    type ReorderableOptions,
+    type ResizableOptions,
+    RowEditEvent,
+    type SelectableOptions
 } from "mona-ui/grid";
-import { VirtualScrollOptions } from "mona-ui";
-import { DataType, type CompositeFilterDescriptor } from "mona-ui/filter";
-import { ButtonDirective } from "mona-ui/button";
-import { ChipComponent } from "mona-ui/chip";
-import { TooltipDirective, TooltipComponent } from "mona-ui/tooltip";
 import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "mona-ui/text-box";
-import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
+import { TooltipComponent } from "mona-ui/tooltip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
+import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 interface GridDemoEditRow extends Record<PropertyKey, unknown> {
@@ -662,7 +662,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         const features = this.features();
         const filteringFeature = features["filtering"];
         const filteringTypeFeature = filteringFeature.subFeatures || {};
-        const options: GridFilterableOptions = {
+        const options: FilterableOptions = {
             enabled: filteringFeature.active ?? false,
             type: filteringTypeFeature["type"]?.dropdownValue || "menu"
         };
@@ -708,7 +708,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         const features = this.features();
         const groupingFeature = features["grouping"];
         const subFeatures = groupingFeature.subFeatures || {};
-        const options: GridGroupableOptions = {
+        const options: GroupableOptions = {
             enabled: groupingFeature.active ?? false,
             showFooter: subFeatures["showFooter"]?.active ?? false
         };
@@ -765,7 +765,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
     protected readonly selection = computed(() => {
         const features = this.features();
         const subFeatures = features["selection"].subFeatures || {};
-        const selectableOptions: GridSelectableOptions = {
+        const selectableOptions: SelectableOptions = {
             enabled: features["selection"].active ?? false,
             mode: subFeatures["mode"].dropdownValue ?? "single"
         };

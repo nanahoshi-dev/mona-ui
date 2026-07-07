@@ -16,5 +16,3 @@ export type { DropdownSelectorVariantProps } from "./dropdowns/styles/dropdown.s
 
 export type { DisableOptions } from "./common/tree/models/DisableOptions";
 export type { ExpandableOptions } from "./common/tree/models/ExpandableOptions";
-export type { FilterableOptions } from "./common/models/FilterableOptions";
-export { FilterChangeEvent } from "./common/filter-input/models/FilterChangeEvent";

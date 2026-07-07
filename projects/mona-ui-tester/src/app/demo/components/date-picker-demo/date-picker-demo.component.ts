@@ -8,9 +8,9 @@ import {
     CalendarMonthCellTemplateDirective,
     CalendarYearCellTemplateDirective,
     DateInputPrefixTemplateDirective,
-    DatePickerComponent,
-    PreventableEvent
+    DatePickerComponent
 } from "mona-ui/date-picker";
+import type { PreventableEvent } from "mona-ui/utils";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
     calendarDecadeCellTemplateFeatureConfig,

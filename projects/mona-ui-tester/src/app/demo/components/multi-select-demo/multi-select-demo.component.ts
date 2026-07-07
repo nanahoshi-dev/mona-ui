@@ -12,15 +12,13 @@ import {
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropDownVirtualScrollDirective,
-    FilterableOptions,
-    GroupableOptions,
     MultiSelectComponent,
     MultiSelectSummaryTagDirective,
     MultiSelectSummaryTagTemplateDirective,
-    MultiSelectTagTemplateDirective,
-    PreventableEvent,
-    VirtualScrollOptions
+    MultiSelectTagTemplateDirective
 } from "mona-ui/multi-select";
+import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
+import type { PreventableEvent } from "mona-ui/utils";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -198,82 +196,81 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         @let featureData = features();
         @let tagConfigData = tagConfig();
         <span>Selected Items: {{ formValueText() }}</span>
-            <mona-multi-select
-                [autoClose]="autoClose()"
-                [checkboxes]="checkboxes()"
-                [data]="multiSelectData()"
-                [itemDisabled]="itemDisabled()"
-                [loading]="loading()"
-                [popupClass]="popupClass()"
-                [popupHeight]="popupHeight()"
-                [popupWidth]="popupWidth()"
-                [rounded]="rounded()"
-                [showClearButton]="showClearButton()"
-                [size]="size()"
-                [textField]="textField()"
-                [valueField]="valueField()"
-                [monaDropDownFilterable]="filtering()"
-                [monaDropDownGroupable]="grouping()"
-                [monaDropDownVirtualScroll]="virtualization()"
-                [monaMultiSelectSummaryTag]="tagConfigData.count"
-                [formField]="form.value"
-                [groupBy]="groupBy()"
-                (close)="onPopupClose($event)"
-                (closed)="onPopupClosed()"
-                (open)="onPopupOpen($event)"
-                (opened)="onPopupOpened()"
-                class="w-60">
-                @if (featureData["footerTemplate"].active) {
-                    <ng-template monaDropDownFooterTemplate>
-                        <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
-                            Total items: {{ multiSelectData().length }}
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["headerTemplate"].active) {
-                    <ng-template monaDropDownHeaderTemplate>
-                        <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
-                            Select your favorite foods
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["itemTemplate"].active) {
-                    <ng-template monaDropDownItemTemplate let-item>
-                        <div class="flex flex-row w-full">
-                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
-                            <span class="flex-1 {{ color }}">{{ item.text }}</span>
-                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
-                                item.price | currency
-                            }}</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["noDataTemplate"].active) {
-                    <ng-template monaDropDownNoDataTemplate>
-                        <div
-                            class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <svg lucideBox></svg>
-                            <span>No items found</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["prefixTemplate"].active) {
-                    <ng-template monaDropdownPrefixTemplate>
-                        <svg lucideSearch [size]="16" class="h-full ms-1"></svg>
-                    </ng-template>
-                }
-                @if (tagConfigData.template) {
-                    <ng-template monaMultiSelectSummaryTagTemplate let-items let-tagCount="tagCount">
-                        @let prefix = tagCount !== 0 ? "and" : "";
-                        <span class="text-blue-400"> {{ prefix }} {{ items.length - tagCount }} more... </span>
-                    </ng-template>
-                }
-                @if (featureData["tagTemplate"].active) {
-                    <ng-template monaMultiSelectTagTemplate let-item>
-                        <span class="italic text-violet-600">{{ item.text }}</span>
-                    </ng-template>
-                }
-            </mona-multi-select>
+        <mona-multi-select
+            [autoClose]="autoClose()"
+            [checkboxes]="checkboxes()"
+            [data]="multiSelectData()"
+            [itemDisabled]="itemDisabled()"
+            [loading]="loading()"
+            [popupClass]="popupClass()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
+            [rounded]="rounded()"
+            [showClearButton]="showClearButton()"
+            [size]="size()"
+            [textField]="textField()"
+            [valueField]="valueField()"
+            [monaDropDownFilterable]="filtering()"
+            [monaDropDownGroupable]="grouping()"
+            [monaDropDownVirtualScroll]="virtualization()"
+            [monaMultiSelectSummaryTag]="tagConfigData.count"
+            [formField]="form.value"
+            [groupBy]="groupBy()"
+            (close)="onPopupClose($event)"
+            (closed)="onPopupClosed()"
+            (open)="onPopupOpen($event)"
+            (opened)="onPopupOpened()"
+            class="w-60">
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaDropDownFooterTemplate>
+                    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                        Total items: {{ multiSelectData().length }}
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaDropDownHeaderTemplate>
+                    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                        Select your favorite foods
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["itemTemplate"].active) {
+                <ng-template monaDropDownItemTemplate let-item>
+                    <div class="flex flex-row w-full">
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 {{ color }}">{{ item.text }}</span>
+                        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                            item.price | currency
+                        }}</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaDropDownNoDataTemplate>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <svg lucideBox></svg>
+                        <span>No items found</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["prefixTemplate"].active) {
+                <ng-template monaDropdownPrefixTemplate>
+                    <svg lucideSearch [size]="16" class="h-full ms-1"></svg>
+                </ng-template>
+            }
+            @if (tagConfigData.template) {
+                <ng-template monaMultiSelectSummaryTagTemplate let-items let-tagCount="tagCount">
+                    @let prefix = tagCount !== 0 ? "and" : "";
+                    <span class="text-blue-400"> {{ prefix }} {{ items.length - tagCount }} more... </span>
+                </ng-template>
+            }
+            @if (featureData["tagTemplate"].active) {
+                <ng-template monaMultiSelectTagTemplate let-item>
+                    <span class="italic text-violet-600">{{ item.text }}</span>
+                </ng-template>
+            }
+        </mona-multi-select>
     `
 })
 class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelectComponent> {

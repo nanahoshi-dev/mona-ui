@@ -13,11 +13,9 @@ import {
     DropDownItemTemplateDirective,
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
-    DropDownVirtualScrollDirective,
-    FilterableOptions,
-    GroupableOptions,
-    VirtualScrollOptions
+    DropDownVirtualScrollDirective
 } from "mona-ui/combo-box";
+import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -162,72 +160,71 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
         @let featureData = features();
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <span>Selected Value: {{ formValueText() }}</span>
-            <mona-combo-box
-                [allowCustomValue]="allowCustomValue()"
-                [data]="comboBoxData()"
-                [itemDisabled]="itemDisabled()"
-                [loading]="loading()"
-                [placeholder]="placeholder()"
-                [popupClass]="popupClass()"
-                [popupHeight]="popupHeight()"
-                [popupWidth]="popupWidth()"
-                [rounded]="rounded()"
-                [showClearButton]="showClearButton()"
-                [size]="size()"
-                [textField]="textField()"
-                [valueField]="valueField()"
-                [monaDropDownGroupable]="grouping()"
-                [monaDropDownFilterable]="filtering()"
-                [monaDropDownVirtualScroll]="virtualization()"
-                [formField]="form.value"
-                [groupBy]="groupBy()"
-                (valueAdd)="onValueAdd($event)"
-                class="w-50">
-                @if (featureData["footerTemplate"].active) {
-                    <ng-template monaDropDownFooterTemplate>
-                        <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
-                            Total items: {{ comboBoxData().length }}
-                        </div>
-                    </ng-template>
-                }
-                @if (groupingFeatures["groupHeaderTemplate"]?.active) {
-                    <ng-template monaDropDownGroupHeaderTemplate let-group>
-                        <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
-                    </ng-template>
-                }
-                @if (featureData["headerTemplate"].active) {
-                    <ng-template monaDropDownHeaderTemplate>
-                        <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
-                            Select your favorite food
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["itemTemplate"].active) {
-                    <ng-template monaDropDownItemTemplate let-item>
-                        <div class="flex flex-row w-full">
-                            @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
-                            <span class="flex-1 {{ color }}">{{ item.text }}</span>
-                            <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
-                                item.price | currency
-                            }}</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["noDataTemplate"].active) {
-                    <ng-template monaDropDownNoDataTemplate>
-                        <div
-                            class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
-                            <svg lucideBox></svg>
-                            <span>No items found</span>
-                        </div>
-                    </ng-template>
-                }
-                @if (featureData["prefixTemplate"].active) {
-                    <ng-template monaDropdownPrefixTemplate>
-                        <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
-                    </ng-template>
-                }
-            </mona-combo-box>
+        <mona-combo-box
+            [allowCustomValue]="allowCustomValue()"
+            [data]="comboBoxData()"
+            [itemDisabled]="itemDisabled()"
+            [loading]="loading()"
+            [placeholder]="placeholder()"
+            [popupClass]="popupClass()"
+            [popupHeight]="popupHeight()"
+            [popupWidth]="popupWidth()"
+            [rounded]="rounded()"
+            [showClearButton]="showClearButton()"
+            [size]="size()"
+            [textField]="textField()"
+            [valueField]="valueField()"
+            [monaDropDownGroupable]="grouping()"
+            [monaDropDownFilterable]="filtering()"
+            [monaDropDownVirtualScroll]="virtualization()"
+            [formField]="form.value"
+            [groupBy]="groupBy()"
+            (valueAdd)="onValueAdd($event)"
+            class="w-50">
+            @if (featureData["footerTemplate"].active) {
+                <ng-template monaDropDownFooterTemplate>
+                    <div class="p-2 bg-accent text-foreground border-t border-t-border font-semibold">
+                        Total items: {{ comboBoxData().length }}
+                    </div>
+                </ng-template>
+            }
+            @if (groupingFeatures["groupHeaderTemplate"]?.active) {
+                <ng-template monaDropDownGroupHeaderTemplate let-group>
+                    <span class="text-blue-600 font-semibold px-3 py-0.5 underline">Group: {{ group }}</span>
+                </ng-template>
+            }
+            @if (featureData["headerTemplate"].active) {
+                <ng-template monaDropDownHeaderTemplate>
+                    <div class="p-2 bg-accent text-foreground border-b border-b-border font-semibold">
+                        Select your favorite food
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["itemTemplate"].active) {
+                <ng-template monaDropDownItemTemplate let-item>
+                    <div class="flex flex-row w-full">
+                        @let color = item.price > 7 ? "text-amber-600" : item.price < 3 ? "text-emerald-700" : "";
+                        <span class="flex-1 {{ color }}">{{ item.text }}</span>
+                        <span class="inline-flex items-center justify-center invert text-xs text-gray-500">{{
+                            item.price | currency
+                        }}</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["noDataTemplate"].active) {
+                <ng-template monaDropDownNoDataTemplate>
+                    <div class="flex flex-col items-center select-none justify-center w-full h-full gap-2 opacity-30">
+                        <svg lucideBox></svg>
+                        <span>No items found</span>
+                    </div>
+                </ng-template>
+            }
+            @if (featureData["prefixTemplate"].active) {
+                <ng-template monaDropdownPrefixTemplate>
+                    <svg lucideSearch [size]="16" class="h-full ml-1"></svg>
+                </ng-template>
+            }
+        </mona-combo-box>
     `
 })
 class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxComponent> {

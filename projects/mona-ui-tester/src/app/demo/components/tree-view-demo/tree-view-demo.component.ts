@@ -21,12 +21,12 @@ import {
     LucideLaptop,
     LucideSmartphone
 } from "@lucide/angular";
+import { FilterableOptions } from "mona-ui/common";
 import {
     CheckableOptions,
     DisableOptions,
     DraggableOptions,
     ExpandableOptions,
-    FilterableOptions,
     moveFlatTreeNode,
     moveTreeNode,
     NodeDropEvent,

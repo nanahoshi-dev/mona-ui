@@ -18,5 +18,4 @@ export * from "./list-box/models/ListBoxSelectionEvent";
 export * from "./list-box/models/ListBoxTransferEvent";
 export * from "./list-box/models/ToolbarOptions";
 
-export { PreventableEvent } from "./utils/PreventableEvent";
 export type { Position } from "./models/Position";

@@ -1,14 +1,6 @@
 /*
- * Public API Surface of mona-ui
+ * Public API Surface of @mirei/mona-ui/popup-menu
  */
-
-/** Common */
-export * from "./models/SelectionMode";
-
-export * from "./common/models/FilterableOptions";
-export * from "./common/models/VirtualScrollOptions";
-
-export * from "./common/filter-input/models/FilterChangeEvent";
 
 export * from "./common/popup-menu/components/popup-menu/popup-menu.component";
 export * from "./common/popup-menu/components/popup-menu-checkbox-item/popup-menu-checkbox-item.component";
@@ -21,11 +13,9 @@ export * from "./common/popup-menu/directives/popup-menu-group-template.directiv
 export * from "./common/popup-menu/directives/popup-menu-icon-template.directive";
 export * from "./common/popup-menu/directives/popup-menu-shortcut-template.directive";
 export * from "./common/popup-menu/directives/popup-menu-text-template.directive";
-
-/** Pipes */
-export * from "./pipes/slice.pipe";
-export * from "./pipes/type-cast.pipe";
-
-/** Utils */
-export * from "./utils/PreventableEvent";
-export * from "./utils/moveIndices";
+export * from "./common/popup-menu/models/PopupMenuCloseEvent";
+export * from "./common/popup-menu/models/PopupMenuItem";
+export * from "./common/popup-menu/models/PopupMenuConfig";
+export * from "./common/popup-menu/models/PopupMenuListConfig";
+export * from "./common/popup-menu/models/PopupMenuNavigationEvent";
+export * from "./common/popup-menu/models/PopupMenuItemClickEvent";

@@ -1,5 +1,15 @@
 import { isPlatformBrowser } from "@angular/common";
-import { computed, DOCUMENT, effect, inject, Injectable, Injector, PLATFORM_ID, signal, TemplateRef } from "@angular/core";
+import {
+    computed,
+    DOCUMENT,
+    effect,
+    inject,
+    Injectable,
+    Injector,
+    PLATFORM_ID,
+    signal,
+    TemplateRef
+} from "@angular/core";
 import { toObservable } from "@angular/core/rxjs-interop";
 import { form, type SchemaOrSchemaFn } from "@angular/forms/signals";
 import {
@@ -33,7 +43,7 @@ import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import { GridKeySelector } from "../models/GridKeySelector";
 import type { GridLockedColumnState } from "../models/GridLockedColumnState";
-import { GridSelectableOptions } from "../models/GridSelectableOptions";
+import { SelectableOptions } from "../models/SelectableOptions";
 import type {
     GridState,
     GridStateCompositeFilterDescriptor,
@@ -249,7 +259,7 @@ export class GridService {
     public readonly scrollEndThreshold = signal<number>(5);
     public readonly scrollbarGutterWidth = this.#scrollbarGutterWidth.asReadonly();
     public readonly selectBy = signal<GridKeySelector<unknown>>("");
-    public readonly selectableOptions = signal<GridSelectableOptions>({ enabled: false, mode: "single" });
+    public readonly selectableOptions = signal<SelectableOptions>({ enabled: false, mode: "single" });
     public readonly selectedKeys = signal(ImmutableSet.create());
     public readonly selectedKeysChange$ = toObservable(this.selectedKeys);
     public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
@@ -934,7 +944,7 @@ export class GridService {
         this.rows.set(ImmutableSet.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
     }
 
-    public setSelectableOptions(options: GridSelectableOptions): void {
+    public setSelectableOptions(options: SelectableOptions): void {
         this.selectableOptions.update(v => ({ ...v, ...options }));
     }
 

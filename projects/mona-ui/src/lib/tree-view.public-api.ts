@@ -29,6 +29,3 @@ export * from "./common/tree/models/TreeSelectableOptions";
 export * from "./common/tree/models/TreeSelectors";
 export * from "./common/tree/utils/moveFlatTreeNode";
 export * from "./common/tree/utils/moveTreeNode";
-
-export type { FilterableOptions } from "./common/models/FilterableOptions";
-export { FilterChangeEvent } from "./common/filter-input/models/FilterChangeEvent";

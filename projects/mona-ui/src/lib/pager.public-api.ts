@@ -17,5 +17,3 @@ export * from "./pager/models/Page";
 export * from "./pager/models/PageChangeEvent";
 export * from "./pager/models/PagerType";
 export * from "./pager/models/PageSizeChangeEvent";
-
-export { PreventableEvent } from "./utils/PreventableEvent";

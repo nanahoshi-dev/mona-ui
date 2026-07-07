@@ -1,4 +1,4 @@
-import { NgComponentOutlet } from "@angular/common";
+import { NgComponentOutlet, SlicePipe } from "@angular/common";
 import {
     ChangeDetectionStrategy,
     Component,
@@ -10,9 +10,7 @@ import {
     signal
 } from "@angular/core";
 import { range } from "@mirei/ts-collections";
-import { SlicePipe } from "mona-ui";
 import {
-    type GroupableOptions,
     ListViewComponent,
     ListViewFooterTemplateDirective,
     ListViewGroupableDirective,
@@ -23,12 +21,15 @@ import {
     ListViewNoDataTemplateDirective,
     ListViewPageableDirective,
     ListViewSelectableDirective,
-    ListViewVirtualScrollDirective,
-    NavigableOptions,
-    type PagerSettings,
-    type SelectableOptions,
-    VirtualScrollOptions
+    ListViewVirtualScrollDirective
 } from "mona-ui/list-view";
+import type {
+    GroupableOptions,
+    NavigableOptions,
+    PagerSettings,
+    SelectableOptions,
+    VirtualScrollOptions
+} from "mona-ui/common";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -385,7 +386,7 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
         @let groupingFeatures = featureData["grouping"]?.subFeatures || {};
         <mona-list-view
             [height]="height()"
-            [items]="listViewItems() | monaSlice: 0 : scrollBottomItemCount()"
+            [items]="listViewItems() | slice: 0 : scrollBottomItemCount()"
             [listClass]="listClassInput()"
             [listItemClass]="listItemClass()"
             [listItemStyle]="listItemStyle()"

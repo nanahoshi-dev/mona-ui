@@ -2,7 +2,7 @@ import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, 
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { orderBy, sequenceEqual } from "@mirei/ts-collections";
 import { pairwise, startWith } from "rxjs";
-import { GridSelectableOptions } from "../models/GridSelectableOptions";
+import { SelectableOptions } from "../models/SelectableOptions";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -15,7 +15,7 @@ export class GridSelectableDirective {
      * @description Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode.
      * @default ""
      */
-    public readonly options = input<GridSelectableOptions | "">("", {
+    public readonly options = input<SelectableOptions | "">("", {
         alias: "monaGridSelectable"
     });
 

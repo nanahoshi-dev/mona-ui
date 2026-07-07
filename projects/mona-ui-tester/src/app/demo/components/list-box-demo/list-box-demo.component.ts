@@ -3,7 +3,7 @@ import { LucideBox } from "@lucide/angular";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { moveIndices } from "mona-ui";
+import { moveIndices } from "mona-ui/utils";
 import {
     ListBoxActionEvent,
     ListBoxComponent,
