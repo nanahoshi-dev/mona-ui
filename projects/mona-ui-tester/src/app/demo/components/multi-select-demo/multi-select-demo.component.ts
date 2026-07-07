@@ -20,7 +20,7 @@ import {
     MultiSelectTagTemplateDirective,
     PreventableEvent,
     VirtualScrollOptions
-} from "mona-ui";
+} from "mona-ui/multi-select";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

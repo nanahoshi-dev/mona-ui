@@ -7,7 +7,7 @@ import {
     CalendarDecadeCellTemplateDirective,
     CalendarMonthCellTemplateDirective,
     CalendarYearCellTemplateDirective
-} from "mona-ui";
+} from "mona-ui/calendar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
     calendarDecadeCellTemplateFeatureConfig,

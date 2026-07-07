@@ -2,19 +2,19 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { LucideHeart, LucideMenu, LucideSettings } from "@lucide/angular";
 import {
+    DropdownButtonCheckboxItemComponent,
     DropdownButtonComponent,
     DropdownButtonGroupComponent,
+    DropdownButtonItemComponent,
+    DropdownButtonRadioGroupComponent,
+    DropdownButtonRadioItemComponent,
+    DropdownButtonSeparatorComponent,
     DropdownButtonMenuGroupTemplateDirective,
     DropdownButtonMenuItemIconTemplateDirective,
-    DropdownButtonItemComponent,
-    DropdownButtonSeparatorComponent,
     DropdownButtonMenuItemShortcutTemplateDirective,
     DropdownButtonMenuItemTextTemplateDirective,
-    DropdownButtonCheckboxItemComponent,
-    DropdownButtonTextTemplateDirective,
-    DropdownButtonRadioGroupComponent,
-    DropdownButtonRadioItemComponent
-} from "mona-ui";
+    DropdownButtonTextTemplateDirective
+} from "mona-ui/dropdown-button";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

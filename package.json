@@ -4,14 +4,83 @@
     "description": "A very light Angular UI framework",
     "main": "dist/mona-ui/fesm2022/mona-ui.mjs",
     "exports": {
+        "./package.json": {
+            "default": "./package.json"
+        },
         ".": {
-            "types": "./dist/mona-ui/index.d.ts",
-            "esm2022": "./dist/mona-ui/esm2022/mona-ui.mjs",
-            "esm": "./dist/mona-ui/esm2022/mona-ui.mjs",
+            "types": "./dist/mona-ui/types/mona-ui.d.ts",
             "default": "./dist/mona-ui/fesm2022/mona-ui.mjs"
+        },
+        "./button": {
+            "types": "./dist/mona-ui/types/mona-ui-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-button.mjs"
+        },
+        "./auto-complete": {
+            "types": "./dist/mona-ui/types/mona-ui-auto-complete.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-auto-complete.mjs"
+        },
+        "./button-group": {
+            "types": "./dist/mona-ui/types/mona-ui-button-group.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-button-group.mjs"
+        },
+        "./calendar": {
+            "types": "./dist/mona-ui/types/mona-ui-calendar.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-calendar.mjs"
+        },
+        "./chip": {
+            "types": "./dist/mona-ui/types/mona-ui-chip.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-chip.mjs"
+        },
+        "./combo-box": {
+            "types": "./dist/mona-ui/types/mona-ui-combo-box.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-combo-box.mjs"
+        },
+        "./date-picker": {
+            "types": "./dist/mona-ui/types/mona-ui-date-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-date-picker.mjs"
+        },
+        "./datetime-picker": {
+            "types": "./dist/mona-ui/types/mona-ui-datetime-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-datetime-picker.mjs"
+        },
+        "./dialog": {
+            "types": "./dist/mona-ui/types/mona-ui-dialog.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-dialog.mjs"
+        },
+        "./drop-down-list": {
+            "types": "./dist/mona-ui/types/mona-ui-drop-down-list.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-drop-down-list.mjs"
+        },
+        "./drop-down-tree": {
+            "types": "./dist/mona-ui/types/mona-ui-drop-down-tree.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-drop-down-tree.mjs"
+        },
+        "./dropdown-button": {
+            "types": "./dist/mona-ui/types/mona-ui-dropdown-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-dropdown-button.mjs"
+        },
+        "./multi-select": {
+            "types": "./dist/mona-ui/types/mona-ui-multi-select.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-multi-select.mjs"
+        },
+        "./split-button": {
+            "types": "./dist/mona-ui/types/mona-ui-split-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-split-button.mjs"
+        },
+        "./time-picker": {
+            "types": "./dist/mona-ui/types/mona-ui-time-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-time-picker.mjs"
+        },
+        "./time-selector": {
+            "types": "./dist/mona-ui/types/mona-ui-time-selector.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-time-selector.mjs"
+        },
+        "./window": {
+            "types": "./dist/mona-ui/types/mona-ui-window.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mona-ui-window.mjs"
         }
     },
-    "typings": "dist/mona-ui/index.d.ts",
+    "typings": "dist/mona-ui/types/mona-ui.d.ts",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",

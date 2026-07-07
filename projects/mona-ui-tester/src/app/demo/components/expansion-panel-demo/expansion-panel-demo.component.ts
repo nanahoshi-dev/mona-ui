@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, inject, input, model, signal } from
 import { LucideArrowDown, LucideArrowUp, LucideSettings } from "@lucide/angular";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import {
-    ButtonDirective,
     ExpansionPanelActionsTemplateDirective,
     ExpansionPanelComponent,
     ExpansionPanelIconTemplateDirective,
     ExpansionPanelTitleTemplateDirective
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";

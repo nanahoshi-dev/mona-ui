@@ -36,14 +36,12 @@ import {
     GridSaveEvent,
     GridToolbarTemplateDirective,
     GridExportDirective,
-    ButtonDirective,
     GridFilterableDirective,
     type CompositeFilterDescriptor,
     type AggregateFunction,
     type GridColumnLockedPosition,
     type GridGroupableOptions,
     type GridFilterableOptions,
-    ChipComponent,
     GridNoDataTemplateDirective,
     GridStatePersistenceDirective,
     type GridState,
@@ -64,6 +62,8 @@ import {
     TooltipDirective,
     TooltipComponent
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
+import { ChipComponent } from "mona-ui/chip";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

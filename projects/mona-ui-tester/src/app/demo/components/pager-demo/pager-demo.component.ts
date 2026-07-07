@@ -2,7 +2,6 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import {
-    ButtonDirective,
     DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
@@ -14,6 +13,7 @@ import {
     PagerPageSizeTemplateDirective,
     SliderComponent
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

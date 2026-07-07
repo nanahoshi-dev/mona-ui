@@ -17,7 +17,7 @@ import {
     FilterableOptions,
     GroupableOptions,
     VirtualScrollOptions
-} from "mona-ui";
+} from "mona-ui/combo-box";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

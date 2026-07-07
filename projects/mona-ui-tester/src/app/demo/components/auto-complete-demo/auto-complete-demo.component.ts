@@ -19,7 +19,7 @@ import {
     GroupableOptions,
     PreventableEvent,
     VirtualScrollOptions
-} from "mona-ui";
+} from "mona-ui/auto-complete";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

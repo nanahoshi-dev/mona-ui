@@ -10,5 +10,5 @@ import { SectionComponent } from "../../../layout/components/section/section.com
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DatePickerDocComponent {
-    protected readonly importCode = `import { DatePickerComponent } from "mona-ui";`;
+    protected readonly importCode = `import { DatePickerComponent } from "mona-ui/date-picker";`;
 }

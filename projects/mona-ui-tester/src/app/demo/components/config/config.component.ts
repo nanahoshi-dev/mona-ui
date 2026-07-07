@@ -4,7 +4,6 @@ import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
 import { where } from "@mirei/ts-collections";
 import {
-    ButtonDirective,
     DropDownItemTemplateDirective,
     DropdownListComponent,
     DropDownListValueTemplateDirective,
@@ -17,6 +16,7 @@ import {
     TabsComponent,
     TextBoxComponent
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ComponentConfig, ComponentInputs, createComponentPropertyConfig } from "../../utils/componentConfig";

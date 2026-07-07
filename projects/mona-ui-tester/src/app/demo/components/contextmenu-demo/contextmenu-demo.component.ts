@@ -8,7 +8,6 @@ import {
     LucideScissors
 } from "@lucide/angular";
 import {
-    ButtonDirective,
     ContextMenuCheckboxItemComponent,
     ContextMenuComponent,
     ContextMenuGroupComponent,
@@ -21,6 +20,7 @@ import {
     ContextMenuShortcutTemplateDirective,
     ContextMenuTextTemplateDirective
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

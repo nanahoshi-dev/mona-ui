@@ -10,5 +10,5 @@ import { SectionComponent } from "../../../layout/components/section/section.com
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimePickerDocComponent {
-    protected readonly importCode = `import { TimePickerComponent } from "mona-ui";`;
+    protected readonly importCode = `import { TimePickerComponent } from "mona-ui/time-picker";`;
 }

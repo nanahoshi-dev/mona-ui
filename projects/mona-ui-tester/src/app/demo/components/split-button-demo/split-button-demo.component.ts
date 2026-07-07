@@ -16,7 +16,7 @@ import {
     SplitButtonRadioItemComponent,
     SplitButtonSeparatorComponent,
     SplitButtonTextTemplateDirective
-} from "mona-ui";
+} from "mona-ui/split-button";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

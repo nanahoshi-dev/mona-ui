@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, 
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
 import {
-    ButtonDirective,
     ColorPickerComponent,
     DropdownListComponent,
     type ThemeId,
@@ -11,6 +10,7 @@ import {
     ThemeStyle,
     type ThemeVariant
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { ComponentConfig } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";

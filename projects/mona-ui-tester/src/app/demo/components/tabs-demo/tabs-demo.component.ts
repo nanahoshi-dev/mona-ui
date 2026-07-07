@@ -1,7 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import {
-    ButtonDirective,
     TabCloseEvent,
     TabComponent,
     TabContentTemplateDirective,
@@ -9,6 +8,7 @@ import {
     TabsComponent,
     TextBoxComponent
 } from "mona-ui";
+import { ButtonDirective } from "mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

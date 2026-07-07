@@ -4,13 +4,15 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideList, LucideSearch } from "@lucide/angular";
 import {
-    DropdownButtonComponent,
-    DropdownButtonItemComponent,
-    DropdownButtonTextTemplateDirective,
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
     TextBoxSuffixTemplateDirective
 } from "mona-ui";
+import {
+    DropdownButtonComponent,
+    DropdownButtonItemComponent,
+    DropdownButtonTextTemplateDirective
+} from "mona-ui/dropdown-button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
