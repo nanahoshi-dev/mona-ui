@@ -10,6 +10,7 @@ import {
     output,
     viewChild
 } from "@angular/core";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { ImmutableSet, select } from "@mirei/ts-collections";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
@@ -21,7 +22,6 @@ import {
     TabsVariantProps
 } from "../../styles/tabs.styles";
 import { TabListComponent } from "../tab-list/tab-list.component";
-import { ThemeService } from "../../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 import { TabComponent } from "../tab/tab.component";
 

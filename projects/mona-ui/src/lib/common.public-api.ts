@@ -1,4 +1,5 @@
 export * from "./models/SelectionMode";
+export type { ScrollDirection } from "./models/ScrollDirection";
 export * from "./common/filter-input/models/FilterChangeEvent";
 export * from "./common/models/FilterableOptions";
 export * from "./common/models/VirtualScrollOptions";

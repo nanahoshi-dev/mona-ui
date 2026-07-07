@@ -503,7 +503,7 @@
     "inputs": [
       {
         "name": "options",
-        "type": "GridSelectableOptions | \"\"",
+        "type": "SelectableOptions | \"\"",
         "description": "Enables row selection on the grid. Pass a `GridSelectableOptions` object to configure single or multiple selection mode.",
         "kind": "input"
       },
@@ -2412,30 +2412,6 @@
       {
         "name": "rounded",
         "type": "StepperVariantProps[\"rounded\"]",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "TabListItemDirective": {
-    "name": "TabListItemDirective",
-    "selector": "\"li[monaTabListItem]\"",
-    "inputs": [
-      {
-        "name": "active",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "TabListListItemVariantProps[\"rounded\"]",
         "description": "",
         "kind": "input"
       }
@@ -7231,144 +7207,6 @@
         "name": "steps",
         "type": "Iterable<StepOptions>",
         "description": "Sets the steps of the stepper.",
-        "kind": "input"
-      }
-    ]
-  },
-  "TabComponent": {
-    "name": "TabComponent",
-    "selector": "\"mona-tab\"",
-    "inputs": [
-      {
-        "name": "closable",
-        "type": "boolean",
-        "description": "Displays a close button on this tab. Overrides the parent `mona-tabs` component's `closable` input.",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Renders this tab with reduced visual emphasis and removes pointer and keyboard interaction.\r\nOverrides the parent `mona-tabs` component's `disabled` input.",
-        "kind": "input"
-      },
-      {
-        "name": "selected",
-        "type": "boolean",
-        "description": "Whether the tab is selected.",
-        "kind": "model"
-      },
-      {
-        "name": "title",
-        "type": "string",
-        "description": "Title text displayed on the tab.",
-        "kind": "input"
-      }
-    ]
-  },
-  "TabListComponent": {
-    "name": "TabListComponent",
-    "selector": "\"mona-tab-list\"",
-    "inputs": [
-      {
-        "name": "closable",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "TabListVariantProps[\"rounded\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "selectedTabId",
-        "type": "string | null",
-        "description": "",
-        "kind": "model"
-      },
-      {
-        "name": "size",
-        "type": "TabListVariantProps[\"size\"]",
-        "description": "",
-        "kind": "input"
-      },
-      {
-        "name": "tabClose",
-        "type": "TabCloseEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "tabSelect",
-        "type": "TabSelectEvent",
-        "description": "",
-        "kind": "output"
-      },
-      {
-        "name": "tabList",
-        "type": "Iterable<TabItem>",
-        "description": "",
-        "kind": "input"
-      }
-    ]
-  },
-  "TabsComponent": {
-    "name": "TabsComponent",
-    "selector": "\"mona-tabs\"",
-    "inputs": [
-      {
-        "name": "closable",
-        "type": "boolean",
-        "description": "Displays a close button on each tab, unless overridden per tab.",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction.",
-        "kind": "input"
-      },
-      {
-        "name": "keepTabContent",
-        "type": "boolean",
-        "description": "Keeps a tab's content in the DOM after it is deselected instead of removing it.",
-        "kind": "input"
-      },
-      {
-        "name": "rounded",
-        "type": "TabsVariantProps[\"rounded\"]",
-        "description": "Border-radius preset applied to the tabs and the tab content area.",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "TabsVariantProps[\"size\"]",
-        "description": "Size preset controlling the tabs' dimensions.",
-        "kind": "input"
-      },
-      {
-        "name": "tabClose",
-        "type": "TabCloseEvent",
-        "description": "Emitted with a {@link TabCloseEvent} when a tab is closed.",
-        "kind": "output"
-      },
-      {
-        "name": "tabSelect",
-        "type": "TabSelectEvent",
-        "description": "Emitted with a {@link TabSelectEvent} when a tab is selected. This event is preventable.",
-        "kind": "output"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
