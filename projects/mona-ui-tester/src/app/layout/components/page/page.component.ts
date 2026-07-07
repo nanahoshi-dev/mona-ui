@@ -12,7 +12,7 @@ import {
     LucideX
 } from "@lucide/angular";
 
-import { BreadcrumbComponent, BreadcrumbItemComponent } from "mona-ui";
+import { BreadcrumbComponent, BreadcrumbItemComponent } from "mona-ui/breadcrumb";
 import { filter, map, startWith } from "rxjs";
 import { PageService } from "../../services/page.service";
 import { SidebarService } from "../../services/sidebar.service";

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { ScrollViewComponent } from "mona-ui";
+import { ScrollViewComponent } from "mona-ui/scroll-view";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";

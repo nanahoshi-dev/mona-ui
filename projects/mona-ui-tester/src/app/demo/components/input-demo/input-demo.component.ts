@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
 import { disabled, form, FormField } from "@angular/forms/signals";
-import { TextBoxDirective } from "mona-ui";
+import { TextBoxDirective } from "mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";

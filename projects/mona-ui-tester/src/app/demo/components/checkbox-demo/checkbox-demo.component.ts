@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
-import { CheckBoxComponent, CheckboxDirective } from "mona-ui";
+import { CheckBoxComponent, CheckboxDirective } from "mona-ui/check-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";

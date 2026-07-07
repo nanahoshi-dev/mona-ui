@@ -19,7 +19,7 @@ import {
     ContextMenuSeparatorComponent,
     ContextMenuShortcutTemplateDirective,
     ContextMenuTextTemplateDirective
-} from "mona-ui";
+} from "mona-ui/contextmenu";
 import { ButtonDirective } from "mona-ui/button";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";

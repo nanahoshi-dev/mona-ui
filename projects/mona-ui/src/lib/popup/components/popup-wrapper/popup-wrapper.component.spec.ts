@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
-import { PopupReferenceInjectionToken, PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
+import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
+import { PopupReferenceInjectionToken } from "../../models/PopupReferenceInjectionToken";
 import { PopupSettings } from "../../models/PopupSettings";
 
 import { PopupWrapperComponent } from "./popup-wrapper.component";

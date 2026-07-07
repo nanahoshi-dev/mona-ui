@@ -11,7 +11,8 @@ import {
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideUser } from "@lucide/angular";
-import { SwitchComponent, TextBoxComponent } from "mona-ui";
+import { SwitchComponent } from "mona-ui/switch";
+import { TextBoxComponent } from "mona-ui/text-box";
 import { ButtonDirective } from "mona-ui/button";
 import { DropdownListComponent } from "mona-ui/drop-down-list";
 import {

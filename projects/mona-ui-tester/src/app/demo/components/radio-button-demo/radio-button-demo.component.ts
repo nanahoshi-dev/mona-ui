@@ -2,7 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { disabled, form, FormField } from "@angular/forms/signals";
-import { RadioButtonComponent, RadioButtonDirective } from "mona-ui";
+import { RadioButtonComponent, RadioButtonDirective } from "mona-ui/radio-button";
 import { ButtonDirective } from "mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

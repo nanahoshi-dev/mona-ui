@@ -2,13 +2,8 @@ import { Directionality } from "@angular/cdk/bidi";
 import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
-import {
-    ColorPickerComponent,
-    type ThemeId,
-    ThemeService,
-    ThemeStyle,
-    type ThemeVariant
-} from "mona-ui";
+import { ColorPickerComponent } from "mona-ui/color-picker";
+import { type ThemeId, ThemeService, ThemeStyle, type ThemeVariant } from "mona-ui/theme";
 import { ButtonDirective } from "mona-ui/button";
 import { DropdownListComponent } from "mona-ui/drop-down-list";
 import { ComponentMetadata } from "../../models/ComponentMetadata";

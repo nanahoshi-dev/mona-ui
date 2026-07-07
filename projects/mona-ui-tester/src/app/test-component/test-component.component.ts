@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from "@angular/core";
-import { PopupRef } from "mona-ui";
+import { PopupRef } from "mona-ui/popup";
 
 @Component({
     selector: "app-test-component",

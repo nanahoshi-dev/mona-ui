@@ -13,7 +13,7 @@ import {
     StepperIndicatorTemplateDirective,
     StepperLabelTemplateDirective,
     StepperStepTemplateDirective
-} from "mona-ui";
+} from "mona-ui/stepper";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
-import { PopupComponent } from "mona-ui";
+import { PopupComponent } from "mona-ui/popup";
 import { ButtonDirective } from "mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

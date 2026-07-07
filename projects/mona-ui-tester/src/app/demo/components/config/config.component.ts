@@ -3,16 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
 import { where } from "@mirei/ts-collections";
-import {
-    ExpansionPanelComponent,
-    ExpansionPanelTitleTemplateDirective,
-    NumericTextBoxComponent,
-    SwitchComponent,
-    TabComponent,
-    TabContentTemplateDirective,
-    TabsComponent,
-    TextBoxComponent
-} from "mona-ui";
+import { ExpansionPanelComponent, ExpansionPanelTitleTemplateDirective } from "mona-ui/expansion-panel";
+import { TabComponent, TabContentTemplateDirective, TabsComponent } from "mona-ui/tabs";
+import { NumericTextBoxComponent } from "mona-ui/numeric-text-box";
+import { SwitchComponent } from "mona-ui/switch";
+import { TextBoxComponent } from "mona-ui/text-box";
 import { ButtonDirective } from "mona-ui/button";
 import {
     DropDownItemTemplateDirective,

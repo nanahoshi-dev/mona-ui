@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { TextBoxDirective, TooltipComponent } from "mona-ui";
+import { TextBoxDirective } from "mona-ui/text-box";
+import { TooltipComponent } from "mona-ui/tooltip";
 import { ButtonDirective } from "mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

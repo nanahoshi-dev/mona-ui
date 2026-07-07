@@ -21,7 +21,8 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take } from "rxjs";
 import { defaultPopupAnimation } from "../../models/PopupAnimationClasses";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
-import { PopupReferenceInjectionToken, PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
+import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
+import { PopupReferenceInjectionToken } from "../../models/PopupReferenceInjectionToken";
 import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSettings";
 
 @Component({

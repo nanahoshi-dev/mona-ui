@@ -10,7 +10,7 @@ import { SectionComponent } from "../../../layout/components/section/section.com
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TreeViewDocComponent {
-    protected readonly importCode = `import { TreeViewComponent } from "mona-ui";`;
+    protected readonly importCode = `import { TreeViewComponent } from "mona-ui/tree-view";`;
 
     protected readonly quickStartTsCode = `
         protected readonly data = [

@@ -2,7 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideHash } from "@lucide/angular";
-import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "mona-ui";
+import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "mona-ui/numeric-text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

@@ -17,7 +17,6 @@ import {
     CellEditEvent,
     GridAddCommandDirective,
     RowEditEvent,
-    DataType,
     GridCellTemplateDirective,
     GridCommandColumnComponent,
     GridColumnComponent,
@@ -37,7 +36,6 @@ import {
     GridToolbarTemplateDirective,
     GridExportDirective,
     GridFilterableDirective,
-    type CompositeFilterDescriptor,
     type AggregateFunction,
     type GridColumnLockedPosition,
     type GridGroupableOptions,
@@ -57,13 +55,12 @@ import {
     type GridEditFormContext,
     type GridEditSchemaFactory,
     type GridEditTemplateContext,
-    TextBoxComponent,
-    TextBoxSuffixTemplateDirective,
-    TooltipDirective,
-    TooltipComponent
 } from "mona-ui";
+import { DataType, type CompositeFilterDescriptor } from "mona-ui/filter";
 import { ButtonDirective } from "mona-ui/button";
 import { ChipComponent } from "mona-ui/chip";
+import { TooltipDirective, TooltipComponent } from "mona-ui/tooltip";
+import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "mona-ui/text-box";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

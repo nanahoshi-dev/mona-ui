@@ -10,6 +10,7 @@ import {
     signal
 } from "@angular/core";
 import { range } from "@mirei/ts-collections";
+import { SlicePipe } from "mona-ui";
 import {
     type GroupableOptions,
     ListViewComponent,
@@ -26,9 +27,8 @@ import {
     NavigableOptions,
     type PagerSettings,
     type SelectableOptions,
-    SlicePipe,
     VirtualScrollOptions
-} from "mona-ui";
+} from "mona-ui/list-view";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

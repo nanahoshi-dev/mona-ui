@@ -5,9 +5,9 @@ import {
     TabComponent,
     TabContentTemplateDirective,
     TabSelectEvent,
-    TabsComponent,
-    TextBoxComponent
-} from "mona-ui";
+    TabsComponent
+} from "mona-ui/tabs";
+import { TextBoxComponent } from "mona-ui/text-box";
 import { ButtonDirective } from "mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

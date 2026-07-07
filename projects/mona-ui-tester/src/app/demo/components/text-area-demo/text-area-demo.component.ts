@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
 import { form, FormField, required } from "@angular/forms/signals";
-import { TextAreaDirective } from "mona-ui";
+import { TextAreaDirective } from "mona-ui/text-area";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";

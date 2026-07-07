@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
-import { ColorPickerComponent } from "mona-ui";
+import { ColorPickerComponent } from "mona-ui/color-picker";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { customColorPalette } from "../../utils/customColorPalette";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

@@ -6,7 +6,7 @@ import {
     ExpansionPanelComponent,
     ExpansionPanelIconTemplateDirective,
     ExpansionPanelTitleTemplateDirective
-} from "mona-ui";
+} from "mona-ui/expansion-panel";
 import { ButtonDirective } from "mona-ui/button";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";

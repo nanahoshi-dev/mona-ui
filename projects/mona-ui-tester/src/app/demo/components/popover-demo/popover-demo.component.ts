@@ -5,7 +5,7 @@ import {
     PopoverComponent,
     PopoverFooterTemplateDirective,
     PopoverTitleTemplateDirective
-} from "mona-ui";
+} from "mona-ui/popover";
 import { ButtonDirective } from "mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

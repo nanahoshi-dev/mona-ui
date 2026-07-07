@@ -17,7 +17,7 @@ import {
     MenuRadioItemComponent,
     MenuSeparatorComponent,
     MenuTextTemplateDirective
-} from "mona-ui";
+} from "mona-ui/menubar";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

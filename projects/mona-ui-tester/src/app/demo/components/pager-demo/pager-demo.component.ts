@@ -1,15 +1,15 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { SliderComponent } from "mona-ui/slider";
 import {
     type PageChangeEvent,
     PagerComponent,
     PagerInfoTemplateDirective,
     PagerNavigationButtonsTemplateDirective,
     PagerNumericButtonsTemplateDirective,
-    PagerPageSizeTemplateDirective,
-    SliderComponent
-} from "mona-ui";
+    PagerPageSizeTemplateDirective
+} from "mona-ui/pager";
 import { ButtonDirective } from "mona-ui/button";
 import {
     DropDownItemTemplateDirective,

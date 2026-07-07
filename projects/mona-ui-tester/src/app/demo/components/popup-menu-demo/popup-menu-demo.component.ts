@@ -11,7 +11,6 @@ import {
 } from "@lucide/angular";
 import { Settings } from "luxon";
 import {
-    MenuItemClickEvent,
     PopupMenuCheckboxItemComponent,
     PopupMenuComponent,
     PopupMenuGroupComponent,
@@ -24,6 +23,7 @@ import {
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
 } from "mona-ui";
+import { MenuItemClickEvent } from "mona-ui/menubar";
 import { ButtonDirective } from "mona-ui/button";
 import { MenuItem } from "../../../../../../mona-ui/src/lib/common/popup-menu/models/PopupMenuItem";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";

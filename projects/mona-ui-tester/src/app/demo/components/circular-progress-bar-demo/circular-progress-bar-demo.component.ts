@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective } from "mona-ui";
+import { CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective } from "mona-ui/circular-progress-bar";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

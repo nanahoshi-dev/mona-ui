@@ -7,7 +7,7 @@ import {
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
     TextBoxSuffixTemplateDirective
-} from "mona-ui";
+} from "mona-ui/text-box";
 import {
     DropdownButtonComponent,
     DropdownButtonItemComponent,

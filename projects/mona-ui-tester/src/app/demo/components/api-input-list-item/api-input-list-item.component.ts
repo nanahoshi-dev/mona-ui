@@ -1,12 +1,10 @@
 import { DatePipe, JsonPipe } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import {
-    ColorPickerComponent,
-    NumericTextBoxComponent,
-    SwitchComponent,
-    TextBoxComponent
-} from "mona-ui";
+import { ColorPickerComponent } from "mona-ui/color-picker";
+import { NumericTextBoxComponent } from "mona-ui/numeric-text-box";
+import { SwitchComponent } from "mona-ui/switch";
+import { TextBoxComponent } from "mona-ui/text-box";
 import {
     DropDownItemTemplateDirective,
     DropdownListComponent,

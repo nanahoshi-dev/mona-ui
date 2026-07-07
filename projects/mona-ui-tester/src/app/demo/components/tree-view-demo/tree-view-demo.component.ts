@@ -40,7 +40,7 @@ import {
     TreeViewFilterableDirective,
     TreeViewNodeTemplateDirective,
     TreeViewSelectableDirective
-} from "mona-ui";
+} from "mona-ui/tree-view";
 import { asapScheduler, of, switchMap, timer } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
