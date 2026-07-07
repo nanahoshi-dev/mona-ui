@@ -69,6 +69,7 @@
             "@mirei/mona-ui/menubar": ["./projects/mona-ui/menubar/public-api.ts"],
             "@mirei/mona-ui/contextmenu": ["./projects/mona-ui/contextmenu/public-api.ts"],
             "@mirei/mona-ui/filter": ["./projects/mona-ui/filter/public-api.ts"],
+            "@mirei/mona-ui/grid": ["./projects/mona-ui/grid/public-api.ts"],
             "mona-ui": ["./projects/mona-ui/src/lib"],
             "mona-ui/button": ["./projects/mona-ui/button/public-api.ts"],
             "mona-ui/auto-complete": ["./projects/mona-ui/auto-complete/public-api.ts"],
@@ -121,6 +122,7 @@
             "mona-ui/menubar": ["./projects/mona-ui/menubar/public-api.ts"],
             "mona-ui/contextmenu": ["./projects/mona-ui/contextmenu/public-api.ts"],
             "mona-ui/filter": ["./projects/mona-ui/filter/public-api.ts"],
+            "mona-ui/grid": ["./projects/mona-ui/grid/public-api.ts"],
             "mona-ui/*": ["./projects/mona-ui/src/lib/*"]
         },
         "pretty": true,

@@ -214,6 +214,10 @@
         "./filter": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-filter.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-filter.mjs"
+        },
+        "./grid": {
+            "types": "./dist/mona-ui/types/mirei-mona-ui-grid.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-grid.mjs"
         }
     },
     "typings": "dist/mona-ui/types/mirei-mona-ui.d.ts",

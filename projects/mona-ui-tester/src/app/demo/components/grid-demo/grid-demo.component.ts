@@ -28,7 +28,6 @@ import {
     GridSelectableDirective,
     GridSelectableOptions,
     GridVirtualScrollDirective,
-    VirtualScrollOptions,
     GridFooterTemplateDirective,
     GridGroupFooterTemplateDirective,
     GridRemoveEvent,
@@ -54,8 +53,9 @@ import {
     type EditableOptions,
     type GridEditFormContext,
     type GridEditSchemaFactory,
-    type GridEditTemplateContext,
-} from "mona-ui";
+    type GridEditTemplateContext
+} from "mona-ui/grid";
+import { VirtualScrollOptions } from "mona-ui";
 import { DataType, type CompositeFilterDescriptor } from "mona-ui/filter";
 import { ButtonDirective } from "mona-ui/button";
 import { ChipComponent } from "mona-ui/chip";
