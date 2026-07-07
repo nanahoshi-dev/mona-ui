@@ -73,6 +73,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
     readonly #popupService = inject(PopupService);
     #triggerSubscription: Subscription | null = null;
     #shouldRestoreFocus = false;
+    #suppressNextTrustedContextMenu = false;
     private readonly groupTemplateConfig = contentChild(PopupMenuGroupTemplateToken, {
         descendants: false
     });
@@ -244,8 +245,24 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                 clientY: center.top + center.height / 2,
                 button: -1
             });
-            contextMenuEvent.stopImmediatePropagation();
+            const ownerDocument = targetElement.ownerDocument;
+            const suppressNativeContextMenu = (nativeEvent: Event): void => {
+                if (nativeEvent.isTrusted) {
+                    nativeEvent.preventDefault();
+                    ownerDocument.removeEventListener("contextmenu", suppressNativeContextMenu, { capture: true });
+                }
+            };
+            this.#suppressNextTrustedContextMenu = true;
+            ownerDocument.addEventListener("contextmenu", suppressNativeContextMenu, { capture: true });
             targetElement.dispatchEvent(contextMenuEvent);
+            rxTimeout(
+                this.#destroyRef,
+                () => {
+                    this.#suppressNextTrustedContextMenu = false;
+                    ownerDocument.removeEventListener("contextmenu", suppressNativeContextMenu, { capture: true });
+                },
+                500
+            );
             return;
         }
         const event = new MouseEvent(this.trigger(), { bubbles: true, cancelable: true });
@@ -347,6 +364,10 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
                 tap(e => e.preventDefault())
             )
             .subscribe(e => {
+                if (e.isTrusted && this.#suppressNextTrustedContextMenu) {
+                    this.#suppressNextTrustedContextMenu = false;
+                    return;
+                }
                 if (this.popupRef) {
                     this.popupRef.close();
                     this.popupRef = null;
