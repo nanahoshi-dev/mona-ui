@@ -4,13 +4,13 @@ import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
 import {
     ColorPickerComponent,
-    DropdownListComponent,
     type ThemeId,
     ThemeService,
     ThemeStyle,
     type ThemeVariant
 } from "mona-ui";
 import { ButtonDirective } from "mona-ui/button";
+import { DropdownListComponent } from "mona-ui/drop-down-list";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { ComponentConfig } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";

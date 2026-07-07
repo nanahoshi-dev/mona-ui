@@ -2,9 +2,6 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import {
-    DropDownItemTemplateDirective,
-    DropdownListComponent,
-    DropDownListValueTemplateDirective,
     type PageChangeEvent,
     PagerComponent,
     PagerInfoTemplateDirective,
@@ -14,6 +11,11 @@ import {
     SliderComponent
 } from "mona-ui";
 import { ButtonDirective } from "mona-ui/button";
+import {
+    DropDownItemTemplateDirective,
+    DropdownListComponent,
+    DropDownListValueTemplateDirective
+} from "mona-ui/drop-down-list";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

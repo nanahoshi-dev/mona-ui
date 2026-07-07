@@ -3,13 +3,15 @@ import { ChangeDetectionStrategy, Component, input, output } from "@angular/core
 import { FormsModule } from "@angular/forms";
 import {
     ColorPickerComponent,
-    DropDownItemTemplateDirective,
-    DropdownListComponent,
-    DropDownListValueTemplateDirective,
     NumericTextBoxComponent,
     SwitchComponent,
     TextBoxComponent
 } from "mona-ui";
+import {
+    DropDownItemTemplateDirective,
+    DropdownListComponent,
+    DropDownListValueTemplateDirective
+} from "mona-ui/drop-down-list";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ProcessedConfigItem } from "../../utils/componentConfig";

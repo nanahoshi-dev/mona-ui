@@ -17,63 +17,43 @@
         "noPropertyAccessFromIndexSignature": true,
         "outDir": "./dist/out-tsc",
         "paths": {
-            "mona-ui": [
-                "./projects/mona-ui/src/lib"
-            ],
-            "mona-ui/button": [
-                "./projects/mona-ui/button/public-api.ts"
-            ],
-            "mona-ui/auto-complete": [
-                "./projects/mona-ui/auto-complete/public-api.ts"
-            ],
-            "mona-ui/button-group": [
-                "./projects/mona-ui/button-group/public-api.ts"
-            ],
-            "mona-ui/calendar": [
-                "./projects/mona-ui/calendar/public-api.ts"
-            ],
-            "mona-ui/chip": [
-                "./projects/mona-ui/chip/public-api.ts"
-            ],
-            "mona-ui/combo-box": [
-                "./projects/mona-ui/combo-box/public-api.ts"
-            ],
-            "mona-ui/date-picker": [
-                "./projects/mona-ui/date-picker/public-api.ts"
-            ],
-            "mona-ui/datetime-picker": [
-                "./projects/mona-ui/datetime-picker/public-api.ts"
-            ],
-            "mona-ui/dialog": [
-                "./projects/mona-ui/dialog/public-api.ts"
-            ],
-            "mona-ui/drop-down-list": [
-                "./projects/mona-ui/drop-down-list/public-api.ts"
-            ],
-            "mona-ui/drop-down-tree": [
-                "./projects/mona-ui/drop-down-tree/public-api.ts"
-            ],
-            "mona-ui/dropdown-button": [
-                "./projects/mona-ui/dropdown-button/public-api.ts"
-            ],
-            "mona-ui/multi-select": [
-                "./projects/mona-ui/multi-select/public-api.ts"
-            ],
-            "mona-ui/split-button": [
-                "./projects/mona-ui/split-button/public-api.ts"
-            ],
-            "mona-ui/time-picker": [
-                "./projects/mona-ui/time-picker/public-api.ts"
-            ],
-            "mona-ui/time-selector": [
-                "./projects/mona-ui/time-selector/public-api.ts"
-            ],
-            "mona-ui/window": [
-                "./projects/mona-ui/window/public-api.ts"
-            ],
-            "mona-ui/*": [
-                "./projects/mona-ui/src/lib/*"
-            ]
+            "@mirei/mona-ui": ["./projects/mona-ui/src/lib"],
+            "@mirei/mona-ui/auto-complete": ["./projects/mona-ui/auto-complete/public-api.ts"],
+            "@mirei/mona-ui/button": ["./projects/mona-ui/button/public-api.ts"],
+            "@mirei/mona-ui/button-group": ["./projects/mona-ui/button-group/public-api.ts"],
+            "@mirei/mona-ui/calendar": ["./projects/mona-ui/calendar/public-api.ts"],
+            "@mirei/mona-ui/chip": ["./projects/mona-ui/chip/public-api.ts"],
+            "@mirei/mona-ui/combo-box": ["./projects/mona-ui/combo-box/public-api.ts"],
+            "@mirei/mona-ui/date-picker": ["./projects/mona-ui/date-picker/public-api.ts"],
+            "@mirei/mona-ui/datetime-picker": ["./projects/mona-ui/datetime-picker/public-api.ts"],
+            "@mirei/mona-ui/dialog": ["./projects/mona-ui/dialog/public-api.ts"],
+            "@mirei/mona-ui/drop-down-list": ["./projects/mona-ui/drop-down-list/public-api.ts"],
+            "@mirei/mona-ui/drop-down-tree": ["./projects/mona-ui/drop-down-tree/public-api.ts"],
+            "@mirei/mona-ui/dropdown-button": ["./projects/mona-ui/dropdown-button/public-api.ts"],
+            "@mirei/mona-ui/multi-select": ["./projects/mona-ui/multi-select/public-api.ts"],
+            "@mirei/mona-ui/split-button": ["./projects/mona-ui/split-button/public-api.ts"],
+            "@mirei/mona-ui/time-picker": ["./projects/mona-ui/time-picker/public-api.ts"],
+            "@mirei/mona-ui/time-selector": ["./projects/mona-ui/time-selector/public-api.ts"],
+            "@mirei/mona-ui/window": ["./projects/mona-ui/window/public-api.ts"],
+            "mona-ui": ["./projects/mona-ui/src/lib"],
+            "mona-ui/button": ["./projects/mona-ui/button/public-api.ts"],
+            "mona-ui/auto-complete": ["./projects/mona-ui/auto-complete/public-api.ts"],
+            "mona-ui/button-group": ["./projects/mona-ui/button-group/public-api.ts"],
+            "mona-ui/calendar": ["./projects/mona-ui/calendar/public-api.ts"],
+            "mona-ui/chip": ["./projects/mona-ui/chip/public-api.ts"],
+            "mona-ui/combo-box": ["./projects/mona-ui/combo-box/public-api.ts"],
+            "mona-ui/date-picker": ["./projects/mona-ui/date-picker/public-api.ts"],
+            "mona-ui/datetime-picker": ["./projects/mona-ui/datetime-picker/public-api.ts"],
+            "mona-ui/dialog": ["./projects/mona-ui/dialog/public-api.ts"],
+            "mona-ui/drop-down-list": ["./projects/mona-ui/drop-down-list/public-api.ts"],
+            "mona-ui/drop-down-tree": ["./projects/mona-ui/drop-down-tree/public-api.ts"],
+            "mona-ui/dropdown-button": ["./projects/mona-ui/dropdown-button/public-api.ts"],
+            "mona-ui/multi-select": ["./projects/mona-ui/multi-select/public-api.ts"],
+            "mona-ui/split-button": ["./projects/mona-ui/split-button/public-api.ts"],
+            "mona-ui/time-picker": ["./projects/mona-ui/time-picker/public-api.ts"],
+            "mona-ui/time-selector": ["./projects/mona-ui/time-selector/public-api.ts"],
+            "mona-ui/window": ["./projects/mona-ui/window/public-api.ts"],
+            "mona-ui/*": ["./projects/mona-ui/src/lib/*"]
         },
         "pretty": true,
         "skipLibCheck": true,
@@ -81,9 +61,7 @@
         "strict": true,
         "stripInternal": true,
         "target": "ES2022",
-        "types": [
-            "vitest/globals"
-        ],
+        "types": ["vitest/globals"],
         "useDefineForClassFields": false
     },
     "angularCompilerOptions": {

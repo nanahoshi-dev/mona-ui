@@ -70,15 +70,64 @@ projects/mona-ui/<entry-point-name>/ng-package.json
 projects/mona-ui/<entry-point-name>/public-api.ts
 ```
 
-Use this `ng-package.json` shape unless the existing project already uses a different proven convention:
+**Important — this is not the naive ng-packagr shape.** Pointing `entryFile` at a
+local `public-api.ts` that lives inside `projects/mona-ui/<entry-point-name>/` (with
+its exports written as `../src/lib/...` relative paths) is what the first migration
+commits tried, and it produces a cryptic, hard-to-diagnose TypeScript/ng-packagr error:
+
+```txt
+Cannot destructure property 'pos' of 'file.referencedFiles[index]' as it is undefined.
+```
+
+The actual working shape, confirmed across all 17 already-migrated entry points, is:
+
+* The real entry file that ng-packagr/TypeScript type-checks must live **physically
+  inside `projects/mona-ui/src/lib/`**, named `<entry-point-name>.public-api.ts`, with
+  its `export * from` paths relative to `src/lib/` (e.g. `./buttons/button/...`, not
+  `../src/lib/buttons/button/...`).
+* `projects/mona-ui/<entry-point-name>/ng-package.json` points `entryFile` **directly**
+  at that file, one level further up than you might expect:
+
+  ```json
+  {
+      "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
+      "lib": {
+          "entryFile": "../src/lib/<entry-point-name>.public-api.ts"
+      }
+  }
+  ```
+
+* `projects/mona-ui/<entry-point-name>/public-api.ts` becomes a one-line passthrough
+  re-export, not the real export list:
+
+  ```ts
+  /*
+   * Public API Surface of @mirei/mona-ui/<entry-point-name>
+   */
+
+  export * from "../src/lib/<entry-point-name>.public-api";
+  ```
+
+Concrete example (`auto-complete`):
 
 ```json
+// projects/mona-ui/auto-complete/ng-package.json
 {
     "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
-    "lib": {
-        "entryFile": "public-api.ts"
-    }
+    "lib": { "entryFile": "../src/lib/auto-complete.public-api.ts" }
 }
+```
+
+```ts
+// projects/mona-ui/auto-complete/public-api.ts
+export * from "../src/lib/auto-complete.public-api";
+```
+
+```ts
+// projects/mona-ui/src/lib/auto-complete.public-api.ts
+export * from "./dropdowns/auto-complete/components/auto-complete.component";
+export * from "./dropdowns/directives/drop-down-footer-template.directive";
+// ...rest of the family's real exports, relative to src/lib
 ```
 
 Adjust the `$schema` relative path if needed based on the actual folder depth. Since the secondary entry point folders should be direct children of `projects/mona-ui`, the path above should normally be correct.
@@ -105,31 +154,45 @@ Bad:
 @mirei/mona-ui/date-inputs
 ```
 
+## tsconfig path alias rule
+
+For the tester/demo app (and any other in-workspace consumer) to resolve the new entry point at dev time before a real library build exists, add a `paths` mapping for each new entry point, e.g. `"mona-ui/button": ["./projects/mona-ui/button/public-api.ts"]`.
+
+Before adding these, check **every** `tsconfig*.json` file that already has its own `compilerOptions.paths` block, not just the root `tsconfig.json` — TypeScript does not merge `paths` across `extends`. If a child config (for example `projects/mona-ui-tester/tsconfig.app.json` or `tsconfig.spec.json`) defines its own `paths`, that block fully replaces whatever the parent config would have provided, including the base `"mona-ui"` and `"mona-ui/*"` mappings the rest of the (not-yet-migrated) library still relies on.
+
+So when a target `tsconfig*.json` already has a `paths` block of its own:
+
+* Add the new entry-point mapping(s) into that same block alongside whatever is already there.
+* Do not assume the base `"mona-ui"` / `"mona-ui/*"` mappings are still active for that file just because they exist in the root `tsconfig.json` — if this file overrides `paths` at all, copy those base mappings into it too, or every not-yet-migrated import in that file will start failing with `TS2307: Cannot find module 'mona-ui'`.
+* After editing, run a real build (see "Validation requirements") rather than assuming the change is inert — a dropped base mapping compiles fine until something imports through it, and cascades into unrelated-looking Angular compiler errors like `NG1010: 'imports' must be an array of components...` in files that never mention the component you migrated.
+
 ## Component family rule
 
 Create one entry point per public component family, not one entry point per physical file.
 
 For example, `dropdown-button` should include the main component, its public item/group/separator components, its public radio/checkbox item components, its public template directives, and any public event/settings/options/model types required to use it.
 
-Example shape:
+Example shape (the real export list lives in `projects/mona-ui/src/lib/dropdown-button.public-api.ts`, per the "Required outcome" section above — paths are relative to `src/lib/`, not to the entry-point folder):
 
 ```ts
-// projects/mona-ui/dropdown-button/public-api.ts
+// projects/mona-ui/src/lib/dropdown-button.public-api.ts
 
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button/dropdown-button.component";
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button-item/dropdown-button-item.component";
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button-group/dropdown-button-group.component";
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button-separator/dropdown-button-separator.component";
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button-checkbox-item/dropdown-button-checkbox-item.component";
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button-radio-group/dropdown-button-radio-group.component";
-export * from "../src/lib/buttons/dropdown-button/components/dropdown-button-radio-item/dropdown-button-radio-item.component";
+export * from "./buttons/dropdown-button/components/dropdown-button/dropdown-button.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-item/dropdown-button-item.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-group/dropdown-button-group.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-separator/dropdown-button-separator.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-checkbox-item/dropdown-button-checkbox-item.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-radio-group/dropdown-button-radio-group.component";
+export * from "./buttons/dropdown-button/components/dropdown-button-radio-item/dropdown-button-radio-item.component";
 
-export * from "../src/lib/buttons/dropdown-button/directives/dropdown-button-text-template.directive";
-export * from "../src/lib/buttons/dropdown-button/directives/dropdown-button-menu-group-template.directive";
-export * from "../src/lib/buttons/dropdown-button/directives/dropdown-button-menu-item-icon-template.directive";
-export * from "../src/lib/buttons/dropdown-button/directives/dropdown-button-menu-item-shortcut-template.directive";
-export * from "../src/lib/buttons/dropdown-button/directives/dropdown-button-menu-item-text-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-text-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-group-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-item-icon-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-item-shortcut-template.directive";
+export * from "./buttons/dropdown-button/directives/dropdown-button-menu-item-text-template.directive";
 ```
+
+(`projects/mona-ui/dropdown-button/public-api.ts` is then just `export * from "../src/lib/dropdown-button.public-api";`.)
 
 Do not create separate entry points like:
 
@@ -165,13 +228,13 @@ Export these when they are public:
 
 Use `export type` for type-only exports where appropriate.
 
-Example:
+Example (written in `projects/mona-ui/src/lib/slider.public-api.ts`, so paths are relative to `src/lib/`):
 
 ```ts
-export type { SliderValue, SliderTick, SliderTickTemplateContext } from "../src/lib/inputs/slider/models/Slider";
-export * from "../src/lib/inputs/slider/components/slider/slider.component";
-export * from "../src/lib/inputs/slider/directives/slider-handle-template.directive";
-export * from "../src/lib/inputs/slider/directives/slider-tick-value-template.directive";
+export type { SliderValue, SliderTick, SliderTickTemplateContext } from "./inputs/slider/models/Slider";
+export * from "./inputs/slider/components/slider/slider.component";
+export * from "./inputs/slider/directives/slider-handle-template.directive";
+export * from "./inputs/slider/directives/slider-tick-value-template.directive";
 ```
 
 Do not export private implementation details.
@@ -232,14 +295,14 @@ If source-level renaming is necessary because the public name is actively mislea
 
 If a component's public API depends on shared models from `src/lib/common`, re-export those shared models from the component's own secondary entry point when consumers need them.
 
-Example:
+Example (in `projects/mona-ui/src/lib/tree-view.public-api.ts`):
 
 ```ts
 // @mirei/mona-ui/tree-view
-export * from "../src/lib/common/tree/models/NodeItem";
-export * from "../src/lib/common/tree/models/NodeSelectEvent";
-export * from "../src/lib/common/tree/models/TreeSelectableOptions";
-export * from "../src/lib/tree-view/components/tree-view/tree-view.component";
+export * from "./common/tree/models/NodeItem";
+export * from "./common/tree/models/NodeSelectEvent";
+export * from "./common/tree/models/TreeSelectableOptions";
+export * from "./tree-view/components/tree-view/tree-view.component";
 ```
 
 Do not force consumers to import common models from vague paths like `@mirei/mona-ui/common` unless there is already a clear, intentional, stable common/core entry point.
@@ -309,6 +372,26 @@ For source files inside the same component family, relative imports are fine.
 
 For cross-entry-point imports inside library source, prefer stable internal relative imports unless the project already has a clear convention for package self-imports.
 
+## Root package.json exports rule
+
+Creating `projects/mona-ui/<entry-point-name>/{ng-package.json,public-api.ts}` and adding the local dev-time `tsconfig.json` path aliases is not the final step — it only makes the new entry point resolvable inside this workspace (by ng-packagr during the library build, and by the tester app / IDE via the `mona-ui/<name>` and `mona-ui/*` path mappings). It does **not** make `@mirei/mona-ui/<name>` resolvable for real consumers after publish.
+
+Check how the package is actually released: this repo publishes from the repo root using the root `package.json` (name `@mirei/mona-ui`) via `@semantic-release/npm` with no `pkgRoot` override, packing `dist` wholesale (`"files": ["dist", "README.md"]`). Because that root `package.json` has an `"exports"` field, Node's package-exports encapsulation means **any subpath not explicitly listed there is blocked for consumers**, even though ng-packagr auto-generates a correct nested `exports` map inside `dist/mona-ui/package.json` itself — that nested file is inert; only the root manifest governs resolution once installed from npm.
+
+So after adding a secondary entry point, always add a matching subpath to the root `package.json`'s `"exports"` map, e.g.:
+
+```json
+"exports": {
+    ".": { "...": "..." },
+    "./button": {
+        "types": "./dist/mona-ui/types/mona-ui-button.d.ts",
+        "default": "./dist/mona-ui/fesm2022/mona-ui-button.mjs"
+    }
+}
+```
+
+Confirm the exact file names by running the build first (`npm run build` / `npx ng build mona-ui`) and inspecting the `exports` map that ng-packagr generates in `dist/mona-ui/package.json` for the new entry point — copy that same `types`/`default` shape (and any other keys it includes) into the root `package.json`, prefixed with `./dist/mona-ui/` since the root manifest's paths are relative to the repo root, not to the `dist/mona-ui` folder. Do not skip this step or assume the tsconfig path aliases are sufficient — they only affect local development, not the published package.
+
 ## Directory target behavior
 
 If the target is a directory containing multiple component families, such as:
@@ -348,23 +431,23 @@ Use this order inside `public-api.ts` where practical:
 5. Public models/events/options/settings.
 6. Public utility types.
 
-Example:
+Example (`projects/mona-ui/src/lib/drop-down-list.public-api.ts`):
 
 ```ts
 /*
  * Public API Surface of @mirei/mona-ui/drop-down-list
  */
 
-export * from "../src/lib/dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
-export * from "../src/lib/dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
+export * from "./dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
+export * from "./dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
 
-export * from "../src/lib/dropdowns/directives/drop-down-item-template.directive";
-export * from "../src/lib/dropdowns/directives/drop-down-header-template.directive";
-export * from "../src/lib/dropdowns/directives/drop-down-footer-template.directive";
-export * from "../src/lib/dropdowns/directives/drop-down-no-data-template.directive";
+export * from "./dropdowns/directives/drop-down-item-template.directive";
+export * from "./dropdowns/directives/drop-down-header-template.directive";
+export * from "./dropdowns/directives/drop-down-footer-template.directive";
+export * from "./dropdowns/directives/drop-down-no-data-template.directive";
 
-export type { FilterableOptions } from "../src/lib/common/models/FilterableOptions";
-export type { VirtualScrollOptions } from "../src/lib/common/models/VirtualScrollOptions";
+export type { FilterableOptions } from "./common/models/FilterableOptions";
+export type { VirtualScrollOptions } from "./common/models/VirtualScrollOptions";
 ```
 
 Prefer explicit exports over `export *` when aliasing is needed or when only selected symbols should be public.
@@ -408,7 +491,7 @@ dist/mona-ui/dropdown-button
 dist/mona-ui/drop-down-list
 ```
 
-Also confirm the generated package metadata includes the corresponding export path, either directly or through ng-packagr output.
+Also confirm the generated package metadata includes the corresponding export path, either directly or through ng-packagr output. Then confirm the root `package.json`'s own `"exports"` map (see "Root package.json exports rule" above) was updated to include the same subpath — this is easy to miss because the build succeeds and `dist/mona-ui/package.json` looks correct even when the root manifest is not.
 
 ## Final report format
 
@@ -419,9 +502,10 @@ When finished, report:
 3. Which public symbols each entry point exports.
 4. Which imports were updated.
 5. Whether root barrel exports were removed, left alone, or marked for later cleanup.
-6. Which validation commands were run and their results.
-7. Any symbols that were ambiguous and how you handled them.
-8. Any remaining TODOs.
+6. Whether the root `package.json` `"exports"` map was updated with the new subpath(s).
+7. Which validation commands were run and their results.
+8. Any symbols that were ambiguous and how you handled them.
+9. Any remaining TODOs.
 
 Do not claim success if the build was not run or failed. If validation could not be completed, say exactly what was not run and why.
 
