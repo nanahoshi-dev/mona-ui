@@ -1,10 +1,10 @@
 import { computed, Directive, inject, input } from "@angular/core";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import {
     RadioButtonDirectiveInput,
     RadioButtonDirectiveProps,
     radioButtonDirectiveThemeVariants
 } from "../styles/radio.styles";
-import { ThemeService } from "@mirei/mona-ui/theme";
 
 @Directive({
     selector: "input[type='radio'][monaRadioButton]",

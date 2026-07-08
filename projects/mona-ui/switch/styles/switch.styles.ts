@@ -1,11 +1,11 @@
-import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@mirei/mona-ui/theme";
-import {
-    switchVariants as monaSwitchVariants,
-    switchHandleVariants as monaSwitchHandleVariants,
-    switchLabelVariants as monaSwitchLabelVariants
-} from "./switch.mona.styles";
 import { VariantInputs } from "@mirei/mona-ui/common";
+import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantProps } from "class-variance-authority";
+import {
+    switchHandleVariants as monaSwitchHandleVariants,
+    switchLabelVariants as monaSwitchLabelVariants,
+    switchVariants as monaSwitchVariants
+} from "./switch.mona.styles";
 
 export const switchThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {
