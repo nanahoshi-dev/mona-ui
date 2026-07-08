@@ -4,6 +4,8 @@ export * from "./date-inputs/models/DateDisabledType";
 export * from "./date-inputs/models/HourFormat";
 export * from "./date-inputs/models/Meridiem";
 export * from "./date-inputs/models/TimeUnit";
+export * from "./date-inputs/pipes/time-limiter.pipe";
 export * from "./date-inputs/styles/date-popup.styles";
 export * from "./date-inputs/services/calendar.service";
 export * from "./date-inputs/services/time-selector.service";
+export * from "./date-inputs/utils/generateHourSet";

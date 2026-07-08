@@ -2,4 +2,6 @@
  * Public API Surface of @mirei/mona-ui/time-selector
  */
 
-export * from "../src/lib/time-selector.public-api";
+export * from "./components/time-selector/time-selector.component";
+
+export type { TimeSelectorVariantProps } from "./styles/time-selector.styles";

@@ -1,12 +1,11 @@
 import { DecimalPipe } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
-    ElementRef,
     effect,
+    ElementRef,
     inject,
     input,
     model,
@@ -17,19 +16,21 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
+import { ButtonDirective, type ButtonVariantProps } from "@mirei/mona-ui/button";
+import { createElementControlId, PreventableEvent } from "@mirei/mona-ui/common";
+import {
+    generateHourSet,
+    generateMinuteSet,
+    generateSecondSet,
+    HourFormat,
+    Meridiem,
+    TimeLimiterPipe,
+    TimeSelectorService
+} from "@mirei/mona-ui/date-input";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
 import { filter } from "rxjs/operators";
-import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
-import { PreventableEvent } from "@mirei/mona-ui/common";
-import { HourFormat } from "../../../models/HourFormat";
-import { Meridiem } from "../../../models/Meridiem";
-import { TimeLimiterPipe } from "../../../pipes/time-limiter.pipe";
-import { TimeSelectorService } from "../../../services/time-selector.service";
-import { TimePickerVariantProps } from "../../../time-picker/styles/time-picker.styles";
-import { generateHourSet, generateMinuteSet, generateSecondSet } from "../../../utils/generateHourSet";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
 import { TimeListType } from "../../models/TimeListType";
@@ -46,7 +47,6 @@ import {
 @Component({
     selector: "mona-time-selector",
     templateUrl: "./time-selector.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [DecimalPipe, TimeLimiterPipe, TimeSelectorItemDirective, ButtonDirective, TimeSelectorListDirective],
     host: {
         role: "group",
@@ -176,7 +176,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
      */
     public readonly required = input(false);
 
-    public readonly rounded = input<TimePickerVariantProps["rounded"]>("medium");
+    public readonly rounded = input<ButtonVariantProps["rounded"]>("medium");
     public readonly secondStep = input(1);
     public readonly showSeconds = input(false);
     public readonly size = input<TimeSelectorVariantProps["size"]>("medium");

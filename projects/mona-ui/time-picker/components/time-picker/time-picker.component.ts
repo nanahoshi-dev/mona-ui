@@ -1,7 +1,6 @@
 import { CdkTrapFocus } from "@angular/cdk/a11y";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -22,24 +21,23 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { AttributeConfig, createElementControlId, PreventableEvent } from "@mirei/mona-ui/common";
+import { HourFormat } from "@mirei/mona-ui/date-input";
+import {
+    DropdownPopupHandlerDirective,
+    DropdownPopupInputToken,
+    dropdownPopupThemeVariants,
+    DropdownService
+} from "@mirei/mona-ui/dropdowns";
+import { ListSizeInputType } from "@mirei/mona-ui/list";
+import { PopupCloseEvent } from "@mirei/mona-ui/popup";
+import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@mirei/mona-ui/text-box";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { TimeSelectorComponent } from "@mirei/mona-ui/time-selector";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { DropdownPopupHandlerDirective } from "../../../../dropdowns/directives/dropdown-popup-handler.directive";
-import { DropdownService } from "../../../../dropdowns/services/dropdown.service";
-import { ListSizeInputType } from "@mirei/mona-ui/list";
-import { AttributeConfig } from "@mirei/mona-ui/common";
-import { dropdownPopupThemeVariants } from "../../../../dropdowns/styles/dropdown-popup.styles";
-import { DropdownPopupInputToken } from "../../../../dropdowns/models/DropdownPopupInput";
-import { TextBoxComponent } from "../../../../../../text-box/components/text-box/text-box.component";
-import { TextBoxSuffixTemplateDirective } from "../../../../../../text-box/directives/text-box-suffix-template.directive";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
-import { PreventableEvent } from "@mirei/mona-ui/common";
-import { HourFormat } from "../../../models/HourFormat";
-import { TimeSelectorComponent } from "../../../time-selector/components/time-selector/time-selector.component";
 import {
     timePickerBaseThemeVariants,
     TimePickerVariantInput,
@@ -49,7 +47,6 @@ import {
 @Component({
     selector: "mona-time-picker",
     templateUrl: "./time-picker.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         DropdownService,
         {

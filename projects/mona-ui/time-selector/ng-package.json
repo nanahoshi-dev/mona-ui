@@ -1,6 +1,6 @@
 {
-    "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+    "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
     "lib": {
-        "entryFile": "../src/lib/time-selector.public-api.ts"
+        "entryFile": "public-api.ts"
     }
 }
