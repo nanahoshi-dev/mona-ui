@@ -2,4 +2,6 @@
  * Public API Surface of @mirei/mona-ui/text-area
  */
 
-export * from "../src/lib/text-area.public-api";
+export * from "./directives/text-area.directive";
+
+export type { TextAreaVariantProps } from "./styles/textarea.styles";

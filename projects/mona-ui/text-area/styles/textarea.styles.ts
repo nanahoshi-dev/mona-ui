@@ -1,7 +1,7 @@
-import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@mirei/mona-ui/theme";
-import { textAreaVariants as monaTextAreaVariants } from "./textarea.mona.styles";
 import { VariantInputs } from "@mirei/mona-ui/common";
+import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantProps } from "class-variance-authority";
+import { textAreaVariants as monaTextAreaVariants } from "./textarea.mona.styles";
 
 export const textAreaThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

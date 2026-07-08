@@ -1,9 +1,8 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, contentChild, inject, input } from "@angular/core";
-import { twMerge } from "tailwind-merge";
+import { Component, computed, contentChild, inject, input } from "@angular/core";
+import { Action, getPercentage } from "@mirei/mona-ui/common";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { Action } from "@mirei/mona-ui/common";
-import { getPercentage } from "../../../utils/progress-bar.utils";
+import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
     circularProgressBarBaseThemeVariants,
@@ -17,6 +16,7 @@ import {
         .indeterminate {
             animation: rotate 2s linear infinite;
         }
+
         @keyframes rotate {
             0% {
                 transform: rotate(0deg);
@@ -29,7 +29,6 @@ import {
             }
         }
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet],
     host: {
         "[class]": "baseClasses()",

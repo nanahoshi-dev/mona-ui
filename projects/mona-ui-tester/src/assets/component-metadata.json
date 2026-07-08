@@ -821,36 +821,6 @@
       }
     ]
   },
-  "TextAreaDirective": {
-    "name": "TextAreaDirective",
-    "selector": "\"textarea[monaTextArea]\"",
-    "inputs": [
-      {
-        "name": "rounded",
-        "type": "TextAreaVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the textarea.",
-        "kind": "input"
-      },
-      {
-        "name": "invalid",
-        "type": "boolean",
-        "description": "Marks the textarea as invalid, triggering error border and ring styling.",
-        "kind": "input"
-      },
-      {
-        "name": "touched",
-        "type": "boolean",
-        "description": "Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
-        "kind": "input"
-      }
-    ]
-  },
   "TextBoxDirective": {
     "name": "TextBoxDirective",
     "selector": "\"input[monaTextBox]\"",
@@ -3416,84 +3386,6 @@
         "type": "string",
         "description": "Two-way bindable current value of the text box.",
         "kind": "model"
-      }
-    ]
-  },
-  "CircularProgressBarComponent": {
-    "name": "CircularProgressBarComponent",
-    "selector": "\"mona-circular-progress-bar\"",
-    "inputs": [
-      {
-        "name": "animate",
-        "type": "boolean",
-        "description": "Enables CSS transitions on stroke and color changes.\r\nSet to `false` when updating `value` at a high frequency.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaLabel",
-        "type": "string",
-        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role without a label.",
-        "kind": "input"
-      },
-      {
-        "name": "ariaValueText",
-        "type": "string",
-        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
-        "kind": "input"
-      },
-      {
-        "name": "color",
-        "type": "string | Action<number, string>",
-        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.",
-        "kind": "input"
-      },
-      {
-        "name": "indeterminate",
-        "type": "boolean",
-        "description": "Activates indeterminate mode when the completion value is unknown.\r\nARIA value attributes are removed and `aria-busy` is set on the host element.",
-        "kind": "input"
-      },
-      {
-        "name": "max",
-        "type": "number",
-        "description": "Upper bound of the value range. Must be greater than `min`.",
-        "kind": "input"
-      },
-      {
-        "name": "min",
-        "type": "number",
-        "description": "Lower bound of the value range.",
-        "kind": "input"
-      },
-      {
-        "name": "size",
-        "type": "number",
-        "description": "Diameter of the indicator in pixels. Controls both width and height of the host element.",
-        "kind": "input"
-      },
-      {
-        "name": "thickness",
-        "type": "number",
-        "description": "Stroke width of the circular track in pixels.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
-        "kind": "input"
-      },
-      {
-        "name": "value",
-        "type": "number",
-        "description": "Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.",
-        "kind": "input"
       }
     ]
   },

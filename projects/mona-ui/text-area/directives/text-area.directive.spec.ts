@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "../../theme/public-api";
 import { TextAreaDirective } from "./text-area.directive";
 
 @Component({
