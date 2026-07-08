@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "../../theme/public-api";
 import { CheckboxDirective } from "./checkbox.directive";
 
 describe("CheckboxDirective", () => {

@@ -1,11 +1,11 @@
-import { VariantProps } from "class-variance-authority";
 import { VariantInputs } from "@mirei/mona-ui/common";
 import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantProps } from "class-variance-authority";
 import {
-    checkboxVariants as monaCheckboxVariants,
-    checkmarkVariants as monaCheckmarkVariants,
     checkboxContainerLabelVariants as monaCheckboxContainerLabelVariants,
-    checkboxDirectiveVariants as monaCheckboxDirectiveVariants
+    checkboxDirectiveVariants as monaCheckboxDirectiveVariants,
+    checkboxVariants as monaCheckboxVariants,
+    checkmarkVariants as monaCheckmarkVariants
 } from "./checkbox.mona.styles";
 
 export const checkboxInputThemeVariants = (theme: ThemeStyle) => {
