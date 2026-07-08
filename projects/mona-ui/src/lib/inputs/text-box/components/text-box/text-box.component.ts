@@ -16,12 +16,10 @@ import {
 import { FormsModule } from "@angular/forms";
 import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { AttributeBinderDirective, AttributeConfig, rxTimeout } from "@mirei/mona-ui/common";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
-import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { AttributeBinderDirective } from "../../../../common/directives/attribute-binder.directive";
-import { AttributeConfig } from "../../../../common/models/AttributeConfig";
-import { rxTimeout } from "../../../../common/utils/rxTimeout";
-import { ThemeService } from "../../../../theme/services/theme.service";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { InputType } from "../../models/InputType";

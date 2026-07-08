@@ -1,7 +1,7 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
 import { Selector } from "@mirei/ts-collections";
-import { GroupableOptions } from "../../common/list/models/GroupableOptions";
-import { ListService } from "../../common/list/services/list.service";
+import { GroupableOptions } from "@mirei/mona-ui/list";
+import { ListService } from "@mirei/mona-ui/list";
 
 @Directive({
     selector: `

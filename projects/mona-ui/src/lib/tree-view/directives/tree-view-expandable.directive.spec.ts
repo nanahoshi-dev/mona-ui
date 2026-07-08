@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { TreeService } from "../../common/tree/services/tree.service";
+import { TreeService } from "@mirei/mona-ui/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewExpandableDirective } from "./tree-view-expandable.directive";
 
@@ -24,7 +24,9 @@ interface TestItem {
     `
 })
 class HostComponent {
-    public readonly data = signal<TestItem[]>([{ id: "1", text: "Node 1", children: [{ id: "1.1", text: "Node 1.1" }] }]);
+    public readonly data = signal<TestItem[]>([
+        { id: "1", text: "Node 1", children: [{ id: "1.1", text: "Node 1.1" }] }
+    ]);
     public readonly expandedKeys = signal<TestItem[]>([]);
 }
 

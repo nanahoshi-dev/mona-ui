@@ -1,8 +1,8 @@
 import { Observable } from "rxjs";
-import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
+import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { ComponentRef } from "@angular/core";
 import { MoveEvent } from "./MoveEvent";
-import { PopupRef } from "../../../popup/models/PopupRef";
+import { PopupRef } from "@mirei/mona-ui/popup";
 import { ResizeEvent } from "./ResizeEvent";
 
 export interface WindowRefParams<R = unknown> {

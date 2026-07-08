@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ListService } from "../../common/list/services/list.service";
+import { ListService } from "@mirei/mona-ui/list";
 import { ListViewComponent } from "../components/list-view/list-view.component";
 import { ListViewGroupableDirective } from "./list-view-groupable.directive";
 

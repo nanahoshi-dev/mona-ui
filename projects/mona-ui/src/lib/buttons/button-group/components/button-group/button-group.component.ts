@@ -15,7 +15,7 @@ import { outputFromObservable, takeUntilDestroyed, toObservable } from "@angular
 import { map, pairwise } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SelectionMode } from "../../../../models/SelectionMode";
-import { ThemeService } from "../../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { ButtonService } from "../../../services/button.service";
 import {

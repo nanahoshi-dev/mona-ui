@@ -1,4 +1,4 @@
-import { PreventableEvent } from "@mirei/mona-ui/utils";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 
 export class TabSelectEvent extends PreventableEvent {
     readonly #index: number;

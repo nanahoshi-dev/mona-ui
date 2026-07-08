@@ -36,9 +36,9 @@ import {
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { rxTimeout } from "../../../../common/utils/rxTimeout";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { Action } from "../../../../utils/Action";
+import { rxTimeout } from "@mirei/mona-ui/common";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { Action } from "@mirei/mona-ui/common";
 import { TextBoxDirective } from "../../../text-box/directives/text-box.directive";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
 import {
@@ -484,7 +484,11 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
 
     private setValueChangeSubscription(): void {
         this.valueChange$
-            .pipe(takeUntilDestroyed(this.#destroyRef), distinctUntilChanged(), map(v => this.parseValue(v)))
+            .pipe(
+                takeUntilDestroyed(this.#destroyRef),
+                distinctUntilChanged(),
+                map(v => this.parseValue(v))
+            )
             .subscribe(value => {
                 this.value.set(value);
                 this.touch.emit();

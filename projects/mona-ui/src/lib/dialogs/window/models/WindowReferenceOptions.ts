@@ -1,4 +1,4 @@
-import { PopupRef } from "../../../popup/models/PopupRef";
+import { PopupRef } from "@mirei/mona-ui/popup";
 import { ComponentRef } from "@angular/core";
 
 export interface WindowReferenceOptions {

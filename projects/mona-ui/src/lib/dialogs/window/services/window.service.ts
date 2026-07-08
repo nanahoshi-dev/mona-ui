@@ -1,7 +1,7 @@
 import { afterNextRender, DOCUMENT, forwardRef, inject, Injectable, Injector } from "@angular/core";
-import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
-import { PopupService } from "../../../popup/services/popup.service";
-import { setWindowStyles } from "../../utils/setWindowStyles";
+import { PopupCloseEvent } from "@mirei/mona-ui/popup";
+import { PopupService } from "@mirei/mona-ui/popup";
+import { setWindowStyles } from "@mirei/mona-ui/common";
 import { WindowContentComponent } from "../components/window-content/window-content.component";
 import { WindowInjectorData } from "../models/WindowInjectorData";
 import { WindowRef } from "../models/WindowRef";
@@ -53,12 +53,15 @@ export class WindowService {
         });
         windowReference.initializePopupRef(popupRef);
 
-        afterNextRender({
-            read: () => {
-                const element = popupRef.overlayRef.overlayElement;
-                setWindowStyles(element, settings);
-            }
-        }, { injector: this.#injector });
+        afterNextRender(
+            {
+                read: () => {
+                    const element = popupRef.overlayRef.overlayElement;
+                    setWindowStyles(element, settings);
+                }
+            },
+            { injector: this.#injector }
+        );
         return windowReference.windowRef;
     }
 }

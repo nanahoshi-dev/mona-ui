@@ -1,6 +1,6 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "../../../theme/models/Theme";
-import { VariantInputs } from "../../../utils/VariantInputs";
+import { VariantInputs } from "@mirei/mona-ui/common";
+import { ThemeStyle } from "@mirei/mona-ui/theme";
 import { buttonVariants as monaButtonVariants } from "./button.mona.styles";
 
 export const buttonThemeVariants = (theme: ThemeStyle) => {
@@ -14,5 +14,3 @@ export const buttonThemeVariants = (theme: ThemeStyle) => {
 
 export type ButtonVariantProps = VariantProps<ReturnType<typeof buttonThemeVariants>>;
 export type ButtonVariantsInput = VariantInputs<ButtonVariantProps>;
-
-export type DropdownButtonVariantInputs = Omit<ButtonVariantsInput, "selected">;

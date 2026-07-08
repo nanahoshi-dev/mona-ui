@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
-import { ListService } from "../../../common/list/services/list.service";
+import { ListService } from "@mirei/mona-ui/list";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { ListViewFooterTemplateDirective } from "../../directives/list-view-footer-template.directive";
 import { ListViewHeaderTemplateDirective } from "../../directives/list-view-header-template.directive";
@@ -187,7 +187,10 @@ describe("ListViewComponent scrollBottom", () => {
     imports: [ListViewComponent, ListViewNavigableDirective],
     providers: [ListService],
     template: `
-        <mona-list-view [items]="data" textField="name" [monaListViewNavigable]="{ mode: 'highlight' }"></mona-list-view>
+        <mona-list-view
+            [items]="data"
+            textField="name"
+            [monaListViewNavigable]="{ mode: 'highlight' }"></mona-list-view>
     `
 })
 class NavigableTestComponent {

@@ -1,6 +1,6 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "../../../theme/models/Theme";
-import { VariantInputs } from "../../../utils/VariantInputs";
+import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantInputs } from "@mirei/mona-ui/common";
 import {
     dropdownListAffixContainerVariants as monaDropdownListAffixContainerVariants,
     dropdownListInputVariants as monaDropdownListInputVariants,

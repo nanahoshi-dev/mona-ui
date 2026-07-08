@@ -15,7 +15,7 @@ export * from "./dropdowns/directives/drop-down-groupable.directive";
 export * from "./dropdowns/directives/drop-down-virtual-scroll.directive";
 export * from "./dropdowns/directives/dropdown-data-handler.directive";
 export * from "./dropdowns/directives/dropdown-list-popup-handler.directive";
-export * from "./common/dropdown/directives/dropdown-popup-handler.directive";
+export * from "./dropdowns/directives/dropdown-popup-handler.directive";
 
 export type { ComboBoxVariantProps } from "./dropdowns/combo-box/styles/combo-box.styles";
 

@@ -34,9 +34,8 @@ import { DropDownVirtualScrollDirective } from "../../../dropdowns/directives/dr
 import { DropdownListComponent } from "../../../dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
 import { DropDownListValueTemplateDirective } from "../../../dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
 import { NumericTextBoxComponent } from "../../../inputs/numeric-text-box/components/numeric-text-box/numeric-text-box.component";
-import { SlicePipe } from "../../../pipes/slice.pipe";
-import { ThemeService } from "../../../theme/services/theme.service";
-import { NavigationKeys } from "../../../common/utils/navigation.utils";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { NavigationKeys, SlicePipe } from "@mirei/mona-ui/common";
 import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
 import { PagerNavigationButtonsTemplateDirective } from "../../directives/pager-navigation-buttons-template.directive";

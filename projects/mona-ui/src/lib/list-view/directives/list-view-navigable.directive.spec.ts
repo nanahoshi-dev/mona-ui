@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ListService } from "../../common/list/services/list.service";
+import { ListService } from "@mirei/mona-ui/list";
 import { ListViewComponent } from "../components/list-view/list-view.component";
 import { ListViewNavigableDirective } from "./list-view-navigable.directive";
 
@@ -8,7 +8,10 @@ import { ListViewNavigableDirective } from "./list-view-navigable.directive";
     imports: [ListViewNavigableDirective, ListViewComponent],
     providers: [ListService],
     template: `
-        <mona-list-view [items]="data" textField="name" [monaListViewNavigable]="{ mode: 'highlight', wrap: true }"></mona-list-view>
+        <mona-list-view
+            [items]="data"
+            textField="name"
+            [monaListViewNavigable]="{ mode: 'highlight', wrap: true }"></mona-list-view>
     `
 })
 class TestComponent {

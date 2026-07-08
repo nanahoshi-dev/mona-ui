@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
-import { ListItem } from "../../common/list/models/ListItem";
+import { ListItem } from "@mirei/mona-ui/list";
 
 @Injectable()
 export class DropdownListService {

@@ -3,8 +3,8 @@ import { Component, computed, inject, input, model, output } from "@angular/core
 import { FormsModule } from "@angular/forms";
 import { type FormCheckboxControl } from "@angular/forms/signals";
 import { LucideMinus } from "@lucide/angular";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "../../../../theme/services/theme.service";
 import {
     checkboxContainerLabelThemeVariants,
     checkboxInputThemeVariants,

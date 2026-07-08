@@ -1,5 +1,5 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import {
     checkboxDirectiveThemeVariants,
     CheckboxDirectiveVariantInput,

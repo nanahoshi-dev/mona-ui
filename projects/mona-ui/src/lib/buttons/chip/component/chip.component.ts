@@ -19,7 +19,7 @@ import { filter, fromEvent } from "rxjs";
 import { ButtonDirective } from "../../button/directives/button.directive";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
 import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 
 @Component({

@@ -3,7 +3,7 @@
  */
 
 export * from "./date-inputs/time-picker/components/time-picker/time-picker.component";
-export * from "./common/dropdown/directives/dropdown-popup-handler.directive";
+export * from "./dropdowns/directives/dropdown-popup-handler.directive";
 
 export type { HourFormat } from "./date-inputs/models/HourFormat";
 export type {

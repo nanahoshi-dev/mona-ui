@@ -1,4 +1,4 @@
-import { PreventableEvent } from "../../utils/PreventableEvent";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import { ToolbarAction } from "./ToolbarOptions";
 
 type ActionType = Extract<ToolbarAction, "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo">;

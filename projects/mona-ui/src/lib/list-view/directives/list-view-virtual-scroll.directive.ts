@@ -1,6 +1,6 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { VirtualScrollOptions } from "../../common/models/VirtualScrollOptions";
-import { ListService } from "../../common/list/services/list.service";
+import { VirtualScrollOptions } from "@mirei/mona-ui/common";
+import { ListService } from "@mirei/mona-ui/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewVirtualScroll]"

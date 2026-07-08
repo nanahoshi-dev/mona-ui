@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { RadioButtonDirective } from "./radio-button.directive";
 
 describe("RadioButtonDirective", () => {

@@ -22,11 +22,11 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { Position } from "../../../models/Position";
-import { fadePopupAnimation } from "../../../popup/models/PopupAnimationClasses";
-import { PopupRef } from "../../../popup/models/PopupRef";
-import { PopupService } from "../../../popup/services/popup.service";
-import { ThemeService } from "../../../theme/services/theme.service";
-import { createElementControlId } from "../../../utils/createElementControlId";
+import { fadePopupAnimation } from "@mirei/mona-ui/popup";
+import { PopupRef } from "@mirei/mona-ui/popup";
+import { PopupService } from "@mirei/mona-ui/popup";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { createElementControlId } from "@mirei/mona-ui/common";
 import {
     tooltipArrowThemeVariants,
     tooltipBaseThemeVariants,

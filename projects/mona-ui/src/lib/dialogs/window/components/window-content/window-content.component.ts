@@ -19,11 +19,11 @@ import {
 } from "@angular/core";
 import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { PopupCloseEvent, PopupCloseSource } from "../../../../popup/models/PopupCloseEvent";
-import { PopupDataInjectionToken } from "../../../../popup/models/PopupInjectionToken";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { createElementControlId } from "../../../../utils/createElementControlId";
-import { focusElement } from "../../../utils/focusElement";
+import { PopupCloseEvent, PopupCloseSource } from "@mirei/mona-ui/popup";
+import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { createElementControlId } from "@mirei/mona-ui/common";
+import { focusElement } from "@mirei/mona-ui/common";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";

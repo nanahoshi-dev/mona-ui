@@ -1,6 +1,6 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "../../../theme/models/Theme";
-import { VariantInputs } from "../../../utils/VariantInputs";
+import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantInputs } from "@mirei/mona-ui/common";
 import {
     calendarBaseVariants as monaCalendarBaseVariants,
     calendarDecadeViewCellVariants as monaCalendarDecadeViewCellVariants,
@@ -136,10 +136,7 @@ export type CalendarVariantInput = CalendarBaseVariantInput &
     CalendarHeaderVariantInput &
     CalendarDecadeViewGridVariantInput &
     Omit<CalendarDecadeViewCellVariantInput, "focused"> &
-    Omit<
-        CalendarMonthViewDayVariantInput,
-        "disabled" | "focused" | "outside" | "rangePreview" | "selected" | "today"
-    > &
+    Omit<CalendarMonthViewDayVariantInput, "disabled" | "focused" | "outside" | "rangePreview" | "selected" | "today"> &
     CalendarMonthViewGridVariantInput &
     CalendarMonthViewGridHeaderVariantInput &
     CalendarYearViewGridVariantInput &

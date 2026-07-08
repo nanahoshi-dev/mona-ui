@@ -1,6 +1,6 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { DateTime } from "luxon";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { CalendarVariantProps, calendarYearViewCellThemeVariants } from "../styles/calendar.styles";
 
 @Directive({

@@ -1,5 +1,5 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { VariantInputs } from "../../utils/VariantInputs";
+import { VariantInputs } from "@mirei/mona-ui/common";
 
 export const dropdownSelectorVariants = cva(
     `

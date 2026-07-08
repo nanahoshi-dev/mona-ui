@@ -17,6 +17,6 @@ export { WindowRef } from "./dialogs/window/models/WindowRef";
 export * from "./dialogs/window/models/WindowSettings";
 export type { WindowVariantProps } from "./dialogs/window/styles/window.styles";
 
-export type { Action } from "./utils/Action";
+export type { Action } from "@mirei/mona-ui/common";
 export { PopupCloseEvent, PopupCloseSource } from "./popup/models/PopupCloseEvent";
 export type { PopupCloseEventOptions } from "./popup/models/PopupCloseEvent";

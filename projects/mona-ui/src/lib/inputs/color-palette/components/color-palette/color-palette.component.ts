@@ -1,9 +1,9 @@
 import { Component, computed, ElementRef, inject, input, model, output, signal, Signal } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
 import { count } from "@mirei/ts-collections";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { ColorScheme } from "../../../models/ColorScheme";
-import { PaletteType } from "../../../models/PaletteType";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { ColorScheme } from "@mirei/mona-ui/common";
+import { PaletteType } from "@mirei/mona-ui/common";
 import {
     colorPaletteBaseThemeVariants,
     colorPaletteItemThemeVariants,
@@ -70,8 +70,12 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         return rows;
     });
     protected readonly focusedColorIndex = signal<number>(-1);
-    protected readonly activeColorIndex = computed(() => (this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()));
-    protected readonly invalidState = computed(() => this.invalid() || (this.required() && this.touched() && !this.value()));
+    protected readonly activeColorIndex = computed(() =>
+        this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()
+    );
+    protected readonly invalidState = computed(
+        () => this.invalid() || (this.required() && this.touched() && !this.value())
+    );
 
     /**
      * @description The number of columns in the color palette grid.

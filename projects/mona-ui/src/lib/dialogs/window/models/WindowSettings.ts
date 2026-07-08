@@ -1,6 +1,6 @@
 import { ElementRef, TemplateRef, Type } from "@angular/core";
-import { PopupCloseEvent } from "../../../popup/models/PopupCloseEvent";
-import { Action } from "../../../utils/Action";
+import { PopupCloseEvent } from "@mirei/mona-ui/popup";
+import { Action } from "@mirei/mona-ui/common";
 import { WindowVariantProps } from "../styles/window.styles";
 import { WindowActionTemplateContext } from "./WindowActionTemplateContext";
 

@@ -10,9 +10,9 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FilterChangeEvent } from "../../common/filter-input/models/FilterChangeEvent";
-import { ListService } from "../../common/list/services/list.service";
-import { FilterableOptions } from "../../common/models/FilterableOptions";
+import { FilterChangeEvent } from "@mirei/mona-ui/filter-input";
+import { ListService } from "@mirei/mona-ui/list";
+import { FilterableOptions } from "@mirei/mona-ui/common";
 
 @Directive({
     selector: `

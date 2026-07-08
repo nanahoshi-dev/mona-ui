@@ -1,5 +1,5 @@
 import { inject, Pipe, PipeTransform } from "@angular/core";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { windowResizerThemeVariants, WindowResizerVariantProps } from "../styles/window.styles";
 
 @Pipe({

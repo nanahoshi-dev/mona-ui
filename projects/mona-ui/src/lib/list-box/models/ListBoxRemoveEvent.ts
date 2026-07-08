@@ -1,5 +1,5 @@
 import { ToolbarAction } from "./ToolbarOptions";
-import { PreventableEvent } from "../../utils/PreventableEvent";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 
 export class ListBoxRemoveEvent<T = any> extends PreventableEvent {
     readonly #action: Extract<ToolbarAction, "remove"> = "remove";

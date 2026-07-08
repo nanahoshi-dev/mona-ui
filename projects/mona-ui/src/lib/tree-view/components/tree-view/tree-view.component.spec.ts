@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { NodeItem } from "../../../common/tree/models/NodeItem";
+import { NodeItem } from "@mirei/mona-ui/tree";
 
 import { TreeViewComponent } from "./tree-view.component";
 

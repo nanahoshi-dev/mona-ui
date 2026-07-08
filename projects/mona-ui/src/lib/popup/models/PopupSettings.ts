@@ -7,7 +7,7 @@ import {
 } from "@angular/cdk/overlay";
 import { ConnectionPoint } from "../utils/connectionPosition";
 import { PopupOffset } from "./PopupOffset";
-import { Action } from "../../utils/Action";
+import { Action } from "@mirei/mona-ui/common";
 import { PopupCloseEvent } from "./PopupCloseEvent";
 
 export type PopupAnchor = FlexibleConnectedPositionStrategyOrigin | string;

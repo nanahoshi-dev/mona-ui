@@ -16,10 +16,10 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { IndicatorIconComponent } from "@mirei/mona-ui/indicator-icon";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { IndicatorIconComponent } from "../../../common/indicator-icon/components/indicator-icon/indicator-icon.component";
-import { ThemeService } from "../../../theme/services/theme.service";
 import { ButtonService } from "../../services/button.service";
 import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "../styles/button.styles";
 

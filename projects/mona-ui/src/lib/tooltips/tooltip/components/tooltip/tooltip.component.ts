@@ -16,12 +16,12 @@ import { DOCUMENT } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { delay, fromEvent, merge, Subscription, take, takeUntil } from "rxjs";
 import { Position } from "../../../../models/Position";
-import { fadePopupAnimation } from "../../../../popup/models/PopupAnimationClasses";
-import { PopupRef } from "../../../../popup/models/PopupRef";
-import { PopupAnchor } from "../../../../popup/models/PopupSettings";
-import { PopupService } from "../../../../popup/services/popup.service";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { createElementControlId } from "../../../../utils/createElementControlId";
+import { fadePopupAnimation } from "@mirei/mona-ui/popup";
+import { PopupRef } from "@mirei/mona-ui/popup";
+import { PopupAnchor } from "@mirei/mona-ui/popup";
+import { PopupService } from "@mirei/mona-ui/popup";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { createElementControlId } from "@mirei/mona-ui/common";
 import {
     tooltipArrowThemeVariants,
     tooltipBaseThemeVariants,

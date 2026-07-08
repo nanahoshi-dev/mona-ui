@@ -11,7 +11,7 @@ import {
     scrollViewPagerArrowVariants as monaScrollViewPagerArrowVariants
 } from "./scroll-view.mona.styles";
 import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@mirei/mona-ui/utils";
+import { VariantInputs } from "@mirei/mona-ui/common";
 
 export const scrollViewBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

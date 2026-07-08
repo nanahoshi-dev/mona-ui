@@ -15,7 +15,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { take } from "rxjs";
-import { PopupCloseEvent } from "../../../../popup/models/PopupCloseEvent";
+import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { WindowActionTemplateDirective } from "../../directives/window-action-template.directive";
 import { WindowContentTemplateDirective } from "../../directives/window-content-template.directive";
 import { WindowFooterTemplateDirective } from "../../directives/window-footer-template.directive";

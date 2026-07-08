@@ -1,11 +1,11 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { DraggableOptions } from "../../common/tree/models/DraggableOptions";
-import { NodeDragEndEvent } from "../../common/tree/models/NodeDragEndEvent";
-import { NodeDragEvent } from "../../common/tree/models/NodeDragEvent";
-import { NodeDragStartEvent } from "../../common/tree/models/NodeDragStartEvent";
-import { NodeDropEvent } from "../../common/tree/models/NodeDropEvent";
-import { TreeService } from "../../common/tree/services/tree.service";
+import { DraggableOptions } from "@mirei/mona-ui/tree";
+import { NodeDragEndEvent } from "@mirei/mona-ui/tree";
+import { NodeDragEvent } from "@mirei/mona-ui/tree";
+import { NodeDragStartEvent } from "@mirei/mona-ui/tree";
+import { NodeDropEvent } from "@mirei/mona-ui/tree";
+import { TreeService } from "@mirei/mona-ui/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 
 @Directive({

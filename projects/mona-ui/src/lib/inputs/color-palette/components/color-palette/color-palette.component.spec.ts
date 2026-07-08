@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
 import { describe, expect, it } from "vitest";
 
-import type { PaletteType } from "../../../models/PaletteType";
+import type { PaletteType } from "@mirei/mona-ui/common";
 import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../utils/colorSchemes";
 import { ColorPaletteComponent } from "./color-palette.component";
 
@@ -12,11 +12,7 @@ const LARGE_TEST_PALETTE = Array.from({ length: 12 }, (_, i) => `#${i.toString(1
 
 @Component({
     template: `
-        <mona-color-palette
-            [(value)]="value"
-            [disabled]="disabled()"
-            [palette]="palette"
-            [readonly]="readonlyState()">
+        <mona-color-palette [(value)]="value" [disabled]="disabled()" [palette]="palette" [readonly]="readonlyState()">
         </mona-color-palette>
     `,
     imports: [ColorPaletteComponent]
@@ -29,12 +25,7 @@ class ValueBindingColorPaletteHostComponent {
 }
 
 @Component({
-    template: `
-        <mona-color-palette
-            [formField]="form.color"
-            [palette]="palette">
-        </mona-color-palette>
-    `,
+    template: ` <mona-color-palette [formField]="form.color" [palette]="palette"> </mona-color-palette> `,
     imports: [ColorPaletteComponent, FormField]
 })
 class SignalFormColorPaletteHostComponent {

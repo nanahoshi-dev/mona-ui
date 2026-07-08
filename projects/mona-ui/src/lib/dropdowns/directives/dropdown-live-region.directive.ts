@@ -1,6 +1,6 @@
 import { computed, Directive, effect, ElementRef, inject } from "@angular/core";
-import { ListService } from "../../common/list/services/list.service";
-import { DropdownService } from "../../common/dropdown/services/dropdown.service";
+import { ListService } from "@mirei/mona-ui/list";
+import { DropdownService } from "../services/dropdown.service";
 
 @Directive({
     selector: "span[monaDropdownLiveRegion]",

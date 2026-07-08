@@ -1,10 +1,10 @@
 import { computed, Directive, inject, input } from "@angular/core";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import {
     inputThemeVariants,
     InputVariantInput,
     InputVariantProps
 } from "../styles/textbox.styles";
-import { ThemeService } from "../../../theme/services/theme.service";
 import { twMerge } from "tailwind-merge";
 
 @Directive({

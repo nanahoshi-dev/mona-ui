@@ -2,8 +2,8 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { DraggableOptions } from "../../common/tree/models/DraggableOptions";
-import { TreeService } from "../../common/tree/services/tree.service";
+import { DraggableOptions } from "@mirei/mona-ui/tree";
+import { TreeService } from "@mirei/mona-ui/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewDragAndDropDirective } from "./tree-view-drag-and-drop.directive";
 

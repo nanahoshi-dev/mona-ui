@@ -2,11 +2,11 @@ import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { sequenceEqual } from "@mirei/ts-collections";
 import { pairwise } from "rxjs";
-import { NodeItem } from "../../common/tree/models/NodeItem";
-import { NodeSelectEvent } from "../../common/tree/models/NodeSelectEvent";
-import { TreeSelectableOptions } from "../../common/tree/models/TreeSelectableOptions";
-import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
-import { TreeService } from "../../common/tree/services/tree.service";
+import { NodeItem } from "@mirei/mona-ui/tree";
+import { NodeSelectEvent } from "@mirei/mona-ui/tree";
+import { TreeSelectableOptions } from "@mirei/mona-ui/tree";
+import { NodeKeySelector } from "@mirei/mona-ui/tree";
+import { TreeService } from "@mirei/mona-ui/tree";
 
 @Directive({
     selector: "mona-tree-view[monaTreeViewSelectable]",

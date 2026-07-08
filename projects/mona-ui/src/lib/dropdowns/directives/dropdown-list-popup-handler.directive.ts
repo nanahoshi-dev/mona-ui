@@ -1,10 +1,10 @@
 import { afterNextRender, DestroyRef, Directive, ElementRef, inject } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { filter, fromEvent, switchMap, take } from "rxjs";
-import { DropdownPopupHandlerDirective } from "../../common/dropdown/directives/dropdown-popup-handler.directive";
-import { DropdownService } from "../../common/dropdown/services/dropdown.service";
-import { ListService } from "../../common/list/services/list.service";
-import { PreventableEvent } from "../../utils/PreventableEvent";
+import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";
+import { DropdownService } from "../services/dropdown.service";
+import { ListService } from "@mirei/mona-ui/list";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
 import { DropdownListService } from "../services/dropdown-list.service";
 

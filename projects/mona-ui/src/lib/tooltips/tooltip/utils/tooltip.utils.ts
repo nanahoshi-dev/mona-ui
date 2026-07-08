@@ -1,7 +1,7 @@
 import { ConnectionPositionPair } from "@angular/cdk/overlay";
 import { Position } from "../../../models/Position";
-import { PopupOffset } from "../../../popup/models/PopupOffset";
-import { ConnectionPoint } from "../../../popup/utils/connectionPosition";
+import { PopupOffset } from "@mirei/mona-ui/popup";
+import { ConnectionPoint } from "@mirei/mona-ui/popup";
 
 /**
  * Derives the tooltip arrow position from a ConnectionPositionPair.

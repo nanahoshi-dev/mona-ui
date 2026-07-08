@@ -3,8 +3,8 @@ import {
     listBoxToolbarVariants as monaListBoxToolbarVariants
 } from "../styles/list-box.mona.styles";
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "../../theme/models/Theme";
-import { VariantInputs } from "../../utils/VariantInputs";
+import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantInputs } from "@mirei/mona-ui/common";
 
 export const listBoxBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

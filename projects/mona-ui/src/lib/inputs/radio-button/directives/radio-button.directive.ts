@@ -4,7 +4,7 @@ import {
     RadioButtonDirectiveProps,
     radioButtonDirectiveThemeVariants
 } from "../styles/radio.styles";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 
 @Directive({
     selector: "input[type='radio'][monaRadioButton]",

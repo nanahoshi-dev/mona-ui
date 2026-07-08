@@ -21,8 +21,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent, Subject, take, takeUntil } from "rxjs";
-import { rxTimeout } from "../../../common/utils/rxTimeout";
-import { Action } from "../../../utils/Action";
+import { rxTimeout } from "@mirei/mona-ui/common";
+import { Action } from "@mirei/mona-ui/common";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupOffset } from "../../models/PopupOffset";
 import { PopupRef } from "../../models/PopupRef";

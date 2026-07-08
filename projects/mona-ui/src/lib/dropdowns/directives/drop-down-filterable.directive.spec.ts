@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { ListService } from "../../common/list/services/list.service";
+import { ListService } from "@mirei/mona-ui/list";
 import { DropDownFilterableDirective } from "./drop-down-filterable.directive";
 
 describe("DropDownFilterableDirective", () => {

@@ -14,4 +14,4 @@ export * from "./popup/models/PopupOffset";
 export * from "./popup/models/PopupInjectionToken";
 export type { ConnectionPoint } from "./popup/utils/connectionPosition";
 
-export type { Action } from "./utils/Action";
+export type { Action } from "@mirei/mona-ui/common";

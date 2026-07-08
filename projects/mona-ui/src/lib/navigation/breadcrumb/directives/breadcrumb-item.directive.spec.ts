@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 import { describe, beforeEach, it } from "vitest";
-import { ThemeService } from "../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
 
 describe("BreadcrumbItemDirective", () => {

@@ -2,4 +2,7 @@
  * Public API Surface of @mirei/mona-ui/editor
  */
 
-export * from "../src/lib/editor.public-api";
+export * from "./components/editor/editor.component";
+
+export type { ContentChangeEvent } from "./models/ContentChangeEvent";
+export type { EditorSettings } from "./models/EditorSettings";

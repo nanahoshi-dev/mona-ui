@@ -15,7 +15,7 @@ import {
 } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { Orientation } from "../../../../models/Orientation";
-import { ThemeService } from "../../../../theme/services/theme.service";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
 import { SliderTick } from "../../../models/SliderTick";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";

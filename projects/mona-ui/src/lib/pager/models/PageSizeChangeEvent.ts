@@ -1,4 +1,4 @@
-import { PreventableEvent } from "../../utils/PreventableEvent";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 
 export class PageSizeChangeEvent extends PreventableEvent {
     public readonly newPageSize: number;

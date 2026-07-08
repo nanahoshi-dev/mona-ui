@@ -2,10 +2,10 @@ import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, 
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { sequenceEqual } from "@mirei/ts-collections";
 import { pairwise } from "rxjs";
-import { ExpandableOptions } from "../../common/tree/models/ExpandableOptions";
-import { NodeItem } from "../../common/tree/models/NodeItem";
-import { NodeKeySelector } from "../../common/tree/models/TreeSelectors";
-import { TreeService } from "../../common/tree/services/tree.service";
+import { ExpandableOptions } from "@mirei/mona-ui/tree";
+import { NodeItem } from "@mirei/mona-ui/tree";
+import { NodeKeySelector } from "@mirei/mona-ui/tree";
+import { TreeService } from "@mirei/mona-ui/tree";
 
 @Directive({
     selector: "mona-tree-view[monaTreeViewExpandable]",
@@ -94,14 +94,12 @@ export class TreeViewExpandableDirective<T, K = T> {
                 }
                 this.expandedKeysChange.emit(keys.toArray());
             });
-        this.#treeService.nodeExpand$
-            .pipe(takeUntilDestroyed(this.#destroyRef))
-            .subscribe(event => {
-                if (event.expanded) {
-                    this.expand.emit(event.node.nodeItem);
-                } else {
-                    this.collapse.emit(event.node.nodeItem);
-                }
-            });
+        this.#treeService.nodeExpand$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (event.expanded) {
+                this.expand.emit(event.node.nodeItem);
+            } else {
+                this.collapse.emit(event.node.nodeItem);
+            }
+        });
     }
 }

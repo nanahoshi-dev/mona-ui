@@ -2,8 +2,8 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { DisableOptions } from "../../common/tree/models/DisableOptions";
-import { TreeService } from "../../common/tree/services/tree.service";
+import { DisableOptions } from "@mirei/mona-ui/tree";
+import { TreeService } from "@mirei/mona-ui/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewDisableDirective } from "./tree-view-disable.directive";
 

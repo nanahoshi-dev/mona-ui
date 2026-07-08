@@ -2,4 +2,7 @@
  * Public API Surface of @mirei/mona-ui/expansion-panel
  */
 
-export * from "../src/lib/expansion-panel.public-api";
+export * from "./components/expansion-panel/expansion-panel.component";
+export * from "./directives/expansion-panel-actions-template.directive";
+export * from "./directives/expansion-panel-icon-template.directive";
+export * from "./directives/expansion-panel-title-template.directive";
