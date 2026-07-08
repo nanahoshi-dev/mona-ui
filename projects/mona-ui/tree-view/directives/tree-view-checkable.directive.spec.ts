@@ -2,10 +2,10 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { DisableOptions } from "@mirei/mona-ui/tree";
-import { TreeService } from "@mirei/mona-ui/tree";
+import { CheckableOptions } from "../../tree/public-api";
+import { TreeService } from "../../tree/public-api";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
-import { TreeViewDisableDirective } from "./tree-view-disable.directive";
+import { TreeViewCheckableDirective } from "./tree-view-checkable.directive";
 
 interface TestItem {
     id: string;
@@ -13,37 +13,35 @@ interface TestItem {
 }
 
 @Component({
-    imports: [TreeViewComponent, TreeViewDisableDirective],
+    imports: [TreeViewComponent, TreeViewCheckableDirective],
     template: `
         <mona-tree-view
             [data]="data()"
             children="children"
             textField="text"
-            monaTreeViewDisable
-            [monaTreeViewDisable]="options()"
-            [disabledKeys]="disabledKeys()"></mona-tree-view>
+            monaTreeViewCheckable
+            [monaTreeViewCheckable]="options()"></mona-tree-view>
     `
 })
 class HostComponent {
     public readonly data = signal<TestItem[]>([{ id: "1", text: "Node 1" }]);
-    public readonly disabledKeys = signal<TestItem[]>([]);
-    public readonly options = signal<Partial<DisableOptions> | "">("");
+    public readonly options = signal<Partial<CheckableOptions> | "">("");
 }
 
-describe("TreeViewDisableDirective", () => {
-    let directive: TreeViewDisableDirective<any>;
+describe("TreeViewCheckableDirective", () => {
+    let directive: TreeViewCheckableDirective<any>;
     beforeEach(() => {
         TestBed.configureTestingModule({
             providers: [TreeService]
         });
-        directive = TestBed.runInInjectionContext(() => new TreeViewDisableDirective());
+        directive = TestBed.runInInjectionContext(() => new TreeViewCheckableDirective());
     });
     it("should create an instance", () => {
         expect(directive).toBeTruthy();
     });
 });
 
-describe("TreeViewDisableDirective wiring to TreeService", () => {
+describe("TreeViewCheckableDirective wiring to TreeService", () => {
     let fixture: ComponentFixture<HostComponent>;
     let treeService: TreeService<TestItem>;
 
@@ -59,16 +57,29 @@ describe("TreeViewDisableDirective wiring to TreeService", () => {
         await fixture.whenStable();
     });
 
-    it("enables disabling with disableChildren on by default when applied bare", () => {
-        expect(treeService.disableOptions()).toEqual({ disableChildren: true, enabled: true });
+    it("enables checkboxes with the multiple/checkChildren/checkParents defaults when applied bare", () => {
+        expect(treeService.checkableOptions()).toEqual({
+            checkChildren: true,
+            checkDisabledChildren: false,
+            childrenOnly: false,
+            checkParents: true,
+            enabled: true,
+            mode: "multiple"
+        });
     });
 
-    it("marks the configured node as disabled", async () => {
-        const node = treeService.nodeSet().first(n => n.data.id === "1");
-        fixture.componentInstance.disabledKeys.set([node.data]);
+    it("merges custom options over the defaults", async () => {
+        fixture.componentInstance.options.set({ checkChildren: false });
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(treeService.isDisabled(node)).toBe(true);
+        expect(treeService.checkableOptions()).toEqual({
+            checkChildren: false,
+            checkDisabledChildren: false,
+            childrenOnly: false,
+            checkParents: true,
+            enabled: true,
+            mode: "multiple"
+        });
     });
 });

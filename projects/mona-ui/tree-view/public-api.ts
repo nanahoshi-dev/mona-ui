@@ -2,4 +2,12 @@
  * Public API Surface of @mirei/mona-ui/tree-view
  */
 
-export * from "../src/lib/tree-view.public-api";
+export * from "./components/tree-view/tree-view.component";
+
+export * from "./directives/tree-view-checkable.directive";
+export * from "./directives/tree-view-disable.directive";
+export * from "./directives/tree-view-drag-and-drop.directive";
+export * from "./directives/tree-view-expandable.directive";
+export * from "./directives/tree-view-filterable.directive";
+export * from "./directives/tree-view-node-template.directive";
+export * from "./directives/tree-view-selectable.directive";

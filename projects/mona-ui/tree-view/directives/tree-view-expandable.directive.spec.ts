@@ -2,46 +2,48 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { DraggableOptions } from "@mirei/mona-ui/tree";
-import { TreeService } from "@mirei/mona-ui/tree";
+import { TreeService } from "../../tree/public-api";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
-import { TreeViewDragAndDropDirective } from "./tree-view-drag-and-drop.directive";
+import { TreeViewExpandableDirective } from "./tree-view-expandable.directive";
 
 interface TestItem {
     id: string;
     text: string;
+    children?: TestItem[];
 }
 
 @Component({
-    imports: [TreeViewComponent, TreeViewDragAndDropDirective],
+    imports: [TreeViewComponent, TreeViewExpandableDirective],
     template: `
         <mona-tree-view
             [data]="data()"
             children="children"
             textField="text"
-            monaTreeViewDragAndDrop
-            [monaTreeViewDragAndDrop]="options()"></mona-tree-view>
+            monaTreeViewExpandable
+            [expandedKeys]="expandedKeys()"></mona-tree-view>
     `
 })
 class HostComponent {
-    public readonly data = signal<TestItem[]>([{ id: "1", text: "Node 1" }]);
-    public readonly options = signal<Partial<DraggableOptions> | "">("");
+    public readonly data = signal<TestItem[]>([
+        { id: "1", text: "Node 1", children: [{ id: "1.1", text: "Node 1.1" }] }
+    ]);
+    public readonly expandedKeys = signal<TestItem[]>([]);
 }
 
-describe("TreeViewDragAndDropDirective", () => {
-    let directive: TreeViewDragAndDropDirective<any>;
+describe("TreeViewExpandableDirective", () => {
+    let directive: TreeViewExpandableDirective<any>;
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [TreeService, { provide: TreeViewComponent, useValue: {} }]
+            providers: [TreeService]
         });
-        directive = TestBed.runInInjectionContext(() => new TreeViewDragAndDropDirective());
+        directive = TestBed.runInInjectionContext(() => new TreeViewExpandableDirective());
     });
     it("should create an instance", () => {
         expect(directive).toBeTruthy();
     });
 });
 
-describe("TreeViewDragAndDropDirective wiring to TreeService", () => {
+describe("TreeViewExpandableDirective wiring to TreeService", () => {
     let fixture: ComponentFixture<HostComponent>;
     let treeService: TreeService<TestItem>;
 
@@ -57,15 +59,18 @@ describe("TreeViewDragAndDropDirective wiring to TreeService", () => {
         await fixture.whenStable();
     });
 
-    it("enables dragging by default when applied bare", () => {
-        expect(treeService.draggableOptions()).toEqual({ enabled: true });
+    it("enables expanding by default when applied bare", () => {
+        expect(treeService.expandableOptions()).toEqual({ enabled: true });
     });
 
-    it("disables dragging when configured to do so", async () => {
-        fixture.componentInstance.options.set({ enabled: false });
+    it("expands the node whose key is present in expandedKeys", async () => {
+        const node = treeService.nodeSet().first(n => n.data.id === "1");
+        expect(treeService.isExpanded(node)).toBe(false);
+
+        fixture.componentInstance.expandedKeys.set([node.data]);
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(treeService.draggableOptions()).toEqual({ enabled: false });
+        expect(treeService.isExpanded(node)).toBe(true);
     });
 });

@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -14,18 +13,20 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Predicate, Selector } from "@mirei/ts-collections";
 import { FilterChangeEvent, FilterInputComponent } from "@mirei/mona-ui/filter-input";
-import { TreeComponent } from "@mirei/mona-ui/tree";
-import { TreeNodeTemplateDirective } from "@mirei/mona-ui/tree";
-import { DataStructure } from "@mirei/mona-ui/tree";
-import { DropPosition } from "@mirei/mona-ui/tree";
-import { ITreeView } from "@mirei/mona-ui/tree";
-import { NodeClickEvent } from "@mirei/mona-ui/tree";
-import { NodeItem } from "@mirei/mona-ui/tree";
-import { NodeMoveSnapshot } from "@mirei/mona-ui/tree";
-import { ChildrenSelector } from "@mirei/mona-ui/tree";
-import { TreeService } from "@mirei/mona-ui/tree";
+import {
+    ChildrenSelector,
+    DataStructure,
+    DropPosition,
+    ITreeView,
+    NodeClickEvent,
+    NodeItem,
+    NodeMoveSnapshot,
+    TreeComponent,
+    TreeNodeTemplateDirective,
+    TreeService
+} from "@mirei/mona-ui/tree";
+import { Predicate, Selector } from "@mirei/ts-collections";
 import { TreeViewNodeTemplateDirective } from "../../directives/tree-view-node-template.directive";
 import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateContext";
 
@@ -33,8 +34,7 @@ import { TreeViewNodeTemplateContext } from "../../models/TreeViewNodeTemplateCo
     selector: "mona-tree-view",
     imports: [FilterInputComponent, TreeComponent, TreeNodeTemplateDirective, NgTemplateOutlet],
     templateUrl: "./tree-view.component.html",
-    providers: [TreeService],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    providers: [TreeService]
 })
 export class TreeViewComponent<T> implements ITreeView<T> {
     readonly #destroyRef = inject(DestroyRef);
