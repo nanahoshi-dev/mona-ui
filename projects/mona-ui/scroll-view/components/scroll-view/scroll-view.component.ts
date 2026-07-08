@@ -31,9 +31,9 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ScrollDirection } from "../../../../models/ScrollDirection";
-import { ThemeService } from "../../../../theme/services/theme.service";
-import { toCssValue } from "../../../../utils/toCssValue";
+import { ScrollDirection } from "@mirei/mona-ui/common";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { toCssValue } from "@mirei/mona-ui/utils";
 import { ScrollViewActivePageDirective } from "../../directives/scroll-view-active-page.directive";
 import { PagerOverlay } from "../../models/PagerOverlay";
 import { ScrollViewListItem } from "../../models/ScrollViewListItem";

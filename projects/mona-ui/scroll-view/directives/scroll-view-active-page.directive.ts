@@ -1,6 +1,6 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "../../../theme/services/theme.service";
-import { scrollViewPagerListItemThemeVariants, ScrollViewVariantProps } from "../styles/scroll-view.styles";
+import { ThemeService } from "@mirei/mona-ui/theme";
+import { scrollViewPagerListItemThemeVariants, type ScrollViewVariantProps } from "../styles/scroll-view.styles";
 
 @Directive({
     selector: "button[monaScrollViewActivePage]",

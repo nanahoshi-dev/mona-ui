@@ -33,10 +33,7 @@ class TestStepperHostComponent {
 }
 
 @Component({
-    template: `
-        <mona-stepper [steps]="steps()" [step]="step()" [linear]="false">
-        </mona-stepper>
-    `,
+    template: ` <mona-stepper [steps]="steps()" [step]="step()" [linear]="false"> </mona-stepper> `,
     imports: [StepperComponent]
 })
 class TestNonLinearStepperHostComponent {
@@ -101,9 +98,7 @@ function getStepperElement(fixture: ComponentFixture<unknown>): HTMLElement {
 }
 
 function getIndicators(fixture: ComponentFixture<unknown>): HTMLElement[] {
-    return fixture.debugElement
-        .queryAll(By.css("[role='button']"))
-        .map(de => de.nativeElement as HTMLElement);
+    return fixture.debugElement.queryAll(By.css("[role='button']")).map(de => de.nativeElement as HTMLElement);
 }
 
 function getLabelSpans(fixture: ComponentFixture<unknown>): HTMLElement[] {
@@ -1051,8 +1046,7 @@ describe("StepperComponent", () => {
             });
 
             it("keyboard navigation should work when stepTemplate is provided", async () => {
-                const stepper = fixture.debugElement.query(By.directive(StepperComponent))
-                    .nativeElement as HTMLElement;
+                const stepper = fixture.debugElement.query(By.directive(StepperComponent)).nativeElement as HTMLElement;
                 dispatchKeydown(stepper, "ArrowRight");
                 await waitForStable(fixture);
                 const buttons = fixture.debugElement

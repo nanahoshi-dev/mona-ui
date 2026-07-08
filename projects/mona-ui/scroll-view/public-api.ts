@@ -2,4 +2,6 @@
  * Public API Surface of @mirei/mona-ui/scroll-view
  */
 
-export * from "../src/lib/scroll-view.public-api";
+export * from "./components/scroll-view/scroll-view.component";
+export * from "./directives/scroll-view-active-page.directive";
+export * from "./models/PagerOverlay";

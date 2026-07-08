@@ -2,7 +2,6 @@ import { Directionality } from "@angular/cdk/bidi";
 import {
     afterNextRender,
     afterRenderEffect,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -12,9 +11,9 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { compact } from "@mirei/ts-collections";
 import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
-import { ThemeService } from "../../../../theme/services/theme.service";
 import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
 import { SplitterPaneComponent } from "../splitter-pane/splitter-pane.component";
 import { SplitterResizerHandleComponent } from "../splitter-resizer-handle/splitter-resizer-handle.component";

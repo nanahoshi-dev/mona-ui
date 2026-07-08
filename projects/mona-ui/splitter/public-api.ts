@@ -2,4 +2,5 @@
  * Public API Surface of @mirei/mona-ui/splitter
  */
 
-export * from "../src/lib/splitter.public-api";
+export * from "./components/splitter/splitter.component";
+export * from "./components/splitter-pane/splitter-pane.component";
