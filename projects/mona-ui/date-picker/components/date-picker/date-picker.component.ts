@@ -29,7 +29,7 @@ import {
     CalendarYearCellTemplateDirective,
     FirstDayOfWeek
 } from "@mirei/mona-ui/calendar";
-import { AttributeConfig, createElementControlId, PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import {
     CalendarService,
     DateDisabledType,
@@ -43,7 +43,8 @@ import {
     DropdownPopupInputToken,
     DropdownService
 } from "@mirei/mona-ui/dropdowns";
-import { ListSizeInputType } from "@mirei/mona-ui/list";
+import { type AttributeConfig, createElementControlId } from "@mirei/mona-ui/internal";
+import { ListSizeInputType } from "@mirei/mona-ui/internal/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import {
     TextBoxComponent,

@@ -5,17 +5,17 @@ import { LucideBox, LucideSearch } from "@lucide/angular";
 import { ComboBoxComponent } from "@mirei/mona-ui/combo-box";
 import { FilterableOptions, VirtualScrollOptions } from "@mirei/mona-ui/common";
 import {
-    DropDownFilterableDirective,
-    DropDownFooterTemplateDirective,
-    DropDownGroupableDirective,
-    DropDownGroupHeaderTemplateDirective,
-    DropDownHeaderTemplateDirective,
-    DropDownItemTemplateDirective,
-    DropDownNoDataTemplateDirective,
+    DropdownFilterableDirective,
+    DropdownFooterTemplateDirective,
+    DropdownGroupableDirective,
+    DropdownGroupHeaderTemplateDirective,
+    DropdownHeaderTemplateDirective,
+    DropdownItemTemplateDirective,
+    DropdownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
-    DropDownVirtualScrollDirective
+    DropdownVirtualScrollDirective
 } from "@mirei/mona-ui/dropdowns";
-import { GroupableOptions } from "@mirei/mona-ui/list";
+import { GroupableOptions } from "@mirei/mona-ui/internal/list";
 import { ImmutableSet, range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -142,16 +142,16 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
 @Component({
     imports: [
         ComboBoxComponent,
-        DropDownVirtualScrollDirective,
-        DropDownNoDataTemplateDirective,
+        DropdownVirtualScrollDirective,
+        DropdownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
-        DropDownFooterTemplateDirective,
-        DropDownHeaderTemplateDirective,
-        DropDownGroupHeaderTemplateDirective,
-        DropDownGroupableDirective,
-        DropDownFilterableDirective,
+        DropdownFooterTemplateDirective,
+        DropdownHeaderTemplateDirective,
+        DropdownGroupHeaderTemplateDirective,
+        DropdownGroupableDirective,
+        DropdownFilterableDirective,
         CurrencyPipe,
-        DropDownItemTemplateDirective,
+        DropdownItemTemplateDirective,
         LucideBox,
         LucideSearch,
         FormField

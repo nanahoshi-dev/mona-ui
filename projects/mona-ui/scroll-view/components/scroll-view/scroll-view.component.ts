@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -16,6 +15,9 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable, toSignal } from "@angular/core/rxjs-interop";
+import { ScrollDirection } from "@mirei/mona-ui/common";
+import { toCssValue } from "@mirei/mona-ui/internal";
+import { ThemeService } from "@mirei/mona-ui/theme";
 import { select } from "@mirei/ts-collections";
 import {
     asyncScheduler,
@@ -31,9 +33,6 @@ import {
     timer
 } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { ScrollDirection } from "@mirei/mona-ui/common";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { toCssValue } from "@mirei/mona-ui/common";
 import { ScrollViewActivePageDirective } from "../../directives/scroll-view-active-page.directive";
 import { PagerOverlay } from "../../models/PagerOverlay";
 import { ScrollViewListItem } from "../../models/ScrollViewListItem";
@@ -53,7 +52,6 @@ import {
 @Component({
     selector: "mona-scroll-view",
     templateUrl: "./scroll-view.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgTemplateOutlet, ScrollViewActivePageDirective],
     styles: `
         @keyframes slideInFromRight {

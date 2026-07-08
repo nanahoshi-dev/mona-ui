@@ -20,28 +20,30 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { createElementControlId, isTypeaheadKey, PreventableEvent, setupTypeahead } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@mirei/mona-ui/common";
+import { isTypeaheadKey, setupTypeahead } from "@mirei/mona-ui/internal";
 import {
     DropdownDataHandlerDirective,
     DropdownDataInput,
     DropdownDataInputToken,
     DropdownFieldPredicateType,
     DropdownFieldSelectorType,
-    DropDownFooterTemplateDirective,
-    DropDownGroupHeaderTemplateDirective,
-    DropDownHeaderTemplateDirective,
-    DropDownItemTemplateDirective,
+    DropdownFooterTemplateDirective,
+    DropdownGroupHeaderTemplateDirective,
+    DropdownHeaderTemplateDirective,
+    DropdownItemTemplateDirective,
     DropdownListPopupHandlerDirective,
     DropdownListService,
     DropdownLiveRegionDirective,
-    DropDownNoDataTemplateDirective,
+    DropdownNoDataTemplateDirective,
     DropdownPopupInput,
     DropdownPopupInputToken,
     dropdownPopupThemeVariants,
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@mirei/mona-ui/dropdowns";
-import { IndicatorIconComponent } from "@mirei/mona-ui/indicator-icon";
+import { createElementControlId } from "@mirei/mona-ui/internal";
+import { IndicatorIconComponent } from "@mirei/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
     ListFooterTemplateDirective,
@@ -53,12 +55,12 @@ import {
     ListSizeInputType,
     SelectableOptions,
     SelectionChangeEvent
-} from "@mirei/mona-ui/list";
+} from "@mirei/mona-ui/internal/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
+import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
 import {
     dropdownListAffixContainerThemeVariants,
     dropdownListInputThemeVariants,
@@ -160,12 +162,12 @@ export class DropdownListComponent<TData = unknown>
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
-    protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
-    protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, {
+    protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
+    protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, {
         read: TemplateRef
     });
-    protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && this.value() == null)
     );
@@ -179,7 +181,7 @@ export class DropdownListComponent<TData = unknown>
         const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
     });
-    protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions: SelectableOptions = {
@@ -198,7 +200,7 @@ export class DropdownListComponent<TData = unknown>
         const hasTemplate = this.valueTemplate() != null;
         return dropdownListValueContainerThemeVariants(theme)({ hasTemplate });
     });
-    protected readonly valueTemplate = contentChild(DropDownListValueTemplateDirective, { read: TemplateRef });
+    protected readonly valueTemplate = contentChild(DropdownListValueTemplateDirective, { read: TemplateRef });
     protected readonly valueText = computed(() => {
         const listItem = this.selectedListItem();
         if (!listItem) {

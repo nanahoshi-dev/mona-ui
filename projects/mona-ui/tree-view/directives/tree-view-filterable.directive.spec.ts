@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { TreeService } from "../../tree/public-api";
+import { TreeService } from "@mirei/mona-ui/internal/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewFilterableDirective } from "./tree-view-filterable.directive";
 

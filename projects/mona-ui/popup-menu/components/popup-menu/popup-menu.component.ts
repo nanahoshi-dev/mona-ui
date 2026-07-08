@@ -14,15 +14,17 @@ import {
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { rxTimeout, toCssValue } from "@mirei/mona-ui/internal";
+import {
+    ConnectionPoint,
+    PopupAnchor,
+    PopupCloseEvent,
+    PopupOffset,
+    PopupRef,
+    PopupService
+} from "@mirei/mona-ui/popup";
 import { any, groupBy, select } from "@mirei/ts-collections";
 import { fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
-import { PopupCloseEvent, PopupService } from "@mirei/mona-ui/popup";
-import { PopupOffset } from "@mirei/mona-ui/popup";
-import { PopupRef } from "@mirei/mona-ui/popup";
-import { PopupAnchor } from "@mirei/mona-ui/popup";
-import { ConnectionPoint } from "@mirei/mona-ui/popup";
-import { toCssValue } from "@mirei/mona-ui/common";
-import { rxTimeout } from "@mirei/mona-ui/common";
 import { PopupMenuCloseEvent } from "../../models/PopupMenuCloseEvent";
 import {
     PopupMenuGroupTemplateToken,

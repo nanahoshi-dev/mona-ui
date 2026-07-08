@@ -42,6 +42,7 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 ```
 
 ```html
+
 <mona-dropdown-list
     [data]="countries"
     textField="name"
@@ -59,24 +60,25 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 | Directive                              | Selector                                       | Template context                                                   | Replaces                                                                          |
 |----------------------------------------|------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------|
-| `DropDownItemTemplateDirective`        | `ng-template[monaDropDownItemTemplate]`        | `{ $implicit: TData }` (the option's data item)                    | Each option's default text rendering inside the popup                             |
+| `DropdownItemTemplateDirective`        | `ng-template[monaDropDownItemTemplate]`        | `{ $implicit: TData }` (the option's data item)                    | Each option's default text rendering inside the popup                             |
 | `DropDownListValueTemplateDirective`   | `ng-template[monaDropDownListValueTemplate]`   | `{ $implicit: TData \| null }` (the selected data item, or `null`) | The default selected-value text rendered in the host element                      |
-| `DropDownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }`                                             | The default group header row, when grouping is enabled                            |
-| `DropDownHeaderTemplateDirective`      | `ng-template[monaDropDownHeaderTemplate]`      | None                                                               | No default — renders above the option list inside the popup                       |
-| `DropDownFooterTemplateDirective`      | `ng-template[monaDropDownFooterTemplate]`      | None                                                               | No default — renders below the option list inside the popup                       |
-| `DropDownNoDataTemplateDirective`      | `ng-template[monaDropDownNoDataTemplate]`      | None                                                               | The popup's default empty-state content                                           |
+| `DropdownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }`                                             | The default group header row, when grouping is enabled                            |
+| `DropdownHeaderTemplateDirective`      | `ng-template[monaDropDownHeaderTemplate]`      | None                                                               | No default — renders above the option list inside the popup                       |
+| `DropdownFooterTemplateDirective`      | `ng-template[monaDropDownFooterTemplate]`      | None                                                               | No default — renders below the option list inside the popup                       |
+| `DropdownNoDataTemplateDirective`      | `ng-template[monaDropDownNoDataTemplate]`      | None                                                               | The popup's default empty-state content                                           |
 | `DropdownPrefixTemplateDirective`      | `ng-template[monaDropdownPrefixTemplate]`      | None                                                               | No default — projected content rendered before the value area on the host element |
 
 ```html
+
 <mona-dropdown-list [data]="countries" textField="name" valueField="id">
     <ng-template monaDropDownItemTemplate let-dataItem>
         <span>{{ dataItem.name }}</span>
     </ng-template>
     <ng-template monaDropDownListValueTemplate let-dataItem>
         @if (dataItem) {
-            <span>{{ dataItem.name }}</span>
+        <span>{{ dataItem.name }}</span>
         } @else {
-            <span>No country selected</span>
+        <span>No country selected</span>
         }
     </ng-template>
 </mona-dropdown-list>
@@ -89,6 +91,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 `monaDropDownListValueTemplate` controls how the selected value renders in the host element, independently of how options render inside the popup.
 
 ```html
+
 <mona-dropdown-list [data]="countries" textField="name" valueField="id">
     <ng-template monaDropDownListValueTemplate let-dataItem>
         <span>{{ dataItem?.name ?? 'No country selected' }}</span>
@@ -101,6 +104,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 `monaDropdownPrefixTemplate` renders projected content before the value area, such as an icon.
 
 ```html
+
 <mona-dropdown-list [data]="countries" textField="name" valueField="id">
     <ng-template monaDropdownPrefixTemplate>
         <fa-icon [icon]="['fas', 'globe']"></fa-icon>
@@ -113,6 +117,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 `disabled` renders the control with reduced visual emphasis and removes pointer interaction. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button and prevents interaction while an operation is in progress. `required` marks the field for form validation and affects the invalid state once the control is touched.
 
 ```html
+
 <mona-dropdown-list
     [data]="countries"
     textField="name"
@@ -139,6 +144,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 ```
 
 ```html
+
 <mona-dropdown-list
     [data]="countries"
     textField="name"
@@ -152,6 +158,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 `monaDropDownFilterable` renders a filter input inside the popup that narrows the visible options by text.
 
 ```html
+
 <mona-dropdown-list
     [data]="countries"
     textField="name"
@@ -167,6 +174,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 `monaDropDownGroupable` groups options under a header row, driven by `groupBy`. If `groupBy` is omitted while grouping is enabled, every option falls into a single, unlabeled group.
 
 ```html
+
 <mona-dropdown-list
     [data]="countries"
     textField="name"
@@ -181,6 +189,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 `monaDropDownVirtualScroll` renders only the options currently in view, for large collections. `height` on the options object is the fixed row height, in pixels, used to measure the viewport; every option must render at that height for scrolling to stay accurate.
 
 ```html
+
 <mona-dropdown-list
     [data]="countries"
     textField="name"
@@ -302,7 +311,7 @@ The control also renders a visually hidden live region that announces the highli
 
 ---
 
-### `DropDownFilterableDirective<TData>`
+### `DropdownFilterableDirective<TData>`
 
 **Selector:** `mona-dropdown-list[monaDropDownFilterable]`
 
@@ -322,7 +331,7 @@ The control also renders a visually hidden live region that announces the highli
 
 ---
 
-### `DropDownGroupableDirective<TData>`
+### `DropdownGroupableDirective<TData>`
 
 **Selector:** `mona-dropdown-list[monaDropDownGroupable]`
 
@@ -337,7 +346,7 @@ No outputs.
 
 ---
 
-### `DropDownVirtualScrollDirective<TData>`
+### `DropdownVirtualScrollDirective<TData>`
 
 **Selector:** `mona-dropdown-list[monaDropDownVirtualScroll]`
 
@@ -386,7 +395,7 @@ No outputs.
 
 <!-- verification-checklist
 - [x] DropdownListComponent inputs/outputs/defaults verified against dropdown-list.component.ts source and cross-checked against component-metadata.json's DropdownListComponent entry (all 25 members matched: ariaLabel, ariaLabelledBy, data, disabled(model), invalid, itemDisabled, loading, placeholder, popupClass, popupHeight, popupWidth, readonly, required, rounded, showClearButton, size, textField, touched, userClass(class), value(model), valueField, close, closed, open, opened, touch)
-- [x] Three behavior directives (Filterable, Groupable, VirtualScroll) inputs/outputs and default option objects verified against drop-down-filterable.directive.ts, drop-down-groupable.directive.ts, drop-down-virtual-scroll.directive.ts
+- [x] Three behavior directives (Filterable, Groupable, VirtualScroll) inputs/outputs and default option objects verified against dropdown-filterable.directive.ts, dropdown-groupable.directive.ts, dropdown-virtual-scroll.directive.ts
 - [x] Seven structural template directives and their selectors verified against dropdowns/directives/*-template.directive.ts and dropdowns/dropdown-list/directives/dropdown-list-value-template.directive.ts; template contexts verified against dropdown-list.component.html's ngTemplateOutletContext bindings
 - [x] Keyboard map (ArrowDown/ArrowUp/Alt+ArrowDown/Alt+ArrowUp/Home/End/Enter/Space/Escape/Tab/typeahead) verified against dropdown-list-popup-handler.directive.ts (handleKeyDown/handleArrowKeys) and dropdown-list.component.ts (setKeydownSubscription/handleEnterKey/handleHomeEndKeys)
 - [x] Staged-vs-committed value behavior verified against dropdown-list.component.ts's #navigatedValue linkedSignal, setArrowKeyNavigationSubscription, and setPopupCloseSubscriptions

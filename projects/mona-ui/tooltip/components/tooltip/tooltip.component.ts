@@ -13,7 +13,8 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { createElementControlId, Position } from "@mirei/mona-ui/common";
+import { Position } from "@mirei/mona-ui/common";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { fadePopupAnimation, PopupAnchor, PopupRef, PopupService } from "@mirei/mona-ui/popup";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { fromEvent, Subscription, take, takeUntil } from "rxjs";

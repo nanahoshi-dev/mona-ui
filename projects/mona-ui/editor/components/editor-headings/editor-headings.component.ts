@@ -1,13 +1,13 @@
 import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
-import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
+import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
     selector: "mona-editor-headings",
-    imports: [DropdownListComponent, FormsModule, DropDownItemTemplateDirective],
+    imports: [DropdownListComponent, FormsModule, DropdownItemTemplateDirective],
     templateUrl: "./editor-headings.component.html",
     styleUrl: "./editor-headings.component.scss"
 })

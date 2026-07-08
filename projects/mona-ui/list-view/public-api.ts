@@ -14,3 +14,5 @@ export * from "./directives/list-view-no-data-template.directive";
 export * from "./directives/list-view-pageable.directive";
 export * from "./directives/list-view-selectable.directive";
 export * from "./directives/list-view-virtual-scroll.directive";
+
+export { NavigableOptions } from "@mirei/mona-ui/internal/list";

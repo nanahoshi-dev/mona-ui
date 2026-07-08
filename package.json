@@ -80,9 +80,9 @@
             "types": "./dist/mona-ui/types/mirei-mona-ui-dialog.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-dialog.mjs"
         },
-        "./drop-down-list": {
-            "types": "./dist/mona-ui/types/mirei-mona-ui-drop-down-list.d.ts",
-            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-drop-down-list.mjs"
+        "./dropdown-list": {
+            "types": "./dist/mona-ui/types/mirei-mona-ui-dropdown-list.d.ts",
+            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-dropdown-list.mjs"
         },
         "./dropdown-button": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-dropdown-button.d.ts",
@@ -104,10 +104,6 @@
             "types": "./dist/mona-ui/types/mirei-mona-ui-fieldset.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-fieldset.mjs"
         },
-        "./filter-input": {
-            "types": "./dist/mona-ui/types/mirei-mona-ui-filter-input.d.ts",
-            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-filter-input.mjs"
-        },
         "./filter": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-filter.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-filter.mjs"
@@ -115,10 +111,6 @@
         "./grid": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-grid.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-grid.mjs"
-        },
-        "./indicator-icon": {
-            "types": "./dist/mona-ui/types/mirei-mona-ui-indicator-icon.d.ts",
-            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-indicator-icon.mjs"
         },
         "./list": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-list.d.ts",
@@ -231,10 +223,6 @@
             "types": "./dist/mona-ui/types/mirei-mona-ui-tooltip.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-tooltip.mjs"
         },
-        "./tree": {
-            "types": "./dist/mona-ui/types/mirei-mona-ui-tree.d.ts",
-            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-tree.mjs"
-        },
         "./tree-view": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-tree-view.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-tree-view.mjs"
@@ -253,6 +241,7 @@
         "build": "npm run build:prod",
         "build:dev": "ng build mona-ui --configuration development",
         "build:prod": "ng build mona-ui --configuration production",
+        "postbuild:prod": "node -e \"require('fs').globSync('dist/mona-ui/**/*.map').forEach(f=>require('fs').rmSync(f))\"",
         "build:watch": "ng build mona-ui --watch --configuration development",
         "build:metadata": "tsx projects/mona-ui-tester/scripts/extract-metadata.ts",
         "watch": "ng build mona-ui --watch --configuration development",
@@ -279,7 +268,12 @@
         "plugins": [
             "@semantic-release/commit-analyzer",
             "@semantic-release/release-notes-generator",
-            "@semantic-release/npm",
+            [
+                "@semantic-release/npm",
+                {
+                    "pkgRoot": "dist/mona-ui"
+                }
+            ],
             "@semantic-release/git",
             "@semantic-release/github"
         ],
@@ -307,6 +301,7 @@
         "@tiptap/extension-font-family": "^3.26.1",
         "@tiptap/extension-highlight": "^3.26.1",
         "@tiptap/extension-image": "^3.26.1",
+        "@tiptap/extension-link": "^3.26.1",
         "@tiptap/extension-subscript": "^3.26.1",
         "@tiptap/extension-superscript": "^3.26.1",
         "@tiptap/extension-table": "^3.26.1",
@@ -317,6 +312,7 @@
         "@tiptap/extension-task-list": "^3.26.1",
         "@tiptap/extension-text-align": "^3.26.1",
         "@tiptap/extension-text-style": "^3.26.1",
+        "@tiptap/extension-underline": "^3.26.1",
         "@tiptap/pm": "^3.26.1",
         "@tiptap/starter-kit": "^3.26.1",
         "class-variance-authority": "^0.7.1",

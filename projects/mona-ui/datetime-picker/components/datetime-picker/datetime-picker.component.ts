@@ -2,7 +2,6 @@ import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -32,7 +31,7 @@ import {
     CalendarYearCellTemplateDirective,
     FirstDayOfWeek
 } from "@mirei/mona-ui/calendar";
-import { AttributeConfig, createElementControlId, PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import {
     CalendarService,
     DateDisabledType,
@@ -47,7 +46,8 @@ import {
     DropdownPopupInputToken,
     DropdownService
 } from "@mirei/mona-ui/dropdowns";
-import { ListSizeInputType } from "@mirei/mona-ui/list";
+import { type AttributeConfig, createElementControlId } from "@mirei/mona-ui/internal";
+import { ListSizeInputType } from "@mirei/mona-ui/internal/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import {
     TextBoxComponent,
@@ -71,7 +71,6 @@ import {
 @Component({
     selector: "mona-datetime-picker",
     templateUrl: "./datetime-picker.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         CalendarService,
         DropdownService,

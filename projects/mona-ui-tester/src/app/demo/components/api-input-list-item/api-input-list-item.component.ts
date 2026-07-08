@@ -1,9 +1,9 @@
 import { DatePipe, JsonPipe } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
+import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import { ColorPickerComponent } from "@mirei/mona-ui/color-picker";
-import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
 import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
 import { SwitchComponent } from "@mirei/mona-ui/switch";
 import { TextBoxComponent } from "@mirei/mona-ui/text-box";
@@ -21,9 +21,9 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
         FormsModule,
         TextBoxComponent,
         SwitchComponent,
-        DropDownItemTemplateDirective,
+        DropdownItemTemplateDirective,
         JsonPipe,
-        DropDownListValueTemplateDirective,
+        DropdownListValueTemplateDirective,
         DatePipe
     ],
     templateUrl: "./api-input-list-item.component.html",

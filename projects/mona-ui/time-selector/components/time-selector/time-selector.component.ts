@@ -17,7 +17,7 @@ import {
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { ButtonDirective, type ButtonVariantProps } from "@mirei/mona-ui/button";
-import { createElementControlId, PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import {
     generateHourSet,
     generateMinuteSet,
@@ -27,6 +27,7 @@ import {
     TimeLimiterPipe,
     TimeSelectorService
 } from "@mirei/mona-ui/date-input";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";

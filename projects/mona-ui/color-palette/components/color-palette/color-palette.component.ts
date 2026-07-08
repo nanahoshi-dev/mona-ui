@@ -1,6 +1,7 @@
 import { Component, computed, ElementRef, inject, input, model, output, signal, Signal } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import { ColorScheme, PaletteType } from "@mirei/mona-ui/common";
+import { PaletteType } from "@mirei/mona-ui/common";
+import type { ColorScheme } from "@mirei/mona-ui/internal";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { count } from "@mirei/ts-collections";
 import {

@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { ListService, NavigableOptions } from "@mirei/mona-ui/list";
+import { ListService, NavigableOptions } from "@mirei/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewNavigable]"

@@ -1,5 +1,5 @@
 import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@mirei/mona-ui/common";
+import { VariantInputs } from "@mirei/mona-ui/internal";
 import { ThemeStyle } from "@mirei/mona-ui/theme";
 import { buttonVariants as monaButtonVariants } from "./button.mona.styles";
 

@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { DisableOptions, NodeKeySelector, TreeService } from "@mirei/mona-ui/tree";
+import { DisableOptions, NodeKeySelector, TreeService } from "@mirei/mona-ui/internal/tree";
 
 @Directive({
     selector: "mona-tree-view[monaTreeViewDisable]",

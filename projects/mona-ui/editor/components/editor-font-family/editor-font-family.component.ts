@@ -1,12 +1,12 @@
 import { Component, computed, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
-import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
+import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import { EditorService } from "../../services/editor.service";
 
 @Component({
     selector: "mona-editor-font-family",
-    imports: [DropdownListComponent, FormsModule, DropDownItemTemplateDirective],
+    imports: [DropdownListComponent, FormsModule, DropdownItemTemplateDirective],
     templateUrl: "./editor-font-family.component.html",
     styleUrl: "./editor-font-family.component.scss"
 })

@@ -1,6 +1,12 @@
 import { DestroyRef, Directive, effect, inject, input, OnInit, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NodeItem, NodeKeySelector, NodeSelectEvent, TreeSelectableOptions, TreeService } from "@mirei/mona-ui/tree";
+import {
+    NodeItem,
+    NodeKeySelector,
+    NodeSelectEvent,
+    TreeSelectableOptions,
+    TreeService
+} from "@mirei/mona-ui/internal/tree";
 import { sequenceEqual } from "@mirei/ts-collections";
 import { pairwise } from "rxjs";
 

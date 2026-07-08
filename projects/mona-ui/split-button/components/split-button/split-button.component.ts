@@ -27,7 +27,7 @@ import {
     PopupMenuToken
 } from "@mirei/mona-ui/popup-menu";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SplitButtonMenuButtonTemplateDirective } from "../../directives/split-button-menu-button-template.directive";

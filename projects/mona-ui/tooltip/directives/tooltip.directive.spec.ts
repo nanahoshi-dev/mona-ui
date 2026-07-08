@@ -6,7 +6,7 @@ import { ConnectionPositionPair } from "@angular/cdk/overlay";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Observable, Subject } from "rxjs";
 import { Position } from "../../common/models/Position";
-import { PopupService } from "../../popup/public-api";
+import { PopupService } from "@mirei/mona-ui/popup";
 import { TooltipVariantProps } from "../styles/tooltip.styles";
 import { TooltipDirective } from "./tooltip.directive";
 

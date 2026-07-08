@@ -22,7 +22,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { AttributeConfig, createElementControlId, PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import { HourFormat } from "@mirei/mona-ui/date-input";
 import {
     DropdownPopupHandlerDirective,
@@ -30,7 +30,8 @@ import {
     dropdownPopupThemeVariants,
     DropdownService
 } from "@mirei/mona-ui/dropdowns";
-import { ListSizeInputType } from "@mirei/mona-ui/list";
+import { type AttributeConfig, createElementControlId } from "@mirei/mona-ui/internal";
+import { ListSizeInputType } from "@mirei/mona-ui/internal/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@mirei/mona-ui/text-box";
 import { ThemeService } from "@mirei/mona-ui/theme";

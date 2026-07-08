@@ -10,17 +10,17 @@ import {
     MultiSelectTagTemplateDirective
 } from "@mirei/mona-ui/multi-select";
 import {
-    DropDownFilterableDirective,
-    DropDownFooterTemplateDirective,
-    DropDownGroupableDirective,
-    DropDownHeaderTemplateDirective,
-    DropDownItemTemplateDirective,
-    DropDownNoDataTemplateDirective,
+    DropdownFilterableDirective,
+    DropdownFooterTemplateDirective,
+    DropdownGroupableDirective,
+    DropdownHeaderTemplateDirective,
+    DropdownItemTemplateDirective,
+    DropdownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
-    DropDownVirtualScrollDirective
+    DropdownVirtualScrollDirective
 } from "@mirei/mona-ui/dropdowns";
 import { FilterableOptions, VirtualScrollOptions } from "@mirei/mona-ui/common";
-import { GroupableOptions } from "@mirei/mona-ui/list";
+import { GroupableOptions } from "@mirei/mona-ui/internal/list";
 import type { PreventableEvent } from "@mirei/mona-ui/common";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -178,18 +178,18 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
 @Component({
     imports: [
         MultiSelectComponent,
-        DropDownVirtualScrollDirective,
-        DropDownFooterTemplateDirective,
-        DropDownHeaderTemplateDirective,
+        DropdownVirtualScrollDirective,
+        DropdownFooterTemplateDirective,
+        DropdownHeaderTemplateDirective,
         CurrencyPipe,
-        DropDownItemTemplateDirective,
-        DropDownNoDataTemplateDirective,
+        DropdownItemTemplateDirective,
+        DropdownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
-        DropDownFilterableDirective,
+        DropdownFilterableDirective,
         MultiSelectSummaryTagTemplateDirective,
         MultiSelectSummaryTagDirective,
         MultiSelectTagTemplateDirective,
-        DropDownGroupableDirective,
+        DropdownGroupableDirective,
         LucideBox,
         LucideSearch,
         FormField

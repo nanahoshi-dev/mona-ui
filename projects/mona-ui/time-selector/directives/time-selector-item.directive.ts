@@ -1,5 +1,5 @@
 import { computed, DestroyRef, Directive, effect, ElementRef, inject, input, signal } from "@angular/core";
-import { rxTimeout } from "@mirei/mona-ui/common";
+import { rxTimeout } from "@mirei/mona-ui/internal";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import {
     timeSelectorListItemThemeVariants,

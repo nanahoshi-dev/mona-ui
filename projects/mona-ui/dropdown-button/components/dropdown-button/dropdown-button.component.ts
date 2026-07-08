@@ -23,7 +23,7 @@ import { PopupMenuShortcutTemplateDirective } from "@mirei/mona-ui/popup-menu";
 import { PopupMenuTextTemplateDirective } from "@mirei/mona-ui/popup-menu";
 import { PopupMenuToken } from "@mirei/mona-ui/popup-menu";
 import { PopupMenuItemClickEvent } from "@mirei/mona-ui/popup-menu";
-import { createElementControlId } from "@mirei/mona-ui/common";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { ButtonDirective } from "@mirei/mona-ui/button";
 import { ButtonVariantProps } from "@mirei/mona-ui/button";
 import { DropdownButtonMenuGroupTemplateDirective } from "../../directives/dropdown-button-menu-group-template.directive";

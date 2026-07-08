@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, contentChildren, inject, input, model, TemplateRef } from "@angular/core";
 import { LucideMinus, LucidePlus } from "@lucide/angular";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
 import { ExpansionPanelIconTemplateDirective } from "../../directives/expansion-panel-icon-template.directive";

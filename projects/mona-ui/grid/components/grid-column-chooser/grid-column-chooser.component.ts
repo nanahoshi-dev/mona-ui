@@ -1,6 +1,6 @@
 import { Component, computed, DestroyRef, inject, linkedSignal, output, signal } from "@angular/core";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { FilterInputComponent } from "@mirei/mona-ui/filter-input";
+import { FilterInputComponent } from "@mirei/mona-ui/internal/filter-input";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,

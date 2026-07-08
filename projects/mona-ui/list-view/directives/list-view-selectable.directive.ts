@@ -1,6 +1,6 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ListKeySelector, ListService, SelectableOptions } from "@mirei/mona-ui/list";
+import { ListKeySelector, ListService, SelectableOptions } from "@mirei/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewSelectable]"

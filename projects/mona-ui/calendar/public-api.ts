@@ -15,6 +15,3 @@ export type {
     YearCellTemplateContext
 } from "./models/CalendarTemplateContext";
 export type { CalendarVariantProps, CalendarVariantInput } from "./styles/calendar.styles";
-
-
-export * from "./utils/compareDates"; // TODO: Move this to a more generic place.

@@ -1,4 +1,4 @@
-import { VariantInputs } from "@mirei/mona-ui/common";
+import { VariantInputs } from "@mirei/mona-ui/internal";
 import { ThemeStyle } from "@mirei/mona-ui/theme";
 import { tooltipArrowThemeVariants } from "@mirei/mona-ui/tooltip";
 import { VariantProps } from "class-variance-authority";

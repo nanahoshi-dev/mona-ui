@@ -9,8 +9,8 @@ import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
 import { SwitchComponent } from "@mirei/mona-ui/switch";
 import { TextBoxComponent } from "@mirei/mona-ui/text-box";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
-import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ComponentConfig, ComponentInputs, createComponentPropertyConfig } from "../../utils/componentConfig";
@@ -29,8 +29,8 @@ import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
         ButtonDirective,
         InputPropertyPipe,
         NgTemplateOutlet,
-        DropDownListValueTemplateDirective,
-        DropDownItemTemplateDirective,
+        DropdownListValueTemplateDirective,
+        DropdownItemTemplateDirective,
         ExpansionPanelComponent,
         ExpansionPanelTitleTemplateDirective,
         TabsComponent,

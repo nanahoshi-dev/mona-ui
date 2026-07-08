@@ -1,6 +1,6 @@
 import { signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { ListService } from "@mirei/mona-ui/list";
+import { ListService } from "@mirei/mona-ui/internal/list";
 import { DropdownDataInputToken } from "../models/DropdownDataInput";
 import { DropdownDataHandlerDirective } from "./dropdown-data-handler.directive";
 

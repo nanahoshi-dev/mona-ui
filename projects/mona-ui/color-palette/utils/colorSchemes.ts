@@ -1,4 +1,4 @@
-import { ColorScheme } from "@mirei/mona-ui/common";
+import { ColorScheme } from "@mirei/mona-ui/internal";
 
 export const flatColorScheme: ColorScheme = {
     name: "flat",

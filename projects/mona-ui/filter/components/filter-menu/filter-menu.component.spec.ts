@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { DropdownListComponent } from "@mirei/mona-ui/drop-down-list";
+import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
 import { TextBoxComponent } from "@mirei/mona-ui/text-box";
 import { FilterService } from "../../services/filter.service";
 

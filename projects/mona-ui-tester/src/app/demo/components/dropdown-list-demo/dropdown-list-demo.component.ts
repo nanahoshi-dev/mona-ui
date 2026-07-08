@@ -3,19 +3,19 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, model, sig
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideUtensils } from "@lucide/angular";
 import { FilterableOptions, PreventableEvent, VirtualScrollOptions } from "@mirei/mona-ui/common";
-import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
 import {
-    DropDownFilterableDirective,
-    DropDownFooterTemplateDirective,
-    DropDownGroupableDirective,
-    DropDownGroupHeaderTemplateDirective,
-    DropDownHeaderTemplateDirective,
-    DropDownItemTemplateDirective,
-    DropDownNoDataTemplateDirective,
+    DropdownFilterableDirective,
+    DropdownFooterTemplateDirective,
+    DropdownGroupableDirective,
+    DropdownGroupHeaderTemplateDirective,
+    DropdownHeaderTemplateDirective,
+    DropdownItemTemplateDirective,
+    DropdownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
-    DropDownVirtualScrollDirective
+    DropdownVirtualScrollDirective
 } from "@mirei/mona-ui/dropdowns";
-import { GroupableOptions } from "@mirei/mona-ui/list";
+import { GroupableOptions } from "@mirei/mona-ui/internal/list";
 import { range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -160,8 +160,8 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DropdownListComponent");
     protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
-        "DropDownFilterableDirective",
-        "DropDownGroupableDirective"
+        "DropdownFilterableDirective",
+        "DropdownGroupableDirective"
     ]);
     protected readonly DropdownListWrapperComponent = DropdownListWrapperComponent;
 }
@@ -169,16 +169,16 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
 @Component({
     imports: [
         DropdownListComponent,
-        DropDownFilterableDirective,
-        DropDownGroupableDirective,
-        DropDownHeaderTemplateDirective,
-        DropDownFooterTemplateDirective,
-        DropDownListValueTemplateDirective,
-        DropDownItemTemplateDirective,
-        DropDownGroupHeaderTemplateDirective,
-        DropDownVirtualScrollDirective,
+        DropdownFilterableDirective,
+        DropdownGroupableDirective,
+        DropdownHeaderTemplateDirective,
+        DropdownFooterTemplateDirective,
+        DropdownListValueTemplateDirective,
+        DropdownItemTemplateDirective,
+        DropdownGroupHeaderTemplateDirective,
+        DropdownVirtualScrollDirective,
         CurrencyPipe,
-        DropDownNoDataTemplateDirective,
+        DropdownNoDataTemplateDirective,
         DropdownPrefixTemplateDirective,
         FormField,
         LucideBox,

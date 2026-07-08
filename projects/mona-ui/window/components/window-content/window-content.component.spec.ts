@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ButtonDirective } from "../../../button/directives/button.directive";
-import { PopupDataInjectionToken } from "../../../popup/public-api";
+import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
 
 import { WindowContentComponent } from "./window-content.component";

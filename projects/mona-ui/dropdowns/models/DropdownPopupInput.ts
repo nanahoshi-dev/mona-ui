@@ -1,5 +1,5 @@
 import { InjectionToken, InputSignal, OutputEmitterRef } from "@angular/core";
-import { ListSizeInputType } from "@mirei/mona-ui/list";
+import { ListSizeInputType } from "@mirei/mona-ui/internal/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { PreventableEvent } from "@mirei/mona-ui/common";
 

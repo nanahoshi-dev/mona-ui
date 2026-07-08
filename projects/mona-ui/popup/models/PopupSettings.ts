@@ -5,7 +5,7 @@ import {
     FlexibleConnectedPositionStrategyOrigin
 } from "@angular/cdk/overlay";
 import { StaticProvider, TemplateRef } from "@angular/core";
-import { Action } from "@mirei/mona-ui/common";
+import { Action } from "@mirei/mona-ui/internal";
 import { ConnectionPoint } from "../utils/connectionPosition";
 import { PopupCloseEvent } from "./PopupCloseEvent";
 import { PopupOffset } from "./PopupOffset";

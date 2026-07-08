@@ -26,7 +26,7 @@ import {
     PopupMenuTextTemplateDirective,
     PopupMenuToken
 } from "@mirei/mona-ui/popup-menu";
-import { createElementControlId } from "@mirei/mona-ui/common";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { any } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
 import { ContextMenuGroupTemplateDirective } from "../../directives/context-menu-group-template.directive";

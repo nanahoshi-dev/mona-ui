@@ -14,7 +14,7 @@
             "@mirei/mona-ui/date-picker": ["../../projects/mona-ui/date-picker/public-api.ts"],
             "@mirei/mona-ui/datetime-picker": ["../../projects/mona-ui/datetime-picker/public-api.ts"],
             "@mirei/mona-ui/dialog": ["../../projects/mona-ui/dialog/public-api.ts"],
-            "@mirei/mona-ui/drop-down-list": ["../../projects/mona-ui/drop-down-list/public-api.ts"],
+            "@mirei/mona-ui/dropdown-list": ["../../projects/mona-ui/dropdown-list/public-api.ts"],
             "@mirei/mona-ui/dropdown-button": ["../../projects/mona-ui/dropdown-button/public-api.ts"],
             "@mirei/mona-ui/multi-select": ["../../projects/mona-ui/multi-select/public-api.ts"],
             "@mirei/mona-ui/split-button": ["../../projects/mona-ui/split-button/public-api.ts"],

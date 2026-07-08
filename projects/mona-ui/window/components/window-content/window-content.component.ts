@@ -18,7 +18,7 @@ import {
 } from "@angular/core";
 import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { createElementControlId, focusElement } from "@mirei/mona-ui/common";
+import { createElementControlId, focusElement } from "@mirei/mona-ui/internal";
 import { PopupCloseEvent, PopupCloseSource, PopupDataInjectionToken } from "@mirei/mona-ui/popup";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";

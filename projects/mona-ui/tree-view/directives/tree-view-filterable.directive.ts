@@ -1,8 +1,8 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FilterableOptions } from "@mirei/mona-ui/common";
-import { FilterChangeEvent } from "@mirei/mona-ui/filter-input";
-import { TreeService } from "@mirei/mona-ui/tree";
+import { FilterChangeEvent } from "@mirei/mona-ui/common";
+import { TreeService } from "@mirei/mona-ui/internal/tree";
 
 @Directive({
     selector: "mona-tree-view[monaTreeViewFilterable]",

@@ -1,4 +1,4 @@
-import type { VariantInputs } from "@mirei/mona-ui/common";
+import type { VariantInputs } from "@mirei/mona-ui/internal";
 import type { ThemeStyle } from "@mirei/mona-ui/theme";
 import type { VariantProps } from "class-variance-authority";
 import { circularProgressBarBaseVariants as monaCircularProgressBarBaseVariants } from "./circular-progress-bar.mona.styles";

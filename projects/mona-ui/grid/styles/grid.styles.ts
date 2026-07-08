@@ -1,6 +1,6 @@
 import { VariantProps } from "class-variance-authority";
 import { ThemeStyle } from "@mirei/mona-ui/theme";
-import { VariantInputs } from "@mirei/mona-ui/common";
+import { VariantInputs } from "@mirei/mona-ui/internal";
 import {
     gridBaseVariants as monaGridBaseVariants,
     gridCellBaseVariants as monaGridCellBaseVariants,

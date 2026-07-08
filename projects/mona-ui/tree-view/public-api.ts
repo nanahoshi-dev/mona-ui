@@ -12,4 +12,16 @@ export * from "./directives/tree-view-filterable.directive";
 export * from "./directives/tree-view-node-template.directive";
 export * from "./directives/tree-view-selectable.directive";
 
-export * from "@mirei/mona-ui/tree";
+export {
+    CheckableOptions,
+    DraggableOptions,
+    ExpandableOptions,
+    DisableOptions,
+    DropPositionChangeEvent,
+    ChildrenSelector,
+    NodeDropEvent,
+    NodeDragEvent,
+    NodeDragEndEvent,
+    NodeClickEvent,
+    NodeMoveSnapshot
+} from "@mirei/mona-ui/internal/tree";

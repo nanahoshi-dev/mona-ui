@@ -1,7 +1,6 @@
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
     afterRenderEffect,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -28,9 +27,10 @@ import {
     LucideEllipsis
 } from "@lucide/angular";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { NavigationKeys, SlicePipe } from "@mirei/mona-ui/common";
-import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
-import { DropDownVirtualScrollDirective } from "@mirei/mona-ui/dropdowns";
+import { SlicePipe } from "@mirei/mona-ui/common";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropdownVirtualScrollDirective } from "@mirei/mona-ui/dropdowns";
+import { NavigationKeys } from "@mirei/mona-ui/internal";
 import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { range } from "@mirei/ts-collections";
@@ -61,7 +61,6 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 @Component({
     selector: "mona-pager",
     templateUrl: "./pager.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         ButtonDirective,
         NumericTextBoxComponent,
@@ -69,9 +68,9 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         DropdownListComponent,
         PagerFocusableDirective,
         SlicePipe,
-        DropDownVirtualScrollDirective,
+        DropdownVirtualScrollDirective,
         NgTemplateOutlet,
-        DropDownListValueTemplateDirective,
+        DropdownListValueTemplateDirective,
         LucideEllipsis,
         LucideChevronsLeft,
         LucideChevronLeft,

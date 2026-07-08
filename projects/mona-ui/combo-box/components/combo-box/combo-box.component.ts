@@ -22,21 +22,22 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { createElementControlId, PreventableEvent, rxTimeout } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@mirei/mona-ui/common";
+import { createElementControlId, rxTimeout } from "@mirei/mona-ui/internal";
 import {
     DropdownDataHandlerDirective,
     DropdownDataInput,
     DropdownDataInputToken,
     DropdownFieldPredicateType,
     DropdownFieldSelectorType,
-    DropDownFooterTemplateDirective,
-    DropDownGroupHeaderTemplateDirective,
-    DropDownHeaderTemplateDirective,
-    DropDownItemTemplateDirective,
+    DropdownFooterTemplateDirective,
+    DropdownGroupHeaderTemplateDirective,
+    DropdownHeaderTemplateDirective,
+    DropdownItemTemplateDirective,
     DropdownListPopupHandlerDirective,
     DropdownListService,
     DropdownLiveRegionDirective,
-    DropDownNoDataTemplateDirective,
+    DropdownNoDataTemplateDirective,
     DropdownPopupInput,
     DropdownPopupInputToken,
     dropdownPopupThemeVariants,
@@ -44,8 +45,8 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@mirei/mona-ui/dropdowns";
-import { FilterChangeEvent } from "@mirei/mona-ui/filter-input";
-import { IndicatorIconComponent } from "@mirei/mona-ui/indicator-icon";
+import { FilterChangeEvent } from "@mirei/mona-ui/common";
+import { IndicatorIconComponent } from "@mirei/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
     ListFooterTemplateDirective,
@@ -58,7 +59,7 @@ import {
     ListSizeInputType,
     SelectableOptions,
     SelectionChangeEvent
-} from "@mirei/mona-ui/list";
+} from "@mirei/mona-ui/internal/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { TextBoxDirective } from "@mirei/mona-ui/text-box";
 import { ThemeService } from "@mirei/mona-ui/theme";
@@ -160,9 +161,9 @@ export class ComboBoxComponent<TData = unknown>
         () => this.ariaLabel() || (this.ariaLabelledBy() ? "" : this.placeholder())
     );
     protected readonly expanded = computed(() => this.#popupRef() !== null);
-    protected readonly footerTemplate = contentChild(DropDownFooterTemplateDirective, { read: TemplateRef });
-    protected readonly groupHeaderTemplate = contentChild(DropDownGroupHeaderTemplateDirective, { read: TemplateRef });
-    protected readonly headerTemplate = contentChild(DropDownHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly footerTemplate = contentChild(DropdownFooterTemplateDirective, { read: TemplateRef });
+    protected readonly groupHeaderTemplate = contentChild(DropdownGroupHeaderTemplateDirective, { read: TemplateRef });
+    protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly id = createElementControlId();
     protected readonly inputClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -172,7 +173,7 @@ export class ComboBoxComponent<TData = unknown>
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && this.value() == null)
     );
-    protected readonly itemTemplate = contentChild(DropDownItemTemplateDirective, { read: TemplateRef });
+    protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -182,7 +183,7 @@ export class ComboBoxComponent<TData = unknown>
         const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
         return twMerge(variantClass, userClass);
     });
-    protected readonly noDataTemplate = contentChild(DropDownNoDataTemplateDirective, { read: TemplateRef });
+    protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
     protected readonly popupTemplate = viewChild.required<TemplateRef<any>>("popupTemplate");
     protected readonly prefixTemplate = contentChild(DropdownPrefixTemplateDirective, { read: TemplateRef });
     protected readonly selectableOptions: SelectableOptions = {

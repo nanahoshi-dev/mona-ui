@@ -25,7 +25,7 @@ import { dropdownPopupAnimation } from "@mirei/mona-ui/popup";
 import { PopupRef } from "@mirei/mona-ui/popup";
 import { PopupService } from "@mirei/mona-ui/popup";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { ColorGradientComponent } from "@mirei/mona-ui/color-gradient";
 import { ColorPaletteComponent } from "@mirei/mona-ui/color-palette";
 import { PaletteType } from "@mirei/mona-ui/common";

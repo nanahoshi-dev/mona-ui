@@ -2,4 +2,4 @@
  * Public API Surface of mona-ui
  */
 
-export default {};
+export default void 0;

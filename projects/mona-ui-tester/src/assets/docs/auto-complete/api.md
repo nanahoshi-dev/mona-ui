@@ -36,6 +36,7 @@ protected readonly countryText = signal<string | null>(null);
 ```
 
 ```html
+
 <mona-auto-complete
     [data]="countries"
     textField="name"
@@ -50,17 +51,18 @@ protected readonly countryText = signal<string | null>(null);
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-auto-complete>...</mona-auto-complete>`. Unlike Dropdown List, there is no value-template directive — the value area is a plain text input, not a rendered data item.
 
-| Directive | Selector | Template context | Replaces |
-|---|---|---|---|
-| `DropDownItemTemplateDirective` | `ng-template[monaDropDownItemTemplate]` | `{ $implicit: TData }` (the option's data item) | Each option's default text rendering inside the popup |
-| `DropDownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }` | The default group header row, when grouping is enabled |
-| `DropDownHeaderTemplateDirective` | `ng-template[monaDropDownHeaderTemplate]` | None | No default — renders above the option list inside the popup |
-| `DropDownFooterTemplateDirective` | `ng-template[monaDropDownFooterTemplate]` | None | No default — renders below the option list inside the popup |
-| `DropDownNoDataTemplateDirective` | `ng-template[monaDropDownNoDataTemplate]` | None | The popup's default empty-state content |
-| `DropdownPrefixTemplateDirective` | `ng-template[monaDropdownPrefixTemplate]` | None | No default — projected content rendered before the input |
-| `DropdownSuffixTemplateDirective` | `ng-template[monaDropdownSuffixTemplate]` | None | No default — projected content rendered after the input, before the live region |
+| Directive                              | Selector                                       | Template context                                | Replaces                                                                        |
+|----------------------------------------|------------------------------------------------|-------------------------------------------------|---------------------------------------------------------------------------------|
+| `DropdownItemTemplateDirective`        | `ng-template[monaDropDownItemTemplate]`        | `{ $implicit: TData }` (the option's data item) | Each option's default text rendering inside the popup                           |
+| `DropdownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }`                          | The default group header row, when grouping is enabled                          |
+| `DropdownHeaderTemplateDirective`      | `ng-template[monaDropDownHeaderTemplate]`      | None                                            | No default — renders above the option list inside the popup                     |
+| `DropdownFooterTemplateDirective`      | `ng-template[monaDropDownFooterTemplate]`      | None                                            | No default — renders below the option list inside the popup                     |
+| `DropdownNoDataTemplateDirective`      | `ng-template[monaDropDownNoDataTemplate]`      | None                                            | The popup's default empty-state content                                         |
+| `DropdownPrefixTemplateDirective`      | `ng-template[monaDropdownPrefixTemplate]`      | None                                            | No default — projected content rendered before the input                        |
+| `DropdownSuffixTemplateDirective`      | `ng-template[monaDropdownSuffixTemplate]`      | None                                            | No default — projected content rendered after the input, before the live region |
 
 ```html
+
 <mona-auto-complete [data]="countries" textField="name">
     <ng-template monaDropDownItemTemplate let-dataItem>
         <span>{{ dataItem.name }}</span>
@@ -78,6 +80,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 `highlightFirst` (default `true`) highlights the first option whose text matches the typed text as the consumer types, so `Enter` can commit it immediately. Set it to `false` to require the consumer to navigate to an option explicitly before `Enter` commits it.
 
 ```html
+
 <mona-auto-complete [data]="countries" textField="name" [highlightFirst]="false"></mona-auto-complete>
 ```
 
@@ -86,6 +89,7 @@ Each structural directive below is an `ng-template` placed as projected content 
 `disabled` renders the control with reduced visual emphasis and removes pointer interaction. `readonly` prevents value changes while preserving the visual state. `loading` shows a loading indicator in place of the clear button and prevents interaction while an operation is in progress. `required` marks the field for form validation and affects the invalid state once the control is touched.
 
 ```html
+
 <mona-auto-complete
     [data]="countries"
     textField="name"
@@ -110,6 +114,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 ```
 
 ```html
+
 <mona-auto-complete [data]="countries" textField="name" [formField]="countryForm.text"></mona-auto-complete>
 ```
 
@@ -118,6 +123,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 `monaDropDownFilterable` narrows the popup's visible options to those matching the typed text. Without it, the popup shows the full `data` collection while still highlighting the best match — see [Matching without `monaDropDownFilterable`](#matching-without-monadropdownfilterable).
 
 ```html
+
 <mona-auto-complete
     [data]="countries"
     textField="name"
@@ -131,6 +137,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 `monaDropDownGroupable` groups options under a header row, driven by `groupBy`.
 
 ```html
+
 <mona-auto-complete [data]="countries" textField="name" monaDropDownGroupable groupBy="region"></mona-auto-complete>
 ```
 
@@ -139,6 +146,7 @@ protected readonly countryForm = form(this.countryModel, schema => {
 `monaDropDownVirtualScroll` renders only the options currently in view, for large collections. `height` on the options object is the fixed row height, in pixels, used to measure the viewport.
 
 ```html
+
 <mona-auto-complete
     [data]="countries"
     textField="name"
@@ -178,15 +186,15 @@ Blurring the input while the popup is closed commits the typed text as `value`, 
 
 ### Keyboard
 
-| Key | Action |
-|---|---|
-| `ArrowDown` / `ArrowUp` | Highlight the next or previous option. Never commits the value by itself. |
-| `Alt+ArrowDown` | Open the popup. |
-| `Alt+ArrowUp` | Close the popup. |
-| `Enter` | Commit the highlighted option's text (if any), or the currently typed text otherwise, and close the popup. |
-| `Escape` | Close the popup if it is open; otherwise clear the typed text. |
-| `Tab` | Close the popup. |
-| Any other character | Typed into the input as usual. When `monaDropDownFilterable` is applied, also narrows the popup's visible options — see [Matching without `monaDropDownFilterable`](#matching-without-monadropdownfilterable). |
+| Key                     | Action                                                                                                                                                                                                         |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ArrowDown` / `ArrowUp` | Highlight the next or previous option. Never commits the value by itself.                                                                                                                                      |
+| `Alt+ArrowDown`         | Open the popup.                                                                                                                                                                                                |
+| `Alt+ArrowUp`           | Close the popup.                                                                                                                                                                                               |
+| `Enter`                 | Commit the highlighted option's text (if any), or the currently typed text otherwise, and close the popup.                                                                                                     |
+| `Escape`                | Close the popup if it is open; otherwise clear the typed text.                                                                                                                                                 |
+| `Tab`                   | Close the popup.                                                                                                                                                                                               |
+| Any other character     | Typed into the input as usual. When `monaDropDownFilterable` is applied, also narrows the popup's visible options — see [Matching without `monaDropDownFilterable`](#matching-without-monadropdownfilterable). |
 
 ### Focus
 
@@ -194,24 +202,24 @@ The host element itself is not a Tab stop (`tabindex="-1"`); the inner `<input>`
 
 ### ARIA
 
-| Element | Attribute | When present | Value |
-|---|---|---|---|
-| Host element | `aria-disabled` | `disabled` is `true` | `"true"` |
-| Host element | `aria-haspopup` | Always | `"listbox"` |
-| Host element | `aria-invalid` | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value | `"true"` |
-| Host element | `aria-readonly` | `readonly` is `true` | `"true"` |
-| Host element | `aria-required` | `required` is `true` | `"true"` |
-| Input | `role` | Always | `"combobox"` |
-| Input | `aria-autocomplete` | Always | `"list"` |
-| Input | `aria-haspopup` | Always | `"listbox"` |
-| Input | `aria-controls` | Always | The popup listbox's element id |
-| Input | `aria-expanded` | Always | Reflects the popup's open state |
-| Input | `aria-busy` | Always | Reflects the `loading` input |
-| Input | `aria-activedescendant` | While an option is highlighted | The highlighted option's element id |
-| Input | `aria-invalid` | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value | `"true"` |
-| Input | `aria-label` | The `ariaLabel` input is set, or as a fallback to `placeholder` when `ariaLabelledBy` is unset | The `ariaLabel` value, or the `placeholder` value |
-| Input | `aria-labelledby` | The `ariaLabelledBy` input is set | The `ariaLabelledBy` value |
-| Input | `aria-describedby` | The `ariaDescribedBy` input is set | The `ariaDescribedBy` value |
+| Element      | Attribute               | When present                                                                                   | Value                                             |
+|--------------|-------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| Host element | `aria-disabled`         | `disabled` is `true`                                                                           | `"true"`                                          |
+| Host element | `aria-haspopup`         | Always                                                                                         | `"listbox"`                                       |
+| Host element | `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value        | `"true"`                                          |
+| Host element | `aria-readonly`         | `readonly` is `true`                                                                           | `"true"`                                          |
+| Host element | `aria-required`         | `required` is `true`                                                                           | `"true"`                                          |
+| Input        | `role`                  | Always                                                                                         | `"combobox"`                                      |
+| Input        | `aria-autocomplete`     | Always                                                                                         | `"list"`                                          |
+| Input        | `aria-haspopup`         | Always                                                                                         | `"listbox"`                                       |
+| Input        | `aria-controls`         | Always                                                                                         | The popup listbox's element id                    |
+| Input        | `aria-expanded`         | Always                                                                                         | Reflects the popup's open state                   |
+| Input        | `aria-busy`             | Always                                                                                         | Reflects the `loading` input                      |
+| Input        | `aria-activedescendant` | While an option is highlighted                                                                 | The highlighted option's element id               |
+| Input        | `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value        | `"true"`                                          |
+| Input        | `aria-label`            | The `ariaLabel` input is set, or as a fallback to `placeholder` when `ariaLabelledBy` is unset | The `ariaLabel` value, or the `placeholder` value |
+| Input        | `aria-labelledby`       | The `ariaLabelledBy` input is set                                                              | The `ariaLabelledBy` value                        |
+| Input        | `aria-describedby`      | The `ariaDescribedBy` input is set                                                             | The `ariaDescribedBy` value                       |
 
 Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the input's purpose. Provide `ariaDescribedBy` to associate error messages or help text with the input.
 
@@ -229,88 +237,88 @@ The control also renders a visually hidden live region that announces the highli
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `ariaDescribedBy` | `string` | `""` | ID of an element that provides an extended description for the input. Use this to associate error messages or help text with the input. |
-| `ariaLabel` | `string` | `""` | Accessible name for the input. Falls back to `placeholder` when neither this nor `ariaLabelledBy` is set. |
-| `ariaLabelledBy` | `string` | `""` | ID of an external element that provides the accessible name for the input. |
-| `data` | `Iterable<TData>` | `[]` | Collection of items to render. |
-| `disabled` | `boolean` | `false` | Two-way bindable. Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `highlightFirst` | `boolean` | `true` | Whether the first matching item is highlighted while typing — see [Highlight the first match while typing](#highlight-the-first-match-while-typing). |
-| `invalid` | `boolean` | `false` | Marks the autocomplete as invalid. Set automatically by `[formField]`. |
-| `itemDisabled` | `DropdownFieldPredicateType<TData>` | `undefined` | Predicate or field name used to determine whether an individual item is disabled. |
-| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. |
-| `placeholder` | `string` | `""` | Placeholder text shown when no value is selected or entered. |
-| `popupClass` | `string` | `""` | Additional CSS classes applied to the popup element. |
-| `popupHeight` | `ListSizeInputType` | `null` | Height of the popup element. |
-| `popupWidth` | `ListSizeInputType` | `null` | Width of the popup element. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. |
-| `required` | `boolean` | `false` | Marks the field as required for form validation. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"` | Border-radius preset applied to the component. |
-| `showClearButton` | `boolean` | `true` | Displays a button that clears the current value when clicked. |
-| `size` | `"small" \| "medium" \| "large"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `DropdownFieldSelectorType<TData>` | `null` | Property name or accessor used to derive the display text from a data item. Uses the item itself when omitted. |
-| `touched` | `boolean` | `false` | Sets the touched state of the autocomplete. Set automatically by `[formField]`. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `value` | `string \| null` | `null` | Two-way bindable, and compatible with Signal Forms via `[formField]`. Current autocomplete value — see [`value` is always the typed text, not a data item](#value-is-always-the-typed-text-not-a-data-item). |
-| `valueField` | `DropdownFieldSelectorType<TData>` | `null` | Property name or accessor forwarded to internal list state. See [`valueField`'s effect is unclear](#valuefields-effect-is-unclear). |
+| Name              | Type                                                 | Default     | Description                                                                                                                                                                                                  |
+|-------------------|------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ariaDescribedBy` | `string`                                             | `""`        | ID of an element that provides an extended description for the input. Use this to associate error messages or help text with the input.                                                                      |
+| `ariaLabel`       | `string`                                             | `""`        | Accessible name for the input. Falls back to `placeholder` when neither this nor `ariaLabelledBy` is set.                                                                                                    |
+| `ariaLabelledBy`  | `string`                                             | `""`        | ID of an external element that provides the accessible name for the input.                                                                                                                                   |
+| `data`            | `Iterable<TData>`                                    | `[]`        | Collection of items to render.                                                                                                                                                                               |
+| `disabled`        | `boolean`                                            | `false`     | Two-way bindable. Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                                        |
+| `highlightFirst`  | `boolean`                                            | `true`      | Whether the first matching item is highlighted while typing — see [Highlight the first match while typing](#highlight-the-first-match-while-typing).                                                         |
+| `invalid`         | `boolean`                                            | `false`     | Marks the autocomplete as invalid. Set automatically by `[formField]`.                                                                                                                                       |
+| `itemDisabled`    | `DropdownFieldPredicateType<TData>`                  | `undefined` | Predicate or field name used to determine whether an individual item is disabled.                                                                                                                            |
+| `loading`         | `boolean`                                            | `false`     | Displays a loading indicator and prevents interaction while an operation is in progress.                                                                                                                     |
+| `placeholder`     | `string`                                             | `""`        | Placeholder text shown when no value is selected or entered.                                                                                                                                                 |
+| `popupClass`      | `string`                                             | `""`        | Additional CSS classes applied to the popup element.                                                                                                                                                         |
+| `popupHeight`     | `ListSizeInputType`                                  | `null`      | Height of the popup element.                                                                                                                                                                                 |
+| `popupWidth`      | `ListSizeInputType`                                  | `null`      | Width of the popup element.                                                                                                                                                                                  |
+| `readonly`        | `boolean`                                            | `false`     | Prevents value changes while preserving the component's visual state.                                                                                                                                        |
+| `required`        | `boolean`                                            | `false`     | Marks the field as required for form validation.                                                                                                                                                             |
+| `rounded`         | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"`  | Border-radius preset applied to the component.                                                                                                                                                               |
+| `showClearButton` | `boolean`                                            | `true`      | Displays a button that clears the current value when clicked.                                                                                                                                                |
+| `size`            | `"small" \| "medium" \| "large"`                     | `"medium"`  | Size preset controlling the component's dimensions.                                                                                                                                                          |
+| `textField`       | `DropdownFieldSelectorType<TData>`                   | `null`      | Property name or accessor used to derive the display text from a data item. Uses the item itself when omitted.                                                                                               |
+| `touched`         | `boolean`                                            | `false`     | Sets the touched state of the autocomplete. Set automatically by `[formField]`.                                                                                                                              |
+| `class`           | `string`                                             | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                    |
+| `value`           | `string \| null`                                     | `null`      | Two-way bindable, and compatible with Signal Forms via `[formField]`. Current autocomplete value — see [`value` is always the typed text, not a data item](#value-is-always-the-typed-text-not-a-data-item). |
+| `valueField`      | `DropdownFieldSelectorType<TData>`                   | `null`      | Property name or accessor forwarded to internal list state. See [`valueField`'s effect is unclear](#valuefields-effect-is-unclear).                                                                          |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `close` | `PopupCloseEvent` | Emits when the popup is about to close. Cancelable. |
-| `closed` | `void` | Emits after the popup is closed. |
-| `open` | `PreventableEvent` | Emits when the popup is about to open. Cancelable. |
-| `opened` | `void` | Emits after the popup is opened. |
-| `touch` | `void` | Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input. Used by `[formField]` to mark the field as touched. |
+| Name     | Type               | Description                                                                                                                                         |
+|----------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `close`  | `PopupCloseEvent`  | Emits when the popup is about to close. Cancelable.                                                                                                 |
+| `closed` | `void`             | Emits after the popup is closed.                                                                                                                    |
+| `open`   | `PreventableEvent` | Emits when the popup is about to open. Cancelable.                                                                                                  |
+| `opened` | `void`             | Emits after the popup is opened.                                                                                                                    |
+| `touch`  | `void`             | Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input. Used by `[formField]` to mark the field as touched. |
 
 ---
 
-### `DropDownFilterableDirective<TData>`
+### `DropdownFilterableDirective<TData>`
 
 **Selector:** `mona-auto-complete[monaDropDownFilterable]`
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `filter` | `string` | `""` | Current filter text used to narrow the visible options. |
-| `filterPlaceholder` | `string` | `""` | No effect on Auto Complete — the popup's own filter row is disabled for this component, since the main input already serves as the filter box. |
-| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
+| Name                     | Type                               | Default | Description                                                                                                                                                                                                           |
+|--------------------------|------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `filter`                 | `string`                           | `""`    | Current filter text used to narrow the visible options.                                                                                                                                                               |
+| `filterPlaceholder`      | `string`                           | `""`    | No effect on Auto Complete — the popup's own filter row is disabled for this component, since the main input already serves as the filter box.                                                                        |
+| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""`    | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name           | Type                | Description                                        |
+|----------------|---------------------|----------------------------------------------------|
 | `filterChange` | `FilterChangeEvent` | Emitted when the filter value changes. Cancelable. |
 
 ---
 
-### `DropDownGroupableDirective<TData>`
+### `DropdownGroupableDirective<TData>`
 
 **Selector:** `mona-auto-complete[monaDropDownGroupable]`
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `groupBy` | `string \| ((item: TData) => R) \| null \| undefined` | `""` | Property name, or accessor, used to derive an option's group. |
-| `monaDropDownGroupable` | `GroupableOptions<TData, R> \| ""` | `""` | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
+| Name                    | Type                                                  | Default | Description                                                                                                                                                                    |
+|-------------------------|-------------------------------------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `groupBy`               | `string \| ((item: TData) => R) \| null \| undefined` | `""`    | Property name, or accessor, used to derive an option's group.                                                                                                                  |
+| `monaDropDownGroupable` | `GroupableOptions<TData, R> \| ""`                    | `""`    | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
 
 No outputs.
 
 ---
 
-### `DropDownVirtualScrollDirective<TData>`
+### `DropdownVirtualScrollDirective<TData>`
 
 **Selector:** `mona-auto-complete[monaDropDownVirtualScroll]`
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""` | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
+| Name                        | Type                                  | Default | Description                                                                                                                                                                                                |
+|-----------------------------|---------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""`    | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
 
 No outputs.
 
@@ -320,28 +328,28 @@ No outputs.
 
 #### `FilterableOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `caseSensitive` | `boolean` | Whether text matching is case-sensitive. |
-| `debounce` | `number` | Milliseconds to wait after the last keystroke before applying the filter. |
-| `enabled` | `boolean` | Whether filtering is active. |
-| `operator` | `"contains" \| "endsWith" \| "startsWith" \| ((value: string, filter: string) => boolean)` | Match strategy used to test an option's text against the filter text. |
+| Field           | Type                                                                                       | Description                                                               |
+|-----------------|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `caseSensitive` | `boolean`                                                                                  | Whether text matching is case-sensitive.                                  |
+| `debounce`      | `number`                                                                                   | Milliseconds to wait after the last keystroke before applying the filter. |
+| `enabled`       | `boolean`                                                                                  | Whether filtering is active.                                              |
+| `operator`      | `"contains" \| "endsWith" \| "startsWith" \| ((value: string, filter: string) => boolean)` | Match strategy used to test an option's text against the filter text.     |
 
 #### `GroupableOptions<T = unknown, R = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean \| undefined` | Whether grouping is active. |
-| `headerOrder` | `"asc" \| "desc" \| undefined` | Sort direction applied to group headers by their key. |
-| `orderBy` | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group. |
-| `orderByDirection` | `"asc" \| "desc" \| undefined` | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
+| Field              | Type                                      | Description                                                             |
+|--------------------|-------------------------------------------|-------------------------------------------------------------------------|
+| `enabled`          | `boolean \| undefined`                    | Whether grouping is active.                                             |
+| `headerOrder`      | `"asc" \| "desc" \| undefined`            | Sort direction applied to group headers by their key.                   |
+| `orderBy`          | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group.         |
+| `orderByDirection` | `"asc" \| "desc" \| undefined`            | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
 
 #### `VirtualScrollOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether virtual scrolling is active. |
-| `height` | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
+| Field     | Type                  | Description                                                               |
+|-----------|-----------------------|---------------------------------------------------------------------------|
+| `enabled` | `boolean`             | Whether virtual scrolling is active.                                      |
+| `height`  | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
 
 `PopupCloseEvent`, `PreventableEvent`, and `FilterChangeEvent` are also exported from `@mirei/mona-ui`.
 

@@ -25,7 +25,7 @@ import {
     ListKeySelector,
     ListNoDataTemplateDirective,
     ListService
-} from "@mirei/mona-ui/list";
+} from "@mirei/mona-ui/internal/list";
 import { PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@mirei/mona-ui/pager";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { ImmutableSet } from "@mirei/ts-collections";

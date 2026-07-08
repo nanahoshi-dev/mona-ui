@@ -16,7 +16,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { IndicatorIconComponent } from "@mirei/mona-ui/indicator-icon";
+import { IndicatorIconComponent } from "@mirei/mona-ui/internal/indicator-icon";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";

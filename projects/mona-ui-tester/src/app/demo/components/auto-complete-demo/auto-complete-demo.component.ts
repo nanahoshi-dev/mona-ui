@@ -6,18 +6,18 @@ import { AutoCompleteComponent } from "@mirei/mona-ui/auto-complete";
 import type { PreventableEvent } from "@mirei/mona-ui/common";
 import { FilterableOptions, VirtualScrollOptions } from "@mirei/mona-ui/common";
 import {
-    DropDownFilterableDirective,
-    DropDownFooterTemplateDirective,
-    DropDownGroupableDirective,
-    DropDownGroupHeaderTemplateDirective,
-    DropDownHeaderTemplateDirective,
-    DropDownItemTemplateDirective,
-    DropDownNoDataTemplateDirective,
+    DropdownFilterableDirective,
+    DropdownFooterTemplateDirective,
+    DropdownGroupableDirective,
+    DropdownGroupHeaderTemplateDirective,
+    DropdownHeaderTemplateDirective,
+    DropdownItemTemplateDirective,
+    DropdownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropdownSuffixTemplateDirective,
-    DropDownVirtualScrollDirective
+    DropdownVirtualScrollDirective
 } from "@mirei/mona-ui/dropdowns";
-import type { GroupableOptions } from "@mirei/mona-ui/list";
+import type { GroupableOptions } from "@mirei/mona-ui/internal/list";
 import { range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -157,16 +157,16 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
 @Component({
     imports: [
         AutoCompleteComponent,
-        DropDownGroupableDirective,
-        DropDownGroupHeaderTemplateDirective,
-        DropDownVirtualScrollDirective,
-        DropDownFilterableDirective,
+        DropdownGroupableDirective,
+        DropdownGroupHeaderTemplateDirective,
+        DropdownVirtualScrollDirective,
+        DropdownFilterableDirective,
         DropdownPrefixTemplateDirective,
         DropdownSuffixTemplateDirective,
-        DropDownFooterTemplateDirective,
-        DropDownItemTemplateDirective,
-        DropDownNoDataTemplateDirective,
-        DropDownHeaderTemplateDirective,
+        DropdownFooterTemplateDirective,
+        DropdownItemTemplateDirective,
+        DropdownNoDataTemplateDirective,
+        DropdownHeaderTemplateDirective,
         CurrencyPipe,
         FormField,
         LucideBox,

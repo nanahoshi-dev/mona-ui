@@ -28,7 +28,7 @@ import {
 } from "@lucide/angular";
 import { ButtonDirective } from "@mirei/mona-ui/button";
 import { ContainsPipe, SelectionMode } from "@mirei/mona-ui/common";
-import { ListKeySelector, ListService, SelectableOptions } from "@mirei/mona-ui/list";
+import { ListKeySelector, ListService, SelectableOptions } from "@mirei/mona-ui/internal/list";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,

@@ -2,8 +2,8 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
-import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import {
     type PageChangeEvent,
     PagerComponent,
@@ -161,8 +161,8 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
         ButtonDirective,
         PagerPageSizeTemplateDirective,
         DropdownListComponent,
-        DropDownListValueTemplateDirective,
-        DropDownItemTemplateDirective
+        DropdownListValueTemplateDirective,
+        DropdownItemTemplateDirective
     ],
     template: `
         @let featureData = features();

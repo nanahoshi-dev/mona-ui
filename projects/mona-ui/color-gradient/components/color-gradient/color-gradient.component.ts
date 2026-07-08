@@ -24,16 +24,25 @@ import { LucideCopy } from "@lucide/angular";
 import { ButtonDirective } from "@mirei/mona-ui/button";
 import {
     Channel,
-    ColorMode,
-    ColorOutputFormat,
+    hex2rgba,
     HSLA,
+    hsla2hsva,
     HSV,
     HSVA,
+    hsva2rgba,
     HSVChannel,
+    isValidHex,
+    isValidHsla,
+    isValidRgb,
     RGB,
     RGBA,
-    RGBChannel
-} from "@mirei/mona-ui/common";
+    rgba2hex,
+    rgba2hsla,
+    rgba2hsva,
+    RGBChannel,
+    string2Hsla,
+    string2rgba
+} from "@mirei/mona-ui/internal";
 import { DropdownButtonComponent, DropdownButtonItemComponent } from "@mirei/mona-ui/dropdown-button";
 import { NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective } from "@mirei/mona-ui/numeric-text-box";
 import { SliderComponent } from "@mirei/mona-ui/slider";
@@ -43,19 +52,7 @@ import {
     TextBoxSuffixTemplateDirective
 } from "@mirei/mona-ui/text-box";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import {
-    hex2rgba,
-    hsla2hsva,
-    hsva2rgba,
-    isValidHex,
-    isValidHsla,
-    isValidRgb,
-    rgba2hex,
-    rgba2hsla,
-    rgba2hsva,
-    string2Hsla,
-    string2rgba
-} from "@mirei/mona-ui/common";
+import { type ColorMode, type ColorOutputFormat } from "@mirei/mona-ui/common";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ColorInput } from "../../models/ColorInput";
 import {

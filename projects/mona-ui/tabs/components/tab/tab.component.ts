@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, contentChild, input, model, TemplateRef } from "@angular/core";
-import { createElementControlId } from "@mirei/mona-ui/common";
-import { v4 } from "uuid";
+import { createElementControlId } from "@mirei/mona-ui/internal";
 import { TabContentTemplateDirective } from "../../directives/tab-content-template.directive";
 import { TabTitleTemplateDirective } from "../../directives/tab-title-template.directive";
 import { TabItem } from "../../models/TabItem";

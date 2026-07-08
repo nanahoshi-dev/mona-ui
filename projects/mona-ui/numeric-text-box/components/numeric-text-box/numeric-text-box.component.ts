@@ -21,7 +21,7 @@ import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { LucideChevronDown, LucideChevronUp } from "@lucide/angular";
 import { ButtonDirective } from "@mirei/mona-ui/button";
-import { Action, rxTimeout } from "@mirei/mona-ui/common";
+import { Action, rxTimeout } from "@mirei/mona-ui/internal";
 import { ThemeService } from "@mirei/mona-ui/theme";
 import {
     concatMap,
