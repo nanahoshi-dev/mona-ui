@@ -29,7 +29,7 @@ import {
 } from "@lucide/angular";
 import { ButtonDirective } from "@mirei/mona-ui/button";
 import { NavigationKeys, SlicePipe } from "@mirei/mona-ui/common";
-import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/drop-down-list";
+import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
 import { DropDownVirtualScrollDirective } from "@mirei/mona-ui/dropdowns";
 import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
 import { ThemeService } from "@mirei/mona-ui/theme";

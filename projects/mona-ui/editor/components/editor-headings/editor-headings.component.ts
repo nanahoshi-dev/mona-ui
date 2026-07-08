@@ -1,6 +1,7 @@
 import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropDownItemTemplateDirective, DropdownListComponent } from "@mirei/mona-ui/drop-down-list";
+import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
+import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
 

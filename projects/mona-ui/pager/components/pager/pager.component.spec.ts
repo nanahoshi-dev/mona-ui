@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { DropdownListComponent } from "../../../src/lib/dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
+import { DropdownListComponent } from "../../../dropdown-list/components/dropdown-list/dropdown-list.component";
 import { NumericTextBoxComponent } from "../../../numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";

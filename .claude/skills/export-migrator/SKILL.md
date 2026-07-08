@@ -435,11 +435,11 @@ Example (`projects/mona-ui/src/lib/drop-down-list.public-api.ts`):
 
 ```ts
 /*
- * Public API Surface of @mirei/mona-ui/drop-down-list
+ * Public API Surface of @mirei/mona-ui/dropdown-list
  */
 
-export * from "./dropdowns/drop-down-list/components/dropdown-list/dropdown-list.component";
-export * from "./dropdowns/drop-down-list/directives/drop-down-list-value-template.directive";
+export * from "./dropdowns/dropdown-list/components/dropdown-list/dropdown-list.component";
+export * from "./dropdowns/dropdown-list/directives/dropdown-list-value-template.directive";
 
 export * from "./dropdowns/directives/drop-down-item-template.directive";
 export * from "./dropdowns/directives/drop-down-header-template.directive";

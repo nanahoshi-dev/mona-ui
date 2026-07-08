@@ -10,14 +10,11 @@ import {
     DropDownGroupHeaderTemplateDirective,
     DropDownHeaderTemplateDirective,
     DropDownItemTemplateDirective,
-    DropdownListComponent,
-    DropDownListValueTemplateDirective,
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropDownVirtualScrollDirective
-} from "mona-ui/drop-down-list";
+} from "mona-ui/dropdowns";
 import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
-import type { PreventableEvent } from "mona-ui/utils";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

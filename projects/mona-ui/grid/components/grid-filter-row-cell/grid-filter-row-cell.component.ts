@@ -19,7 +19,7 @@ import { debounceTime, Subject } from "rxjs";
 import { ButtonDirective } from "@mirei/mona-ui/button";
 import { PopupMenuCheckboxItemComponent, PopupMenuComponent } from "@mirei/mona-ui/popup-menu";
 import { DatePickerComponent } from "@mirei/mona-ui/date-picker";
-import { DropdownListComponent } from "@mirei/mona-ui/drop-down-list";
+import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
 import { FilterService, type FilterMenuDataItem, type FilterMenuValue } from "@mirei/mona-ui/filter";
 import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
 import { TextBoxComponent } from "@mirei/mona-ui/text-box";

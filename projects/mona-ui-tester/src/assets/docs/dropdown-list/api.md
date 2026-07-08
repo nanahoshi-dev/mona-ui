@@ -57,15 +57,15 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-dropdown-list>...</mona-dropdown-list>`.
 
-| Directive | Selector | Template context | Replaces |
-|---|---|---|---|
-| `DropDownItemTemplateDirective` | `ng-template[monaDropDownItemTemplate]` | `{ $implicit: TData }` (the option's data item) | Each option's default text rendering inside the popup |
-| `DropDownListValueTemplateDirective` | `ng-template[monaDropDownListValueTemplate]` | `{ $implicit: TData \| null }` (the selected data item, or `null`) | The default selected-value text rendered in the host element |
-| `DropDownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }` | The default group header row, when grouping is enabled |
-| `DropDownHeaderTemplateDirective` | `ng-template[monaDropDownHeaderTemplate]` | None | No default — renders above the option list inside the popup |
-| `DropDownFooterTemplateDirective` | `ng-template[monaDropDownFooterTemplate]` | None | No default — renders below the option list inside the popup |
-| `DropDownNoDataTemplateDirective` | `ng-template[monaDropDownNoDataTemplate]` | None | The popup's default empty-state content |
-| `DropdownPrefixTemplateDirective` | `ng-template[monaDropdownPrefixTemplate]` | None | No default — projected content rendered before the value area on the host element |
+| Directive                              | Selector                                       | Template context                                                   | Replaces                                                                          |
+|----------------------------------------|------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| `DropDownItemTemplateDirective`        | `ng-template[monaDropDownItemTemplate]`        | `{ $implicit: TData }` (the option's data item)                    | Each option's default text rendering inside the popup                             |
+| `DropDownListValueTemplateDirective`   | `ng-template[monaDropDownListValueTemplate]`   | `{ $implicit: TData \| null }` (the selected data item, or `null`) | The default selected-value text rendered in the host element                      |
+| `DropDownGroupHeaderTemplateDirective` | `ng-template[monaDropDownGroupHeaderTemplate]` | `{ $implicit: group }`                                             | The default group header row, when grouping is enabled                            |
+| `DropDownHeaderTemplateDirective`      | `ng-template[monaDropDownHeaderTemplate]`      | None                                                               | No default — renders above the option list inside the popup                       |
+| `DropDownFooterTemplateDirective`      | `ng-template[monaDropDownFooterTemplate]`      | None                                                               | No default — renders below the option list inside the popup                       |
+| `DropDownNoDataTemplateDirective`      | `ng-template[monaDropDownNoDataTemplate]`      | None                                                               | The popup's default empty-state content                                           |
+| `DropdownPrefixTemplateDirective`      | `ng-template[monaDropdownPrefixTemplate]`      | None                                                               | No default — projected content rendered before the value area on the host element |
 
 ```html
 <mona-dropdown-list [data]="countries" textField="name" valueField="id">
@@ -217,17 +217,17 @@ These three directives are independent — applying more than one to the same `m
 
 ### Keyboard
 
-| Key | Action |
-|---|---|
+| Key                     | Action                                                                                                                                                                                                                                            |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ArrowDown` / `ArrowUp` | Navigate to the next or previous option. Commits the value immediately when the popup is closed; only highlights the option when the popup is open — see [Staged navigation while the popup is open](#staged-navigation-while-the-popup-is-open). |
-| `Alt+ArrowDown` | Open the popup. |
-| `Alt+ArrowUp` | Close the popup. |
-| `Home` | Move to the first option. |
-| `End` | Move to the last option. |
-| `Enter` | Open the popup when closed. When open, commits the highlighted option and closes the popup. |
-| `Space` | Toggle the popup open or closed. |
-| `Escape` / `Tab` | Close the popup without committing a highlighted-but-uncommitted option. |
-| Character keys | Typeahead: cycles through options whose text matches the typed characters. |
+| `Alt+ArrowDown`         | Open the popup.                                                                                                                                                                                                                                   |
+| `Alt+ArrowUp`           | Close the popup.                                                                                                                                                                                                                                  |
+| `Home`                  | Move to the first option.                                                                                                                                                                                                                         |
+| `End`                   | Move to the last option.                                                                                                                                                                                                                          |
+| `Enter`                 | Open the popup when closed. When open, commits the highlighted option and closes the popup.                                                                                                                                                       |
+| `Space`                 | Toggle the popup open or closed.                                                                                                                                                                                                                  |
+| `Escape` / `Tab`        | Close the popup without committing a highlighted-but-uncommitted option.                                                                                                                                                                          |
+| Character keys          | Typeahead: cycles through options whose text matches the typed characters.                                                                                                                                                                        |
 
 ### Focus
 
@@ -235,20 +235,20 @@ The host element is the only Tab stop; DOM focus does not move into the popup's 
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"combobox"` |
-| `aria-haspopup` | Always | `"listbox"` |
-| `aria-expanded` | Always | Reflects the popup's open state |
-| `aria-activedescendant` | While an option is highlighted | The highlighted option's element id |
-| `aria-controls` | Always | The popup listbox's element id |
-| `aria-label` | The `ariaLabel` input is set, or as a fallback to `placeholder` when `ariaLabelledBy` is unset | The `ariaLabel` value, or the `placeholder` value |
-| `aria-labelledby` | The `ariaLabelledBy` input is set | The `ariaLabelledBy` value |
-| `aria-disabled` | `disabled` is `true` | `"true"` |
-| `aria-readonly` | `readonly` is `true` | `"true"` |
-| `aria-required` | `required` is `true` | `"true"` |
-| `aria-invalid` | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value selected | `"true"` |
-| `aria-busy` | `loading` is `true` | `"true"` |
+| Attribute               | When present                                                                                     | Value                                             |
+|-------------------------|--------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| `role`                  | Always                                                                                           | `"combobox"`                                      |
+| `aria-haspopup`         | Always                                                                                           | `"listbox"`                                       |
+| `aria-expanded`         | Always                                                                                           | Reflects the popup's open state                   |
+| `aria-activedescendant` | While an option is highlighted                                                                   | The highlighted option's element id               |
+| `aria-controls`         | Always                                                                                           | The popup listbox's element id                    |
+| `aria-label`            | The `ariaLabel` input is set, or as a fallback to `placeholder` when `ariaLabelledBy` is unset   | The `ariaLabel` value, or the `placeholder` value |
+| `aria-labelledby`       | The `ariaLabelledBy` input is set                                                                | The `ariaLabelledBy` value                        |
+| `aria-disabled`         | `disabled` is `true`                                                                             | `"true"`                                          |
+| `aria-readonly`         | `readonly` is `true`                                                                             | `"true"`                                          |
+| `aria-required`         | `required` is `true`                                                                             | `"true"`                                          |
+| `aria-invalid`          | `invalid` is `true`, or `required` is `true` and the control is `touched` with no value selected | `"true"`                                          |
+| `aria-busy`             | `loading` is `true`                                                                              | `"true"`                                          |
 
 Provide `ariaLabel` or `ariaLabelledBy` when `placeholder` does not already identify the control's purpose — `placeholder` only supplies a fallback accessible name, and disappears once a value is selected.
 
@@ -266,39 +266,39 @@ The control also renders a visually hidden live region that announces the highli
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `ariaLabel` | `string` | `""` | Accessible name for the host element. Falls back to `placeholder` when empty. |
-| `ariaLabelledBy` | `string` | `""` | ID of an external element that provides the accessible name for the host element. |
-| `data` | `Iterable<TData>` | `[]` | Collection of items to render. |
-| `disabled` | `boolean` | `false` | Two-way bindable. Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `invalid` | `boolean` | `false` | Marks the field as invalid. Set automatically by `[formField]`. |
-| `itemDisabled` | `DropdownFieldPredicateType<TData>` | `undefined` | Predicate or field name used to determine whether an individual item is disabled. |
-| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. |
-| `placeholder` | `string` | `""` | Placeholder text shown when no value is selected. |
-| `popupClass` | `string` | `""` | Additional CSS classes applied to the popup element. |
-| `popupHeight` | `ListSizeInputType` | `null` | Height of the popup element. |
-| `popupWidth` | `ListSizeInputType` | `null` | Width of the popup element. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the component's visual state. |
-| `required` | `boolean` | `false` | Marks the field as required for form validation. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"` | Border-radius preset applied to the component. |
-| `showClearButton` | `boolean` | `false` | Shows a clear button that resets the selected value when clicked. |
-| `size` | `"small" \| "medium" \| "large"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `DropdownFieldSelectorType<TData>` | `undefined` | Property name or accessor used to derive the display text from a data item. Uses the item itself when omitted. |
-| `touched` | `boolean` | `false` | Marks the control as touched. Set automatically by `[formField]`. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `value` | `TData \| null` | `null` | Two-way bindable, and compatible with Signal Forms via `[formField]`. Currently selected value; holds the primitive field value instead of the full data item when `valueField` is set. |
-| `valueField` | `DropdownFieldSelectorType<TData>` | `undefined` | Property name or accessor used to derive the value from a data item. Uses the item itself when omitted. |
+| Name              | Type                                                 | Default     | Description                                                                                                                                                                             |
+|-------------------|------------------------------------------------------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ariaLabel`       | `string`                                             | `""`        | Accessible name for the host element. Falls back to `placeholder` when empty.                                                                                                           |
+| `ariaLabelledBy`  | `string`                                             | `""`        | ID of an external element that provides the accessible name for the host element.                                                                                                       |
+| `data`            | `Iterable<TData>`                                    | `[]`        | Collection of items to render.                                                                                                                                                          |
+| `disabled`        | `boolean`                                            | `false`     | Two-way bindable. Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                   |
+| `invalid`         | `boolean`                                            | `false`     | Marks the field as invalid. Set automatically by `[formField]`.                                                                                                                         |
+| `itemDisabled`    | `DropdownFieldPredicateType<TData>`                  | `undefined` | Predicate or field name used to determine whether an individual item is disabled.                                                                                                       |
+| `loading`         | `boolean`                                            | `false`     | Displays a loading indicator and prevents interaction while an operation is in progress.                                                                                                |
+| `placeholder`     | `string`                                             | `""`        | Placeholder text shown when no value is selected.                                                                                                                                       |
+| `popupClass`      | `string`                                             | `""`        | Additional CSS classes applied to the popup element.                                                                                                                                    |
+| `popupHeight`     | `ListSizeInputType`                                  | `null`      | Height of the popup element.                                                                                                                                                            |
+| `popupWidth`      | `ListSizeInputType`                                  | `null`      | Width of the popup element.                                                                                                                                                             |
+| `readonly`        | `boolean`                                            | `false`     | Prevents value changes while preserving the component's visual state.                                                                                                                   |
+| `required`        | `boolean`                                            | `false`     | Marks the field as required for form validation.                                                                                                                                        |
+| `rounded`         | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"`  | Border-radius preset applied to the component.                                                                                                                                          |
+| `showClearButton` | `boolean`                                            | `false`     | Shows a clear button that resets the selected value when clicked.                                                                                                                       |
+| `size`            | `"small" \| "medium" \| "large"`                     | `"medium"`  | Size preset controlling the component's dimensions.                                                                                                                                     |
+| `textField`       | `DropdownFieldSelectorType<TData>`                   | `undefined` | Property name or accessor used to derive the display text from a data item. Uses the item itself when omitted.                                                                          |
+| `touched`         | `boolean`                                            | `false`     | Marks the control as touched. Set automatically by `[formField]`.                                                                                                                       |
+| `class`           | `string`                                             | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                               |
+| `value`           | `TData \| null`                                      | `null`      | Two-way bindable, and compatible with Signal Forms via `[formField]`. Currently selected value; holds the primitive field value instead of the full data item when `valueField` is set. |
+| `valueField`      | `DropdownFieldSelectorType<TData>`                   | `undefined` | Property name or accessor used to derive the value from a data item. Uses the item itself when omitted.                                                                                 |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `close` | `PopupCloseEvent` | Emitted when the popup is about to close. Cancelable. |
-| `closed` | `void` | Emitted after the popup closes. |
-| `open` | `PreventableEvent` | Emitted when the popup is about to open. Cancelable. |
-| `opened` | `void` | Emitted after the popup opens. |
-| `touch` | `void` | Emitted when the control is interacted with via blur, selection, or clear. Used by `[formField]` to mark the field as touched. |
+| Name     | Type               | Description                                                                                                                    |
+|----------|--------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `close`  | `PopupCloseEvent`  | Emitted when the popup is about to close. Cancelable.                                                                          |
+| `closed` | `void`             | Emitted after the popup closes.                                                                                                |
+| `open`   | `PreventableEvent` | Emitted when the popup is about to open. Cancelable.                                                                           |
+| `opened` | `void`             | Emitted after the popup opens.                                                                                                 |
+| `touch`  | `void`             | Emitted when the control is interacted with via blur, selection, or clear. Used by `[formField]` to mark the field as touched. |
 
 ---
 
@@ -308,16 +308,16 @@ The control also renders a visually hidden live region that announces the highli
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `filter` | `string` | `""` | Current filter text used to narrow the visible options. |
-| `filterPlaceholder` | `string` | `""` | Placeholder text shown in the popup's filter input. |
-| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""` | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
+| Name                     | Type                               | Default | Description                                                                                                                                                                                                           |
+|--------------------------|------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `filter`                 | `string`                           | `""`    | Current filter text used to narrow the visible options.                                                                                                                                                               |
+| `filterPlaceholder`      | `string`                           | `""`    | Placeholder text shown in the popup's filter input.                                                                                                                                                                   |
+| `monaDropDownFilterable` | `Partial<FilterableOptions> \| ""` | `""`    | Filter operator, case sensitivity, and debounce delay. An empty string enables filtering with default settings (`operator: "contains"`, `caseSensitive: false`, `debounce: 0`); pass an object to override any field. |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name           | Type                | Description                                        |
+|----------------|---------------------|----------------------------------------------------|
 | `filterChange` | `FilterChangeEvent` | Emitted when the filter value changes. Cancelable. |
 
 ---
@@ -328,10 +328,10 @@ The control also renders a visually hidden live region that announces the highli
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `groupBy` | `string \| ((item: TData) => R) \| null \| undefined` | `""` | Property name, or accessor, used to derive an option's group. |
-| `monaDropDownGroupable` | `GroupableOptions<TData, R> \| ""` | `""` | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
+| Name                    | Type                                                  | Default | Description                                                                                                                                                                    |
+|-------------------------|-------------------------------------------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `groupBy`               | `string \| ((item: TData) => R) \| null \| undefined` | `""`    | Property name, or accessor, used to derive an option's group.                                                                                                                  |
+| `monaDropDownGroupable` | `GroupableOptions<TData, R> \| ""`                    | `""`    | Group header order, and optional per-group item ordering. An empty string enables grouping with default settings (`headerOrder: "asc"`); pass an object to override any field. |
 
 No outputs.
 
@@ -343,9 +343,9 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""` | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
+| Name                        | Type                                  | Default | Description                                                                                                                                                                                                |
+|-----------------------------|---------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaDropDownVirtualScroll` | `Partial<VirtualScrollOptions> \| ""` | `""`    | Whether virtual scrolling is enabled and the pixel height of a single option row. An empty string enables virtual scrolling with default settings (`height: 28`); pass an object to override either field. |
 
 No outputs.
 
@@ -355,28 +355,28 @@ No outputs.
 
 #### `FilterableOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `caseSensitive` | `boolean` | Whether text matching is case-sensitive. |
-| `debounce` | `number` | Milliseconds to wait after the last keystroke before applying the filter. |
-| `enabled` | `boolean` | Whether filtering is active. |
-| `operator` | `"contains" \| "endsWith" \| "startsWith" \| ((value: string, filter: string) => boolean)` | Match strategy used to test an option's text against the filter text. |
+| Field           | Type                                                                                       | Description                                                               |
+|-----------------|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| `caseSensitive` | `boolean`                                                                                  | Whether text matching is case-sensitive.                                  |
+| `debounce`      | `number`                                                                                   | Milliseconds to wait after the last keystroke before applying the filter. |
+| `enabled`       | `boolean`                                                                                  | Whether filtering is active.                                              |
+| `operator`      | `"contains" \| "endsWith" \| "startsWith" \| ((value: string, filter: string) => boolean)` | Match strategy used to test an option's text against the filter text.     |
 
 #### `GroupableOptions<T = unknown, R = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean \| undefined` | Whether grouping is active. |
-| `headerOrder` | `"asc" \| "desc" \| undefined` | Sort direction applied to group headers by their key. |
-| `orderBy` | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group. |
-| `orderByDirection` | `"asc" \| "desc" \| undefined` | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
+| Field              | Type                                      | Description                                                             |
+|--------------------|-------------------------------------------|-------------------------------------------------------------------------|
+| `enabled`          | `boolean \| undefined`                    | Whether grouping is active.                                             |
+| `headerOrder`      | `"asc" \| "desc" \| undefined`            | Sort direction applied to group headers by their key.                   |
+| `orderBy`          | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group.         |
+| `orderByDirection` | `"asc" \| "desc" \| undefined`            | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
 
 #### `VirtualScrollOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether virtual scrolling is active. |
-| `height` | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
+| Field     | Type                  | Description                                                               |
+|-----------|-----------------------|---------------------------------------------------------------------------|
+| `enabled` | `boolean`             | Whether virtual scrolling is active.                                      |
+| `height`  | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
 
 `PopupCloseEvent`, `PreventableEvent`, and `FilterChangeEvent` are also exported from `@mirei/mona-ui`.
 
@@ -387,7 +387,7 @@ No outputs.
 <!-- verification-checklist
 - [x] DropdownListComponent inputs/outputs/defaults verified against dropdown-list.component.ts source and cross-checked against component-metadata.json's DropdownListComponent entry (all 25 members matched: ariaLabel, ariaLabelledBy, data, disabled(model), invalid, itemDisabled, loading, placeholder, popupClass, popupHeight, popupWidth, readonly, required, rounded, showClearButton, size, textField, touched, userClass(class), value(model), valueField, close, closed, open, opened, touch)
 - [x] Three behavior directives (Filterable, Groupable, VirtualScroll) inputs/outputs and default option objects verified against drop-down-filterable.directive.ts, drop-down-groupable.directive.ts, drop-down-virtual-scroll.directive.ts
-- [x] Seven structural template directives and their selectors verified against dropdowns/directives/*-template.directive.ts and dropdowns/drop-down-list/directives/drop-down-list-value-template.directive.ts; template contexts verified against dropdown-list.component.html's ngTemplateOutletContext bindings
+- [x] Seven structural template directives and their selectors verified against dropdowns/directives/*-template.directive.ts and dropdowns/dropdown-list/directives/dropdown-list-value-template.directive.ts; template contexts verified against dropdown-list.component.html's ngTemplateOutletContext bindings
 - [x] Keyboard map (ArrowDown/ArrowUp/Alt+ArrowDown/Alt+ArrowUp/Home/End/Enter/Space/Escape/Tab/typeahead) verified against dropdown-list-popup-handler.directive.ts (handleKeyDown/handleArrowKeys) and dropdown-list.component.ts (setKeydownSubscription/handleEnterKey/handleHomeEndKeys)
 - [x] Staged-vs-committed value behavior verified against dropdown-list.component.ts's #navigatedValue linkedSignal, setArrowKeyNavigationSubscription, and setPopupCloseSubscriptions
 - [x] Single Tab-stop focus behavior verified against dropdown-list-popup-handler.directive.ts's keydown listener bound to the host element (not to popup items) plus list-item.directive.ts's rovingTabIndex (roving -1 on all items since the combobox never delegates DOM focus into the popup)

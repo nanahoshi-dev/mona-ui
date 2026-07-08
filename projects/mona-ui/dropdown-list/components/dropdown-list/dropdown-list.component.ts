@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -21,39 +20,44 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { Subject } from "rxjs";
-import { twMerge } from "tailwind-merge";
-import { ListComponent } from "@mirei/mona-ui/list";
-import { ListFooterTemplateDirective } from "@mirei/mona-ui/list";
-import { ListGroupHeaderTemplateDirective } from "@mirei/mona-ui/list";
-import { ListHeaderTemplateDirective } from "@mirei/mona-ui/list";
-import { ListItemTemplateDirective } from "@mirei/mona-ui/list";
-import { ListNoDataTemplateDirective } from "@mirei/mona-ui/list";
-import { ListSizeInputType } from "@mirei/mona-ui/list";
-import { SelectableOptions } from "@mirei/mona-ui/list";
-import { SelectionChangeEvent } from "@mirei/mona-ui/list";
-import { ListService } from "@mirei/mona-ui/list";
-import { dropdownPopupThemeVariants } from "../../../styles/dropdown-popup.styles";
-import { isTypeaheadKey, setupTypeahead } from "@mirei/mona-ui/common";
+import { createElementControlId, isTypeaheadKey, PreventableEvent, setupTypeahead } from "@mirei/mona-ui/common";
+import {
+    DropdownDataHandlerDirective,
+    DropdownDataInput,
+    DropdownDataInputToken,
+    DropdownFieldPredicateType,
+    DropdownFieldSelectorType,
+    DropDownFooterTemplateDirective,
+    DropDownGroupHeaderTemplateDirective,
+    DropDownHeaderTemplateDirective,
+    DropDownItemTemplateDirective,
+    DropdownListPopupHandlerDirective,
+    DropdownListService,
+    DropdownLiveRegionDirective,
+    DropDownNoDataTemplateDirective,
+    DropdownPopupInput,
+    DropdownPopupInputToken,
+    dropdownPopupThemeVariants,
+    DropdownPrefixTemplateDirective,
+    DropdownService
+} from "@mirei/mona-ui/dropdowns";
+import { IndicatorIconComponent } from "@mirei/mona-ui/indicator-icon";
+import {
+    ListComponent,
+    ListFooterTemplateDirective,
+    ListGroupHeaderTemplateDirective,
+    ListHeaderTemplateDirective,
+    ListItemTemplateDirective,
+    ListNoDataTemplateDirective,
+    ListService,
+    ListSizeInputType,
+    SelectableOptions,
+    SelectionChangeEvent
+} from "@mirei/mona-ui/list";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
-import { PreventableEvent } from "@mirei/mona-ui/common";
-import { DropDownFooterTemplateDirective } from "../../../directives/drop-down-footer-template.directive";
-import { DropDownGroupHeaderTemplateDirective } from "../../../directives/drop-down-group-header-template.directive";
-import { DropDownHeaderTemplateDirective } from "../../../directives/drop-down-header-template.directive";
-import { DropDownItemTemplateDirective } from "../../../directives/drop-down-item-template.directive";
-import { DropDownNoDataTemplateDirective } from "../../../directives/drop-down-no-data-template.directive";
-import { DropdownDataHandlerDirective } from "../../../directives/dropdown-data-handler.directive";
-import { DropdownLiveRegionDirective } from "../../../directives/dropdown-live-region.directive";
-import { DropdownListPopupHandlerDirective } from "../../../directives/dropdown-list-popup-handler.directive";
-import { DropdownPrefixTemplateDirective } from "../../../directives/dropdown-prefix-template.directive";
-import { DropdownDataInput, DropdownDataInputToken } from "../../../models/DropdownDataInput";
-import { DropdownFieldPredicateType, DropdownFieldSelectorType } from "../../../models/DropdownFieldTypes";
-import { DropdownPopupInput, DropdownPopupInputToken } from "../../../models/DropdownPopupInput";
-import { IndicatorIconComponent } from "@mirei/mona-ui/indicator-icon";
-import { DropdownService } from "../../../services/dropdown.service";
-import { DropdownListService } from "../../../services/dropdown-list.service";
+import { Subject } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { DropDownListValueTemplateDirective } from "../../directives/drop-down-list-value-template.directive";
 import {
     dropdownListAffixContainerThemeVariants,
@@ -66,7 +70,6 @@ import {
 @Component({
     selector: "mona-dropdown-list",
     templateUrl: "./dropdown-list.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     hostDirectives: [DropdownDataHandlerDirective, DropdownListPopupHandlerDirective],
     providers: [
         ListService,

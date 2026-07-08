@@ -4,7 +4,7 @@ import { ButtonDirective } from "@mirei/mona-ui/button";
 import { ButtonGroupComponent } from "@mirei/mona-ui/button-group";
 import { DataType } from "@mirei/mona-ui/common";
 import { DatePickerComponent } from "@mirei/mona-ui/date-picker";
-import { DropdownListComponent } from "@mirei/mona-ui/drop-down-list";
+import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
 import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
 import {
     BooleanFilterOperators,
