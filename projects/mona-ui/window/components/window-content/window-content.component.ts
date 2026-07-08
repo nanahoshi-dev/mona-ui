@@ -3,7 +3,6 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     ApplicationRef,
-    ChangeDetectionStrategy,
     Component,
     ComponentRef,
     computed,
@@ -18,12 +17,10 @@ import {
     ViewContainerRef
 } from "@angular/core";
 import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX } from "@lucide/angular";
-import { ButtonDirective } from "../../../../buttons/button/directives/button.directive";
-import { PopupCloseEvent, PopupCloseSource } from "@mirei/mona-ui/popup";
-import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { createElementControlId, focusElement } from "@mirei/mona-ui/common";
+import { PopupCloseEvent, PopupCloseSource, PopupDataInjectionToken } from "@mirei/mona-ui/popup";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/common";
-import { focusElement } from "@mirei/mona-ui/common";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
@@ -42,7 +39,6 @@ import {
 @Component({
     selector: "mona-window-content",
     templateUrl: "./window-content.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         WindowDragHandlerDirective,
         NgTemplateOutlet,

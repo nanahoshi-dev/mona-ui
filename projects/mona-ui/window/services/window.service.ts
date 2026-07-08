@@ -1,7 +1,6 @@
 import { afterNextRender, DOCUMENT, forwardRef, inject, Injectable, Injector } from "@angular/core";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { PopupService } from "@mirei/mona-ui/popup";
 import { setWindowStyles } from "@mirei/mona-ui/common";
+import { PopupCloseEvent, PopupService } from "@mirei/mona-ui/popup";
 import { WindowContentComponent } from "../components/window-content/window-content.component";
 import { WindowInjectorData } from "../models/WindowInjectorData";
 import { WindowRef } from "../models/WindowRef";

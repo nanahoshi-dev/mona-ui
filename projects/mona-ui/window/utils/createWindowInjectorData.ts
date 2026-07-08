@@ -1,7 +1,9 @@
 import { WindowInjectorData } from "../models/WindowInjectorData";
 import { WindowSettings } from "../models/WindowSettings";
 
-export const createWindowInjectorData = (settings: Partial<WindowSettings>): Omit<WindowInjectorData, "windowReference"> => {
+export const createWindowInjectorData = (
+    settings: Partial<WindowSettings>
+): Omit<WindowInjectorData, "windowReference"> => {
     return {
         actionTemplate: settings.actionTemplate,
         closable: settings.closable ?? true,

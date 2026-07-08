@@ -1,6 +1,5 @@
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     contentChild,
     DestroyRef,
@@ -14,8 +13,8 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { take } from "rxjs";
 import { PopupCloseEvent } from "@mirei/mona-ui/popup";
+import { take } from "rxjs";
 import { WindowActionTemplateDirective } from "../../directives/window-action-template.directive";
 import { WindowContentTemplateDirective } from "../../directives/window-content-template.directive";
 import { WindowFooterTemplateDirective } from "../../directives/window-footer-template.directive";
@@ -27,7 +26,6 @@ import { WindowVariantInput, WindowVariantProps } from "../../styles/window.styl
 @Component({
     selector: "mona-window",
     template: ``,
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         class: "hidden"
     }
