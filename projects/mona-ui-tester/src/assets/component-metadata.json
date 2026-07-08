@@ -1091,30 +1091,6 @@
       }
     ]
   },
-  "BreadcrumbItemDirective": {
-    "name": "BreadcrumbItemDirective",
-    "selector": "\"button[monaBreadcrumbItem]\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Renders this item with reduced visual emphasis and removes pointer interaction.",
-        "kind": "input"
-      },
-      {
-        "name": "listDisabled",
-        "type": "boolean",
-        "description": "Reflects whether the parent breadcrumb is disabled. Controls compound disabled styling when only individual items are disabled.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "Additional CSS classes merged onto the breadcrumb item via `tailwind-merge`.",
-        "kind": "input"
-      }
-    ]
-  },
   "PagerComponent": {
     "name": "PagerComponent",
     "selector": "\"mona-pager\"",
@@ -4064,48 +4040,6 @@
         "type": "string",
         "description": "Two-way bindable current value of the text box.",
         "kind": "model"
-      }
-    ]
-  },
-  "BreadcrumbComponent": {
-    "name": "BreadcrumbComponent",
-    "selector": "\"mona-breadcrumb\"",
-    "inputs": [
-      {
-        "name": "ariaLabel",
-        "type": "string",
-        "description": "Accessible name for the breadcrumb navigation landmark.\r\nOverride when multiple breadcrumb components appear on the same page.",
-        "kind": "input"
-      },
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.",
-        "kind": "input"
-      },
-      {
-        "name": "userClass",
-        "type": "string",
-        "description": "Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.",
-        "kind": "input"
-      }
-    ]
-  },
-  "BreadcrumbItemComponent": {
-    "name": "BreadcrumbItemComponent",
-    "selector": "\"mona-breadcrumb-item\"",
-    "inputs": [
-      {
-        "name": "disabled",
-        "type": "boolean",
-        "description": "Renders this item with reduced visual emphasis and removes pointer interaction.\r\nHas no visual effect when the parent breadcrumb is also disabled.",
-        "kind": "input"
-      },
-      {
-        "name": "itemClick",
-        "type": "void",
-        "description": "Emitted when the item is clicked or activated via keyboard.\r\nNot emitted when this is the last (current-page) item or when the item is disabled.",
-        "kind": "output"
       }
     ]
   },

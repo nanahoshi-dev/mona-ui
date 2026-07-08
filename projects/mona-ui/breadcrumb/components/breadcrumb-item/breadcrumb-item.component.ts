@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, output, TemplateRef, viewChild } from "@angular/core";
+import { Component, input, output, TemplateRef, viewChild } from "@angular/core";
 
 @Component({
     selector: "mona-breadcrumb-item",
-    templateUrl: "./breadcrumb-item.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./breadcrumb-item.component.html"
 })
 export class BreadcrumbItemComponent {
     /**
