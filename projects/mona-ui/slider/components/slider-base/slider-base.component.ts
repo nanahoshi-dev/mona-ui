@@ -13,15 +13,15 @@ import {
     TemplateRef,
     viewChildren
 } from "@angular/core";
-import { twMerge } from "tailwind-merge";
-import { Orientation } from "../../../../models/Orientation";
+import { Orientation } from "@mirei/mona-ui/common";
 import { ThemeService } from "@mirei/mona-ui/theme";
-import { SliderLabelPosition } from "../../../models/SliderLabelPosition";
-import { SliderTick } from "../../../models/SliderTick";
+import { twMerge } from "tailwind-merge";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
 import { LabelStyleArgs } from "../../models/LabelStyleArgs";
+import { SliderLabelPosition } from "../../models/SliderLabelPosition";
+import { SliderTick } from "../../models/SliderTick";
 import { TickStyleArgs } from "../../models/TickStyleArgs";
 import {
     sliderBaseThemeVariants,

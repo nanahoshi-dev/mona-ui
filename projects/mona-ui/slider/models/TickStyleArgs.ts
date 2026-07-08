@@ -1,4 +1,4 @@
-import { Orientation } from "../../../models/Orientation";
+import { Orientation } from "@mirei/mona-ui/common";
 
 export interface TickStyleArgs {
     largeTickStep: number | null;

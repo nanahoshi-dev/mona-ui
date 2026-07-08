@@ -1,16 +1,16 @@
-import { VariantProps } from "class-variance-authority";
+import { VariantInputs } from "@mirei/mona-ui/common";
 import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantProps } from "class-variance-authority";
 import {
     sliderBaseVariants as monaSliderBaseVariants,
-    sliderTrackVariants as monaSliderTrackVariants,
+    sliderHandleVariants as monaSliderHandleVariants,
     sliderSelectionVariants as monaSliderSelectionVariants,
-    sliderTickListVariants as monaSliderTickListVariants,
-    sliderTickVariants as monaSliderTickVariants,
     sliderTickLabelListVariants as monaSliderTickLabelListVariants,
     sliderTickLabelVariants as monaSliderTickLabelVariants,
-    sliderHandleVariants as monaSliderHandleVariants
+    sliderTickListVariants as monaSliderTickListVariants,
+    sliderTickVariants as monaSliderTickVariants,
+    sliderTrackVariants as monaSliderTrackVariants
 } from "./slider.mona.styles";
-import { VariantInputs } from "@mirei/mona-ui/common";
 
 export const sliderBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

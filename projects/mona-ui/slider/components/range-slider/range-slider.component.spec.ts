@@ -170,7 +170,17 @@ describe("RangeSliderComponent", () => {
 
             const host = getRangeSliderElement(fixture);
             host.getBoundingClientRect = () =>
-                ({ left: 0, top: 0, width: 100, height: 20, right: 100, bottom: 20, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect;
+                ({
+                    left: 0,
+                    top: 0,
+                    width: 100,
+                    height: 20,
+                    right: 100,
+                    bottom: 20,
+                    x: 0,
+                    y: 0,
+                    toJSON: () => ({})
+                }) as DOMRect;
 
             host.dispatchEvent(new MouseEvent("click", { clientX: 90, clientY: 10, bubbles: true }));
             await waitForStable(fixture);

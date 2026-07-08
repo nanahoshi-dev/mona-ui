@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { SliderTick } from "../../models/SliderTick";
+import { SliderTick } from "../models/SliderTick";
 import { TickStyleArgs } from "../models/TickStyleArgs";
 import { valueToPosition } from "../utils/valueToPosition";
 

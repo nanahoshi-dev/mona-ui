@@ -1,7 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, input, model, Signal, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { type FormValueControl, required } from "@angular/forms/signals";
+import { type FormValueControl } from "@angular/forms/signals";
 import { filter, fromEvent, switchMap, takeUntil, tap } from "rxjs";
 import { SliderTickDirective } from "../../directives/slider-tick.directive";
 import { LabelStylePipe } from "../../pipes/label-style.pipe";

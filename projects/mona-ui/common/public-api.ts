@@ -3,12 +3,13 @@ export type { ScrollDirection } from "./models/ScrollDirection";
 
 export * from "./directives/attribute-binder.directive";
 
+export * from "./models/AttributeConfig";
 export * from "./models/ColorMode";
 export * from "./models/ColorScheme";
 export * from "./models/ColorSpaces";
-export * from "./models/AttributeConfig";
 export * from "./models/DataType";
 export * from "./models/FilterableOptions";
+export * from "./models/Orientation";
 export * from "./models/PaletteType";
 export * from "./models/VirtualScrollOptions";
 
