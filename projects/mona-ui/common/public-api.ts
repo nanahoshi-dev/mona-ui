@@ -11,10 +11,13 @@ export * from "./models/DataType";
 export * from "./models/FilterableOptions";
 export * from "./models/Orientation";
 export * from "./models/PaletteType";
+export * from "./models/Position";
 export * from "./models/VirtualScrollOptions";
 
 export { AnyPipe } from "./pipes/any.pipe";
+export { ContainsPipe } from "./pipes/contains.pipe";
 export { SlicePipe } from "./pipes/slice.pipe";
+export { TakeFirstPipe } from "./pipes/take-first.pipe";
 
 export { PreventableEvent } from "./utils/PreventableEvent";
 export { isValidHex, isValidHsla, isValidRgb } from "./utils/colorRegexes";

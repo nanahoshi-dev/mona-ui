@@ -2,4 +2,7 @@
  * Public API Surface of @mirei/mona-ui/numeric-text-box
  */
 
-export * from "../src/lib/numeric-text-box.public-api";
+export * from "./components/numeric-text-box/numeric-text-box.component";
+export * from "./directives/numeric-text-box-prefix-template.directive";
+
+export type { NumericTextboxVariantProps } from "./styles/numeric-textbox.styles";

@@ -18,5 +18,6 @@ export * from "../src/lib/dropdowns/directives/dropdown-prefix-template.directiv
 export * from "../src/lib/dropdowns/directives/dropdown-suffix-template.directive";
 
 export * from "../src/lib/dropdowns/services/dropdown.service";
+export * from "../src/lib/dropdowns/services/dropdown-list.service";
 
 export * from "../src/lib/dropdowns/styles/dropdown-popup.styles";
