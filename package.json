@@ -84,10 +84,6 @@
             "types": "./dist/mona-ui/types/mirei-mona-ui-drop-down-list.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-drop-down-list.mjs"
         },
-        "./drop-down-tree": {
-            "types": "./dist/mona-ui/types/mirei-mona-ui-drop-down-tree.d.ts",
-            "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-drop-down-tree.mjs"
-        },
         "./dropdown-button": {
             "types": "./dist/mona-ui/types/mirei-mona-ui-dropdown-button.d.ts",
             "default": "./dist/mona-ui/fesm2022/mirei-mona-ui-dropdown-button.mjs"

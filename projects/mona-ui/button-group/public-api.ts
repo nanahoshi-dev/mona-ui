@@ -2,4 +2,5 @@
  * Public API Surface of @mirei/mona-ui/button-group
  */
 
-export * from "../src/lib/button-group.public-api";
+export { ButtonGroupComponent } from "./components/button-group/button-group.component";
+export type { ButtonGroupVariantProps } from "./styles/button-group.styles";

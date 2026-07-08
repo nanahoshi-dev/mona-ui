@@ -15,7 +15,6 @@
             "mona-ui/datetime-picker": ["../../projects/mona-ui/datetime-picker/public-api.ts"],
             "mona-ui/dialog": ["../../projects/mona-ui/dialog/public-api.ts"],
             "mona-ui/drop-down-list": ["../../projects/mona-ui/drop-down-list/public-api.ts"],
-            "mona-ui/drop-down-tree": ["../../projects/mona-ui/drop-down-tree/public-api.ts"],
             "mona-ui/dropdown-button": ["../../projects/mona-ui/dropdown-button/public-api.ts"],
             "mona-ui/multi-select": ["../../projects/mona-ui/multi-select/public-api.ts"],
             "mona-ui/split-button": ["../../projects/mona-ui/split-button/public-api.ts"],

@@ -2,4 +2,6 @@
  * Public API Surface of @mirei/mona-ui/chip
  */
 
-export * from "../src/lib/chip.public-api";
+export { ChipComponent } from "./component/chip.component";
+export { ChipPrefixTemplateDirective } from "./directives/chip-prefix-template.directive";
+export type { ChipVariantProps } from "./styles/chip.styles";

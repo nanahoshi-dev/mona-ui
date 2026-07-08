@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideAnimations } from "@angular/platform-browser/animations";
-import { PopupDataInjectionToken } from "../../../src/lib/popup/models/PopupInjectionToken";
+import { PopupDataInjectionToken } from "../../../popup/models/PopupInjectionToken";
 import { DialogReference } from "../../models/DialogReference";
 import { createDialogInjectorData } from "../../utils/createDialogInjectorData";
 

@@ -4,7 +4,7 @@ import { provideAnimations } from "@angular/platform-browser/animations";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { BrowserModule, By } from "@angular/platform-browser";
 import { MenuItemComponent } from "../../../menubar/components/menu-item/menu-item.component";
-import { ButtonDirective } from "../../../src/lib/buttons/button/directives/button.directive";
+import { ButtonDirective } from "../../../button/directives/button.directive";
 import { SplitButtonComponent } from "./split-button.component";
 import { ContextMenuComponent } from "../../../contextmenu/components/contextmenu/context-menu.component";
 

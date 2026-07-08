@@ -56,7 +56,6 @@ Examples:
 projects/mona-ui/button
 projects/mona-ui/dropdown-button
 projects/mona-ui/drop-down-list
-projects/mona-ui/drop-down-tree
 projects/mona-ui/multi-select
 projects/mona-ui/slider
 projects/mona-ui/tabs
@@ -114,7 +113,9 @@ Concrete example (`auto-complete`):
 // projects/mona-ui/auto-complete/ng-package.json
 {
     "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
-    "lib": { "entryFile": "../src/lib/auto-complete.public-api.ts" }
+    "lib": {
+        "entryFile": "../src/lib/auto-complete.public-api.ts"
+    }
 }
 ```
 
@@ -140,7 +141,6 @@ Good:
 @mirei/mona-ui/button
 @mirei/mona-ui/dropdown-button
 @mirei/mona-ui/drop-down-list
-@mirei/mona-ui/drop-down-tree
 @mirei/mona-ui/multi-select
 @mirei/mona-ui/range-slider
 ```
@@ -382,11 +382,11 @@ So after adding a secondary entry point, always add a matching subpath to the ro
 
 ```json
 "exports": {
-    ".": { "...": "..." },
-    "./button": {
-        "types": "./dist/mona-ui/types/mona-ui-button.d.ts",
-        "default": "./dist/mona-ui/fesm2022/mona-ui-button.mjs"
-    }
+".": {"...": "..."},
+"./button": {
+"types": "./dist/mona-ui/types/mona-ui-button.d.ts",
+"default": "./dist/mona-ui/fesm2022/mona-ui-button.mjs"
+}
 }
 ```
 
@@ -408,7 +408,6 @@ For `dropdowns`, likely entry points are:
 @mirei/mona-ui/auto-complete
 @mirei/mona-ui/combo-box
 @mirei/mona-ui/drop-down-list
-@mirei/mona-ui/drop-down-tree
 @mirei/mona-ui/multi-select
 ```
 
