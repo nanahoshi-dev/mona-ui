@@ -1,7 +1,7 @@
-import { afterNextRender, ChangeDetectionStrategy, Component, input, OutputEmitterRef, signal } from "@angular/core";
+import { afterNextRender, Component, input, OutputEmitterRef, signal } from "@angular/core";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { PreventableEvent } from "@mirei/mona-ui/common";
 import { ImmutableList } from "@mirei/ts-collections";
-import { PreventableEvent } from "mona-ui/utils";
-import { ButtonDirective } from "mona-ui/button";
 
 interface OutputEventItem {
     readonly name: string;
@@ -18,7 +18,6 @@ interface EventLogItem {
 @Component({
     selector: "app-event-viewer",
     templateUrl: "./event-viewer.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ButtonDirective],
     host: {
         class: "w-full overflow-hidden h-80 border border-border flex flex-col"

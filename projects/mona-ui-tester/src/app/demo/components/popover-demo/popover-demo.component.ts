@@ -1,12 +1,12 @@
 import { NgComponentOutlet, NgOptimizedImage } from "@angular/common";
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
 import { LucideX } from "@lucide/angular";
+import { ButtonDirective } from "@mirei/mona-ui/button";
 import {
     PopoverComponent,
     PopoverFooterTemplateDirective,
     PopoverTitleTemplateDirective
-} from "mona-ui/popover";
-import { ButtonDirective } from "mona-ui/button";
+} from "@mirei/mona-ui/popover";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -15,8 +15,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-popover-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./popover-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./popover-demo.component.html"
 })
 export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent> {
     readonly #injector = createFeatureInjector({

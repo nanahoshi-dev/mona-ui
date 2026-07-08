@@ -1,6 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { CircularProgressBarComponent, CircularProgressBarLabelTemplateDirective } from "mona-ui/circular-progress-bar";
+import {
+    CircularProgressBarComponent,
+    CircularProgressBarLabelTemplateDirective
+} from "@mirei/mona-ui/circular-progress-bar";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -9,8 +12,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-circular-progress-bar-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./circular-progress-bar-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./circular-progress-bar-demo.component.html"
 })
 export class CircularProgressBarDemoComponent extends AbstractDemoComponent<CircularProgressBarComponent> {
     readonly #injector = createFeatureInjector({

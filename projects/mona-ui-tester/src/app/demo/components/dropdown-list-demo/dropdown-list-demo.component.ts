@@ -2,7 +2,8 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideUtensils } from "@lucide/angular";
-import { range } from "@mirei/ts-collections";
+import { FilterableOptions, PreventableEvent, VirtualScrollOptions } from "@mirei/mona-ui/common";
+import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
 import {
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
@@ -13,8 +14,9 @@ import {
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropDownVirtualScrollDirective
-} from "mona-ui/dropdowns";
-import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
+} from "@mirei/mona-ui/dropdowns";
+import { GroupableOptions } from "@mirei/mona-ui/list";
+import { range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -33,8 +35,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-dropdown-list-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./dropdown-list-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./dropdown-list-demo.component.html"
 })
 export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownListComponent> {
     readonly #injector = createFeatureInjector({

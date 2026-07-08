@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
 import { LucideLayers } from "@lucide/angular";
-import { ButtonDirective } from "mona-ui/button";
+import { ButtonDirective } from "@mirei/mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-button-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./button-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./button-demo.component.html"
 })
 export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> {
     protected readonly ButtonWrapperComponent = ButtonWrapperComponent;

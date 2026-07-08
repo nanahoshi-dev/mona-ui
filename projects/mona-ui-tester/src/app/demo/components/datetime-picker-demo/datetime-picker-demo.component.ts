@@ -2,15 +2,15 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
 import { LucideBadgeQuestionMark, LucideBriefcaseBusiness, LucideDynamicIcon, LucideTentTree } from "@lucide/angular";
-import { DateTime } from "luxon";
 import {
     CalendarDecadeCellTemplateDirective,
     CalendarMonthCellTemplateDirective,
-    CalendarYearCellTemplateDirective,
-    DateInputPrefixTemplateDirective,
-    DateTimePickerComponent
-} from "mona-ui/datetime-picker";
-import type { PreventableEvent } from "mona-ui/utils";
+    CalendarYearCellTemplateDirective
+} from "@mirei/mona-ui/calendar";
+import type { PreventableEvent } from "@mirei/mona-ui/common";
+import { DateInputPrefixTemplateDirective } from "@mirei/mona-ui/date-input";
+import { DateTimePickerComponent } from "@mirei/mona-ui/datetime-picker";
+import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
     calendarDecadeCellTemplateFeatureConfig,
@@ -24,8 +24,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-datetime-picker-demo",
     templateUrl: "./datetime-picker-demo.component.html",
-    imports: [DemoContainerComponent, NgComponentOutlet],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [DemoContainerComponent, NgComponentOutlet]
 })
 export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimePickerComponent> {
     readonly #injector = createFeatureInjector({

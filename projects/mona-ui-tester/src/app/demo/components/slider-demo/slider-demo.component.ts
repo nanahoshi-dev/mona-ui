@@ -3,7 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, mo
 import { disabled, form, FormField } from "@angular/forms/signals";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faMoon, faStar, faSun } from "@fortawesome/free-solid-svg-icons";
-import { SliderComponent, SliderHandleTemplateDirective, SliderTickValueTemplateDirective } from "mona-ui/slider";
+import {
+    SliderComponent,
+    SliderHandleTemplateDirective,
+    SliderTickValueTemplateDirective
+} from "@mirei/mona-ui/slider";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -12,8 +16,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-slider-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./slider-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./slider-demo.component.html"
 })
 export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> {
     readonly #injector = createFeatureInjector({

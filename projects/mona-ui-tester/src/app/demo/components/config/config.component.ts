@@ -3,17 +3,14 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
 import { where } from "@mirei/ts-collections";
-import { ExpansionPanelComponent, ExpansionPanelTitleTemplateDirective } from "mona-ui/expansion-panel";
-import { TabComponent, TabContentTemplateDirective, TabsComponent } from "mona-ui/tabs";
-import { NumericTextBoxComponent } from "mona-ui/numeric-text-box";
-import { SwitchComponent } from "mona-ui/switch";
-import { TextBoxComponent } from "mona-ui/text-box";
-import { ButtonDirective } from "mona-ui/button";
-import {
-    DropDownItemTemplateDirective,
-    DropdownListComponent,
-    DropDownListValueTemplateDirective
-} from "mona-ui/drop-down-list";
+import { ExpansionPanelComponent, ExpansionPanelTitleTemplateDirective } from "@mirei/mona-ui/expansion-panel";
+import { TabComponent, TabContentTemplateDirective, TabsComponent } from "@mirei/mona-ui/tabs";
+import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
+import { SwitchComponent } from "@mirei/mona-ui/switch";
+import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ComponentConfig, ComponentInputs, createComponentPropertyConfig } from "../../utils/componentConfig";

@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
+import { Component, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
-import { ColorPaletteComponent } from "mona-ui/color-palette";
+import { ColorPaletteComponent } from "@mirei/mona-ui/color-palette";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { customColorPalette } from "../../utils/customColorPalette";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -11,8 +11,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-color-palette-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./color-palette-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./color-palette-demo.component.html"
 })
 export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPaletteComponent> {
     readonly #injector = createFeatureInjector({

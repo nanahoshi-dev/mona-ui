@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { ProgressBarComponent, ProgressBarLabelTemplateDirective } from "mona-ui/progress-bar";
+import { ProgressBarComponent, ProgressBarLabelTemplateDirective } from "@mirei/mona-ui/progress-bar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -9,19 +9,11 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-progress-bar-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./progress-bar-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./progress-bar-demo.component.html"
 })
 export class ProgressBarDemoComponent extends AbstractDemoComponent<ProgressBarComponent> {
     readonly #injector = createFeatureInjector({
         labelTemplate: {
-            code: `
-                 <mona-progress-bar>
-                     <ng-template monaProgressBarLabelTemplate let-value let-min="min" let-max="max">
-                        <span class="text-xs px-2"> {{ value }} | {{ max }} </span>
-                     </ng-template>
-                 </mona-progress-bar>
-            `,
             active: false,
             description: "Custom label template for the progress bar",
             name: "Label Template"

@@ -3,7 +3,7 @@ import { LucideBox } from "@lucide/angular";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { moveIndices } from "mona-ui/utils";
+import { moveIndices } from "@mirei/mona-ui/common";
 import {
     ListBoxActionEvent,
     ListBoxComponent,
@@ -14,7 +14,7 @@ import {
     ListBoxSelectionEvent,
     ToolbarAction,
     ToolbarOptions
-} from "mona-ui/list-box";
+} from "@mirei/mona-ui/list-box";
 import { ComponentConfig, type ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";

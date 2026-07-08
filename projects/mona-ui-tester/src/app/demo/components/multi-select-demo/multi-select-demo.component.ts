@@ -4,6 +4,12 @@ import { disabled, form, FormField, readonly, required } from "@angular/forms/si
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
 import {
+    MultiSelectComponent,
+    MultiSelectSummaryTagDirective,
+    MultiSelectSummaryTagTemplateDirective,
+    MultiSelectTagTemplateDirective
+} from "@mirei/mona-ui/multi-select";
+import {
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
     DropDownGroupableDirective,
@@ -11,14 +17,11 @@ import {
     DropDownItemTemplateDirective,
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
-    DropDownVirtualScrollDirective,
-    MultiSelectComponent,
-    MultiSelectSummaryTagDirective,
-    MultiSelectSummaryTagTemplateDirective,
-    MultiSelectTagTemplateDirective
-} from "mona-ui/multi-select";
-import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
-import type { PreventableEvent } from "mona-ui/utils";
+    DropDownVirtualScrollDirective
+} from "@mirei/mona-ui/dropdowns";
+import { FilterableOptions, VirtualScrollOptions } from "@mirei/mona-ui/common";
+import { GroupableOptions } from "@mirei/mona-ui/list";
+import type { PreventableEvent } from "@mirei/mona-ui/common";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

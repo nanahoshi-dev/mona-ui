@@ -9,6 +9,8 @@ import {
     LucideRotateCw,
     LucideSettings
 } from "@lucide/angular";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { MenuItemClickEvent } from "@mirei/mona-ui/menubar";
 import {
     type MenuItem,
     PopupMenuCheckboxItemComponent,
@@ -22,9 +24,7 @@ import {
     PopupMenuSeparatorComponent,
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
-} from "mona-ui/popup-menu";
-import { MenuItemClickEvent } from "mona-ui/menubar";
-import { ButtonDirective } from "mona-ui/button";
+} from "@mirei/mona-ui/popup-menu";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -34,8 +34,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-popup-menu-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./popup-menu-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./popup-menu-demo.component.html"
 })
 export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuComponent> {
     readonly #injector = createFeatureInjector({

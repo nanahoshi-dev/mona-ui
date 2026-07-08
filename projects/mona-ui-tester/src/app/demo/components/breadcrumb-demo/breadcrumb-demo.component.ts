@@ -17,7 +17,7 @@ import {
     BreadcrumbComponent,
     BreadcrumbItemComponent,
     BreadcrumbSeparatorTemplateDirective
-} from "mona-ui/breadcrumb";
+} from "@mirei/mona-ui/breadcrumb";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

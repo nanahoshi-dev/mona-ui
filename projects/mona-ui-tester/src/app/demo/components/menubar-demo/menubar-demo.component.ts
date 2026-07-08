@@ -17,7 +17,7 @@ import {
     MenuRadioItemComponent,
     MenuSeparatorComponent,
     MenuTextTemplateDirective
-} from "mona-ui/menubar";
+} from "@mirei/mona-ui/menubar";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -27,8 +27,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-menubar-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./menubar-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./menubar-demo.component.html"
 })
 export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent> {
     readonly #injector = createFeatureInjector({

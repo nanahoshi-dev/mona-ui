@@ -13,7 +13,7 @@ import {
     StepperIndicatorTemplateDirective,
     StepperLabelTemplateDirective,
     StepperStepTemplateDirective
-} from "mona-ui/stepper";
+} from "@mirei/mona-ui/stepper";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -23,8 +23,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-stepper-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./stepper-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./stepper-demo.component.html"
 })
 export class StepperDemoComponent extends AbstractDemoComponent<StepperComponent> {
     readonly #injector = createFeatureInjector({

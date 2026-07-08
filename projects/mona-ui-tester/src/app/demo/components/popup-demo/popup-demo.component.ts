@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
-import { PopupComponent } from "mona-ui/popup";
-import { ButtonDirective } from "mona-ui/button";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { PopupComponent } from "@mirei/mona-ui/popup";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-popup-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./popup-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./popup-demo.component.html"
 })
 export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
     readonly #document = inject(DOCUMENT);

@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { SplitterComponent, SplitterPaneComponent } from "@mirei/mona-ui/splitter";
 import { compact } from "@mirei/ts-collections";
-import { SplitterComponent, SplitterPaneComponent } from "mona-ui/splitter";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -10,8 +10,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-splitter-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./splitter-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./splitter-demo.component.html"
 })
 export class SplitterDemoComponent extends AbstractDemoComponent<SplitterComponent> {
     readonly #injector = createFeatureInjector({

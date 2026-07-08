@@ -1,15 +1,7 @@
 import { NgComponentOutlet, SlicePipe } from "@angular/common";
-import {
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    effect,
-    inject,
-    input,
-    linkedSignal,
-    signal
-} from "@angular/core";
-import { range } from "@mirei/ts-collections";
+import { Component, computed, effect, inject, input, linkedSignal, signal } from "@angular/core";
+import type { VirtualScrollOptions } from "@mirei/mona-ui/common";
+import type { GroupableOptions, NavigableOptions, PagerSettings, SelectableOptions } from "@mirei/mona-ui/list";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,
@@ -22,26 +14,19 @@ import {
     ListViewPageableDirective,
     ListViewSelectableDirective,
     ListViewVirtualScrollDirective
-} from "mona-ui/list-view";
-import type {
-    GroupableOptions,
-    NavigableOptions,
-    PagerSettings,
-    SelectableOptions,
-    VirtualScrollOptions
-} from "mona-ui/common";
+} from "@mirei/mona-ui/list-view";
+import { range } from "@mirei/ts-collections";
+import { twMerge } from "tailwind-merge";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
-import { twMerge } from "tailwind-merge";
 
 @Component({
     selector: "app-list-view-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./list-view-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./list-view-demo.component.html"
 })
 export class ListViewDemoComponent extends AbstractDemoComponent<ListViewComponent> {
     readonly #injector = createFeatureInjector({

@@ -2,8 +2,7 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { disabled, form, FormField } from "@angular/forms/signals";
-import { RadioButtonComponent, RadioButtonDirective } from "mona-ui/radio-button";
-import { ButtonDirective } from "mona-ui/button";
+import { RadioButtonComponent, RadioButtonDirective } from "@mirei/mona-ui/radio-button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -11,8 +10,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-radio-button-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./radio-button-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./radio-button-demo.component.html"
 })
 export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonComponent> {
     protected readonly RadioButtonWrapperComponent = RadioButtonWrapperComponent;

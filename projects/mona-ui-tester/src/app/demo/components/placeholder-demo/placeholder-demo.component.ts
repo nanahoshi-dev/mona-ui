@@ -1,16 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { PlaceholderComponent } from "mona-ui/placeholder";
-import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
-import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
-import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { NgComponentOutlet } from "@angular/common";
+import { Component, inject, input, signal } from "@angular/core";
+import { PlaceholderComponent } from "@mirei/mona-ui/placeholder";
+import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
+import { AbstractDemoComponent } from "../base/abstract-demo.component";
+import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 @Component({
     selector: "app-placeholder-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./placeholder-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./placeholder-demo.component.html"
 })
 export class PlaceholderDemoComponent extends AbstractDemoComponent<PlaceholderComponent> {
     readonly #injector = createFeatureInjector({

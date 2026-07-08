@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { TooltipDirective } from "mona-ui/tooltip";
-import { ButtonDirective } from "mona-ui/button";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { TooltipDirective } from "@mirei/mona-ui/tooltip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-tooltip-directive-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./tooltip-directive-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./tooltip-directive-demo.component.html"
 })
 export class TooltipDirectiveDemoComponent extends AbstractDemoComponent<TooltipDirective> {
     protected readonly config = signal<ComponentConfig<TooltipDirective>>({

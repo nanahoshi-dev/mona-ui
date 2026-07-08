@@ -1,10 +1,10 @@
 import { Clipboard } from "@angular/cdk/clipboard";
-import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { LucideCopy } from "@lucide/angular";
 import HighlightJS from "highlight.js/lib/core";
+import json from "highlight.js/lib/languages/json";
 import typescript from "highlight.js/lib/languages/typescript";
 import html from "highlight.js/lib/languages/xml";
-import json from "highlight.js/lib/languages/json";
 
 HighlightJS.registerLanguage("typescript", typescript);
 HighlightJS.registerLanguage("html", html);
@@ -13,7 +13,6 @@ HighlightJS.registerLanguage("json", json);
 @Component({
     selector: "app-code-viewer",
     templateUrl: "./code-viewer.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [LucideCopy],
     host: {
         "[class]": "'mona-code-viewer block relative overflow-auto'"

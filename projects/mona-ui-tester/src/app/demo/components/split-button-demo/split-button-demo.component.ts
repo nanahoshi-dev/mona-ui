@@ -2,7 +2,6 @@ import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
 import { LucideHeart, LucideSettings, LucideUser, LucideUsers } from "@lucide/angular";
 import {
-    MenuItemClickEvent,
     SplitButtonCheckboxItemComponent,
     SplitButtonComponent,
     SplitButtonGroupComponent,
@@ -16,7 +15,8 @@ import {
     SplitButtonRadioItemComponent,
     SplitButtonSeparatorComponent,
     SplitButtonTextTemplateDirective
-} from "mona-ui/split-button";
+} from "@mirei/mona-ui/split-button";
+import { MenuItemClickEvent } from "@mirei/mona-ui/menubar";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

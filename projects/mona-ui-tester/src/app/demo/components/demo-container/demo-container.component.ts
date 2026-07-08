@@ -1,11 +1,11 @@
 import { Directionality } from "@angular/cdk/bidi";
-import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
+import { Component, computed, DOCUMENT, inject, input, output, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
-import { ColorPickerComponent } from "mona-ui/color-picker";
-import { type ThemeId, ThemeService, ThemeStyle, type ThemeVariant } from "mona-ui/theme";
-import { ButtonDirective } from "mona-ui/button";
-import { DropdownListComponent } from "mona-ui/drop-down-list";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ColorPickerComponent } from "@mirei/mona-ui/color-picker";
+import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
+import { type ThemeId, ThemeService, ThemeStyle, type ThemeVariant } from "@mirei/mona-ui/theme";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { ComponentConfig } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
@@ -23,7 +23,6 @@ import { ConfigComponent } from "../config/config.component";
         LucideCode
     ],
     templateUrl: "./demo-container.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     styles: [
         `
             .demo-code-panel-enter {

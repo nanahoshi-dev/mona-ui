@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
-import { CheckBoxComponent, CheckboxDirective } from "mona-ui/check-box";
+import { CheckBoxComponent, CheckboxDirective } from "@mirei/mona-ui/check-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -8,8 +8,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-checkbox-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./checkbox-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./checkbox-demo.component.html"
 })
 export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxComponent> {
     protected readonly config = signal<ComponentConfig<CheckBoxComponent>>({

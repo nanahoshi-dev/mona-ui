@@ -1,7 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { SliderComponent } from "mona-ui/slider";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { DropdownListComponent, DropDownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
+import { DropDownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
 import {
     type PageChangeEvent,
     PagerComponent,
@@ -9,13 +11,9 @@ import {
     PagerNavigationButtonsTemplateDirective,
     PagerNumericButtonsTemplateDirective,
     PagerPageSizeTemplateDirective
-} from "mona-ui/pager";
-import { ButtonDirective } from "mona-ui/button";
-import {
-    DropDownItemTemplateDirective,
-    DropdownListComponent,
-    DropDownListValueTemplateDirective
-} from "mona-ui/drop-down-list";
+} from "@mirei/mona-ui/pager";
+import { SliderComponent } from "@mirei/mona-ui/slider";
+
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -24,8 +22,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-pager-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./pager-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./pager-demo.component.html"
 })
 export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
     readonly #injector = createFeatureInjector({

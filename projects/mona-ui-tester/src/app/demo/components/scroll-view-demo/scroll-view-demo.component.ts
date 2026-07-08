@@ -1,16 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
-import { AbstractDemoComponent } from "../base/abstract-demo.component";
-import { ScrollViewComponent } from "mona-ui/scroll-view";
-import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
-import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
-import { DemoContainerComponent } from "../demo-container/demo-container.component";
 import { NgComponentOutlet } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, input, model, signal } from "@angular/core";
+import { ScrollViewComponent } from "@mirei/mona-ui/scroll-view";
+import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
+import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
+import { AbstractDemoComponent } from "../base/abstract-demo.component";
+import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 @Component({
     selector: "app-scroll-view-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./scroll-view-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./scroll-view-demo.component.html"
 })
 export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewComponent> {
     readonly #injector = createFeatureInjector({});

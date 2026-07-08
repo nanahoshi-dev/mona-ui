@@ -7,7 +7,7 @@ import {
     SwitchHandleContentTemplateDirective,
     SwitchOffLabelTemplateDirective,
     SwitchOnLabelTemplateDirective
-} from "mona-ui/switch";
+} from "@mirei/mona-ui/switch";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -16,8 +16,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-switch-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./switch-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./switch-demo.component.html"
 })
 export class SwitchDemoComponent extends AbstractDemoComponent<SwitchComponent> {
     readonly #injector = createFeatureInjector({

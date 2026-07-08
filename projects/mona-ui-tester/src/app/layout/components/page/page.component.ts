@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
 import {
@@ -12,7 +12,7 @@ import {
     LucideX
 } from "@lucide/angular";
 
-import { BreadcrumbComponent, BreadcrumbItemComponent } from "mona-ui/breadcrumb";
+import { BreadcrumbComponent, BreadcrumbItemComponent } from "@mirei/mona-ui/breadcrumb";
 import { filter, map, startWith } from "rxjs";
 import { PageService } from "../../services/page.service";
 import { SidebarService } from "../../services/sidebar.service";
@@ -32,7 +32,6 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
         LucideX
     ],
     templateUrl: "./page.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [PageService]
 })
 export class PageComponent {

@@ -7,7 +7,7 @@ import {
     CalendarDecadeCellTemplateDirective,
     CalendarMonthCellTemplateDirective,
     CalendarYearCellTemplateDirective
-} from "mona-ui/calendar";
+} from "@mirei/mona-ui/calendar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
     calendarDecadeCellTemplateFeatureConfig,
@@ -21,8 +21,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-calendar-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./calendar-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./calendar-demo.component.html"
 })
 export class CalendarDemoComponent extends AbstractDemoComponent<CalendarComponent> {
     readonly #injector = createFeatureInjector({

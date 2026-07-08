@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
-import { form, FormField, required } from "@angular/forms/signals";
-import { TextAreaDirective } from "mona-ui/text-area";
+import { Component, input, signal } from "@angular/core";
+import { form, FormField } from "@angular/forms/signals";
+import { TextAreaDirective } from "@mirei/mona-ui/text-area";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-text-area-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./text-area-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./text-area-demo.component.html"
 })
 export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirective> {
     protected readonly config = signal<ComponentConfig<TextAreaDirective>>({

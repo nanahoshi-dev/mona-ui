@@ -1,25 +1,24 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { ButtonDirective } from "@mirei/mona-ui/button";
 import {
     TabCloseEvent,
     TabComponent,
     TabContentTemplateDirective,
-    TabSelectEvent,
-    TabsComponent
-} from "mona-ui/tabs";
-import { TextBoxComponent } from "mona-ui/text-box";
-import { ButtonDirective } from "mona-ui/button";
+    TabsComponent,
+    TabSelectEvent
+} from "@mirei/mona-ui/tabs";
+import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+import { range } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
-import { range } from "@mirei/ts-collections";
 
 @Component({
     selector: "app-tabs-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./tabs-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./tabs-demo.component.html"
 })
 export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     readonly #injector = createFeatureInjector({

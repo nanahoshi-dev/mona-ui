@@ -1,9 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
+import { TimePickerComponent } from "@mirei/mona-ui/time-picker";
+import type { PreventableEvent } from "@mirei/mona-ui/common";
 import { DateTime } from "luxon";
-import { TimePickerComponent } from "mona-ui/time-picker";
-import type { PreventableEvent } from "mona-ui/utils";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -12,8 +12,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-time-picker-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./time-picker-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./time-picker-demo.component.html"
 })
 export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerComponent> {
     readonly #injector = createFeatureInjector({

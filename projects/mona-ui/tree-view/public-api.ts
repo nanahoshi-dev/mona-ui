@@ -11,3 +11,5 @@ export * from "./directives/tree-view-expandable.directive";
 export * from "./directives/tree-view-filterable.directive";
 export * from "./directives/tree-view-node-template.directive";
 export * from "./directives/tree-view-selectable.directive";
+
+export * from "@mirei/mona-ui/tree";

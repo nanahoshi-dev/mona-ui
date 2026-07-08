@@ -1,9 +1,10 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal, TemplateRef, viewChild } from "@angular/core";
 import { LucideFileXCorner } from "@lucide/angular";
-import { CheckBoxComponent } from "mona-ui/check-box";
-import { TextBoxComponent, TextBoxDirective } from "mona-ui/text-box";
-import { ButtonDirective } from "mona-ui/button";
+import { CheckBoxComponent } from "@mirei/mona-ui/check-box";
+import type { PopupCloseEvent } from "@mirei/mona-ui/popup";
+import { TextBoxComponent, TextBoxDirective } from "@mirei/mona-ui/text-box";
+import { ButtonDirective } from "@mirei/mona-ui/button";
 import {
     DialogAction,
     DialogActionEvent,
@@ -14,9 +15,8 @@ import {
     DialogIconTemplateDirective,
     DialogRef,
     DialogService,
-    DialogTitleTemplateDirective,
-    PopupCloseEvent
-} from "mona-ui/dialog";
+    DialogTitleTemplateDirective
+} from "@mirei/mona-ui/dialog";
 import { take } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

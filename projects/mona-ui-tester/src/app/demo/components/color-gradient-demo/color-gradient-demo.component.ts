@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { disabled, form, FormField } from "@angular/forms/signals";
-import { ColorGradientComponent } from "mona-ui/color-gradient";
+import { ColorGradientComponent } from "@mirei/mona-ui/color-gradient";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-color-gradient-demo",
     imports: [NgComponentOutlet, DemoContainerComponent],
-    templateUrl: "./color-gradient-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./color-gradient-demo.component.html"
 })
 export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradientComponent> {
     protected readonly ColorGradientWrapperComponent = ColorGradientWrapperComponent;

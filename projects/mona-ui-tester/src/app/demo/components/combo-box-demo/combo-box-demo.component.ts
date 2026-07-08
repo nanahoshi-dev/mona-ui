@@ -2,9 +2,9 @@ import { CurrencyPipe, NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
-import { ImmutableSet, range } from "@mirei/ts-collections";
+import { ComboBoxComponent } from "@mirei/mona-ui/combo-box";
+import { FilterableOptions, VirtualScrollOptions } from "@mirei/mona-ui/common";
 import {
-    ComboBoxComponent,
     DropDownFilterableDirective,
     DropDownFooterTemplateDirective,
     DropDownGroupableDirective,
@@ -14,8 +14,9 @@ import {
     DropDownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropDownVirtualScrollDirective
-} from "mona-ui/combo-box";
-import { FilterableOptions, GroupableOptions, VirtualScrollOptions } from "mona-ui/common";
+} from "@mirei/mona-ui/dropdowns";
+import { GroupableOptions } from "@mirei/mona-ui/list";
+import { ImmutableSet, range } from "@mirei/ts-collections";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

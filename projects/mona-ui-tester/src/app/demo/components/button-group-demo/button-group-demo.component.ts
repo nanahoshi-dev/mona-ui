@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
-import { ButtonDirective } from "mona-ui/button";
-import { ButtonGroupComponent } from "mona-ui/button-group";
+import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonGroupComponent } from "@mirei/mona-ui/button-group";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-button-group-demo",
     imports: [NgComponentOutlet, DemoContainerComponent],
-    templateUrl: "./button-group-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./button-group-demo.component.html"
 })
 export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupComponent> {
     protected readonly ButtonGroupWrapperComponent = ButtonGroupWrapperComponent;

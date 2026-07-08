@@ -4,15 +4,15 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideList, LucideSearch } from "@lucide/angular";
 import {
-    TextBoxComponent,
-    TextBoxPrefixTemplateDirective,
-    TextBoxSuffixTemplateDirective
-} from "mona-ui/text-box";
-import {
     DropdownButtonComponent,
     DropdownButtonItemComponent,
     DropdownButtonTextTemplateDirective
-} from "mona-ui/dropdown-button";
+} from "@mirei/mona-ui/dropdown-button";
+import {
+    TextBoxComponent,
+    TextBoxPrefixTemplateDirective,
+    TextBoxSuffixTemplateDirective
+} from "@mirei/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -21,24 +21,17 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-text-box-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./text-box-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./text-box-demo.component.html"
 })
 export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent> {
     readonly #injector = createFeatureInjector({
         prefixTemplate: {
             active: false,
-            code: `
-
-            `,
             description: `This template is used to customize the prefix of the text box.`,
             name: "Prefix Template"
         },
         suffixTemplate: {
             active: false,
-            code: `
-
-            `,
             description: `This template is used to customize the suffix of the text box.`,
             name: "Suffix Template"
         }

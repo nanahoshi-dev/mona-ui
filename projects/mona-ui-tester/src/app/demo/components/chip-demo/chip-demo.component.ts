@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, model, signal } from "@angular/core";
-import { AvatarComponent } from "mona-ui/avatar";
-import { ChipComponent, ChipPrefixTemplateDirective } from "mona-ui/chip";
+import { AvatarComponent } from "@mirei/mona-ui/avatar";
+import { ChipComponent, ChipPrefixTemplateDirective } from "@mirei/mona-ui/chip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -10,8 +10,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-chip-demo",
     imports: [NgComponentOutlet, DemoContainerComponent],
-    templateUrl: "./chip-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./chip-demo.component.html"
 })
 export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     readonly #injector = createFeatureInjector({
