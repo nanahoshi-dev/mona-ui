@@ -4,6 +4,13 @@ on:
   pull_request:
     branches: [main, beta]
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test:
     name: PR Test
@@ -16,11 +23,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
+          node-version: 24
+          cache: npm
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build:prod
 
       - name: Test
         run: npm run test:lib -- --browsers=ChromeHeadless --watch=false --code-coverage

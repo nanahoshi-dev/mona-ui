@@ -32,10 +32,16 @@
             [
                 "@semantic-release/npm",
                 {
-                    "pkgRoot": "dist/mona-ui"
+                    "npmPublish": false,
+                    "pkgRoot": "projects/mona-ui"
                 }
             ],
-            "@semantic-release/git",
+            [
+                "@semantic-release/git",
+                {
+                    "assets": ["projects/mona-ui/package.json", "CHANGELOG.md"]
+                }
+            ],
             "@semantic-release/github"
         ],
         "branches": [
