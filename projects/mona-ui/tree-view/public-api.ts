@@ -14,14 +14,22 @@ export * from "./directives/tree-view-selectable.directive";
 
 export {
     CheckableOptions,
-    DraggableOptions,
-    ExpandableOptions,
-    DisableOptions,
-    DropPositionChangeEvent,
     ChildrenSelector,
-    NodeDropEvent,
-    NodeDragEvent,
-    NodeDragEndEvent,
+    DataStructure,
+    DisableOptions,
+    DraggableOptions,
+    DropPositionChangeEvent,
+    ExpandableOptions,
+    moveFlatTreeNode,
+    moveTreeNode,
+    NodeCheckEvent,
     NodeClickEvent,
-    NodeMoveSnapshot
+    NodeDragEndEvent,
+    NodeDragEvent,
+    NodeDragStartEvent,
+    NodeDropEvent,
+    NodeItem,
+    NodeKeySelector,
+    NodeMoveSnapshot,
+    SelectableOptions
 } from "@mirei/mona-ui/internal/tree";

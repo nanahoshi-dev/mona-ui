@@ -4,7 +4,7 @@ import {
     NodeItem,
     NodeKeySelector,
     NodeSelectEvent,
-    TreeSelectableOptions,
+    SelectableOptions,
     TreeService
 } from "@mirei/mona-ui/internal/tree";
 import { sequenceEqual } from "@mirei/ts-collections";
@@ -15,7 +15,7 @@ import { pairwise } from "rxjs";
     exportAs: "monaTreeViewSelectable"
 })
 export class TreeViewSelectableDirective<T, K = T> implements OnInit {
-    readonly #defaultOptions: TreeSelectableOptions = {
+    readonly #defaultOptions: SelectableOptions = {
         childrenOnly: false,
         enabled: true,
         mode: "single",
@@ -55,7 +55,7 @@ export class TreeViewSelectableDirective<T, K = T> implements OnInit {
      * @description Configures selection mode, toggleability, and whether only child nodes are selectable. Merged over `{ childrenOnly: false, enabled: true, mode: "single", toggleable: false }` when applied bare.
      * @default ""
      */
-    public readonly options = input<Partial<TreeSelectableOptions> | "">("", {
+    public readonly options = input<Partial<SelectableOptions> | "">("", {
         alias: "monaTreeViewSelectable"
     });
 

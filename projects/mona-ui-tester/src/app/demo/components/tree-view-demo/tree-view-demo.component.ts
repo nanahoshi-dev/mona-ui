@@ -31,7 +31,7 @@ import {
     moveTreeNode,
     NodeDropEvent,
     NodeItem,
-    TreeSelectableOptions,
+    SelectableOptions,
     TreeViewCheckableDirective,
     TreeViewComponent,
     TreeViewDisableDirective,
@@ -421,7 +421,7 @@ class TreeViewWrapperComponent implements ComponentInputsAsSignal<TreeViewCompon
     protected readonly selectable = computed(() => {
         const features = this.features();
         const subFeatures = features["selectable"].subFeatures || {};
-        const selectableSettings: TreeSelectableOptions = {
+        const selectableSettings: SelectableOptions = {
             enabled: features["selectable"].active ?? false,
             mode: subFeatures["mode"]?.dropdownValue ?? "single",
             childrenOnly: subFeatures["childrenOnly"]?.active ?? false,

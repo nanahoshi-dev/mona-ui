@@ -1,4 +1,4 @@
-export type TreeSelectableOptions = {
+export type SelectableOptions = {
     /**
      * @description Determines if the selection functionality is active.
      */

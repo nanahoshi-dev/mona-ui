@@ -1,6 +1,5 @@
 import {
     afterNextRender,
-    ChangeDetectionStrategy,
     Component,
     DestroyRef,
     effect,
@@ -20,7 +19,6 @@ import { debounceTime, fromEvent, Subject } from "rxjs";
 
 @Component({
     selector: "mona-filter-input",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [TextBoxComponent, FormsModule, TextBoxPrefixTemplateDirective],
     templateUrl: "./filter-input.component.html"
 })

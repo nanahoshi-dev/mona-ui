@@ -11,8 +11,8 @@
     <app-section id="overview" [header]="'Overview & Component Selection'" headerType="H2">
         <p>
             Use Tree View to let a consumer browse or act on data that has parent-child relationships, such as a file
-            system, a category tree, or an org chart. The data can be shaped as nested items (hierarchical mode) or
-            as a flat list linked by an id and a parent id (flat mode).
+            system, a category tree, or an org chart. The data can be shaped as nested items (hierarchical mode) or as a
+            flat list linked by an id and a parent id (flat mode).
         </p>
         <p>
             Selection, checking, disabling, expand/collapse control, filtering, and drag-and-drop reordering are all
@@ -23,8 +23,7 @@
         </p>
         <p>
             Use Grid when data is naturally tabular rather than hierarchical. Use Dropdown List, Combo Box, or Multi
-            Select when the consumer is choosing from a flat collection of options rather than navigating a
-            hierarchy.
+            Select when the consumer is choosing from a flat collection of options rather than navigating a hierarchy.
         </p>
     </app-section>
 
@@ -48,9 +47,8 @@
                 <code>element</code> (the node's host <code>HTMLElement</code>).
             </li>
             <li>
-                <code>mona-tree-view[monaTreeViewSelectable]</code>,
-                <code>mona-tree-view[monaTreeViewCheckable]</code>, <code>mona-tree-view[monaTreeViewDisable]</code>,
-                <code>mona-tree-view[monaTreeViewExpandable]</code>,
+                <code>mona-tree-view[monaTreeViewSelectable]</code>, <code>mona-tree-view[monaTreeViewCheckable]</code>,
+                <code>mona-tree-view[monaTreeViewDisable]</code>, <code>mona-tree-view[monaTreeViewExpandable]</code>,
                 <code>mona-tree-view[monaTreeViewFilterable]</code>,
                 <code>mona-tree-view[monaTreeViewDragAndDrop]</code> &ndash; attribute directives applied to the
                 <code>mona-tree-view</code> host element to enable each behavior.
@@ -67,8 +65,8 @@
     <app-section id="examples" [header]="'Examples'" headerType="H2">
         <app-section id="flatData" [header]="'Flat data'" headerType="H3">
             <p>
-                Set <code>mode="flat"</code> and provide <code>idField</code> and <code>parentIdField</code> instead
-                of <code>children</code> when the source data is a flat list linked by id references.
+                Set <code>mode="flat"</code> and provide <code>idField</code> and <code>parentIdField</code> instead of
+                <code>children</code> when the source data is a flat list linked by id references.
             </p>
             <app-code-viewer [code]="flatDataCode" language="typescript"></app-code-viewer>
             <app-code-viewer [code]="flatDataHtmlCode" language="html"></app-code-viewer>
@@ -76,8 +74,8 @@
 
         <app-section id="selection" [header]="'Selection'" headerType="H3">
             <p>
-                Apply <code>monaTreeViewSelectable</code> to track which node is selected. Single mode is the
-                default; pass <code>{{ '{' }} mode: 'multiple' {{ '}' }}</code> to allow multiple selected nodes.
+                Apply <code>monaTreeViewSelectable</code> to track which node is selected. Single mode is the default;
+                pass <code>{{ "{" }} mode: 'multiple' {{ "}" }}</code> to allow multiple selected nodes.
             </p>
             <app-code-viewer [code]="selectableCode" language="html"></app-code-viewer>
         </app-section>
@@ -93,8 +91,8 @@
 
         <app-section id="disabling" [header]="'Disabling nodes'" headerType="H3">
             <p>
-                Apply <code>monaTreeViewDisable</code> and pass the keys of the nodes to disable. Disabling a node
-                also disables its descendants by default.
+                Apply <code>monaTreeViewDisable</code> and pass the keys of the nodes to disable. Disabling a node also
+                disables its descendants by default.
             </p>
             <app-code-viewer [code]="disableCode" language="html"></app-code-viewer>
         </app-section>
@@ -109,8 +107,8 @@
 
         <app-section id="filtering" [header]="'Filtering'" headerType="H3">
             <p>
-                Apply <code>monaTreeViewFilterable</code> to narrow the visible nodes by text. The tree itself does
-                not render a filter input; wire <code>filter</code> to a consumer-provided control, or place
+                Apply <code>monaTreeViewFilterable</code> to narrow the visible nodes by text. The tree itself does not
+                render a filter input; wire <code>filter</code> to a consumer-provided control, or place
                 <code>monaTreeViewFilterable</code> without further configuration to enable the tree's own filter
                 region.
             </p>
@@ -121,8 +119,8 @@
             <p>
                 Apply <code>monaTreeViewDragAndDrop</code> to let the consumer reorder or reparent nodes by dragging.
                 Dropping a node does not mutate the array passed to <code>data</code>; use the exported
-                <code>moveTreeNode</code> (hierarchical data) or <code>moveFlatTreeNode</code> (flat data) helper
-                inside the <code>nodeDrop</code> handler to compute an updated array and pass it back through
+                <code>moveTreeNode</code> (hierarchical data) or <code>moveFlatTreeNode</code> (flat data) helper inside
+                the <code>nodeDrop</code> handler to compute an updated array and pass it back through
                 <code>data</code>.
             </p>
             <app-code-viewer [code]="dragAndDropHtmlCode" language="html"></app-code-viewer>
@@ -131,9 +129,9 @@
 
         <app-section id="lazyLoading" [header]="'Lazy-loaded children'" headerType="H3">
             <p>
-                Pass a function returning an <code>Observable</code> as <code>children</code> to load a node's
-                children on first expand instead of upfront. Provide <code>hasChildren</code> so unexpanded nodes can
-                render an expand affordance before their children are fetched.
+                Pass a function returning an <code>Observable</code> as <code>children</code> to load a node's children
+                on first expand instead of upfront. Provide <code>hasChildren</code> so unexpanded nodes can render an
+                expand affordance before their children are fetched.
             </p>
             <app-code-viewer [code]="lazyLoadingHtmlCode" language="html"></app-code-viewer>
             <app-code-viewer [code]="lazyLoadingCode" language="typescript"></app-code-viewer>
@@ -144,10 +142,10 @@
         <ul class="list-disc pl-5">
             <li>
                 <code>nodeSelect</code>, <code>nodeCheck</code>, <code>nodeClick</code>, <code>nodeDragStart</code>,
-                <code>nodeDragEnd</code>, <code>nodeDrop</code>, and <code>filterChange</code> emit an event object
-                with <code>preventDefault()</code> and <code>isDefaultPrevented()</code>. Calling
-                <code>preventDefault()</code> in a handler stops the corresponding state change (selection, check,
-                drag, drop, or filter) from being applied.
+                <code>nodeDragEnd</code>, <code>nodeDrop</code>, and <code>filterChange</code> emit an event object with
+                <code>preventDefault()</code> and <code>isDefaultPrevented()</code>. Calling
+                <code>preventDefault()</code> in a handler stops the corresponding state change (selection, check, drag,
+                drop, or filter) from being applied.
             </li>
             <li>
                 Switching <code>mode</code> requires providing the matching fields: <code>children</code> for
@@ -156,11 +154,11 @@
             </li>
             <li>
                 <code>TreeViewComponent</code> exposes <code>moveNode(source, target, position)</code> and
-                <code>undoMoveNode(snapshot)</code> for moving nodes in the tree's internal structure directly,
-                without going through <code>data</code>. The <code>nodeDrop</code> event's <code>treeView</code>
-                property refers to the emitting <code>TreeViewComponent</code> instance.
-                TODO(owner-review): the interface type behind <code>treeView</code> is not exported from
-                <code>mona-ui</code>, so consumers cannot explicitly type a variable holding it.
+                <code>undoMoveNode(snapshot)</code> for moving nodes in the tree's internal structure directly, without
+                going through <code>data</code>. The <code>nodeDrop</code> event's <code>treeView</code> property refers
+                to the emitting <code>TreeViewComponent</code> instance. TODO(owner-review): the interface type behind
+                <code>treeView</code> is not exported from <code>mona-ui</code>, so consumers cannot explicitly type a
+                variable holding it.
             </li>
         </ul>
     </app-section>
@@ -254,8 +252,9 @@
                     </tr>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4">Node</td>
-                        <td class="py-2 pr-4"><code>aria-level</code>, <code>aria-setsize</code>,
-                            <code>aria-posinset</code></td>
+                        <td class="py-2 pr-4">
+                            <code>aria-level</code>, <code>aria-setsize</code>, <code>aria-posinset</code>
+                        </td>
                         <td class="py-2 pr-4">Always</td>
                         <td class="py-2">The node's depth and position among its siblings</td>
                     </tr>
@@ -285,19 +284,16 @@
                     </tr>
                 </tbody>
             </table>
-            <p>
-                Provide <code>ariaLabel</code> when surrounding content does not already identify the tree's
-                purpose.
-            </p>
+            <p>Provide <code>ariaLabel</code> when surrounding content does not already identify the tree's purpose.</p>
         </app-section>
 
         <app-section id="focusBehavior" [header]="'Focus Behavior'" headerType="H3">
             <p>
                 The tree host is the only tab stop; individual nodes are not part of the page's tab order. Arrow-key
                 navigation moves an internal active node pointer, reflected through
-                <code>aria-activedescendant</code> on the tree host, instead of moving DOM focus between nodes. When
-                the tree regains focus, it restores the previously active node, or activates the first node if none
-                was active yet.
+                <code>aria-activedescendant</code> on the tree host, instead of moving DOM focus between nodes. When the
+                tree regains focus, it restores the previously active node, or activates the first node if none was
+                active yet.
             </p>
         </app-section>
 
@@ -433,8 +429,10 @@
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>moveNode</code></td>
                         <td class="py-2 pr-4">
-                            <code>(source: NodeItem&lt;T&gt;, target: NodeItem&lt;T&gt;, position: "before" | "after"
-                                | "inside" | "outside") =&gt; NodeMoveSnapshot | null</code>
+                            <code
+                                >(source: NodeItem&lt;T&gt;, target: NodeItem&lt;T&gt;, position: "before" | "after" |
+                                "inside" | "outside") =&gt; NodeMoveSnapshot | null</code
+                            >
                         </td>
                         <td class="py-2">
                             Moves a node in the tree's internal structure. Returns a snapshot usable with
@@ -464,12 +462,15 @@
                 <tbody>
                     <tr class="border-b border-border">
                         <td class="py-2 pr-4"><code>options</code> (<code>monaTreeViewSelectable</code>)</td>
-                        <td class="py-2 pr-4"><code>Partial&lt;TreeSelectableOptions&gt; | ""</code></td>
+                        <td class="py-2 pr-4"><code>Partial&lt;SelectableOptions&gt; | ""</code></td>
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
                             Selection mode, toggleability, and whether only leaf nodes are selectable. Merged over
-                            <code>{{ '{' }} childrenOnly: false, enabled: true, mode: "single", toggleable: false
-                            {{ '}' }}</code> when applied bare.
+                            <code
+                                >{{ "{" }} childrenOnly: false, enabled: true, mode: "single", toggleable: false
+                                {{ "}" }}</code
+                            >
+                            when applied bare.
                         </td>
                     </tr>
                     <tr class="border-b border-border">
@@ -477,8 +478,8 @@
                         <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
-                            Property name, or accessor, used to derive a node's selection key. Falls back to the
-                            node's data when unset.
+                            Property name, or accessor, used to derive a node's selection key. Falls back to the node's
+                            data when unset.
                         </td>
                     </tr>
                     <tr class="border-b border-border">
@@ -536,8 +537,8 @@
                         <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
-                            Property name, or accessor, used to derive a node's check key. Falls back to the node's
-                            data when unset.
+                            Property name, or accessor, used to derive a node's check key. Falls back to the node's data
+                            when unset.
                         </td>
                     </tr>
                     <tr class="border-b border-border">
@@ -553,8 +554,8 @@
                         <td class="py-2 pr-4"><code>((data: T, uid: string) =&gt; boolean) | null</code></td>
                         <td class="py-2 pr-4"><code>null</code></td>
                         <td class="py-2">
-                            Predicate that determines whether a node displays a checkbox. Every node displays one
-                            when unset.
+                            Predicate that determines whether a node displays a checkbox. Every node displays one when
+                            unset.
                         </td>
                     </tr>
                     <tr class="border-b border-border">
@@ -563,8 +564,11 @@
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
                             Check mode and whether checking a node also checks its children or parents. Merged over
-                            <code>{{ '{' }} checkChildren: true, checkParents: true, enabled: true, mode: "multiple"
-                            {{ '}' }}</code> when applied bare.
+                            <code
+                                >{{ "{" }} checkChildren: true, checkParents: true, enabled: true, mode: "multiple"
+                                {{ "}" }}</code
+                            >
+                            when applied bare.
                         </td>
                     </tr>
                 </tbody>
@@ -609,8 +613,8 @@
                         <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
-                            Property name, or accessor, used to derive a node's disable key. Falls back to the
-                            node's data when unset.
+                            Property name, or accessor, used to derive a node's disable key. Falls back to the node's
+                            data when unset.
                         </td>
                     </tr>
                     <tr class="border-b border-border">
@@ -625,7 +629,7 @@
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
                             Whether disabling a node also disables its children. Merged over
-                            <code>{{ '{' }} disableChildren: true, enabled: true {{ '}' }}</code> when applied bare.
+                            <code>{{ "{" }} disableChildren: true, enabled: true {{ "}" }}</code> when applied bare.
                         </td>
                     </tr>
                 </tbody>
@@ -650,8 +654,8 @@
                         <td class="py-2 pr-4"><code>NodeKeySelector&lt;T, K&gt; | undefined</code></td>
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
-                            Property name, or accessor, used to derive a node's expand key. Falls back to the
-                            node's data when unset.
+                            Property name, or accessor, used to derive a node's expand key. Falls back to the node's
+                            data when unset.
                         </td>
                     </tr>
                     <tr class="border-b border-border">
@@ -668,7 +672,7 @@
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
                             Whether expanding and collapsing nodes is enabled. Merged over
-                            <code>{{ '{' }} enabled: true {{ '}' }}</code> when applied bare.
+                            <code>{{ "{" }} enabled: true {{ "}" }}</code> when applied bare.
                         </td>
                     </tr>
                 </tbody>
@@ -731,8 +735,11 @@
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
                             Filter operator, case sensitivity, and debounce delay. Merged over
-                            <code>{{ '{' }} enabled: true, operator: "contains", caseSensitive: false, debounce: 0
-                            {{ '}' }}</code> when applied bare.
+                            <code
+                                >{{ "{" }} enabled: true, operator: "contains", caseSensitive: false, debounce: 0
+                                {{ "}" }}</code
+                            >
+                            when applied bare.
                         </td>
                     </tr>
                 </tbody>
@@ -773,7 +780,7 @@
                         <td class="py-2 pr-4"><code>""</code></td>
                         <td class="py-2">
                             Whether dragging nodes to reorder or reparent them is enabled. Merged over
-                            <code>{{ '{' }} enabled: true {{ '}' }}</code> when applied bare.
+                            <code>{{ "{" }} enabled: true {{ "}" }}</code> when applied bare.
                         </td>
                     </tr>
                 </tbody>
@@ -813,7 +820,7 @@
 
         <app-section id="apiTypes" [header]="'Exported Types'" headerType="H3">
             <p>
-                <code>NodeItem&lt;T&gt;</code>, <code>NodeMoveSnapshot</code>, <code>TreeSelectableOptions</code>,
+                <code>NodeItem&lt;T&gt;</code>, <code>NodeMoveSnapshot</code>, <code>SelectableOptions</code>,
                 <code>CheckableOptions</code>, <code>DisableOptions</code>, <code>ExpandableOptions</code>,
                 <code>DraggableOptions</code>, <code>FilterableOptions</code>, <code>ChildrenSelector&lt;T&gt;</code>,
                 <code>NodeKeySelector&lt;T, K&gt;</code>, <code>NodeClickEvent&lt;T&gt;</code>,
@@ -823,9 +830,9 @@
                 <code>FilterChangeEvent</code> are exported from <code>mona-ui</code>.
             </p>
             <p>
-                TODO(owner-review): <code>DataStructure</code> (the <code>mode</code> input's type) and the
-                interface behind <code>NodeDropEvent.treeView</code> are used in public signatures but are not
-                exported from <code>mona-ui</code>.
+                TODO(owner-review): <code>DataStructure</code> (the <code>mode</code> input's type) and the interface
+                behind <code>NodeDropEvent.treeView</code> are used in public signatures but are not exported from
+                <code>mona-ui</code>.
             </p>
         </app-section>
     </app-section>

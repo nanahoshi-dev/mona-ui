@@ -25,7 +25,7 @@ export * from "./models/TreeNode";
 export * from "./models/TreeNodeCheckEvent";
 export * from "./models/TreeNodeExpandEvent";
 export * from "./models/TreeNodeSelectEvent";
-export * from "./models/TreeSelectableOptions";
+export * from "./models/SelectableOptions";
 export * from "./models/TreeSelectors";
 export * from "./services/tree.service";
 export * from "./utils/moveFlatTreeNode";

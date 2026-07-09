@@ -40,3 +40,13 @@ testem.log
 .DS_Store
 Thumbs.db
 /dist/
+
+
+# Agents
+.agents/
+.ai/
+.antigravitycli/
+.claude/
+.codex/
+.junie/
+.mimocode/
