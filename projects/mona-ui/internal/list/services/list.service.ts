@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from "@angular/core";
-import { FilterableOptions, FilterChangeEvent, VirtualScrollOptions } from "@mirei/mona-ui/common";
+import { FilterableOptions, FilterChangeEvent, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     from,
     IEnumerable,

@@ -1,5 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     timeSelectorListThemeVariants,
     TimeSelectorListVariantInput,

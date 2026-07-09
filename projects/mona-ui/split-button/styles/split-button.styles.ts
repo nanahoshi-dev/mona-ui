@@ -1,5 +1,5 @@
-import { ThemeStyle } from "@mirei/mona-ui/theme";
-import { VariantInputs } from "@mirei/mona-ui/internal";
+import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 import { splitButtonVariants as monaSplitButtonVariants } from "./split-button.mona.styles";
 

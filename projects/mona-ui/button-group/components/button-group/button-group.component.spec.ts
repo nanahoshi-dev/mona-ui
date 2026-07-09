@@ -2,7 +2,7 @@ import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
-import { SelectionMode } from "@mirei/mona-ui/common";
+import { SelectionMode } from "@nanahoshi/mona-ui/common";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { ButtonService } from "../../../button/services/button.service";
 import { ButtonGroupVariantProps } from "../../styles/button-group.styles";

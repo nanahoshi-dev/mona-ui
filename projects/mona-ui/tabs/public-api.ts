@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/tabs
+ * Public API Surface of @nanahoshi/mona-ui/tabs
  */
 
 export * from "./models/TabCloseEvent";

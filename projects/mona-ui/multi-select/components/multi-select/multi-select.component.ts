@@ -19,8 +19,8 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { ChipComponent } from "@mirei/mona-ui/chip";
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { ChipComponent } from "@nanahoshi/mona-ui/chip";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     DropdownDataHandlerDirective,
     DropdownDataInput,
@@ -40,9 +40,9 @@ import {
     DropdownPopupVariantInput,
     DropdownPrefixTemplateDirective,
     DropdownService
-} from "@mirei/mona-ui/dropdowns";
-import { createElementControlId, restoreOverlayScroll, rxFromResize } from "@mirei/mona-ui/internal";
-import { IndicatorIconComponent } from "@mirei/mona-ui/internal/indicator-icon";
+} from "@nanahoshi/mona-ui/dropdowns";
+import { createElementControlId, restoreOverlayScroll, rxFromResize } from "@nanahoshi/mona-ui/internal";
+import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
     ListFooterTemplateDirective,
@@ -53,9 +53,9 @@ import {
     ListNoDataTemplateDirective,
     ListService,
     ListSizeInputType
-} from "@mirei/mona-ui/internal/list";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { ThemeService } from "@mirei/mona-ui/theme";
+} from "@nanahoshi/mona-ui/internal/list";
+import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { none } from "@mirei/ts-collections";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";

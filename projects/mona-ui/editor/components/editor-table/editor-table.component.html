@@ -2,7 +2,11 @@
     <button monaButton title="Insert table" #insertTableButton>
         <i class="ri-grid-line"></i>
     </button>
-    <button monaButton [disabled]="addColumnBeforeDisabled()" (click)="onAddColumnBeforeClick()" title="Add column before">
+    <button
+        monaButton
+        [disabled]="addColumnBeforeDisabled()"
+        (click)="onAddColumnBeforeClick()"
+        title="Add column before">
         <i class="ri-insert-column-left"></i>
     </button>
     <button monaButton [disabled]="addColumnAfterDisabled()" (click)="onAddColumnAfterClick()" title="Add column after">

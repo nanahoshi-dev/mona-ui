@@ -1,5 +1,5 @@
 import { Component, computed, inject, input } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import {
     placeholderBaseThemeVariants,

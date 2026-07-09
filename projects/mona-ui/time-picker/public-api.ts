@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/time-picker
+ * Public API Surface of @nanahoshi/mona-ui/time-picker
  */
 
 export * from "./components/time-picker/time-picker.component";

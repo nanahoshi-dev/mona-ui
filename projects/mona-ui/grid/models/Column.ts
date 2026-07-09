@@ -1,6 +1,6 @@
 import type { TemplateRef } from "@angular/core";
-import type { DataType } from "@mirei/mona-ui/common";
-import type { SortDirection } from "@mirei/mona-ui/query";
+import type { DataType } from "@nanahoshi/mona-ui/common";
+import type { SortDirection } from "@nanahoshi/mona-ui/query";
 import type { AggregateFunction } from "./AggregateFunction";
 import type { GridColumnLockedPosition } from "./GridColumnLockedPosition";
 

@@ -77,10 +77,7 @@ describe("TimeSelectorComponent", () => {
 @Component({
     imports: [TimeSelectorComponent, FormField],
     template: `
-        <mona-time-selector
-            [formField]="form.time"
-            [focusOnMount]="false"
-            [footer]="false"></mona-time-selector>
+        <mona-time-selector [formField]="form.time" [focusOnMount]="false" [footer]="false"></mona-time-selector>
     `
 })
 class TimeSelectorHostComponent {

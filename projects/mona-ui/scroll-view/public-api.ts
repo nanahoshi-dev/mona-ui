@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/scroll-view
+ * Public API Surface of @nanahoshi/mona-ui/scroll-view
  */
 
 export * from "./components/scroll-view/scroll-view.component";

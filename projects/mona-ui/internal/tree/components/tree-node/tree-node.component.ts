@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { filter, map, Subject, tap } from "rxjs";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeClickEvent } from "../../models/NodeClickEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";

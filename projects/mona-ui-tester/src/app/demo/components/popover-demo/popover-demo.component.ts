@@ -1,12 +1,12 @@
 import { NgComponentOutlet, NgOptimizedImage } from "@angular/common";
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
 import { LucideX } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     PopoverComponent,
     PopoverFooterTemplateDirective,
     PopoverTitleTemplateDirective
-} from "@mirei/mona-ui/popover";
+} from "@nanahoshi/mona-ui/popover";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

@@ -13,8 +13,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import { FilterChangeEvent } from "@mirei/mona-ui/common";
-import { TextBoxComponent, TextBoxPrefixTemplateDirective } from "@mirei/mona-ui/text-box";
+import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { TextBoxComponent, TextBoxPrefixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
 import { debounceTime, fromEvent, Subject } from "rxjs";
 
 @Component({

@@ -15,7 +15,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asapScheduler, filter, fromEvent, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";

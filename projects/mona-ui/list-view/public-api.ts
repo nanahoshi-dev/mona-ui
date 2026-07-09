@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/list-view
+ * Public API Surface of @nanahoshi/mona-ui/list-view
  */
 
 export * from "./components/list-view/list-view.component";
@@ -15,4 +15,4 @@ export * from "./directives/list-view-pageable.directive";
 export * from "./directives/list-view-selectable.directive";
 export * from "./directives/list-view-virtual-scroll.directive";
 
-export { NavigableOptions } from "@mirei/mona-ui/internal/list";
+export { NavigableOptions } from "@nanahoshi/mona-ui/internal/list";

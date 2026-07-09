@@ -1,7 +1,7 @@
 import { Component, computed, inject, viewChild } from "@angular/core";
-import { ButtonGroupComponent } from "@mirei/mona-ui/button-group";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { PopoverComponent } from "@mirei/mona-ui/popover";
+import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { PopoverComponent } from "@nanahoshi/mona-ui/popover";
 import { EditorTableInsertEvent } from "../../models/EditorTableInsertEvent";
 import { EditorService } from "../../services/editor.service";
 import { EditorTableCreatorComponent } from "../editor-table-creator/editor-table-creator.component";

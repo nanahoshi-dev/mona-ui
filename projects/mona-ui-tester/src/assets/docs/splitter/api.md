@@ -12,7 +12,7 @@ Each pane controls its own sizing through `size`, `min`, and `max`, and can opt 
 ## Import & Basic Usage
 
 ```typescript
-import { SplitterComponent, SplitterPaneComponent } from "@mirei/mona-ui";
+import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add both to your standalone component's `imports` array.
@@ -101,10 +101,10 @@ A collapsed pane's content is hidden and its size reduced to zero; expanding it 
 
 ### Orientation
 
-| `orientation` | Layout |
-|---|---|
-| `horizontal` (default) | Panes arranged in a row, draggable bars are vertical |
-| `vertical` | Panes arranged in a column, draggable bars are horizontal |
+| `orientation`          | Layout                                                    |
+|------------------------|-----------------------------------------------------------|
+| `horizontal` (default) | Panes arranged in a row, draggable bars are vertical      |
+| `vertical`             | Panes arranged in a column, draggable bars are horizontal |
 
 ### Custom classes
 
@@ -114,26 +114,26 @@ A collapsed pane's content is hidden and its size reduced to zero; expanding it 
 
 The resizer bar between two panes renders `role="separator"` with the following managed attributes:
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"separator"` |
-| `aria-orientation` | Always | Matches the splitter's `orientation` |
-| `aria-valuenow` | Always | Current size, in pixels, of the pane before the bar |
-| `aria-valuemin` | Always | Minimum size, in pixels, the pane before the bar can shrink to |
-| `aria-valuemax` | Always | Maximum size, in pixels, the pane before the bar can currently grow to |
-| `tabindex` | Always | `"0"`, or `"-1"` when the bar cannot be dragged (either adjacent pane has `resizable` set to `false`) and neither adjacent pane is `collapsible` |
-| `aria-hidden` | On a pane's content wrapper, while that pane is `collapsible` and `collapsed` | `"true"` |
+| Attribute          | When present                                                                  | Value                                                                                                                                            |
+|--------------------|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `role`             | Always                                                                        | `"separator"`                                                                                                                                    |
+| `aria-orientation` | Always                                                                        | Matches the splitter's `orientation`                                                                                                             |
+| `aria-valuenow`    | Always                                                                        | Current size, in pixels, of the pane before the bar                                                                                              |
+| `aria-valuemin`    | Always                                                                        | Minimum size, in pixels, the pane before the bar can shrink to                                                                                   |
+| `aria-valuemax`    | Always                                                                        | Maximum size, in pixels, the pane before the bar can currently grow to                                                                           |
+| `tabindex`         | Always                                                                        | `"0"`, or `"-1"` when the bar cannot be dragged (either adjacent pane has `resizable` set to `false`) and neither adjacent pane is `collapsible` |
+| `aria-hidden`      | On a pane's content wrapper, while that pane is `collapsible` and `collapsed` | `"true"`                                                                                                                                         |
 
 Each collapse button rendered on hover has an `aria-label` describing its action (e.g. "Collapse previous pane" / "Collapse next pane" for horizontal splitters, "Collapse pane above" / "Collapse pane below" for vertical splitters).
 
 **Keyboard map** (when a resizer bar has focus):
 
-| Key | Action |
-|---|---|
-| `ArrowLeft` / `ArrowRight` (horizontal) or `ArrowUp` / `ArrowDown` (vertical) | Resize the adjacent panes by a fixed step. Works as long as at least one of the two adjacent panes is resizable. |
-| `Alt` + arrow key (same mapping as above) | Collapse the adjacent collapsible pane in that direction. No-op if that pane is not collapsible. |
-| `Enter` | Toggle collapse/expand of the nearest collapsible pane, preferring a pane that is already collapsed. |
-| `Tab` / `Shift+Tab` | Move focus to the next/previous resizer bar within the same splitter instead of the browser's default focus order. |
+| Key                                                                           | Action                                                                                                             |
+|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
+| `ArrowLeft` / `ArrowRight` (horizontal) or `ArrowUp` / `ArrowDown` (vertical) | Resize the adjacent panes by a fixed step. Works as long as at least one of the two adjacent panes is resizable.   |
+| `Alt` + arrow key (same mapping as above)                                     | Collapse the adjacent collapsible pane in that direction. No-op if that pane is not collapsible.                   |
+| `Enter`                                                                       | Toggle collapse/expand of the nearest collapsible pane, preferring a pane that is already collapsed.               |
+| `Tab` / `Shift+Tab`                                                           | Move focus to the next/previous resizer bar within the same splitter instead of the browser's default focus order. |
 
 Because `Tab` jumps directly between resizer bars, focusable elements projected inside a pane that sits between two resizer bars may not be reachable by tabbing through the splitter — tab into that pane's content before reaching its surrounding resizer bars.
 
@@ -147,8 +147,8 @@ No additional ARIA wiring is required from the consumer for the splitter or its 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
+| Name          | Type                         | Default        | Description                                 |
+|---------------|------------------------------|----------------|---------------------------------------------|
 | `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | The layout direction of the splitter panes. |
 
 `SplitterComponent` has no outputs.
@@ -159,14 +159,14 @@ No additional ARIA wiring is required from the consumer for the splitter or its 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `collapsed` | `boolean` | `false` | Two-way bindable collapsed state. When `true`, the pane's content is hidden and its size reduced to zero. |
-| `collapsible` | `boolean` | `false` | Allows the pane to be collapsed and expanded via the adjacent resizer bar's double-click, hover controls, or keyboard. |
-| `max` | `string \| number \| null` | `null` | Maximum size, in pixels, the pane can grow to. Accepts a number or a pixel-suffixed string (e.g. `"400px"`); percentage and `fr` values are not supported. |
-| `min` | `string \| number \| null` | `null` | Minimum size, in pixels, the pane can shrink to. Accepts a number or a pixel-suffixed string (e.g. `"120px"`); percentage and `fr` values are not supported. |
-| `resizable` | `boolean` | `true` | Allows the pane to be resized by dragging the resizer bar(s) adjacent to it. Setting this to `false` disables dragging on both adjacent bars. |
-| `size` | `string \| number` | `''` | Two-way bindable pane size. Accepts a pixel number, a CSS length string (e.g. `"240px"`, `"20%"`), or a proportional `"<n>fr"` string. Left empty, the pane absorbs the splitter's remaining space; see Pane Sizing above. |
+| Name          | Type                       | Default | Description                                                                                                                                                                                                                |
+|---------------|----------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `collapsed`   | `boolean`                  | `false` | Two-way bindable collapsed state. When `true`, the pane's content is hidden and its size reduced to zero.                                                                                                                  |
+| `collapsible` | `boolean`                  | `false` | Allows the pane to be collapsed and expanded via the adjacent resizer bar's double-click, hover controls, or keyboard.                                                                                                     |
+| `max`         | `string \| number \| null` | `null`  | Maximum size, in pixels, the pane can grow to. Accepts a number or a pixel-suffixed string (e.g. `"400px"`); percentage and `fr` values are not supported.                                                                 |
+| `min`         | `string \| number \| null` | `null`  | Minimum size, in pixels, the pane can shrink to. Accepts a number or a pixel-suffixed string (e.g. `"120px"`); percentage and `fr` values are not supported.                                                               |
+| `resizable`   | `boolean`                  | `true`  | Allows the pane to be resized by dragging the resizer bar(s) adjacent to it. Setting this to `false` disables dragging on both adjacent bars.                                                                              |
+| `size`        | `string \| number`         | `''`    | Two-way bindable pane size. Accepts a pixel number, a CSS length string (e.g. `"240px"`, `"20%"`), or a proportional `"<n>fr"` string. Left empty, the pane absorbs the splitter's remaining space; see Pane Sizing above. |
 
 `SplitterPaneComponent` has no outputs. Observe `[(size)]` and `[(collapsed)]` to react to changes.
 

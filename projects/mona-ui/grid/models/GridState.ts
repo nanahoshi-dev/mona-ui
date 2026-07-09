@@ -1,4 +1,4 @@
-import type { FilterLogic, FilterOperators, SortDirection } from "@mirei/mona-ui/query";
+import type { FilterLogic, FilterOperators, SortDirection } from "@nanahoshi/mona-ui/query";
 import type { GroupDescriptor } from "./GroupDescriptor";
 
 export type GridStateVersion = 1;

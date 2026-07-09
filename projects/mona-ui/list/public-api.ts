@@ -4,4 +4,4 @@ export {
     ListKeySelector,
     SelectableOptions,
     SelectionChangeEvent
-} from "@mirei/mona-ui/internal/list";
+} from "@nanahoshi/mona-ui/internal/list";

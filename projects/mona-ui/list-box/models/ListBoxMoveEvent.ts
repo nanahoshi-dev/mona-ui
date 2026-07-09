@@ -1,4 +1,4 @@
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { ToolbarAction } from "./ToolbarOptions";
 
 export class ListBoxMoveEvent<T = any> extends PreventableEvent {

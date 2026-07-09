@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/pager
+ * Public API Surface of @nanahoshi/mona-ui/pager
  */
 
 export * from "./components/pager/pager.component";

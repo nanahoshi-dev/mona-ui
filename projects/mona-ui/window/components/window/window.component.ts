@@ -13,7 +13,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
+import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { take } from "rxjs";
 import { WindowActionTemplateDirective } from "../../directives/window-action-template.directive";
 import { WindowContentTemplateDirective } from "../../directives/window-content-template.directive";

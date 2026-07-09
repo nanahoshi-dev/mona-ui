@@ -1,56 +1,65 @@
-<button monaButton [look]="look()" [size]="size()"
-        [iconOnly]="iconOnly()"
-        [loading]="loading()"
-        [rounded]="rounded()"
-        [disabled]="disabled()"
-        [attr.aria-label]="ariaLabelledby() ? null : (dropdownButtonAriaLabel() || null)"
-        [attr.aria-labelledby]="ariaLabelledby() || null"
-        [attr.aria-haspopup]="'menu'"
-        [attr.aria-expanded]="isMenuOpen()"
-        [attr.aria-controls]="menuId"
-        #dropdownButton>
+<button
+    monaButton
+    [look]="look()"
+    [size]="size()"
+    [iconOnly]="iconOnly()"
+    [loading]="loading()"
+    [rounded]="rounded()"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabelledby() ? null : dropdownButtonAriaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledby() || null"
+    [attr.aria-haspopup]="'menu'"
+    [attr.aria-expanded]="isMenuOpen()"
+    [attr.aria-controls]="menuId"
+    #dropdownButton>
     @if (textTemplate()) {
-        <ng-container [ngTemplateOutlet]="textTemplate()"
-                      [ngTemplateOutletContext]="{$implicit: text()}"></ng-container>
+        <ng-container
+            [ngTemplateOutlet]="textTemplate()"
+            [ngTemplateOutletContext]="{ $implicit: text() }"></ng-container>
     } @else {
         {{ text() }}
     }
 </button>
 
-<mona-popup-menu #popupMenu
-                 (close)="onMenuClose()"
-                 (menuClick)="onMenuItemClick($event)"
-                 (open)="onMenuOpen()"
-                 [anchorConnectionPoint]="'bottomcenter'"
-                 [id]="menuId"
-                 [items]="menuItems()"
-                 [offset]="{horizontal: 0, vertical: 2}"
-                 [popupConnectionPoint]="'topcenter'"
-                 [size]="size()"
-                 [target]="dropdownButton"
-                 [trigger]="'click'">
+<mona-popup-menu
+    #popupMenu
+    (close)="onMenuClose()"
+    (menuClick)="onMenuItemClick($event)"
+    (open)="onMenuOpen()"
+    [anchorConnectionPoint]="'bottomcenter'"
+    [id]="menuId"
+    [items]="menuItems()"
+    [offset]="{ horizontal: 0, vertical: 2 }"
+    [popupConnectionPoint]="'topcenter'"
+    [size]="size()"
+    [target]="dropdownButton"
+    [trigger]="'click'">
     @if (groupTemplate()) {
         <ng-template monaPopupMenuGroupTemplate let-group>
-            <ng-container [ngTemplateOutlet]="groupTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: group}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="groupTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: group }"></ng-container>
         </ng-template>
     }
     @if (menuItemIconTemplate()) {
         <ng-template monaPopupMenuIconTemplate let-item>
-            <ng-container [ngTemplateOutlet]="menuItemIconTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="menuItemIconTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
         </ng-template>
     }
     @if (menuItemShortcutTemplate()) {
         <ng-template monaPopupMenuShortcutTemplate let-item>
-            <ng-container [ngTemplateOutlet]="menuItemShortcutTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="menuItemShortcutTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
         </ng-template>
     }
     @if (menuItemTextTemplate()) {
         <ng-template monaPopupMenuTextTemplate let-item>
-            <ng-container [ngTemplateOutlet]="menuItemTextTemplate()"
-                          [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+            <ng-container
+                [ngTemplateOutlet]="menuItemTextTemplate()"
+                [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
         </ng-template>
     }
 </mona-popup-menu>

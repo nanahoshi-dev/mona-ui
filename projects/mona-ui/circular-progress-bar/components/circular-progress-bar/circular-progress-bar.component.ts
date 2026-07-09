@@ -1,8 +1,8 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
-import { getPercentage } from "@mirei/mona-ui/common";
-import type { Action } from "@mirei/mona-ui/internal";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { getPercentage } from "@nanahoshi/mona-ui/common";
+import type { Action } from "@nanahoshi/mona-ui/internal";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {

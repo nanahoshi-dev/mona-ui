@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input, model, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { type FormCheckboxControl } from "@angular/forms/signals";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import {
     checkboxContainerLabelThemeVariants,

@@ -15,8 +15,8 @@ import {
     SplitButtonRadioItemComponent,
     SplitButtonSeparatorComponent,
     SplitButtonTextTemplateDirective
-} from "@mirei/mona-ui/split-button";
-import { MenuItemClickEvent } from "@mirei/mona-ui/menubar";
+} from "@nanahoshi/mona-ui/split-button";
+import { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

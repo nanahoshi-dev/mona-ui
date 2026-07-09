@@ -16,9 +16,9 @@ For a plain styled `<input>` without a wrapper element, use `TextBoxDirective` (
 ## Import & Basic Usage
 
 ```typescript
-import { TextBoxComponent } from "@mirei/mona-ui";
+import { TextBoxComponent } from "@nanahoshi/mona-ui";
 // For template slots:
-import { TextBoxPrefixTemplateDirective, TextBoxSuffixTemplateDirective } from "@mirei/mona-ui";
+import { TextBoxPrefixTemplateDirective, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 Add the imported symbols to your standalone component's `imports` array.
@@ -107,11 +107,11 @@ Multiple prefix and suffix templates are supported and render in source order.
 
 ### `size` presets
 
-| `size`   | Height | Font size           |
-|----------|--------|---------------------|
-| `small`  | 32px   | Extra-small         |
-| `medium` | 36px   | Small (default)     |
-| `large`  | 40px   | Medium              |
+| `size`   | Height | Font size       |
+|----------|--------|-----------------|
+| `small`  | 32px   | Extra-small     |
+| `medium` | 36px   | Small (default) |
+| `large`  | 40px   | Medium          |
 
 ### Visual states
 
@@ -151,8 +151,8 @@ Or reference an external label element:
 <mona-text-box [inputAttributes]="{ 'aria-labelledby': 'search-label' }"></mona-text-box>
 ```
 
-| Attribute      | When present                        | Value    |
-|----------------|-------------------------------------|----------|
+| Attribute      | When present                          | Value    |
+|----------------|---------------------------------------|----------|
 | `aria-invalid` | When the text box is in invalid state | `"true"` |
 
 **Consumer responsibilities:**
@@ -169,36 +169,36 @@ Implements `FormValueControl<string>` from `@angular/forms/signals`. Use the `[f
 
 #### Inputs
 
-| Name              | Type                                                    | Default    | Description |
-|-------------------|---------------------------------------------------------|------------|-------------|
-| `class`           | `string`                                                | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `clearButton`     | `boolean`                                               | `false`    | Displays a clear button that resets the value to empty. The button only appears when the value is non-empty. |
-| `disabled`        | `boolean`                                               | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `inputAttributes` | `Record<string, unknown>`                               | `{}`       | Additional HTML attributes applied directly to the inner `<input>` element. Use for `aria-label`, `aria-labelledby`, `autocomplete`, `min`, `max`, `pattern`, and similar. |
-| `inputClass`      | `string \| string[]`                                    | `''`       | Additional CSS classes applied to the inner `<input>` element. |
-| `inputStyle`      | `string \| Partial<CSSStyleDeclaration> \| null`        | `null`     | Inline styles applied to the inner `<input>` element. |
-| `invalid`         | `boolean`                                               | `false`    | Marks the text box as invalid. When using `[formField]`, the `FormField` directive writes this automatically. |
-| `placeholder`     | `string`                                                | `''`       | Placeholder text shown when no value has been entered. |
-| `readonly`        | `boolean`                                               | `false`    | Prevents value changes while preserving the component's visual state. |
-| `required`        | `boolean`                                               | `false`    | Marks the text box as required. Triggers the invalid state when the value is empty and `touched` is `true`. |
-| `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset applied to the component. |
-| `size`            | `'small' \| 'medium' \| 'large'`                        | `'medium'` | Size preset controlling the component's dimensions. |
-| `touched`         | `boolean`                                               | `false`    | Sets the touched state. When using `[formField]`, the `FormField` directive writes this automatically. |
-| `type`            | `'email' \| 'password' \| 'text'`                       | `'text'`   | Sets the `type` attribute of the inner `<input>` element. |
-| `value`           | `string`                                                | `''`       | Two-way bindable current value of the text box. |
+| Name              | Type                                                 | Default    | Description                                                                                                                                                                |
+|-------------------|------------------------------------------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `class`           | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                  |
+| `clearButton`     | `boolean`                                            | `false`    | Displays a clear button that resets the value to empty. The button only appears when the value is non-empty.                                                               |
+| `disabled`        | `boolean`                                            | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                        |
+| `inputAttributes` | `Record<string, unknown>`                            | `{}`       | Additional HTML attributes applied directly to the inner `<input>` element. Use for `aria-label`, `aria-labelledby`, `autocomplete`, `min`, `max`, `pattern`, and similar. |
+| `inputClass`      | `string \| string[]`                                 | `''`       | Additional CSS classes applied to the inner `<input>` element.                                                                                                             |
+| `inputStyle`      | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`     | Inline styles applied to the inner `<input>` element.                                                                                                                      |
+| `invalid`         | `boolean`                                            | `false`    | Marks the text box as invalid. When using `[formField]`, the `FormField` directive writes this automatically.                                                              |
+| `placeholder`     | `string`                                             | `''`       | Placeholder text shown when no value has been entered.                                                                                                                     |
+| `readonly`        | `boolean`                                            | `false`    | Prevents value changes while preserving the component's visual state.                                                                                                      |
+| `required`        | `boolean`                                            | `false`    | Marks the text box as required. Triggers the invalid state when the value is empty and `touched` is `true`.                                                                |
+| `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the component.                                                                                                                             |
+| `size`            | `'small' \| 'medium' \| 'large'`                     | `'medium'` | Size preset controlling the component's dimensions.                                                                                                                        |
+| `touched`         | `boolean`                                            | `false`    | Sets the touched state. When using `[formField]`, the `FormField` directive writes this automatically.                                                                     |
+| `type`            | `'email' \| 'password' \| 'text'`                    | `'text'`   | Sets the `type` attribute of the inner `<input>` element.                                                                                                                  |
+| `value`           | `string`                                             | `''`       | Two-way bindable current value of the text box.                                                                                                                            |
 
 #### Outputs
 
-| Name         | Type         | Description |
-|--------------|--------------|-------------|
-| `inputBlur`  | `FocusEvent` | Emitted when the inner input loses focus. |
-| `inputFocus` | `FocusEvent` | Emitted when the inner input gains focus. |
+| Name         | Type         | Description                                                                                                                                             |
+|--------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `inputBlur`  | `FocusEvent` | Emitted when the inner input loses focus.                                                                                                               |
+| `inputFocus` | `FocusEvent` | Emitted when the inner input gains focus.                                                                                                               |
 | `touch`      | `void`       | Emitted when the text box is interacted with — on blur, value change, or clear. The `FormField` directive listens to this to mark the field as touched. |
 
 #### Public methods
 
-| Name      | Signature  | Description |
-|-----------|------------|-------------|
+| Name      | Signature  | Description                                                                     |
+|-----------|------------|---------------------------------------------------------------------------------|
 | `focus()` | `(): void` | Programmatically focuses the inner input and scrolls to the end of its content. |
 
 ---

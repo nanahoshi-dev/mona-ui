@@ -1,4 +1,4 @@
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { NodeItem } from "./NodeItem";
 import { TreeNode } from "./TreeNode";
 

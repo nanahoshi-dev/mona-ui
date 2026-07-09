@@ -16,7 +16,7 @@ When both are provided, `text` takes precedence and projected content is not ren
 ## Import & Basic Usage
 
 ```typescript
-import { PlaceholderComponent } from "@mirei/mona-ui";
+import { PlaceholderComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add `PlaceholderComponent` to your standalone component's `imports` array.
@@ -90,9 +90,9 @@ If the placeholder communicates a state change that screen reader users must be 
 
 #### Inputs
 
-| Name    | Type     | Default | Description |
-|---------|----------|---------|-------------|
-| `class` | `string` | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| Name    | Type     | Default | Description                                                                                                         |
+|---------|----------|---------|---------------------------------------------------------------------------------------------------------------------|
+| `class` | `string` | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`.                                           |
 | `text`  | `string` | `''`    | Text displayed as an uppercase muted label inside the placeholder. When non-empty, projected content is suppressed. |
 
 `PlaceholderComponent` has no model inputs and no event outputs.

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/dialog
+ * Public API Surface of @nanahoshi/mona-ui/dialog
  */
 
 export * from "./components/dialog/dialog.component";

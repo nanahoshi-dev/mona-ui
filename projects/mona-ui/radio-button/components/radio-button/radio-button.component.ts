@@ -3,7 +3,7 @@ import { Component, computed, inject, input, model, output } from "@angular/core
 import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     radioButtonCircleThemeVariants,
     radioButtonContainerLabelThemeVariants,

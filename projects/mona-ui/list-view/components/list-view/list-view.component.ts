@@ -25,9 +25,9 @@ import {
     ListKeySelector,
     ListNoDataTemplateDirective,
     ListService
-} from "@mirei/mona-ui/internal/list";
-import { PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@mirei/mona-ui/pager";
-import { ThemeService } from "@mirei/mona-ui/theme";
+} from "@nanahoshi/mona-ui/internal/list";
+import { PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@nanahoshi/mona-ui/pager";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { filter, fromEvent, Subscription } from "rxjs";
 import { twMerge } from "tailwind-merge";

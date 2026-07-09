@@ -7,7 +7,7 @@ Use the calendar as a standalone date selection control when a popup picker is n
 ## Import & Quick Start
 
 ```typescript
-import { CalendarComponent } from "@mirei/mona-ui";
+import { CalendarComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add `CalendarComponent` to your standalone component's `imports` array.
@@ -40,10 +40,10 @@ Replaces the default day number in the month view:
 
 **Template context:**
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `$implicit` (as `let-day`) | `number` | Day of the month (1–31). |
-| `date` | `Date` | Full `Date` object for this cell. |
+| Variable                   | Type     | Description                       |
+|----------------------------|----------|-----------------------------------|
+| `$implicit` (as `let-day`) | `number` | Day of the month (1–31).          |
+| `date`                     | `Date`   | Full `Date` object for this cell. |
 
 ### Year cell — `monaCalendarYearCellTemplate`
 
@@ -59,10 +59,10 @@ Replaces the default month label in the year (month-selection) view:
 
 **Template context:**
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `$implicit` (as `let-month`) | `number` | Month number (1–12). |
-| `text` | `string` | Abbreviated month name (e.g., `"Jan"`, `"Feb"`). |
+| Variable                     | Type     | Description                                      |
+|------------------------------|----------|--------------------------------------------------|
+| `$implicit` (as `let-month`) | `number` | Month number (1–12).                             |
+| `text`                       | `string` | Abbreviated month name (e.g., `"Jan"`, `"Feb"`). |
 
 ### Decade cell — `monaCalendarDecadeCellTemplate`
 
@@ -78,8 +78,8 @@ Replaces the default year label in the decade view:
 
 **Template context:**
 
-| Variable | Type | Description |
-|----------|------|-------------|
+| Variable                    | Type     | Description                        |
+|-----------------------------|----------|------------------------------------|
 | `$implicit` (as `let-year`) | `number` | The year represented by this cell. |
 
 ## Feature Examples
@@ -193,76 +193,76 @@ All keyboard actions are active when the calendar host has focus.
 
 ### Month view
 
-| Key | Action |
-|-----|--------|
-| `ArrowLeft` | Move focus one day back |
-| `ArrowRight` | Move focus one day forward |
-| `ArrowUp` | Move focus one week back |
-| `ArrowDown` | Move focus one week forward |
-| `Ctrl/Cmd + ArrowLeft` | Navigate to previous month |
-| `Ctrl/Cmd + ArrowRight` | Navigate to next month |
-| `Ctrl/Cmd + ArrowUp` | Switch to year view |
-| `Home` | Move focus to first day of the month |
-| `End` | Move focus to last day of the month |
-| `PageUp` | Navigate to previous month |
-| `PageDown` | Navigate to next month |
-| `Enter` / `Space` | Select focused date |
-| `T` | Navigate to today |
+| Key                     | Action                               |
+|-------------------------|--------------------------------------|
+| `ArrowLeft`             | Move focus one day back              |
+| `ArrowRight`            | Move focus one day forward           |
+| `ArrowUp`               | Move focus one week back             |
+| `ArrowDown`             | Move focus one week forward          |
+| `Ctrl/Cmd + ArrowLeft`  | Navigate to previous month           |
+| `Ctrl/Cmd + ArrowRight` | Navigate to next month               |
+| `Ctrl/Cmd + ArrowUp`    | Switch to year view                  |
+| `Home`                  | Move focus to first day of the month |
+| `End`                   | Move focus to last day of the month  |
+| `PageUp`                | Navigate to previous month           |
+| `PageDown`              | Navigate to next month               |
+| `Enter` / `Space`       | Select focused date                  |
+| `T`                     | Navigate to today                    |
 
 ### Multiple selection additions (month view only)
 
-| Key | Action |
-|-----|--------|
-| `Shift + ArrowLeft/Right` | Extend selection by one day |
-| `Shift + ArrowUp/Down` | Extend selection by one week |
-| `Ctrl/Cmd + Enter` | Toggle focused date in the selection |
-| `Shift + Enter` | Select all dates from the last selected to the focused date |
+| Key                       | Action                                                      |
+|---------------------------|-------------------------------------------------------------|
+| `Shift + ArrowLeft/Right` | Extend selection by one day                                 |
+| `Shift + ArrowUp/Down`    | Extend selection by one week                                |
+| `Ctrl/Cmd + Enter`        | Toggle focused date in the selection                        |
+| `Shift + Enter`           | Select all dates from the last selected to the focused date |
 
 ### Year view (month selection)
 
-| Key | Action |
-|-----|--------|
-| `ArrowLeft` / `ArrowRight` | Move focus one month |
-| `ArrowUp` / `ArrowDown` | Move focus three months (one row) |
-| `Ctrl/Cmd + ArrowLeft` | Navigate to previous year |
-| `Ctrl/Cmd + ArrowRight` | Navigate to next year |
-| `Ctrl/Cmd + ArrowDown` | Switch to month view |
-| `Home` | Move focus to January |
-| `End` | Move focus to December |
-| `PageUp` | Navigate to previous year |
-| `PageDown` | Navigate to next year |
-| `Enter` / `Space` | Select month and switch to month view |
+| Key                        | Action                                |
+|----------------------------|---------------------------------------|
+| `ArrowLeft` / `ArrowRight` | Move focus one month                  |
+| `ArrowUp` / `ArrowDown`    | Move focus three months (one row)     |
+| `Ctrl/Cmd + ArrowLeft`     | Navigate to previous year             |
+| `Ctrl/Cmd + ArrowRight`    | Navigate to next year                 |
+| `Ctrl/Cmd + ArrowDown`     | Switch to month view                  |
+| `Home`                     | Move focus to January                 |
+| `End`                      | Move focus to December                |
+| `PageUp`                   | Navigate to previous year             |
+| `PageDown`                 | Navigate to next year                 |
+| `Enter` / `Space`          | Select month and switch to month view |
 
 ### Decade view (year selection)
 
-| Key | Action |
-|-----|--------|
-| `ArrowLeft` / `ArrowRight` | Move focus one year |
-| `ArrowUp` / `ArrowDown` | Move focus four years (one row) |
-| `Ctrl/Cmd + ArrowLeft` | Navigate to previous decade |
-| `Ctrl/Cmd + ArrowRight` | Navigate to next decade |
-| `Ctrl/Cmd + ArrowDown` | Switch to year view |
-| `Home` | Move focus to first year of decade |
-| `End` | Move focus to last year of decade |
-| `PageUp` | Navigate to previous decade |
-| `PageDown` | Navigate to next decade |
-| `Enter` / `Space` | Select year and switch to year view |
+| Key                        | Action                              |
+|----------------------------|-------------------------------------|
+| `ArrowLeft` / `ArrowRight` | Move focus one year                 |
+| `ArrowUp` / `ArrowDown`    | Move focus four years (one row)     |
+| `Ctrl/Cmd + ArrowLeft`     | Navigate to previous decade         |
+| `Ctrl/Cmd + ArrowRight`    | Navigate to next decade             |
+| `Ctrl/Cmd + ArrowDown`     | Switch to year view                 |
+| `Home`                     | Move focus to first year of decade  |
+| `End`                      | Move focus to last year of decade   |
+| `PageUp`                   | Navigate to previous decade         |
+| `PageDown`                 | Navigate to next decade             |
+| `Enter` / `Space`          | Select year and switch to year view |
 
 ## Accessibility Notes
 
 The host element carries `role="application"` and a dynamic `aria-label` that describes the current view and position (e.g., `"Calendar, June 2025"`, `"Year view, 2025"`, `"Decade view, 2020–2029"`). An `aria-live="polite"` region announces view changes for screen readers.
 
-| Attribute | When present | Value |
-|-----------|--------------|-------|
-| `role` | Always (host) | `"application"` |
-| `aria-label` | Always (host) | Current view description |
-| `aria-invalid` | When `invalid` is `true` | `"true"` |
-| `tabindex` | Always (host) | `0` when enabled, `-1` when disabled |
-| `aria-selected` | On each day, month, and year cell when selected | `"true"` |
-| `aria-disabled` | On month-view day cells when the date is disabled | `"true"` |
-| `aria-current` | On the current day (month view) | `"date"` |
-| `aria-current` | On the current month (year view) | `"date"` |
-| `aria-label` | On year cells, decade cells, and navigation buttons | Descriptive text |
+| Attribute       | When present                                        | Value                                |
+|-----------------|-----------------------------------------------------|--------------------------------------|
+| `role`          | Always (host)                                       | `"application"`                      |
+| `aria-label`    | Always (host)                                       | Current view description             |
+| `aria-invalid`  | When `invalid` is `true`                            | `"true"`                             |
+| `tabindex`      | Always (host)                                       | `0` when enabled, `-1` when disabled |
+| `aria-selected` | On each day, month, and year cell when selected     | `"true"`                             |
+| `aria-disabled` | On month-view day cells when the date is disabled   | `"true"`                             |
+| `aria-current`  | On the current day (month view)                     | `"date"`                             |
+| `aria-current`  | On the current month (year view)                    | `"date"`                             |
+| `aria-label`    | On year cells, decade cells, and navigation buttons | Descriptive text                     |
 
 **Known gaps — TODO(owner-review):**
 
@@ -278,13 +278,13 @@ The host element carries `role="application"` and a dynamic `aria-label` that de
 
 The `FormField` directive writes the following inputs automatically when a `[formField]` binding is active:
 
-| Input | Written by `FormField` |
-|-------|------------------------|
-| `disabled` | ✓ |
-| `invalid` | ✓ |
-| `readonly` | ✓ |
-| `required` | ✓ |
-| `touched` | ✓ |
+| Input      | Written by `FormField` |
+|------------|------------------------|
+| `disabled` | ✓                      |
+| `invalid`  | ✓                      |
+| `readonly` | ✓                      |
+| `required` | ✓                      |
+| `touched`  | ✓                      |
 
 The `touch` output fires each time the user completes a date selection. `FormField` listens to this output to mark the field as touched.
 
@@ -300,27 +300,27 @@ Implements `FormValueControl<Date | Date[] | null>` from `@angular/forms/signals
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `class` | `string` | `''` | Additional CSS classes merged onto the calendar host element. |
-| `disabled` | `boolean` | `false` | Two-way bindable. Renders the calendar with reduced visual emphasis and prevents all date selection and navigation. |
-| `disabledDates` | `Iterable<Date> \| ((date: Date) => boolean) \| null \| undefined` | `undefined` | Dates to mark as non-selectable. Accepts an iterable of specific `Date` objects or a predicate called for each rendered date. Dates outside `minDate`–`maxDate` are also disabled regardless of this input. |
-| `firstDay` | `'monday' \| 'sunday'` | `'monday'` | First day of the week in the month view column headers and grid layout. |
-| `invalid` | `boolean` | `false` | Marks the calendar as invalid, activating an error-color border. Written automatically by the signal forms `FormField` directive. |
-| `maxDate` | `Date \| null` | `undefined` | Latest selectable date (inclusive). Dates after this value are disabled. |
-| `minDate` | `Date \| null` | `undefined` | Earliest selectable date (inclusive). Dates before this value are disabled. |
-| `readonly` | `boolean` | `false` | Prevents date selection while keeping navigation active. Written automatically by the signal forms `FormField` directive. |
-| `required` | `boolean` | `false` | Marks the field as required. When used with signal forms and `touched` is `true`, an empty selection is treated as invalid. Written automatically by the signal forms `FormField` directive. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the calendar container. |
-| `selection` | `'single' \| 'multiple' \| 'range'` | `'single'` | Date selection mode. `'single'` emits a `Date \| null`. `'multiple'` emits a `Date[]`. `'range'` emits a two-element `Date[]` as `[startDate, endDate]`. |
-| `touched` | `boolean` | `false` | Marks the field as having been interacted with. Used together with `required` and `invalid` to determine validation display. Written automatically by the signal forms `FormField` directive. |
-| `value` | `Date \| Date[] \| null` | `null` | Two-way bindable current selection. The expected shape depends on `selection`: a `Date \| null` for `'single'`, a `Date[]` for `'multiple'`, and `[startDate, endDate]` for `'range'`. Implements `FormValueControl<Date \| Date[] \| null>`, enabling signal forms `[formField]` binding. |
-| `weekNumber` | `boolean` | `false` | Shows ISO week numbers in a left column of the month grid. |
+| Name            | Type                                                               | Default     | Description                                                                                                                                                                                                                                                                                |
+|-----------------|--------------------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `class`         | `string`                                                           | `''`        | Additional CSS classes merged onto the calendar host element.                                                                                                                                                                                                                              |
+| `disabled`      | `boolean`                                                          | `false`     | Two-way bindable. Renders the calendar with reduced visual emphasis and prevents all date selection and navigation.                                                                                                                                                                        |
+| `disabledDates` | `Iterable<Date> \| ((date: Date) => boolean) \| null \| undefined` | `undefined` | Dates to mark as non-selectable. Accepts an iterable of specific `Date` objects or a predicate called for each rendered date. Dates outside `minDate`–`maxDate` are also disabled regardless of this input.                                                                                |
+| `firstDay`      | `'monday' \| 'sunday'`                                             | `'monday'`  | First day of the week in the month view column headers and grid layout.                                                                                                                                                                                                                    |
+| `invalid`       | `boolean`                                                          | `false`     | Marks the calendar as invalid, activating an error-color border. Written automatically by the signal forms `FormField` directive.                                                                                                                                                          |
+| `maxDate`       | `Date \| null`                                                     | `undefined` | Latest selectable date (inclusive). Dates after this value are disabled.                                                                                                                                                                                                                   |
+| `minDate`       | `Date \| null`                                                     | `undefined` | Earliest selectable date (inclusive). Dates before this value are disabled.                                                                                                                                                                                                                |
+| `readonly`      | `boolean`                                                          | `false`     | Prevents date selection while keeping navigation active. Written automatically by the signal forms `FormField` directive.                                                                                                                                                                  |
+| `required`      | `boolean`                                                          | `false`     | Marks the field as required. When used with signal forms and `touched` is `true`, an empty selection is treated as invalid. Written automatically by the signal forms `FormField` directive.                                                                                               |
+| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`               | `'medium'`  | Border-radius preset applied to the calendar container.                                                                                                                                                                                                                                    |
+| `selection`     | `'single' \| 'multiple' \| 'range'`                                | `'single'`  | Date selection mode. `'single'` emits a `Date \| null`. `'multiple'` emits a `Date[]`. `'range'` emits a two-element `Date[]` as `[startDate, endDate]`.                                                                                                                                   |
+| `touched`       | `boolean`                                                          | `false`     | Marks the field as having been interacted with. Used together with `required` and `invalid` to determine validation display. Written automatically by the signal forms `FormField` directive.                                                                                              |
+| `value`         | `Date \| Date[] \| null`                                           | `null`      | Two-way bindable current selection. The expected shape depends on `selection`: a `Date \| null` for `'single'`, a `Date[]` for `'multiple'`, and `[startDate, endDate]` for `'range'`. Implements `FormValueControl<Date \| Date[] \| null>`, enabling signal forms `[formField]` binding. |
+| `weekNumber`    | `boolean`                                                          | `false`     | Shows ISO week numbers in a left column of the month grid.                                                                                                                                                                                                                                 |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name    | Type   | Description                                                                                                                             |
+|---------|--------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | `touch` | `void` | Emitted each time the user completes a date selection. Consumed by the signal forms `FormField` directive to mark the field as touched. |
 
 ---
@@ -333,10 +333,10 @@ Provides a custom template for each day cell in the month view.
 
 **Template context:**
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `$implicit` (as `let-day`) | `number` | Day of the month (1–31). |
-| `date` | `Date` | Full `Date` object for this cell. |
+| Variable                   | Type     | Description                       |
+|----------------------------|----------|-----------------------------------|
+| `$implicit` (as `let-day`) | `number` | Day of the month (1–31).          |
+| `date`                     | `Date`   | Full `Date` object for this cell. |
 
 ---
 
@@ -348,10 +348,10 @@ Provides a custom template for each month cell in the year (month-selection) vie
 
 **Template context:**
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `$implicit` (as `let-month`) | `number` | Month number (1–12). |
-| `text` | `string` | Abbreviated month name (e.g., `"Jan"`, `"Feb"`). |
+| Variable                     | Type     | Description                                      |
+|------------------------------|----------|--------------------------------------------------|
+| `$implicit` (as `let-month`) | `number` | Month number (1–12).                             |
+| `text`                       | `string` | Abbreviated month name (e.g., `"Jan"`, `"Feb"`). |
 
 ---
 
@@ -363,13 +363,13 @@ Provides a custom template for each year cell in the decade view.
 
 **Template context:**
 
-| Variable | Type | Description |
-|----------|------|-------------|
+| Variable                    | Type     | Description                        |
+|-----------------------------|----------|------------------------------------|
 | `$implicit` (as `let-year`) | `number` | The year represented by this cell. |
 
 ---
 
-TODO(owner-review): `CalendarSelection`, `FirstDayOfWeek`, `DateDisabledType`, and the three template context interfaces (`MonthCellTemplateContext`, `YearCellTemplateContext`, `DecadeCellTemplateContext`) are used in public input signatures but are not exported from `@mirei/mona-ui`. Consumers cannot import them for type annotations without reaching into internal paths.
+TODO(owner-review): `CalendarSelection`, `FirstDayOfWeek`, `DateDisabledType`, and the three template context interfaces (`MonthCellTemplateContext`, `YearCellTemplateContext`, `DecadeCellTemplateContext`) are used in public input signatures but are not exported from `@nanahoshi/mona-ui`. Consumers cannot import them for type annotations without reaching into internal paths.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source

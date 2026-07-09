@@ -21,8 +21,8 @@ Mona UI provides two ways to render a styled checkbox:
 ## Import & Basic Usage
 
 ```typescript
-import { CheckBoxComponent } from "@mirei/mona-ui";   // component
-import { CheckboxDirective } from "@mirei/mona-ui";   // directive
+import { CheckBoxComponent } from "@nanahoshi/mona-ui";   // component
+import { CheckboxDirective } from "@nanahoshi/mona-ui";   // directive
 ```
 
 Add the imported symbols to your standalone component's `imports` array.
@@ -108,14 +108,14 @@ Both `CheckBoxComponent` and `CheckboxDirective` accept the same `rounded` input
 
 ### Visual states
 
-| State           | Appearance                                                           |
-|-----------------|----------------------------------------------------------------------|
-| Unchecked       | Empty box with the theme's input background and border               |
-| Checked         | Filled box using the primary color, with a checkmark                 |
-| Indeterminate   | Filled box using the primary color, with a dash indicator            |
-| Focused         | Visible focus ring using the primary color                           |
-| Disabled        | Reduced opacity, no pointer interaction                              |
-| Invalid (forms) | Border changes to the error color when touched and invalid           |
+| State           | Appearance                                                 |
+|-----------------|------------------------------------------------------------|
+| Unchecked       | Empty box with the theme's input background and border     |
+| Checked         | Filled box using the primary color, with a checkmark       |
+| Indeterminate   | Filled box using the primary color, with a dash indicator  |
+| Focused         | Visible focus ring using the primary color                 |
+| Disabled        | Reduced opacity, no pointer interaction                    |
+| Invalid (forms) | Border changes to the error color when touched and invalid |
 
 The `Invalid` state activates when the signal forms field is touched and the value fails validation.
 
@@ -157,26 +157,26 @@ Implements `FormCheckboxControl` from `@angular/forms/signals`. Use `[(checked)]
 
 #### Inputs
 
-| Name            | Type                                                    | Default    | Description |
-|-----------------|---------------------------------------------------------|------------|-------------|
-| `checked`       | `boolean`                                               | `false`    | Two-way bindable checked state. Implements `FormCheckboxControl`, enabling use with the signal forms `[formField]` binding. |
-| `class`         | `string`                                                | `''`       | Additional CSS classes merged onto the outer `<label>` container via `tailwind-merge`. |
-| `disabled`      | `boolean`                                               | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `indeterminate` | `boolean`                                               | `false`    | Sets the native indeterminate state. Renders the checkbox filled with a dash indicator, and sets `aria-checked="mixed"` on the native input. Activating an indeterminate checkbox sets it to checked. |
-| `label`         | `string`                                                | `''`       | Text label displayed adjacent to the checkbox. When non-empty, takes precedence over projected content and is also used as the accessible name on the native input. |
-| `labelPosition` | `'before' \| 'after'`                                   | `'after'`  | Position of the label relative to the checkbox box. |
-| `labelSize`     | `'small' \| 'medium' \| 'large'`                        | `'medium'` | Font size of the label text. |
-| `required`      | `boolean`                                               | `false`    | Marks the native input as required. Activates browser validation and the `:required` CSS pseudo-class. |
-| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset for the visible checkbox box. |
-| `tabIndex`      | `number`                                                | `0`        | Tab index applied to the native input. Ignored when `disabled` is `true` (forced to `-1`). |
+| Name            | Type                                                 | Default    | Description                                                                                                                                                                                           |
+|-----------------|------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `checked`       | `boolean`                                            | `false`    | Two-way bindable checked state. Implements `FormCheckboxControl`, enabling use with the signal forms `[formField]` binding.                                                                           |
+| `class`         | `string`                                             | `''`       | Additional CSS classes merged onto the outer `<label>` container via `tailwind-merge`.                                                                                                                |
+| `disabled`      | `boolean`                                            | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                                                   |
+| `indeterminate` | `boolean`                                            | `false`    | Sets the native indeterminate state. Renders the checkbox filled with a dash indicator, and sets `aria-checked="mixed"` on the native input. Activating an indeterminate checkbox sets it to checked. |
+| `label`         | `string`                                             | `''`       | Text label displayed adjacent to the checkbox. When non-empty, takes precedence over projected content and is also used as the accessible name on the native input.                                   |
+| `labelPosition` | `'before' \| 'after'`                                | `'after'`  | Position of the label relative to the checkbox box.                                                                                                                                                   |
+| `labelSize`     | `'small' \| 'medium' \| 'large'`                     | `'medium'` | Font size of the label text.                                                                                                                                                                          |
+| `required`      | `boolean`                                            | `false`    | Marks the native input as required. Activates browser validation and the `:required` CSS pseudo-class.                                                                                                |
+| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset for the visible checkbox box.                                                                                                                                                    |
+| `tabIndex`      | `number`                                             | `0`        | Tab index applied to the native input. Ignored when `disabled` is `true` (forced to `-1`).                                                                                                            |
 
 #### Outputs
 
-| Name          | Type         | Description |
-|---------------|--------------|-------------|
-| `inputBlur`   | `FocusEvent` | Emitted when the native input loses focus. |
-| `inputChange` | `Event`      | Emitted when the native input fires a `change` event. |
-| `inputFocus`  | `FocusEvent` | Emitted when the native input gains focus. |
+| Name          | Type         | Description                                                                                                                              |
+|---------------|--------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `inputBlur`   | `FocusEvent` | Emitted when the native input loses focus.                                                                                               |
+| `inputChange` | `Event`      | Emitted when the native input fires a `change` event.                                                                                    |
+| `inputFocus`  | `FocusEvent` | Emitted when the native input gains focus.                                                                                               |
 | `touch`       | `void`       | Emitted when the checkbox loses focus or its value changes. Consumed by the signal forms `Field` directive to mark the field as touched. |
 
 ---
@@ -189,10 +189,10 @@ Applies Mona UI styling to a native `<input type="checkbox">`. All native checkb
 
 #### Inputs
 
-| Name      | Type                                                    | Default    | Description |
-|-----------|---------------------------------------------------------|------------|-------------|
-| `class`   | `string`                                                | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset for the checkbox. |
+| Name      | Type                                                 | Default    | Description                                                               |
+|-----------|------------------------------------------------------|------------|---------------------------------------------------------------------------|
+| `class`   | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset for the checkbox.                                    |
 
 `CheckboxDirective` has no outputs. Listen to native events (`(change)`, `(focus)`, `(blur)`) on the host element directly.
 

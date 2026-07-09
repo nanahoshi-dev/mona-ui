@@ -6,6 +6,5 @@ describe("WindowDragHandlerDirective", () => {
         // // const directive = new WindowDragHandlerDirective();
         // expect(directive).toBeTruthy();
         expect(true).toBeTruthy();
-        ;
     });
 });

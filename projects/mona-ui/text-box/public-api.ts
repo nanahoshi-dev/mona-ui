@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/text-box
+ * Public API Surface of @nanahoshi/mona-ui/text-box
  */
 
 export * from "./components/text-box/text-box.component";

@@ -1,0 +1,17 @@
+{
+    "name": "mona-ui-tester",
+    "private": true,
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.2.0",
+        "@tailwindcss/postcss": "^4.3.1",
+        "highlight.js": "^11.11.1",
+        "marked": "^18.0.5",
+        "marked-highlight": "^2.2.4",
+        "ngx-markdown": "^22.0.0",
+        "postcss": "^8.5.15",
+        "tailwindcss": "^4.3.1"
+    },
+    "devDependencies": {
+        "@types/highlightjs": "^10.1.0"
+    }
+}

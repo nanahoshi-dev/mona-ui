@@ -3,7 +3,7 @@
 To install Mona UI, run the following command in your terminal:
 
 ```bash
-npm install @mirei/mona-ui
+npm install @nanahoshi/mona-ui
 ```
 
 ## Setup Styles
@@ -11,7 +11,7 @@ npm install @mirei/mona-ui
 Import the styles in your main stylesheet `styles.css`:
 
 ```css
-@import "@mirei/mona-ui/styles.css";
+@import "@nanahoshi/mona-ui/styles.css";
 ```
 
 Enjoy building clean, accessible, and fast web applications!

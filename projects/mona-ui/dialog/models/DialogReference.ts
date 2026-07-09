@@ -1,5 +1,5 @@
 import { ComponentRef, signal, WritableSignal } from "@angular/core";
-import { PopupCloseEvent, PopupCloseSource, PopupRef } from "@mirei/mona-ui/popup";
+import { PopupCloseEvent, PopupCloseSource, PopupRef } from "@nanahoshi/mona-ui/popup";
 import { map, Observable, Subject } from "rxjs";
 import { DialogInjectorData } from "./DialogInjectorData";
 import { DialogRef } from "./DialogRef";

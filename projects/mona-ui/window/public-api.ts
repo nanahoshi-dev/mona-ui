@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/window
+ * Public API Surface of @nanahoshi/mona-ui/window
  */
 
 export * from "./components/window/window.component";

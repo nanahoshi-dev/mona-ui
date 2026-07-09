@@ -14,9 +14,9 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideBadgeInfo, LucideCircleCheckBig, LucideOctagonAlert, LucideOctagonX, LucideX } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ProgressBarComponent } from "@mirei/mona-ui/progress-bar";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asyncScheduler, interval, takeWhile } from "rxjs";
 import { NotificationData } from "../../models/NotificationData";
 import {

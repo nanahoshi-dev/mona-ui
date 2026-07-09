@@ -1,23 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { DropdownButtonRadioGroupComponent } from './dropdown-button-radio-group.component';
+import { DropdownButtonRadioGroupComponent } from "./dropdown-button-radio-group.component";
 
-describe('DropdownButtonRadioGroupComponent', () => {
+describe("DropdownButtonRadioGroupComponent", () => {
     let component: DropdownButtonRadioGroupComponent;
     let fixture: ComponentFixture<DropdownButtonRadioGroupComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [DropdownButtonRadioGroupComponent]
-        })
-            .compileComponents();
+        }).compileComponents();
 
         fixture = TestBed.createComponent(DropdownButtonRadioGroupComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it("should create", () => {
         expect(component).toBeTruthy();
     });
 });

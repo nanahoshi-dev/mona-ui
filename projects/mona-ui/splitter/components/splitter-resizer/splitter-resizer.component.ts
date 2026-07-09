@@ -11,7 +11,7 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { compact } from "@mirei/ts-collections";
 import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
 import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";

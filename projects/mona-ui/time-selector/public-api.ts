@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/time-selector
+ * Public API Surface of @nanahoshi/mona-ui/time-selector
  */
 
 export * from "./components/time-selector/time-selector.component";

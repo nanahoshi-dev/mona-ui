@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/placeholder
+ * Public API Surface of @nanahoshi/mona-ui/placeholder
  */
 
 export * from "./components/placeholder/placeholder.component";

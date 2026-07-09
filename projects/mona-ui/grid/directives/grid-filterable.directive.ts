@@ -11,8 +11,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { filter as rxFilter } from "rxjs";
-import { CompositeFilterDescriptor } from "@mirei/mona-ui/query";
-import { deepEquals } from "@mirei/mona-ui/common";
+import { CompositeFilterDescriptor } from "@nanahoshi/mona-ui/query";
+import { deepEquals } from "@nanahoshi/mona-ui/common";
 import type { FilterableOptions } from "../models/FilterableOptions";
 import { GridService } from "../services/grid.service";
 

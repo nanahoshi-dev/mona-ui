@@ -9,7 +9,7 @@ Use `ColorPaletteComponent` when the user should choose only from known colors. 
 ## Import & Quick Start
 
 ```typescript
-import { ColorGradientComponent } from "@mirei/mona-ui";
+import { ColorGradientComponent } from "@nanahoshi/mona-ui";
 ```
 
 **Direct value binding**
@@ -26,7 +26,7 @@ protected readonly color = signal<string | null | undefined>("#336699");
 
 ```typescript
 import { FormField, form } from "@angular/forms/signals";
-import { ColorGradientComponent } from "@mirei/mona-ui";
+import { ColorGradientComponent } from "@nanahoshi/mona-ui";
 
 protected readonly form = form({ color: "#336699" });
 ```
@@ -92,11 +92,11 @@ The `value` model accepts `undefined`, `null`, and color strings. When `value` i
 
 The source validates and parses these string shapes:
 
-| Input shape | Example |
-|-------------|---------|
-| Hex | `#336699`, `#369`, `#336699cc` |
-| RGB/RGBA | `rgb(51, 102, 153)`, `rgba(51, 102, 153, 0.8)` |
-| HSL/HSLA | `hsl(210, 50%, 40%)`, `hsla(210, 50%, 40%, 0.8)` |
+| Input shape | Example                                          |
+|-------------|--------------------------------------------------|
+| Hex         | `#336699`, `#369`, `#336699cc`                   |
+| RGB/RGBA    | `rgb(51, 102, 153)`, `rgba(51, 102, 153, 0.8)`   |
+| HSL/HSLA    | `hsl(210, 50%, 40%)`, `hsla(210, 50%, 40%, 0.8)` |
 
 When the component emits a value, the emitted string follows the `format` input. Alpha is included where the selected format supports it.
 
@@ -104,17 +104,17 @@ When the component emits a value, the emitted string follows the `format` input.
 
 The saturation/value handle is focusable when the component is enabled.
 
-| Key | Action |
-|-----|--------|
-| `ArrowLeft` | Decrease saturation by 1 |
-| `ArrowRight` | Increase saturation by 1 |
-| `ArrowUp` | Increase value by 1 |
-| `ArrowDown` | Decrease value by 1 |
-| `Shift` + arrow key | Adjust by 10 instead of 1 |
-| `PageUp` | Increase value by 25 |
-| `PageDown` | Decrease value by 25 |
-| `Home` | Move to saturation 0, value 100 |
-| `End` | Move to saturation 100, value 0 |
+| Key                 | Action                          |
+|---------------------|---------------------------------|
+| `ArrowLeft`         | Decrease saturation by 1        |
+| `ArrowRight`        | Increase saturation by 1        |
+| `ArrowUp`           | Increase value by 1             |
+| `ArrowDown`         | Decrease value by 1             |
+| `Shift` + arrow key | Adjust by 10 instead of 1       |
+| `PageUp`            | Increase value by 25            |
+| `PageDown`          | Decrease value by 25            |
+| `Home`              | Move to saturation 0, value 100 |
+| `End`               | Move to saturation 100, value 0 |
 
 The previous-color swatch is keyboard-activatable with `Enter` and `Space`.
 
@@ -122,16 +122,16 @@ The previous-color swatch is keyboard-activatable with `Enter` and `Space`.
 
 The saturation/value handle renders a focusable slider with an accessible name and exposes the current saturation and value.
 
-| Attribute | When present | Value |
-|-----------|--------------|-------|
-| `role` | Always on the saturation/value handle | `"slider"` |
-| `aria-label` | Always on the saturation/value handle | `"Color saturation and value"` |
-| `aria-valuemin` | Always on the saturation/value handle | `0` |
-| `aria-valuemax` | Always on the saturation/value handle | `100` |
-| `aria-valuenow` | Always on the saturation/value handle | Current saturation |
-| `aria-valuetext` | Always on the saturation/value handle | `"Saturation n%, Value n%"` |
-| `aria-disabled` | When disabled | `true` |
-| `tabindex` | Always on the saturation/value handle | `0` when enabled, `-1` when disabled |
+| Attribute        | When present                          | Value                                |
+|------------------|---------------------------------------|--------------------------------------|
+| `role`           | Always on the saturation/value handle | `"slider"`                           |
+| `aria-label`     | Always on the saturation/value handle | `"Color saturation and value"`       |
+| `aria-valuemin`  | Always on the saturation/value handle | `0`                                  |
+| `aria-valuemax`  | Always on the saturation/value handle | `100`                                |
+| `aria-valuenow`  | Always on the saturation/value handle | Current saturation                   |
+| `aria-valuetext` | Always on the saturation/value handle | `"Saturation n%, Value n%"`          |
+| `aria-disabled`  | When disabled                         | `true`                               |
+| `tabindex`       | Always on the saturation/value handle | `0` when enabled, `-1` when disabled |
 
 The previous-color swatch renders as a button only for the previous color. The current-color preview is marked `aria-hidden`.
 
@@ -168,24 +168,24 @@ Implements `FormValueControl<string | null | undefined>` from `@angular/forms/si
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `disabled` | `boolean` | `false` | Sets the disabled state of the color gradient. |
-| `format` | `'hex' \| 'rgb' \| 'hsl'` | `'hex'` | Output format used when the component emits a color value. |
-| `opacity` | `boolean` | `true` | Shows or hides the alpha slider. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the color gradient controls. |
-| `showButtons` | `boolean` | `true` | Shows Apply and Cancel buttons. When `false`, value changes emit immediately. |
-| `showColorInputs` | `boolean` | `true` | Shows or hides the RGB/HSV numeric channel inputs. |
-| `showHexInput` | `boolean` | `true` | Shows or hides the hex text input. |
-| `value` | `string \| null \| undefined` | `undefined` | Two-way bindable current color value. `undefined` keeps the default internal color state; `null` clears the current color. Implements `FormValueControl<string | null | undefined>`, enabling signal forms `[formField]` binding. |
+| Name              | Type                                                 | Default     | Description                                                                                                                                                    |
+|-------------------|------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled`        | `boolean`                                            | `false`     | Sets the disabled state of the color gradient.                                                                                                                 |
+| `format`          | `'hex' \| 'rgb' \| 'hsl'`                            | `'hex'`     | Output format used when the component emits a color value.                                                                                                     |
+| `opacity`         | `boolean`                                            | `true`      | Shows or hides the alpha slider.                                                                                                                               |
+| `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`  | Border-radius preset applied to the color gradient controls.                                                                                                   |
+| `showButtons`     | `boolean`                                            | `true`      | Shows Apply and Cancel buttons. When `false`, value changes emit immediately.                                                                                  |
+| `showColorInputs` | `boolean`                                            | `true`      | Shows or hides the RGB/HSV numeric channel inputs.                                                                                                             |
+| `showHexInput`    | `boolean`                                            | `true`      | Shows or hides the hex text input.                                                                                                                             |
+| `value`           | `string \| null \| undefined`                        | `undefined` | Two-way bindable current color value. `undefined` keeps the default internal color state; `null` clears the current color. Implements `FormValueControl<string | null | undefined>`, enabling signal forms `[formField]` binding. |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
-| `apply` | `void` | Emitted when the Apply button is clicked. The button is only displayed when `showButtons` is `true`. |
-| `cancel` | `void` | Emitted when the Cancel button is clicked. The button is only displayed when `showButtons` is `true`. |
-| `touch` | `void` | Emitted when the color gradient is interacted with on blur or value adjustment. Consumed by the signal forms `FormField` directive to mark the field as touched. |
+| Name     | Type   | Description                                                                                                                                                      |
+|----------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `apply`  | `void` | Emitted when the Apply button is clicked. The button is only displayed when `showButtons` is `true`.                                                             |
+| `cancel` | `void` | Emitted when the Cancel button is clicked. The button is only displayed when `showButtons` is `true`.                                                            |
+| `touch`  | `void` | Emitted when the color gradient is interacted with on blur or value adjustment. Consumed by the signal forms `FormField` directive to mark the field as touched. |
 
 ---
 
@@ -193,7 +193,7 @@ TODO(owner-review): `format` is typed as the internal `ColorOutputFormat` alias 
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source and component-metadata.json
-- [x] Basic examples use public imports from @mirei/mona-ui
+- [x] Basic examples use public imports from @nanahoshi/mona-ui
 - [x] Signal forms support verified against FormValueControl implementation and specs
 - [x] ControlValueAccessor absence documented
 - [x] Keyboard map verified against source and focused specs

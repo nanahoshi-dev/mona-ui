@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input, TemplateRef } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { FieldsetLegendTemplateDirective } from "../../directives/fieldset-legend-template.directive";
 import {

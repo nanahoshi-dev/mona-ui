@@ -1,5 +1,5 @@
 import { Component, computed, inject } from "@angular/core";
-import { ColorPickerComponent, ColorPickerValueTemplateDirective } from "@mirei/mona-ui/color-picker";
+import { ColorPickerComponent, ColorPickerValueTemplateDirective } from "@nanahoshi/mona-ui/color-picker";
 import { EditorService } from "../../services/editor.service";
 
 @Component({

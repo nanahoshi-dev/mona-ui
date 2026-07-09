@@ -1,5 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { inputThemeVariants, InputVariantInput, InputVariantProps } from "../styles/textbox.styles";
 import { twMerge } from "tailwind-merge";
 

@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Observable, Subject } from "rxjs";
-import { PopupCloseEvent, PopupService } from "@mirei/mona-ui/popup";
+import { PopupCloseEvent, PopupService } from "@nanahoshi/mona-ui/popup";
 import { PopoverFooterTemplateDirective } from "../../directives/popover-footer-template.directive";
 import { PopoverTitleTemplateDirective } from "../../directives/popover-title-template.directive";
 import { PopoverHideEvent } from "../../models/PopoverHideEvent";

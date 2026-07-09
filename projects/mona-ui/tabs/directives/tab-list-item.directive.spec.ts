@@ -8,7 +8,7 @@ describe("TabListItemDirective", () => {
             imports: [TabListItemDirective]
         });
         directive = TestBed.runInInjectionContext(() => new TabListItemDirective());
-    })
+    });
     it("should create an instance", () => {
         expect(directive).toBeTruthy();
     });

@@ -19,9 +19,9 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faChevronLeft, faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ScrollDirection } from "@mirei/mona-ui/common";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ScrollDirection } from "@nanahoshi/mona-ui/common";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { firstOrDefault } from "@mirei/ts-collections";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";

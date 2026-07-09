@@ -14,7 +14,7 @@ import {
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { rxTimeout, toCssValue } from "@mirei/mona-ui/internal";
+import { rxTimeout, toCssValue } from "@nanahoshi/mona-ui/internal";
 import {
     ConnectionPoint,
     PopupAnchor,
@@ -22,7 +22,7 @@ import {
     PopupOffset,
     PopupRef,
     PopupService
-} from "@mirei/mona-ui/popup";
+} from "@nanahoshi/mona-ui/popup";
 import { any, groupBy, select } from "@mirei/ts-collections";
 import { fromEvent, Subject, Subscription, take, takeUntil, tap } from "rxjs";
 import { PopupMenuCloseEvent } from "../../models/PopupMenuCloseEvent";

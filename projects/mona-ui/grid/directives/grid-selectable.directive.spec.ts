@@ -6,6 +6,5 @@ describe("GridSelectableDirective", () => {
         // // const directive = new GridSelectableDirective();
         // expect(directive).toBeTruthy();
         expect(true).toBeTruthy();
-        ;
     });
 });

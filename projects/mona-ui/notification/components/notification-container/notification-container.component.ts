@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { NotificationData } from "../../models/NotificationData";
 import { NotificationPosition } from "../../models/NotificationPosition";
 import { notificationContainerBaseThemeVariants } from "../../styles/notification.styles";

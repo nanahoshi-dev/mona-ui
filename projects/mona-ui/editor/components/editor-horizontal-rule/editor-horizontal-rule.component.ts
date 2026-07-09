@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { EditorService } from "../../services/editor.service";
 
 @Component({

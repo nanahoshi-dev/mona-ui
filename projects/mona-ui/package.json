@@ -1,18 +1,256 @@
 {
-    "name": "@mirei/mona-ui",
-    "version": "7.1.1",
-    "peerDependencies": {
-        "@angular/cdk": "^22.0.1",
-        "@angular/common": "^22.0.1",
-        "@angular/core": "^22.0.1",
-        "@angular/forms": "^22.0.1",
-        "@fortawesome/angular-fontawesome": "^5.0.0"
+    "name": "@nanahoshi/mona-ui",
+    "version": "0.1.0",
+    "description": "A very light Angular UI framework",
+    "author": "Nanahoshi",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nanahoshi-dev/mona-ui"
     },
-    "dependencies": {
-        "@fortawesome/fontawesome-svg-core": "^7.2.0",
-        "@fortawesome/free-solid-svg-icons": "^7.2.0",
-        "@lucide/angular": "^1.21.0",
-        "@mirei/ts-collections": "^17.5.6",
+    "publishConfig": {
+        "access": "public"
+    },
+    "main": "../../dist/mona-ui/fesm2022/nanahoshi-mona-ui.mjs",
+    "typings": "../../dist/mona-ui/types/nanahoshi-mona-ui.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui.mjs"
+        },
+        "./auto-complete": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-auto-complete.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-auto-complete.mjs"
+        },
+        "./avatar": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-avatar.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-avatar.mjs"
+        },
+        "./breadcrumb": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-breadcrumb.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-breadcrumb.mjs"
+        },
+        "./button": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-button.mjs"
+        },
+        "./button-group": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-button-group.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-button-group.mjs"
+        },
+        "./calendar": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-calendar.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-calendar.mjs"
+        },
+        "./check-box": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-check-box.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-check-box.mjs"
+        },
+        "./chip": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-chip.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-chip.mjs"
+        },
+        "./circular-progress-bar": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-circular-progress-bar.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-circular-progress-bar.mjs"
+        },
+        "./color-gradient": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-color-gradient.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-color-gradient.mjs"
+        },
+        "./color-palette": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-color-palette.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-color-palette.mjs"
+        },
+        "./color-picker": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-color-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-color-picker.mjs"
+        },
+        "./combo-box": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-combo-box.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-combo-box.mjs"
+        },
+        "./common": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-common.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-common.mjs"
+        },
+        "./contextmenu": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-contextmenu.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-contextmenu.mjs"
+        },
+        "./date-picker": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-date-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-date-picker.mjs"
+        },
+        "./datetime-picker": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-datetime-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-datetime-picker.mjs"
+        },
+        "./dialog": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-dialog.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-dialog.mjs"
+        },
+        "./dropdown-list": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-dropdown-list.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-dropdown-list.mjs"
+        },
+        "./dropdown-button": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-dropdown-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-dropdown-button.mjs"
+        },
+        "./dropdowns": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-dropdowns.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-dropdowns.mjs"
+        },
+        "./editor": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-editor.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-editor.mjs"
+        },
+        "./expansion-panel": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-expansion-panel.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-expansion-panel.mjs"
+        },
+        "./fieldset": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-fieldset.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-fieldset.mjs"
+        },
+        "./filter": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-filter.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-filter.mjs"
+        },
+        "./grid": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-grid.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-grid.mjs"
+        },
+        "./list": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-list.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-list.mjs"
+        },
+        "./list-box": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-list-box.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-list-box.mjs"
+        },
+        "./list-view": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-list-view.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-list-view.mjs"
+        },
+        "./menubar": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-menubar.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-menubar.mjs"
+        },
+        "./multi-select": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-multi-select.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-multi-select.mjs"
+        },
+        "./notification": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-notification.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-notification.mjs"
+        },
+        "./numeric-text-box": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-numeric-text-box.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-numeric-text-box.mjs"
+        },
+        "./package.json": {
+            "default": "./package.json"
+        },
+        "./pager": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-pager.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-pager.mjs"
+        },
+        "./placeholder": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-placeholder.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-placeholder.mjs"
+        },
+        "./popover": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-popover.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-popover.mjs"
+        },
+        "./popup": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-popup.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-popup.mjs"
+        },
+        "./popup-menu": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-popup-menu.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-popup-menu.mjs"
+        },
+        "./progress-bar": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-progress-bar.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-progress-bar.mjs"
+        },
+        "./radio-button": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-radio-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-radio-button.mjs"
+        },
+        "./scroll-view": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-scroll-view.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-scroll-view.mjs"
+        },
+        "./slider": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-slider.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-slider.mjs"
+        },
+        "./split-button": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-split-button.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-split-button.mjs"
+        },
+        "./splitter": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-splitter.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-splitter.mjs"
+        },
+        "./stepper": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-stepper.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-stepper.mjs"
+        },
+        "./switch": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-switch.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-switch.mjs"
+        },
+        "./tabs": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-tabs.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-tabs.mjs"
+        },
+        "./text-area": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-text-area.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-text-area.mjs"
+        },
+        "./text-box": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-text-box.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-text-box.mjs"
+        },
+        "./theme": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-theme.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-theme.mjs"
+        },
+        "./time-picker": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-time-picker.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-time-picker.mjs"
+        },
+        "./time-selector": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-time-selector.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-time-selector.mjs"
+        },
+        "./tooltip": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-tooltip.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-tooltip.mjs"
+        },
+        "./tree-view": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-tree-view.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-tree-view.mjs"
+        },
+        "./window": {
+            "types": "./dist/mona-ui/types/nanahoshi-mona-ui-window.d.ts",
+            "default": "./dist/mona-ui/fesm2022/nanahoshi-mona-ui-window.mjs"
+        }
+    },
+    "peerDependencies": {
+        "@angular/cdk": ">=22.0.0 <24.0.0",
+        "@angular/common": ">=22.0.0 <24.0.0",
+        "@angular/compiler": ">=22.0.0 <24.0.0",
+        "@angular/core": ">=22.0.0 <24.0.0",
+        "@angular/forms": ">=22.0.0 <24.0.0",
+        "@angular/platform-browser": ">=22.0.0 <24.0.0",
+        "@angular/platform-browser-dynamic": ">=22.0.0 <24.0.0",
+        "@angular/router": ">=22.0.0 <24.0.0",
+        "@fortawesome/angular-fontawesome": "^5.0.0",
         "@tiptap/core": "^3.26.1",
         "@tiptap/extension-color": "^3.26.1",
         "@tiptap/extension-font-family": "^3.26.1",
@@ -32,6 +270,13 @@
         "@tiptap/extension-underline": "^3.26.1",
         "@tiptap/pm": "^3.26.1",
         "@tiptap/starter-kit": "^3.26.1",
+        "rxjs": "^7.8.2"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^7.2.0",
+        "@fortawesome/free-solid-svg-icons": "^7.2.0",
+        "@lucide/angular": "^1.21.0",
+        "@mirei/ts-collections": "^17.5.6",
         "class-variance-authority": "^0.7.1",
         "luxon": "^3.7.2",
         "remixicon": "^4.9.1",

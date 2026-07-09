@@ -20,7 +20,7 @@ When both are absent the radio button has no accessible name. Always provide eit
 ### Import & Basic Usage
 
 ```typescript
-import { RadioButtonComponent } from "@mirei/mona-ui";
+import { RadioButtonComponent } from "@nanahoshi/mona-ui";
 ```
 
 **Minimal group with `ngModel`:**
@@ -147,7 +147,7 @@ protected readonly selectedSize = signal<string>("M");
 ### Import & Basic Usage
 
 ```typescript
-import { RadioButtonDirective } from "@mirei/mona-ui";
+import { RadioButtonDirective } from "@nanahoshi/mona-ui";
 ```
 
 Pair each input with a `<label>` for accessibility. The `<label>` must either wrap the input or reference it via `for`/`id`:
@@ -186,8 +186,8 @@ Pair each input with a `<label>` for accessibility. The `<label>` must either wr
 
 ### Appearance & Styling
 
-| Variant | Input | Options | Default |
-|---------|-------|---------|---------|
+| Variant       | Input     | Options                                                  | Default  |
+|---------------|-----------|----------------------------------------------------------|----------|
 | Border radius | `rounded` | `'full'` · `'large'` · `'medium'` · `'small'` · `'none'` | `'none'` |
 
 The directive applies styles directly to the `<input>` element's `class` attribute. Additional classes can be added directly to the `<input>` element.
@@ -198,8 +198,8 @@ The directive applies styles directly to the `<input>` element's `class` attribu
 
 **Selector:** `input[type='radio'][monaRadioButton]`
 
-| Name | Kind | Type | Default | Required | Description |
-|------|------|------|---------|----------|-------------|
+| Name      | Kind  | Type                                                 | Default  | Required | Description                                 |
+|-----------|-------|------------------------------------------------------|----------|----------|---------------------------------------------|
 | `rounded` | input | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'none'` | Optional | Sets the border radius of the radio button. |
 
 The directive has no outputs. All native input events (`change`, `blur`, `focus`, etc.) are available directly on the host element.
@@ -208,15 +208,15 @@ The directive has no outputs. All native input events (`change`, `blur`, `focus`
 
 ## Choosing Between Component and Directive
 
-| | `RadioButtonComponent` | `RadioButtonDirective` |
-|---|---|---|
-| Selector | `mona-radio-button` | `input[type='radio'][monaRadioButton]` |
-| Label managed | Yes (`label` input + content projection) | No — consumer provides `<label>` |
-| `ControlValueAccessor` | Yes | No — use `ngModel`/`formControl` directly |
-| Label position | `labelPosition` input | Consumer controls layout |
-| Label size | `labelSize` input | Consumer controls font |
-| DOM control | Minimal | Full |
-| Accessible name | Via `label` or projected content | Via explicit `<label>` element |
+|                        | `RadioButtonComponent`                   | `RadioButtonDirective`                    |
+|------------------------|------------------------------------------|-------------------------------------------|
+| Selector               | `mona-radio-button`                      | `input[type='radio'][monaRadioButton]`    |
+| Label managed          | Yes (`label` input + content projection) | No — consumer provides `<label>`          |
+| `ControlValueAccessor` | Yes                                      | No — use `ngModel`/`formControl` directly |
+| Label position         | `labelPosition` input                    | Consumer controls layout                  |
+| Label size             | `labelSize` input                        | Consumer controls font                    |
+| DOM control            | Minimal                                  | Full                                      |
+| Accessible name        | Via `label` or projected content         | Via explicit `<label>` element            |
 
 ---
 

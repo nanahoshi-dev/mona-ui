@@ -54,7 +54,15 @@
     }
 }
 
-:host.notification-enter-top    { animation: notification-slide-in-top    300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-:host.notification-enter-bottom { animation: notification-slide-in-bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-:host.notification-leave-top    { animation: notification-slide-out-top   300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-:host.notification-leave-bottom { animation: notification-slide-out-bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+:host.notification-enter-top {
+    animation: notification-slide-in-top 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+:host.notification-enter-bottom {
+    animation: notification-slide-in-bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+:host.notification-leave-top {
+    animation: notification-slide-out-top 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+:host.notification-leave-bottom {
+    animation: notification-slide-out-bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

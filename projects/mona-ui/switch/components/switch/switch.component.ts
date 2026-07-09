@@ -14,7 +14,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormCheckboxControl } from "@angular/forms/signals";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, fromEvent, merge, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SwitchHandleContentTemplateDirective } from "../../directives/switch-handle-content-template.directive";

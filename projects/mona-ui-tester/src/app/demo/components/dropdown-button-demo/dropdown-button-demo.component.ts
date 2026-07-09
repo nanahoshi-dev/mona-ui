@@ -14,7 +14,7 @@ import {
     DropdownButtonMenuItemShortcutTemplateDirective,
     DropdownButtonMenuItemTextTemplateDirective,
     DropdownButtonTextTemplateDirective
-} from "@mirei/mona-ui/dropdown-button";
+} from "@nanahoshi/mona-ui/dropdown-button";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

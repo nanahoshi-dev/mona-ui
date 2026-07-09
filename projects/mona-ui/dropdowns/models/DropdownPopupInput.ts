@@ -1,7 +1,7 @@
 import { InjectionToken, InputSignal, OutputEmitterRef } from "@angular/core";
-import { ListSizeInputType } from "@mirei/mona-ui/internal/list";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
+import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 
 export interface DropdownPopupInput {
     readonly close: OutputEmitterRef<PopupCloseEvent>;

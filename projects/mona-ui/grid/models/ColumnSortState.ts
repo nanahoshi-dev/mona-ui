@@ -1,4 +1,4 @@
-import { SortDescriptor } from "@mirei/mona-ui/query";
+import { SortDescriptor } from "@nanahoshi/mona-ui/query";
 
 export interface ColumnSortState {
     sort: SortDescriptor;

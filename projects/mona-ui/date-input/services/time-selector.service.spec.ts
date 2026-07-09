@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { TimeSelectorService } from './time-selector.service';
+import { TimeSelectorService } from "./time-selector.service";
 
-describe('TimeSelectorService', () => {
-  let service: TimeSelectorService;
+describe("TimeSelectorService", () => {
+    let service: TimeSelectorService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [TimeSelectorService] });
-    service = TestBed.inject(TimeSelectorService);
-  });
+    beforeEach(() => {
+        TestBed.configureTestingModule({ providers: [TimeSelectorService] });
+        service = TestBed.inject(TimeSelectorService);
+    });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+    it("should be created", () => {
+        expect(service).toBeTruthy();
+    });
 });

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/color-picker
+ * Public API Surface of @nanahoshi/mona-ui/color-picker
  */
 
 export * from "./components/color-picker/color-picker.component";

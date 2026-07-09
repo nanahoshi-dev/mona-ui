@@ -19,7 +19,7 @@ When `selection` is `"single"` or `"multiple"`, the group coordinates toggle sta
 ## Import & Basic Usage
 
 ```typescript
-import { ButtonGroupComponent, ButtonDirective } from "@mirei/mona-ui";
+import { ButtonGroupComponent, ButtonDirective } from "@nanahoshi/mona-ui";
 ```
 
 Add both to your standalone component's `imports` array. `ButtonDirective` is required on each child button.
@@ -134,9 +134,9 @@ Override container styles with the `class` input. When multiple groups appear on
 
 The group host receives `role="group"` and an `aria-label` that defaults to `"Button group"`.
 
-| Attribute    | When present | Value                          |
-|--------------|--------------|--------------------------------|
-| `role`       | Always       | `"group"`                      |
+| Attribute    | When present | Value                           |
+|--------------|--------------|---------------------------------|
+| `role`       | Always       | `"group"`                       |
 | `aria-label` | Always       | Value of the `aria-label` input |
 
 Each child button's `aria-pressed` attribute is managed by `ButtonDirective` and reflects the button's current `selected` state.
@@ -156,21 +156,21 @@ Each child button's `aria-pressed` attribute is managed by `ButtonDirective` and
 
 #### Inputs
 
-| Name         | Type                                                                                                                       | Default          | Description |
-|--------------|----------------------------------------------------------------------------------------------------------------------------|------------------|-------------|
-| `allowEmpty` | `boolean`                                                                                                                  | `true`           | When `false` and `selection` is `"single"`, at least one button must remain selected; the active button cannot be deselected. Has no effect in `"multiple"` mode. |
-| `aria-label` | `string`                                                                                                                   | `'Button group'` | Accessible name for the host element. Override when multiple button groups appear on the same page so screen reader users can distinguish them. |
-| `class`      | `string`                                                                                                                   | `''`             | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled`   | `boolean`                                                                                                                  | `false`          | Two-way bindable. Renders all child buttons with reduced visual emphasis and removes pointer interaction. |
-| `look`       | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'`           | `'outline'`      | Visual style variant propagated to all child buttons. Also controls container-level divider and border behavior. |
-| `rounded`    | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                                      | `'medium'`       | Border-radius preset applied to the container and the outer corners of the first and last child button. |
-| `selection`  | `'single' \| 'multiple'`                                                                                                   | `'multiple'`     | Two-way bindable. Controls whether child buttons behave as a radio group (`"single"`) or toggle independently (`"multiple"`). `SelectionMode` is importable from `@mirei/mona-ui`. |
-| `size`       | `'small' \| 'medium' \| 'large'`                                                                                           | `'medium'`       | Size preset propagated to all child buttons, overriding their individual `size` inputs. |
+| Name         | Type                                                                                                           | Default          | Description                                                                                                                                                                            |
+|--------------|----------------------------------------------------------------------------------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `allowEmpty` | `boolean`                                                                                                      | `true`           | When `false` and `selection` is `"single"`, at least one button must remain selected; the active button cannot be deselected. Has no effect in `"multiple"` mode.                      |
+| `aria-label` | `string`                                                                                                       | `'Button group'` | Accessible name for the host element. Override when multiple button groups appear on the same page so screen reader users can distinguish them.                                        |
+| `class`      | `string`                                                                                                       | `''`             | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                              |
+| `disabled`   | `boolean`                                                                                                      | `false`          | Two-way bindable. Renders all child buttons with reduced visual emphasis and removes pointer interaction.                                                                              |
+| `look`       | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'outline'`      | Visual style variant propagated to all child buttons. Also controls container-level divider and border behavior.                                                                       |
+| `rounded`    | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                           | `'medium'`       | Border-radius preset applied to the container and the outer corners of the first and last child button.                                                                                |
+| `selection`  | `'single' \| 'multiple'`                                                                                       | `'multiple'`     | Two-way bindable. Controls whether child buttons behave as a radio group (`"single"`) or toggle independently (`"multiple"`). `SelectionMode` is importable from `@nanahoshi/mona-ui`. |
+| `size`       | `'small' \| 'medium' \| 'large'`                                                                               | `'medium'`       | Size preset propagated to all child buttons, overriding their individual `size` inputs.                                                                                                |
 
 #### Outputs
 
-| Name          | Type   | Description |
-|---------------|--------|-------------|
+| Name          | Type   | Description                                                                                                                          |
+|---------------|--------|--------------------------------------------------------------------------------------------------------------------------------------|
 | `buttonClick` | `void` | Emitted when any child button in the group is clicked. Use `[(selected)]` on child buttons to observe the resulting selection state. |
 
 ---
@@ -182,7 +182,7 @@ Each child button's `aria-pressed` attribute is managed by `ButtonDirective` and
 - [x] look type union excludes "link" and "clear" (ButtonGroup-specific CVA)
 - [x] Basic examples compile against the public API surface
 - [x] No internal or unexported APIs exposed
-- [x] SelectionMode exported from @mirei/mona-ui — noted in selection row
+- [x] SelectionMode exported from @nanahoshi/mona-ui — noted in selection row
 - [x] buttonClick output documented; old "no event outputs" note removed
 - [x] mode-switch reconciliation callout added (multiple→single now deselects all but first)
 - [x] Accessibility claims verified against source: role="group" and aria-label host bindings confirmed in button-group.component.ts; aria-pressed on children managed by ButtonDirective

@@ -13,8 +13,8 @@ import {
     TemplateRef,
     viewChildren
 } from "@angular/core";
-import { Orientation } from "@mirei/mona-ui/common";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { Orientation } from "@nanahoshi/mona-ui/common";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";

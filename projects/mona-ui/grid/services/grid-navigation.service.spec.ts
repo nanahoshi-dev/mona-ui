@@ -9,7 +9,9 @@ function createElement(): HTMLTableCellElement {
     return element;
 }
 
-function createData(overrides: Partial<NavigationData> & Pick<NavigationData, "rowIndex" | "colIndex">): NavigationData {
+function createData(
+    overrides: Partial<NavigationData> & Pick<NavigationData, "rowIndex" | "colIndex">
+): NavigationData {
     return {
         cellKind: "data",
         element: createElement(),

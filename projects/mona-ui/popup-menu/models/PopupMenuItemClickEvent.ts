@@ -1,4 +1,4 @@
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { PopupMenuItem } from "./PopupMenuItem";
 
 export class PopupMenuItemClickEvent extends PreventableEvent {

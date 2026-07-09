@@ -20,7 +20,7 @@ Used on its own, a list box behaves like a selectable list with arrow-key naviga
 ## Import & Quick Start
 
 ```typescript
-import { ListBoxComponent } from "@mirei/mona-ui";
+import { ListBoxComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -33,12 +33,12 @@ import { ListBoxComponent } from "@mirei/mona-ui";
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-list-box>...</mona-list-box>`.
 
-| Directive | Selector | Template context | Replaces |
-|---|---|---|---|
-| `ListBoxHeaderTemplateDirective` | `ng-template[monaListBoxHeaderTemplate]` | None | No default — renders above the list |
-| `ListBoxItemTemplateDirective` | `ng-template[monaListBoxItemTemplate]` | `{ $implicit: T }` (the raw data item) — see `ListBoxItemTemplateContext` | The default text rendered from `textField` |
-| `ListBoxFooterTemplateDirective` | `ng-template[monaListBoxFooterTemplate]` | None | No default — renders below the list |
-| `ListBoxNoDataTemplateDirective` | `ng-template[monaListBoxNoDataTemplate]` | None | The default "No data" placeholder |
+| Directive                        | Selector                                 | Template context                                                          | Replaces                                   |
+|----------------------------------|------------------------------------------|---------------------------------------------------------------------------|--------------------------------------------|
+| `ListBoxHeaderTemplateDirective` | `ng-template[monaListBoxHeaderTemplate]` | None                                                                      | No default — renders above the list        |
+| `ListBoxItemTemplateDirective`   | `ng-template[monaListBoxItemTemplate]`   | `{ $implicit: T }` (the raw data item) — see `ListBoxItemTemplateContext` | The default text rendered from `textField` |
+| `ListBoxFooterTemplateDirective` | `ng-template[monaListBoxFooterTemplate]` | None                                                                      | No default — renders below the list        |
+| `ListBoxNoDataTemplateDirective` | `ng-template[monaListBoxNoDataTemplate]` | None                                                                      | The default "No data" placeholder          |
 
 ```html
 <mona-list-box [items]="items" textField="name" selectBy="id">
@@ -130,12 +130,12 @@ List Box never adds, removes, or reorders the collection passed to `items`. Ever
 
 ### Which list box's `actionClick` fires
 
-| Action | Fires on |
-|---|---|
-| `clear`, `remove` | Whichever list box (`this` or `connectedList`) currently holds the selection. |
-| `moveUp`, `moveDown` | Whichever list box currently holds the selection. Not emitted at all if neither list box has one. |
-| `transferTo`, `transferAllTo` | The list box the toolbar is attached to. |
-| `transferFrom`, `transferAllFrom` | The `connectedList`. |
+| Action                            | Fires on                                                                                          |
+|-----------------------------------|---------------------------------------------------------------------------------------------------|
+| `clear`, `remove`                 | Whichever list box (`this` or `connectedList`) currently holds the selection.                     |
+| `moveUp`, `moveDown`              | Whichever list box currently holds the selection. Not emitted at all if neither list box has one. |
+| `transferTo`, `transferAllTo`     | The list box the toolbar is attached to.                                                          |
+| `transferFrom`, `transferAllFrom` | The `connectedList`.                                                                              |
 
 ### Arrow-key navigation moves the selection
 
@@ -149,15 +149,15 @@ Both accept a string property name or a function `(item: T) => K`/`(item: T) => 
 
 ### Keyboard
 
-| Key | Action |
-|---|---|
-| `ArrowDown` | Select the next enabled item. |
-| `ArrowUp` | Select the previous enabled item. |
-| `Home` | Select the first enabled item. |
-| `End` | Select the last enabled item. |
-| `PageDown` | Scroll the list forward by roughly one viewport. |
-| `PageUp` | Scroll the list back by roughly one viewport. |
-| `Enter` | Select the highlighted or currently selected item. |
+| Key                                             | Action                                                                                                      |
+|-------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `ArrowDown`                                     | Select the next enabled item.                                                                               |
+| `ArrowUp`                                       | Select the previous enabled item.                                                                           |
+| `Home`                                          | Select the first enabled item.                                                                              |
+| `End`                                           | Select the last enabled item.                                                                               |
+| `PageDown`                                      | Scroll the list forward by roughly one viewport.                                                            |
+| `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
+| `Enter`                                         | Select the highlighted or currently selected item.                                                          |
 | Any letter, digit, space, hyphen, or underscore | Typeahead: jumps to the next item whose text starts with the typed characters (resets after a short pause). |
 
 ### Focus
@@ -166,14 +166,14 @@ The list is a single Tab stop, as in List View — Tab/Shift+Tab moves focus int
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always, on the inner list element | `"listbox"` |
-| `aria-label` | When `ariaLabel`/`aria-label` is set | The provided string |
-| `role` | Always, on each item | `"option"` |
-| `aria-selected` | Always, on each item | Reflects whether the item is selected |
-| `aria-disabled` | Always, on each item | Reflects whether the item is disabled |
-| `aria-posinset` / `aria-setsize` | Always, on each item | The item's 1-based position and the total count |
+| Attribute                        | When present                         | Value                                           |
+|----------------------------------|--------------------------------------|-------------------------------------------------|
+| `role`                           | Always, on the inner list element    | `"listbox"`                                     |
+| `aria-label`                     | When `ariaLabel`/`aria-label` is set | The provided string                             |
+| `role`                           | Always, on each item                 | `"option"`                                      |
+| `aria-selected`                  | Always, on each item                 | Reflects whether the item is selected           |
+| `aria-disabled`                  | Always, on each item                 | Reflects whether the item is disabled           |
+| `aria-posinset` / `aria-setsize` | Always, on each item                 | The item's 1-based position and the total count |
 
 Each toolbar button (Move Up, Move Down, Transfer From/To, Transfer All From/To, Clear Selection, Remove) carries its own `aria-label` matching its visible tooltip, so no consumer action is needed there. The toolbar itself renders as a plain `<div>` of buttons with no `role="toolbar"` grouping.
 
@@ -189,36 +189,36 @@ Form integration is not applicable — List Box is a display/selection widget, n
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `aria-label` | `string` | `""` | Accessible name for the list box's `listbox` element. Describe what the list represents, which matters in particular when connecting two list boxes. Bound as `[aria-label]`/plain `aria-label` (the input's property name is `ariaLabel`). |
-| `connectedList` | `ListBoxComponent<T, K> \| null` | `null` | The other list box to transfer items to and from using the toolbar actions. |
-| `height` | `string \| number` | `"100%"` | Sets the height of the component. |
-| `items` | `Iterable<T>` | `[]` | Collection of items to render. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Border-radius preset applied to the component. |
-| `selectBy` | `string \| ((item: T) => K) \| null` | `""` | Property name or accessor used to derive the key from a data item, used to identify selected items. |
-| `selectedKeys` | `Iterable<K>` | `[]` | Keys of the currently selected items. Pair with `(selectedKeysChange)` to keep in sync. |
-| `selectionMode` | `SelectionMode` (`"single" \| "multiple"`) | `"single"` | Allows multiple items to be selected simultaneously when set to `"multiple"`. |
-| `singleSelectionToggleable` | `boolean` | `true` | Allows an already-selected item to be deselected by clicking it again while `selectionMode` is `"single"`. Has no effect when `selectionMode` is `"multiple"`. |
-| `size` | `"small" \| "medium" \| "large"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `string \| ((item: T) => string) \| null` | `""` | Property name or accessor used to derive the display text from a data item. |
-| `toolbar` | `boolean \| Partial<ToolbarOptions>` | `true` | Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize which actions are shown and where the toolbar is positioned. The toolbar is only rendered while `connectedList` is also set. |
-| `width` | `string \| number` | `"100%"` | Sets the width of the component. |
+| Name                        | Type                                       | Default    | Description                                                                                                                                                                                                                                 |
+|-----------------------------|--------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`                | `string`                                   | `""`       | Accessible name for the list box's `listbox` element. Describe what the list represents, which matters in particular when connecting two list boxes. Bound as `[aria-label]`/plain `aria-label` (the input's property name is `ariaLabel`). |
+| `connectedList`             | `ListBoxComponent<T, K> \| null`           | `null`     | The other list box to transfer items to and from using the toolbar actions.                                                                                                                                                                 |
+| `height`                    | `string \| number`                         | `"100%"`   | Sets the height of the component.                                                                                                                                                                                                           |
+| `items`                     | `Iterable<T>`                              | `[]`       | Collection of items to render.                                                                                                                                                                                                              |
+| `rounded`                   | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Border-radius preset applied to the component.                                                                                                                                                                                              |
+| `selectBy`                  | `string \| ((item: T) => K) \| null`       | `""`       | Property name or accessor used to derive the key from a data item, used to identify selected items.                                                                                                                                         |
+| `selectedKeys`              | `Iterable<K>`                              | `[]`       | Keys of the currently selected items. Pair with `(selectedKeysChange)` to keep in sync.                                                                                                                                                     |
+| `selectionMode`             | `SelectionMode` (`"single" \| "multiple"`) | `"single"` | Allows multiple items to be selected simultaneously when set to `"multiple"`.                                                                                                                                                               |
+| `singleSelectionToggleable` | `boolean`                                  | `true`     | Allows an already-selected item to be deselected by clicking it again while `selectionMode` is `"single"`. Has no effect when `selectionMode` is `"multiple"`.                                                                              |
+| `size`                      | `"small" \| "medium" \| "large"`           | `"medium"` | Size preset controlling the component's dimensions.                                                                                                                                                                                         |
+| `textField`                 | `string \| ((item: T) => string) \| null`  | `""`       | Property name or accessor used to derive the display text from a data item.                                                                                                                                                                 |
+| `toolbar`                   | `boolean \| Partial<ToolbarOptions>`       | `true`     | Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize which actions are shown and where the toolbar is positioned. The toolbar is only rendered while `connectedList` is also set.                  |
+| `width`                     | `string \| number`                         | `"100%"`   | Sets the width of the component.                                                                                                                                                                                                            |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `actionClick` | `ListBoxActionEvent<T>` | Emitted when a toolbar action button is clicked, carrying the action's details. See [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires) and [The component does not mutate `items` itself](#the-component-does-not-mutate-items-itself). |
-| `selectedKeysChange` | `K[]` | Emitted with the updated keys whenever the selection changes. |
-| `selectionChange` | `ListBoxSelectionEvent<T>` | Emitted with the selected and deselected items whenever the selection changes. |
+| Name                 | Type                       | Description                                                                                                                                                                                                                                                     |
+|----------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `actionClick`        | `ListBoxActionEvent<T>`    | Emitted when a toolbar action button is clicked, carrying the action's details. See [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires) and [The component does not mutate `items` itself](#the-component-does-not-mutate-items-itself). |
+| `selectedKeysChange` | `K[]`                      | Emitted with the updated keys whenever the selection changes.                                                                                                                                                                                                   |
+| `selectionChange`    | `ListBoxSelectionEvent<T>` | Emitted with the selected and deselected items whenever the selection changes.                                                                                                                                                                                  |
 
 #### Public methods
 
-| Name | Description |
-|---|---|
-| `clearSelections(): void` | Clears the current selection without emitting `selectionChange`. Call `notifySelectionChange()` afterward if the resulting change should be emitted. |
-| `notifySelectionChange(): void` | Emits `selectionChange` for any selection changes made since the last notification (e.g. after calling `clearSelections()` directly). |
+| Name                            | Description                                                                                                                                          |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `clearSelections(): void`       | Clears the current selection without emitting `selectionChange`. Call `notifySelectionChange()` afterward if the resulting change should be emitted. |
+| `notifySelectionChange(): void` | Emits `selectionChange` for any selection changes made since the last notification (e.g. after calling `clearSelections()` directly).                |
 
 ---
 
@@ -228,34 +228,34 @@ Form integration is not applicable — List Box is a display/selection widget, n
 
 #### `ListBoxClearEvent<T = unknown>`
 
-| Property | Type | Description |
-|---|---|---|
-| `action` | `"clear"` | Discriminant matching the `ListBoxActionEvent` union. |
-| `selectedItems` | `T[]` | The items that were selected when Clear Selection was clicked. |
+| Property        | Type      | Description                                                    |
+|-----------------|-----------|----------------------------------------------------------------|
+| `action`        | `"clear"` | Discriminant matching the `ListBoxActionEvent` union.          |
+| `selectedItems` | `T[]`     | The items that were selected when Clear Selection was clicked. |
 
 #### `ListBoxMoveEvent<T = unknown>`
 
-| Property | Type | Description |
-|---|---|---|
-| `action` | `"moveDown" \| "moveUp"` | Discriminant matching the `ListBoxActionEvent` union. |
-| `newIndex` | `number` | The index the selection would move to. |
-| `oldIndex` | `number` | The index of the first selected item before the move. |
-| `selectedIndices` | `number[]` | Indices of all selected items before the move. |
-| `selectedItems` | `T[]` | The items that were selected when the move was requested. |
+| Property          | Type                     | Description                                               |
+|-------------------|--------------------------|-----------------------------------------------------------|
+| `action`          | `"moveDown" \| "moveUp"` | Discriminant matching the `ListBoxActionEvent` union.     |
+| `newIndex`        | `number`                 | The index the selection would move to.                    |
+| `oldIndex`        | `number`                 | The index of the first selected item before the move.     |
+| `selectedIndices` | `number[]`               | Indices of all selected items before the move.            |
+| `selectedItems`   | `T[]`                    | The items that were selected when the move was requested. |
 
 #### `ListBoxRemoveEvent<T = unknown>`
 
-| Property | Type | Description |
-|---|---|---|
-| `action` | `"remove"` | Discriminant matching the `ListBoxActionEvent` union. |
-| `selectedItems` | `T[]` | The items that were selected when Remove was clicked. |
+| Property        | Type       | Description                                           |
+|-----------------|------------|-------------------------------------------------------|
+| `action`        | `"remove"` | Discriminant matching the `ListBoxActionEvent` union. |
+| `selectedItems` | `T[]`      | The items that were selected when Remove was clicked. |
 
 #### `ListBoxTransferEvent<T = unknown>`
 
-| Property | Type | Description |
-|---|---|---|
-| `action` | `"transferAllFrom" \| "transferAllTo" \| "transferFrom" \| "transferTo"` | Discriminant matching the `ListBoxActionEvent` union. |
-| `selectedItems` | `T[]` | The items that were selected when the transfer was requested. Not populated for the "all" variants — see [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires). |
+| Property        | Type                                                                     | Description                                                                                                                                                                          |
+|-----------------|--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `action`        | `"transferAllFrom" \| "transferAllTo" \| "transferFrom" \| "transferTo"` | Discriminant matching the `ListBoxActionEvent` union.                                                                                                                                |
+| `selectedItems` | `T[]`                                                                    | The items that were selected when the transfer was requested. Not populated for the "all" variants — see [Which list box's `actionClick` fires](#which-list-boxs-actionclick-fires). |
 
 ---
 
@@ -267,22 +267,22 @@ Form integration is not applicable — List Box is a display/selection widget, n
 
 #### `ListBoxItemTemplateContext<T = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `$implicit` | `T` | The raw data item being rendered. |
+| Field       | Type | Description                       |
+|-------------|------|-----------------------------------|
+| `$implicit` | `T`  | The raw data item being rendered. |
 
 #### `ListBoxSelectionEvent<T = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `deselectedItems` | `T[]` | Items that were deselected. |
-| `selectedItems` | `T[]` | Items that are now selected. |
+| Field             | Type  | Description                  |
+|-------------------|-------|------------------------------|
+| `deselectedItems` | `T[]` | Items that were deselected.  |
+| `selectedItems`   | `T[]` | Items that are now selected. |
 
 #### `ToolbarOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `actions` | `ToolbarAction[]` | Which toolbar buttons to show, in order. |
+| Field      | Type                                     | Description                                    |
+|------------|------------------------------------------|------------------------------------------------|
+| `actions`  | `ToolbarAction[]`                        | Which toolbar buttons to show, in order.       |
 | `position` | `"top" \| "right" \| "bottom" \| "left"` | Which side of the list the toolbar renders on. |
 
 #### `ToolbarAction`

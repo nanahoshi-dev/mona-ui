@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { NodeItem } from "@mirei/mona-ui/internal/tree";
+import { NodeItem } from "@nanahoshi/mona-ui/internal/tree";
 
 import { TreeViewComponent } from "./tree-view.component";
 

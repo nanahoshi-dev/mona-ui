@@ -1,5 +1,5 @@
 import { Directive, effect, inject, untracked } from "@angular/core";
-import { ListService } from "@mirei/mona-ui/internal/list";
+import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { DropdownDataInputToken } from "../models/DropdownDataInput";
 
 @Directive({

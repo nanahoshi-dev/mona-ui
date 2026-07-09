@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/chip
+ * Public API Surface of @nanahoshi/mona-ui/chip
  */
 
 export { ChipComponent } from "./component/chip.component";

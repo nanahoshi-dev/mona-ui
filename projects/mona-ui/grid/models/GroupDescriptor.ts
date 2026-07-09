@@ -1,4 +1,4 @@
-import { SortDirection } from "@mirei/mona-ui/query";
+import { SortDirection } from "@nanahoshi/mona-ui/query";
 
 export interface GroupDescriptor {
     field: string;

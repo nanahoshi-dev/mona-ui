@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/theme
+ * Public API Surface of @nanahoshi/mona-ui/theme
  */
 
 export * from "./services/theme.service";

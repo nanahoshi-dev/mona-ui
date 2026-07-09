@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angu
 import {
     CircularProgressBarComponent,
     CircularProgressBarLabelTemplateDirective
-} from "@mirei/mona-ui/circular-progress-bar";
+} from "@nanahoshi/mona-ui/circular-progress-bar";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

@@ -9,7 +9,7 @@ import {
     type NumericFilterOperators,
     type StringFilterDescriptor,
     type StringFilterOperators
-} from "@mirei/mona-ui/query";
+} from "@nanahoshi/mona-ui/query";
 import type { FilterDescriptorBuildArgs } from "../models/FilterDescriptorBuildArgs";
 import type { FilterMenuDataItem } from "../models/FilterMenuDataItem";
 

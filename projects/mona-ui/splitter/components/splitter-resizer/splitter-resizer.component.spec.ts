@@ -13,8 +13,7 @@ import { SplitterComponent } from "../splitter/splitter.component";
     styles: "",
     imports: [SplitterComponent, SplitterPaneComponent]
 })
-class TestHostComponent {
-}
+class TestHostComponent {}
 
 describe("SplitterResizerComponent", () => {
     let hostComponent: TestHostComponent;

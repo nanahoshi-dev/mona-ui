@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
-import { SplitterComponent, SplitterPaneComponent } from "@mirei/mona-ui/splitter";
+import { SplitterComponent, SplitterPaneComponent } from "@nanahoshi/mona-ui/splitter";
 import { compact } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

@@ -9,7 +9,7 @@ Use `TextBoxComponent` when the user needs freeform text. `NumericTextBoxCompone
 ## Import & Quick Start
 
 ```typescript
-import { NumericTextBoxComponent } from "@mirei/mona-ui";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui";
 import { FormField, form } from "@angular/forms/signals";
 ```
 
@@ -106,17 +106,17 @@ The spinner buttons and arrow keys use the configured `step` value.
 
 `NumericTextBoxComponent` renders `role="spinbutton"` on the inner input element and keeps the following ARIA attributes in sync with state:
 
-| Attribute | When present | Value |
-|-----------|--------------|-------|
-| `role` | Always | `"spinbutton"` |
-| `aria-disabled` | Always | `disabled()` |
-| `aria-invalid` | When the control is invalid | `"true"` |
-| `aria-readonly` | Always | `readonly()` |
-| `aria-required` | Always | `required()` |
-| `aria-valuemax` | When `maxValue` is set | `maxValue` |
-| `aria-valuemin` | When `minValue` is set | `minValue` |
-| `aria-valuenow` | When a numeric value is present | Current numeric value |
-| `aria-valuetext` | Always | Formatted display value |
+| Attribute        | When present                    | Value                   |
+|------------------|---------------------------------|-------------------------|
+| `role`           | Always                          | `"spinbutton"`          |
+| `aria-disabled`  | Always                          | `disabled()`            |
+| `aria-invalid`   | When the control is invalid     | `"true"`                |
+| `aria-readonly`  | Always                          | `readonly()`            |
+| `aria-required`  | Always                          | `required()`            |
+| `aria-valuemax`  | When `maxValue` is set          | `maxValue`              |
+| `aria-valuemin`  | When `minValue` is set          | `minValue`              |
+| `aria-valuenow`  | When a numeric value is present | Current numeric value   |
+| `aria-valuetext` | Always                          | Formatted display value |
 
 **Consumer responsibilities**
 
@@ -148,40 +148,40 @@ Implements `FormValueControl<number | null>` from `@angular/forms/signals`.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `ariaLabel` | `string \| null` | `null` | Accessible name for the input. |
-| `decimals` | `number` | `0` | Number of decimals to show when the value is displayed. |
-| `disabled` | `boolean` | `false` | Renders the control with reduced visual emphasis and prevents interaction. |
-| `formatter` | `((value: number \| null) => string) \| null` | `null` | Formats the value for display when the control is not focused. |
-| `invalid` | `boolean` | `false` | Marks the control as invalid. When used with `[formField]`, the `FormField` directive writes this automatically. |
-| `maxValue` | `number \| null` | `null` | Upper bound of the value that can be entered. |
-| `minValue` | `number \| null` | `null` | Lower bound of the value that can be entered. |
-| `nullable` | `boolean` | `true` | Allows the value to become empty. |
-| `readonly` | `boolean` | `false` | Prevents value changes while preserving the control's visual state. |
-| `required` | `boolean` | `false` | Marks the control as required. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the control. |
-| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Size preset controlling the control's dimensions. |
-| `spinners` | `boolean` | `true` | Shows the increment and decrement buttons. |
-| `step` | `number` | `1` | Step value used by the spinner buttons and arrow-key changes. |
-| `tabindex` | `number` | `0` | Tab index of the inner input element. |
-| `touched` | `boolean` | `false` | Sets the touched state. When used with `[formField]`, the `FormField` directive writes this automatically. |
-| `userClass` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `value` | `number \| null` | `null` | Two-way bindable current value of the numeric text box. |
+| Name        | Type                                                 | Default    | Description                                                                                                      |
+|-------------|------------------------------------------------------|------------|------------------------------------------------------------------------------------------------------------------|
+| `ariaLabel` | `string \| null`                                     | `null`     | Accessible name for the input.                                                                                   |
+| `decimals`  | `number`                                             | `0`        | Number of decimals to show when the value is displayed.                                                          |
+| `disabled`  | `boolean`                                            | `false`    | Renders the control with reduced visual emphasis and prevents interaction.                                       |
+| `formatter` | `((value: number \| null) => string) \| null`        | `null`     | Formats the value for display when the control is not focused.                                                   |
+| `invalid`   | `boolean`                                            | `false`    | Marks the control as invalid. When used with `[formField]`, the `FormField` directive writes this automatically. |
+| `maxValue`  | `number \| null`                                     | `null`     | Upper bound of the value that can be entered.                                                                    |
+| `minValue`  | `number \| null`                                     | `null`     | Lower bound of the value that can be entered.                                                                    |
+| `nullable`  | `boolean`                                            | `true`     | Allows the value to become empty.                                                                                |
+| `readonly`  | `boolean`                                            | `false`    | Prevents value changes while preserving the control's visual state.                                              |
+| `required`  | `boolean`                                            | `false`    | Marks the control as required.                                                                                   |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the control.                                                                     |
+| `size`      | `'small' \| 'medium' \| 'large'`                     | `'medium'` | Size preset controlling the control's dimensions.                                                                |
+| `spinners`  | `boolean`                                            | `true`     | Shows the increment and decrement buttons.                                                                       |
+| `step`      | `number`                                             | `1`        | Step value used by the spinner buttons and arrow-key changes.                                                    |
+| `tabindex`  | `number`                                             | `0`        | Tab index of the inner input element.                                                                            |
+| `touched`   | `boolean`                                            | `false`    | Sets the touched state. When used with `[formField]`, the `FormField` directive writes this automatically.       |
+| `userClass` | `string`                                             | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                        |
+| `value`     | `number \| null`                                     | `null`     | Two-way bindable current value of the numeric text box.                                                          |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
-| `inputBlur` | `FocusEvent` | Emitted when the inner input is blurred. |
-| `inputFocus` | `FocusEvent` | Emitted when the inner input is focused. |
-| `inputFocusOut` | `FocusEvent` | Emitted when the inner input loses focus. |
-| `touch` | `void` | Emitted when the control is interacted with on blur, value change, or spinner update. |
+| Name            | Type         | Description                                                                           |
+|-----------------|--------------|---------------------------------------------------------------------------------------|
+| `inputBlur`     | `FocusEvent` | Emitted when the inner input is blurred.                                              |
+| `inputFocus`    | `FocusEvent` | Emitted when the inner input is focused.                                              |
+| `inputFocusOut` | `FocusEvent` | Emitted when the inner input loses focus.                                             |
+| `touch`         | `void`       | Emitted when the control is interacted with on blur, value change, or spinner update. |
 
 #### Public methods
 
-| Name | Signature | Description |
-|------|-----------|-------------|
+| Name      | Signature  | Description                               |
+|-----------|------------|-------------------------------------------|
 | `focus()` | `(): void` | Programmatically focuses the inner input. |
 
 ## Verification Checklist

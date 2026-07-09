@@ -1,7 +1,7 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ImmutableList } from "@mirei/ts-collections";
-import type { SortDescriptor } from "@mirei/mona-ui/query";
+import type { SortDescriptor } from "@nanahoshi/mona-ui/query";
 import type { Column } from "../models/Column";
 import { ColumnSortEvent } from "../models/ColumnSortEvent";
 import type { SortableOptions } from "../models/SortableOptions";

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/switch
+ * Public API Surface of @nanahoshi/mona-ui/switch
  */
 
 export * from "./components/switch/switch.component";

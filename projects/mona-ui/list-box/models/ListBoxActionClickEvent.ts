@@ -4,7 +4,4 @@ import { ListBoxTransferEvent } from "./ListBoxTransferEvent";
 import { ListBoxClearEvent } from "./ListBoxClearEvent";
 
 export type ListBoxActionEvent<T = any> =
-    | ListBoxClearEvent<T>
-    | ListBoxMoveEvent<T>
-    | ListBoxRemoveEvent<T>
-    | ListBoxTransferEvent<T>;
+    ListBoxClearEvent<T> | ListBoxMoveEvent<T> | ListBoxRemoveEvent<T> | ListBoxTransferEvent<T>;

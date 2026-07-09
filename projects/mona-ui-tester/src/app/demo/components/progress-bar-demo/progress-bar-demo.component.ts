@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, signal } from "@angular/core";
-import { ProgressBarComponent, ProgressBarLabelTemplateDirective } from "@mirei/mona-ui/progress-bar";
+import { ProgressBarComponent, ProgressBarLabelTemplateDirective } from "@nanahoshi/mona-ui/progress-bar";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

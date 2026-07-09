@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/tooltip
+ * Public API Surface of @nanahoshi/mona-ui/tooltip
  */
 
 export * from "./components/tooltip/tooltip.component";

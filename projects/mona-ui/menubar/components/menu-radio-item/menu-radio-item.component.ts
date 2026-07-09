@@ -4,7 +4,7 @@ import {
     PopupMenuRadioItemComponent,
     PopupMenuRadioItemToken,
     PopupMenuToken
-} from "@mirei/mona-ui/popup-menu";
+} from "@nanahoshi/mona-ui/popup-menu";
 import { ensureMenubarTemplateTypes } from "../../utils/menubar.utils";
 
 @Component({

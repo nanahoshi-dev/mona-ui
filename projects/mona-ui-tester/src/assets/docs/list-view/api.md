@@ -24,7 +24,7 @@ List View renders a collection of items as a `role="listbox"` list. On its own i
 ## Import & Quick Start
 
 ```typescript
-import { ListViewComponent } from "@mirei/mona-ui";
+import { ListViewComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -37,13 +37,13 @@ import { ListViewComponent } from "@mirei/mona-ui";
 
 Each structural directive below is an `ng-template` placed as projected content inside `<mona-list-view>...</mona-list-view>`.
 
-| Directive | Selector | Template context | Replaces |
-|---|---|---|---|
-| `ListViewHeaderTemplateDirective` | `ng-template[monaListViewHeaderTemplate]` | None | No default — renders above the list |
-| `ListViewItemTemplateDirective` | `ng-template[monaListViewItemTemplate]` | `{ $implicit: T }` (the raw data item) | The default text rendered from `textField` |
-| `ListViewGroupHeaderTemplateDirective` | `ng-template[monaListViewGroupHeaderTemplate]` | `{ $implicit: K }` (the group's key value) | The default bold group header text |
-| `ListViewFooterTemplateDirective` | `ng-template[monaListViewFooterTemplate]` | None | No default — renders below the list, above the pager |
-| `ListViewNoDataTemplateDirective` | `ng-template[monaListViewNoDataTemplate]` | None | The default "No data" placeholder |
+| Directive                              | Selector                                       | Template context                           | Replaces                                             |
+|----------------------------------------|------------------------------------------------|--------------------------------------------|------------------------------------------------------|
+| `ListViewHeaderTemplateDirective`      | `ng-template[monaListViewHeaderTemplate]`      | None                                       | No default — renders above the list                  |
+| `ListViewItemTemplateDirective`        | `ng-template[monaListViewItemTemplate]`        | `{ $implicit: T }` (the raw data item)     | The default text rendered from `textField`           |
+| `ListViewGroupHeaderTemplateDirective` | `ng-template[monaListViewGroupHeaderTemplate]` | `{ $implicit: K }` (the group's key value) | The default bold group header text                   |
+| `ListViewFooterTemplateDirective`      | `ng-template[monaListViewFooterTemplate]`      | None                                       | No default — renders below the list, above the pager |
+| `ListViewNoDataTemplateDirective`      | `ng-template[monaListViewNoDataTemplate]`      | None                                       | The default "No data" placeholder                    |
 
 ```html
 <mona-list-view [items]="items" textField="name">
@@ -143,7 +143,7 @@ When `monaListViewVirtualScroll` reports `enabled: true`, the pager rendered by 
 
 ### `SelectableOptions` is not exported
 
-`monaListViewSelectable`'s options object is typed as `SelectableOptions` internally, but that type is not re-exported from `@mirei/mona-ui`. Inline object literals (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
+`monaListViewSelectable`'s options object is typed as `SelectableOptions` internally, but that type is not re-exported from `@nanahoshi/mona-ui`. Inline object literals (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
 `TODO(owner-review): confirm whether SelectableOptions should be added to the public barrel export.`
 
 ### Grouping key type defaults to the item type
@@ -156,15 +156,15 @@ When `monaListViewVirtualScroll` reports `enabled: true`, the pager rendered by 
 
 Keyboard navigation requires `monaListViewNavigable`.
 
-| Key | Action |
-|---|---|
-| `ArrowDown` | Move to the next enabled item. |
-| `ArrowUp` | Move to the previous enabled item. |
-| `Home` | Move to the first enabled item. |
-| `End` | Move to the last enabled item. |
-| `PageDown` | Scroll the list forward by roughly one viewport. |
-| `PageUp` | Scroll the list back by roughly one viewport. |
-| `Enter` | Select the highlighted or currently selected item. |
+| Key                                             | Action                                                                                                      |
+|-------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| `ArrowDown`                                     | Move to the next enabled item.                                                                              |
+| `ArrowUp`                                       | Move to the previous enabled item.                                                                          |
+| `Home`                                          | Move to the first enabled item.                                                                             |
+| `End`                                           | Move to the last enabled item.                                                                              |
+| `PageDown`                                      | Scroll the list forward by roughly one viewport.                                                            |
+| `PageUp`                                        | Scroll the list back by roughly one viewport.                                                               |
+| `Enter`                                         | Select the highlighted or currently selected item.                                                          |
 | Any letter, digit, space, hyphen, or underscore | Typeahead: jumps to the next item whose text starts with the typed characters (resets after a short pause). |
 
 Disabled items (set through the underlying list's `disabledBy`, not currently exposed as a `ListViewComponent` input — `TODO(owner-review): confirm whether list-view should expose a disabledBy input`) are skipped during navigation.
@@ -175,14 +175,14 @@ The list is a single Tab stop. Tabbing into `<mona-list-view>` focuses its first
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always, on the inner list element | `"listbox"` |
-| `role` | Always, on each item | `"option"` |
-| `aria-selected` | Always, on each item | Reflects whether the item is selected |
-| `aria-disabled` | Always, on each item | Reflects whether the item is disabled |
-| `aria-current` | Always, on each item | Reflects whether the item is the currently highlighted item |
-| `aria-posinset` / `aria-setsize` | Always, on each item | The item's 1-based position and the total count among non-header items |
+| Attribute                        | When present                      | Value                                                                  |
+|----------------------------------|-----------------------------------|------------------------------------------------------------------------|
+| `role`                           | Always, on the inner list element | `"listbox"`                                                            |
+| `role`                           | Always, on each item              | `"option"`                                                             |
+| `aria-selected`                  | Always, on each item              | Reflects whether the item is selected                                  |
+| `aria-disabled`                  | Always, on each item              | Reflects whether the item is disabled                                  |
+| `aria-current`                   | Always, on each item              | Reflects whether the item is the currently highlighted item            |
+| `aria-posinset` / `aria-setsize` | Always, on each item              | The item's 1-based position and the total count among non-header items |
 
 `ListViewComponent` does not accept an `aria-label`/`aria-labelledby` input; provide an accessible name for the list via a `monaListViewHeaderTemplate` heading or a wrapping landmark, as needed.
 
@@ -196,26 +196,26 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `height` | `string \| number` | `"100%"` | Sets the height of the list view. |
-| `items` | `Iterable<T>` | `[]` | Collection of items to render. |
-| `listClass` | `string` | `""` | Sets the classes of the inner `<ul>` element. |
-| `listItemClass` | `string` | `""` | Sets the classes of the list items. |
-| `listItemStyle` | `Partial<CSSStyleDeclaration>` | `{}` | Sets the style of the list items. |
-| `listStyle` | `Partial<CSSStyleDeclaration>` | `{}` | Sets the style of the list. |
-| `maxHeight` | `string \| number` | `""` | Sets the maximum height of the list. |
-| `maxWidth` | `string \| number` | `""` | Sets the maximum width of the list. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Border-radius preset applied to the component. |
-| `size` | `"small" \| "medium" \| "large"` | `"medium"` | Size preset controlling the component's dimensions. |
-| `textField` | `string \| ((item: T) => string) \| null` | `""` | Property name or accessor used to derive the display text from a data item. |
-| `width` | `string \| number` | `"100%"` | Sets the width of the list view. |
+| Name            | Type                                       | Default    | Description                                                                 |
+|-----------------|--------------------------------------------|------------|-----------------------------------------------------------------------------|
+| `class`         | `string`                                   | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.   |
+| `height`        | `string \| number`                         | `"100%"`   | Sets the height of the list view.                                           |
+| `items`         | `Iterable<T>`                              | `[]`       | Collection of items to render.                                              |
+| `listClass`     | `string`                                   | `""`       | Sets the classes of the inner `<ul>` element.                               |
+| `listItemClass` | `string`                                   | `""`       | Sets the classes of the list items.                                         |
+| `listItemStyle` | `Partial<CSSStyleDeclaration>`             | `{}`       | Sets the style of the list items.                                           |
+| `listStyle`     | `Partial<CSSStyleDeclaration>`             | `{}`       | Sets the style of the list.                                                 |
+| `maxHeight`     | `string \| number`                         | `""`       | Sets the maximum height of the list.                                        |
+| `maxWidth`      | `string \| number`                         | `""`       | Sets the maximum width of the list.                                         |
+| `rounded`       | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Border-radius preset applied to the component.                              |
+| `size`          | `"small" \| "medium" \| "large"`           | `"medium"` | Size preset controlling the component's dimensions.                         |
+| `textField`     | `string \| ((item: T) => string) \| null`  | `""`       | Property name or accessor used to derive the display text from a data item. |
+| `width`         | `string \| number`                         | `"100%"`   | Sets the width of the list view.                                            |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name           | Type    | Description                                                                                                                                                                                       |
+|----------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `scrollBottom` | `Event` | Emitted when the list is scrolled to the bottom. Does not fire while `monaListViewPageable` is enabled — see [`scrollBottom` and `monaListViewPageable`](#scrollbottom-and-monalistviewpageable). |
 
 ---
@@ -226,16 +226,16 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaListViewSelectable` | `Partial<SelectableOptions> \| ""` | `""` | Enables selection. An empty string enables single selection with default settings; pass an object to configure `mode` (`"single"` or `"multiple"`), `toggleable`, and `checkboxes`. |
-| `selectBy` | `string \| ((item: T) => K) \| null` | `""` | Property name or accessor used to derive the selection key from a data item. When omitted, the data item itself is used as the key. |
-| `selectedKeys` | `Iterable<K>` | `[]` | Two-way-equivalent initial/programmatic selection, expressed as keys rather than items. Pair with `(selectedKeysChange)` to keep it in sync. |
+| Name                     | Type                                 | Default | Description                                                                                                                                                                         |
+|--------------------------|--------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaListViewSelectable` | `Partial<SelectableOptions> \| ""`   | `""`    | Enables selection. An empty string enables single selection with default settings; pass an object to configure `mode` (`"single"` or `"multiple"`), `toggleable`, and `checkboxes`. |
+| `selectBy`               | `string \| ((item: T) => K) \| null` | `""`    | Property name or accessor used to derive the selection key from a data item. When omitted, the data item itself is used as the key.                                                 |
+| `selectedKeys`           | `Iterable<K>`                        | `[]`    | Two-way-equivalent initial/programmatic selection, expressed as keys rather than items. Pair with `(selectedKeysChange)` to keep it in sync.                                        |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name                 | Type       | Description                                    |
+|----------------------|------------|------------------------------------------------|
 | `selectedKeysChange` | `Array<K>` | Emitted when the set of selected keys changes. |
 
 ---
@@ -246,9 +246,9 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaListViewNavigable` | `Partial<NavigableOptions> \| ""` | `""` | Enables keyboard navigation. An empty string enables navigation with default settings (`mode: "highlight"`, `wrap: false`); pass an object to override either field. |
+| Name                    | Type                              | Default | Description                                                                                                                                                          |
+|-------------------------|-----------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaListViewNavigable` | `Partial<NavigableOptions> \| ""` | `""`    | Enables keyboard navigation. An empty string enables navigation with default settings (`mode: "highlight"`, `wrap: false`); pass an object to override either field. |
 
 ---
 
@@ -258,10 +258,10 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `groupBy` | `string \| ((item: T) => K) \| null` | `""` | Property name or accessor used to derive the group key from a data item. |
-| `monaListViewGroupable` | `GroupableOptions<T, K> \| ""` | `""` | Enables grouping. An empty string enables grouping with default settings; pass an object to configure `headerOrder`, `orderBy`, and `orderByDirection`. |
+| Name                    | Type                                 | Default | Description                                                                                                                                             |
+|-------------------------|--------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `groupBy`               | `string \| ((item: T) => K) \| null` | `""`    | Property name or accessor used to derive the group key from a data item.                                                                                |
+| `monaListViewGroupable` | `GroupableOptions<T, K> \| ""`       | `""`    | Enables grouping. An empty string enables grouping with default settings; pass an object to configure `headerOrder`, `orderBy`, and `orderByDirection`. |
 
 ---
 
@@ -271,9 +271,9 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaListViewPageable` | `Partial<PagerSettings> \| ""` | `""` | Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`, `previousNext: true`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine). |
+| Name                   | Type                           | Default | Description                                                                                                                                                                                                                                                                                                                                                                                       |
+|------------------------|--------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaListViewPageable` | `Partial<PagerSettings> \| ""` | `""`    | Enables pagination. An empty string enables pagination with default settings (`type: "numeric"`, `previousNext: true`, `pageSizeValues: [5, 10, 20, 25, 50, 100]`, `visiblePages: 5`); pass an object to override any field. Has no visible effect while `monaListViewVirtualScroll` is enabled — see [Pagination and virtualization don't combine](#pagination-and-virtualization-dont-combine). |
 
 ---
 
@@ -283,8 +283,8 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
+| Name                        | Type                   | Default      | Description                                                                                                                                         |
+|-----------------------------|------------------------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `monaListViewVirtualScroll` | `VirtualScrollOptions` | — (required) | Enables virtual scrolling. `height` is the fixed row height, in pixels, used to measure the viewport; when omitted, a `28`px row height is assumed. |
 
 ---
@@ -293,39 +293,39 @@ Form integration is not applicable — List View is a display/selection widget, 
 
 #### `GroupableOptions<T = unknown, R = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean \| undefined` | Whether grouping is active. |
-| `headerOrder` | `"asc" \| "desc" \| undefined` | Sort direction applied to group headers by their key. |
-| `orderBy` | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group. |
-| `orderByDirection` | `"asc" \| "desc" \| undefined` | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
+| Field              | Type                                      | Description                                                             |
+|--------------------|-------------------------------------------|-------------------------------------------------------------------------|
+| `enabled`          | `boolean \| undefined`                    | Whether grouping is active.                                             |
+| `headerOrder`      | `"asc" \| "desc" \| undefined`            | Sort direction applied to group headers by their key.                   |
+| `orderBy`          | `string \| ((item: T) => R) \| undefined` | Property name or accessor used to sort items within each group.         |
+| `orderByDirection` | `"asc" \| "desc" \| undefined`            | Sort direction applied by `orderBy`. Ignored when `orderBy` is not set. |
 
 #### `NavigableOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether keyboard navigation is active. |
-| `mode` | `"highlight" \| "select"` | Whether navigation only moves a visual highlight (`"highlight"`) or also changes selection (`"select"`). |
-| `wrap` | `boolean` | Whether navigating past the last (or before the first) item cycles to the other end. |
+| Field     | Type                      | Description                                                                                              |
+|-----------|---------------------------|----------------------------------------------------------------------------------------------------------|
+| `enabled` | `boolean`                 | Whether keyboard navigation is active.                                                                   |
+| `mode`    | `"highlight" \| "select"` | Whether navigation only moves a visual highlight (`"highlight"`) or also changes selection (`"select"`). |
+| `wrap`    | `boolean`                 | Whether navigating past the last (or before the first) item cycles to the other end.                     |
 
 #### `PagerSettings`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether the pager is active. |
-| `firstLast` | `boolean` | Whether first/last page buttons are shown. |
-| `pageSizeValues` | `number[] \| boolean` | Page size options shown in the pager, or `false`/`true` to hide/show a default set. |
-| `previousNext` | `boolean` | Whether previous/next page buttons are shown. |
-| `showInfo` | `boolean` | Whether a page summary (e.g. "1-10 of 50") is shown. |
-| `type` | `"numeric" \| "input"` | Whether pages are selected via numbered buttons or a page-number input. |
-| `visiblePages` | `number` | Number of numeric page buttons shown at once, when `type` is `"numeric"`. |
+| Field            | Type                   | Description                                                                         |
+|------------------|------------------------|-------------------------------------------------------------------------------------|
+| `enabled`        | `boolean`              | Whether the pager is active.                                                        |
+| `firstLast`      | `boolean`              | Whether first/last page buttons are shown.                                          |
+| `pageSizeValues` | `number[] \| boolean`  | Page size options shown in the pager, or `false`/`true` to hide/show a default set. |
+| `previousNext`   | `boolean`              | Whether previous/next page buttons are shown.                                       |
+| `showInfo`       | `boolean`              | Whether a page summary (e.g. "1-10 of 50") is shown.                                |
+| `type`           | `"numeric" \| "input"` | Whether pages are selected via numbered buttons or a page-number input.             |
+| `visiblePages`   | `number`               | Number of numeric page buttons shown at once, when `type` is `"numeric"`.           |
 
 #### `VirtualScrollOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether virtual scrolling is active. |
-| `height` | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
+| Field     | Type                  | Description                                                               |
+|-----------|-----------------------|---------------------------------------------------------------------------|
+| `enabled` | `boolean`             | Whether virtual scrolling is active.                                      |
+| `height`  | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
 
 ---
 

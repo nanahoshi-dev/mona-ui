@@ -10,7 +10,7 @@ import {
     TemplateRef
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { CheckboxDirective } from "@mirei/mona-ui/check-box";
+import { CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";

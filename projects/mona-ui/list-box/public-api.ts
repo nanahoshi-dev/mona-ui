@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/list-box
+ * Public API Surface of @nanahoshi/mona-ui/list-box
  */
 
 export * from "./components/list-box/list-box.component";

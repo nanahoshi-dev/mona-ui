@@ -8,7 +8,7 @@ describe("ScrollViewActivePageDirective", () => {
             imports: [ScrollViewActivePageDirective]
         });
         directive = TestBed.runInInjectionContext(() => new ScrollViewActivePageDirective());
-    })
+    });
     it("should create an instance", () => {
         expect(directive).toBeTruthy();
     });

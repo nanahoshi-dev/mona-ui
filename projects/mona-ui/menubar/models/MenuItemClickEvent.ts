@@ -1,3 +1,3 @@
-import { PopupMenuItemClickEvent } from "@mirei/mona-ui/popup-menu";
+import { PopupMenuItemClickEvent } from "@nanahoshi/mona-ui/popup-menu";
 
 export type MenuItemClickEvent = PopupMenuItemClickEvent;

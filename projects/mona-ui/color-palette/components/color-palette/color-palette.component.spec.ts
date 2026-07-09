@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
 import { describe, expect, it } from "vitest";
 
-import type { PaletteType } from "@mirei/mona-ui/common";
+import type { PaletteType } from "@nanahoshi/mona-ui/common";
 import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../utils/colorSchemes";
 import { ColorPaletteComponent } from "./color-palette.component";
 

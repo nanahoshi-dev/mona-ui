@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { SortDirection } from "@mirei/mona-ui/query";
+import { SortDirection } from "@nanahoshi/mona-ui/query";
 
 @Pipe({
     name: "columnAriaSort"

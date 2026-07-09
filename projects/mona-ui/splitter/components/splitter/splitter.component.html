@@ -5,8 +5,7 @@
         [attr.data-px]="$index"
         monaSplitterPaneStyle
         [pane]="pane"
-        [paneList]="paneList()"
-    >
+        [paneList]="paneList()">
         <ng-container [ngTemplateOutlet]="pane.template()"></ng-container>
     </div>
     @if ($index !== $count - 1) {

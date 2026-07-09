@@ -16,7 +16,11 @@
             </button>
         }
         @if (strikeThroughVisible()) {
-            <button monaButton [selected]="strikeThroughSelected()" (click)="onStrikeThroughToggle()" title="Strikethrough">
+            <button
+                monaButton
+                [selected]="strikeThroughSelected()"
+                (click)="onStrikeThroughToggle()"
+                title="Strikethrough">
                 <i class="ri-strikethrough"></i>
             </button>
         }

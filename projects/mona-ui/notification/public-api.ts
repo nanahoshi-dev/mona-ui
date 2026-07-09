@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/notification
+ * Public API Surface of @nanahoshi/mona-ui/notification
  */
 
 export * from "./services/notification.service";

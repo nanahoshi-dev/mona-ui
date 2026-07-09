@@ -1,23 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PopupMenuGroupComponent } from './popup-menu-group.component';
+import { PopupMenuGroupComponent } from "./popup-menu-group.component";
 
-describe('PopupMenuGroupComponent', () => {
+describe("PopupMenuGroupComponent", () => {
     let component: PopupMenuGroupComponent;
     let fixture: ComponentFixture<PopupMenuGroupComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [PopupMenuGroupComponent]
-        })
-            .compileComponents();
+        }).compileComponents();
 
         fixture = TestBed.createComponent(PopupMenuGroupComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it("should create", () => {
         expect(component).toBeTruthy();
     });
 });

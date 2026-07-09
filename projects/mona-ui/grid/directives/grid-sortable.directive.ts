@@ -11,7 +11,7 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { type SortDescriptor, SortDirection } from "@mirei/mona-ui/query";
+import { type SortDescriptor, SortDirection } from "@nanahoshi/mona-ui/query";
 import type { Column } from "../models/Column";
 import type { ColumnSortEvent } from "../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../models/GridColumnDefinition";

@@ -3,23 +3,31 @@
 }
 @if (listService.filterableOptions().enabled && listService.filterInputVisible()) {
     <div class="p-2">
-        <mona-filter-input [filter]="listService.filterText()"
-                           [debounce]="listService.filterableOptions().debounce"
-                           [placeholder]="listService.filterPlaceholder()"
-                           [size]="size()"
-                           (filterChange)="onFilterChange($event)"></mona-filter-input>
+        <mona-filter-input
+            [filter]="listService.filterText()"
+            [debounce]="listService.filterableOptions().debounce"
+            [placeholder]="listService.filterPlaceholder()"
+            [size]="size()"
+            (filterChange)="onFilterChange($event)"></mona-filter-input>
     </div>
 }
 @if (listService.virtualScrollOptions().enabled) {
     @if (listService.viewItems().length !== 0) {
-        <cdk-virtual-scroll-viewport [itemSize]="listService.virtualScrollOptions().height"
-                                     [style.height]="viewportHeight()">
-            <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1" [id]="listId()" role="listbox"
+        <cdk-virtual-scroll-viewport
+            [itemSize]="listService.virtualScrollOptions().height"
+            [style.height]="viewportHeight()">
+            <ul
+                [class]="innerListClasses()"
+                [style]="listStyle()"
+                [tabIndex]="-1"
+                [id]="listId()"
+                role="listbox"
                 [attr.aria-label]="ariaLabel() || null"
                 [attr.aria-multiselectable]="listService.selectableOptions().mode === 'multiple' || null">
                 <ng-container *cdkVirtualFor="let item of listService.viewItems()">
-                    <ng-container [ngTemplateOutlet]="listItemTemplate"
-                                  [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="listItemTemplate"
+                        [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
                 </ng-container>
             </ul>
         </cdk-virtual-scroll-viewport>
@@ -30,12 +38,18 @@
     }
 } @else {
     @if (listService.viewItems().length !== 0) {
-        <ul [class]="innerListClasses()" [style]="listStyle()" [tabIndex]="-1" [id]="listId()" role="listbox"
+        <ul
+            [class]="innerListClasses()"
+            [style]="listStyle()"
+            [tabIndex]="-1"
+            [id]="listId()"
+            role="listbox"
             [attr.aria-label]="ariaLabel() || null"
             [attr.aria-multiselectable]="listService.selectableOptions().mode === 'multiple' || null">
             @for (item of listService.viewItems(); track item.uid) {
-                <ng-container [ngTemplateOutlet]="listItemTemplate"
-                              [ngTemplateOutletContext]="{$implicit: item}"></ng-container>
+                <ng-container
+                    [ngTemplateOutlet]="listItemTemplate"
+                    [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
             }
         </ul>
     } @else if (noDataTemplate()) {
@@ -54,14 +68,19 @@
             <mona-list-item [item]="item" [template]="groupHeaderTemplate()"></mona-list-item>
         </li>
     } @else {
-        <li [class]="listItemClass()"
+        <li
+            [class]="listItemClass()"
             [class.px-0.5]="true"
             [style]="listItemStyle()"
             [id]="item.uid"
             [attr.data-uid]="item.uid"
             (click)="onListItemClick(item)"
-            monaListItem [item]="item">
-            <mona-list-item [item]="item" [template]="itemTemplate()" (checked)="onListItemCheck(item)"></mona-list-item>
+            monaListItem
+            [item]="item">
+            <mona-list-item
+                [item]="item"
+                [template]="itemTemplate()"
+                (checked)="onListItemCheck(item)"></mona-list-item>
         </li>
     }
 </ng-template>

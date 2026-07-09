@@ -17,7 +17,7 @@ The legend is hidden entirely when neither `legend` nor `monaFieldsetLegendTempl
 ## Import & Basic Usage
 
 ```typescript
-import { FieldsetComponent } from "@mirei/mona-ui";
+import { FieldsetComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add `FieldsetComponent` to your standalone component's `imports` array.
@@ -88,13 +88,13 @@ Set `disabled` to disable the rendered `<fieldset>` and all projected form contr
 
 **Selector:** `mona-fieldset`
 
-| Name       | Type                                                  | Default     | Description |
-|------------|-------------------------------------------------------|-------------|-------------|
-| `class`    | `string`                                              | `''`        | Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`. |
-| `disabled` | `boolean`                                             | `false`     | Disables the rendered `<fieldset>` and all projected form controls, and applies a reduced-emphasis visual style. |
-| `legend`   | `string`                                              | `''`        | Text displayed in the legend notch. Ignored when `monaFieldsetLegendTemplate` is provided. When both are empty, no `<legend>` element is rendered. |
-| `name`     | `string \| undefined`                                 | `undefined` | The `name` attribute reflected onto the rendered `<fieldset>` element. |
-| `rounded`  | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`  | `'medium'`  | Border-radius preset applied to both the fieldset border and the legend notch. |
+| Name       | Type                                                 | Default     | Description                                                                                                                                        |
+|------------|------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `class`    | `string`                                             | `''`        | Additional CSS classes merged onto the rendered `<fieldset>` element via `tailwind-merge`.                                                         |
+| `disabled` | `boolean`                                            | `false`     | Disables the rendered `<fieldset>` and all projected form controls, and applies a reduced-emphasis visual style.                                   |
+| `legend`   | `string`                                             | `''`        | Text displayed in the legend notch. Ignored when `monaFieldsetLegendTemplate` is provided. When both are empty, no `<legend>` element is rendered. |
+| `name`     | `string \| undefined`                                | `undefined` | The `name` attribute reflected onto the rendered `<fieldset>` element.                                                                             |
+| `rounded`  | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`  | Border-radius preset applied to both the fieldset border and the legend notch.                                                                     |
 
 `FieldsetComponent` has no model inputs and no event outputs.
 
@@ -105,7 +105,7 @@ Set `disabled` to disable the rendered `<fieldset>` and all projected form contr
 Replaces the string `legend` with projected content inside the `<legend>` element. When this template is present, no default legend styling is applied — the consumer is responsible for all visual treatment. The template has no context variables.
 
 ```typescript
-import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@mirei/mona-ui";
+import { FieldsetComponent, FieldsetLegendTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 ---

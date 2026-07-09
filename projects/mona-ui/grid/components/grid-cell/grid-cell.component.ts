@@ -1,7 +1,7 @@
 import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, inject, input, LOCALE_ID } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";

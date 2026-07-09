@@ -7,7 +7,7 @@ import {
     NodeDragStartEvent,
     NodeDropEvent,
     TreeService
-} from "@mirei/mona-ui/internal/tree";
+} from "@nanahoshi/mona-ui/internal/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 
 @Directive({

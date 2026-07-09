@@ -1,7 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { TreeService } from "@mirei/mona-ui/internal/tree";
+import { TreeService } from "@nanahoshi/mona-ui/internal/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewExpandableDirective } from "./tree-view-expandable.directive";
 

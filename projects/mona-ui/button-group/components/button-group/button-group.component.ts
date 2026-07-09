@@ -11,9 +11,9 @@ import {
     untracked
 } from "@angular/core";
 import { outputFromObservable, takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { ButtonDirective, ButtonService } from "@mirei/mona-ui/button";
-import { SelectionMode } from "@mirei/mona-ui/common";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective, ButtonService } from "@nanahoshi/mona-ui/button";
+import { SelectionMode } from "@nanahoshi/mona-ui/common";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 
 import { map, pairwise } from "rxjs";
 import { twMerge } from "tailwind-merge";

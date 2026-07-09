@@ -1,6 +1,12 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { disabled as fieldDisabled, form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
+import {
+    disabled as fieldDisabled,
+    form,
+    FormField,
+    readonly as fieldReadonly,
+    required
+} from "@angular/forms/signals";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { AutoCompleteComponent } from "./auto-complete.component";

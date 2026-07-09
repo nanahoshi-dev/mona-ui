@@ -23,7 +23,7 @@ There are two ways to use it:
 ## Import & Quick Start
 
 ```typescript
-import { WindowComponent } from "@mirei/mona-ui";
+import { WindowComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -40,7 +40,7 @@ Imperative usage returns a `WindowRef` synchronously:
 
 ```typescript
 import { inject, TemplateRef, viewChild } from "@angular/core";
-import { WindowService } from "@mirei/mona-ui";
+import { WindowService } from "@nanahoshi/mona-ui";
 
 protected readonly content = viewChild<TemplateRef<unknown>>("content");
 protected readonly windowService = inject(WindowService);
@@ -59,12 +59,12 @@ open(): void {
 
 Window has four structural template directives, each an `ng-template` placed as projected content inside `<mona-window>...</mona-window>`.
 
-| Directive | Selector | Template context | Replaces |
-|---|---|---|---|
-| `WindowTitleTemplateDirective` | `ng-template[monaWindowTitleTemplate]` | None | The `title` input |
-| `WindowContentTemplateDirective` | `ng-template[monaWindowContentTemplate]` | None | Projected content passed directly to `<mona-window>` |
-| `WindowFooterTemplateDirective` | `ng-template[monaWindowFooterTemplate]` | None | No default — the footer area is empty unless provided |
-| `WindowActionTemplateDirective` | `ng-template[monaWindowActionTemplate]` | `WindowActionTemplateContext` (`{ $implicit: WindowRef }`) | No default — renders next to the minimize/maximize/close buttons |
+| Directive                        | Selector                                 | Template context                                           | Replaces                                                         |
+|----------------------------------|------------------------------------------|------------------------------------------------------------|------------------------------------------------------------------|
+| `WindowTitleTemplateDirective`   | `ng-template[monaWindowTitleTemplate]`   | None                                                       | The `title` input                                                |
+| `WindowContentTemplateDirective` | `ng-template[monaWindowContentTemplate]` | None                                                       | Projected content passed directly to `<mona-window>`             |
+| `WindowFooterTemplateDirective`  | `ng-template[monaWindowFooterTemplate]`  | None                                                       | No default — the footer area is empty unless provided            |
+| `WindowActionTemplateDirective`  | `ng-template[monaWindowActionTemplate]`  | `WindowActionTemplateContext` (`{ $implicit: WindowRef }`) | No default — renders next to the minimize/maximize/close buttons |
 
 ```html
 <mona-window [maximizable]="true">
@@ -194,11 +194,11 @@ Window only traps focus while `modal` is `true`. When it opens, focus moves auto
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"dialog"` |
-| `aria-labelledby` | Always | ID of the title element (rendered even when a custom `monaWindowTitleTemplate` is used) |
-| `aria-modal` | Always | Reflects the `modal` input (`"true"` or `"false"`) |
+| Attribute         | When present | Value                                                                                   |
+|-------------------|--------------|-----------------------------------------------------------------------------------------|
+| `role`            | Always       | `"dialog"`                                                                              |
+| `aria-labelledby` | Always       | ID of the title element (rendered even when a custom `monaWindowTitleTemplate` is used) |
+| `aria-modal`      | Always       | Reflects the `modal` input (`"true"` or `"false"`)                                      |
 
 Each generated header button (`Minimize`, `Maximize`/`Restore`, `Close window`) has its own `aria-label`. The draggable title bar and each resize handle also carry a descriptive `aria-label` (e.g. `"Move window. Use arrow keys to move."`).
 
@@ -212,45 +212,45 @@ Form integration is not applicable — Window is a container, not a form control
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `closable` | `boolean` | `true` | Sets the visibility of the close button in the window header. |
-| `closeOnEscape` | `boolean` | `true` | Sets whether the window should close when the escape key is pressed. |
-| `draggable` | `boolean` | `true` | Sets whether the window can be dragged by the user. |
-| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | — | Sets the element that should receive focus when the window is opened. Accepts an element reference or a query selector string. |
-| `height` | `number` | — | Two-way bindable. Sets the height of the window. |
-| `left` | `number` | — | Two-way bindable. Sets the left position of the window. |
-| `look` | `"default" \| "primary"` | `"default"` | Sets the look of the window. |
-| `maxHeight` | `number` | — | Sets the maximum height of the window. |
-| `maxWidth` | `number` | — | Sets the maximum width of the window. |
-| `maximizable` | `boolean` | `true` | Sets whether the user can maximize the window. |
-| `minHeight` | `number` | — | Sets the minimum height of the window. |
-| `minWidth` | `number` | — | Sets the minimum width of the window. |
-| `minimizable` | `boolean` | `true` | Sets whether the user can minimize the window. |
-| `modal` | `boolean` | `false` | Sets whether the window should have an overlay behind it. Also controls focus trapping — see [Focus](#focus). |
-| `resizable` | `boolean` | `false` | Sets whether the user can resize the window. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Sets the border radius of the window. |
-| `title` | `string` | — | Sets the title of the window. |
-| `top` | `number` | — | Two-way bindable. Sets the top position of the window. |
-| `width` | `number` | — | Two-way bindable. Sets the width of the window. |
+| Name             | Type                                                       | Default     | Description                                                                                                                    |
+|------------------|------------------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `closable`       | `boolean`                                                  | `true`      | Sets the visibility of the close button in the window header.                                                                  |
+| `closeOnEscape`  | `boolean`                                                  | `true`      | Sets whether the window should close when the escape key is pressed.                                                           |
+| `draggable`      | `boolean`                                                  | `true`      | Sets whether the window can be dragged by the user.                                                                            |
+| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | —           | Sets the element that should receive focus when the window is opened. Accepts an element reference or a query selector string. |
+| `height`         | `number`                                                   | —           | Two-way bindable. Sets the height of the window.                                                                               |
+| `left`           | `number`                                                   | —           | Two-way bindable. Sets the left position of the window.                                                                        |
+| `look`           | `"default" \| "primary"`                                   | `"default"` | Sets the look of the window.                                                                                                   |
+| `maxHeight`      | `number`                                                   | —           | Sets the maximum height of the window.                                                                                         |
+| `maxWidth`       | `number`                                                   | —           | Sets the maximum width of the window.                                                                                          |
+| `maximizable`    | `boolean`                                                  | `true`      | Sets whether the user can maximize the window.                                                                                 |
+| `minHeight`      | `number`                                                   | —           | Sets the minimum height of the window.                                                                                         |
+| `minWidth`       | `number`                                                   | —           | Sets the minimum width of the window.                                                                                          |
+| `minimizable`    | `boolean`                                                  | `true`      | Sets whether the user can minimize the window.                                                                                 |
+| `modal`          | `boolean`                                                  | `false`     | Sets whether the window should have an overlay behind it. Also controls focus trapping — see [Focus](#focus).                  |
+| `resizable`      | `boolean`                                                  | `false`     | Sets whether the user can resize the window.                                                                                   |
+| `rounded`        | `"none" \| "small" \| "medium" \| "large"`                 | `"medium"`  | Sets the border radius of the window.                                                                                          |
+| `title`          | `string`                                                   | —           | Sets the title of the window.                                                                                                  |
+| `top`            | `number`                                                   | —           | Two-way bindable. Sets the top position of the window.                                                                         |
+| `width`          | `number`                                                   | —           | Two-way bindable. Sets the width of the window.                                                                                |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `close` | `PopupCloseEvent` | Emits when the window is about to be closed. Preventable — see [`close` fires for every close path](#close-fires-for-every-close-path). |
-| `closed` | `void` | Emitted after the window has fully closed (post-animation). Preventing this event has no effect. |
-| `dragEnd` | `void` | Emits when the window dragging ends. |
-| `dragStart` | `void` | Emits when the window dragging starts. |
+| Name        | Type              | Description                                                                                                                             |
+|-------------|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `close`     | `PopupCloseEvent` | Emits when the window is about to be closed. Preventable — see [`close` fires for every close path](#close-fires-for-every-close-path). |
+| `closed`    | `void`            | Emitted after the window has fully closed (post-animation). Preventing this event has no effect.                                        |
+| `dragEnd`   | `void`            | Emits when the window dragging ends.                                                                                                    |
+| `dragStart` | `void`            | Emits when the window dragging starts.                                                                                                  |
 
 #### Public methods
 
-| Name | Description |
-|---|---|
-| `closeWindow(): void` | Closes the window. |
-| `move(position: { top?: number; left?: number }): void` | Moves the window to the given position, in pixels. An omitted axis is left unchanged. |
-| `openWindow(): void` | Opens the window. Called automatically once after the first render — see [`openWindow()` is not for reopening](#openwindow-is-not-for-reopening) before calling it manually. |
-| `resize(dimensions: { width?: number; height?: number }): void` | Resizes the window to the given dimensions, in pixels. An omitted dimension is left unchanged. |
+| Name                                                            | Description                                                                                                                                                                  |
+|-----------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `closeWindow(): void`                                           | Closes the window.                                                                                                                                                           |
+| `move(position: { top?: number; left?: number }): void`         | Moves the window to the given position, in pixels. An omitted axis is left unchanged.                                                                                        |
+| `openWindow(): void`                                            | Opens the window. Called automatically once after the first render — see [`openWindow()` is not for reopening](#openwindow-is-not-for-reopening) before calling it manually. |
+| `resize(dimensions: { width?: number; height?: number }): void` | Resizes the window to the given dimensions, in pixels. An omitted dimension is left unchanged.                                                                               |
 
 ---
 
@@ -260,8 +260,8 @@ Injectable service, `providedIn: "root"`.
 
 #### Public methods
 
-| Name | Description |
-|---|---|
+| Name                                        | Description                                 |
+|---------------------------------------------|---------------------------------------------|
 | `open(settings: WindowSettings): WindowRef` | Opens a window and returns its `WindowRef`. |
 
 ---
@@ -272,29 +272,29 @@ Returned by `WindowService.open()`.
 
 #### Public methods
 
-| Name | Description |
-|---|---|
-| `center(): void` | Centers the window in the viewport at its current size. |
-| `close(result?: R): void` | Closes the window, optionally carrying a result value. |
-| `closeWithDelay(delay: number, result?: R): void` | Closes the window after the given delay, in milliseconds. |
-| `move(params: { top?: number; left?: number }): void` | Moves the window to the given position, in pixels. |
+| Name                                                                          | Description                                               |
+|-------------------------------------------------------------------------------|-----------------------------------------------------------|
+| `center(): void`                                                              | Centers the window in the viewport at its current size.   |
+| `close(result?: R): void`                                                     | Closes the window, optionally carrying a result value.    |
+| `closeWithDelay(delay: number, result?: R): void`                             | Closes the window after the given delay, in milliseconds. |
+| `move(params: { top?: number; left?: number }): void`                         | Moves the window to the given position, in pixels.        |
 | `resize(params: { width?: number; height?: number; center?: boolean }): void` | Resizes the window, optionally re-centering it afterward. |
 
 #### Properties
 
-| Name | Type | Description |
-|---|---|---|
-| `close$` | `Observable<PopupCloseEvent<R>>` | Emits before any close proceeds. |
-| `closed$` | `Observable<void>` | Emits once the window has fully closed. |
-| `component` | `ComponentRef<unknown> \| null` | The hosted component instance, when `content` is a component rather than a `TemplateRef`. |
-| `drag$` | `Observable<MoveEvent>` | Emits `{ top, left }` continuously while the window is being dragged. |
-| `dragEnd$` | `Observable<void>` | Emits once when a drag gesture ends. |
-| `dragStart$` | `Observable<void>` | Emits once when a drag gesture starts. |
-| `element` | `HTMLElement` | The window's overlay element. |
-| `height` | `number` | The window's current rendered height, in pixels. |
-| `popupRef` | `PopupRef` | The underlying `PopupRef`, for advanced overlay access. |
-| `resize$` | `Observable<ResizeEvent>` | Emits `{ width, height, top, left }` continuously while the window is being resized. |
-| `width` | `number` | The window's current rendered width, in pixels. |
+| Name         | Type                             | Description                                                                               |
+|--------------|----------------------------------|-------------------------------------------------------------------------------------------|
+| `close$`     | `Observable<PopupCloseEvent<R>>` | Emits before any close proceeds.                                                          |
+| `closed$`    | `Observable<void>`               | Emits once the window has fully closed.                                                   |
+| `component`  | `ComponentRef<unknown> \| null`  | The hosted component instance, when `content` is a component rather than a `TemplateRef`. |
+| `drag$`      | `Observable<MoveEvent>`          | Emits `{ top, left }` continuously while the window is being dragged.                     |
+| `dragEnd$`   | `Observable<void>`               | Emits once when a drag gesture ends.                                                      |
+| `dragStart$` | `Observable<void>`               | Emits once when a drag gesture starts.                                                    |
+| `element`    | `HTMLElement`                    | The window's overlay element.                                                             |
+| `height`     | `number`                         | The window's current rendered height, in pixels.                                          |
+| `popupRef`   | `PopupRef`                       | The underlying `PopupRef`, for advanced overlay access.                                   |
+| `resize$`    | `Observable<ResizeEvent>`        | Emits `{ width, height, top, left }` continuously while the window is being resized.      |
+| `width`      | `number`                         | The window's current rendered width, in pixels.                                           |
 
 ---
 
@@ -304,19 +304,19 @@ Returned by `WindowService.open()`.
 
 The settings object accepted by `WindowService.open()`. Fields mirror the `WindowComponent` inputs of the same name (`closable`, `closeOnEscape`, `draggable`, `focusedElement`, `height`, `left`, `look`, `maxHeight`, `maxWidth`, `maximizable`, `minHeight`, `minWidth`, `minimizable`, `modal`, `resizable`, `rounded`, `top`, `width`), plus these service-only fields:
 
-| Field | Type | Description |
-|---|---|---|
-| `actionTemplate` | `TemplateRef<WindowActionTemplateContext>` | Template rendered next to the minimize/maximize/close buttons. |
-| `content` | `TemplateRef<unknown> \| Type<unknown>` | The window's content — a template reference or a component class. |
-| `footerTemplate` | `TemplateRef<unknown>` | Template rendered in the window's footer area. |
-| `preventClose` | `(event: PopupCloseEvent) => boolean` | Return `true` to cancel a close from a built-in trigger. See [`preventClose` is service-only](#preventclose-is-service-only). |
-| `title` | `string \| TemplateRef<unknown>` | The window's title — a plain string or a template reference. |
-| `windowClass` | `string \| string[]` | Class(es) applied to the window's overlay element. |
+| Field            | Type                                       | Description                                                                                                                   |
+|------------------|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `actionTemplate` | `TemplateRef<WindowActionTemplateContext>` | Template rendered next to the minimize/maximize/close buttons.                                                                |
+| `content`        | `TemplateRef<unknown> \| Type<unknown>`    | The window's content — a template reference or a component class.                                                             |
+| `footerTemplate` | `TemplateRef<unknown>`                     | Template rendered in the window's footer area.                                                                                |
+| `preventClose`   | `(event: PopupCloseEvent) => boolean`      | Return `true` to cancel a close from a built-in trigger. See [`preventClose` is service-only](#preventclose-is-service-only). |
+| `title`          | `string \| TemplateRef<unknown>`           | The window's title — a plain string or a template reference.                                                                  |
+| `windowClass`    | `string \| string[]`                       | Class(es) applied to the window's overlay element.                                                                            |
 
 #### `WindowActionTemplateContext`
 
-| Field | Type | Description |
-|---|---|---|
+| Field       | Type        | Description                                                                                |
+|-------------|-------------|--------------------------------------------------------------------------------------------|
 | `$implicit` | `WindowRef` | The window's own `WindowRef`, exposed to a `monaWindowActionTemplate` via `let-windowRef`. |
 
 #### `MoveEvent`

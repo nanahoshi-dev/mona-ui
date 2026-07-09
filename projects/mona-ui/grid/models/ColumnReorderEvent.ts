@@ -1,4 +1,4 @@
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import type { Column } from "./Column";
 
 export class ColumnReorderEvent extends PreventableEvent {

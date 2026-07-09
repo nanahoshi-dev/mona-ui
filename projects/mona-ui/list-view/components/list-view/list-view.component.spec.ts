@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { PageSizeChangeEvent } from "../../../pager/models/PageSizeChangeEvent";
-import { ListService } from "@mirei/mona-ui/internal/list";
+import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { PagerComponent } from "../../../pager/components/pager/pager.component";
 import { ListViewFooterTemplateDirective } from "../../directives/list-view-footer-template.directive";
 import { ListViewHeaderTemplateDirective } from "../../directives/list-view-header-template.directive";

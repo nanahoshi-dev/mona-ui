@@ -22,15 +22,15 @@ import {
 } from "@mirei/ts-collections";
 import { BehaviorSubject, Subject } from "rxjs";
 import { v4 } from "uuid";
-import { VirtualScrollOptions } from "@mirei/mona-ui/common";
-import { PopupMenuItem } from "@mirei/mona-ui/popup-menu";
+import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { PopupMenuItem } from "@nanahoshi/mona-ui/popup-menu";
 import {
     Query,
     CompositeFilterDescriptor,
     FilterDescriptor,
     SortDescriptor,
     SortDirection
-} from "@mirei/mona-ui/query";
+} from "@nanahoshi/mona-ui/query";
 import type { AggregateFunction } from "../models/AggregateFunction";
 import { CellEditEvent } from "../models/CellEditEvent";
 import type { Column, ColumnConfig } from "../models/Column";

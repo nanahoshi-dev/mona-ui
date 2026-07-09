@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/button-group
+ * Public API Surface of @nanahoshi/mona-ui/button-group
  */
 
 export { ButtonGroupComponent } from "./components/button-group/button-group.component";

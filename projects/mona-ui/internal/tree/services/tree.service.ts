@@ -22,8 +22,8 @@ import {
     switchMap,
     take
 } from "rxjs";
-import { FilterChangeEvent } from "@mirei/mona-ui/common";
-import { FilterableOptions } from "@mirei/mona-ui/common";
+import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { FilterableOptions } from "@nanahoshi/mona-ui/common";
 import { CheckableOptions } from "../models/CheckableOptions";
 import { DataStructure } from "../models/DataStructure";
 import { DisableOptions } from "../models/DisableOptions";

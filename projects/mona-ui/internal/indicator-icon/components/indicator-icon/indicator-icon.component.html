@@ -4,8 +4,5 @@
 
 @let renderedIcon = iconToRender();
 @if (!hasProjectedContent() && renderedIcon) {
-    <svg
-        [lucideIcon]="renderedIcon"
-        [size]="size()"
-        [class]="iconClass()"></svg>
+    <svg [lucideIcon]="renderedIcon" [size]="size()" [class]="iconClass()"></svg>
 }

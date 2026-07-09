@@ -26,9 +26,9 @@ import {
     LucideTrash2,
     LucideX
 } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ContainsPipe, SelectionMode } from "@mirei/mona-ui/common";
-import { ListKeySelector, ListService, SelectableOptions } from "@mirei/mona-ui/internal/list";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ContainsPipe, SelectionMode } from "@nanahoshi/mona-ui/common";
+import { ListKeySelector, ListService, SelectableOptions } from "@nanahoshi/mona-ui/internal/list";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,
@@ -37,8 +37,8 @@ import {
     ListViewNavigableDirective,
     ListViewNoDataTemplateDirective,
     ListViewSelectableDirective
-} from "@mirei/mona-ui/list-view";
-import { ThemeService } from "@mirei/mona-ui/theme";
+} from "@nanahoshi/mona-ui/list-view";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
 import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";

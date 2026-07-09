@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/list
+ * Public API Surface of @nanahoshi/mona-ui/list
  */
 
 export * from "./components/list/list.component";

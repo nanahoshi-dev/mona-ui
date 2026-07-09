@@ -11,7 +11,7 @@ import {
     viewChild
 } from "@angular/core";
 import { LucideChevronDown, LucideDynamicIcon, type LucideIconInput, LucideLoader, LucideX } from "@lucide/angular";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { indicatorIconHostThemeVariants, indicatorIconSvgThemeVariants } from "../../styles/indicator-icon.styles";
 

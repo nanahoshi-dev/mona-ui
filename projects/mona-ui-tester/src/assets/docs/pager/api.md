@@ -12,8 +12,8 @@ When `responsive` is enabled (the default), Pager narrows its own layout as the 
 ## Import & Quick Start
 
 ```typescript
-import { PagerComponent, PagerFocusableDirective } from "@mirei/mona-ui";
-import type { PageChangeEvent } from "@mirei/mona-ui";
+import { PagerComponent, PagerFocusableDirective } from "@nanahoshi/mona-ui";
+import type { PageChangeEvent } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -33,13 +33,13 @@ protected onPageChange(event: PageChangeEvent): void {
 
 Pager's default first/previous/next/last buttons, numeric page buttons, page-size control, and info summary can each be replaced with a matching `ng-template` directive projected into `<mona-pager>`.
 
-| Directive | Selector | Template context |
-|---|---|---|
+| Directive                                 | Selector                                          | Template context                                                                                                                                                                                |
+|-------------------------------------------|---------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `PagerNavigationButtonsTemplateDirective` | `ng-template[monaPagerNavigationButtonsTemplate]` | `NavigationButtonsTemplateContext`: `disabled`, `pageSize`, `totalPages`. Requires a `type` attribute input: `"first" \| "previous" \| "next" \| "last"`, identifying which button it replaces. |
-| `PagerNumericButtonsTemplateDirective` | `ng-template[monaPagerNumericButtonsTemplate]` | `NumericButtonsTemplateContext`: `totalPages`. Only used when `type` is `"numeric"`. |
-| `PagerPageSizeTemplateDirective` | `ng-template[monaPagerPageSizeTemplate]` | Implicit context: the resolved `number[]` of page-size options. |
-| `PagerInfoTemplateDirective` | `ng-template[monaPagerInfoTemplate]` | `InfoTemplateContext`: `currentPage`, `pageSize`, `skip`, `total`, `totalPages`. |
-| `PagerFocusableDirective` | `[monaPagerFocusable]` | Marks a custom focusable element or composite component host so it participates in Pager's inner keyboard navigation loop. |
+| `PagerNumericButtonsTemplateDirective`    | `ng-template[monaPagerNumericButtonsTemplate]`    | `NumericButtonsTemplateContext`: `totalPages`. Only used when `type` is `"numeric"`.                                                                                                            |
+| `PagerPageSizeTemplateDirective`          | `ng-template[monaPagerPageSizeTemplate]`          | Implicit context: the resolved `number[]` of page-size options.                                                                                                                                 |
+| `PagerInfoTemplateDirective`              | `ng-template[monaPagerInfoTemplate]`              | `InfoTemplateContext`: `currentPage`, `pageSize`, `skip`, `total`, `totalPages`.                                                                                                                |
+| `PagerFocusableDirective`                 | `[monaPagerFocusable]`                            | Marks a custom focusable element or composite component host so it participates in Pager's inner keyboard navigation loop.                                                                      |
 
 ## Feature Examples
 
@@ -97,28 +97,28 @@ protected onPageSizeChange(event: PageSizeChangeEvent): void {
 
 Pager enables keyboard navigation by default. Set `[navigable]="false"` to keep only the native Tab order and native button/input behavior.
 
-| Focus location | Shortcut | Behavior |
-|---|---|---|
-| Anywhere inside Pager | `Home` | Loads the first page. |
-| Anywhere inside Pager | `End` | Loads the last page. |
-| Pager wrapper | `Enter` | Activates inner Pager navigation and focuses the first enabled pager control. |
-| Pager wrapper | `ArrowLeft` / `PageUp` | Loads the previous page. |
-| Pager wrapper | `ArrowRight` / `PageDown` | Loads the next page. |
-| Pager wrapper | `Tab` / `Shift+Tab` | Leaves Pager in the page's normal Tab order. |
-| Inner navigation | `Tab` / `Shift+Tab` | Moves through marked Pager controls and wraps at the ends. |
-| Inner navigation | `Escape` | Returns focus to the Pager wrapper and deactivates inner navigation. |
-| Inner navigation | `Enter` | Runs the focused control's native action. |
+| Focus location        | Shortcut                  | Behavior                                                                      |
+|-----------------------|---------------------------|-------------------------------------------------------------------------------|
+| Anywhere inside Pager | `Home`                    | Loads the first page.                                                         |
+| Anywhere inside Pager | `End`                     | Loads the last page.                                                          |
+| Pager wrapper         | `Enter`                   | Activates inner Pager navigation and focuses the first enabled pager control. |
+| Pager wrapper         | `ArrowLeft` / `PageUp`    | Loads the previous page.                                                      |
+| Pager wrapper         | `ArrowRight` / `PageDown` | Loads the next page.                                                          |
+| Pager wrapper         | `Tab` / `Shift+Tab`       | Leaves Pager in the page's normal Tab order.                                  |
+| Inner navigation      | `Tab` / `Shift+Tab`       | Moves through marked Pager controls and wraps at the ends.                    |
+| Inner navigation      | `Escape`                  | Returns focus to the Pager wrapper and deactivates inner navigation.          |
+| Inner navigation      | `Enter`                   | Runs the focused control's native action.                                     |
 
 Default Pager controls are already marked for inner navigation. Custom controls rendered through pager templates must use `monaPagerFocusable` on the focusable element or on the composite component host.
 
 ### ARIA Roles
 
-| Attribute | When present | Value |
-|---|---|---|
-| `aria-label` | On the first/previous/next/last buttons | `"First page"`, `"Previous page"`, `"Next page"`, `"Last page"` |
-| `aria-label` | On the jump (ellipsis) buttons | `"Jump back {visiblePages} pages"` / `"Jump forward {visiblePages} pages"` |
-| `aria-label` | On every numeric page button | `"Page {n}"` |
-| `aria-current` | On the numeric page button matching the current page | `"page"` |
+| Attribute      | When present                                         | Value                                                                      |
+|----------------|------------------------------------------------------|----------------------------------------------------------------------------|
+| `aria-label`   | On the first/previous/next/last buttons              | `"First page"`, `"Previous page"`, `"Next page"`, `"Last page"`            |
+| `aria-label`   | On the jump (ellipsis) buttons                       | `"Jump back {visiblePages} pages"` / `"Jump forward {visiblePages} pages"` |
+| `aria-label`   | On every numeric page button                         | `"Page {n}"`                                                               |
+| `aria-current` | On the numeric page button matching the current page | `"page"`                                                                   |
 
 These labels are rendered by Pager's default button markup only. If a consumer replaces a button using `PagerNavigationButtonsTemplateDirective` or `PagerNumericButtonsTemplateDirective`, they are responsible for providing an equivalent accessible name on their own markup.
 
@@ -138,45 +138,45 @@ Pager is not a form control. It does not implement `FormValueControl`/`FormCheck
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `class` | `string` | `''` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `firstLast` | `boolean` | `true` | Whether to show the first and last page buttons. |
-| `navigable` | `boolean` | `true` | Whether to enable keyboard navigation on the pager wrapper and its inner controls. |
-| `pageInput` | `boolean` | `false` | Whether to show the page-jump numeric input. |
-| `pageSize` | `number` | `5` | The page size. |
-| `pageSizeValues` | `number[] \| boolean` | `[5, 10, 20, 50, 100]` | The page-size dropdown options. `false` or `[]` hides the dropdown. |
-| `previousNext` | `boolean` | `true` | Whether to show the previous and next page buttons. |
-| `responsive` | `boolean` | `true` | Whether to progressively hide sections (info, then page-size/input, then the numeric page list) as the host element narrows. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset. |
-| `showInfo` | `boolean` | `true` | Whether to show the info summary section. |
-| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Size preset for text, buttons, and icons. |
-| `skip` | `number` | `0` | The number of items to skip (0-based offset into the collection). |
-| `total` | `number` | `0` | The total number of items in the collection. |
-| `type` | `'input' \| 'numeric'` | `'numeric'` | Whether to render numeric page buttons or a "Page [input] of N" control. |
-| `visiblePages` | `number` | `5` | The number of numeric page buttons visible at once before collapsing into jump buttons. |
+| Name             | Type                                                 | Default                | Description                                                                                                                  |
+|------------------|------------------------------------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| `class`          | `string`                                             | `''`                   | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                    |
+| `firstLast`      | `boolean`                                            | `true`                 | Whether to show the first and last page buttons.                                                                             |
+| `navigable`      | `boolean`                                            | `true`                 | Whether to enable keyboard navigation on the pager wrapper and its inner controls.                                           |
+| `pageInput`      | `boolean`                                            | `false`                | Whether to show the page-jump numeric input.                                                                                 |
+| `pageSize`       | `number`                                             | `5`                    | The page size.                                                                                                               |
+| `pageSizeValues` | `number[] \| boolean`                                | `[5, 10, 20, 50, 100]` | The page-size dropdown options. `false` or `[]` hides the dropdown.                                                          |
+| `previousNext`   | `boolean`                                            | `true`                 | Whether to show the previous and next page buttons.                                                                          |
+| `responsive`     | `boolean`                                            | `true`                 | Whether to progressively hide sections (info, then page-size/input, then the numeric page list) as the host element narrows. |
+| `rounded`        | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`             | Border-radius preset.                                                                                                        |
+| `showInfo`       | `boolean`                                            | `true`                 | Whether to show the info summary section.                                                                                    |
+| `size`           | `'small' \| 'medium' \| 'large'`                     | `'medium'`             | Size preset for text, buttons, and icons.                                                                                    |
+| `skip`           | `number`                                             | `0`                    | The number of items to skip (0-based offset into the collection).                                                            |
+| `total`          | `number`                                             | `0`                    | The total number of items in the collection.                                                                                 |
+| `type`           | `'input' \| 'numeric'`                               | `'numeric'`            | Whether to render numeric page buttons or a "Page [input] of N" control.                                                     |
+| `visiblePages`   | `number`                                             | `5`                    | The number of numeric page buttons visible at once before collapsing into jump buttons.                                      |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `pageChange` | `PageChangeEvent` | Emitted when the current page changes. See [Technical & Behavior Notes](#technical--behavior-notes) for when this fires beyond direct user interaction. |
-| `pageSizeChange` | `PageSizeChangeEvent` | Emitted when the page size changes. Call `preventDefault()` on the event to cancel the change. |
+| Name             | Type                  | Description                                                                                                                                             |
+|------------------|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pageChange`     | `PageChangeEvent`     | Emitted when the current page changes. See [Technical & Behavior Notes](#technical--behavior-notes) for when this fires beyond direct user interaction. |
+| `pageSizeChange` | `PageSizeChangeEvent` | Emitted when the page size changes. Call `preventDefault()` on the event to cancel the change.                                                          |
 
 `PagerComponent` has no model inputs and no public methods intended for consumer use.
 
 ### Exported Types & Directives
 
-| Type | Shape | Description |
-|---|---|---|
-| `PagerType` | `'input' \| 'numeric'` | Valid values for the `type` input. |
-| `PageChangeEvent` | `{ page: number; skip: number; take: number }` | Payload of `pageChange`. `page` is 1-based. |
-| `PageSizeChangeEvent` | Extends `PreventableEvent`; adds `newPageSize: number`, `oldPageSize: number` | Payload of `pageSizeChange`. Call `preventDefault()`/`isDefaultPrevented()` to cancel the change. |
-| `InfoTemplateContext` | `{ currentPage, pageSize, skip, total, totalPages }` | Template context for `PagerInfoTemplateDirective`. |
-| `NavigationButtonsTemplateContext` | `{ disabled, pageSize, totalPages }` | Template context for `PagerNavigationButtonsTemplateDirective`. |
-| `NumericButtonsTemplateContext` | `{ totalPages }` | Template context for `PagerNumericButtonsTemplateDirective`. |
-| `Page` | `{ page: number; text: string }` | Shape of a single page entry. Not referenced by any Pager input, output, or template context — exported for consumers who need to type a page list independently. |
-| `PagerFocusableDirective` | `[monaPagerFocusable]` | Directive for registering custom template controls with Pager keyboard navigation. |
+| Type                               | Shape                                                                         | Description                                                                                                                                                       |
+|------------------------------------|-------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PagerType`                        | `'input' \| 'numeric'`                                                        | Valid values for the `type` input.                                                                                                                                |
+| `PageChangeEvent`                  | `{ page: number; skip: number; take: number }`                                | Payload of `pageChange`. `page` is 1-based.                                                                                                                       |
+| `PageSizeChangeEvent`              | Extends `PreventableEvent`; adds `newPageSize: number`, `oldPageSize: number` | Payload of `pageSizeChange`. Call `preventDefault()`/`isDefaultPrevented()` to cancel the change.                                                                 |
+| `InfoTemplateContext`              | `{ currentPage, pageSize, skip, total, totalPages }`                          | Template context for `PagerInfoTemplateDirective`.                                                                                                                |
+| `NavigationButtonsTemplateContext` | `{ disabled, pageSize, totalPages }`                                          | Template context for `PagerNavigationButtonsTemplateDirective`.                                                                                                   |
+| `NumericButtonsTemplateContext`    | `{ totalPages }`                                                              | Template context for `PagerNumericButtonsTemplateDirective`.                                                                                                      |
+| `Page`                             | `{ page: number; text: string }`                                              | Shape of a single page entry. Not referenced by any Pager input, output, or template context — exported for consumers who need to type a page list independently. |
+| `PagerFocusableDirective`          | `[monaPagerFocusable]`                                                        | Directive for registering custom template controls with Pager keyboard navigation.                                                                                |
 
 ---
 

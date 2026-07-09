@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { FilterOperators } from "@mirei/mona-ui/query";
+import { FilterOperators } from "@nanahoshi/mona-ui/query";
 import { FilterMenuDataItem } from "../models/FilterMenuDataItem";
 
 @Pipe({

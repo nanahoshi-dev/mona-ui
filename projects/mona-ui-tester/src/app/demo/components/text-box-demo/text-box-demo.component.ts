@@ -7,12 +7,12 @@ import {
     DropdownButtonComponent,
     DropdownButtonItemComponent,
     DropdownButtonTextTemplateDirective
-} from "@mirei/mona-ui/dropdown-button";
+} from "@nanahoshi/mona-ui/dropdown-button";
 import {
     TextBoxComponent,
     TextBoxPrefixTemplateDirective,
     TextBoxSuffixTemplateDirective
-} from "@mirei/mona-ui/text-box";
+} from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

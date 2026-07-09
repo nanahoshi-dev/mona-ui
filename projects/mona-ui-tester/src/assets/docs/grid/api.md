@@ -20,7 +20,7 @@ Columns are a flat, content-projected list — there is no column-group or neste
 ## Import & Quick Start
 
 ```typescript
-import { GridComponent, GridColumnComponent } from "@mirei/mona-ui";
+import { GridComponent, GridColumnComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```typescript
@@ -44,17 +44,17 @@ Without any behavior directive applied, the grid above only paginates; see [Feat
 
 Each directive below is an `ng-template` (or, for `monaGridColumnTitleTemplate`, an inline template) placed as projected content inside `<mona-grid-column>`, `<mona-grid-command-column>`, or `<mona-grid>` itself.
 
-| Directive | Selector | Placed inside | Template context | Replaces |
-|---|---|---|---|---|
-| `GridCellTemplateDirective` | `ng-template[monaGridCellTemplate]` | `mona-grid-column` or `mona-grid-command-column` | `{ $implicit: dataItem, column: string }` | The column's default formatted cell text |
-| `GridColumnTitleTemplateDirective` | `[monaGridColumnTitleTemplate]` | `mona-grid-column` | None | The column header's default title text (used when `monaGridHeaderTemplate` is not present) |
-| `GridEditTemplateDirective` | `ng-template[monaGridEditTemplate]` | `mona-grid-column` | `GridEditTemplateContext` — see [API](#gridedittemplatecontext) | The built-in editor for that column while the cell or row is being edited |
-| `GridFooterTemplateDirective` | `ng-template[monaGridFooterTemplate]` | `mona-grid-column` | `TODO(owner-review): the context interface (aggregate value plus `column`/`columnIndex`/`rows`) is not exported — confirm before treating its shape as a stable contract.` | The column's default aggregate footer value |
-| `GridGroupFooterTemplateDirective` | `ng-template[monaGridGroupFooterTemplate]` | `mona-grid-column` | `TODO(owner-review): extends the footer template context with `count`/`depth`/`groupKey`/`groupValue`; neither context type is exported.` | The default per-group aggregate footer, shown when a group is collapsed |
-| `GridHeaderTemplateDirective` | `ng-template[monaGridHeaderTemplate]` | `mona-grid-column` | `{ $implicit: column, column: Column }` | The column header's default title text |
-| `GridDetailTemplateDirective` | `ng-template[monaGridDetailTemplate]` | `mona-grid` | `{ $implicit: dataItem }` | No default — renders as an expandable row beneath the data row when present |
-| `GridNoDataTemplateDirective` | `ng-template[monaGridNoDataTemplate]` | `mona-grid` | None | The grid's default empty-state message |
-| `GridToolbarTemplateDirective` | `ng-template[monaGridToolbarTemplate]` | `mona-grid` | `{ $implicit: GridService, addRowData, addRowVisible, cancelAdd(): boolean, editSession, saveAdd(): boolean, startAdd(): boolean }` — `TODO(owner-review): $implicit exposes GridService, an internal service class not in the public barrel; confirm this is an intended part of the template context before relying on members beyond addRowVisible/editSession/etc.` | No default — renders above the column headers |
+| Directive                          | Selector                                   | Placed inside                                    | Template context                                                                                                                                                                                                                                                                                                                                                        | Replaces                                                                                   |
+|------------------------------------|--------------------------------------------|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| `GridCellTemplateDirective`        | `ng-template[monaGridCellTemplate]`        | `mona-grid-column` or `mona-grid-command-column` | `{ $implicit: dataItem, column: string }`                                                                                                                                                                                                                                                                                                                               | The column's default formatted cell text                                                   |
+| `GridColumnTitleTemplateDirective` | `[monaGridColumnTitleTemplate]`            | `mona-grid-column`                               | None                                                                                                                                                                                                                                                                                                                                                                    | The column header's default title text (used when `monaGridHeaderTemplate` is not present) |
+| `GridEditTemplateDirective`        | `ng-template[monaGridEditTemplate]`        | `mona-grid-column`                               | `GridEditTemplateContext` — see [API](#gridedittemplatecontext)                                                                                                                                                                                                                                                                                                         | The built-in editor for that column while the cell or row is being edited                  |
+| `GridFooterTemplateDirective`      | `ng-template[monaGridFooterTemplate]`      | `mona-grid-column`                               | `TODO(owner-review): the context interface (aggregate value plus `column`/`columnIndex`/`rows`) is not exported — confirm before treating its shape as a stable contract.`                                                                                                                                                                                              | The column's default aggregate footer value                                                |
+| `GridGroupFooterTemplateDirective` | `ng-template[monaGridGroupFooterTemplate]` | `mona-grid-column`                               | `TODO(owner-review): extends the footer template context with `count`/`depth`/`groupKey`/`groupValue`; neither context type is exported.`                                                                                                                                                                                                                               | The default per-group aggregate footer, shown when a group is collapsed                    |
+| `GridHeaderTemplateDirective`      | `ng-template[monaGridHeaderTemplate]`      | `mona-grid-column`                               | `{ $implicit: column, column: Column }`                                                                                                                                                                                                                                                                                                                                 | The column header's default title text                                                     |
+| `GridDetailTemplateDirective`      | `ng-template[monaGridDetailTemplate]`      | `mona-grid`                                      | `{ $implicit: dataItem }`                                                                                                                                                                                                                                                                                                                                               | No default — renders as an expandable row beneath the data row when present                |
+| `GridNoDataTemplateDirective`      | `ng-template[monaGridNoDataTemplate]`      | `mona-grid`                                      | None                                                                                                                                                                                                                                                                                                                                                                    | The grid's default empty-state message                                                     |
+| `GridToolbarTemplateDirective`     | `ng-template[monaGridToolbarTemplate]`     | `mona-grid`                                      | `{ $implicit: GridService, addRowData, addRowVisible, cancelAdd(): boolean, editSession, saveAdd(): boolean, startAdd(): boolean }` — `TODO(owner-review): $implicit exposes GridService, an internal service class not in the public barrel; confirm this is an intended part of the template context before relying on members beyond addRowVisible/editSession/etc.` | No default — renders above the column headers                                              |
 
 ```html
 <mona-grid [data]="orders()">
@@ -275,24 +275,24 @@ Grid styling is implemented with Tailwind utility classes internally; there are 
 
 ### `GridColumnChooserComponent` is not in the public barrel
 
-The grid renders a built-in "Columns" toolbar button backed by an internal `GridColumnChooserComponent`, but that component is not exported from `@mirei/mona-ui`. `TODO(owner-review): confirm whether column-visibility toggling through this button is an intended public feature before documenting it further, or whether the component should be added to the public barrel.`
+The grid renders a built-in "Columns" toolbar button backed by an internal `GridColumnChooserComponent`, but that component is not exported from `@nanahoshi/mona-ui`. `TODO(owner-review): confirm whether column-visibility toggling through this button is an intended public feature before documenting it further, or whether the component should be added to the public barrel.`
 
 ## Accessibility & Forms Integration
 
 ### Keyboard
 
-| Key | Action |
-|---|---|
-| `ArrowDown` / `ArrowUp` | Move focus to the same column in the next/previous row. |
-| `Alt+ArrowDown` | Toggle expand/collapse of a group row or master-detail row, instead of moving focus. |
-| `ArrowLeft` / `ArrowRight` | Move focus to the previous/next cell in the row. |
-| `Home` / `End` | Move focus to the first/last cell in the current row. |
-| `Ctrl+Home` / `Ctrl+End` | Move focus to the first/last cell in the grid. |
-| `Enter` | On a group header or header cell, toggles expand/collapse. On a command cell, focuses its first inner button. Otherwise starts cell editing (no-op while the grid is in row-edit mode). |
-| `F2` | Same as `Enter`, except it never toggles a group/header row. |
-| `Tab` / `Shift+Tab` | Outside a command cell, moves focus to the next/previous focusable element outside the grid (toolbar, pager, or beyond). Inside a command cell, cycles focus among that cell's own buttons. |
-| `Escape` | While focus is inside a command cell's inner button, returns focus to the cell. |
-| `Ctrl+C` / `Cmd+C` | Copies the focused cell's text to the clipboard (data rows only, and not while the grid is in edit mode). |
+| Key                        | Action                                                                                                                                                                                      |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ArrowDown` / `ArrowUp`    | Move focus to the same column in the next/previous row.                                                                                                                                     |
+| `Alt+ArrowDown`            | Toggle expand/collapse of a group row or master-detail row, instead of moving focus.                                                                                                        |
+| `ArrowLeft` / `ArrowRight` | Move focus to the previous/next cell in the row.                                                                                                                                            |
+| `Home` / `End`             | Move focus to the first/last cell in the current row.                                                                                                                                       |
+| `Ctrl+Home` / `Ctrl+End`   | Move focus to the first/last cell in the grid.                                                                                                                                              |
+| `Enter`                    | On a group header or header cell, toggles expand/collapse. On a command cell, focuses its first inner button. Otherwise starts cell editing (no-op while the grid is in row-edit mode).     |
+| `F2`                       | Same as `Enter`, except it never toggles a group/header row.                                                                                                                                |
+| `Tab` / `Shift+Tab`        | Outside a command cell, moves focus to the next/previous focusable element outside the grid (toolbar, pager, or beyond). Inside a command cell, cycles focus among that cell's own buttons. |
+| `Escape`                   | While focus is inside a command cell's inner button, returns focus to the cell.                                                                                                             |
+| `Ctrl+C` / `Cmd+C`         | Copies the focused cell's text to the clipboard (data rows only, and not while the grid is in edit mode).                                                                                   |
 
 Toolbar controls (for example a custom `monaGridToolbarTemplate` button) support `ArrowLeft`/`ArrowRight` roving-tabindex navigation among the toolbar's own focusable elements.
 
@@ -302,24 +302,24 @@ Grid cells use a roving `tabindex`: the currently focused cell has `tabindex="0"
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | On the host element | `"grid"` |
-| `role` | On the header/body/footer row groups | `"rowgroup"` |
-| `role` | On header cells | `"columnheader"` |
-| `role` | On data/group/footer rows | `"row"` |
-| `role` | On data cells | `"gridcell"` |
-| `role` | On the column resize handle | `"separator"` |
-| `aria-sort` | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"` |
-| `aria-selected` | On a row, only while `monaGridSelectable` is enabled | Reflects whether the row is selected |
-| `aria-rowindex` | On every row | 1-based row position, accounting for the header row |
-| `aria-colindex` | On every cell | 1-based column position, accounting for group indent columns |
-| `aria-expanded` | On a group header row | Reflects whether the group is expanded |
-| `aria-level` | On a group header row | The group's nesting depth |
-| `aria-readonly` | On a data cell | `"true"` when editing is disabled for that cell or column |
-| `aria-orientation` | On the column resize handle | `"vertical"` |
-| `aria-label` | On the column resize handle | `"Resize column"` |
-| `aria-label` | On the built-in command buttons | `"Save row"`, `"Cancel row edit"`, `"Edit row"`, or `"Remove row"` |
+| Attribute          | When present                                               | Value                                                              |
+|--------------------|------------------------------------------------------------|--------------------------------------------------------------------|
+| `role`             | On the host element                                        | `"grid"`                                                           |
+| `role`             | On the header/body/footer row groups                       | `"rowgroup"`                                                       |
+| `role`             | On header cells                                            | `"columnheader"`                                                   |
+| `role`             | On data/group/footer rows                                  | `"row"`                                                            |
+| `role`             | On data cells                                              | `"gridcell"`                                                       |
+| `role`             | On the column resize handle                                | `"separator"`                                                      |
+| `aria-sort`        | On a header cell, only while `monaGridSortable` is enabled | `"ascending"`, `"descending"`, or `"none"`                         |
+| `aria-selected`    | On a row, only while `monaGridSelectable` is enabled       | Reflects whether the row is selected                               |
+| `aria-rowindex`    | On every row                                               | 1-based row position, accounting for the header row                |
+| `aria-colindex`    | On every cell                                              | 1-based column position, accounting for group indent columns       |
+| `aria-expanded`    | On a group header row                                      | Reflects whether the group is expanded                             |
+| `aria-level`       | On a group header row                                      | The group's nesting depth                                          |
+| `aria-readonly`    | On a data cell                                             | `"true"` when editing is disabled for that cell or column          |
+| `aria-orientation` | On the column resize handle                                | `"vertical"`                                                       |
+| `aria-label`       | On the column resize handle                                | `"Resize column"`                                                  |
+| `aria-label`       | On the built-in command buttons                            | `"Save row"`, `"Cancel row edit"`, `"Edit row"`, or `"Remove row"` |
 
 `TODO(owner-review): no aria-live region or aria-multiselectable attribute was found for grouped or multi-select grids — confirm whether announcing selection/grouping changes to assistive technology is expected before relying on it.`
 
@@ -335,15 +335,15 @@ Inline editing is built exclusively on Angular Signal Forms: the built-in editor
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `data` | `Iterable<T>` | `[]` | The row data to be displayed in the grid. |
-| `pageSize` | `number` | `undefined` | The number of items to be displayed on a page. |
-| `pageSizeValues` | `number[]` | `[]` | The page sizes that the user can select from, shown in the page size dropdown. |
-| `resizeMethod` | `ResizeMethod` | `"fitView"` | The method used to set initial column widths — see [`resizeMethod` controls initial column widths](#resizemethod-controls-initial-column-widths). |
-| `responsivePager` | `boolean` | `true` | Whether the pager collapses into a dropdown when the grid narrows. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | The border radius of the grid. |
+| Name              | Type                                       | Default     | Description                                                                                                                                       |
+|-------------------|--------------------------------------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `class`           | `string`                                   | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                         |
+| `data`            | `Iterable<T>`                              | `[]`        | The row data to be displayed in the grid.                                                                                                         |
+| `pageSize`        | `number`                                   | `undefined` | The number of items to be displayed on a page.                                                                                                    |
+| `pageSizeValues`  | `number[]`                                 | `[]`        | The page sizes that the user can select from, shown in the page size dropdown.                                                                    |
+| `resizeMethod`    | `ResizeMethod`                             | `"fitView"` | The method used to set initial column widths — see [`resizeMethod` controls initial column widths](#resizemethod-controls-initial-column-widths). |
+| `responsivePager` | `boolean`                                  | `true`      | Whether the pager collapses into a dropdown when the grid narrows.                                                                                |
+| `rounded`         | `"none" \| "small" \| "medium" \| "large"` | `"medium"`  | The border radius of the grid.                                                                                                                    |
 
 No outputs — see [`GridComponent` has no outputs of its own](#gridcomponent-has-no-outputs-of-its-own).
 
@@ -355,21 +355,21 @@ No outputs — see [`GridComponent` has no outputs of its own](#gridcomponent-ha
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `aggregate` | `AggregateFunction \| null` | `null` | The aggregate shown in the grid footer for this column. |
-| `editable` | `boolean` | `true` | Whether this column is editable when the grid is in edit mode. |
-| `field` | `string` | `""` | The field name of the data property to display in this column. |
-| `format` | `ColumnFormat \| null` | `undefined` | Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text. |
-| `hidden` | `boolean` | `false` | Whether this column is hidden from the rendered grid. |
-| `locked` | `boolean` | `false` | Whether this column remains fixed while the grid scrolls horizontally. |
-| `lockedPosition` | `GridColumnLockedPosition` | `"left"` | The side of the grid where this locked column is fixed. |
-| `maxWidth` | `number \| null` | `null` | The maximum width of this column in pixels. |
-| `minWidth` | `number` | `40` | The minimum width of this column in pixels. |
-| `stateKey` | `string \| null` | `null` | A stable key used to persist state for columns whose field is empty or unstable. |
-| `title` | `string` | `""` | The title displayed in the column header. |
-| `type` | `DataType` | `"string"` | The data type of the column. Determines the default edit component and filter behavior. |
-| `width` | `number \| null` | `undefined` | The fixed width of this column in pixels. If not set, the width is calculated automatically. |
+| Name             | Type                        | Default     | Description                                                                                                                            |
+|------------------|-----------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `aggregate`      | `AggregateFunction \| null` | `null`      | The aggregate shown in the grid footer for this column.                                                                                |
+| `editable`       | `boolean`                   | `true`      | Whether this column is editable when the grid is in edit mode.                                                                         |
+| `field`          | `string`                    | `""`        | The field name of the data property to display in this column.                                                                         |
+| `format`         | `ColumnFormat \| null`      | `undefined` | Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text. |
+| `hidden`         | `boolean`                   | `false`     | Whether this column is hidden from the rendered grid.                                                                                  |
+| `locked`         | `boolean`                   | `false`     | Whether this column remains fixed while the grid scrolls horizontally.                                                                 |
+| `lockedPosition` | `GridColumnLockedPosition`  | `"left"`    | The side of the grid where this locked column is fixed.                                                                                |
+| `maxWidth`       | `number \| null`            | `null`      | The maximum width of this column in pixels.                                                                                            |
+| `minWidth`       | `number`                    | `40`        | The minimum width of this column in pixels.                                                                                            |
+| `stateKey`       | `string \| null`            | `null`      | A stable key used to persist state for columns whose field is empty or unstable.                                                       |
+| `title`          | `string`                    | `""`        | The title displayed in the column header.                                                                                              |
+| `type`           | `DataType`                  | `"string"`  | The data type of the column. Determines the default edit component and filter behavior.                                                |
+| `width`          | `number \| null`            | `undefined` | The fixed width of this column in pixels. If not set, the width is calculated automatically.                                           |
 
 No outputs.
 
@@ -381,17 +381,17 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `hidden` | `boolean` | `false` | Whether this command column is hidden from the rendered grid. |
-| `locked` | `boolean` | `false` | Whether this command column remains fixed while the grid scrolls horizontally. |
-| `lockedPosition` | `GridColumnLockedPosition` | `"left"` | The side of the grid where this locked command column is fixed. |
-| `maxWidth` | `number \| null` | `null` | The maximum width of this command column in pixels. |
-| `minWidth` | `number \| null` | `null` | The minimum width of this command column in pixels. |
-| `removeConfirmation` | `boolean` | `false` | Whether the built-in remove command asks for confirmation before emitting `remove`. |
-| `stateKey` | `string \| null` | `"commands"` | A stable key used to persist state for this command column. |
-| `title` | `string` | `"Commands"` | The title displayed in the command column header. |
-| `width` | `number \| null` | `160` | The fixed width of this command column in pixels. |
+| Name                 | Type                       | Default      | Description                                                                         |
+|----------------------|----------------------------|--------------|-------------------------------------------------------------------------------------|
+| `hidden`             | `boolean`                  | `false`      | Whether this command column is hidden from the rendered grid.                       |
+| `locked`             | `boolean`                  | `false`      | Whether this command column remains fixed while the grid scrolls horizontally.      |
+| `lockedPosition`     | `GridColumnLockedPosition` | `"left"`     | The side of the grid where this locked command column is fixed.                     |
+| `maxWidth`           | `number \| null`           | `null`       | The maximum width of this command column in pixels.                                 |
+| `minWidth`           | `number \| null`           | `null`       | The minimum width of this command column in pixels.                                 |
+| `removeConfirmation` | `boolean`                  | `false`      | Whether the built-in remove command asks for confirmation before emitting `remove`. |
+| `stateKey`           | `string \| null`           | `"commands"` | A stable key used to persist state for this command column.                         |
+| `title`              | `string`                   | `"Commands"` | The title displayed in the command column header.                                   |
+| `width`              | `number \| null`           | `160`        | The fixed width of this command column in pixels.                                   |
 
 No outputs. Accepts a `monaGridCellTemplate` content child to customize the rendered command buttons.
 
@@ -403,15 +403,15 @@ No outputs. Accepts a `monaGridCellTemplate` content child to customize the rend
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaGridSortable` | `SortableOptions \| ""` | `""` | Enables column sorting. An empty string enables sorting with default settings; pass an object to configure sort mode, unsort behavior, or sort-index display. |
-| `sort` | `SortDescriptor[]` | `[]` | Two-way bindable. Current sort descriptors applied to the grid. |
+| Name               | Type                    | Default | Description                                                                                                                                                   |
+|--------------------|-------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaGridSortable` | `SortableOptions \| ""` | `""`    | Enables column sorting. An empty string enables sorting with default settings; pass an object to configure sort mode, unsort behavior, or sort-index display. |
+| `sort`             | `SortDescriptor[]`      | `[]`    | Two-way bindable. Current sort descriptors applied to the grid.                                                                                               |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name         | Type              | Description                                                                         |
+|--------------|-------------------|-------------------------------------------------------------------------------------|
 | `columnSort` | `ColumnSortEvent` | Emitted when a column header is activated to change its sort direction. Cancelable. |
 
 ---
@@ -422,10 +422,10 @@ No outputs. Accepts a `monaGridCellTemplate` content child to customize the rend
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `filter` | `CompositeFilterDescriptor[]` | `[]` | Two-way bindable. Current filter descriptors applied to the grid. |
-| `monaGridFilterable` | `FilterableOptions \| ""` | `""` | Enables column filtering. An empty string enables filtering with default settings; pass an object to configure whether filters render in the header menu, a filter row, or both. |
+| Name                 | Type                          | Default | Description                                                                                                                                                                      |
+|----------------------|-------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `filter`             | `CompositeFilterDescriptor[]` | `[]`    | Two-way bindable. Current filter descriptors applied to the grid.                                                                                                                |
+| `monaGridFilterable` | `FilterableOptions \| ""`     | `""`    | Enables column filtering. An empty string enables filtering with default settings; pass an object to configure whether filters render in the header menu, a filter row, or both. |
 
 No outputs.
 
@@ -437,15 +437,15 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `group` | `GroupDescriptor[]` | `[]` | Current group descriptors applied to the grid. |
+| Name                | Type                                  | Default     | Description                                                                                                                        |
+|---------------------|---------------------------------------|-------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `group`             | `GroupDescriptor[]`                   | `[]`        | Current group descriptors applied to the grid.                                                                                     |
 | `monaGridGroupable` | `GroupableOptions \| "" \| undefined` | `undefined` | Enables column grouping. An empty string enables grouping with default settings; pass an object to configure group footer display. |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name          | Type                | Description                                                                                                                 |
+|---------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | `groupChange` | `GroupDescriptor[]` | Emitted when the applied group descriptors change, from dragging a column into the group panel or from a group sort change. |
 
 ---
@@ -456,16 +456,16 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaGridSelectable` | `GridSelectableOptions \| ""` | `""` | Enables row selection. An empty string enables selection with default settings; pass an object to configure single or multiple selection mode. |
-| `selectBy` | `string` | `""` | Field name or selector used to derive a row's selection key. |
-| `selectedKeys` | `Iterable<unknown>` | `[]` | Currently selected row keys. |
+| Name                 | Type                          | Default | Description                                                                                                                                    |
+|----------------------|-------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaGridSelectable` | `GridSelectableOptions \| ""` | `""`    | Enables row selection. An empty string enables selection with default settings; pass an object to configure single or multiple selection mode. |
+| `selectBy`           | `string`                      | `""`    | Field name or selector used to derive a row's selection key.                                                                                   |
+| `selectedKeys`       | `Iterable<unknown>`           | `[]`    | Currently selected row keys.                                                                                                                   |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name                 | Type        | Description                                        |
+|----------------------|-------------|----------------------------------------------------|
 | `selectedKeysChange` | `unknown[]` | Emitted when the set of selected row keys changes. |
 
 ---
@@ -476,23 +476,23 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaGridEditable` | `EditableOptions \| ""` | `""` | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
-| `newRowFactory` | `() => Record<PropertyKey, unknown>` | `() => ({})` | Creates the initial data object used by the add-row editor. |
-| `rowKey` | `GridKeySelector<unknown> \| null` | `null` | Field name or selector used to keep edited row identity stable when data is rebound. |
+| Name               | Type                                 | Default      | Description                                                                                                                                                                     |
+|--------------------|--------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaGridEditable` | `EditableOptions \| ""`              | `""`         | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
+| `newRowFactory`    | `() => Record<PropertyKey, unknown>` | `() => ({})` | Creates the initial data object used by the add-row editor.                                                                                                                     |
+| `rowKey`           | `GridKeySelector<unknown> \| null`   | `null`       | Field name or selector used to keep edited row identity stable when data is rebound.                                                                                            |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `add` | `GridAddEvent` | Emitted before the grid displays the new-row editor. Cancelable. |
-| `cancel` | `GridCancelEvent` | Emitted before an edit operation is canceled. Cancelable. |
-| `cellEdit` | `CellEditEvent` | Emitted when a cell is edited. Cancelable. |
-| `edit` | `GridEditEvent` | Emitted before a row enters edit mode. Cancelable. |
-| `remove` | `GridRemoveEvent` | Emitted when a row remove command is triggered. Cancelable. |
-| `rowEdit` | `RowEditEvent` | Emitted when a row edit is committed (row mode only). Cancelable. |
-| `save` | `GridSaveEvent` | Emitted before an edited or new row is saved. Cancelable. |
+| Name       | Type              | Description                                                       |
+|------------|-------------------|-------------------------------------------------------------------|
+| `add`      | `GridAddEvent`    | Emitted before the grid displays the new-row editor. Cancelable.  |
+| `cancel`   | `GridCancelEvent` | Emitted before an edit operation is canceled. Cancelable.         |
+| `cellEdit` | `CellEditEvent`   | Emitted when a cell is edited. Cancelable.                        |
+| `edit`     | `GridEditEvent`   | Emitted before a row enters edit mode. Cancelable.                |
+| `remove`   | `GridRemoveEvent` | Emitted when a row remove command is triggered. Cancelable.       |
+| `rowEdit`  | `RowEditEvent`    | Emitted when a row edit is committed (row mode only). Cancelable. |
+| `save`     | `GridSaveEvent`   | Emitted before an edited or new row is saved. Cancelable.         |
 
 ---
 
@@ -502,14 +502,14 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaGridResizable` | `ResizableOptions \| ""` | `""` | Enables column resizing. An empty string enables resizing with default settings; pass an object to configure it explicitly. |
+| Name                | Type                     | Default | Description                                                                                                                 |
+|---------------------|--------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------|
+| `monaGridResizable` | `ResizableOptions \| ""` | `""`    | Enables column resizing. An empty string enables resizing with default settings; pass an object to configure it explicitly. |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name           | Type                | Description                                                                                         |
+|----------------|---------------------|-----------------------------------------------------------------------------------------------------|
 | `columnResize` | `ColumnResizeEvent` | Emitted when a column resize completes, with the column and its old and new widths. Not cancelable. |
 
 ---
@@ -520,14 +520,14 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaGridReorderable` | `ReorderableOptions \| ""` | `""` | Enables column reordering via drag and drop. An empty string enables reordering with default settings; pass an object to configure it explicitly. |
+| Name                  | Type                       | Default | Description                                                                                                                                       |
+|-----------------------|----------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaGridReorderable` | `ReorderableOptions \| ""` | `""`    | Enables column reordering via drag and drop. An empty string enables reordering with default settings; pass an object to configure it explicitly. |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name            | Type                 | Description                                                       |
+|-----------------|----------------------|-------------------------------------------------------------------|
 | `columnReorder` | `ColumnReorderEvent` | Emitted when a column is dropped into a new position. Cancelable. |
 
 ---
@@ -538,15 +538,15 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
+| Name                    | Type                                               | Default     | Description                                                                                                                                 |
+|-------------------------|----------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | `monaGridVirtualScroll` | `Partial<VirtualScrollOptions> \| "" \| undefined` | `undefined` | Enables row virtualization. An empty string enables virtualization with default settings; pass an object to configure the fixed row height. |
-| `scrollEndThreshold` | `number` | `5` | Distance, in rows, from the bottom of the virtualized list at which `scrollEnd` is emitted. |
+| `scrollEndThreshold`    | `number`                                           | `5`         | Distance, in rows, from the bottom of the virtualized list at which `scrollEnd` is emitted.                                                 |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name        | Type   | Description                                                                                                |
+|-------------|--------|------------------------------------------------------------------------------------------------------------|
 | `scrollEnd` | `void` | Emitted when the scroll position reaches the configured threshold from the bottom of the virtualized list. |
 
 ---
@@ -559,19 +559,19 @@ No outputs.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `monaGridStatePersistence` | `GridStatePersistenceOptions \| ""` | `""` | State persistence options such as schema version and page size persistence. |
-| `state` | `GridState \| null` | `null` | Two-way bindable. The persisted grid state to apply and update when the grid state changes. |
+| Name                       | Type                                | Default | Description                                                                                 |
+|----------------------------|-------------------------------------|---------|---------------------------------------------------------------------------------------------|
+| `monaGridStatePersistence` | `GridStatePersistenceOptions \| ""` | `""`    | State persistence options such as schema version and page size persistence.                 |
+| `state`                    | `GridState \| null`                 | `null`  | Two-way bindable. The persisted grid state to apply and update when the grid state changes. |
 
 No outputs.
 
 #### Methods
 
-| Name | Returns | Description |
-|---|---|---|
-| `captureState()` | `GridState` | Captures the grid's current state (columns, sort, filter, group) without waiting for the next change cycle. |
-| `loadState(state, options?)` | `GridStateLoadResult` | Applies a previously captured state to the grid. |
+| Name                         | Returns               | Description                                                                                                 |
+|------------------------------|-----------------------|-------------------------------------------------------------------------------------------------------------|
+| `captureState()`             | `GridState`           | Captures the grid's current state (columns, sort, filter, group) without waiting for the next change cycle. |
+| `loadState(state, options?)` | `GridStateLoadResult` | Applies a previously captured state to the grid.                                                            |
 
 ---
 
@@ -585,9 +585,9 @@ No inputs, no outputs.
 
 #### Methods
 
-| Name | Returns | Description |
-|---|---|---|
-| `exportCsv(filename?)` | `void` | Exports the grid's current data as a CSV file. |
+| Name                   | Returns | Description                                    |
+|------------------------|---------|------------------------------------------------|
+| `exportCsv(filename?)` | `void`  | Exports the grid's current data as a CSV file. |
 
 ---
 
@@ -595,122 +595,122 @@ No inputs, no outputs.
 
 #### `Column` / `ColumnConfig`
 
-| Field | Type | Description |
-|---|---|---|
-| `aggregate` | `AggregateFunction \| null` | The aggregate function applied to this column's footer value. |
-| `dataType` | `DataType` | The column's declared data type. |
-| `editable` | `boolean` | Whether the column can be edited. |
-| `field` | `string` | The bound data field name. |
-| `format` | `ColumnFormat \| null` | The format string or formatter function applied to cell values. |
-| `hidden` | `boolean` | Whether the column is hidden. |
-| `id` | `string` | The column's stable internal identifier. |
-| `kind` | `"command" \| "data"` | Whether the column renders data or built-in row commands. |
-| `locked` | `boolean` | Whether the column is fixed while scrolling. |
-| `lockedPosition` | `GridColumnLockedPosition` | The side the column is fixed to, when locked. |
-| `maxWidth` / `minWidth` / `width` | `number \| null` | Column width constraints, in pixels. |
-| `removeConfirmation` | `boolean` | Whether removing a row through this command column asks for confirmation. |
-| `stateKey` | `string \| null` | The key used to persist this column's state. |
-| `title` | `string` | The column header title. |
-| `calculatedWidth` | `number \| null` | The column's currently rendered width. |
-| `columnSortDirection` / `groupSortDirection` | `SortDirection \| null` | The column's current sort direction, for regular sorting and group sorting respectively. |
-| `filtered` | `boolean` | Whether a filter is currently applied to this column. |
-| `index` / `sortIndex` | `number \| number \| null` | The column's display position, and its position among active sorts (when `showIndices` is enabled). |
+| Field                                        | Type                        | Description                                                                                         |
+|----------------------------------------------|-----------------------------|-----------------------------------------------------------------------------------------------------|
+| `aggregate`                                  | `AggregateFunction \| null` | The aggregate function applied to this column's footer value.                                       |
+| `dataType`                                   | `DataType`                  | The column's declared data type.                                                                    |
+| `editable`                                   | `boolean`                   | Whether the column can be edited.                                                                   |
+| `field`                                      | `string`                    | The bound data field name.                                                                          |
+| `format`                                     | `ColumnFormat \| null`      | The format string or formatter function applied to cell values.                                     |
+| `hidden`                                     | `boolean`                   | Whether the column is hidden.                                                                       |
+| `id`                                         | `string`                    | The column's stable internal identifier.                                                            |
+| `kind`                                       | `"command" \| "data"`       | Whether the column renders data or built-in row commands.                                           |
+| `locked`                                     | `boolean`                   | Whether the column is fixed while scrolling.                                                        |
+| `lockedPosition`                             | `GridColumnLockedPosition`  | The side the column is fixed to, when locked.                                                       |
+| `maxWidth` / `minWidth` / `width`            | `number \| null`            | Column width constraints, in pixels.                                                                |
+| `removeConfirmation`                         | `boolean`                   | Whether removing a row through this command column asks for confirmation.                           |
+| `stateKey`                                   | `string \| null`            | The key used to persist this column's state.                                                        |
+| `title`                                      | `string`                    | The column header title.                                                                            |
+| `calculatedWidth`                            | `number \| null`            | The column's currently rendered width.                                                              |
+| `columnSortDirection` / `groupSortDirection` | `SortDirection \| null`     | The column's current sort direction, for regular sorting and group sorting respectively.            |
+| `filtered`                                   | `boolean`                   | Whether a filter is currently applied to this column.                                               |
+| `index` / `sortIndex`                        | `number \| number \| null`  | The column's display position, and its position among active sorts (when `showIndices` is enabled). |
 
 #### `EditableOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean \| undefined` | Whether editing is active. |
-| `mode` | `"cell" \| "row"` | Whether editing commits per cell or per row. |
-| `schema` | `GridEditSchemaFactory \| undefined` | Builds a Signal Forms validation schema for the row being edited. |
+| Field     | Type                                 | Description                                                       |
+|-----------|--------------------------------------|-------------------------------------------------------------------|
+| `enabled` | `boolean \| undefined`               | Whether editing is active.                                        |
+| `mode`    | `"cell" \| "row"`                    | Whether editing commits per cell or per row.                      |
+| `schema`  | `GridEditSchemaFactory \| undefined` | Builds a Signal Forms validation schema for the row being edited. |
 
 #### `SortableOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `allowUnsort` | `boolean \| undefined` | Whether a third click on a sorted column clears its sort. |
-| `enabled` | `boolean \| undefined` | Whether sorting is active. |
-| `mode` | `"single" \| "multiple" \| undefined` | Whether one or several columns can be sorted at once. |
-| `showIndices` | `boolean \| undefined` | Whether sort order indices are displayed on header cells. |
+| Field         | Type                                  | Description                                               |
+|---------------|---------------------------------------|-----------------------------------------------------------|
+| `allowUnsort` | `boolean \| undefined`                | Whether a third click on a sorted column clears its sort. |
+| `enabled`     | `boolean \| undefined`                | Whether sorting is active.                                |
+| `mode`        | `"single" \| "multiple" \| undefined` | Whether one or several columns can be sorted at once.     |
+| `showIndices` | `boolean \| undefined`                | Whether sort order indices are displayed on header cells. |
 
 #### `FilterableOptions` (exported as `GridFilterableOptions`)
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether filtering is active. |
-| `type` | `"menu" \| "row" \| "menu, row"` | Where filter UI renders — the column header menu, a filter row, or both. |
+| Field     | Type                             | Description                                                              |
+|-----------|----------------------------------|--------------------------------------------------------------------------|
+| `enabled` | `boolean`                        | Whether filtering is active.                                             |
+| `type`    | `"menu" \| "row" \| "menu, row"` | Where filter UI renders — the column header menu, a filter row, or both. |
 
 #### `GroupableOptions` (exported as `GridGroupableOptions`)
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean` | Whether grouping is active. |
+| Field        | Type      | Description                                          |
+|--------------|-----------|------------------------------------------------------|
+| `enabled`    | `boolean` | Whether grouping is active.                          |
 | `showFooter` | `boolean` | Whether an aggregate footer is shown for each group. |
 
 #### `GridSelectableOptions`
 
-| Field | Type | Description |
-|---|---|---|
-| `enabled` | `boolean \| undefined` | Whether row selection is active. |
-| `mode` | `"single" \| "multiple" \| undefined` | Whether one or several rows can be selected at once. |
+| Field     | Type                                  | Description                                          |
+|-----------|---------------------------------------|------------------------------------------------------|
+| `enabled` | `boolean \| undefined`                | Whether row selection is active.                     |
+| `mode`    | `"single" \| "multiple" \| undefined` | Whether one or several rows can be selected at once. |
 
 #### `ReorderableOptions`
 
-| Field | Type | Description |
-|---|---|---|
+| Field     | Type      | Description                          |
+|-----------|-----------|--------------------------------------|
 | `enabled` | `boolean` | Whether column reordering is active. |
 
 #### `ResizableOptions`
 
-| Field | Type | Description |
-|---|---|---|
+| Field     | Type      | Description                        |
+|-----------|-----------|------------------------------------|
 | `enabled` | `boolean` | Whether column resizing is active. |
 
 #### `GridState`
 
-| Field | Type | Description |
-|---|---|---|
-| `columns` | `readonly GridColumnState[]` | Persisted per-column hidden/order/width state. |
-| `filter` | `readonly GridStateCompositeFilterDescriptor[]` | Persisted filter descriptors. |
-| `group` | `readonly GroupDescriptor[]` | Persisted group descriptors. |
-| `pageSize` | `number \| undefined` | Persisted page size, when `persistPageSize` is enabled. |
-| `schemaVersion` | `number \| string \| undefined` | Consumer-defined version tag used to reject stale persisted state. |
-| `sort` | `readonly GridStateSortDescriptor[]` | Persisted sort descriptors. |
-| `version` | `1` | The state schema version produced by this version of the library. |
+| Field           | Type                                            | Description                                                        |
+|-----------------|-------------------------------------------------|--------------------------------------------------------------------|
+| `columns`       | `readonly GridColumnState[]`                    | Persisted per-column hidden/order/width state.                     |
+| `filter`        | `readonly GridStateCompositeFilterDescriptor[]` | Persisted filter descriptors.                                      |
+| `group`         | `readonly GroupDescriptor[]`                    | Persisted group descriptors.                                       |
+| `pageSize`      | `number \| undefined`                           | Persisted page size, when `persistPageSize` is enabled.            |
+| `schemaVersion` | `number \| string \| undefined`                 | Consumer-defined version tag used to reject stale persisted state. |
+| `sort`          | `readonly GridStateSortDescriptor[]`            | Persisted sort descriptors.                                        |
+| `version`       | `1`                                             | The state schema version produced by this version of the library.  |
 
 #### `GridEditSession`
 
-| Field | Type | Description |
-|---|---|---|
-| `column` | `Column \| null` | The column currently being edited, in cell mode. |
-| `field` | `string \| null` | The field name currently being edited, in cell mode. |
-| `form` | `FieldTree<Record<PropertyKey, unknown>>` | The Signal Forms field tree backing the row being edited. |
-| `isNew` | `boolean` | Whether this session represents a new row being added. |
-| `mode` | `"cell" \| "row"` | The active editing mode. |
-| `model` | `WritableSignal<Record<PropertyKey, unknown>>` | The signal holding the row's current edited values. |
-| `operation` | `GridEditOperation` | `"create"` or `"update"`. |
-| `originalRowData` | `Record<PropertyKey, unknown> \| null` | The row's data before editing began. |
-| `row` | `Row \| null` | The internal row wrapper being edited. |
-| `rowUid` | `string \| null` | The stable identifier of the row being edited. |
+| Field             | Type                                           | Description                                               |
+|-------------------|------------------------------------------------|-----------------------------------------------------------|
+| `column`          | `Column \| null`                               | The column currently being edited, in cell mode.          |
+| `field`           | `string \| null`                               | The field name currently being edited, in cell mode.      |
+| `form`            | `FieldTree<Record<PropertyKey, unknown>>`      | The Signal Forms field tree backing the row being edited. |
+| `isNew`           | `boolean`                                      | Whether this session represents a new row being added.    |
+| `mode`            | `"cell" \| "row"`                              | The active editing mode.                                  |
+| `model`           | `WritableSignal<Record<PropertyKey, unknown>>` | The signal holding the row's current edited values.       |
+| `operation`       | `GridEditOperation`                            | `"create"` or `"update"`.                                 |
+| `originalRowData` | `Record<PropertyKey, unknown> \| null`         | The row's data before editing began.                      |
+| `row`             | `Row \| null`                                  | The internal row wrapper being edited.                    |
+| `rowUid`          | `string \| null`                               | The stable identifier of the row being edited.            |
 
 #### `GridEditTemplateContext`
 
-| Field | Type | Description |
-|---|---|---|
-| `cancel` | `() => void` | Cancels the current edit. |
-| `column` | `string` | The field name of the column being edited. |
-| `commit` | `() => void` | Commits the current edit. |
-| `dataField` | `string` | Same as `column`; the field name being edited. |
-| `dataItem` | `Record<PropertyKey, unknown>` | The row's current edited values. |
-| `errors` | `readonly ValidationError.WithFieldTree[]` | Validation errors for this field. |
-| `field` | `FieldTree<unknown>` | The Signal Forms field for this column. |
-| `form` | `GridEditSession["form"]` | The row's full Signal Forms field tree. |
-| `invalid` | `boolean` | Whether this field currently fails validation. |
-| `isNew` | `boolean` | Whether this is a new row being added. |
-| `session` | `GridEditSession` | The full edit session for this row. |
-| `setValue` | `(value: unknown) => void` | Sets this field's value. |
-| `touched` | `boolean` | Whether this field has been touched. |
-| `value` | `unknown` | This field's current value. |
+| Field       | Type                                       | Description                                    |
+|-------------|--------------------------------------------|------------------------------------------------|
+| `cancel`    | `() => void`                               | Cancels the current edit.                      |
+| `column`    | `string`                                   | The field name of the column being edited.     |
+| `commit`    | `() => void`                               | Commits the current edit.                      |
+| `dataField` | `string`                                   | Same as `column`; the field name being edited. |
+| `dataItem`  | `Record<PropertyKey, unknown>`             | The row's current edited values.               |
+| `errors`    | `readonly ValidationError.WithFieldTree[]` | Validation errors for this field.              |
+| `field`     | `FieldTree<unknown>`                       | The Signal Forms field for this column.        |
+| `form`      | `GridEditSession["form"]`                  | The row's full Signal Forms field tree.        |
+| `invalid`   | `boolean`                                  | Whether this field currently fails validation. |
+| `isNew`     | `boolean`                                  | Whether this is a new row being added.         |
+| `session`   | `GridEditSession`                          | The full edit session for this row.            |
+| `setValue`  | `(value: unknown) => void`                 | Sets this field's value.                       |
+| `touched`   | `boolean`                                  | Whether this field has been touched.           |
+| `value`     | `unknown`                                  | This field's current value.                    |
 
 #### Event classes
 
@@ -724,7 +724,7 @@ No inputs, no outputs.
 
 `"left" | "right"`.
 
-`TODO(owner-review): GridFooterTemplateContext and GridGroupFooterTemplateContext (the template context types for monaGridFooterTemplate and monaGridGroupFooterTemplate) are not exported from @mirei/mona-ui — confirm whether they should be added to the public barrel.`
+`TODO(owner-review): GridFooterTemplateContext and GridGroupFooterTemplateContext (the template context types for monaGridFooterTemplate and monaGridGroupFooterTemplate) are not exported from @nanahoshi/mona-ui — confirm whether they should be added to the public barrel.`
 
 ---
 

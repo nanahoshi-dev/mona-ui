@@ -7,8 +7,8 @@ Use the Stepper when a task must be completed in a defined series of stages — 
 ## Import & Quick Start
 
 ```typescript
-import { StepperComponent } from "@mirei/mona-ui";
-import type { StepOptions } from "@mirei/mona-ui";
+import { StepperComponent } from "@nanahoshi/mona-ui";
+import type { StepOptions } from "@nanahoshi/mona-ui";
 ```
 
 Add `StepperComponent` to your standalone component's `imports` array.
@@ -31,21 +31,21 @@ protected currentStep = 0;
 
 Each step renders an **indicator** (the numbered circle) and a **label** (the text below or beside it). Three `ng-template` directives let you replace either part, or replace the entire step unit:
 
-| Directive | Selector | Replaces |
-|---|---|---|
-| `StepperIndicatorTemplateDirective` | `ng-template[monaStepperIndicatorTemplate]` | Content inside the indicator circle |
-| `StepperLabelTemplateDirective` | `ng-template[monaStepperLabelTemplate]` | The step label text |
-| `StepperStepTemplateDirective` | `ng-template[monaStepperStepTemplate]` | The entire step unit (indicator + label area) |
+| Directive                           | Selector                                    | Replaces                                      |
+|-------------------------------------|---------------------------------------------|-----------------------------------------------|
+| `StepperIndicatorTemplateDirective` | `ng-template[monaStepperIndicatorTemplate]` | Content inside the indicator circle           |
+| `StepperLabelTemplateDirective`     | `ng-template[monaStepperLabelTemplate]`     | The step label text                           |
+| `StepperStepTemplateDirective`      | `ng-template[monaStepperStepTemplate]`      | The entire step unit (indicator + label area) |
 
 All three directives expose the same typed context (`StepperTemplateContext<T>`):
 
-| Variable | Type | Description |
-|---|---|---|
-| `$implicit` (`let-step`) | `StepOptions<T>` | The step's options object |
-| `active` | `boolean` | True when this step's index ≤ the current active step index |
-| `currentIndex` | `number` | Zero-based index of the currently active step |
-| `disabled` | `boolean` | Whether this step is disabled |
-| `index` | `number` | Zero-based index of this step |
+| Variable                 | Type             | Description                                                 |
+|--------------------------|------------------|-------------------------------------------------------------|
+| `$implicit` (`let-step`) | `StepOptions<T>` | The step's options object                                   |
+| `active`                 | `boolean`        | True when this step's index ≤ the current active step index |
+| `currentIndex`           | `number`         | Zero-based index of the currently active step               |
+| `disabled`               | `boolean`        | Whether this step is disabled                               |
+| `index`                  | `number`         | Zero-based index of this step                               |
 
 Import all three alongside the component:
 
@@ -55,7 +55,7 @@ import {
     StepperIndicatorTemplateDirective,
     StepperLabelTemplateDirective,
     StepperStepTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 ### Indicator template
@@ -130,13 +130,13 @@ In vertical mode, `ArrowUp` and `ArrowDown` replace `ArrowLeft` and `ArrowRight`
 
 ### Rounded presets
 
-| `rounded` | Shape |
-|---|---|
-| `none` | Square corners |
-| `small` | Slightly rounded |
-| `medium` | Moderately rounded |
-| `large` | Generously rounded |
-| `full` | Circular (default) |
+| `rounded` | Shape              |
+|-----------|--------------------|
+| `none`    | Square corners     |
+| `small`   | Slightly rounded   |
+| `medium`  | Moderately rounded |
+| `large`   | Generously rounded |
+| `full`    | Circular (default) |
 
 ### Attaching data to steps
 
@@ -153,35 +153,36 @@ protected readonly steps: StepOptions<{ icon: string }>[] = [
 
 ### Keyboard map
 
-| Key | Action |
-|---|---|
-| `ArrowLeft` (horizontal) / `ArrowUp` (vertical) | Move highlight to previous step |
-| `ArrowRight` (horizontal) / `ArrowDown` (vertical) | Move highlight to next step |
-| `Home` | Move highlight to first step |
-| `End` | Move highlight to last step |
-| `Enter` / `Space` | Activate the highlighted step |
+| Key                                                | Action                          |
+|----------------------------------------------------|---------------------------------|
+| `ArrowLeft` (horizontal) / `ArrowUp` (vertical)    | Move highlight to previous step |
+| `ArrowRight` (horizontal) / `ArrowDown` (vertical) | Move highlight to next step     |
+| `Home`                                             | Move highlight to first step    |
+| `End`                                              | Move highlight to last step     |
+| `Enter` / `Space`                                  | Activate the highlighted step   |
 
 Arrow key movement respects linear mode (limits range) and disabled steps (skips them). The stepper uses a **roving tabindex** pattern — only the highlighted step has `tabindex="0"`.
 
 ### ARIA attributes
 
-| Attribute | Element | When | Value |
-|---|---|---|---|
-| `role="group"` | Host | Always | — |
-| `aria-label` | Host | Always | `aria-label` input (default `"Progress"`) |
-| `role="button"` | Each step indicator | Always | — |
-| `aria-label` | Each step indicator | Always | Step's `label` string |
-| `aria-current="step"` | Active step indicator | When this step is active | `"step"` |
-| `aria-disabled="true"` | Locked/disabled indicator | When locked (linear) or disabled | `true` |
-| `tabindex="0"` | Highlighted step indicator | When highlighted | `0` |
-| `tabindex="-1"` | All other indicators | Otherwise | `-1` |
-| `role="presentation"` | Each `<li>` | Always | — |
-| `role="progressbar"` | Progress track | Always | — |
-| `aria-valuenow` | Progress track | Always | Current step index |
-| `aria-valuemin` / `aria-valuemax` | Progress track | Always | `0` / total steps minus one |
-| `aria-label` | Progress track | Always | `progressAriaLabel` input (default `"Step progress"`) |
+| Attribute                         | Element                    | When                             | Value                                                 |
+|-----------------------------------|----------------------------|----------------------------------|-------------------------------------------------------|
+| `role="group"`                    | Host                       | Always                           | —                                                     |
+| `aria-label`                      | Host                       | Always                           | `aria-label` input (default `"Progress"`)             |
+| `role="button"`                   | Each step indicator        | Always                           | —                                                     |
+| `aria-label`                      | Each step indicator        | Always                           | Step's `label` string                                 |
+| `aria-current="step"`             | Active step indicator      | When this step is active         | `"step"`                                              |
+| `aria-disabled="true"`            | Locked/disabled indicator  | When locked (linear) or disabled | `true`                                                |
+| `tabindex="0"`                    | Highlighted step indicator | When highlighted                 | `0`                                                   |
+| `tabindex="-1"`                   | All other indicators       | Otherwise                        | `-1`                                                  |
+| `role="presentation"`             | Each `<li>`                | Always                           | —                                                     |
+| `role="progressbar"`              | Progress track             | Always                           | —                                                     |
+| `aria-valuenow`                   | Progress track             | Always                           | Current step index                                    |
+| `aria-valuemin` / `aria-valuemax` | Progress track             | Always                           | `0` / total steps minus one                           |
+| `aria-label`                      | Progress track             | Always                           | `progressAriaLabel` input (default `"Step progress"`) |
 
 **Consumer responsibilities:**
+
 - Provide a meaningful `aria-label` when context does not already identify the stepper's purpose.
 - Provide a localized `progressAriaLabel` for non-English applications.
 - All `label` fields in `StepOptions` are required and become the accessible name for each indicator.
@@ -194,20 +195,20 @@ Arrow key movement respects linear mode (limits range) and disabled steps (skips
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `aria-label` | `string` | `"Progress"` | Accessible label for the stepper group (`role="group"`). |
-| `linear` | `boolean` | `true` | When true, only the immediately adjacent step can be reached by click or keyboard. |
-| `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | Layout direction of the step list and track. |
-| `progressAriaLabel` | `string` | `"Step progress"` | Accessible label for the progress bar. Localize this for non-English apps. |
-| `rounded` | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"full"` | Border-radius preset applied to each step indicator. |
-| `step` | `number` | `0` | Two-way bindable active step index. Use `[(step)]` for two-way binding or `(stepChange)` to listen for changes. |
-| `steps` | `Iterable<StepOptions>` | `[]` | Ordered list of step definitions. |
+| Name                | Type                                                 | Default           | Description                                                                                                     |
+|---------------------|------------------------------------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------|
+| `aria-label`        | `string`                                             | `"Progress"`      | Accessible label for the stepper group (`role="group"`).                                                        |
+| `linear`            | `boolean`                                            | `true`            | When true, only the immediately adjacent step can be reached by click or keyboard.                              |
+| `orientation`       | `"horizontal" \| "vertical"`                         | `"horizontal"`    | Layout direction of the step list and track.                                                                    |
+| `progressAriaLabel` | `string`                                             | `"Step progress"` | Accessible label for the progress bar. Localize this for non-English apps.                                      |
+| `rounded`           | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"full"`          | Border-radius preset applied to each step indicator.                                                            |
+| `step`              | `number`                                             | `0`               | Two-way bindable active step index. Use `[(step)]` for two-way binding or `(stepChange)` to listen for changes. |
+| `steps`             | `Iterable<StepOptions>`                              | `[]`              | Ordered list of step definitions.                                                                               |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name         | Type     | Description                                                                  |
+|--------------|----------|------------------------------------------------------------------------------|
 | `stepChange` | `number` | Emitted when the active step changes. Carries the new zero-based step index. |
 
 ---
@@ -236,28 +237,28 @@ Replaces the entire visual step unit. The component wraps projected content in a
 
 #### `StepOptions<T = unknown>`
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `label` | `string` | Yes | Display label and accessible name for the indicator. |
-| `data` | `T` | No | Arbitrary data attached to this step. Available in template contexts as `step.data`. |
-| `disabled` | `boolean` | No | When true, the step cannot be activated by click or keyboard regardless of linear mode. |
+| Field      | Type      | Required | Description                                                                             |
+|------------|-----------|----------|-----------------------------------------------------------------------------------------|
+| `label`    | `string`  | Yes      | Display label and accessible name for the indicator.                                    |
+| `data`     | `T`       | No       | Arbitrary data attached to this step. Available in template contexts as `step.data`.    |
+| `disabled` | `boolean` | No       | When true, the step cannot be activated by click or keyboard regardless of linear mode. |
 
 #### `StepItem<T = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `index` | `number` | Zero-based position of the step in the list. |
-| `options` | `StepOptions<T>` | The original options object for this step. |
+| Field     | Type             | Description                                  |
+|-----------|------------------|----------------------------------------------|
+| `index`   | `number`         | Zero-based position of the step in the list. |
+| `options` | `StepOptions<T>` | The original options object for this step.   |
 
 #### `StepperTemplateContext<T = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `$implicit` | `StepOptions<T>` | The step's options object (bind with `let-myVar`). |
-| `active` | `boolean` | True when this step's index ≤ the current active step index. |
-| `currentIndex` | `number` | Zero-based index of the currently active step. |
-| `disabled` | `boolean` | Whether this step is disabled. |
-| `index` | `number` | Zero-based index of this step. |
+| Field          | Type             | Description                                                  |
+|----------------|------------------|--------------------------------------------------------------|
+| `$implicit`    | `StepOptions<T>` | The step's options object (bind with `let-myVar`).           |
+| `active`       | `boolean`        | True when this step's index ≤ the current active step index. |
+| `currentIndex` | `number`         | Zero-based index of the currently active step.               |
+| `disabled`     | `boolean`        | Whether this step is disabled.                               |
+| `index`        | `number`         | Zero-based index of this step.                               |
 
 ---
 

@@ -1,5 +1,5 @@
 import { Component, effect, forwardRef } from "@angular/core";
-import { PopupMenuGroupComponent, PopupMenuOrigin, PopupMenuToken } from "@mirei/mona-ui/popup-menu";
+import { PopupMenuGroupComponent, PopupMenuOrigin, PopupMenuToken } from "@nanahoshi/mona-ui/popup-menu";
 import { ensureContextMenuComponentTypes, ensureContextMenuTemplateTypes } from "../../utils/ctx-menu.utils";
 
 @Component({

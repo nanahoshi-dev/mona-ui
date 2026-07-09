@@ -12,9 +12,9 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { SlicePipe } from "@mirei/mona-ui/common";
-import { ContextMenuComponent } from "@mirei/mona-ui/contextmenu";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { SlicePipe } from "@nanahoshi/mona-ui/common";
+import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
 import { GridCellDirective } from "../../directives/grid-cell.directive";

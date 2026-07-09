@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/numeric-text-box
+ * Public API Surface of @nanahoshi/mona-ui/numeric-text-box
  */
 
 export * from "./components/numeric-text-box/numeric-text-box.component";

@@ -1,12 +1,12 @@
 import { Component, computed, DestroyRef, inject, linkedSignal, output, signal } from "@angular/core";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { FilterInputComponent } from "@mirei/mona-ui/internal/filter-input";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
 import {
     ListViewComponent,
     ListViewFooterTemplateDirective,
     ListViewHeaderTemplateDirective,
     ListViewSelectableDirective
-} from "@mirei/mona-ui/list-view";
+} from "@nanahoshi/mona-ui/list-view";
 import { GridService } from "../../services/grid.service";
 
 @Component({

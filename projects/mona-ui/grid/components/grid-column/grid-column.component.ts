@@ -8,7 +8,7 @@ import {
     TemplateRef
 } from "@angular/core";
 import { v4 } from "uuid";
-import { DataType } from "@mirei/mona-ui/common";
+import { DataType } from "@nanahoshi/mona-ui/common";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
 import { GridColumnTitleTemplateDirective } from "../../directives/grid-column-title-template.directive";
 import { GridEditTemplateDirective } from "../../directives/grid-edit-template.directive";

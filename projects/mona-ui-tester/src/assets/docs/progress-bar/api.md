@@ -17,7 +17,7 @@ An indeterminate mode is available for tasks where the total duration is unknown
 ## Import & Basic Usage
 
 ```typescript
-import { ProgressBarComponent } from "@mirei/mona-ui";
+import { ProgressBarComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add `ProgressBarComponent` to your standalone component's `imports` array.
@@ -76,30 +76,30 @@ protected getColor = (percent: number): string =>
 
 ### Rounded presets
 
-| `rounded` | Shape                      |
-|-----------|----------------------------|
-| `none`    | No rounding                |
-| `small`   | Slight rounding            |
-| `medium`  | Moderate rounding (default)|
-| `large`   | Strong rounding            |
-| `full`    | Pill / fully rounded       |
+| `rounded` | Shape                       |
+|-----------|-----------------------------|
+| `none`    | No rounding                 |
+| `small`   | Slight rounding             |
+| `medium`  | Moderate rounding (default) |
+| `large`   | Strong rounding             |
+| `full`    | Pill / fully rounded        |
 
 ### Label alignment
 
-| `labelPosition` | Label alignment |
-|-----------------|-----------------|
-| `start`         | Flush left      |
+| `labelPosition` | Label alignment    |
+|-----------------|--------------------|
+| `start`         | Flush left         |
 | `center`        | Centered (default) |
-| `end`           | Flush right     |
+| `end`           | Flush right        |
 
 ### Visual states
 
-| State         | Appearance                                                        |
-|---------------|-------------------------------------------------------------------|
-| Default       | Fill extends from left to `value` percentage of the bar width     |
-| Indeterminate | Repeating diagonal stripe animation; label hidden                 |
-| Disabled      | Reduced opacity, non-interactive                                  |
-| Zero value    | Fill area is transparent (bar appears empty)                      |
+| State         | Appearance                                                    |
+|---------------|---------------------------------------------------------------|
+| Default       | Fill extends from left to `value` percentage of the bar width |
+| Indeterminate | Repeating diagonal stripe animation; label hidden             |
+| Disabled      | Reduced opacity, non-interactive                              |
+| Zero value    | Fill area is transparent (bar appears empty)                  |
 
 ### Track animation
 
@@ -125,10 +125,10 @@ The template context exposes four variables:
 
 | Variable    | Type     | Description                                  |
 |-------------|----------|----------------------------------------------|
-| `$implicit` | `number` | The raw `value` input — use `let-value`       |
-| `min`       | `number` | The raw `min` input                           |
-| `max`       | `number` | The raw `max` input                           |
-| `percent`   | `number` | Computed percentage (0–100, rounded to 2 dp)  |
+| `$implicit` | `number` | The raw `value` input — use `let-value`      |
+| `min`       | `number` | The raw `min` input                          |
+| `max`       | `number` | The raw `max` input                          |
+| `percent`   | `number` | Computed percentage (0–100, rounded to 2 dp) |
 
 The template renders in a way that keeps text readable against both the filled and unfilled areas.
 
@@ -153,13 +153,13 @@ Merge additional Tailwind or custom classes onto the host element via the `class
 
 The host element carries `role="progressbar"`. The component manages the following ARIA attributes automatically:
 
-| Attribute        | When present       | Value                        |
-|------------------|--------------------|------------------------------|
-| `aria-valuemin`  | Determinate mode   | Bound to `min`               |
-| `aria-valuemax`  | Determinate mode   | Bound to `max`               |
-| `aria-valuenow`  | Determinate mode   | Bound to `value`             |
-| `aria-busy`      | Indeterminate mode | `true`                       |
-| `aria-disabled`  | `disabled` is true | `true`                       |
+| Attribute       | When present       | Value            |
+|-----------------|--------------------|------------------|
+| `aria-valuemin` | Determinate mode   | Bound to `min`   |
+| `aria-valuemax` | Determinate mode   | Bound to `max`   |
+| `aria-valuenow` | Determinate mode   | Bound to `value` |
+| `aria-busy`     | Indeterminate mode | `true`           |
+| `aria-disabled` | `disabled` is true | `true`           |
 
 Consumer responsibilities:
 
@@ -174,22 +174,22 @@ Consumer responsibilities:
 
 #### Inputs
 
-| Name            | Type                                      | Default    | Description |
-|-----------------|-------------------------------------------|------------|-------------|
-| `animate`       | `boolean`                                 | `true`     | Enables CSS transitions on the fill track. Set to `false` when updating `value` at a high frequency. |
-| `aria-label`    | `string`                                  | `''`       | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label. |
-| `aria-valuetext` | `string`                                 | `''`       | Overrides the numeric `aria-valuenow` announcement for assistive technology. Particularly useful in indeterminate mode — set to a localized string such as `"Loading"` so screen readers announce state rather than silence. When empty, assistive technology falls back to the numeric value. |
-| `class`         | `string`                                  | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `color`         | `string \| ((percent: number) => string)` | `''`       | Fill color of the progress track. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100). |
-| `disabled`      | `boolean`                                 | `false`    | Renders the component at reduced opacity with pointer events removed. |
-| `indeterminate` | `boolean`                                 | `false`    | Activates a repeating diagonal stripe animation. The label is hidden in this mode (including custom `monaProgressBarLabelTemplate`). `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are removed from the host element; `aria-busy="true"` is added. |
-| `labelPosition` | `'start' \| 'center' \| 'end'`            | `'center'` | Horizontal alignment of the label within the bar. |
-| `labelStyles`   | `Partial<CSSStyleDeclaration>`            | `{}`       | Inline styles applied to the default label `<span>`. Has no effect when `monaProgressBarLabelTemplate` is used. |
-| `labelVisible`  | `boolean`                                 | `true`     | Hides the label when `false`. Has no effect in indeterminate mode (label is always hidden). |
-| `max`           | `number`                                  | `100`      | Maximum value of the progress range. |
-| `min`           | `number`                                  | `0`        | Minimum value of the progress range. |
-| `rounded`       | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the host and both track elements. |
-| `value`         | `number`                                  | `0`        | Current progress value within `[min, max]`. Values outside the range are clamped to `[0, 100]` before rendering. Non-finite values (e.g. `NaN`) are treated as `0`. |
+| Name             | Type                                                 | Default    | Description                                                                                                                                                                                                                                                                                    |
+|------------------|------------------------------------------------------|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `animate`        | `boolean`                                            | `true`     | Enables CSS transitions on the fill track. Set to `false` when updating `value` at a high frequency.                                                                                                                                                                                           |
+| `aria-label`     | `string`                                             | `''`       | Accessible label forwarded to the host `aria-label` attribute. Describe what the progress bar measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role and numeric values without a label.                                                                    |
+| `aria-valuetext` | `string`                                             | `''`       | Overrides the numeric `aria-valuenow` announcement for assistive technology. Particularly useful in indeterminate mode — set to a localized string such as `"Loading"` so screen readers announce state rather than silence. When empty, assistive technology falls back to the numeric value. |
+| `class`          | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                                                                                                      |
+| `color`          | `string \| ((percent: number) => string)`            | `''`       | Fill color of the progress track. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100).                                                                                                                                |
+| `disabled`       | `boolean`                                            | `false`    | Renders the component at reduced opacity with pointer events removed.                                                                                                                                                                                                                          |
+| `indeterminate`  | `boolean`                                            | `false`    | Activates a repeating diagonal stripe animation. The label is hidden in this mode (including custom `monaProgressBarLabelTemplate`). `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are removed from the host element; `aria-busy="true"` is added.                                     |
+| `labelPosition`  | `'start' \| 'center' \| 'end'`                       | `'center'` | Horizontal alignment of the label within the bar.                                                                                                                                                                                                                                              |
+| `labelStyles`    | `Partial<CSSStyleDeclaration>`                       | `{}`       | Inline styles applied to the default label `<span>`. Has no effect when `monaProgressBarLabelTemplate` is used.                                                                                                                                                                                |
+| `labelVisible`   | `boolean`                                            | `true`     | Hides the label when `false`. Has no effect in indeterminate mode (label is always hidden).                                                                                                                                                                                                    |
+| `max`            | `number`                                             | `100`      | Maximum value of the progress range.                                                                                                                                                                                                                                                           |
+| `min`            | `number`                                             | `0`        | Minimum value of the progress range.                                                                                                                                                                                                                                                           |
+| `rounded`        | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the host and both track elements.                                                                                                                                                                                                                              |
+| `value`          | `number`                                             | `0`        | Current progress value within `[min, max]`. Values outside the range are clamped to `[0, 100]` before rendering. Non-finite values (e.g. `NaN`) are treated as `0`.                                                                                                                            |
 
 `ProgressBarComponent` has no event outputs.
 
@@ -203,13 +203,13 @@ Structural template directive that replaces the default percentage label. The te
 import {
     ProgressBarComponent,
     ProgressBarLabelTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 The `LabelPosition` type used by the `labelPosition` input is also exported for use in consuming components:
 
 ```typescript
-import type { LabelPosition } from "@mirei/mona-ui";
+import type { LabelPosition } from "@nanahoshi/mona-ui";
 ```
 
 ---

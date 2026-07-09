@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/filter
+ * Public API Surface of @nanahoshi/mona-ui/filter
  */
 
 export * from "./models/FilterMenuDataItem";

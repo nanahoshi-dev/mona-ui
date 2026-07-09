@@ -1,7 +1,7 @@
 import { ElementRef, OutputEmitterRef, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { DropdownService } from "../services/dropdown.service";
-import { ListService } from "@mirei/mona-ui/internal/list";
+import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
 import { DropdownListPopupHandlerDirective } from "./dropdown-list-popup-handler.directive";
 

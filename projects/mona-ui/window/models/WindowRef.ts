@@ -1,5 +1,5 @@
 import { ComponentRef } from "@angular/core";
-import { PopupCloseEvent, PopupRef } from "@mirei/mona-ui/popup";
+import { PopupCloseEvent, PopupRef } from "@nanahoshi/mona-ui/popup";
 import { Observable } from "rxjs";
 import { MoveEvent } from "./MoveEvent";
 import { ResizeEvent } from "./ResizeEvent";

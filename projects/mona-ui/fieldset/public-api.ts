@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/fieldset
+ * Public API Surface of @nanahoshi/mona-ui/fieldset
  */
 
 export * from "./directives/fieldset-legend-template.directive";

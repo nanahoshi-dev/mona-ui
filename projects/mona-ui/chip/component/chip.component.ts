@@ -14,8 +14,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCircleX } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";

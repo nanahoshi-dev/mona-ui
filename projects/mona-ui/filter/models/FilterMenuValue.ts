@@ -1,4 +1,4 @@
-import { FilterOperators } from "@mirei/mona-ui/query";
+import { FilterOperators } from "@nanahoshi/mona-ui/query";
 
 export interface FilterMenuValue {
     logic?: "and" | "or";

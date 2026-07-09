@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/check-box
+ * Public API Surface of @nanahoshi/mona-ui/check-box
  */
 
 export * from "./components/check-box/check-box.component";

@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { ListService } from "@mirei/mona-ui/internal/list";
+import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { DropdownVirtualScrollDirective } from "./dropdown-virtual-scroll.directive";
 
 describe("DropdownVirtualScrollDirective", () => {

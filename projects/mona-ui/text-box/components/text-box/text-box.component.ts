@@ -15,11 +15,11 @@ import {
 import { FormsModule } from "@angular/forms";
 import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { rxTimeout } from "@mirei/mona-ui/internal";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
-import { AttributeBinderDirective, AttributeConfig } from "@mirei/mona-ui/internal";
+import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { InputType } from "../../models/InputType";

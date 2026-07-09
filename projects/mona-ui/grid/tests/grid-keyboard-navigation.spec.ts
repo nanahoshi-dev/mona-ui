@@ -1,6 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { GridCommandColumnComponent } from "../components/grid-command-column/grid-command-column.component";
 import { GridColumnComponent } from "../components/grid-column/grid-column.component";
 import { GridToolbarTemplateDirective } from "../directives/grid-toolbar-template.directive";

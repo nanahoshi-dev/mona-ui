@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, output } from "@angular/core";
 import { LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideChevronUp } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { splitterResizerHandleThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
 
 @Component({

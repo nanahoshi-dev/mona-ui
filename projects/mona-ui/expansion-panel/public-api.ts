@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/expansion-panel
+ * Public API Surface of @nanahoshi/mona-ui/expansion-panel
  */
 
 export * from "./components/expansion-panel/expansion-panel.component";

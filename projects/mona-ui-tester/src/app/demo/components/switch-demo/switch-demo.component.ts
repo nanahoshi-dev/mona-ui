@@ -7,7 +7,7 @@ import {
     SwitchHandleContentTemplateDirective,
     SwitchOffLabelTemplateDirective,
     SwitchOnLabelTemplateDirective
-} from "@mirei/mona-ui/switch";
+} from "@nanahoshi/mona-ui/switch";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

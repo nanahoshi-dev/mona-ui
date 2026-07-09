@@ -1,7 +1,7 @@
 import type { CdkDragStart } from "@angular/cdk/drag-drop";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ImmutableList } from "@mirei/ts-collections";
-import { PagerComponent } from "@mirei/mona-ui/pager";
+import { PagerComponent } from "@nanahoshi/mona-ui/pager";
 import type { Column } from "../../models/Column";
 import type { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";

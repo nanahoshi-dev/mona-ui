@@ -29,7 +29,11 @@
     (blur)="onInputBlur()" />
 
 @if (showClearButton() && autoCompleteValue() && !loading()) {
-    <mona-indicator-icon preset="clear" [interactive]="true" label="Clear" (activate)="onValueClear($event)"></mona-indicator-icon>
+    <mona-indicator-icon
+        preset="clear"
+        [interactive]="true"
+        label="Clear"
+        (activate)="onValueClear($event)"></mona-indicator-icon>
 }
 
 @if (loading()) {

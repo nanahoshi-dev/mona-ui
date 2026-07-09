@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/splitter
+ * Public API Surface of @nanahoshi/mona-ui/splitter
  */
 
 export * from "./components/splitter/splitter.component";

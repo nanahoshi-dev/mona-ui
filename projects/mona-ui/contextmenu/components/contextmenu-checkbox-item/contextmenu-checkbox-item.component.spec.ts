@@ -25,7 +25,9 @@ describe("ContextmenuCheckboxItemComponent", () => {
 @Component({
     selector: "mona-test-contextmenu-checkbox-item-host",
     imports: [ContextMenuCheckboxItemComponent],
-    template: ` <mona-contextmenu-checkbox-item label="Preview Pane" [checked]="true"></mona-contextmenu-checkbox-item> `
+    template: `
+        <mona-contextmenu-checkbox-item label="Preview Pane" [checked]="true"></mona-contextmenu-checkbox-item>
+    `
 })
 class ContextMenuCheckboxItemHostComponent {
     public readonly item = viewChild.required(ContextMenuCheckboxItemComponent);

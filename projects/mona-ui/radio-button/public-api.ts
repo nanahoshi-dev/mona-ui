@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/radio-button
+ * Public API Surface of @nanahoshi/mona-ui/radio-button
  */
 
 export * from "./components/radio-button/radio-button.component";

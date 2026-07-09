@@ -14,7 +14,7 @@ Use `SliderComponent` when the user must select a single numeric value within a 
 ## Import & Quick Start
 
 ```typescript
-import { SliderComponent } from "@mirei/mona-ui";
+import { SliderComponent } from "@nanahoshi/mona-ui";
 ```
 
 **Direct value binding:**
@@ -49,7 +49,7 @@ Two structural directives allow customising the handle and tick labels.
 Use `monaSliderHandleTemplate` to replace the default circular handle. The template context exposes the current value as the implicit variable:
 
 ```typescript
-import { SliderComponent, SliderHandleTemplateDirective } from "@mirei/mona-ui";
+import { SliderComponent, SliderHandleTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -66,7 +66,7 @@ import { SliderComponent, SliderHandleTemplateDirective } from "@mirei/mona-ui";
 Use `monaSliderTickValueTemplate` to replace default numeric tick labels. The template context exposes the tick value as the implicit variable. This template has no effect unless `showTicks` and `showLabels` are both enabled:
 
 ```typescript
-import { SliderComponent, SliderTickValueTemplateDirective } from "@mirei/mona-ui";
+import { SliderComponent, SliderTickValueTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -255,7 +255,7 @@ import {
     SliderComponent,
     SliderHandleTemplateDirective,
     SliderTickValueTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 ---

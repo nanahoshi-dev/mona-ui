@@ -1,8 +1,8 @@
 import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { getPercentage } from "@mirei/mona-ui/common";
-import { Action } from "@mirei/mona-ui/internal";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { getPercentage } from "@nanahoshi/mona-ui/common";
+import { Action } from "@nanahoshi/mona-ui/internal";
 
 import { twMerge } from "tailwind-merge";
 import { ProgressBarLabelTemplateDirective } from "../../directives/progress-bar-label-template.directive";

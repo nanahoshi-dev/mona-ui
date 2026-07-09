@@ -15,9 +15,9 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable, toSignal } from "@angular/core/rxjs-interop";
-import { ScrollDirection } from "@mirei/mona-ui/common";
-import { toCssValue } from "@mirei/mona-ui/internal";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ScrollDirection } from "@nanahoshi/mona-ui/common";
+import { toCssValue } from "@nanahoshi/mona-ui/internal";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { select } from "@mirei/ts-collections";
 import {
     asyncScheduler,

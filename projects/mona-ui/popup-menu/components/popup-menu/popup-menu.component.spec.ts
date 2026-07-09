@@ -1,9 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PopupMenuComponent } from './popup-menu.component';
-import { DOCUMENT } from '@angular/core';
+import { PopupMenuComponent } from "./popup-menu.component";
+import { DOCUMENT } from "@angular/core";
 
-describe('PopupMenuComponent', () => {
+describe("PopupMenuComponent", () => {
     let component: PopupMenuComponent;
     let fixture: ComponentFixture<PopupMenuComponent>;
     let document: Document;
@@ -12,8 +12,7 @@ describe('PopupMenuComponent', () => {
         await TestBed.configureTestingModule({
             imports: [PopupMenuComponent],
             providers: []
-        })
-            .compileComponents();
+        }).compileComponents();
 
         fixture = TestBed.createComponent(PopupMenuComponent);
         component = fixture.componentInstance;
@@ -22,7 +21,7 @@ describe('PopupMenuComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it("should create", () => {
         expect(component).toBeTruthy();
     });
 });

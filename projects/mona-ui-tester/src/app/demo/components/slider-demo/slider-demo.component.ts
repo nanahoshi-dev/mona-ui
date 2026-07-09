@@ -7,7 +7,7 @@ import {
     SliderComponent,
     SliderHandleTemplateDirective,
     SliderTickValueTemplateDirective
-} from "@mirei/mona-ui/slider";
+} from "@nanahoshi/mona-ui/slider";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

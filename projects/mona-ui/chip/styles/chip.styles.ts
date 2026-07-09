@@ -1,5 +1,5 @@
-import { VariantInputs } from "@mirei/mona-ui/internal";
-import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import { chipVariants as monaChipVariants } from "./chip.mona.styles";
 

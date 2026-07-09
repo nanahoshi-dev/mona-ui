@@ -9,9 +9,9 @@ import {
     viewChild,
     ViewContainerRef
 } from "@angular/core";
-import { PlaceholderComponent } from "@mirei/mona-ui/placeholder";
-import { NotificationRef, NotificationService } from "@mirei/mona-ui/notification";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
+import { NotificationRef, NotificationService } from "@nanahoshi/mona-ui/notification";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

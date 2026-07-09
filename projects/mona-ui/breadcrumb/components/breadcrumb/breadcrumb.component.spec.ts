@@ -141,7 +141,6 @@ describe("BreadcrumbComponent", () => {
             items[1].nativeElement.focus();
             expect(hostFixture.nativeElement.ownerDocument.activeElement).not.toBe(items[1].nativeElement);
         });
-
     });
 
     describe("Click Behavior", () => {

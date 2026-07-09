@@ -6,10 +6,10 @@ import {
     CalendarDecadeCellTemplateDirective,
     CalendarMonthCellTemplateDirective,
     CalendarYearCellTemplateDirective
-} from "@mirei/mona-ui/calendar";
-import type { PreventableEvent } from "@mirei/mona-ui/common";
-import { DateInputPrefixTemplateDirective } from "@mirei/mona-ui/date-input";
-import { DateTimePickerComponent } from "@mirei/mona-ui/datetime-picker";
+} from "@nanahoshi/mona-ui/calendar";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { DateInputPrefixTemplateDirective } from "@nanahoshi/mona-ui/date-input";
+import { DateTimePickerComponent } from "@nanahoshi/mona-ui/datetime-picker";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

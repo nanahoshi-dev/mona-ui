@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/contextmenu
+ * Public API Surface of @nanahoshi/mona-ui/contextmenu
  */
 
 export * from "./components/contextmenu/context-menu.component";

@@ -19,10 +19,10 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Position } from "@mirei/mona-ui/common";
-import { createElementControlId } from "@mirei/mona-ui/internal";
-import { fadePopupAnimation, PopupRef, PopupService } from "@mirei/mona-ui/popup";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { Position } from "@nanahoshi/mona-ui/common";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import {

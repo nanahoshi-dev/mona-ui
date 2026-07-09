@@ -1,5 +1,5 @@
 import { ComponentRef } from "@angular/core";
-import { PopupCloseEvent, PopupCloseSource, PopupRef } from "@mirei/mona-ui/popup";
+import { PopupCloseEvent, PopupCloseSource, PopupRef } from "@nanahoshi/mona-ui/popup";
 import { asapScheduler, map, Observable, Subject } from "rxjs";
 import { DefaultMaxWindowHeight, DefaultMaxWindowWidth } from "../utils/defaults";
 import { MoveEvent } from "./MoveEvent";

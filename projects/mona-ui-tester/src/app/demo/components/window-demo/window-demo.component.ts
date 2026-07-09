@@ -11,12 +11,12 @@ import {
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideUser } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { SwitchComponent } from "@mirei/mona-ui/switch";
-import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import {
     WindowActionTemplateDirective,
     WindowComponent,
@@ -25,7 +25,7 @@ import {
     WindowRef,
     WindowService,
     WindowTitleTemplateDirective
-} from "@mirei/mona-ui/window";
+} from "@nanahoshi/mona-ui/window";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

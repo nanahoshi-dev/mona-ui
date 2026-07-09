@@ -13,7 +13,7 @@ When multiple panels are stacked directly adjacent to one another, the component
 ## Import & Basic Usage
 
 ```typescript
-import { ExpansionPanelComponent } from "@mirei/mona-ui";
+import { ExpansionPanelComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add `ExpansionPanelComponent` to your standalone component's `imports` array.
@@ -46,12 +46,12 @@ Add `ExpansionPanelComponent` to your standalone component's `imports` array.
 
 ### Rounded presets
 
-| `rounded` | Shape                 |
-|-----------|-----------------------|
-| `none`    | Square corners        |
-| `small`   | `rounded-sm`          |
+| `rounded` | Shape                  |
+|-----------|------------------------|
+| `none`    | Square corners         |
+| `small`   | `rounded-sm`           |
 | `medium`  | `rounded-md` (default) |
-| `large`   | `rounded-lg`          |
+| `large`   | `rounded-lg`           |
 
 When panels are stacked, border-radius is only visible on the first panel's top corners and the last panel's bottom corners. The `rounded` value must be consistent across all panels in a stack for the stitching to look correct.
 
@@ -71,11 +71,11 @@ Pass `userClass` to merge additional CSS classes onto the host element.
 
 Three `ng-template` directives customize the header:
 
-| Slot              | Selector                                   | Replaces                                      |
-|-------------------|--------------------------------------------|-----------------------------------------------|
-| Title template    | `ng-template[monaExpansionPanelTitleTemplate]`   | The string `title` inside the header title area |
-| Actions template  | `ng-template[monaExpansionPanelActionsTemplate]` | Injected into the header between title and icon |
-| Icon template     | `ng-template[monaExpansionPanelIconTemplate]`    | The default plus/minus icon                   |
+| Slot             | Selector                                         | Replaces                                        |
+|------------------|--------------------------------------------------|-------------------------------------------------|
+| Title template   | `ng-template[monaExpansionPanelTitleTemplate]`   | The string `title` inside the header title area |
+| Actions template | `ng-template[monaExpansionPanelActionsTemplate]` | Injected into the header between title and icon |
+| Icon template    | `ng-template[monaExpansionPanelIconTemplate]`    | The default plus/minus icon                     |
 
 **Title template** — replace the string title with any content:
 
@@ -123,15 +123,15 @@ Three `ng-template` directives customize the header:
 
 The header toggles via mouse click and via `Enter` or `Space` while it has focus; both keys call `preventDefault()` so `Space` does not scroll the page.
 
-| Attribute       | When present                  | Value                                  |
-|-----------------|--------------------------------|-----------------------------------------|
-| `role`          | Always                         | `"button"`                              |
-| `tabindex`      | Always                         | `0`, or `-1` when `disabled` is `true`  |
-| `aria-expanded` | Always                          | Reflects the current `expanded` state   |
-| `aria-controls` | Always                          | The content region's generated `id`     |
-| `aria-disabled` | When `disabled` is `true`       | `"true"`                                |
-| `aria-hidden`   | On the content region, always   | `"true"` when collapsed, `"false"` when expanded |
-| `inert`         | On the content region, when collapsed | Present (blocks focus from entering) |
+| Attribute       | When present                          | Value                                            |
+|-----------------|---------------------------------------|--------------------------------------------------|
+| `role`          | Always                                | `"button"`                                       |
+| `tabindex`      | Always                                | `0`, or `-1` when `disabled` is `true`           |
+| `aria-expanded` | Always                                | Reflects the current `expanded` state            |
+| `aria-controls` | Always                                | The content region's generated `id`              |
+| `aria-disabled` | When `disabled` is `true`             | `"true"`                                         |
+| `aria-hidden`   | On the content region, always         | `"true"` when collapsed, `"false"` when expanded |
+| `inert`         | On the content region, when collapsed | Present (blocks focus from entering)             |
 
 TODO(owner-review): confirm whether the header should remain a `role="button"` `<div>` or move to a native `<button>` element; the current implementation supports the ARIA disclosure pattern either way.
 
@@ -143,13 +143,13 @@ TODO(owner-review): confirm whether the header should remain a `role="button"` `
 
 #### Inputs
 
-| Name        | Type                                        | Default    | Description |
-|-------------|----------------------------------------------|------------|-------------|
-| `disabled`  | `boolean`                                    | `false`    | Suppresses click and keyboard toggling on the header. |
-| `expanded`  | `boolean`                                    | `false`    | Two-way bindable. Controls whether the panel is expanded. Use `[(expanded)]` for two-way binding or `[expanded]` for one-way. Changing this programmatically animates the content region. |
-| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'`   | `'medium'` | Border-radius preset. When stacking panels, use the same value for all panels in the group. |
-| `title`     | `string`                                     | `''`       | Text shown in the header title area. Ignored when `monaExpansionPanelTitleTemplate` is provided. |
-| `userClass` | `string`                                     | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| Name        | Type                                       | Default    | Description                                                                                                                                                                               |
+|-------------|--------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled`  | `boolean`                                  | `false`    | Suppresses click and keyboard toggling on the header.                                                                                                                                     |
+| `expanded`  | `boolean`                                  | `false`    | Two-way bindable. Controls whether the panel is expanded. Use `[(expanded)]` for two-way binding or `[expanded]` for one-way. Changing this programmatically animates the content region. |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'` | Border-radius preset. When stacking panels, use the same value for all panels in the group.                                                                                               |
+| `title`     | `string`                                   | `''`       | Text shown in the header title area. Ignored when `monaExpansionPanelTitleTemplate` is provided.                                                                                          |
+| `userClass` | `string`                                   | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                 |
 
 `ExpansionPanelComponent` has no event outputs. Observe `[(expanded)]` to react to state changes.
 
@@ -173,8 +173,8 @@ Injects content between the title area and the toggle icon. The template has no 
 
 Replaces the default plus/minus toggle icon. The template context exposes one variable:
 
-| Variable    | Type      | Description                         |
-|-------------|-----------|-------------------------------------|
+| Variable    | Type      | Description                                 |
+|-------------|-----------|---------------------------------------------|
 | `$implicit` | `boolean` | The current expanded state (`let-expanded`) |
 
 Import all template directives alongside the component:
@@ -185,7 +185,7 @@ import {
     ExpansionPanelTitleTemplateDirective,
     ExpansionPanelActionsTemplateDirective,
     ExpansionPanelIconTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 ---

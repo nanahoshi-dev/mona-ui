@@ -1,4 +1,4 @@
-import { Orientation } from "@mirei/mona-ui/common";
+import { Orientation } from "@nanahoshi/mona-ui/common";
 
 export interface LabelStyleArgs {
     labelPosition: "before" | "after";

@@ -1,4 +1,4 @@
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 
 export class GridRemoveEvent extends PreventableEvent {
     readonly #options: GridRemoveEventOptions;

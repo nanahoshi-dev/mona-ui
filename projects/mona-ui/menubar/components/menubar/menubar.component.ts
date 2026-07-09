@@ -25,8 +25,8 @@ import {
     PopupMenuNavigationEvent,
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
-} from "@mirei/mona-ui/popup-menu";
-import { ThemeService } from "@mirei/mona-ui/theme";
+} from "@nanahoshi/mona-ui/popup-menu";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { rotate, zip } from "@mirei/ts-collections";
 import { pairwise, startWith, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";

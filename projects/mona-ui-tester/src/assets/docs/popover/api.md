@@ -18,7 +18,7 @@
 ## Import & Quick Start
 
 ```typescript
-import { PopoverComponent } from "@mirei/mona-ui";
+import { PopoverComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -44,10 +44,10 @@ To call `open()` / `close()` from the template, capture a reference with `export
 
 Content placed inside `<mona-popover>...</mona-popover>` — other than the template directives below — becomes the panel's body content.
 
-| Directive selector | Purpose |
-|---|---|
-| `ng-template[monaPopoverTitleTemplate]` | Replaces the plain-text `title` in the header. Takes precedence over `title` when both are provided. |
-| `ng-template[monaPopoverFooterTemplate]` | Adds a footer region below the body content. |
+| Directive selector                       | Purpose                                                                                              |
+|------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `ng-template[monaPopoverTitleTemplate]`  | Replaces the plain-text `title` in the header. Takes precedence over `title` when both are provided. |
+| `ng-template[monaPopoverFooterTemplate]` | Adds a footer region below the body content.                                                         |
 
 Neither directive exposes a template context (no `let-` variables).
 
@@ -107,7 +107,7 @@ Clicking the target toggles the popover — a second click on the same target cl
 ### Preventing a close
 
 ```typescript
-import type { PopoverHideEvent } from "@mirei/mona-ui";
+import type { PopoverHideEvent } from "@nanahoshi/mona-ui";
 
 protected onHide(event: PopoverHideEvent): void {
     if (!this.canClose()) {
@@ -146,8 +146,8 @@ protected onHide(event: PopoverHideEvent): void {
 
 ### Keyboard
 
-| Key | Action |
-|---|---|
+| Key    | Action                                                                                                      |
+|--------|-------------------------------------------------------------------------------------------------------------|
 | Escape | Closes the popover (handled by the underlying popup service; not configurable through Popover's public API) |
 
 No other keyboard handling is implemented by `PopoverComponent` itself. If `target` is a native interactive element (for example a `<button>`), its own keyboard activation (Enter / Space) already dispatches the `click` event that the default trigger listens for.
@@ -156,21 +156,21 @@ No other keyboard handling is implemented by `PopoverComponent` itself. If `targ
 
 **Target element** (the element bound to `target`):
 
-| Attribute | When present | Value |
-|---|---|---|
-| `aria-haspopup` | From the first time the popover opens onward | `"dialog"` |
-| `aria-controls` | From the first time the popover opens onward | The panel's auto-generated id |
+| Attribute       | When present                                 | Value                                        |
+|-----------------|----------------------------------------------|----------------------------------------------|
+| `aria-haspopup` | From the first time the popover opens onward | `"dialog"`                                   |
+| `aria-controls` | From the first time the popover opens onward | The panel's auto-generated id                |
 | `aria-expanded` | From the first time the popover opens onward | `"true"` while open, `"false"` after closing |
 
 These attributes are not present on the target before the popover has opened at least once.
 
 **Panel:**
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"dialog"` |
-| `id` | Always | Auto-generated, matches the target's `aria-controls` |
-| `aria-labelledby` | When `title` is non-empty or a title template is projected | The header element's auto-generated id |
+| Attribute         | When present                                               | Value                                                |
+|-------------------|------------------------------------------------------------|------------------------------------------------------|
+| `role`            | Always                                                     | `"dialog"`                                           |
+| `id`              | Always                                                     | Auto-generated, matches the target's `aria-controls` |
+| `aria-labelledby` | When `title` is non-empty or a title template is projected | The header element's auto-generated id               |
 
 ### Focus
 
@@ -189,32 +189,32 @@ These attributes are not present on the target before the popover has opened at 
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `displayArrow` | `boolean` | `false` | Renders a small arrow pointing from the panel toward the target, on the side specified by `position`. |
-| `position` | `"top" \| "right" \| "bottom" \| "left"`¹ | `"top"` | Side of the target the panel is anchored to. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'` | Border-radius preset applied to the panel, and to the header's top corners when a header is rendered. |
-| `target` | `Element \| ElementRef` | — | Required. The element the popover is anchored to and listens for the trigger event on. |
-| `title` | `string` | `''` | Plain-text title shown in the header. Ignored when a `monaPopoverTitleTemplate` is projected. |
-| `trigger` | `PopoverTrigger` | `'click'` | The event that opens/closes the popover. See [Technical & Behavior Notes](#technical--behavior-notes). |
+| Name           | Type                                       | Default    | Description                                                                                            |
+|----------------|--------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
+| `displayArrow` | `boolean`                                  | `false`    | Renders a small arrow pointing from the panel toward the target, on the side specified by `position`.  |
+| `position`     | `"top" \| "right" \| "bottom" \| "left"`¹  | `"top"`    | Side of the target the panel is anchored to.                                                           |
+| `rounded`      | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'` | Border-radius preset applied to the panel, and to the header's top corners when a header is rendered.  |
+| `target`       | `Element \| ElementRef`                    | —          | Required. The element the popover is anchored to and listens for the trigger event on.                 |
+| `title`        | `string`                                   | `''`       | Plain-text title shown in the header. Ignored when a `monaPopoverTitleTemplate` is projected.          |
+| `trigger`      | `PopoverTrigger`                           | `'click'`  | The event that opens/closes the popover. See [Technical & Behavior Notes](#technical--behavior-notes). |
 
-¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@mirei/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
+¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `hide` | `PopoverHideEvent` | Emitted before the popover closes — by the trigger, `close()`, an outside click, or Escape. Call `event.preventDefault()` to cancel the close. See the close-event notes below and in Technical & Behavior Notes. |
-| `hidden` | `void` | Emitted after the popover has fully closed. Not emitted if a `hide` listener canceled the close. |
-| `show` | `PopoverShowEvent` | Emitted before the popover opens through its configured trigger. Call `event.preventDefault()` to cancel the open. **Not emitted when opening through the public `open()` method** — see Technical & Behavior Notes. |
-| `shown` | `PopoverShownEvent` | Emitted after the popover has opened through its configured trigger. **Not emitted when opening through `open()`** — see Technical & Behavior Notes. |
+| Name     | Type                | Description                                                                                                                                                                                                          |
+|----------|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `hide`   | `PopoverHideEvent`  | Emitted before the popover closes — by the trigger, `close()`, an outside click, or Escape. Call `event.preventDefault()` to cancel the close. See the close-event notes below and in Technical & Behavior Notes.    |
+| `hidden` | `void`              | Emitted after the popover has fully closed. Not emitted if a `hide` listener canceled the close.                                                                                                                     |
+| `show`   | `PopoverShowEvent`  | Emitted before the popover opens through its configured trigger. Call `event.preventDefault()` to cancel the open. **Not emitted when opening through the public `open()` method** — see Technical & Behavior Notes. |
+| `shown`  | `PopoverShownEvent` | Emitted after the popover has opened through its configured trigger. **Not emitted when opening through `open()`** — see Technical & Behavior Notes.                                                                 |
 
 #### Public methods
 
-| Name | Description |
-|---|---|
+| Name            | Description                                                                                                                                                                                    |
+|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `close(): void` | Closes the popover if one is currently open. Emits `hide` and respects `preventDefault()` — if canceled, the popup stays open and the component's internal state remains consistent with that. |
-| `open(): void` | Opens the popover directly. No-op if it is already open. Does not emit `show` or `shown`. |
+| `open(): void`  | Opens the popover directly. No-op if it is already open. Does not emit `show` or `shown`.                                                                                                      |
 
 ---
 
@@ -248,25 +248,25 @@ type PopoverTrigger = "click" | "hover" | "none" | (string & {});
 
 Extends `PreventableEvent`.
 
-| Property | Type | Description |
-|---|---|---|
+| Property | Type      | Description                             |
+|----------|-----------|-----------------------------------------|
 | `target` | `Element` | The element the popover is anchored to. |
 
 #### `PopoverHideEvent`
 
 Extends `PreventableEvent`.
 
-| Property | Type | Description |
-|---|---|---|
-| `popupRef` | `PopupRef` | Reference to the popup being closed. |
-| `target` | `Element` | The element the popover is anchored to. |
+| Property   | Type       | Description                             |
+|------------|------------|-----------------------------------------|
+| `popupRef` | `PopupRef` | Reference to the popup being closed.    |
+| `target`   | `Element`  | The element the popover is anchored to. |
 
 #### `PopoverShownEvent`
 
-| Property | Type | Description |
-|---|---|---|
+| Property   | Type       | Description                             |
+|------------|------------|-----------------------------------------|
 | `popupRef` | `PopupRef` | Reference to the popup that was opened. |
-| `target` | `Element` | The element the popover is anchored to. |
+| `target`   | `Element`  | The element the popover is anchored to. |
 
 `PreventableEvent` (the base class of `PopoverShowEvent` and `PopoverHideEvent`) exposes `preventDefault(): void` and `isDefaultPrevented(): boolean`.
 

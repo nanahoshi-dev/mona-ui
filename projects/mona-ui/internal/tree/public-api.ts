@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/tree
+ * Public API Surface of @nanahoshi/mona-ui/tree
  */
 
 export * from "./components/tree/tree.component";

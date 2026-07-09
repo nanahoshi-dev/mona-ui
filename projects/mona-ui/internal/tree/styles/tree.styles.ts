@@ -1,4 +1,4 @@
-import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import {
     subTreeListItemVariants as monaSubTreeListItemVariants,
     subTreeListVariants as monaSubTreeListVariants,

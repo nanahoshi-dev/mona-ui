@@ -11,8 +11,8 @@ import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, 
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { asapScheduler, take } from "rxjs";
-import { CheckBoxComponent } from "@mirei/mona-ui/check-box";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";

@@ -1,5 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { Row } from "../models/Row";
 import { GridService } from "../services/grid.service";
 import { gridListTableRowThemeVariants } from "../styles/grid.styles";

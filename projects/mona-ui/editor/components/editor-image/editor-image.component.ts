@@ -1,6 +1,6 @@
 import { Component, inject, signal } from "@angular/core";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { WindowComponent } from "@mirei/mona-ui/window";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { WindowComponent } from "@nanahoshi/mona-ui/window";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
 import { EditorService } from "../../services/editor.service";
 import { EditorImageInserterComponent } from "../editor-image-inserter/editor-image-inserter.component";

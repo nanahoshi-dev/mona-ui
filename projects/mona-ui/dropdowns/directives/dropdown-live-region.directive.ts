@@ -1,5 +1,5 @@
 import { computed, Directive, effect, ElementRef, inject } from "@angular/core";
-import { ListService } from "@mirei/mona-ui/internal/list";
+import { ListService } from "@nanahoshi/mona-ui/internal/list";
 import { DropdownService } from "../services/dropdown.service";
 
 @Directive({

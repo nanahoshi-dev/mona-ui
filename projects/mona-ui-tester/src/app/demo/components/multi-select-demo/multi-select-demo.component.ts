@@ -8,7 +8,7 @@ import {
     MultiSelectSummaryTagDirective,
     MultiSelectSummaryTagTemplateDirective,
     MultiSelectTagTemplateDirective
-} from "@mirei/mona-ui/multi-select";
+} from "@nanahoshi/mona-ui/multi-select";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -18,10 +18,10 @@ import {
     DropdownNoDataTemplateDirective,
     DropdownPrefixTemplateDirective,
     DropdownVirtualScrollDirective
-} from "@mirei/mona-ui/dropdowns";
-import { FilterableOptions, VirtualScrollOptions } from "@mirei/mona-ui/common";
-import { GroupableOptions } from "@mirei/mona-ui/internal/list";
-import type { PreventableEvent } from "@mirei/mona-ui/common";
+} from "@nanahoshi/mona-ui/dropdowns";
+import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
+import { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {

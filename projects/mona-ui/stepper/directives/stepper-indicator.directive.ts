@@ -1,5 +1,5 @@
 import { afterRenderEffect, computed, Directive, ElementRef, inject, input } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../styles/stepper.styles";
 
 @Directive({

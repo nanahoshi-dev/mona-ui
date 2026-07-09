@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { GroupableOptions, ListKeySelector, ListService } from "@mirei/mona-ui/internal/list";
+import { GroupableOptions, ListKeySelector, ListService } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewGroupable]"

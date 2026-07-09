@@ -10,7 +10,7 @@ import {
     output,
     viewChild
 } from "@angular/core";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableSet, select } from "@mirei/ts-collections";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";

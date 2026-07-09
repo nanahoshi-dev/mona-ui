@@ -1,8 +1,8 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField, maxDate, minDate, readonly, required } from "@angular/forms/signals";
-import { TimePickerComponent } from "@mirei/mona-ui/time-picker";
-import type { PreventableEvent } from "@mirei/mona-ui/common";
+import { TimePickerComponent } from "@nanahoshi/mona-ui/time-picker";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

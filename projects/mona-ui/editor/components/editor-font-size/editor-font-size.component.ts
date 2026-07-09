@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropdownListComponent } from "@mirei/mona-ui/dropdown-list";
+import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { EditorService } from "../../services/editor.service";
 
 @Component({

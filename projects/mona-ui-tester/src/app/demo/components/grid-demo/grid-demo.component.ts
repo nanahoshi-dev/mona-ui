@@ -12,9 +12,9 @@ import {
 } from "@angular/core";
 import { FormField, type SchemaPathTree, validate } from "@angular/forms/signals";
 import { LucideContainer, LucideOctagonAlert } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ChipComponent } from "@mirei/mona-ui/chip";
-import { type DataType, VirtualScrollOptions } from "@mirei/mona-ui/common";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ChipComponent } from "@nanahoshi/mona-ui/chip";
+import { type DataType, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     type AggregateFunction,
     CellEditEvent,
@@ -56,10 +56,10 @@ import {
     type ResizableOptions,
     RowEditEvent,
     type SelectableOptions
-} from "@mirei/mona-ui/grid";
-import { type CompositeFilterDescriptor } from "@mirei/mona-ui/query";
-import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@mirei/mona-ui/text-box";
-import { TooltipComponent } from "@mirei/mona-ui/tooltip";
+} from "@nanahoshi/mona-ui/grid";
+import { type CompositeFilterDescriptor } from "@nanahoshi/mona-ui/query";
+import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
+import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 import { DateTime } from "luxon";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

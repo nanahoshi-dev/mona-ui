@@ -6,7 +6,6 @@
         "^@fortawesome/free-solid-svg-icons$",
         "^@lucide/angular$",
         "^@mirei/ts-collections$",
-        "^@tiptap/",
         "^class-variance-authority$",
         "^luxon$",
         "^remixicon$",

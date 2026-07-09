@@ -16,7 +16,7 @@ Notifications are shown imperatively through `NotificationService`, not by placi
 ## Import & Quick Start
 
 ```typescript
-import { NotificationService } from "@mirei/mona-ui";
+import { NotificationService } from "@nanahoshi/mona-ui";
 ```
 
 Inject `NotificationService` (it is `providedIn: "root"`, so no module setup is required) and call `show()`:
@@ -40,10 +40,10 @@ export class MyComponent {
 
 `NotificationService` is the entire public surface consumers interact with directly — there is no notification component to place in a template. It is a root-provided (`providedIn: "root"`) singleton, so a single instance manages every notification across the application, grouped by screen `position`.
 
-| Method | Description |
-|---|---|
-| `hide(id: string): void` | Closes the notification with the given `id`, wherever its container is positioned. No-op if no notification with that `id` is currently shown. |
-| `hideAll(): void` | Closes every currently visible notification, across all positions. |
+| Method                                                | Description                                                                                                                                                                                                          |
+|-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `hide(id: string): void`                              | Closes the notification with the given `id`, wherever its container is positioned. No-op if no notification with that `id` is currently shown.                                                                       |
+| `hideAll(): void`                                     | Closes every currently visible notification, across all positions.                                                                                                                                                   |
 | `show(options: NotificationOptions): NotificationRef` | Creates a notification and returns a `NotificationRef`. If a notification with the same `id` already exists at the resolved `position`, returns a ref to that existing notification instead of creating a duplicate. |
 
 See [Anatomy & Options Resolution](#anatomy--options-resolution) for how `show()` fills in defaults, and [API](#api) for the full `NotificationOptions` / `NotificationRef` shapes.
@@ -52,12 +52,12 @@ See [Anatomy & Options Resolution](#anatomy--options-resolution) for how `show()
 
 `show()` resolves defaults before creating the notification:
 
-| Option | Resolved default when omitted |
-|---|---|
-| `id` | A generated identifier |
-| `position` | `"topright"` |
-| `type` | `"info"` |
-| `title` | Derived from `type` (e.g. `"Info"`, `"Success"`, `"Warning"`, `"Error"`) |
+| Option     | Resolved default when omitted                                                  |
+|------------|--------------------------------------------------------------------------------|
+| `id`       | A generated identifier                                                         |
+| `position` | `"topright"`                                                                   |
+| `type`     | `"info"`                                                                       |
+| `title`    | Derived from `type` (e.g. `"Info"`, `"Success"`, `"Warning"`, `"Error"`)       |
 | `closable` | `true`, but only when `duration` is also omitted — see [Dismissal](#dismissal) |
 
 `show()` does not mutate the `options` object passed to it.
@@ -136,10 +136,10 @@ No keyboard handling is implemented by the notification itself beyond the close 
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"alert"` for `type: "error"` or `"warning"`; `"status"` for `type: "info"` or `"success"` |
-| `aria-live` | Always | `"assertive"` for `type: "error"` or `"warning"`; `"polite"` for `type: "info"` or `"success"` |
+| Attribute   | When present | Value                                                                                          |
+|-------------|--------------|------------------------------------------------------------------------------------------------|
+| `role`      | Always       | `"alert"` for `type: "error"` or `"warning"`; `"status"` for `type: "info"` or `"success"`     |
+| `aria-live` | Always       | `"assertive"` for `type: "error"` or `"warning"`; `"polite"` for `type: "info"` or `"success"` |
 
 `error` and `warning` notifications interrupt screen readers immediately. `info` and `success` notifications are announced without interrupting the user's current task.
 
@@ -158,36 +158,36 @@ Not applicable — Notification does not accept or emit user input and has no fo
 
 Injectable, `providedIn: "root"`. See [NotificationService](#notificationservice) for a description of each method.
 
-| Method | Description |
-|---|---|
-| `hide(id: string): void` | Closes the notification with the given `id`. |
-| `hideAll(): void` | Closes every currently visible notification. |
+| Method                                                | Description                                  |
+|-------------------------------------------------------|----------------------------------------------|
+| `hide(id: string): void`                              | Closes the notification with the given `id`. |
+| `hideAll(): void`                                     | Closes every currently visible notification. |
 | `show(options: NotificationOptions): NotificationRef` | Creates (or reuses, by `id`) a notification. |
 
 ### `NotificationOptions`
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `appendTo` | `ViewContainerRef \| undefined` | `undefined` (appends to `document.body`) | The container to append the notification's container to. |
-| `closable` | `boolean \| undefined` | `true` when `duration` is not set, otherwise `undefined` | Whether a close button is rendered. |
-| `closeTitle` | `string \| undefined` | `"Close"` | The accessible title/tooltip for the close button. |
-| `content` | `string \| TemplateRef<unknown> \| Type<unknown>` | — | The notification's content. |
-| `duration` | `number \| undefined` | `undefined` (stays open until manually closed) | Time, in milliseconds, before the notification auto-closes. |
-| `height` | `number \| string \| undefined` | `undefined` | The notification's height; a number is treated as pixels. |
-| `id` | `string \| undefined` | A generated identifier | A unique identifier, scoped per `position`; reusing an `id` returns the existing notification. |
-| `position` | `NotificationPosition \| undefined` | `"topright"` | The screen position the notification is anchored to. |
-| `progressBar` | `boolean \| undefined` | `undefined` | Whether a countdown progress bar is displayed for a timed notification. |
-| `title` | `string \| undefined` | Derived from `type` (e.g. `"Info"`, `"Success"`) | The notification's title. |
-| `type` | `NotificationType \| undefined` | `"info"` | Controls icon, color, and the ARIA `role`/`aria-live` combination — see [Accessibility & Forms Integration](#accessibility--forms-integration). |
-| `width` | `number \| string \| undefined` | `undefined` | The notification's width; a number is treated as pixels. |
+| Name          | Type                                              | Default                                                  | Description                                                                                                                                     |
+|---------------|---------------------------------------------------|----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `appendTo`    | `ViewContainerRef \| undefined`                   | `undefined` (appends to `document.body`)                 | The container to append the notification's container to.                                                                                        |
+| `closable`    | `boolean \| undefined`                            | `true` when `duration` is not set, otherwise `undefined` | Whether a close button is rendered.                                                                                                             |
+| `closeTitle`  | `string \| undefined`                             | `"Close"`                                                | The accessible title/tooltip for the close button.                                                                                              |
+| `content`     | `string \| TemplateRef<unknown> \| Type<unknown>` | —                                                        | The notification's content.                                                                                                                     |
+| `duration`    | `number \| undefined`                             | `undefined` (stays open until manually closed)           | Time, in milliseconds, before the notification auto-closes.                                                                                     |
+| `height`      | `number \| string \| undefined`                   | `undefined`                                              | The notification's height; a number is treated as pixels.                                                                                       |
+| `id`          | `string \| undefined`                             | A generated identifier                                   | A unique identifier, scoped per `position`; reusing an `id` returns the existing notification.                                                  |
+| `position`    | `NotificationPosition \| undefined`               | `"topright"`                                             | The screen position the notification is anchored to.                                                                                            |
+| `progressBar` | `boolean \| undefined`                            | `undefined`                                              | Whether a countdown progress bar is displayed for a timed notification.                                                                         |
+| `title`       | `string \| undefined`                             | Derived from `type` (e.g. `"Info"`, `"Success"`)         | The notification's title.                                                                                                                       |
+| `type`        | `NotificationType \| undefined`                   | `"info"`                                                 | Controls icon, color, and the ARIA `role`/`aria-live` combination — see [Accessibility & Forms Integration](#accessibility--forms-integration). |
+| `width`       | `number \| string \| undefined`                   | `undefined`                                              | The notification's width; a number is treated as pixels.                                                                                        |
 
 ### `NotificationRef`
 
-| Name | Type | Description |
-|---|---|---|
-| `afterHide` | `Observable<void>` | Emits once the notification has finished closing and been removed. |
-| `content` | `ComponentRef<unknown> \| null` | The dynamically created content component's reference, or `null` for string/template content. |
-| `hide(): void` | — | Closes the notification. |
+| Name           | Type                            | Description                                                                                   |
+|----------------|---------------------------------|-----------------------------------------------------------------------------------------------|
+| `afterHide`    | `Observable<void>`              | Emits once the notification has finished closing and been removed.                            |
+| `content`      | `ComponentRef<unknown> \| null` | The dynamically created content component's reference, or `null` for string/template content. |
+| `hide(): void` | —                               | Closes the notification.                                                                      |
 
 ### Exported Types
 

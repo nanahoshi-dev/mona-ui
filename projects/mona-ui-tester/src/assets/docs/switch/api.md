@@ -17,7 +17,7 @@
 ## Import & Basic Usage
 
 ```typescript
-import { SwitchComponent } from "@mirei/mona-ui";
+import { SwitchComponent } from "@nanahoshi/mona-ui";
 ```
 
 **Direct binding:**
@@ -107,23 +107,23 @@ The `disabled` state can be managed declaratively from the form schema. The `tou
 
 ### Rounded presets
 
-| `rounded` | Shape                              |
-|-----------|------------------------------------|
-| `none`    | No rounding                        |
-| `small`   | Slight rounding                    |
-| `medium`  | Moderate rounding                  |
-| `large`   | Strong rounding                    |
-| `full`    | Fully rounded, pill shape (default)|
+| `rounded` | Shape                               |
+|-----------|-------------------------------------|
+| `none`    | No rounding                         |
+| `small`   | Slight rounding                     |
+| `medium`  | Moderate rounding                   |
+| `large`   | Strong rounding                     |
+| `full`    | Fully rounded, pill shape (default) |
 
 ### Visual states
 
-| State           | Appearance                                                    |
-|-----------------|---------------------------------------------------------------|
-| Off             | Track uses the theme's input background and border            |
-| On (checked)    | Track fills with the primary color                            |
-| Focused         | Visible focus ring using the primary color                    |
-| Disabled        | Reduced opacity, no pointer interaction                       |
-| Invalid (forms) | Border changes to the error color when touched and invalid    |
+| State           | Appearance                                                 |
+|-----------------|------------------------------------------------------------|
+| Off             | Track uses the theme's input background and border         |
+| On (checked)    | Track fills with the primary color                         |
+| Focused         | Visible focus ring using the primary color                 |
+| Disabled        | Reduced opacity, no pointer interaction                    |
+| Invalid (forms) | Border changes to the error color when touched and invalid |
 
 ### Custom classes
 
@@ -155,8 +155,8 @@ The `onLabel` and `offLabel` inputs display text *inside the track* — they do 
 
 **Keyboard interaction:**
 
-| Key     | Action                  |
-|---------|-------------------------|
+| Key     | Action                    |
+|---------|---------------------------|
 | `Space` | Toggles the switch on/off |
 | `Enter` | Toggles the switch on/off |
 
@@ -172,22 +172,22 @@ Implements `FormCheckboxControl` from `@angular/forms/signals`. Use `[(checked)]
 
 #### Inputs
 
-| Name              | Type                                                  | Default    | Description |
-|-------------------|-------------------------------------------------------|------------|-------------|
-| `aria-label`      | `string \| null`                                      | `null`     | Accessible name for the host element. Describe what the component represents. When empty, assistive technology announces the role without a label. |
-| `aria-labelledby` | `string \| null`                                      | `null`     | ID of an external element that provides the accessible name for the host element. |
-| `checked`         | `boolean`                                             | `false`    | Two-way bindable. Whether the control is checked. Implements `FormCheckboxControl`, enabling use with the signal forms `[formField]` binding. |
-| `class`           | `string`                                              | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled`        | `boolean`                                             | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `offLabel`        | `string`                                              | `''`       | Label displayed inside the switch track when it is in the off state. Overridden by `monaSwitchOffLabelTemplate` when provided. |
-| `onLabel`         | `string`                                              | `''`       | Label displayed inside the switch track when it is in the on state. Overridden by `monaSwitchOnLabelTemplate` when provided. |
-| `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'full'`   | Border-radius preset applied to the component. |
-| `size`            | `'small' \| 'medium' \| 'large'`                      | `'medium'` | Size preset controlling the component's dimensions. |
+| Name              | Type                                                 | Default    | Description                                                                                                                                        |
+|-------------------|------------------------------------------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`      | `string \| null`                                     | `null`     | Accessible name for the host element. Describe what the component represents. When empty, assistive technology announces the role without a label. |
+| `aria-labelledby` | `string \| null`                                     | `null`     | ID of an external element that provides the accessible name for the host element.                                                                  |
+| `checked`         | `boolean`                                            | `false`    | Two-way bindable. Whether the control is checked. Implements `FormCheckboxControl`, enabling use with the signal forms `[formField]` binding.      |
+| `class`           | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                          |
+| `disabled`        | `boolean`                                            | `false`    | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                |
+| `offLabel`        | `string`                                             | `''`       | Label displayed inside the switch track when it is in the off state. Overridden by `monaSwitchOffLabelTemplate` when provided.                     |
+| `onLabel`         | `string`                                             | `''`       | Label displayed inside the switch track when it is in the on state. Overridden by `monaSwitchOnLabelTemplate` when provided.                       |
+| `rounded`         | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'full'`   | Border-radius preset applied to the component.                                                                                                     |
+| `size`            | `'small' \| 'medium' \| 'large'`                     | `'medium'` | Size preset controlling the component's dimensions.                                                                                                |
 
 #### Outputs
 
-| Name    | Type   | Description |
-|---------|--------|-------------|
+| Name    | Type   | Description                                                                                                                            |
+|---------|--------|----------------------------------------------------------------------------------------------------------------------------------------|
 | `touch` | `void` | Emitted when the switch loses focus or its value changes. Consumed by the signal forms `Field` directive to mark the field as touched. |
 
 ---
@@ -196,11 +196,11 @@ Implements `FormCheckboxControl` from `@angular/forms/signals`. Use `[(checked)]
 
 These structural directives are projected inside `<mona-switch>` to customize specific parts of the switch.
 
-| Directive selector                   | Template context              | Description |
-|--------------------------------------|-------------------------------|-------------|
-| `ng-template[monaSwitchOnLabelTemplate]`      | None                          | Replaces the on-state label. Takes precedence over `onLabel`. |
-| `ng-template[monaSwitchOffLabelTemplate]`     | None                          | Replaces the off-state label. Takes precedence over `offLabel`. |
-| `ng-template[monaSwitchHandleContentTemplate]`| `$implicit: boolean` (checked state) | Replaces the content inside the sliding handle. The implicit variable reflects the current checked state. |
+| Directive selector                             | Template context                     | Description                                                                                               |
+|------------------------------------------------|--------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `ng-template[monaSwitchOnLabelTemplate]`       | None                                 | Replaces the on-state label. Takes precedence over `onLabel`.                                             |
+| `ng-template[monaSwitchOffLabelTemplate]`      | None                                 | Replaces the off-state label. Takes precedence over `offLabel`.                                           |
+| `ng-template[monaSwitchHandleContentTemplate]` | `$implicit: boolean` (checked state) | Replaces the content inside the sliding handle. The implicit variable reflects the current checked state. |
 
 **Imports:**
 
@@ -210,7 +210,7 @@ import {
     SwitchOnLabelTemplateDirective,
     SwitchOffLabelTemplateDirective,
     SwitchHandleContentTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 ---

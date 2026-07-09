@@ -1,5 +1,5 @@
 import { ComponentRef } from "@angular/core";
-import { PopupRef } from "@mirei/mona-ui/popup";
+import { PopupRef } from "@nanahoshi/mona-ui/popup";
 
 export interface DialogReferenceOptions {
     componentRef?: ComponentRef<unknown>;

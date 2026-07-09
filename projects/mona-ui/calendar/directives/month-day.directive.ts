@@ -1,6 +1,6 @@
 import { computed, Directive, inject, input, output } from "@angular/core";
-import { DateDisabledType } from "@mirei/mona-ui/date-input";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { DateDisabledType } from "@nanahoshi/mona-ui/date-input";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { any, exactly, KeyValuePair } from "@mirei/ts-collections";
 import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 import { compareDates } from "../utils/compareDates";

@@ -1,6 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
 import { Component, inject, input, signal } from "@angular/core";
-import { PlaceholderComponent } from "@mirei/mona-ui/placeholder";
+import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

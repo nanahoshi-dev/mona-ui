@@ -21,21 +21,21 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { PreventableEvent } from "@mirei/mona-ui/common";
-import { HourFormat } from "@mirei/mona-ui/date-input";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { HourFormat } from "@nanahoshi/mona-ui/date-input";
 import {
     DropdownPopupHandlerDirective,
     DropdownPopupInputToken,
     dropdownPopupThemeVariants,
     DropdownService
-} from "@mirei/mona-ui/dropdowns";
-import { type AttributeConfig, createElementControlId } from "@mirei/mona-ui/internal";
-import { ListSizeInputType } from "@mirei/mona-ui/internal/list";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@mirei/mona-ui/text-box";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { TimeSelectorComponent } from "@mirei/mona-ui/time-selector";
+} from "@nanahoshi/mona-ui/dropdowns";
+import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
+import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";

@@ -13,8 +13,7 @@ export type DeepPartial<T> = T extends BuiltIn
 export type Path<T> = T extends object
     ? {
           [K in keyof T]-?:
-              | [K]
-              | (Path<T[K]> extends infer P ? (P extends ReadonlyArray<PropertyKey> ? [K, ...P] : never) : never);
+              [K] | (Path<T[K]> extends infer P ? (P extends ReadonlyArray<PropertyKey> ? [K, ...P] : never) : never);
       }[keyof T]
     : never;
 

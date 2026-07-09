@@ -14,7 +14,7 @@ import { TabsComponent } from "./tabs.component";
     `,
     imports: [TabsComponent, TabComponent]
 })
-class TestHostComponent { }
+class TestHostComponent {}
 
 @Component({
     template: `

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/dropdown-list
+ * Public API Surface of @nanahoshi/mona-ui/dropdown-list
  */
 
 export * from "./components/dropdown-list/dropdown-list.component";

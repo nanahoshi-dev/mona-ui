@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, contentChildren, inject, input, TemplateRef } from "@angular/core";
 import { LucideChevronRight } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
 import {

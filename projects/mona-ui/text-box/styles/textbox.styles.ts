@@ -1,6 +1,6 @@
 import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@mirei/mona-ui/internal";
-import { ThemeStyle } from "@mirei/mona-ui/theme";
+import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { textBoxVariants as monaTextBoxVariants } from "./textbox.mona.styles";
 import { inputVariants as monaInputVariants } from "./textbox.mona.styles";
 

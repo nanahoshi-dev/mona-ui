@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/circular-progress-bar
+ * Public API Surface of @nanahoshi/mona-ui/circular-progress-bar
  */
 
 export * from "./components/circular-progress-bar/circular-progress-bar.component";

@@ -16,7 +16,7 @@ The selected range is always returned as a sorted `[min, max]` tuple — even if
 ## Import & Quick Start
 
 ```typescript
-import { RangeSliderComponent } from "@mirei/mona-ui";
+import { RangeSliderComponent } from "@nanahoshi/mona-ui";
 ```
 
 **Direct value binding:**
@@ -48,7 +48,7 @@ protected readonly filterForm = form({ price: [0, 100] as [number, number] });
 `monaSliderHandleTemplate` applies to **both** handles. The implicit variable is the current value of the respective handle:
 
 ```typescript
-import { RangeSliderComponent, SliderHandleTemplateDirective } from "@mirei/mona-ui";
+import { RangeSliderComponent, SliderHandleTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -118,33 +118,33 @@ The primary (lower) handle defaults to `"Minimum value"` and the secondary (uppe
 
 Each handle is independently focusable. Tab to switch between handles; the same key bindings apply to whichever handle has focus.
 
-| Key | Action |
-|-----|--------|
-| `ArrowRight` / `ArrowUp` | Increase focused handle value by `step` |
-| `ArrowLeft` / `ArrowDown` | Decrease focused handle value by `step` |
-| `Shift` + `ArrowRight`/`ArrowUp` | Increase by `step × shiftMultiplier` |
-| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease by `step × shiftMultiplier` |
-| `Home` | Jump focused handle to `minValue` |
-| `End` | Jump focused handle to `maxValue` |
-| `PageUp` | Increase by 10% of the total range |
-| `PageDown` | Decrease by 10% of the total range |
+| Key                               | Action                                  |
+|-----------------------------------|-----------------------------------------|
+| `ArrowRight` / `ArrowUp`          | Increase focused handle value by `step` |
+| `ArrowLeft` / `ArrowDown`         | Decrease focused handle value by `step` |
+| `Shift` + `ArrowRight`/`ArrowUp`  | Increase by `step × shiftMultiplier`    |
+| `Shift` + `ArrowLeft`/`ArrowDown` | Decrease by `step × shiftMultiplier`    |
+| `Home`                            | Jump focused handle to `minValue`       |
+| `End`                             | Jump focused handle to `maxValue`       |
+| `PageUp`                          | Increase by 10% of the total range      |
+| `PageDown`                        | Decrease by 10% of the total range      |
 
 ## Accessibility Notes
 
 `RangeSliderComponent` renders two focusable `div` elements each with `role="slider"`. Both handles share the same `aria-valuemin` and `aria-valuemax`. Each handle manages its own `aria-valuenow`.
 
-| Attribute | When present | Value |
-|-----------|-------------|-------|
-| `role` | Always (each handle) | `"slider"` |
-| `aria-valuemin` | Always | `minValue` |
-| `aria-valuemax` | Always | `maxValue` |
-| `aria-valuenow` | Always | Current value of that handle |
-| `aria-valuetext` | When `ariaValueText` is provided | Return value of the provided function for that handle's value |
-| `aria-orientation` | Always | `"horizontal"` or `"vertical"` |
-| `aria-disabled` | When disabled | `true` |
-| `aria-required` | When `required` is `true` | `true` |
-| `aria-invalid` | When `invalid` is `true` | `true` |
-| `tabindex` | Always | `0` (enabled) or `-1` (disabled) |
+| Attribute          | When present                     | Value                                                         |
+|--------------------|----------------------------------|---------------------------------------------------------------|
+| `role`             | Always (each handle)             | `"slider"`                                                    |
+| `aria-valuemin`    | Always                           | `minValue`                                                    |
+| `aria-valuemax`    | Always                           | `maxValue`                                                    |
+| `aria-valuenow`    | Always                           | Current value of that handle                                  |
+| `aria-valuetext`   | When `ariaValueText` is provided | Return value of the provided function for that handle's value |
+| `aria-orientation` | Always                           | `"horizontal"` or `"vertical"`                                |
+| `aria-disabled`    | When disabled                    | `true`                                                        |
+| `aria-required`    | When `required` is `true`        | `true`                                                        |
+| `aria-invalid`     | When `invalid` is `true`         | `true`                                                        |
+| `tabindex`         | Always                           | `0` (enabled) or `-1` (disabled)                              |
 
 **Consumer responsibilities:**
 
@@ -180,39 +180,39 @@ Implements `FormValueControl<[number, number]>` from `@angular/forms/signals`.
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `aria-label` | `string \| null` | `null` | Accessible name applied to both handles simultaneously. When provided, takes precedence over `aria-label-start`/`aria-label-end`. Prefer `aria-labelledby` to associate a visible group label. |
-| `aria-label-end` | `string \| null` | `'Maximum value'` | Accessible name for the upper-value (secondary) handle. |
-| `aria-label-start` | `string \| null` | `'Minimum value'` | Accessible name for the lower-value (primary) handle. |
-| `aria-labelledby` | `string \| null` | `null` | ID of an external element that provides the accessible name for both handles. |
-| `ariaValueText` | `((value: number) => string) \| null` | `null` | Human-readable override for the `aria-valuenow` announcement. The function is called independently for each handle's value. |
-| `disabled` | `boolean` | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `handleClasses` | `string \| string[]` | `[]` | Additional CSS classes to apply to both slider handles. |
-| `handleStyles` | `Partial<CSSStyleDeclaration>` | `{}` | Additional inline styles to apply to both slider handles. |
-| `invalid` | `boolean` | `false` | Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on both handle elements. |
-| `labelPosition` | `'before' \| 'after'` | `'after'` | Position of the tick label list relative to the track. |
-| `labelStep` | `number` | `1` | Controls which tick labels are shown — only every n-th label is rendered. |
-| `largeTickStep` | `number \| null` | `null` | Controls which ticks render at large size — only every n-th tick is enlarged. Pass `null` to disable large ticks. |
-| `maxValue` | `number` | `10` | Upper bound of the selectable range. Must be greater than `minValue`. |
-| `minValue` | `number` | `0` | Lower bound of the selectable range. |
-| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Layout orientation of the component. |
-| `required` | `boolean` | `false` | Marks the slider as required in a form context, reflecting `aria-required` on both handle elements. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'full'` | Border-radius preset applied to both slider handles. |
-| `selectionBackground` | `string \| Partial<CSSStyleDeclaration> \| null` | `null` | Background color of the filled selection area between the two handles. Accepts a CSS color string or a `CSSStyleDeclaration` partial. |
-| `shiftMultiplier` | `number` | `10` | Multiplier applied to the step when the user holds Shift while pressing an arrow key. |
-| `showLabels` | `boolean` | `false` | Displays value labels alongside tick marks. Only takes effect when `showTicks` is `true`. |
-| `showTicks` | `boolean` | `false` | Displays tick marks at each step position along the track. |
-| `smallTickStep` | `number` | `1` | Controls how many ticks are visible — only every n-th tick is rendered. |
-| `step` | `number` | `1` | Increment applied when a handle value changes via keyboard navigation. |
-| `trackBackground` | `string \| Partial<CSSStyleDeclaration> \| null` | `null` | Background color of the unfilled track portions. Accepts a CSS color string or a `CSSStyleDeclaration` partial. |
-| `trackSize` | `string \| number` | `undefined` | Width (vertical orientation) or height (horizontal orientation) of the track. Accepts a pixel number or any CSS length string. |
-| `value` | `[number, number]` | `[0, 10]` | Two-way bindable. Selected range as `[minimum, maximum]`. Values outside `[minValue, maxValue]` are clamped; the tuple is always sorted so index 0 ≤ index 1. Implements `FormValueControl<[number, number]>`, enabling use with the signal forms `[formField]` binding. |
+| Name                  | Type                                                 | Default           | Description                                                                                                                                                                                                                                                              |
+|-----------------------|------------------------------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`          | `string \| null`                                     | `null`            | Accessible name applied to both handles simultaneously. When provided, takes precedence over `aria-label-start`/`aria-label-end`. Prefer `aria-labelledby` to associate a visible group label.                                                                           |
+| `aria-label-end`      | `string \| null`                                     | `'Maximum value'` | Accessible name for the upper-value (secondary) handle.                                                                                                                                                                                                                  |
+| `aria-label-start`    | `string \| null`                                     | `'Minimum value'` | Accessible name for the lower-value (primary) handle.                                                                                                                                                                                                                    |
+| `aria-labelledby`     | `string \| null`                                     | `null`            | ID of an external element that provides the accessible name for both handles.                                                                                                                                                                                            |
+| `ariaValueText`       | `((value: number) => string) \| null`                | `null`            | Human-readable override for the `aria-valuenow` announcement. The function is called independently for each handle's value.                                                                                                                                              |
+| `disabled`            | `boolean`                                            | `false`           | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                                                                                                                      |
+| `handleClasses`       | `string \| string[]`                                 | `[]`              | Additional CSS classes to apply to both slider handles.                                                                                                                                                                                                                  |
+| `handleStyles`        | `Partial<CSSStyleDeclaration>`                       | `{}`              | Additional inline styles to apply to both slider handles.                                                                                                                                                                                                                |
+| `invalid`             | `boolean`                                            | `false`           | Marks the control as invalid for form validation purposes, reflecting `aria-invalid` on both handle elements.                                                                                                                                                            |
+| `labelPosition`       | `'before' \| 'after'`                                | `'after'`         | Position of the tick label list relative to the track.                                                                                                                                                                                                                   |
+| `labelStep`           | `number`                                             | `1`               | Controls which tick labels are shown — only every n-th label is rendered.                                                                                                                                                                                                |
+| `largeTickStep`       | `number \| null`                                     | `null`            | Controls which ticks render at large size — only every n-th tick is enlarged. Pass `null` to disable large ticks.                                                                                                                                                        |
+| `maxValue`            | `number`                                             | `10`              | Upper bound of the selectable range. Must be greater than `minValue`.                                                                                                                                                                                                    |
+| `minValue`            | `number`                                             | `0`               | Lower bound of the selectable range.                                                                                                                                                                                                                                     |
+| `orientation`         | `'horizontal' \| 'vertical'`                         | `'horizontal'`    | Layout orientation of the component.                                                                                                                                                                                                                                     |
+| `required`            | `boolean`                                            | `false`           | Marks the slider as required in a form context, reflecting `aria-required` on both handle elements.                                                                                                                                                                      |
+| `rounded`             | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'full'`          | Border-radius preset applied to both slider handles.                                                                                                                                                                                                                     |
+| `selectionBackground` | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`            | Background color of the filled selection area between the two handles. Accepts a CSS color string or a `CSSStyleDeclaration` partial.                                                                                                                                    |
+| `shiftMultiplier`     | `number`                                             | `10`              | Multiplier applied to the step when the user holds Shift while pressing an arrow key.                                                                                                                                                                                    |
+| `showLabels`          | `boolean`                                            | `false`           | Displays value labels alongside tick marks. Only takes effect when `showTicks` is `true`.                                                                                                                                                                                |
+| `showTicks`           | `boolean`                                            | `false`           | Displays tick marks at each step position along the track.                                                                                                                                                                                                               |
+| `smallTickStep`       | `number`                                             | `1`               | Controls how many ticks are visible — only every n-th tick is rendered.                                                                                                                                                                                                  |
+| `step`                | `number`                                             | `1`               | Increment applied when a handle value changes via keyboard navigation.                                                                                                                                                                                                   |
+| `trackBackground`     | `string \| Partial<CSSStyleDeclaration> \| null`     | `null`            | Background color of the unfilled track portions. Accepts a CSS color string or a `CSSStyleDeclaration` partial.                                                                                                                                                          |
+| `trackSize`           | `string \| number`                                   | `undefined`       | Width (vertical orientation) or height (horizontal orientation) of the track. Accepts a pixel number or any CSS length string.                                                                                                                                           |
+| `value`               | `[number, number]`                                   | `[0, 10]`         | Two-way bindable. Selected range as `[minimum, maximum]`. Values outside `[minValue, maxValue]` are clamped; the tuple is always sorted so index 0 ≤ index 1. Implements `FormValueControl<[number, number]>`, enabling use with the signal forms `[formField]` binding. |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name    | Type   | Description                                                                                                                                                       |
+|---------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `touch` | `void` | Emitted when either handle loses focus or its value changes via keyboard navigation. Consumed by the signal forms `Field` directive to mark the field as touched. |
 
 ---
@@ -221,10 +221,10 @@ Implements `FormValueControl<[number, number]>` from `@angular/forms/signals`.
 
 These structural directives are projected inside `<mona-range-slider>` and are shared with `SliderComponent`.
 
-| Directive selector | Template context | Description |
-|-------------------|-----------------|-------------|
-| `ng-template[monaSliderHandleTemplate]` | `$implicit: number` (handle value) | Replaces the default handle element. Applied to both handles; the implicit variable is each handle's own current value. |
-| `ng-template[monaSliderTickValueTemplate]` | `$implicit: number` (tick value) | Replaces the default numeric tick label. Has no effect unless both `showTicks` and `showLabels` are `true`. |
+| Directive selector                         | Template context                   | Description                                                                                                             |
+|--------------------------------------------|------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `ng-template[monaSliderHandleTemplate]`    | `$implicit: number` (handle value) | Replaces the default handle element. Applied to both handles; the implicit variable is each handle's own current value. |
+| `ng-template[monaSliderTickValueTemplate]` | `$implicit: number` (tick value)   | Replaces the default numeric tick label. Has no effect unless both `showTicks` and `showLabels` are `true`.             |
 
 **Imports:**
 
@@ -233,7 +233,7 @@ import {
     RangeSliderComponent,
     SliderHandleTemplateDirective,
     SliderTickValueTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 ---

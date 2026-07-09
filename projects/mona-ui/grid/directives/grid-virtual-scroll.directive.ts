@@ -1,6 +1,6 @@
 import { DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { VirtualScrollOptions } from "@mirei/mona-ui/common";
+import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { GridService } from "../services/grid.service";
 
 @Directive({

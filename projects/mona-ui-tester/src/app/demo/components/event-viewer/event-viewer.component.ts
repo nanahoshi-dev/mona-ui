@@ -1,6 +1,6 @@
 import { afterNextRender, Component, input, OutputEmitterRef, signal } from "@angular/core";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import { ImmutableList } from "@mirei/ts-collections";
 
 interface OutputEventItem {

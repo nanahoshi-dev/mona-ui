@@ -7,7 +7,7 @@ import {
     input,
     TemplateRef
 } from "@angular/core";
-import { MenuItem, PopupMenuComponent, PopupMenuToken, preparePopupMenuItems } from "@mirei/mona-ui/popup-menu";
+import { MenuItem, PopupMenuComponent, PopupMenuToken, preparePopupMenuItems } from "@nanahoshi/mona-ui/popup-menu";
 import { any } from "@mirei/ts-collections";
 import { v4 } from "uuid";
 import { MenuIconTemplateDirective } from "../../directives/menu-icon-template.directive";

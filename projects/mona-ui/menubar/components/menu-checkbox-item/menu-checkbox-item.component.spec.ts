@@ -1,23 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { MenuCheckboxItemComponent } from './menu-checkbox-item.component';
+import { MenuCheckboxItemComponent } from "./menu-checkbox-item.component";
 
-describe('MenuCheckboxItemComponent', () => {
+describe("MenuCheckboxItemComponent", () => {
     let component: MenuCheckboxItemComponent;
     let fixture: ComponentFixture<MenuCheckboxItemComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [MenuCheckboxItemComponent]
-        })
-            .compileComponents();
+        }).compileComponents();
 
         fixture = TestBed.createComponent(MenuCheckboxItemComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it("should create", () => {
         expect(component).toBeTruthy();
     });
 });

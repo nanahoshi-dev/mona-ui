@@ -1,7 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, model, signal } from "@angular/core";
-import { AvatarComponent } from "@mirei/mona-ui/avatar";
-import { ChipComponent, ChipPrefixTemplateDirective } from "@mirei/mona-ui/chip";
+import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
+import { ChipComponent, ChipPrefixTemplateDirective } from "@nanahoshi/mona-ui/chip";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";

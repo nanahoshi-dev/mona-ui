@@ -6,7 +6,7 @@ import {
     NodeSelectEvent,
     SelectableOptions,
     TreeService
-} from "@mirei/mona-ui/internal/tree";
+} from "@nanahoshi/mona-ui/internal/tree";
 import { sequenceEqual } from "@mirei/ts-collections";
 import { pairwise } from "rxjs";
 

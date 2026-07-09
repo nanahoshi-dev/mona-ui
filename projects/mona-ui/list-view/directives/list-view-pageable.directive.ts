@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { ListService, PagerSettings } from "@mirei/mona-ui/internal/list";
+import { ListService, PagerSettings } from "@nanahoshi/mona-ui/internal/list";
 
 @Directive({
     selector: "mona-list-view[monaListViewPageable]"

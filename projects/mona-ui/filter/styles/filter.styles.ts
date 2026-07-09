@@ -1,6 +1,6 @@
 import type { VariantProps } from "class-variance-authority";
-import type { ThemeStyle } from "@mirei/mona-ui/theme";
-import type { VariantInputs } from "@mirei/mona-ui/internal";
+import type { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import {
     filterMenuBaseVariants as monaFilterMenuBaseVariants,
     filterMenuActionVariants as monaFilterMenuActionVariants,

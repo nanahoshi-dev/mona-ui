@@ -1,7 +1,7 @@
 import { Component, computed, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ButtonDirective } from "../../../button/directives/button.directive";
-import { SelectionMode } from "@mirei/mona-ui/common";
+import { SelectionMode } from "@nanahoshi/mona-ui/common";
 import { ListBoxActionEvent } from "../../models/ListBoxActionClickEvent";
 import { ListBoxMoveEvent } from "../../models/ListBoxMoveEvent";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";

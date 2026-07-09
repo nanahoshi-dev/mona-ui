@@ -1,8 +1,8 @@
 import { Component, output } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
-import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { EditorImageFormOptions } from "../../models/EditorImageFormOptions";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
 

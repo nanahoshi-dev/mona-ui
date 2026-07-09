@@ -1,7 +1,7 @@
 import { isPlatformBrowser } from "@angular/common";
 import { DOCUMENT } from "@angular/common";
 import { inject, Injectable, PLATFORM_ID } from "@angular/core";
-import type { DataType } from "@mirei/mona-ui/common";
+import type { DataType } from "@nanahoshi/mona-ui/common";
 import { GridService } from "./grid.service";
 
 @Injectable()

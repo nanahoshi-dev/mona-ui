@@ -20,10 +20,10 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
-import { PreventableEvent } from "@mirei/mona-ui/common";
-import { createElementControlId, rxTimeout } from "@mirei/mona-ui/internal";
-import { FilterChangeEvent } from "@mirei/mona-ui/common";
-import { IndicatorIconComponent } from "@mirei/mona-ui/internal/indicator-icon";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
+import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
     ListFooterTemplateDirective,
@@ -35,7 +35,7 @@ import {
     ListSizeInputType,
     SelectableOptions,
     SelectionChangeEvent
-} from "@mirei/mona-ui/internal/list";
+} from "@nanahoshi/mona-ui/internal/list";
 import {
     DropdownDataHandlerDirective,
     DropdownDataInput,
@@ -56,10 +56,10 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownService,
     DropdownSuffixTemplateDirective
-} from "@mirei/mona-ui/dropdowns";
-import { PopupCloseEvent } from "@mirei/mona-ui/popup";
-import { TextBoxDirective } from "@mirei/mona-ui/text-box";
-import { ThemeService } from "@mirei/mona-ui/theme";
+} from "@nanahoshi/mona-ui/dropdowns";
+import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
+import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 

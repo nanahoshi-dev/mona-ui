@@ -1,6 +1,6 @@
 import { afterNextRender, DOCUMENT, forwardRef, inject, Injectable, Injector } from "@angular/core";
-import { PopupService } from "@mirei/mona-ui/popup";
-import { setWindowStyles } from "@mirei/mona-ui/internal";
+import { PopupService } from "@nanahoshi/mona-ui/popup";
+import { setWindowStyles } from "@nanahoshi/mona-ui/internal";
 import { DialogContentComponent } from "../components/dialog-content/dialog-content.component";
 import { DialogRef } from "../models/DialogRef";
 import { DialogReference } from "../models/DialogReference";

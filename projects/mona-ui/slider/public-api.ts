@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/slider
+ * Public API Surface of @nanahoshi/mona-ui/slider
  */
 
 export * from "./components/slider/slider.component";

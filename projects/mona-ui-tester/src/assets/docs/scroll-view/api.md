@@ -7,7 +7,7 @@ Use `ScrollViewComponent` when you need to display a sequence of items — image
 ## Import & Basic Usage
 
 ```typescript
-import { ScrollViewComponent } from "@mirei/mona-ui";
+import { ScrollViewComponent } from "@nanahoshi/mona-ui";
 ```
 
 A slide template projected inside `<mona-scroll-view>` is required. Without it, no content is rendered inside each slide.
@@ -24,11 +24,11 @@ A slide template projected inside `<mona-scroll-view>` is required. Without it, 
 
 Each slide renders the projected template with the following context variables:
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `$implicit` (e.g., `let-item`) | `unknown` | The current data item from the `data` collection. |
-| `width` | `number` | Width of the content area in pixels at render time. |
-| `height` | `number` | Height of the content area in pixels at render time. |
+| Variable                       | Type      | Description                                          |
+|--------------------------------|-----------|------------------------------------------------------|
+| `$implicit` (e.g., `let-item`) | `unknown` | The current data item from the `data` collection.    |
+| `width`                        | `number`  | Width of the content area in pixels at render time.  |
+| `height`                       | `number`  | Height of the content area in pixels at render time. |
 
 ```html
 <mona-scroll-view [data]="panels" width="100%" height="400px">
@@ -129,20 +129,20 @@ Users who enable `prefers-reduced-motion` in their OS settings will see animatio
 
 **Host element**
 
-| Attribute | Value |
-|-----------|-------|
-| `role` | `"region"` |
-| `aria-roledescription` | `"carousel"` |
-| `aria-label` | `"Page N of M"` — updated on every navigation |
-| `tabindex` | `0` |
+| Attribute              | Value                                         |
+|------------------------|-----------------------------------------------|
+| `role`                 | `"region"`                                    |
+| `aria-roledescription` | `"carousel"`                                  |
+| `aria-label`           | `"Page N of M"` — updated on every navigation |
+| `tabindex`             | `0`                                           |
 
 **Each slide**
 
-| Attribute | Value |
-|-----------|-------|
-| `role` | `"group"` |
-| `aria-roledescription` | `"slide"` |
-| `aria-label` | `"N of M"` |
+| Attribute              | Value      |
+|------------------------|------------|
+| `role`                 | `"group"`  |
+| `aria-roledescription` | `"slide"`  |
+| `aria-label`           | `"N of M"` |
 
 **Navigation arrow buttons**
 
@@ -154,10 +154,10 @@ Each pager dot carries `aria-label="Page N"` and `aria-current="true"` when it i
 
 ### Keyboard interaction
 
-| Key | Action |
-|-----|--------|
-| `ArrowLeft` | Navigate to the previous page |
-| `ArrowRight` | Navigate to the next page |
+| Key          | Action                        |
+|--------------|-------------------------------|
+| `ArrowLeft`  | Navigate to the previous page |
+| `ArrowRight` | Navigate to the next page     |
 
 The host element must be focused before keyboard navigation is active. It receives focus via `tabindex="0"` and is part of the natural tab order.
 
@@ -174,21 +174,21 @@ The host element must be focused before keyboard navigation is active. It receiv
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `animate` | `boolean \| number` | `true` | Controls slide transition animation. `true` uses the default 500 ms duration. `false` disables animation. A number sets a custom duration in milliseconds. |
-| `arrows` | `boolean` | `false` | Shows previous/next navigation arrows on the left and right edges. In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `data` | `Iterable<unknown>` | `[]` | The collection of items to display. Each item is passed as the implicit variable to the slide template. |
-| `height` | `string \| number` | — | **Required.** Height of the scroll view. Accepts a CSS string (e.g., `"360px"`) or a unitless number. |
-| `index` | `number` | `0` | Two-way bindable. Zero-based index of the currently active page. |
-| `infinite` | `boolean` | `false` | When `true`, navigating past the last item wraps to the first, and vice versa. |
-| `pageable` | `boolean` | `false` | Shows a row of dot buttons representing each page at the bottom of the component. |
-| `pagerBlur` | `number` | `3` | Backdrop blur in pixels applied to the pager overlay strip. Has no visual effect when `pagerOverlay` is `"none"`. |
-| `pagerOverlay` | `'dark' \| 'light' \| 'none'` | `"dark"` | Background style of the pager strip. `"dark"` and `"light"` apply a semi-transparent overlay with backdrop blur. `"none"` renders the pager without a background. |
-| `pagerRounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `"medium"` | Border-radius preset applied to each pager dot. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large'` | `"medium"` | Border-radius preset applied to the scroll view container. |
-| `width` | `string \| number` | — | **Required.** Width of the scroll view. Accepts a CSS string (e.g., `"640px"`) or a unitless number. |
+| Name           | Type                                                 | Default    | Description                                                                                                                                                                   |
+|----------------|------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `animate`      | `boolean \| number`                                  | `true`     | Controls slide transition animation. `true` uses the default 500 ms duration. `false` disables animation. A number sets a custom duration in milliseconds.                    |
+| `arrows`       | `boolean`                                            | `false`    | Shows previous/next navigation arrows on the left and right edges. In finite mode, the left arrow is hidden on the first page and the right arrow is hidden on the last page. |
+| `class`        | `string`                                             | `""`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                     |
+| `data`         | `Iterable<unknown>`                                  | `[]`       | The collection of items to display. Each item is passed as the implicit variable to the slide template.                                                                       |
+| `height`       | `string \| number`                                   | —          | **Required.** Height of the scroll view. Accepts a CSS string (e.g., `"360px"`) or a unitless number.                                                                         |
+| `index`        | `number`                                             | `0`        | Two-way bindable. Zero-based index of the currently active page.                                                                                                              |
+| `infinite`     | `boolean`                                            | `false`    | When `true`, navigating past the last item wraps to the first, and vice versa.                                                                                                |
+| `pageable`     | `boolean`                                            | `false`    | Shows a row of dot buttons representing each page at the bottom of the component.                                                                                             |
+| `pagerBlur`    | `number`                                             | `3`        | Backdrop blur in pixels applied to the pager overlay strip. Has no visual effect when `pagerOverlay` is `"none"`.                                                             |
+| `pagerOverlay` | `'dark' \| 'light' \| 'none'`                        | `"dark"`   | Background style of the pager strip. `"dark"` and `"light"` apply a semi-transparent overlay with backdrop blur. `"none"` renders the pager without a background.             |
+| `pagerRounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `"medium"` | Border-radius preset applied to each pager dot.                                                                                                                               |
+| `rounded`      | `'none' \| 'small' \| 'medium' \| 'large'`           | `"medium"` | Border-radius preset applied to the scroll view container.                                                                                                                    |
+| `width`        | `string \| number`                                   | —          | **Required.** Width of the scroll view. Accepts a CSS string (e.g., `"640px"`) or a unitless number.                                                                          |
 
 `ScrollViewComponent` has no outputs.
 
@@ -198,22 +198,22 @@ The host element must be focused before keyboard navigation is active. It receiv
 
 Project a single `ng-template` inside `<mona-scroll-view>` to control how each slide is rendered.
 
-| Template variable | Type | Description |
-|-------------------|------|-------------|
-| `$implicit` | `unknown` | The current data item. |
-| `width` | `number` | Content area width in pixels. |
-| `height` | `number` | Content area height in pixels. |
+| Template variable | Type      | Description                    |
+|-------------------|-----------|--------------------------------|
+| `$implicit`       | `unknown` | The current data item.         |
+| `width`           | `number`  | Content area width in pixels.  |
+| `height`          | `number`  | Content area height in pixels. |
 
 ---
 
 ### Exported types
 
-| Type | Description |
-|------|-------------|
+| Type           | Description                                                                |
+|----------------|----------------------------------------------------------------------------|
 | `PagerOverlay` | `'dark' \| 'light' \| 'none'` — valid values for the `pagerOverlay` input. |
 
 ```typescript
-import type { PagerOverlay } from "@mirei/mona-ui";
+import type { PagerOverlay } from "@nanahoshi/mona-ui";
 ```
 
 ---

@@ -152,8 +152,12 @@ describe("NumericTextBoxComponent", () => {
             expect(getInput(fixture).getAttribute("aria-valuenow")).toBe("13");
 
             const buttons = fixture.debugElement.queryAll(By.css("button"));
-            (buttons[1].nativeElement as HTMLButtonElement).dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
-            (buttons[1].nativeElement as HTMLButtonElement).dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+            (buttons[1].nativeElement as HTMLButtonElement).dispatchEvent(
+                new PointerEvent("pointerdown", { bubbles: true })
+            );
+            (buttons[1].nativeElement as HTMLButtonElement).dispatchEvent(
+                new PointerEvent("pointerup", { bubbles: true })
+            );
             await waitForStable(fixture);
 
             expect(component.value()).toBe(12);

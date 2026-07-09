@@ -27,15 +27,19 @@ import {
     untracked,
     viewChild
 } from "@angular/core";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { ChipComponent } from "@mirei/mona-ui/chip";
-import { FilterService } from "@mirei/mona-ui/filter";
-import { type PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@mirei/mona-ui/pager";
-import { PlaceholderComponent } from "@mirei/mona-ui/placeholder";
-import { PopupComponent } from "@mirei/mona-ui/popup";
-import { PopupMenuComponent, PopupMenuItemComponent, PopupMenuTextTemplateDirective } from "@mirei/mona-ui/popup-menu";
-import { SortDirection } from "@mirei/mona-ui/query";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ChipComponent } from "@nanahoshi/mona-ui/chip";
+import { FilterService } from "@nanahoshi/mona-ui/filter";
+import { type PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@nanahoshi/mona-ui/pager";
+import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
+import { PopupComponent } from "@nanahoshi/mona-ui/popup";
+import {
+    PopupMenuComponent,
+    PopupMenuItemComponent,
+    PopupMenuTextTemplateDirective
+} from "@nanahoshi/mona-ui/popup-menu";
+import { SortDirection } from "@nanahoshi/mona-ui/query";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";

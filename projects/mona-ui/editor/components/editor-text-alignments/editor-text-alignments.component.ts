@@ -1,6 +1,6 @@
 import { Component, computed, inject } from "@angular/core";
-import { ButtonGroupComponent } from "@mirei/mona-ui/button-group";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { EditorService } from "../../services/editor.service";
 
 @Component({

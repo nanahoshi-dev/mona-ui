@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/text-area
+ * Public API Surface of @nanahoshi/mona-ui/text-area
  */
 
 export * from "./directives/text-area.directive";

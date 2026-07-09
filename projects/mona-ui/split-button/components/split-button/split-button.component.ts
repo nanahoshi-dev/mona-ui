@@ -16,7 +16,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideChevronDown } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
@@ -25,9 +25,9 @@ import {
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective,
     PopupMenuToken
-} from "@mirei/mona-ui/popup-menu";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { createElementControlId } from "@mirei/mona-ui/internal";
+} from "@nanahoshi/mona-ui/popup-menu";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SplitButtonMenuButtonTemplateDirective } from "../../directives/split-button-menu-button-template.directive";

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/color-gradient
+ * Public API Surface of @nanahoshi/mona-ui/color-gradient
  */
 
 export * from "./components/color-gradient/color-gradient.component";

@@ -18,11 +18,11 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FilterChangeEvent } from "@mirei/mona-ui/common";
-import { isTypeaheadKey, setupTypeahead } from "@mirei/mona-ui/internal";
-import { FilterInputComponent } from "@mirei/mona-ui/internal/filter-input";
-import { PlaceholderComponent } from "@mirei/mona-ui/placeholder";
-import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
+import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
+import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListFooterTemplateDirective } from "../../directives/list-footer-template.directive";

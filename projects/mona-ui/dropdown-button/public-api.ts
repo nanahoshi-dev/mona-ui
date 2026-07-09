@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/dropdown-button
+ * Public API Surface of @nanahoshi/mona-ui/dropdown-button
  */
 
 export { DropdownButtonComponent } from "./components/dropdown-button/dropdown-button.component";

@@ -15,7 +15,7 @@ The circular progress bar communicates a quantified progress value within an exp
 ## Import & Basic Usage
 
 ```typescript
-import { CircularProgressBarComponent } from "@mirei/mona-ui";
+import { CircularProgressBarComponent } from "@nanahoshi/mona-ui";
 ```
 
 Add `CircularProgressBarComponent` to your standalone component's `imports` array.
@@ -72,11 +72,11 @@ protected getColor = (percent: number): string =>
 
 The `size` input controls the outer dimension of the SVG in pixels. Both width and height are set to the same value.
 
-| `size` value | Rendered size |
-|--------------|---------------|
-| `60`         | 60 × 60 px    |
+| `size` value | Rendered size          |
+|--------------|------------------------|
+| `60`         | 60 × 60 px             |
 | `100`        | 100 × 100 px (default) |
-| `160`        | 160 × 160 px  |
+| `160`        | 160 × 160 px           |
 
 ### Stroke thickness
 
@@ -88,11 +88,11 @@ When `color` is empty the arc color falls back to `var(--color-primary)`. The tr
 
 ### Visual states
 
-| State           | Appearance                                                   |
-|-----------------|--------------------------------------------------------------|
-| Default         | Arc rendered at `value` percentage of the circumference      |
-| Indeterminate   | Arc rendered as a fixed partial stroke, rotating continuously |
-| Disabled        | Reduced opacity, non-interactive                             |
+| State         | Appearance                                                    |
+|---------------|---------------------------------------------------------------|
+| Default       | Arc rendered at `value` percentage of the circumference       |
+| Indeterminate | Arc rendered as a fixed partial stroke, rotating continuously |
+| Disabled      | Reduced opacity, non-interactive                              |
 
 ### Track animation
 
@@ -124,30 +124,30 @@ By default the component renders the computed percentage number inside the circl
 
 The template context exposes four variables:
 
-| Variable   | Type     | Description                                  |
-|------------|----------|----------------------------------------------|
-| `$implicit` | `number` | The raw `value` input — use `let-value`       |
-| `min`      | `number` | The raw `min` input                           |
-| `max`      | `number` | The raw `max` input                           |
-| `percent`  | `number` | Computed percentage (0–100, rounded to 2 dp)  |
+| Variable    | Type     | Description                                  |
+|-------------|----------|----------------------------------------------|
+| `$implicit` | `number` | The raw `value` input — use `let-value`      |
+| `min`       | `number` | The raw `min` input                          |
+| `max`       | `number` | The raw `max` input                          |
+| `percent`   | `number` | Computed percentage (0–100, rounded to 2 dp) |
 
 The label is hidden in indeterminate mode. Importing the context type:
 
 ```typescript
-import type { LabelTemplateContext } from "@mirei/mona-ui";
+import type { LabelTemplateContext } from "@nanahoshi/mona-ui";
 ```
 
 ## Accessibility Notes
 
 The host element carries `role="progressbar"`. The component manages the following ARIA attributes automatically:
 
-| Attribute        | When present       | Value                        |
-|------------------|--------------------|------------------------------|
-| `aria-valuemin`  | Determinate mode   | Bound to `min`               |
-| `aria-valuemax`  | Determinate mode   | Bound to `max`               |
-| `aria-valuenow`  | Determinate mode   | Bound to `value`             |
-| `aria-busy`      | Indeterminate mode | `true`                       |
-| `aria-disabled`  | `disabled` is true | `true`                       |
+| Attribute       | When present       | Value            |
+|-----------------|--------------------|------------------|
+| `aria-valuemin` | Determinate mode   | Bound to `min`   |
+| `aria-valuemax` | Determinate mode   | Bound to `max`   |
+| `aria-valuenow` | Determinate mode   | Bound to `value` |
+| `aria-busy`     | Indeterminate mode | `true`           |
+| `aria-disabled` | `disabled` is true | `true`           |
 
 Consumer responsibilities:
 
@@ -162,20 +162,20 @@ Consumer responsibilities:
 
 #### Inputs
 
-| Name             | Type                                      | Default | Description |
-|------------------|-------------------------------------------|---------|-------------|
-| `animate`        | `boolean`                                 | `true`  | Enables CSS transitions on the arc fill and color. Set to `false` when updating `value` at a high frequency. |
-| `aria-label`     | `string`                                  | `''`    | Accessible name for the host element. Describe what the indicator measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role without context. |
+| Name             | Type                                      | Default | Description                                                                                                                                                                                                   |
+|------------------|-------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `animate`        | `boolean`                                 | `true`  | Enables CSS transitions on the arc fill and color. Set to `false` when updating `value` at a high frequency.                                                                                                  |
+| `aria-label`     | `string`                                  | `''`    | Accessible name for the host element. Describe what the indicator measures (e.g., `"Upload progress"`). When empty, assistive technology announces the role without context.                                  |
 | `aria-valuetext` | `string`                                  | `''`    | Human-readable override for the `aria-valuenow` announcement. Useful in indeterminate mode — set to a localized string such as `"Loading"`. When empty, assistive technology falls back to the numeric value. |
-| `class`          | `string`                                  | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `color`          | `string \| ((percent: number) => string)` | `''`    | Accent color of the progress arc. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100). |
-| `disabled`       | `boolean`                                 | `false` | Renders the component with reduced visual emphasis and removes pointer interaction. |
-| `indeterminate`  | `boolean`                                 | `false` | Activates indeterminate mode when the completion value is unknown. The label is hidden and `aria-busy` is set on the host element. `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are removed. |
-| `max`            | `number`                                  | `100`   | Upper bound of the value range. Must be greater than `min`. |
-| `min`            | `number`                                  | `0`     | Lower bound of the value range. |
-| `size`           | `number`                                  | `100`   | Diameter of the indicator in pixels. Controls both width and height of the host element. |
-| `thickness`      | `number`                                  | `6`     | Stroke width of the circular track in pixels. |
-| `value`          | `number`                                  | `0`     | Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`. |
+| `class`          | `string`                                  | `''`    | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                     |
+| `color`          | `string \| ((percent: number) => string)` | `''`    | Accent color of the progress arc. When empty, falls back to the primary theme color. Pass a function to return a color based on the current percentage (0–100).                                               |
+| `disabled`       | `boolean`                                 | `false` | Renders the component with reduced visual emphasis and removes pointer interaction.                                                                                                                           |
+| `indeterminate`  | `boolean`                                 | `false` | Activates indeterminate mode when the completion value is unknown. The label is hidden and `aria-busy` is set on the host element. `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are removed.         |
+| `max`            | `number`                                  | `100`   | Upper bound of the value range. Must be greater than `min`.                                                                                                                                                   |
+| `min`            | `number`                                  | `0`     | Lower bound of the value range.                                                                                                                                                                               |
+| `size`           | `number`                                  | `100`   | Diameter of the indicator in pixels. Controls both width and height of the host element.                                                                                                                      |
+| `thickness`      | `number`                                  | `6`     | Stroke width of the circular track in pixels.                                                                                                                                                                 |
+| `value`          | `number`                                  | `0`     | Current progress value within `[min, max]`. Values outside the range are clamped before rendering; non-finite values are treated as `0`.                                                                      |
 
 `CircularProgressBarComponent` has no event outputs.
 
@@ -189,7 +189,7 @@ Structural template directive that replaces the default numeric label inside the
 import {
     CircularProgressBarComponent,
     CircularProgressBarLabelTemplateDirective
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 ---

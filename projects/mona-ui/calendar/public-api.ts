@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/calendar
+ * Public API Surface of @nanahoshi/mona-ui/calendar
  */
 
 export * from "./components/calendar/calendar.component";

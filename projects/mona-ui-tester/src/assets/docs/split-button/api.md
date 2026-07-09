@@ -23,7 +23,7 @@ import {
     SplitButtonCheckboxItemComponent,
     SplitButtonRadioGroupComponent,
     SplitButtonRadioItemComponent
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -39,7 +39,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import { MenuItemClickEvent } from "@mirei/mona-ui";
+import { MenuItemClickEvent } from "@nanahoshi/mona-ui";
 
 protected
 onSave()
@@ -269,18 +269,18 @@ The main button carries:
 
 #### Inputs
 
-| Name                  | Type                                                                                                           | Default               | Description                                                                                                                                  |
-|-----------------------|----------------------------------------------------------------------------------------------------------------|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `aria-label`          | `string`                                                                                                       | `''`                  | Accessible name for the main action button. Falls back to `"{text} splitbutton"` when empty.                                                 |
+| Name                  | Type                                                                                                           | Default               | Description                                                                                                                                   |
+|-----------------------|----------------------------------------------------------------------------------------------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`          | `string`                                                                                                       | `''`                  | Accessible name for the main action button. Falls back to `"{text} splitbutton"` when empty.                                                  |
 | `aria-labelledby`     | `string`                                                                                                       | `''`                  | ID of an external element that provides the accessible name for the main action button. Takes precedence over `aria-label` when both are set. |
-| `class`               | `string`                                                                                                       | `''`                  | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                    |
-| `disabled`            | `boolean`                                                                                                      | `false`               | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button.     |
-| `look`                | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'`           | Visual style preset applied to the button.                                                                                                   |
-| `menuButtonAriaLabel` | `string`                                                                                                       | `'Show menu options'` | Accessible name for the menu toggle button. Override to provide a localized label for non-English applications.                              |
-| `popupWidth`          | `number`                                                                                                       | `0`                   | Minimum width of the popup menu in pixels. A value of `0` means no minimum width is applied.                                                 |
-| `rounded`             | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'`                                                           | `'medium'`            | Border-radius preset applied to the button.                                                                                                  |
-| `size`                | `'large' \| 'medium' \| 'small'`                                                                               | `'medium'`            | Size preset controlling the button's dimensions.                                                                                             |
-| `text`                | `string`                                                                                                       | `''`                  | Primary text content displayed in the main action button. Ignored when a `monaSplitButtonTextTemplate` is provided.                          |
+| `class`               | `string`                                                                                                       | `''`                  | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                     |
+| `disabled`            | `boolean`                                                                                                      | `false`               | Renders the component with reduced visual emphasis and removes pointer interaction from both the main button and the menu toggle button.      |
+| `look`                | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'`           | Visual style preset applied to the button.                                                                                                    |
+| `menuButtonAriaLabel` | `string`                                                                                                       | `'Show menu options'` | Accessible name for the menu toggle button. Override to provide a localized label for non-English applications.                               |
+| `popupWidth`          | `number`                                                                                                       | `0`                   | Minimum width of the popup menu in pixels. A value of `0` means no minimum width is applied.                                                  |
+| `rounded`             | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'`                                                           | `'medium'`            | Border-radius preset applied to the button.                                                                                                   |
+| `size`                | `'large' \| 'medium' \| 'small'`                                                                               | `'medium'`            | Size preset controlling the button's dimensions.                                                                                              |
+| `text`                | `string`                                                                                                       | `''`                  | Primary text content displayed in the main action button. Ignored when a `monaSplitButtonTextTemplate` is provided.                           |
 
 #### Outputs
 
@@ -390,7 +390,7 @@ No inputs or outputs. Renders a horizontal visual divider between menu sections.
 - [x] ariaLabel input name corrected — consumers use [ariaLabel], not [aria-label] (no alias on this component)
 - [x] SplitButtonGroupComponent.title and SplitButtonRadioItemComponent.value marked Required (input.required<string>())
 - [x] SplitButtonRadioGroupComponent.value documented as two-way bindable model
-- [x] menuItemClick and buttonClick output type verified: MenuItemClickEvent is the public alias exported from @mirei/mona-ui
+- [x] menuItemClick and buttonClick output type verified: MenuItemClickEvent is the public alias exported from @nanahoshi/mona-ui
 - [x] Kind and Required columns removed from API tables; tables split into Inputs / Outputs per doc guidelines
 - [x] No internal or unexported APIs exposed
 - [x] ChangeDetectionStrategy.OnPush confirmed on all components

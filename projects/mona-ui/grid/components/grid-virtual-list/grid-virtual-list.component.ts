@@ -15,10 +15,10 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
-import { SlicePipe } from "@mirei/mona-ui/common";
-import { ContextMenuComponent } from "@mirei/mona-ui/contextmenu";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { rxTimeout } from "@mirei/mona-ui/internal";
+import { SlicePipe } from "@nanahoshi/mona-ui/common";
+import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
 import { GridCellDirective } from "../../directives/grid-cell.directive";

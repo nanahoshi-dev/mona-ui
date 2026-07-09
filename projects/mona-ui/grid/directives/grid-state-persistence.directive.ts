@@ -1,5 +1,5 @@
 import { afterNextRender, Directive, effect, inject, input, model, signal, untracked } from "@angular/core";
-import { deepEquals } from "@mirei/mona-ui/common";
+import { deepEquals } from "@nanahoshi/mona-ui/common";
 import type { GridState, GridStateLoadResult, GridStatePersistenceOptions } from "../models/GridState";
 import { GridService } from "../services/grid.service";
 

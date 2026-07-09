@@ -21,7 +21,7 @@ import {
     LucideLaptop,
     LucideSmartphone
 } from "@lucide/angular";
-import { FilterableOptions } from "@mirei/mona-ui/common";
+import { FilterableOptions } from "@nanahoshi/mona-ui/common";
 import {
     CheckableOptions,
     DisableOptions,
@@ -40,7 +40,7 @@ import {
     TreeViewFilterableDirective,
     TreeViewNodeTemplateDirective,
     TreeViewSelectableDirective
-} from "@mirei/mona-ui/tree-view";
+} from "@nanahoshi/mona-ui/tree-view";
 import { asapScheduler, of, switchMap, timer } from "rxjs";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

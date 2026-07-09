@@ -14,10 +14,10 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Position } from "@mirei/mona-ui/common";
-import { fadePopupAnimation, PopupRef, PopupService } from "@mirei/mona-ui/popup";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { getOffsetForPosition, getPositionConnectionPoints } from "@mirei/mona-ui/tooltip";
+import { Position } from "@nanahoshi/mona-ui/common";
+import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { getOffsetForPosition, getPositionConnectionPoints } from "@nanahoshi/mona-ui/tooltip";
 import { filter, fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";

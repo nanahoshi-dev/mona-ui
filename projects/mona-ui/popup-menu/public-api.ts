@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/popup-menu
+ * Public API Surface of @nanahoshi/mona-ui/popup-menu
  */
 
 export * from "./components/popup-menu/popup-menu.component";

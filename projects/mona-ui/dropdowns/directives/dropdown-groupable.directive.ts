@@ -1,5 +1,5 @@
 import { Directive, effect, inject, input, untracked } from "@angular/core";
-import { GroupableOptions, ListService } from "@mirei/mona-ui/internal/list";
+import { GroupableOptions, ListService } from "@nanahoshi/mona-ui/internal/list";
 import { Selector } from "@mirei/ts-collections";
 
 @Directive({

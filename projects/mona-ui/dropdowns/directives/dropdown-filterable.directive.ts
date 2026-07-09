@@ -1,8 +1,8 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FilterChangeEvent } from "@mirei/mona-ui/common";
-import { ListService } from "@mirei/mona-ui/internal/list";
-import { FilterableOptions } from "@mirei/mona-ui/common";
+import { FilterChangeEvent } from "@nanahoshi/mona-ui/common";
+import { ListService } from "@nanahoshi/mona-ui/internal/list";
+import { FilterableOptions } from "@nanahoshi/mona-ui/common";
 
 @Directive({
     selector: `

@@ -1,14 +1,14 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
-import { ButtonDirective } from "@mirei/mona-ui/button";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     TabCloseEvent,
     TabComponent,
     TabContentTemplateDirective,
     TabsComponent,
     TabSelectEvent
-} from "@mirei/mona-ui/tabs";
-import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+} from "@nanahoshi/mona-ui/tabs";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { range } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

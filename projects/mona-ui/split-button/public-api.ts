@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/split-button
+ * Public API Surface of @nanahoshi/mona-ui/split-button
  */
 
 export { SplitButtonComponent } from "./components/split-button/split-button.component";

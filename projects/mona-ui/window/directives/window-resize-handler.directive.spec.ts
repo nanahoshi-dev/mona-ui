@@ -6,6 +6,5 @@ describe("WindowResizeHandlerDirective", () => {
         // // const directive = new WindowResizeHandlerDirective();
         // expect(directive).toBeTruthy();
         expect(true).toBeTruthy();
-        ;
     });
 });

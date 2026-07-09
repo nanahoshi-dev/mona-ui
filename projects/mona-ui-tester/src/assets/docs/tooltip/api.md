@@ -7,7 +7,7 @@ Use `TooltipComponent` when the tooltip needs more than plain text. Use `Tooltip
 ## Import & Basic Usage
 
 ```typescript
-import { TooltipComponent } from "@mirei/mona-ui";
+import { TooltipComponent } from "@nanahoshi/mona-ui";
 ```
 
 **Targeting an element reference:**
@@ -93,10 +93,10 @@ An open tooltip closes on <kbd>Escape</kbd> and on an outside click, in addition
 
 **Known limitation:** with the default `hideDelay` of `0`, the tooltip closes as soon as the pointer leaves the target. There is currently no way to move the pointer onto the tooltip panel itself before it closes.
 
-| Attribute         | When present                             | Value                             |
-|--------------------|-------------------------------------------|-------------------------------------|
-| `aria-describedby` | While the tooltip is open                 | The tooltip panel's generated id    |
-| `role="tooltip"`   | On the tooltip panel itself, while open   | `"tooltip"`                         |
+| Attribute          | When present                            | Value                            |
+|--------------------|-----------------------------------------|----------------------------------|
+| `aria-describedby` | While the tooltip is open               | The tooltip panel's generated id |
+| `role="tooltip"`   | On the tooltip panel itself, while open | `"tooltip"`                      |
 
 **Consumer responsibilities:**
 
@@ -110,25 +110,25 @@ An open tooltip closes on <kbd>Escape</kbd> and on an outside click, in addition
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `disabled` | `boolean` | `false` | Whether the tooltip is disabled. When disabled, the tooltip will not be shown. |
-| `hideDelay` | `number` | `0` | Delay in milliseconds before hiding the tooltip after the trigger event ends. |
-| `position` | `"top" \| "right" \| "bottom" \| "left"`¹ | `'top'` | Side of the target element the tooltip is anchored to. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the tooltip panel. |
-| `showDelay` | `number` | `0` | Delay in milliseconds before showing the tooltip after the trigger event. |
-| `target` | `Element \| ElementRef<HTMLElement> \| string`² | — | Required. The target element(s) the tooltip is attached to: a direct element/`ElementRef`, or a CSS selector string matching one or more elements. |
+| Name        | Type                                                 | Default    | Description                                                                                                                                        |
+|-------------|------------------------------------------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled`  | `boolean`                                            | `false`    | Whether the tooltip is disabled. When disabled, the tooltip will not be shown.                                                                     |
+| `hideDelay` | `number`                                             | `0`        | Delay in milliseconds before hiding the tooltip after the trigger event ends.                                                                      |
+| `position`  | `"top" \| "right" \| "bottom" \| "left"`¹            | `'top'`    | Side of the target element the tooltip is anchored to.                                                                                             |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the tooltip panel.                                                                                                 |
+| `showDelay` | `number`                                             | `0`        | Delay in milliseconds before showing the tooltip after the trigger event.                                                                          |
+| `target`    | `Element \| ElementRef<HTMLElement> \| string`²      | —          | Required. The target element(s) the tooltip is attached to: a direct element/`ElementRef`, or a CSS selector string matching one or more elements. |
 
-¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@mirei/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
+¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
 
-² Exposed publicly via the `PopupAnchor` type, which is referenced by this input but not exported from `@mirei/mona-ui`. <!-- TODO(owner-review): confirm whether PopupAnchor should be exported. -->
+² Exposed publicly via the `PopupAnchor` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether PopupAnchor should be exported. -->
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name     | Type   | Description                               |
+|----------|--------|-------------------------------------------|
 | `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown` | `void` | Emitted when the tooltip popup is shown. |
+| `shown`  | `void` | Emitted when the tooltip popup is shown.  |
 
 `TooltipComponent` has no public methods.
 

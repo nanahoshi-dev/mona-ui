@@ -18,7 +18,7 @@
 ## Import & Basic Usage
 
 ```typescript
-import { TextBoxDirective } from "@mirei/mona-ui";
+import { TextBoxDirective } from "@nanahoshi/mona-ui";
 ```
 
 Add `TextBoxDirective` to your standalone component's `imports` array.
@@ -49,30 +49,30 @@ Always pair `monaTextBox` with an accessible label — either a `<label for>`, o
 
 ### `rounded` presets
 
-| `rounded` | Shape                           |
-|-----------|---------------------------------|
-| `none`    | No rounding                     |
-| `small`   | Slight rounding                 |
-| `medium`  | Moderate rounding (default)     |
-| `large`   | Strong rounding                 |
+| `rounded` | Shape                                    |
+|-----------|------------------------------------------|
+| `none`    | No rounding                              |
+| `small`   | Slight rounding                          |
+| `medium`  | Moderate rounding (default)              |
+| `large`   | Strong rounding                          |
 | `full`    | Pill shape; horizontal padding increased |
 
 ### `size` presets
 
-| `size`   | Height | Font size           |
-|----------|--------|---------------------|
-| `small`  | 32px   | Extra-small         |
-| `medium` | 36px   | Small (default)     |
-| `large`  | 40px   | Medium              |
+| `size`   | Height | Font size       |
+|----------|--------|-----------------|
+| `small`  | 32px   | Extra-small     |
+| `medium` | 36px   | Small (default) |
+| `large`  | 40px   | Medium          |
 
 ### Visual states
 
-| State           | Appearance                                                        |
-|-----------------|-------------------------------------------------------------------|
-| Default         | Mona UI themed border and background                              |
-| Focused         | Focus ring visible for keyboard-initiated focus                   |
+| State           | Appearance                                                                                 |
+|-----------------|--------------------------------------------------------------------------------------------|
+| Default         | Mona UI themed border and background                                                       |
+| Focused         | Focus ring visible for keyboard-initiated focus                                            |
 | Disabled        | Reduced visual emphasis; pointer interaction removed. Use the native `disabled` attribute. |
-| Invalid (forms) | Error-colored border when the input is touched and invalid        |
+| Invalid (forms) | Error-colored border when the input is touched and invalid                                 |
 
 ### Custom classes
 
@@ -102,11 +102,11 @@ The focus ring appears only for keyboard-initiated focus, matching browser `focu
 
 #### Inputs
 
-| Name      | Type                                                    | Default    | Description |
-|-----------|-------------------------------------------------------- |------------|-------------|
-| `class`   | `string`                                                | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`   | `'medium'` | Border-radius preset applied to the component. |
-| `size`    | `'small' \| 'medium' \| 'large'`                        | `'medium'` | Size preset controlling the component's dimensions. |
+| Name      | Type                                                 | Default    | Description                                                               |
+|-----------|------------------------------------------------------|------------|---------------------------------------------------------------------------|
+| `class`   | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the component.                            |
+| `size`    | `'small' \| 'medium' \| 'large'`                     | `'medium'` | Size preset controlling the component's dimensions.                       |
 
 `TextBoxDirective` has no outputs. Listen to native events (`(focus)`, `(blur)`, `(change)`, `(input)`) directly on the host element.
 

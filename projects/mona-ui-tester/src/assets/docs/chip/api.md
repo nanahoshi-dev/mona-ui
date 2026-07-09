@@ -19,9 +19,9 @@ When `toggleable` is `true`, each activation flips the `selected` model. When `r
 ## Import & Basic Usage
 
 ```typescript
-import { ChipComponent } from "@mirei/mona-ui";
+import { ChipComponent } from "@nanahoshi/mona-ui";
 // Optional: only needed when adding a prefix template
-import { ChipPrefixTemplateDirective } from "@mirei/mona-ui";
+import { ChipPrefixTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 Add the imported symbols to your standalone component's `imports` array.
@@ -74,17 +74,17 @@ The prefix template renders before the label or projected content. It receives n
 
 ### Look variants
 
-| `look`      | Appearance                                        |
-|-------------|---------------------------------------------------|
+| `look`      | Appearance                                         |
+|-------------|----------------------------------------------------|
 | `default`   | Background with border; adapts to the active theme |
-| `outline`   | Transparent background with border                |
-| `primary`   | Filled primary color                              |
-| `secondary` | Filled secondary color                            |
-| `success`   | Filled success color                              |
-| `error`     | Filled error color                                |
-| `warning`   | Filled warning color                              |
-| `info`      | Filled info color                                 |
-| `ghost`     | No background or border; hover reveals background |
+| `outline`   | Transparent background with border                 |
+| `primary`   | Filled primary color                               |
+| `secondary` | Filled secondary color                             |
+| `success`   | Filled success color                               |
+| `error`     | Filled error color                                 |
+| `warning`   | Filled warning color                               |
+| `info`      | Filled info color                                  |
+| `ghost`     | No background or border; hover reveals background  |
 
 ### Sizes
 
@@ -122,14 +122,14 @@ Classes passed via `class` are merged with variant classes using `tailwind-merge
 
 The following attributes are managed automatically on the host element:
 
-| Attribute       | When present                                        | Value                                |
-|-----------------|-----------------------------------------------------|--------------------------------------|
-| `aria-label`    | `ariaLabel` input (`aria-label`) is non-empty       | Value of the `aria-label` input      |
-| `aria-label`    | `aria-label` is empty and `label` is non-empty      | Value of the `label` input           |
-| `aria-checked`  | `toggleable` is `true`                              | `"true"` or `"false"`                |
-| `aria-disabled` | `disabled` is `true`                                | `"true"`                             |
-| `role`          | `toggleable` is `true`                              | `"checkbox"`                         |
-| `tabindex`      | Always                                              | `0` when interactive, `-1` otherwise |
+| Attribute       | When present                                   | Value                                |
+|-----------------|------------------------------------------------|--------------------------------------|
+| `aria-label`    | `ariaLabel` input (`aria-label`) is non-empty  | Value of the `aria-label` input      |
+| `aria-label`    | `aria-label` is empty and `label` is non-empty | Value of the `label` input           |
+| `aria-checked`  | `toggleable` is `true`                         | `"true"` or `"false"`                |
+| `aria-disabled` | `disabled` is `true`                           | `"true"`                             |
+| `role`          | `toggleable` is `true`                         | `"checkbox"`                         |
+| `tabindex`      | Always                                         | `0` when interactive, `-1` otherwise |
 
 **Remove button:** When `removable` is `true`, the remove button inside the chip has an automatically computed accessible label: `"Remove, <label>"` using the `label` input, or `"Remove, item"` when no `label` is set. Override this with the `removeLabel` input.
 
@@ -151,28 +151,28 @@ Keyboard activation (Enter and Space) fires when the chip host has focus. When k
 
 #### Inputs
 
-| Name           | Type                                                                                                              | Default     | Description |
-|----------------|-------------------------------------------------------------------------------------------------------------------|-------------|-------------|
-| `aria-label`   | `string`                                                                                                          | `""`        | Accessible name for the host element. Describe what the chip represents. When empty, assistive technology announces the role without a label. Falls back to the `label` input value when not set. |
-| `class`        | `string`                                                                                                          | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled`     | `boolean`                                                                                                         | `false`     | Renders the chip with reduced visual emphasis and removes pointer interaction. |
-| `label`        | `string`                                                                                                          | `""`        | Text label displayed inside the chip. When non-empty, takes precedence over projected content. Also used as the fallback accessible name and as part of the remove button's accessible label. |
-| `look`         | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'`  | `'default'` | Visual style variant controlling the chip's background color, border, and interaction states. |
-| `removable`    | `boolean`                                                                                                         | `false`     | Renders a remove button inside the chip. When activated, emits the `remove` output. |
-| `removeLabel`  | `string`                                                                                                          | —           | Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback. Use when the chip shows only projected content and the default label is not descriptive enough. |
-| `rounded`      | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                             | `'full'`    | Border-radius preset applied to the chip. |
-| `selected`     | `boolean`                                                                                                         | `false`     | Two-way bindable selected state. When `toggleable` is `true`, each activation flips this value. Use `[(selected)]` for two-way binding. |
-| `size`         | `'small' \| 'medium' \| 'large'`                                                                                  | `'medium'`  | Size preset controlling the chip's padding and remove button dimensions. |
-| `tabindex`     | `number \| string`                                                                                                | —           | Tab index override. When not set, computed automatically: `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`. |
-| `toggleable`   | `boolean`                                                                                                         | `false`     | Enables toggle behavior. When `true`, each activation flips `selected` and the host receives `role="checkbox"` with `aria-checked`. |
-| `value`        | `unknown`                                                                                                         | —           | Arbitrary value associated with this chip. Useful for identifying which chip was selected or removed in a collection. |
+| Name          | Type                                                                                                           | Default     | Description                                                                                                                                                                                        |
+|---------------|----------------------------------------------------------------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`  | `string`                                                                                                       | `""`        | Accessible name for the host element. Describe what the chip represents. When empty, assistive technology announces the role without a label. Falls back to the `label` input value when not set.  |
+| `class`       | `string`                                                                                                       | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                          |
+| `disabled`    | `boolean`                                                                                                      | `false`     | Renders the chip with reduced visual emphasis and removes pointer interaction.                                                                                                                     |
+| `label`       | `string`                                                                                                       | `""`        | Text label displayed inside the chip. When non-empty, takes precedence over projected content. Also used as the fallback accessible name and as part of the remove button's accessible label.      |
+| `look`        | `'default' \| 'error' \| 'ghost' \| 'info' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual style variant controlling the chip's background color, border, and interaction states.                                                                                                      |
+| `removable`   | `boolean`                                                                                                      | `false`     | Renders a remove button inside the chip. When activated, emits the `remove` output.                                                                                                                |
+| `removeLabel` | `string`                                                                                                       | —           | Accessible label for the remove button, overriding the auto-computed `"Remove, <label>"` fallback. Use when the chip shows only projected content and the default label is not descriptive enough. |
+| `rounded`     | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'`                                                           | `'full'`    | Border-radius preset applied to the chip.                                                                                                                                                          |
+| `selected`    | `boolean`                                                                                                      | `false`     | Two-way bindable selected state. When `toggleable` is `true`, each activation flips this value. Use `[(selected)]` for two-way binding.                                                            |
+| `size`        | `'small' \| 'medium' \| 'large'`                                                                               | `'medium'`  | Size preset controlling the chip's padding and remove button dimensions.                                                                                                                           |
+| `tabindex`    | `number \| string`                                                                                             | —           | Tab index override. When not set, computed automatically: `0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.                            |
+| `toggleable`  | `boolean`                                                                                                      | `false`     | Enables toggle behavior. When `true`, each activation flips `selected` and the host receives `role="checkbox"` with `aria-checked`.                                                                |
+| `value`       | `unknown`                                                                                                      | —           | Arbitrary value associated with this chip. Useful for identifying which chip was selected or removed in a collection.                                                                              |
 
 #### Outputs
 
-| Name           | Type    | Description |
-|----------------|---------|-------------|
+| Name           | Type    | Description                                                                                                             |
+|----------------|---------|-------------------------------------------------------------------------------------------------------------------------|
 | `contentClick` | `void`  | Emitted when the chip body is clicked or activated via Enter or Space. Not emitted when the remove button is activated. |
-| `remove`       | `Event` | Emitted when the remove button is clicked. Only fires when `removable` is `true`. Emits the originating `Event`. |
+| `remove`       | `Event` | Emitted when the remove button is clicked. Only fires when `removable` is `true`. Emits the originating `Event`.        |
 
 ---
 

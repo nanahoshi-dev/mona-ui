@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/button
+ * Public API Surface of @nanahoshi/mona-ui/button
  */
 
 export { ButtonDirective } from "./directives/button.directive";

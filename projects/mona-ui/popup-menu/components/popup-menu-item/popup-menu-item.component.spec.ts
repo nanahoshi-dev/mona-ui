@@ -1,23 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { PopupMenuItemComponent } from './popup-menu-item.component';
+import { PopupMenuItemComponent } from "./popup-menu-item.component";
 
-describe('PopupMenuItemComponent', () => {
+describe("PopupMenuItemComponent", () => {
     let component: PopupMenuItemComponent;
     let fixture: ComponentFixture<PopupMenuItemComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [PopupMenuItemComponent]
-        })
-            .compileComponents();
+        }).compileComponents();
 
         fixture = TestBed.createComponent(PopupMenuItemComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it("should create", () => {
         expect(component).toBeTruthy();
     });
 });

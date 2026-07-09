@@ -14,12 +14,12 @@ import {
 } from "@angular/core";
 import { type FieldTree, FormField } from "@angular/forms/signals";
 import { LucideOctagonAlert } from "@lucide/angular";
-import { CheckBoxComponent } from "@mirei/mona-ui/check-box";
-import { DatePickerComponent } from "@mirei/mona-ui/date-picker";
-import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
-import { TextBoxComponent } from "@mirei/mona-ui/text-box";
-import { ThemeService } from "@mirei/mona-ui/theme";
-import { TooltipComponent } from "@mirei/mona-ui/tooltip";
+import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
+import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 import { Column } from "../../models/Column";
 import type { GridEditSession } from "../../models/GridEditSession";
 import type { GridEditTemplateContext } from "../../models/GridEditTemplateContext";

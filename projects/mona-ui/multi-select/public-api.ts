@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/multi-select
+ * Public API Surface of @nanahoshi/mona-ui/multi-select
  */
 
 export * from "./components/multi-select/multi-select.component";

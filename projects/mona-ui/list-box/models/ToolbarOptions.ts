@@ -1,4 +1,4 @@
-import { Position } from "@mirei/mona-ui/common";
+import { Position } from "@nanahoshi/mona-ui/common";
 
 export interface ToolbarOptions {
     actions: ToolbarAction[];
@@ -6,11 +6,4 @@ export interface ToolbarOptions {
 }
 
 export type ToolbarAction =
-    | "clear"
-    | "moveDown"
-    | "moveUp"
-    | "remove"
-    | "transferAllFrom"
-    | "transferAllTo"
-    | "transferFrom"
-    | "transferTo";
+    "clear" | "moveDown" | "moveUp" | "remove" | "transferAllFrom" | "transferAllTo" | "transferFrom" | "transferTo";

@@ -30,7 +30,7 @@ export const progressBarIndeterminateVariants = cva(
         bg-[repeating-linear-gradient(135deg,var(--color-background),var(--color-background)_10px,var(--color-secondary)_10px,var(--color-secondary)_20px)]
         bg-size-[200%_200%]
     `
-)
+);
 
 export const progressBarLabelVariants = cva(
     `
@@ -69,4 +69,4 @@ export const progressBarTrackVariants = cva(
             }
         }
     }
-)
+);

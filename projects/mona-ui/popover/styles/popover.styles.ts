@@ -1,6 +1,6 @@
-import { VariantInputs } from "@mirei/mona-ui/internal";
-import { ThemeStyle } from "@mirei/mona-ui/theme";
-import { tooltipArrowThemeVariants } from "@mirei/mona-ui/tooltip";
+import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { tooltipArrowThemeVariants } from "@nanahoshi/mona-ui/tooltip";
 import { VariantProps } from "class-variance-authority";
 import {
     popoverBaseVariants as monaPopoverBaseVariants,

@@ -16,8 +16,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { ButtonDirective, type ButtonVariantProps } from "@mirei/mona-ui/button";
-import { PreventableEvent } from "@mirei/mona-ui/common";
+import { ButtonDirective, type ButtonVariantProps } from "@nanahoshi/mona-ui/button";
+import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
     generateHourSet,
     generateMinuteSet,
@@ -26,9 +26,9 @@ import {
     Meridiem,
     TimeLimiterPipe,
     TimeSelectorService
-} from "@mirei/mona-ui/date-input";
-import { createElementControlId } from "@mirei/mona-ui/internal";
-import { ThemeService } from "@mirei/mona-ui/theme";
+} from "@nanahoshi/mona-ui/date-input";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
 import { filter } from "rxjs/operators";

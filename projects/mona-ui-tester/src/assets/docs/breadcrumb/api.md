@@ -18,9 +18,9 @@ Separators between items default to a `ChevronRight` icon and are hidden from as
 ## Import & Basic Usage
 
 ```typescript
-import { BreadcrumbComponent, BreadcrumbItemComponent } from "@mirei/mona-ui";
+import { BreadcrumbComponent, BreadcrumbItemComponent } from "@nanahoshi/mona-ui";
 // Optional: only needed when providing a custom separator
-import { BreadcrumbSeparatorTemplateDirective } from "@mirei/mona-ui";
+import { BreadcrumbSeparatorTemplateDirective } from "@nanahoshi/mona-ui";
 ```
 
 Add the imported symbols to your standalone component's `imports` array.
@@ -122,11 +122,11 @@ When multiple breadcrumbs appear on the same page, each should have a distinct `
 
 #### Inputs
 
-| Name         | Type      | Default        | Description |
-|--------------|-----------|----------------|-------------|
+| Name         | Type      | Default        | Description                                                                                                                   |
+|--------------|-----------|----------------|-------------------------------------------------------------------------------------------------------------------------------|
 | `aria-label` | `string`  | `'Breadcrumb'` | Accessible name for the breadcrumb navigation landmark. Override when multiple breadcrumb components appear on the same page. |
-| `class`      | `string`  | `''`           | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`. |
-| `disabled`   | `boolean` | `false`        | Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items. |
+| `class`      | `string`  | `''`           | Additional CSS classes merged onto the breadcrumb list via `tailwind-merge`.                                                  |
+| `disabled`   | `boolean` | `false`        | Renders the entire breadcrumb with reduced visual emphasis and removes pointer interaction from all items.                    |
 
 `BreadcrumbComponent` has no event outputs.
 
@@ -140,14 +140,14 @@ Use as a direct child of `<mona-breadcrumb>`. Project any Angular content — te
 
 #### Inputs
 
-| Name       | Type      | Default | Description |
-|------------|-----------|---------|-------------|
+| Name       | Type      | Default | Description                                                                                                                                       |
+|------------|-----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------|
 | `disabled` | `boolean` | `false` | Renders this item with reduced visual emphasis and removes pointer interaction. Has no visual effect when the parent breadcrumb is also disabled. |
 
 #### Outputs
 
-| Name        | Type   | Description |
-|-------------|--------|-------------|
+| Name        | Type   | Description                                                                                                                                             |
+|-------------|--------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `itemClick` | `void` | Emitted when the item is clicked or activated via Enter or Space. Never emitted when this is the last item (current page) or when the item is disabled. |
 
 ---

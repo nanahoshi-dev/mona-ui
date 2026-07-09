@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/popover
+ * Public API Surface of @nanahoshi/mona-ui/popover
  */
 
 export * from "./components/popover/popover.component";

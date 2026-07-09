@@ -1,23 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { SplitButtonGroupComponent } from './split-button-group.component';
+import { SplitButtonGroupComponent } from "./split-button-group.component";
 
-describe('SplitButtonGroupComponent', () => {
+describe("SplitButtonGroupComponent", () => {
     let component: SplitButtonGroupComponent;
     let fixture: ComponentFixture<SplitButtonGroupComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [SplitButtonGroupComponent]
-        })
-            .compileComponents();
+        }).compileComponents();
 
         fixture = TestBed.createComponent(SplitButtonGroupComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it("should create", () => {
         expect(component).toBeTruthy();
     });
 });

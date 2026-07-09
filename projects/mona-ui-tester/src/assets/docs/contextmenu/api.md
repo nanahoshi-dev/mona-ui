@@ -22,7 +22,7 @@ import {
     ContextMenuComponent,
     ContextMenuItemComponent,
     ContextMenuSeparatorComponent
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -40,7 +40,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import type { MenuItemClickEvent } from "@mirei/mona-ui";
+import type { MenuItemClickEvent } from "@nanahoshi/mona-ui";
 
 protected onMenuClick(event: MenuItemClickEvent): void { /* ... */ }
 ```
@@ -68,12 +68,12 @@ Alternatively, pass an `items` collection directly (see the API section) instead
 
 Each directive can be placed directly inside `<mona-contextmenu>` to apply to every matching item, or nested inside a specific `mona-contextmenu-item`/`mona-contextmenu-group` to override it for that item or group only.
 
-| Directive attribute | Scope | Template context |
-|---|---|---|
-| `monaContextMenuGroupTemplate` | Global / Group | `$implicit: string` — the group title |
-| `monaContextMenuIconTemplate` | Global / Item | `$implicit` — the menu item (`label`, `disabled`, …); see API for the type caveat |
-| `monaContextMenuShortcutTemplate` | Global / Item | `$implicit` — the menu item, as above |
-| `monaContextMenuTextTemplate` | Global / Item | `$implicit` — the menu item, as above |
+| Directive attribute               | Scope          | Template context                                                                  |
+|-----------------------------------|----------------|-----------------------------------------------------------------------------------|
+| `monaContextMenuGroupTemplate`    | Global / Group | `$implicit: string` — the group title                                             |
+| `monaContextMenuIconTemplate`     | Global / Item  | `$implicit` — the menu item (`label`, `disabled`, …); see API for the type caveat |
+| `monaContextMenuShortcutTemplate` | Global / Item  | `$implicit` — the menu item, as above                                             |
+| `monaContextMenuTextTemplate`     | Global / Item  | `$implicit` — the menu item, as above                                             |
 
 **Custom group header:**
 
@@ -187,47 +187,47 @@ protected readonly sortField = signal("name");
 
 ### Keyboard navigation
 
-| Key | Action |
-|---|---|
-| Right-click | Opens the menu at the pointer position |
-| `ContextMenu` key, or `Shift+F10` | Opens the menu at the target's center, while the target has focus |
-| `ArrowDown` | Highlights the next item, wrapping to the first |
-| `ArrowUp` | Highlights the previous item, wrapping to the last |
-| `ArrowRight` | Opens the highlighted item's submenu, if it has nested items |
-| `ArrowLeft` | Closes the current submenu and returns to the parent level |
-| `Home` | Highlights the first item |
-| `End` | Highlights the last item |
-| `Enter` / `Space` | Activates the highlighted item, or opens its submenu if it has nested items |
-| `Escape` | Closes the open submenu |
-| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text |
+| Key                               | Action                                                                      |
+|-----------------------------------|-----------------------------------------------------------------------------|
+| Right-click                       | Opens the menu at the pointer position                                      |
+| `ContextMenu` key, or `Shift+F10` | Opens the menu at the target's center, while the target has focus           |
+| `ArrowDown`                       | Highlights the next item, wrapping to the first                             |
+| `ArrowUp`                         | Highlights the previous item, wrapping to the last                          |
+| `ArrowRight`                      | Opens the highlighted item's submenu, if it has nested items                |
+| `ArrowLeft`                       | Closes the current submenu and returns to the parent level                  |
+| `Home`                            | Highlights the first item                                                   |
+| `End`                             | Highlights the last item                                                    |
+| `Enter` / `Space`                 | Activates the highlighted item, or opens its submenu if it has nested items |
+| `Escape`                          | Closes the open submenu                                                     |
+| Letter, digit, space, `-`, or `_` | Jumps to (cycles through) items whose label starts with the typed text      |
 
 ### ARIA
 
 **Target element** (the element bound to `target`):
 
-| Attribute | When present | Value |
-|---|---|---|
-| `aria-haspopup` | Always | `"menu"` |
-| `aria-controls` | Always | The menu container's auto-generated ID |
-| `aria-expanded` | Always | `"true"` while the menu is open, otherwise `"false"` |
+| Attribute       | When present | Value                                                |
+|-----------------|--------------|------------------------------------------------------|
+| `aria-haspopup` | Always       | `"menu"`                                             |
+| `aria-controls` | Always       | The menu container's auto-generated ID               |
+| `aria-expanded` | Always       | `"true"` while the menu is open, otherwise `"false"` |
 
 **Menu container** (`role="menu"`):
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"menu"` |
-| `aria-orientation` | Always | `"vertical"` |
+| Attribute               | When present                                         | Value                     |
+|-------------------------|------------------------------------------------------|---------------------------|
+| `role`                  | Always                                               | `"menu"`                  |
+| `aria-orientation`      | Always                                               | `"vertical"`              |
 | `aria-activedescendant` | While an item is highlighted via keyboard or pointer | The highlighted item's ID |
 
 **Item** (`role="menuitem"`):
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"menuitem"` |
-| `aria-disabled` | Always | Reflects the item's `disabled` input |
-| `aria-haspopup` | When the item has nested items | `"menu"` |
-| `aria-expanded` | When the item has nested items | `"true"` while its submenu is open |
-| `aria-label` | When the item's `label` is non-empty | The item's `label` text |
+| Attribute       | When present                         | Value                                |
+|-----------------|--------------------------------------|--------------------------------------|
+| `role`          | Always                               | `"menuitem"`                         |
+| `aria-disabled` | Always                               | Reflects the item's `disabled` input |
+| `aria-haspopup` | When the item has nested items       | `"menu"`                             |
+| `aria-expanded` | When the item has nested items       | `"true"` while its submenu is open   |
+| `aria-label`    | When the item's `label` is non-empty | The item's `label` text              |
 
 **Group** (`role="group"`): carries `aria-labelledby` pointing at the group header. **Separator:** `role="separator"`.
 
@@ -246,20 +246,20 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `ariaLabel` | `string` | `''` | Reserved for an ARIA label on the context menu. TODO(owner-review): not currently applied to the target element or the rendered menu. |
-| `items` | `Iterable<PopupMenuItem>` | `[]` | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. TODO(owner-review): `PopupMenuItem` is not exported from `@mirei/mona-ui`; prefer content projection until this type is exported. |
-| `minWidth` | `string \| number` | `undefined` | Minimum width applied to the root menu and all submenus. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'` | Border-radius preset applied to the root menu and all submenus. |
-| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Size preset applied to the root menu and all submenus. |
-| `target` | `ElementRef<HTMLElement> \| HTMLElement` | — | Required. The element that opens the menu on right-click or keyboard activation. |
-| `width` | `string \| number` | `undefined` | Width applied to the root menu and all submenus. |
+| Name        | Type                                       | Default     | Description                                                                                                                                                                                                                                                                |
+|-------------|--------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ariaLabel` | `string`                                   | `''`        | Reserved for an ARIA label on the context menu. TODO(owner-review): not currently applied to the target element or the rendered menu.                                                                                                                                      |
+| `items`     | `Iterable<PopupMenuItem>`                  | `[]`        | Menu items to render directly, instead of content-projected item components. Takes precedence over projected content when non-empty. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; prefer content projection until this type is exported. |
+| `minWidth`  | `string \| number`                         | `undefined` | Minimum width applied to the root menu and all submenus.                                                                                                                                                                                                                   |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large'` | `'medium'`  | Border-radius preset applied to the root menu and all submenus.                                                                                                                                                                                                            |
+| `size`      | `'small' \| 'medium' \| 'large'`           | `'medium'`  | Size preset applied to the root menu and all submenus.                                                                                                                                                                                                                     |
+| `target`    | `ElementRef<HTMLElement> \| HTMLElement`   | —           | Required. The element that opens the menu on right-click or keyboard activation.                                                                                                                                                                                           |
+| `width`     | `string \| number`                         | `undefined` | Width applied to the root menu and all submenus.                                                                                                                                                                                                                           |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name        | Type                 | Description                                                                                                        |
+|-------------|----------------------|--------------------------------------------------------------------------------------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when a menu item is activated by pointer or keyboard. Call `event.preventDefault()` to keep the menu open. |
 
 ---
@@ -270,15 +270,15 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
+| Name       | Type      | Default | Description                                                           |
+|------------|-----------|---------|-----------------------------------------------------------------------|
 | `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection. |
-| `label` | `string` | `''` | Display text of the item. |
+| `label`    | `string`  | `''`    | Display text of the item.                                             |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name        | Type                 | Description                                                                                                                         |
+|-------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when this item is selected by pointer or keyboard. Not emitted when the item has nested items (it opens a submenu instead). |
 
 ---
@@ -289,18 +289,18 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `checked` | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection. |
-| `label` | `string` | `''` | Display text of the item. |
+| Name       | Type      | Default | Description                                                                 |
+|------------|-----------|---------|-----------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
+| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection.       |
+| `label`    | `string`  | `''`    | Display text of the item.                                                   |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `checkedChange` | `boolean` | Emitted with the new checked state after activation. Not emitted when `event.preventDefault()` is called on `menuClick`. |
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is activated. Call `event.preventDefault()` to suppress the checked-state change. |
+| Name            | Type                 | Description                                                                                                              |
+|-----------------|----------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `checkedChange` | `boolean`            | Emitted with the new checked state after activation. Not emitted when `event.preventDefault()` is called on `menuClick`. |
+| `menuClick`     | `MenuItemClickEvent` | Emitted when the item is activated. Call `event.preventDefault()` to suppress the checked-state change.                  |
 
 ---
 
@@ -310,10 +310,10 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `title` | `string` | `''` | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered. |
-| `value` | `string` | `''` | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The `mona-contextmenu-radio-item` with the matching `value` renders as selected. |
+| Name    | Type     | Default | Description                                                                                                                                                                 |
+|---------|----------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `title` | `string` | `''`    | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered.                                           |
+| `value` | `string` | `''`    | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The `mona-contextmenu-radio-item` with the matching `value` renders as selected. |
 
 `ContextMenuRadioGroupComponent` has no outputs; observe `[(value)]` to react to selection changes.
 
@@ -325,16 +325,16 @@ protected readonly sortField = signal("name");
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection. |
-| `label` | `string` | `''` | Display text of the item. |
-| `value` | `string` | — | Required. The value reported to the parent `mona-contextmenu-radio-group` when this item is selected. |
+| Name       | Type      | Default | Description                                                                                           |
+|------------|-----------|---------|-------------------------------------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false` | Renders the item with reduced visual emphasis and prevents selection.                                 |
+| `label`    | `string`  | `''`    | Display text of the item.                                                                             |
+| `value`    | `string`  | —       | Required. The value reported to the parent `mona-contextmenu-radio-group` when this item is selected. |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name        | Type                 | Description                                                                                                                            |
+|-------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. Call `event.preventDefault()` to suppress the resulting selection update on the parent radio group. |
 
 Must be projected inside a `mona-contextmenu-radio-group` to participate in selection.
@@ -347,9 +347,9 @@ Must be projected inside a `mona-contextmenu-radio-group` to participate in sele
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `title` | `string` | — | Required. Header text displayed above the group's projected items. |
+| Name    | Type     | Default | Description                                                        |
+|---------|----------|---------|--------------------------------------------------------------------|
+| `title` | `string` | —       | Required. Header text displayed above the group's projected items. |
 
 `ContextMenuGroupComponent` has no outputs.
 
@@ -369,8 +369,8 @@ Renders a horizontal visual divider between items. Has no inputs or outputs.
 
 Customizes a group header's content.
 
-| Variable | Type | Description |
-|---|---|---|
+| Variable                     | Type     | Description        |
+|------------------------------|----------|--------------------|
 | `$implicit` (as `let-title`) | `string` | The group's title. |
 
 ---
@@ -381,13 +381,13 @@ Customizes a group header's content.
 
 Customize, respectively, an item's leading icon area, its trailing shortcut area (shown only on leaf items), and its label text.
 
-| Variable | Type | Description |
-|---|---|---|
-| `$implicit` (as `let-item`) | `PopupMenuItem` | The menu item. TODO(owner-review): `PopupMenuItem` is not exported from `@mirei/mona-ui`; consumers can read properties such as `item.label` and `item.disabled` but cannot import the type for an explicit annotation. |
+| Variable                    | Type            | Description                                                                                                                                                                                                                 |
+|-----------------------------|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `$implicit` (as `let-item`) | `PopupMenuItem` | The menu item. TODO(owner-review): `PopupMenuItem` is not exported from `@nanahoshi/mona-ui`; consumers can read properties such as `item.label` and `item.disabled` but cannot import the type for an explicit annotation. |
 
 ---
 
-TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by the icon/shortcut/text template contexts) is not exported from `@mirei/mona-ui`. `MenuItemClickEvent` (used by every `menuClick` output above) **is** exported, as a type alias for `PopupMenuItemClickEvent`.
+TODO(owner-review): `PopupMenuItem` (used by `ContextMenuComponent.items` and by the icon/shortcut/text template contexts) is not exported from `@nanahoshi/mona-ui`. `MenuItemClickEvent` (used by every `menuClick` output above) **is** exported, as a type alias for `PopupMenuItemClickEvent`.
 
 <!-- verification-checklist
 - [x] API definitions and defaults verified against source (context-menu.component.ts and inherited PopupMenu* base classes under common/popup-menu)

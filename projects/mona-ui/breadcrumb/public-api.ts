@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/breadcrumb
+ * Public API Surface of @nanahoshi/mona-ui/breadcrumb
  */
 
 export * from "./components/breadcrumb/breadcrumb.component";

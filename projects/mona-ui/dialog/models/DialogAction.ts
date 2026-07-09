@@ -1,4 +1,4 @@
-import { ButtonVariantProps } from "@mirei/mona-ui/button";
+import { ButtonVariantProps } from "@nanahoshi/mona-ui/button";
 
 export interface DialogAction<T = unknown> {
     cssClass?: string;

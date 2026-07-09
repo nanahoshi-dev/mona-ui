@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/progress-bar
+ * Public API Surface of @nanahoshi/mona-ui/progress-bar
  */
 
 export * from "./components/progress-bar/progress-bar.component";

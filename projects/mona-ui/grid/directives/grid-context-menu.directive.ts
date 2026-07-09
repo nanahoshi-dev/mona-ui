@@ -1,5 +1,5 @@
 import { contentChildren, Directive, effect, inject, untracked } from "@angular/core";
-import { ContextMenuItemComponent } from "@mirei/mona-ui/contextmenu";
+import { ContextMenuItemComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { GridService } from "../services/grid.service";
 
 @Directive({

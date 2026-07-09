@@ -17,10 +17,10 @@ import {
     ViewContainerRef
 } from "@angular/core";
 import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { createElementControlId, focusElement } from "@mirei/mona-ui/internal";
-import { PopupCloseEvent, PopupCloseSource, PopupDataInjectionToken } from "@mirei/mona-ui/popup";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { createElementControlId, focusElement } from "@nanahoshi/mona-ui/internal";
+import { PopupCloseEvent, PopupCloseSource, PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";

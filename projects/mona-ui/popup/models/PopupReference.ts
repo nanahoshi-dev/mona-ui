@@ -1,6 +1,6 @@
 import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 import { ComponentRef } from "@angular/core";
-import { Action } from "@mirei/mona-ui/internal";
+import { Action } from "@nanahoshi/mona-ui/internal";
 import { asyncScheduler, Observable, ReplaySubject, Subject } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "./PopupCloseEvent";
 import { PopupRef } from "./PopupRef";

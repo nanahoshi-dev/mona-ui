@@ -11,11 +11,11 @@ import {
     LucideOctagonX,
     LucideX
 } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { AnyPipe } from "@mirei/mona-ui/common";
-import { createElementControlId, focusElement } from "@mirei/mona-ui/internal";
-import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
-import { ThemeService } from "@mirei/mona-ui/theme";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { AnyPipe } from "@nanahoshi/mona-ui/common";
+import { createElementControlId, focusElement } from "@nanahoshi/mona-ui/internal";
+import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DialogAction } from "../../models/DialogAction";
 import { DialogInjectorData } from "../../models/DialogInjectorData";
 import {

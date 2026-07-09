@@ -24,7 +24,7 @@ There are two ways to use it:
 ## Import & Quick Start
 
 ```typescript
-import { DialogComponent } from "@mirei/mona-ui";
+import { DialogComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```html
@@ -44,7 +44,7 @@ Imperative usage returns a `DialogRef` synchronously:
 
 ```typescript
 import { inject } from "@angular/core";
-import { DialogService } from "@mirei/mona-ui";
+import { DialogService } from "@nanahoshi/mona-ui";
 
 protected readonly dialogService = inject(DialogService);
 
@@ -66,13 +66,13 @@ confirmDiscard(): void {
 
 Dialog has five structural template directives, each an `ng-template` placed as projected content inside `<mona-dialog>...</mona-dialog>`. None of them expose a template context.
 
-| Directive | Selector | Replaces |
-|---|---|---|
-| `DialogTitleTemplateDirective` | `ng-template[monaDialogTitleTemplate]` | The `title` input |
-| `DialogDescriptionTemplateDirective` | `ng-template[monaDialogDescriptionTemplate]` | The `description` input |
-| `DialogContentTemplateDirective` | `ng-template[monaDialogContentTemplate]` | The `text` input |
-| `DialogIconTemplateDirective` | `ng-template[monaDialogIconTemplate]` | The built-in `type` icon |
-| `DialogFooterTemplateDirective` | `ng-template[monaDialogFooterTemplate]` | The generated `actions` button row |
+| Directive                            | Selector                                     | Replaces                           |
+|--------------------------------------|----------------------------------------------|------------------------------------|
+| `DialogTitleTemplateDirective`       | `ng-template[monaDialogTitleTemplate]`       | The `title` input                  |
+| `DialogDescriptionTemplateDirective` | `ng-template[monaDialogDescriptionTemplate]` | The `description` input            |
+| `DialogContentTemplateDirective`     | `ng-template[monaDialogContentTemplate]`     | The `text` input                   |
+| `DialogIconTemplateDirective`        | `ng-template[monaDialogIconTemplate]`        | The built-in `type` icon           |
+| `DialogFooterTemplateDirective`      | `ng-template[monaDialogFooterTemplate]`      | The generated `actions` button row |
 
 ```html
 <mona-dialog title="Delete file?">
@@ -203,11 +203,11 @@ Dialog traps focus inside itself for as long as it is open — Tab and Shift+Tab
 
 ### ARIA
 
-| Attribute | When present | Value |
-|---|---|---|
-| `role` | Always | `"alertdialog"` when `type` is `"confirm"`, `"error"`, or `"warning"`; `"dialog"` otherwise |
-| `aria-labelledby` | Always | ID of the title element (rendered even when a custom `monaDialogTitleTemplate` is used) |
-| `aria-describedby` | Only when `description` or a `monaDialogDescriptionTemplate` is present | ID of the description element |
+| Attribute          | When present                                                            | Value                                                                                       |
+|--------------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `role`             | Always                                                                  | `"alertdialog"` when `type` is `"confirm"`, `"error"`, or `"warning"`; `"dialog"` otherwise |
+| `aria-labelledby`  | Always                                                                  | ID of the title element (rendered even when a custom `monaDialogTitleTemplate` is used)     |
+| `aria-describedby` | Only when `description` or a `monaDialogDescriptionTemplate` is present | ID of the description element                                                               |
 
 Dialog does not render `aria-modal`, even when `modal` is `true`. <!-- TODO(owner-review): confirm whether aria-modal should be added; Window renders it but Dialog currently does not. -->
 
@@ -221,35 +221,35 @@ Form integration is not applicable — Dialog is a container, not a form control
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `actions` | `Iterable<DialogAction>` | `[]` | Sets the actions of the dialog. |
-| `actionsLayout` | `ActionsLayout` | `"end"` | Sets the layout of the actions in the dialog footer. |
-| `closable` | `boolean` | `true` | Sets the visibility of the close button in the dialog header. |
-| `closeOnEscape` | `boolean` | `true` | Sets whether the dialog should close when the escape key is pressed. |
-| `description` | `string` | — | Sets the description of the dialog. |
-| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null` | — | Sets the element that should receive focus when the dialog is opened. When omitted, focus moves to the first focusable element automatically. |
-| `height` | `number` | — | Sets the height of the dialog. |
-| `left` | `number` | — | Sets the left position of the dialog. |
-| `maxHeight` | `number` | — | Sets the maximum height of the dialog. |
-| `maxWidth` | `number` | — | Sets the maximum width of the dialog. |
-| `minHeight` | `number` | — | Sets the minimum height of the dialog. |
-| `minWidth` | `number` | — | Sets the minimum width of the dialog. |
-| `modal` | `boolean` | `true` | Sets whether the dialog should have an overlay behind it. See [`modal` only controls the backdrop](#modal-only-controls-the-backdrop). |
-| `rounded` | `"none" \| "small" \| "medium" \| "large"` | `"medium"` | Border-radius preset applied to the component. |
-| `text` | `string` | — | Primary text content displayed by the component. |
-| `title` | `string` | — | Title text displayed in the component header or trigger. |
-| `top` | `number` | — | Sets the top position of the dialog. |
-| `type` | `"info" \| "success" \| "warning" \| "error" \| "confirm" \| null` | `"info"` | Visual severity type of the dialog, controlling its icon and semantic role. Set to `null` to render the dialog without an icon. |
-| `width` | `number` | — | Sets the width of the dialog. |
+| Name             | Type                                                               | Default    | Description                                                                                                                                   |
+|------------------|--------------------------------------------------------------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `actions`        | `Iterable<DialogAction>`                                           | `[]`       | Sets the actions of the dialog.                                                                                                               |
+| `actionsLayout`  | `ActionsLayout`                                                    | `"end"`    | Sets the layout of the actions in the dialog footer.                                                                                          |
+| `closable`       | `boolean`                                                          | `true`     | Sets the visibility of the close button in the dialog header.                                                                                 |
+| `closeOnEscape`  | `boolean`                                                          | `true`     | Sets whether the dialog should close when the escape key is pressed.                                                                          |
+| `description`    | `string`                                                           | —          | Sets the description of the dialog.                                                                                                           |
+| `focusedElement` | `HTMLElement \| ElementRef<HTMLElement> \| string \| null`         | —          | Sets the element that should receive focus when the dialog is opened. When omitted, focus moves to the first focusable element automatically. |
+| `height`         | `number`                                                           | —          | Sets the height of the dialog.                                                                                                                |
+| `left`           | `number`                                                           | —          | Sets the left position of the dialog.                                                                                                         |
+| `maxHeight`      | `number`                                                           | —          | Sets the maximum height of the dialog.                                                                                                        |
+| `maxWidth`       | `number`                                                           | —          | Sets the maximum width of the dialog.                                                                                                         |
+| `minHeight`      | `number`                                                           | —          | Sets the minimum height of the dialog.                                                                                                        |
+| `minWidth`       | `number`                                                           | —          | Sets the minimum width of the dialog.                                                                                                         |
+| `modal`          | `boolean`                                                          | `true`     | Sets whether the dialog should have an overlay behind it. See [`modal` only controls the backdrop](#modal-only-controls-the-backdrop).        |
+| `rounded`        | `"none" \| "small" \| "medium" \| "large"`                         | `"medium"` | Border-radius preset applied to the component.                                                                                                |
+| `text`           | `string`                                                           | —          | Primary text content displayed by the component.                                                                                              |
+| `title`          | `string`                                                           | —          | Title text displayed in the component header or trigger.                                                                                      |
+| `top`            | `number`                                                           | —          | Sets the top position of the dialog.                                                                                                          |
+| `type`           | `"info" \| "success" \| "warning" \| "error" \| "confirm" \| null` | `"info"`   | Visual severity type of the dialog, controlling its icon and semantic role. Set to `null` to render the dialog without an icon.               |
+| `width`          | `number`                                                           | —          | Sets the width of the dialog.                                                                                                                 |
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
-| `action` | `DialogActionEvent` | Emitted when the user clicks an action button. Call `event.preventDefault()` to keep the dialog open. |
-| `close` | `PopupCloseEvent` | Emits for every close path (close button, Escape, or a programmatic close). Preventable — see [`close` fires for every close path](#close-fires-for-every-close-path). |
-| `closed` | `void` | Emitted after the dialog has fully closed. Preventing this event has no effect. |
+| Name     | Type                | Description                                                                                                                                                            |
+|----------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `action` | `DialogActionEvent` | Emitted when the user clicks an action button. Call `event.preventDefault()` to keep the dialog open.                                                                  |
+| `close`  | `PopupCloseEvent`   | Emits for every close path (close button, Escape, or a programmatic close). Preventable — see [`close` fires for every close path](#close-fires-for-every-close-path). |
+| `closed` | `void`              | Emitted after the dialog has fully closed. Preventing this event has no effect.                                                                                        |
 
 ---
 
@@ -259,8 +259,8 @@ Injectable service, `providedIn: "root"`.
 
 #### Public methods
 
-| Name | Description |
-|---|---|
+| Name                                        | Description                                 |
+|---------------------------------------------|---------------------------------------------|
 | `show(settings: DialogSettings): DialogRef` | Opens a dialog and returns its `DialogRef`. |
 
 ---
@@ -271,23 +271,23 @@ Returned by `DialogService.show()`.
 
 #### Public methods
 
-| Name | Description |
-|---|---|
-| `close(result?: R): void` | Closes the dialog, optionally carrying a result value. |
+| Name                                          | Description                                                                                 |
+|-----------------------------------------------|---------------------------------------------------------------------------------------------|
+| `close(result?: R): void`                     | Closes the dialog, optionally carrying a result value.                                      |
 | `update(data: Partial<DialogSettings>): void` | Updates the dialog's content and appearance in place. Only the fields provided are changed. |
 
 #### Properties
 
-| Name | Type | Description |
-|---|---|---|
-| `close$` | `Observable<PopupCloseEvent<R>>` | Emits before any close proceeds. |
-| `closed$` | `Observable<void>` | Emits once the dialog has fully closed. |
-| `component` | `ComponentRef<unknown> \| null` | The hosted component instance, when `content` is a component rather than a `TemplateRef`. |
-| `element` | `HTMLElement` | The dialog's overlay element. |
-| `height` | `number` | The dialog's current rendered height, in pixels. |
-| `popupRef` | `PopupRef` | The underlying `PopupRef`, for advanced overlay access. |
-| `result` | `Observable<DialogResult>` | Emits the outcome of the dialog: an action click or a close. Primarily useful with `DialogService.show()`, where there is no `(action)`/`(close)` template binding to subscribe to instead. |
-| `width` | `number` | The dialog's current rendered width, in pixels. |
+| Name        | Type                             | Description                                                                                                                                                                                 |
+|-------------|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `close$`    | `Observable<PopupCloseEvent<R>>` | Emits before any close proceeds.                                                                                                                                                            |
+| `closed$`   | `Observable<void>`               | Emits once the dialog has fully closed.                                                                                                                                                     |
+| `component` | `ComponentRef<unknown> \| null`  | The hosted component instance, when `content` is a component rather than a `TemplateRef`.                                                                                                   |
+| `element`   | `HTMLElement`                    | The dialog's overlay element.                                                                                                                                                               |
+| `height`    | `number`                         | The dialog's current rendered height, in pixels.                                                                                                                                            |
+| `popupRef`  | `PopupRef`                       | The underlying `PopupRef`, for advanced overlay access.                                                                                                                                     |
+| `result`    | `Observable<DialogResult>`       | Emits the outcome of the dialog: an action click or a close. Primarily useful with `DialogService.show()`, where there is no `(action)`/`(close)` template binding to subscribe to instead. |
+| `width`     | `number`                         | The dialog's current rendered width, in pixels.                                                                                                                                             |
 
 ---
 
@@ -297,18 +297,18 @@ Extends `PreventableEvent`.
 
 #### Properties
 
-| Name | Type | Description |
-|---|---|---|
-| `action` | `DialogAction<T>` | The action that was clicked. |
-| `originalEvent` | `Event \| undefined` | Inherited from `PreventableEvent`. |
-| `type` | `string \| undefined` | Inherited from `PreventableEvent`. |
+| Name            | Type                  | Description                        |
+|-----------------|-----------------------|------------------------------------|
+| `action`        | `DialogAction<T>`     | The action that was clicked.       |
+| `originalEvent` | `Event \| undefined`  | Inherited from `PreventableEvent`. |
+| `type`          | `string \| undefined` | Inherited from `PreventableEvent`. |
 
 #### Inherited methods
 
-| Name | Description |
-|---|---|
-| `preventDefault(): void` | Marks the event as prevented, keeping the dialog open. |
-| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called. |
+| Name                            | Description                                            |
+|---------------------------------|--------------------------------------------------------|
+| `preventDefault(): void`        | Marks the event as prevented, keeping the dialog open. |
+| `isDefaultPrevented(): boolean` | Whether `preventDefault()` was called.                 |
 
 ---
 
@@ -316,14 +316,14 @@ Extends `PreventableEvent`.
 
 #### `DialogAction<T = unknown>`
 
-| Field | Type | Description |
-|---|---|---|
-| `text` | `string` | Required. The button's label. |
-| `cssClass` | `string` | Additional class applied to the action button. |
-| `data` | `T` | Arbitrary data associated with the action, readable from `DialogActionEvent.action.data`. |
-| `iconOnly` | `boolean` | Renders the button as icon-only. |
-| `look` | `ButtonVariantProps["look"]` | The action button's visual style. |
-| `rounded` | `ButtonVariantProps["rounded"]` | The action button's border-radius preset. Falls back to the dialog's own `rounded` when omitted. |
+| Field      | Type                            | Description                                                                                      |
+|------------|---------------------------------|--------------------------------------------------------------------------------------------------|
+| `text`     | `string`                        | Required. The button's label.                                                                    |
+| `cssClass` | `string`                        | Additional class applied to the action button.                                                   |
+| `data`     | `T`                             | Arbitrary data associated with the action, readable from `DialogActionEvent.action.data`.        |
+| `iconOnly` | `boolean`                       | Renders the button as icon-only.                                                                 |
+| `look`     | `ButtonVariantProps["look"]`    | The action button's visual style.                                                                |
+| `rounded`  | `ButtonVariantProps["rounded"]` | The action button's border-radius preset. Falls back to the dialog's own `rounded` when omitted. |
 
 #### `DialogResult`
 
@@ -333,13 +333,13 @@ Extends `PreventableEvent`.
 
 The settings object accepted by `DialogService.show()`. Fields mirror the `DialogComponent` inputs of the same name (`actions`, `actionsLayout`, `closable`, `closeOnEscape`, `description`, `focusedElement`, `height`, `left`, `maxHeight`, `maxWidth`, `minHeight`, `minWidth`, `modal`, `rounded`, `text`, `title`, `top`, `type`, `width`), plus these service-only fields:
 
-| Field | Type | Description |
-|---|---|---|
-| `content` | `TemplateRef<unknown>` | Template rendered in place of `text`. |
-| `descriptionTemplate` | `TemplateRef<unknown>` | Template rendered in place of `description`. |
-| `footerTemplate` | `TemplateRef<unknown>` | Template rendered in place of the generated action-button row. |
-| `iconTemplate` | `TemplateRef<unknown>` | Template rendered in place of the built-in `type` icon. |
-| `titleTemplate` | `TemplateRef<unknown>` | Template rendered in place of `title`. |
+| Field                 | Type                   | Description                                                    |
+|-----------------------|------------------------|----------------------------------------------------------------|
+| `content`             | `TemplateRef<unknown>` | Template rendered in place of `text`.                          |
+| `descriptionTemplate` | `TemplateRef<unknown>` | Template rendered in place of `description`.                   |
+| `footerTemplate`      | `TemplateRef<unknown>` | Template rendered in place of the generated action-button row. |
+| `iconTemplate`        | `TemplateRef<unknown>` | Template rendered in place of the built-in `type` icon.        |
+| `titleTemplate`       | `TemplateRef<unknown>` | Template rendered in place of `title`.                         |
 
 ---
 

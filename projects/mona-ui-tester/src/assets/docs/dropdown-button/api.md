@@ -24,7 +24,7 @@ import {
     DropdownButtonCheckboxItemComponent,
     DropdownButtonRadioGroupComponent,
     DropdownButtonRadioItemComponent
-} from "@mirei/mona-ui";
+} from "@nanahoshi/mona-ui";
 ```
 
 Add the components you need to your standalone component's `imports` array.
@@ -41,7 +41,7 @@ Add the components you need to your standalone component's `imports` array.
 ```
 
 ```typescript
-import type { MenuItemClickEvent } from "@mirei/mona-ui";
+import type { MenuItemClickEvent } from "@nanahoshi/mona-ui";
 
 protected onAction(event: MenuItemClickEvent): void { /* ... */ }
 ```
@@ -67,13 +67,13 @@ mona-dropdown-button
 
 Templates placed directly inside `<mona-dropdown-button>` apply globally to all matching items. Templates nested inside a specific item override only that item.
 
-| Directive attribute | Scope | Template context |
-|---|---|---|
-| `monaDropdownButtonTextTemplate` | Button label | `$implicit: string` — the current `text` input value |
-| `monaDropdownButtonMenuGroupTemplate` | Global / Group | `$implicit: string` — the group title |
-| `monaDropdownButtonMenuItemIconTemplate` | Global / Item | `$implicit` — menu item object (`label`, `disabled`) |
-| `monaDropdownButtonMenuItemShortcutTemplate` | Global / Item | `$implicit` — menu item object (`label`, `disabled`) |
-| `monaDropdownButtonMenuItemTextTemplate` | Global / Item | `$implicit` — menu item object (`label`, `disabled`) |
+| Directive attribute                          | Scope          | Template context                                     |
+|----------------------------------------------|----------------|------------------------------------------------------|
+| `monaDropdownButtonTextTemplate`             | Button label   | `$implicit: string` — the current `text` input value |
+| `monaDropdownButtonMenuGroupTemplate`        | Global / Group | `$implicit: string` — the group title                |
+| `monaDropdownButtonMenuItemIconTemplate`     | Global / Item  | `$implicit` — menu item object (`label`, `disabled`) |
+| `monaDropdownButtonMenuItemShortcutTemplate` | Global / Item  | `$implicit` — menu item object (`label`, `disabled`) |
+| `monaDropdownButtonMenuItemTextTemplate`     | Global / Item  | `$implicit` — menu item object (`label`, `disabled`) |
 
 **Customize the button label** (`monaDropdownButtonTextTemplate` receives the `text` value as context):
 
@@ -198,11 +198,11 @@ Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-bu
 
 ### Keyboard navigation
 
-| Key | Action |
-|-----|--------|
-| `Tab` | Move focus to / from the button |
-| `ArrowDown` / `ArrowUp` / `Enter` / `Space` | Open the popup menu |
-| `Escape` (while menu open) | Close the popup and return focus to the button |
+| Key                                         | Action                                         |
+|---------------------------------------------|------------------------------------------------|
+| `Tab`                                       | Move focus to / from the button                |
+| `ArrowDown` / `ArrowUp` / `Enter` / `Space` | Open the popup menu                            |
+| `Escape` (while menu open)                  | Close the popup and return focus to the button |
 
 > TODO(owner-review): Verify the full keyboard navigation map inside the popup (arrow key item traversal, Enter to select, Escape for nested submenus). Document once confirmed against runtime behavior.
 
@@ -210,12 +210,12 @@ Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-bu
 
 The button element carries the following attributes:
 
-| Attribute | When present | Value |
-|---|---|---|
-| `aria-haspopup` | Always | `"menu"` |
-| `aria-expanded` | Always | `"true"` when the menu is open, `"false"` when closed |
-| `aria-controls` | Always | The popup element's auto-generated ID |
-| `aria-label` | When `ariaLabelledby` is not set | Value of `ariaLabel`, or `"{text} dropdown button"` as fallback |
+| Attribute         | When present                       | Value                                                                         |
+|-------------------|------------------------------------|-------------------------------------------------------------------------------|
+| `aria-haspopup`   | Always                             | `"menu"`                                                                      |
+| `aria-expanded`   | Always                             | `"true"` when the menu is open, `"false"` when closed                         |
+| `aria-controls`   | Always                             | The popup element's auto-generated ID                                         |
+| `aria-label`      | When `ariaLabelledby` is not set   | Value of `ariaLabel`, or `"{text} dropdown button"` as fallback               |
 | `aria-labelledby` | When `ariaLabelledby` is non-empty | Forwarded from the `ariaLabelledby` input; takes precedence over `aria-label` |
 
 **Consumer responsibilities:**
@@ -231,23 +231,23 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `aria-label` | `string` | `""` | Accessible name for the dropdown button. Falls back to `"{text} dropdown button"` when empty; provide an explicit value when no visible text is present. |
-| `ariaLabelledby` | `string` | `""` | ID of an external element that provides the accessible name for the dropdown button. Takes precedence over `aria-label` when both are set. |
-| `class` | `string` | `""` | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `disabled` | `boolean` | `false` | Renders the button with reduced visual emphasis and removes pointer interaction. |
-| `iconOnly` | `boolean` | `false` | Renders the button as a square for icon-only usage, removing horizontal text padding. Set `ariaLabel` when no visible text is present to ensure an accessible name. |
-| `loading` | `boolean` | `false` | Displays a loading indicator and prevents interaction while an operation is in progress. |
-| `look` | `'clear' \| 'default' \| 'error' \| 'ghost' \| 'info' \| 'link' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual style preset applied to the button. |
-| `rounded` | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Border-radius preset applied to the button. |
-| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Size preset controlling the button's dimensions. |
-| `text` | `string` | `""` | Primary text content displayed inside the dropdown button. Passed as `$implicit` to a `monaDropdownButtonTextTemplate` when one is provided. |
+| Name             | Type                                                                                                                                | Default     | Description                                                                                                                                                         |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `aria-label`     | `string`                                                                                                                            | `""`        | Accessible name for the dropdown button. Falls back to `"{text} dropdown button"` when empty; provide an explicit value when no visible text is present.            |
+| `ariaLabelledby` | `string`                                                                                                                            | `""`        | ID of an external element that provides the accessible name for the dropdown button. Takes precedence over `aria-label` when both are set.                          |
+| `class`          | `string`                                                                                                                            | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                           |
+| `disabled`       | `boolean`                                                                                                                           | `false`     | Renders the button with reduced visual emphasis and removes pointer interaction.                                                                                    |
+| `iconOnly`       | `boolean`                                                                                                                           | `false`     | Renders the button as a square for icon-only usage, removing horizontal text padding. Set `ariaLabel` when no visible text is present to ensure an accessible name. |
+| `loading`        | `boolean`                                                                                                                           | `false`     | Displays a loading indicator and prevents interaction while an operation is in progress.                                                                            |
+| `look`           | `'clear' \| 'default' \| 'error' \| 'ghost' \| 'info' \| 'link' \| 'outline' \| 'primary' \| 'secondary' \| 'success' \| 'warning'` | `'default'` | Visual style preset applied to the button.                                                                                                                          |
+| `rounded`        | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'`                                                                                | `'medium'`  | Border-radius preset applied to the button.                                                                                                                         |
+| `size`           | `'large' \| 'medium' \| 'small'`                                                                                                    | `'medium'`  | Size preset controlling the button's dimensions.                                                                                                                    |
+| `text`           | `string`                                                                                                                            | `""`        | Primary text content displayed inside the dropdown button. Passed as `$implicit` to a `monaDropdownButtonTextTemplate` when one is provided.                        |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name            | Type                 | Description                                            |
+|-----------------|----------------------|--------------------------------------------------------|
 | `menuItemClick` | `MenuItemClickEvent` | Emitted when any item in the dropdown menu is clicked. |
 
 ---
@@ -258,15 +258,15 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
+| Name       | Type      | Default | Description                                                                |
+|------------|-----------|---------|----------------------------------------------------------------------------|
 | `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection. |
-| `label` | `string` | `""` | Display text of the menu item. |
+| `label`    | `string`  | `""`    | Display text of the menu item.                                             |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name        | Type                 | Description                                             |
+|-------------|----------------------|---------------------------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by mouse or keyboard. |
 
 ---
@@ -277,9 +277,9 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | — | Required. Section header text displayed above the group's items. |
+| Name    | Type     | Default | Description                                                      |
+|---------|----------|---------|------------------------------------------------------------------|
+| `title` | `string` | —       | Required. Section header text displayed above the group's items. |
 
 ---
 
@@ -289,18 +289,18 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `checked` | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
-| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection. |
-| `label` | `string` | `""` | Display text of the menu item. |
+| Name       | Type      | Default | Description                                                                 |
+|------------|-----------|---------|-----------------------------------------------------------------------------|
+| `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
+| `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection.  |
+| `label`    | `string`  | `""`    | Display text of the menu item.                                              |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
-| `checkedChange` | `boolean` | Emitted when the checked state changes after a click. Not emitted when `event.preventDefault()` is called on `menuClick`. |
-| `menuClick` | `MenuItemClickEvent` | Emitted when the item is clicked. Call `event.preventDefault()` to suppress the state change. |
+| Name            | Type                 | Description                                                                                                               |
+|-----------------|----------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `checkedChange` | `boolean`            | Emitted when the checked state changes after a click. Not emitted when `event.preventDefault()` is called on `menuClick`. |
+| `menuClick`     | `MenuItemClickEvent` | Emitted when the item is clicked. Call `event.preventDefault()` to suppress the state change.                             |
 
 ---
 
@@ -310,10 +310,10 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `""` | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered. |
-| `value` | `string` | `""` | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The matching `mona-dropdown-button-radio-item` with the same `value` renders as selected. |
+| Name    | Type     | Default | Description                                                                                                                                                                          |
+|---------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `title` | `string` | `""`    | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered.                                                    |
+| `value` | `string` | `""`    | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The matching `mona-dropdown-button-radio-item` with the same `value` renders as selected. |
 
 ---
 
@@ -323,16 +323,16 @@ The button element carries the following attributes:
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `disabled` | `boolean` | `false` | Renders the radio item with reduced visual emphasis and prevents selection. |
-| `label` | `string` | `""` | Display text of the radio item. |
-| `value` | `string` | — | Required. The value emitted to the parent `mona-dropdown-button-radio-group` when this item is selected. |
+| Name       | Type      | Default | Description                                                                                              |
+|------------|-----------|---------|----------------------------------------------------------------------------------------------------------|
+| `disabled` | `boolean` | `false` | Renders the radio item with reduced visual emphasis and prevents selection.                              |
+| `label`    | `string`  | `""`    | Display text of the radio item.                                                                          |
+| `value`    | `string`  | —       | Required. The value emitted to the parent `mona-dropdown-button-radio-group` when this item is selected. |
 
 #### Outputs
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name        | Type                 | Description                        |
+|-------------|----------------------|------------------------------------|
 | `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. |
 
 ---

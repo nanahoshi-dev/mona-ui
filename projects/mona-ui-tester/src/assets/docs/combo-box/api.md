@@ -27,7 +27,7 @@ Filtering, grouping, and virtual scrolling are opt-in through companion attribut
 ## Import & Quick Start
 
 ```typescript
-import { ComboBoxComponent } from "@mirei/mona-ui";
+import { ComboBoxComponent } from "@nanahoshi/mona-ui";
 ```
 
 ```typescript
@@ -213,7 +213,7 @@ While the popup is open, `Escape` reverts the displayed text to the currently se
 
 ### `DropdownFieldSelectorType`, `DropdownFieldPredicateType`, and `ListSizeInputType` are not exported
 
-`textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@mirei/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
+`textField`, `valueField`, `itemDisabled`, `popupHeight`, and `popupWidth` are typed with these generic aliases internally, but none of the three types are re-exported from `@nanahoshi/mona-ui`. Inline values (as in the examples above) still type-check structurally; only a standalone typed variable would require an import.
 `TODO(owner-review): confirm whether these types should be added to the public barrel export.`
 
 ## Accessibility & Forms Integration
@@ -385,7 +385,7 @@ No outputs.
 | `enabled` | `boolean`             | Whether virtual scrolling is active.                                      |
 | `height`  | `number \| undefined` | Fixed row height, in pixels, used to measure the virtual scroll viewport. |
 
-`PopupCloseEvent`, `PreventableEvent`, and `FilterChangeEvent` are also exported from `@mirei/mona-ui`.
+`PopupCloseEvent`, `PreventableEvent`, and `FilterChangeEvent` are also exported from `@nanahoshi/mona-ui`.
 
 `TODO(owner-review): DropdownFieldSelectorType<TData>, DropdownFieldPredicateType<TData>, and ListSizeInputType are used in public input signatures but are not exported — see` [DropdownFieldSelectorType, DropdownFieldPredicateType, and ListSizeInputType are not exported](#dropdownfieldselectortype-dropdownfieldpredicatetype-and-listsizeinputtype-are-not-exported).
 

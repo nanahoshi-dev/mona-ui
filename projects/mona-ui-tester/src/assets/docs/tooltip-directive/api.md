@@ -7,7 +7,7 @@ Use `TooltipDirective` when you want a styled, positioned tooltip driven entirel
 ## Import & Basic Usage
 
 ```typescript
-import { TooltipDirective } from "@mirei/mona-ui";
+import { TooltipDirective } from "@nanahoshi/mona-ui";
 ```
 
 **Basic usage — `host` mode:**
@@ -91,10 +91,10 @@ An open tooltip closes on <kbd>Escape</kbd> and on an outside click, in addition
 
 **Known limitation:** with the default `hideDelay` of `0`, the tooltip closes as soon as the pointer leaves the anchor. There is currently no way to move the pointer onto the tooltip panel itself before it closes.
 
-| Attribute         | When present                  | Value                                  |
-|--------------------|-------------------------------|-----------------------------------------|
-| `aria-describedby` | While the tooltip is open     | The tooltip panel's generated id        |
-| `role="tooltip"`   | On the tooltip panel itself, while open | `"tooltip"`                   |
+| Attribute          | When present                            | Value                            |
+|--------------------|-----------------------------------------|----------------------------------|
+| `aria-describedby` | While the tooltip is open               | The tooltip panel's generated id |
+| `role="tooltip"`   | On the tooltip panel itself, while open | `"tooltip"`                      |
 
 **Consumer responsibilities:**
 
@@ -108,24 +108,24 @@ An open tooltip closes on <kbd>Escape</kbd> and on an outside click, in addition
 
 #### Inputs
 
-| Name | Type | Default | Description |
-|---|---|---|---|
-| `disabled` | `boolean` | `false` | Whether the tooltip is disabled. When disabled, the tooltip will not be shown. |
-| `filter` | `string` | `'[title]'` | CSS selector matching descendant elements that receive tooltips. Only applies when `mode` is `'content'`. |
-| `hideDelay` | `number` | `0` | Delay in milliseconds before hiding the tooltip. |
-| `mode` | `'host' \| 'content'` | `'host'` | `'host'` reads the tooltip text from the host element's own `title` attribute. `'content'` reads it from descendant elements matching `filter`. |
-| `position` | `"top" \| "right" \| "bottom" \| "left"`¹ | `'top'` | Side of the target element the tooltip is anchored to. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the tooltip panel. Bound via the `tooltipRounded` alias. |
-| `showDelay` | `number` | `0` | Delay in milliseconds before showing the tooltip after the trigger event. |
+| Name        | Type                                                 | Default     | Description                                                                                                                                     |
+|-------------|------------------------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `disabled`  | `boolean`                                            | `false`     | Whether the tooltip is disabled. When disabled, the tooltip will not be shown.                                                                  |
+| `filter`    | `string`                                             | `'[title]'` | CSS selector matching descendant elements that receive tooltips. Only applies when `mode` is `'content'`.                                       |
+| `hideDelay` | `number`                                             | `0`         | Delay in milliseconds before hiding the tooltip.                                                                                                |
+| `mode`      | `'host' \| 'content'`                                | `'host'`    | `'host'` reads the tooltip text from the host element's own `title` attribute. `'content'` reads it from descendant elements matching `filter`. |
+| `position`  | `"top" \| "right" \| "bottom" \| "left"`¹            | `'top'`     | Side of the target element the tooltip is anchored to.                                                                                          |
+| `rounded`   | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'`  | Border-radius preset applied to the tooltip panel. Bound via the `tooltipRounded` alias.                                                        |
+| `showDelay` | `number`                                             | `0`         | Delay in milliseconds before showing the tooltip after the trigger event.                                                                       |
 
-¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@mirei/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
+¹ Exposed publicly via the `Position` type, which is referenced by this input but not exported from `@nanahoshi/mona-ui`. <!-- TODO(owner-review): confirm whether Position should be exported. -->
 
 #### Outputs
 
-| Name | Type | Description |
-|---|---|---|
+| Name     | Type   | Description                               |
+|----------|--------|-------------------------------------------|
 | `hidden` | `void` | Emitted when the tooltip popup is hidden. |
-| `shown` | `void` | Emitted when the tooltip popup is shown. |
+| `shown`  | `void` | Emitted when the tooltip popup is shown.  |
 
 ---
 

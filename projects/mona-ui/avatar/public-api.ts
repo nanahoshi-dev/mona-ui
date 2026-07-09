@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/avatar
+ * Public API Surface of @nanahoshi/mona-ui/avatar
  */
 
 export * from "./components/avatar/avatar.component";

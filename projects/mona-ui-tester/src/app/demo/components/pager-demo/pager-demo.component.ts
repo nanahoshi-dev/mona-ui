@@ -1,9 +1,9 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
-import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
+import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
 import {
     type PageChangeEvent,
     PagerComponent,
@@ -11,8 +11,8 @@ import {
     PagerNavigationButtonsTemplateDirective,
     PagerNumericButtonsTemplateDirective,
     PagerPageSizeTemplateDirective
-} from "@mirei/mona-ui/pager";
-import { SliderComponent } from "@mirei/mona-ui/slider";
+} from "@nanahoshi/mona-ui/pager";
+import { SliderComponent } from "@nanahoshi/mona-ui/slider";
 
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

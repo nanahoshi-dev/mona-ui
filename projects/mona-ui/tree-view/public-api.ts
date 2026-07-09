@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/tree-view
+ * Public API Surface of @nanahoshi/mona-ui/tree-view
  */
 
 export * from "./components/tree-view/tree-view.component";
@@ -32,4 +32,4 @@ export {
     NodeKeySelector,
     NodeMoveSnapshot,
     SelectableOptions
-} from "@mirei/mona-ui/internal/tree";
+} from "@nanahoshi/mona-ui/internal/tree";

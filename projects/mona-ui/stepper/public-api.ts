@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/stepper
+ * Public API Surface of @nanahoshi/mona-ui/stepper
  */
 
 export type { StepOptions } from "./models/Step";

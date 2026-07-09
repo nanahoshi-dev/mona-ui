@@ -3,7 +3,7 @@ import {
     PopupMenuShortcutTemplateDirective,
     PopupMenuShortcutTemplateToken,
     PopupMenuTemplateOrigin
-} from "@mirei/mona-ui/popup-menu";
+} from "@nanahoshi/mona-ui/popup-menu";
 
 @Directive({
     selector: "ng-template[monaMenuItemShortcutTemplate]",

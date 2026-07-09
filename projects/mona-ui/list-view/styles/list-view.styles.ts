@@ -1,7 +1,7 @@
 import type { VariantProps } from "class-variance-authority";
 import { listViewBaseVariants as monaListViewBaseVariants } from "./list-view.mona.styles";
-import { ThemeStyle } from "@mirei/mona-ui/theme";
-import { VariantInputs } from "@mirei/mona-ui/internal";
+import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const listViewBaseThemeVariants = (theme: ThemeStyle) => {
     switch (theme) {

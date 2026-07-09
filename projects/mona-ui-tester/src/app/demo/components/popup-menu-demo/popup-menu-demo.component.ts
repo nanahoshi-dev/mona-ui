@@ -9,8 +9,8 @@ import {
     LucideRotateCw,
     LucideSettings
 } from "@lucide/angular";
-import { ButtonDirective } from "@mirei/mona-ui/button";
-import { MenuItemClickEvent } from "@mirei/mona-ui/menubar";
+import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { MenuItemClickEvent } from "@nanahoshi/mona-ui/menubar";
 import {
     type MenuItem,
     PopupMenuCheckboxItemComponent,
@@ -24,7 +24,7 @@ import {
     PopupMenuSeparatorComponent,
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
-} from "@mirei/mona-ui/popup-menu";
+} from "@nanahoshi/mona-ui/popup-menu";
 import { RandomColorPipe } from "../../pipes/random-color.pipe";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";

@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/editor
+ * Public API Surface of @nanahoshi/mona-ui/editor
  */
 
 export * from "./components/editor/editor.component";

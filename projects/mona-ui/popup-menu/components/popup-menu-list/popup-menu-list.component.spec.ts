@@ -2,7 +2,7 @@ import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { groupBy } from "@mirei/ts-collections";
 import { Subject } from "rxjs";
-import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
+import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";

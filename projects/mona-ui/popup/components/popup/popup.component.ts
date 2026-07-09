@@ -19,7 +19,7 @@ import {
     viewChild
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Action, rxTimeout } from "@mirei/mona-ui/internal";
+import { Action, rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { fromEvent, Subject, take, takeUntil } from "rxjs";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupOffset } from "../../models/PopupOffset";

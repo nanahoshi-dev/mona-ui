@@ -1,4 +1,4 @@
-import { ScrollDirection } from "@mirei/mona-ui/common";
+import { ScrollDirection } from "@nanahoshi/mona-ui/common";
 
 export interface ScrollIntent {
     direction: ScrollDirection;

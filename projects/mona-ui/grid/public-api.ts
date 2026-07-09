@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/grid
+ * Public API Surface of @nanahoshi/mona-ui/grid
  */
 
 export { CellEditEvent } from "./models/CellEditEvent";

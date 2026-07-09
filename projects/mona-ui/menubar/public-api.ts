@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @mirei/mona-ui/menubar
+ * Public API Surface of @nanahoshi/mona-ui/menubar
  */
 
 export { MenuItemClickEvent } from "./models/MenuItemClickEvent";

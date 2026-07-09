@@ -1,12 +1,12 @@
 import { DatePipe, JsonPipe } from "@angular/common";
 import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropdownItemTemplateDirective } from "@mirei/mona-ui/dropdowns";
-import { ColorPickerComponent } from "@mirei/mona-ui/color-picker";
-import { DropdownListComponent, DropdownListValueTemplateDirective } from "@mirei/mona-ui/dropdown-list";
-import { NumericTextBoxComponent } from "@mirei/mona-ui/numeric-text-box";
-import { SwitchComponent } from "@mirei/mona-ui/switch";
-import { TextBoxComponent } from "@mirei/mona-ui/text-box";
+import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
+import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
+import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
+import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
+import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { InputPropertyPipe } from "../../pipes/input-type.pipe";
 import { ProcessedConfigItem } from "../../utils/componentConfig";

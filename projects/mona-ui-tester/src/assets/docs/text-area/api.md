@@ -7,7 +7,7 @@ Use `TextAreaDirective` when you need a styled multi-line input and want full co
 ## Import & Basic Usage
 
 ```typescript
-import { TextAreaDirective } from "@mirei/mona-ui";
+import { TextAreaDirective } from "@nanahoshi/mona-ui";
 ```
 
 Add the imported symbol to your standalone component's `imports` array.
@@ -56,21 +56,21 @@ When used with Angular Reactive Forms (`formControl`, `formControlName`, or `ngM
 
 ### `rounded` presets
 
-| `rounded`  | Shape                       |
-|------------|-----------------------------|
-| `none`     | No rounding                 |
-| `small`    | Slight rounding             |
-| `medium`   | Moderate rounding (default) |
-| `large`    | Strong rounding             |
+| `rounded` | Shape                       |
+|-----------|-----------------------------|
+| `none`    | No rounding                 |
+| `small`   | Slight rounding             |
+| `medium`  | Moderate rounding (default) |
+| `large`   | Strong rounding             |
 
 ### Visual states
 
-| State    | Appearance                                                        |
-|----------|-------------------------------------------------------------------|
-| Default  | Mona UI themed border and background                              |
-| Focused  | Visible focus ring using the primary color (keyboard only)        |
-| Disabled | Reduced visual emphasis; pointer interaction removed              |
-| Invalid  | Error-colored border and ring                                     |
+| State    | Appearance                                                 |
+|----------|------------------------------------------------------------|
+| Default  | Mona UI themed border and background                       |
+| Focused  | Visible focus ring using the primary color (keyboard only) |
+| Disabled | Reduced visual emphasis; pointer interaction removed       |
+| Invalid  | Error-colored border and ring                              |
 
 The invalid state activates when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes these automatically. When using Angular Reactive Forms without signal forms, the invalid styling is applied automatically based on Angular's validation class state.
 
@@ -100,9 +100,9 @@ The directive does not manage an accessible name. Associate a label using one of
 <textarea id="notes-field" monaTextArea rows="4"></textarea>
 ```
 
-| Attribute      | When present                                          | Value    |
-|----------------|-------------------------------------------------------|----------|
-| `aria-invalid` | When both `invalid` and `touched` are `true`          | `"true"` |
+| Attribute      | When present                                 | Value    |
+|----------------|----------------------------------------------|----------|
+| `aria-invalid` | When both `invalid` and `touched` are `true` | `"true"` |
 
 **Consumer responsibilities:**
 
@@ -116,12 +116,12 @@ The directive does not manage an accessible name. Associate a label using one of
 
 #### Inputs
 
-| Name      | Type                                          | Default    | Description                                                                                                      |
-|-----------|-----------------------------------------------|------------|------------------------------------------------------------------------------------------------------------------|
-| `class`   | `string`                                      | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                        |
-| `invalid` | `boolean`                                     | `false`    | Marks the textarea as invalid, triggering error border and ring styling. When using `[formField]`, `FormField` writes this automatically. |
-| `rounded` | `'large' \| 'medium' \| 'none' \| 'small'`   | `'medium'` | Border-radius preset applied to the component.                                                                   |
-| `touched` | `boolean`                                     | `false`    | Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes this automatically. |
+| Name      | Type                                       | Default    | Description                                                                                                                                                               |
+|-----------|--------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `class`   | `string`                                   | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                 |
+| `invalid` | `boolean`                                  | `false`    | Marks the textarea as invalid, triggering error border and ring styling. When using `[formField]`, `FormField` writes this automatically.                                 |
+| `rounded` | `'large' \| 'medium' \| 'none' \| 'small'` | `'medium'` | Border-radius preset applied to the component.                                                                                                                            |
+| `touched` | `boolean`                                  | `false`    | Marks the textarea as touched. Error styling is only shown when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes this automatically. |
 
 `TextAreaDirective` has no outputs. All native `<textarea>` events (`input`, `change`, `blur`, `focus`, etc.) are available directly on the host element.
 
