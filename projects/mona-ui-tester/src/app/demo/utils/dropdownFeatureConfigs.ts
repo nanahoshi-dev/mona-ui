@@ -1,4 +1,4 @@
-import { DropdownFieldSelectorType } from "@mirei/mona-ui/dropdowns/models/DropdownFieldTypes";
+import { DropdownFieldSelectorType } from "@mirei/mona-ui/dropdowns";
 import { ComponentConfigFeatureItemOptions } from "./componentConfig";
 
 export const dropdownFilteringFeatureConfig = <TDropdown = any>(

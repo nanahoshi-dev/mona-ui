@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { CheckableOptions, TreeService } from "@mirei/mona-ui/internal/tree";
 import { TreeViewComponent } from "../components/tree-view/tree-view.component";
 import { TreeViewCheckableDirective } from "./tree-view-checkable.directive";
@@ -47,7 +46,7 @@ describe("TreeViewCheckableDirective wiring to TreeService", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [HostComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
 
         fixture = TestBed.createComponent(HostComponent);

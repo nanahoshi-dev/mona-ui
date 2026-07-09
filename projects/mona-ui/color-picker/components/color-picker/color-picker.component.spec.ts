@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
@@ -98,7 +97,7 @@ describe("ColorPickerComponent", () => {
 
     it("should create", async () => {
         await TestBed.configureTestingModule({
-            imports: [ColorPickerComponent, BrowserAnimationsModule]
+            imports: [ColorPickerComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(ColorPickerComponent);
@@ -277,7 +276,7 @@ describe("ColorPickerComponent clear button", () => {
 
     it("resets the value and closes the popup when the clear button is clicked", async () => {
         await TestBed.configureTestingModule({
-            imports: [ClearButtonColorPickerHostComponent, BrowserAnimationsModule]
+            imports: [ClearButtonColorPickerHostComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(ClearButtonColorPickerHostComponent);
@@ -300,7 +299,7 @@ describe("ColorPickerComponent closeOnSelect", () => {
 
     it("keeps the popup open after selecting a color when closeOnSelect is false", async () => {
         await TestBed.configureTestingModule({
-            imports: [CloseOnSelectColorPickerHostComponent, BrowserAnimationsModule]
+            imports: [CloseOnSelectColorPickerHostComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(CloseOnSelectColorPickerHostComponent);
@@ -383,7 +382,7 @@ describe("ColorPickerComponent gradient state propagation", () => {
 
 async function createValueBindingFixture(): Promise<ComponentFixture<ValueBindingColorPickerHostComponent>> {
     await TestBed.configureTestingModule({
-        imports: [ValueBindingColorPickerHostComponent, BrowserAnimationsModule]
+        imports: [ValueBindingColorPickerHostComponent]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(ValueBindingColorPickerHostComponent);
@@ -393,7 +392,7 @@ async function createValueBindingFixture(): Promise<ComponentFixture<ValueBindin
 
 async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormColorPickerHostComponent>> {
     await TestBed.configureTestingModule({
-        imports: [SignalFormColorPickerHostComponent, BrowserAnimationsModule]
+        imports: [SignalFormColorPickerHostComponent]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(SignalFormColorPickerHostComponent);

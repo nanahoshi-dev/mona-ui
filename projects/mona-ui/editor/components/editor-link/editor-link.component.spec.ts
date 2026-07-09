@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { EditorService } from "../../services/editor.service";
 
 import { EditorLinkComponent } from "./editor-link.component";
@@ -20,8 +19,7 @@ describe("EditorLinkComponent", () => {
                         },
                         state: vi.fn()
                     }
-                },
-                provideAnimations()
+                }
             ]
         }).compileComponents();
 

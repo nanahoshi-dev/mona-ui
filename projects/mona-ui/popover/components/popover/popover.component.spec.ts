@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Observable, Subject } from "rxjs";
 import { PopupCloseEvent, PopupService } from "@mirei/mona-ui/popup";
@@ -134,7 +133,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverComponentTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
@@ -155,7 +154,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverComponentTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
@@ -190,7 +189,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverComponentTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
@@ -225,7 +224,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverComponentTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
@@ -258,7 +257,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverEventsTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverEventsTestComponent);
@@ -341,7 +340,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverComponentTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverComponentTestComponent);
@@ -394,7 +393,7 @@ describe("PopoverComponent", () => {
 
             await TestBed.configureTestingModule({
                 imports: [PopoverTemplatesTestComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             hostFixture = TestBed.createComponent(PopoverTemplatesTestComponent);

@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, readonly } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { TimePickerComponent } from "./time-picker.component";
 
 describe("TimePickerComponent", () => {
@@ -9,7 +8,7 @@ describe("TimePickerComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [TimePickerHostComponent, BrowserAnimationsModule]
+            imports: [TimePickerHostComponent]
         });
         fixture = TestBed.createComponent(TimePickerHostComponent);
         fixture.detectChanges();

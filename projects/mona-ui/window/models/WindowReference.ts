@@ -80,7 +80,11 @@ export class WindowReference<R = unknown> implements WindowRefParams<R> {
 
     public get component(): ComponentRef<unknown> | null {
         // The type of component is ComponentRef<WindowContentComponent>. It is set as unknown to avoid circular dependency.
-        return (this.popupRef.component as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance.componentRef ?? null;
+        const popupComponent = this.popupRef.component;
+        if (!popupComponent) {
+            return null;
+        }
+        return (popupComponent as ComponentRef<{ componentRef: ComponentRef<unknown> }>).instance.componentRef ?? null;
     }
 
     public get drag$(): Observable<MoveEvent> {

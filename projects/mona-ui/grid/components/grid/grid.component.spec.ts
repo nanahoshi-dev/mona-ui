@@ -1,6 +1,5 @@
 import type { CdkDragStart } from "@angular/cdk/drag-drop";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { ImmutableList } from "@mirei/ts-collections";
 import { PagerComponent } from "@mirei/mona-ui/pager";
 import type { Column } from "../../models/Column";
@@ -58,7 +57,7 @@ describe("GridComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [GridComponent, PagerComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
         fixture = TestBed.createComponent(GridComponent);
         component = fixture.componentInstance;

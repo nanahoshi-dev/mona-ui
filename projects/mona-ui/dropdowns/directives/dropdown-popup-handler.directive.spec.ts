@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { DropdownPopupInputToken } from "../models/DropdownPopupInput";
 import { DropdownService } from "../services/dropdown.service";
 import { DropdownPopupHandlerDirective } from "./dropdown-popup-handler.directive";
@@ -23,8 +22,7 @@ describe("DropdownPopupHandlerDirective", () => {
                 {
                     provide: DropdownPopupInputToken,
                     useValue: () => {}
-                },
-                provideNoopAnimations()
+                }
             ]
         }).compileComponents();
 

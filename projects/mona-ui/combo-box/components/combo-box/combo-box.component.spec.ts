@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { ComboBoxComponent } from "./combo-box.component";
@@ -46,7 +45,7 @@ describe("ComboBoxComponent", () => {
 
     it("creates", async () => {
         await TestBed.configureTestingModule({
-            imports: [ComboBoxComponent, BrowserAnimationsModule]
+            imports: [ComboBoxComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(ComboBoxComponent);
@@ -168,7 +167,7 @@ describe("ComboBoxComponent", () => {
 
     it("falls back the input's accessible name to the placeholder when no aria-label is provided", async () => {
         await TestBed.configureTestingModule({
-            imports: [ComboBoxComponent, BrowserAnimationsModule]
+            imports: [ComboBoxComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(ComboBoxComponent);
@@ -190,7 +189,7 @@ describe("ComboBoxComponent", () => {
 
 async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormComboBoxHostComponent>> {
     await TestBed.configureTestingModule({
-        imports: [SignalFormComboBoxHostComponent, BrowserAnimationsModule]
+        imports: [SignalFormComboBoxHostComponent]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(SignalFormComboBoxHostComponent);

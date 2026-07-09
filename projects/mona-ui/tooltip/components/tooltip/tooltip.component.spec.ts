@@ -1,7 +1,6 @@
 import { Component, ElementRef, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { ConnectionPositionPair } from "@angular/cdk/overlay";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Observable, Subject } from "rxjs";
@@ -143,7 +142,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestBasicTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestBasicTooltipHost);
@@ -175,7 +174,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestBasicTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestBasicTooltipHost);
@@ -212,7 +211,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -273,7 +272,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestSelectorTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestSelectorTooltipHost);
@@ -330,7 +329,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -384,7 +383,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -435,7 +434,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -499,7 +498,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -574,7 +573,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -629,7 +628,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -704,7 +703,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -735,7 +734,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -769,7 +768,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);
@@ -817,7 +816,7 @@ describe("TooltipComponent", () => {
             mockPopupService = { create: vi.fn().mockReturnValue(mockPopupRef) };
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableTooltipHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableTooltipHost);

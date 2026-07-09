@@ -12,7 +12,7 @@
                 }
             },
             "root": "projects/mona-ui",
-            "sourceRoot": "projects/mona-ui/src",
+            "sourceRoot": "projects/mona-ui",
             "prefix": "mona",
             "architect": {
                 "build": {

@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { NodeItem } from "@mirei/mona-ui/internal/tree";
 
 import { TreeViewComponent } from "./tree-view.component";
@@ -31,7 +30,7 @@ describe("TreeViewComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [TreeViewComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
 
         fixture = TestBed.createComponent(TreeViewComponent);

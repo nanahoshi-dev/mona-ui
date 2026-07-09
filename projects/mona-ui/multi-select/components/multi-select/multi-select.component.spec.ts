@@ -7,7 +7,6 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { MultiSelectVariantProps } from "../../styles/multi-select.styles";
@@ -54,7 +53,7 @@ describe("MultiSelectComponent", () => {
 
     it("creates", async () => {
         await TestBed.configureTestingModule({
-            imports: [MultiSelectComponent, BrowserAnimationsModule]
+            imports: [MultiSelectComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(MultiSelectComponent);
@@ -171,7 +170,7 @@ describe("MultiSelectComponent", () => {
 
 async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormMultiSelectHostComponent>> {
     await TestBed.configureTestingModule({
-        imports: [SignalFormMultiSelectHostComponent, BrowserAnimationsModule]
+        imports: [SignalFormMultiSelectHostComponent]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(SignalFormMultiSelectHostComponent);

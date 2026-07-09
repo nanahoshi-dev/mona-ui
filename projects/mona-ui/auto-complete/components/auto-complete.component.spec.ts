@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { AutoCompleteComponent } from "./auto-complete.component";
@@ -45,7 +44,7 @@ describe("AutoCompleteComponent", () => {
 
     it("creates", async () => {
         await TestBed.configureTestingModule({
-            imports: [AutoCompleteComponent, BrowserAnimationsModule]
+            imports: [AutoCompleteComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(AutoCompleteComponent);
@@ -155,7 +154,7 @@ describe("AutoCompleteComponent", () => {
 
     it("falls back the input's accessible name to the placeholder when no aria-label is provided", async () => {
         await TestBed.configureTestingModule({
-            imports: [AutoCompleteComponent, BrowserAnimationsModule]
+            imports: [AutoCompleteComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(AutoCompleteComponent);
@@ -177,7 +176,7 @@ describe("AutoCompleteComponent", () => {
 
 async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormAutoCompleteHostComponent>> {
     await TestBed.configureTestingModule({
-        imports: [SignalFormAutoCompleteHostComponent, BrowserAnimationsModule]
+        imports: [SignalFormAutoCompleteHostComponent]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(SignalFormAutoCompleteHostComponent);

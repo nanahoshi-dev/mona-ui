@@ -1,6 +1,5 @@
 import { Component, signal, TemplateRef, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { Subject } from "rxjs";
 import { NotificationData } from "../../models/NotificationData";
 import { NotificationComponent } from "./notification.component";
@@ -36,7 +35,7 @@ describe("NotificationComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [NotificationComponent, BrowserAnimationsModule]
+            imports: [NotificationComponent]
         });
         notificationData = createNotificationData();
         fixture = createFixture(notificationData);

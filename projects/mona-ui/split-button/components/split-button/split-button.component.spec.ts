@@ -1,6 +1,5 @@
 import { CommonModule } from "@angular/common";
 import { ApplicationRef, Component } from "@angular/core";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { BrowserModule, By } from "@angular/platform-browser";
 import { MenuItemComponent } from "../../../menubar/components/menu-item/menu-item.component";
@@ -52,7 +51,7 @@ describe("SplitButtonComponent", () => {
                 ContextMenuComponent,
                 ButtonDirective
             ],
-            providers: [ApplicationRef, provideAnimations()]
+            providers: [ApplicationRef]
         });
         fixture = TestBed.createComponent(SplitButtonComponent);
         hostFixture = TestBed.createComponent(TestHostComponent);

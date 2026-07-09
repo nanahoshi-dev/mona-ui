@@ -1,6 +1,5 @@
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { EditorService } from "../../services/editor.service";
 
 import { EditorHeadingsComponent } from "./editor-headings.component";
@@ -45,8 +44,7 @@ describe("EditorHeadingsComponent", () => {
                             }
                         })
                     }
-                },
-                provideAnimations()
+                }
             ]
         }).compileComponents();
 

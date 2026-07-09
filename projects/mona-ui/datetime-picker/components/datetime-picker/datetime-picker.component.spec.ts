@@ -1,7 +1,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, readonly } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { DateTimePickerComponent } from "./datetime-picker.component";
 
 describe("DateTimePickerComponent", () => {
@@ -9,7 +8,7 @@ describe("DateTimePickerComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [DateTimePickerHostComponent, BrowserAnimationsModule]
+            imports: [DateTimePickerHostComponent]
         });
         fixture = TestBed.createComponent(DateTimePickerHostComponent);
         fixture.detectChanges();

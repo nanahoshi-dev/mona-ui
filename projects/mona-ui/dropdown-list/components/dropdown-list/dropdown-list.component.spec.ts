@@ -7,7 +7,6 @@ import {
     readonly as fieldReadonly,
     required
 } from "@angular/forms/signals";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { DropdownListComponent } from "./dropdown-list.component";
@@ -52,7 +51,7 @@ describe("DropdownListComponent", () => {
 
     it("creates", async () => {
         await TestBed.configureTestingModule({
-            imports: [DropdownListComponent, BrowserAnimationsModule]
+            imports: [DropdownListComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(DropdownListComponent);
@@ -171,7 +170,7 @@ describe("DropdownListComponent", () => {
 
     it("falls back the accessible name to the placeholder when no aria-label is provided", async () => {
         await TestBed.configureTestingModule({
-            imports: [DropdownListComponent, BrowserAnimationsModule]
+            imports: [DropdownListComponent]
         }).compileComponents();
 
         const fixture = TestBed.createComponent(DropdownListComponent);
@@ -184,7 +183,7 @@ describe("DropdownListComponent", () => {
 
 async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormDropdownListHostComponent>> {
     await TestBed.configureTestingModule({
-        imports: [SignalFormDropdownListHostComponent, BrowserAnimationsModule]
+        imports: [SignalFormDropdownListHostComponent]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(SignalFormDropdownListHostComponent);

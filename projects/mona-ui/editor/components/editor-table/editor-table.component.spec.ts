@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { EditorService } from "../../services/editor.service";
 
 import { EditorTableComponent } from "./editor-table.component";
@@ -32,8 +31,7 @@ describe("EditorTableComponent", () => {
                         },
                         state: vi.fn()
                     }
-                },
-                provideAnimations()
+                }
             ]
         }).compileComponents();
 

@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { DropdownListComponent } from "../../../dropdown-list/components/dropdown-list/dropdown-list.component";
 import { NumericTextBoxComponent } from "../../../numeric-text-box/components/numeric-text-box/numeric-text-box.component";
 import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
@@ -40,7 +39,7 @@ describe("PagerComponent", () => {
 
         TestBed.configureTestingModule({
             imports: [PagerComponent],
-            providers: [provideAnimations()]
+            providers: []
         });
         fixture = TestBed.createComponent(PagerComponent);
     });
@@ -523,7 +522,7 @@ describe("PagerComponent with info template", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PagerInfoTemplateHostComponent],
-            providers: [provideAnimations()]
+            providers: []
         });
         hostFixture = TestBed.createComponent(PagerInfoTemplateHostComponent);
         hostFixture.detectChanges();
@@ -554,7 +553,7 @@ describe("PagerComponent with navigation button template", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PagerNavigationTemplateHostComponent],
-            providers: [provideAnimations()]
+            providers: []
         });
         hostFixture = TestBed.createComponent(PagerNavigationTemplateHostComponent);
         hostFixture.detectChanges();
@@ -585,7 +584,7 @@ describe("PagerComponent with numeric buttons template", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PagerNumericTemplateHostComponent],
-            providers: [provideAnimations()]
+            providers: []
         });
         hostFixture = TestBed.createComponent(PagerNumericTemplateHostComponent);
         hostFixture.detectChanges();
@@ -618,7 +617,7 @@ describe("PagerComponent with focusable template markers", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PagerFocusableTemplateHostComponent],
-            providers: [provideAnimations()]
+            providers: []
         });
         hostFixture = TestBed.createComponent(PagerFocusableTemplateHostComponent);
         hostFixture.detectChanges();
@@ -659,7 +658,7 @@ describe("PagerComponent with page-size template", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [PagerPageSizeTemplateHostComponent],
-            providers: [provideAnimations()]
+            providers: []
         });
         hostFixture = TestBed.createComponent(PagerPageSizeTemplateHostComponent);
         hostFixture.detectChanges();

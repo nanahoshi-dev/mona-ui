@@ -1,6 +1,5 @@
 import { Component, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { DOCUMENT } from "@angular/core";
 
 import { ContextMenuComponent } from "./context-menu.component";
@@ -14,7 +13,7 @@ describe("ContextMenuComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [ContextMenuComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
 
         fixture = TestBed.createComponent(ContextMenuComponent);
@@ -69,7 +68,7 @@ describe("ContextMenuComponent keyboard trigger and menu click", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [ContextMenuHostComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
 
         fixture = TestBed.createComponent(ContextMenuHostComponent);

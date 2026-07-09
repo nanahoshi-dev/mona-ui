@@ -1,5 +1,4 @@
 import { TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 
 import { WindowService } from "./window.service";
 
@@ -8,7 +7,7 @@ describe("WindowService", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [BrowserAnimationsModule]
+            imports: []
         });
         service = TestBed.inject(WindowService);
     });

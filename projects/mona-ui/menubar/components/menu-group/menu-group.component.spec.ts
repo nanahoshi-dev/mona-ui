@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { MenuGroupComponent } from "./menu-group.component";
 
@@ -10,7 +9,7 @@ describe("MenuItemGroupComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [MenuGroupComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
 
         fixture = TestBed.createComponent(MenuGroupComponent);

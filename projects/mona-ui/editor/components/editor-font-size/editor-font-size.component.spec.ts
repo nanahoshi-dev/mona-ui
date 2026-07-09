@@ -1,6 +1,5 @@
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { EditorService } from "../../services/editor.service";
 
@@ -23,8 +22,7 @@ describe("EditorFontSizeComponent", () => {
                         state: vi.fn(),
                         fontSizes: signal(ImmutableSet.create(["16px", "24px"]))
                     }
-                },
-                provideAnimations()
+                }
             ]
         }).compileComponents();
 

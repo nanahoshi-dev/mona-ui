@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { MenuItemComponent } from "./menu-item.component";
 
@@ -10,7 +9,7 @@ describe("MenuItemComponent", () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [MenuItemComponent],
-            providers: [provideAnimations()]
+            providers: []
         }).compileComponents();
 
         fixture = TestBed.createComponent(MenuItemComponent);

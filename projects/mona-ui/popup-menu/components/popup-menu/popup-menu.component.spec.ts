@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PopupMenuComponent } from './popup-menu.component';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { DOCUMENT } from '@angular/core';
 
 describe('PopupMenuComponent', () => {
@@ -12,7 +11,7 @@ describe('PopupMenuComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [PopupMenuComponent],
-            providers: [provideNoopAnimations()]
+            providers: []
         })
             .compileComponents();
 

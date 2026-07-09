@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { ButtonDirective } from "../../../button/directives/button.directive";
 import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
@@ -28,7 +27,7 @@ describe("WindowContentComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [WindowContentComponent, ButtonDirective, BrowserAnimationsModule],
+            imports: [WindowContentComponent, ButtonDirective],
             providers: [POPUP_TOKEN]
         });
         fixture = TestBed.createComponent(WindowContentComponent);

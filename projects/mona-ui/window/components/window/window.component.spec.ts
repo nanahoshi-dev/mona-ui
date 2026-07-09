@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { WindowService } from "../../services/window.service";
 import { WindowComponent } from "./window.component";
 
@@ -9,7 +8,7 @@ describe("WindowComponent", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [WindowComponent, BrowserAnimationsModule],
+            imports: [WindowComponent],
             providers: [WindowService]
         });
         fixture = TestBed.createComponent(WindowComponent);

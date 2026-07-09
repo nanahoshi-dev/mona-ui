@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { EditorService } from "../../services/editor.service";
 
 import { EditorFontColorComponent } from "./editor-font-color.component";
@@ -24,8 +23,7 @@ describe("EditorFontColorComponent", () => {
                         },
                         state: vi.fn()
                     }
-                },
-                provideAnimations()
+                }
             ]
         }).compileComponents();
 

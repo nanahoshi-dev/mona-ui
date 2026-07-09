@@ -1,6 +1,5 @@
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { groupBy } from "@mirei/ts-collections";
 import { Subject } from "rxjs";
 import { PopupDataInjectionToken } from "@mirei/mona-ui/popup";
@@ -41,7 +40,7 @@ const createConfig = (menuItems: PopupMenuItem[]): PopupMenuListConfig => ({
 async function setup(menuItems: PopupMenuItem[]): Promise<ComponentFixture<PopupMenuListComponent>> {
     await TestBed.configureTestingModule({
         imports: [PopupMenuListComponent],
-        providers: [{ provide: PopupDataInjectionToken, useValue: createConfig(menuItems) }, provideNoopAnimations()]
+        providers: [{ provide: PopupDataInjectionToken, useValue: createConfig(menuItems) }]
     }).compileComponents();
 
     const fixture = TestBed.createComponent(PopupMenuListComponent);

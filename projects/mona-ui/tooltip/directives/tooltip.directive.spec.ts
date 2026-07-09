@@ -1,7 +1,6 @@
 import { Component, createComponent, EnvironmentInjector, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { ConnectionPositionPair } from "@angular/cdk/overlay";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Observable, Subject } from "rxjs";
@@ -149,7 +148,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestHostModeComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestHostModeComponent);
@@ -183,7 +182,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestHostModeComponent],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestHostModeComponent);
@@ -222,7 +221,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -337,7 +336,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -379,7 +378,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestContentModeHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestContentModeHost);
@@ -456,7 +455,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -514,7 +513,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -579,7 +578,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -644,7 +643,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -686,7 +685,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -734,7 +733,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestNoTitleHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestNoTitleHost);
@@ -769,7 +768,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -798,7 +797,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -831,7 +830,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -866,7 +865,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             // Probe a real ComponentRef instance to find the runtime prototype that
@@ -930,7 +929,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -974,7 +973,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -1001,7 +1000,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
@@ -1033,7 +1032,7 @@ describe("TooltipDirective", () => {
 
             await TestBed.configureTestingModule({
                 imports: [TestConfigurableHost],
-                providers: [provideNoopAnimations(), { provide: PopupService, useValue: mockPopupService }]
+                providers: [{ provide: PopupService, useValue: mockPopupService }]
             }).compileComponents();
 
             fixture = TestBed.createComponent(TestConfigurableHost);
