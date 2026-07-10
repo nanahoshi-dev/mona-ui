@@ -19,16 +19,12 @@ export const routes: Routes = [
             {
                 path: "introduction",
                 loadComponent: () =>
-                    import("./docs/introduction-doc/introduction-doc.component").then(
-                        m => m.IntroductionDocComponent
-                    )
+                    import("./docs/introduction-doc/introduction-doc.component").then(m => m.IntroductionDocComponent)
             },
             {
                 path: "installation",
                 loadComponent: () =>
-                    import("./docs/installation-doc/installation-doc.component").then(
-                        m => m.InstallationDocComponent
-                    )
+                    import("./docs/installation-doc/installation-doc.component").then(m => m.InstallationDocComponent)
             },
             {
                 path: "auto-complete",
@@ -151,6 +147,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "editor",
+                loadComponent: () =>
+                    import("./docs/components/editor-doc/editor-doc.component").then(m => m.EditorDocComponent)
+            },
+            {
                 path: "expansion-panel",
                 loadComponent: () =>
                     import("./docs/components/expansion-panel-doc/expansion-panel-doc.component").then(
@@ -229,6 +230,13 @@ export const routes: Routes = [
                 path: "popup",
                 loadComponent: () =>
                     import("./docs/components/popup-doc/popup-doc.component").then(m => m.PopupDocComponent)
+            },
+            {
+                path: "popup-menu",
+                loadComponent: () =>
+                    import("./docs/components/popup-menu-doc/popup-menu-doc.component").then(
+                        m => m.PopupMenuDocComponent
+                    )
             },
             {
                 path: "progress-bar",
@@ -328,13 +336,6 @@ export const routes: Routes = [
                 path: "window",
                 loadComponent: () =>
                     import("./docs/components/window-doc/window-doc.component").then(m => m.WindowDocComponent)
-            },
-            {
-                path: "popup-menu-internal",
-                loadComponent: () =>
-                    import("./docs/components/popup-menu-doc/popup-menu-doc.component").then(
-                        m => m.PopupMenuDocComponent
-                    )
             }
         ]
     }

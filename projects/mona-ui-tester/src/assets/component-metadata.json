@@ -3732,42 +3732,48 @@
       {
         "name": "blur",
         "type": "void",
-        "description": "",
+        "description": "Emits when the editor loses focus.",
         "kind": "output"
       },
       {
         "name": "create",
         "type": "void",
-        "description": "",
+        "description": "Emits when the editor is created for the first time and is ready to be used.",
         "kind": "output"
       },
       {
         "name": "focus",
         "type": "void",
-        "description": "",
+        "description": "Emits when the editor gains focus.",
         "kind": "output"
       },
       {
         "name": "selectionUpdate",
         "type": "void",
-        "description": "",
+        "description": "Emits when the selection of the editor changes.",
         "kind": "output"
       },
       {
         "name": "update",
         "type": "ContentChangeEvent",
-        "description": "",
+        "description": "Emits when the content of the editor changes.",
         "kind": "output"
       },
       {
         "name": "content",
         "type": "string | JSONContent",
-        "description": "",
+        "description": "The initial content of the editor.",
         "kind": "input"
       },
       {
         "name": "settings",
         "type": "Partial<EditorSettings>",
+        "description": "The settings of the editor.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
         "description": "",
         "kind": "input"
       }

@@ -1,5 +1,5 @@
 @if (anyToolVisible()) {
-    <mona-button-group selection="multiple">
+    <mona-button-group selection="multiple" [size]="'small'">
         @if (boldVisible()) {
             <button monaButton [selected]="boldSelected()" (click)="onBoldToggle()" title="Bold">
                 <i class="ri-bold"></i>

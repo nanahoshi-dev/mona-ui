@@ -1,38 +1,65 @@
-import { Component, output } from "@angular/core";
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { Component, computed, inject, output, signal } from "@angular/core";
+import { form, FormField, FormRoot, maxLength, required } from "@angular/forms/signals";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { EditorImageFormOptions } from "../../models/EditorImageFormOptions";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
+import type { ImageInsertFormModel } from "../../models/ImageInsertFormModel";
+import {
+    editorImageInserterActionsThemeVariants,
+    editorImageInserterFormThemeVariants,
+    editorImageInserterRowLabelThemeVariants,
+    editorImageInserterRowThemeVariants
+} from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-image-inserter",
-    imports: [TextBoxComponent, ReactiveFormsModule, ButtonDirective, NumericTextBoxComponent],
-    templateUrl: "./editor-image-inserter.component.html",
-    styleUrl: "./editor-image-inserter.component.scss"
+    imports: [TextBoxComponent, ButtonDirective, NumericTextBoxComponent, FormRoot, FormField],
+    templateUrl: "./editor-image-inserter.component.html"
 })
 export class EditorImageInserterComponent {
-    protected readonly imageForm = new FormGroup<EditorImageFormOptions>({
-        altText: new FormControl(""),
-        height: new FormControl(null),
-        link: new FormControl("", { nonNullable: true, validators: [Validators.required] }),
-        width: new FormControl(null)
+    readonly #imageFormModel = signal<ImageInsertFormModel>({
+        alt: "",
+        height: null,
+        link: "",
+        width: null
+    });
+    readonly #themeService = inject(ThemeService);
+    protected readonly actionsClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return editorImageInserterActionsThemeVariants(theme)();
+    });
+    protected readonly formClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return editorImageInserterFormThemeVariants(theme)();
+    });
+    protected readonly iForm = form(this.#imageFormModel, schema => {
+        required(schema.link);
+        maxLength(schema.link, 2048);
+    });
+    protected readonly rowClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return editorImageInserterRowThemeVariants(theme)();
+    });
+    protected readonly rowLabelClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return editorImageInserterRowLabelThemeVariants(theme)();
     });
 
     public readonly cancel = output();
     public readonly insert = output<EditorImageInsertEvent>();
 
-    public onCancel(): void {
+    protected onCancel(): void {
         this.cancel.emit();
     }
 
-    public onImageInsert(): void {
+    protected onImageInsert(): void {
         this.insert.emit({
-            altText: this.imageForm.controls.altText.value ?? "",
-            height: this.imageForm.controls.height.value,
-            link: this.imageForm.controls.link.value,
-            width: this.imageForm.controls.width.value
+            alt: this.iForm.alt().value(),
+            height: this.iForm.height().value(),
+            link: this.iForm.link().value(),
+            width: this.iForm.width().value()
         });
     }
 }

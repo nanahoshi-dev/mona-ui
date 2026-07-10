@@ -1,4 +1,4 @@
-export interface EditorImageInsertEvent {
+export interface ImageInsertFormModel {
     alt: string;
     height: number | null;
     link: string;

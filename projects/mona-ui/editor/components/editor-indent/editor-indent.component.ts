@@ -6,8 +6,7 @@ import { EditorService } from "../../services/editor.service";
 @Component({
     selector: "mona-editor-indent",
     imports: [ButtonGroupComponent, ButtonDirective],
-    templateUrl: "./editor-indent.component.html",
-    styleUrl: "./editor-indent.component.scss"
+    templateUrl: "./editor-indent.component.html"
 })
 export class EditorIndentComponent {
     readonly #editorService: EditorService = inject(EditorService);

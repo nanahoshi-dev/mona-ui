@@ -7,7 +7,6 @@ import { SidebarGroupComponent } from "../sidebar-group/sidebar-group.component"
     selector: "app-sidebar",
     imports: [SidebarGroupComponent, LucideSearch, LucideSparkles],
     templateUrl: "./sidebar.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         class: "flex flex-col h-full"
     }
@@ -45,6 +44,7 @@ export class SidebarComponent {
                 { text: "Dialog", path: "/dialog" },
                 { text: "Dropdown Button", path: "/dropdown-button" },
                 { text: "Dropdown List", path: "/dropdown-list" },
+                { text: "Editor", path: "/editor" },
                 { text: "Expansion Panel", path: "/expansion-panel" },
                 { text: "Fieldset", path: "/fieldset" },
                 { text: "Grid", path: "/grid" },
@@ -59,6 +59,7 @@ export class SidebarComponent {
                 { text: "Placeholder", path: "/placeholder" },
                 { text: "Popover", path: "/popover" },
                 { text: "Popup", path: "/popup" },
+                { text: "Popup Menu", path: "/popup-menu" },
                 { text: "Progress Bar", path: "/progress-bar" },
                 { text: "Radio Button", path: "/radio-button" },
                 { text: "Range Slider", path: "/range-slider" },
@@ -75,8 +76,7 @@ export class SidebarComponent {
                 { text: "Tooltip", path: "/tooltip" },
                 { text: "Tooltip Directive", path: "/tooltip-directive" },
                 { text: "Tree View", path: "/tree-view" },
-                { text: "Window", path: "/window" },
-                { text: "#PopupMenuInternal", path: "/popup-menu-internal" }
+                { text: "Window", path: "/window" }
             ]
         }
     ]);

@@ -1,22 +1,26 @@
-<form [formGroup]="imageForm">
-    <div class="editor-image-inserter-row">
-        <div class="editor-image-inserter-row-label">Image URL</div>
-        <mona-text-box formControlName="link"></mona-text-box>
+<form [formRoot]="iForm" [class]="formClass()">
+    <div [class]="rowClass()">
+        <div [class]="rowLabelClass()">Image URL</div>
+        <mona-text-box [size]="'small'" [formField]="iForm.link"></mona-text-box>
     </div>
-    <div class="editor-image-inserter-row">
-        <div class="editor-image-inserter-row-label">Alt Text</div>
-        <mona-text-box formControlName="altText"></mona-text-box>
+    <div [class]="rowClass()">
+        <div [class]="rowLabelClass()">Alt Text</div>
+        <mona-text-box [size]="'small'" [formField]="iForm.alt"></mona-text-box>
     </div>
-    <div class="editor-image-inserter-row">
-        <div class="editor-image-inserter-row-label">Width (px)</div>
-        <mona-numeric-text-box formControlName="width"></mona-numeric-text-box>
+    <div class="flex gap-2">
+        <div [class]="rowClass()">
+            <div [class]="rowLabelClass()">Width (px)</div>
+            <mona-numeric-text-box [size]="'small'" [formField]="iForm.width"></mona-numeric-text-box>
+        </div>
+        <div [class]="rowClass()">
+            <div [class]="rowLabelClass()">Height (px)</div>
+            <mona-numeric-text-box [size]="'small'" [formField]="iForm.height"></mona-numeric-text-box>
+        </div>
     </div>
-    <div class="editor-image-inserter-row">
-        <div class="editor-image-inserter-row-label">Height (px)</div>
-        <mona-numeric-text-box formControlName="height"></mona-numeric-text-box>
-    </div>
-    <div class="editor-image-inserter-actions">
-        <button monaButton [disabled]="!imageForm.valid" (click)="onImageInsert()">Insert</button>
-        <button monaButton [look]="'secondary'" (click)="onCancel()">Cancel</button>
+    <div [class]="actionsClass()">
+        <button monaButton [size]="'small'" [disabled]="!iForm().valid()" look="primary" (click)="onImageInsert()">
+            Insert
+        </button>
+        <button monaButton [size]="'small'" [look]="'secondary'" (click)="onCancel()">Cancel</button>
     </div>
 </form>

@@ -2,18 +2,24 @@ import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
+import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-headings",
     imports: [DropdownListComponent, FormsModule, DropdownItemTemplateDirective],
-    templateUrl: "./editor-headings.component.html",
-    styleUrl: "./editor-headings.component.scss"
+    templateUrl: "./editor-headings.component.html"
 })
 export class EditorHeadingsComponent {
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #themeService = inject(ThemeService);
     protected readonly HeadingType = HeadingType;
+    protected readonly dropdownListClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return editorHeadingsDropdownListThemeVariants(theme)();
+    });
     protected readonly headingsDropdownListData = [
         { text: "Paragraph", value: HeadingType.Paragraph },
         { text: "Heading 1", value: HeadingType.Heading1 },
@@ -32,7 +38,10 @@ export class EditorHeadingsComponent {
         return this.headingsDropdownListData.find(item => item.value === HeadingType.Paragraph);
     });
 
-    public onFormatChange(headingItem: HeadingsDropdownListDataItem): void {
+    public onFormatChange(headingItem: HeadingsDropdownListDataItem | null | undefined): void {
+        if (!headingItem) {
+            return;
+        }
         if (headingItem.value === HeadingType.Paragraph) {
             this.#editorService.editor.chain().focus().setParagraph().run();
         } else {

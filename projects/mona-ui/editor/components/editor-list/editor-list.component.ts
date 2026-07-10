@@ -6,8 +6,7 @@ import { EditorService } from "../../services/editor.service";
 @Component({
     selector: "mona-editor-list",
     imports: [ButtonGroupComponent, ButtonDirective],
-    templateUrl: "./editor-list.component.html",
-    styleUrl: "./editor-list.component.scss"
+    templateUrl: "./editor-list.component.html"
 })
 export class EditorListComponent {
     readonly #editorService: EditorService = inject(EditorService);

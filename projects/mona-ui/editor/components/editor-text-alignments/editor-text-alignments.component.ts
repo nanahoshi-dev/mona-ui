@@ -6,8 +6,7 @@ import { EditorService } from "../../services/editor.service";
 @Component({
     selector: "mona-editor-text-alignments",
     imports: [ButtonGroupComponent, ButtonDirective],
-    templateUrl: "./editor-text-alignments.component.html",
-    styleUrl: "./editor-text-alignments.component.scss"
+    templateUrl: "./editor-text-alignments.component.html"
 })
 export class EditorTextAlignmentsComponent {
     readonly #editorService: EditorService = inject(EditorService);

@@ -5,8 +5,7 @@ import { EditorService } from "../../services/editor.service";
 @Component({
     selector: "mona-editor-blockquote",
     imports: [ButtonDirective],
-    templateUrl: "./editor-blockquote.component.html",
-    styleUrl: "./editor-blockquote.component.scss"
+    templateUrl: "./editor-blockquote.component.html"
 })
 export class EditorBlockquoteComponent {
     readonly #editorService: EditorService = inject(EditorService);

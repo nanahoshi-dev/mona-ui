@@ -6,8 +6,7 @@ import { EditorService } from "../../services/editor.service";
 @Component({
     selector: "mona-editor-basic-text-styles",
     imports: [ButtonDirective, ButtonGroupComponent],
-    templateUrl: "./editor-basic-text-styles.component.html",
-    styleUrl: "./editor-basic-text-styles.component.scss"
+    templateUrl: "./editor-basic-text-styles.component.html"
 })
 export class EditorBasicTextStylesComponent {
     protected readonly anyToolVisible = computed(() => {

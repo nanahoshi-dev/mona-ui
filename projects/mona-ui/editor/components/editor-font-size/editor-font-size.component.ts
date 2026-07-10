@@ -1,16 +1,22 @@
-import { Component, computed, inject, OnInit } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorService } from "../../services/editor.service";
+import { editorFontSizeDropdownListThemeVariants } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-font-size",
     imports: [DropdownListComponent, FormsModule],
-    templateUrl: "./editor-font-size.component.html",
-    styleUrl: "./editor-font-size.component.scss"
+    templateUrl: "./editor-font-size.component.html"
 })
-export class EditorFontSizeComponent implements OnInit {
+export class EditorFontSizeComponent {
     protected readonly editorService: EditorService = inject(EditorService);
+    readonly #themeService = inject(ThemeService);
+    protected readonly dropdownListClass = computed(() => {
+        const theme = this.#themeService.theme();
+        return editorFontSizeDropdownListThemeVariants(theme)();
+    });
     protected readonly selectedFontSize = computed(() => {
         this.editorService.state();
         return (
@@ -20,11 +26,10 @@ export class EditorFontSizeComponent implements OnInit {
         );
     });
 
-    public ngOnInit(): void {
-        // this.#editorService.editor.chain().focus().setFontSize(this.selectedFontSize().value).run();
-    }
-
-    public onFontSizeChange(fontSize: string): void {
+    public onFontSizeChange(fontSize: string | null | undefined): void {
+        if (!fontSize) {
+            return;
+        }
         this.editorService.editor.chain().focus().setFontSize(fontSize).run();
     }
 }

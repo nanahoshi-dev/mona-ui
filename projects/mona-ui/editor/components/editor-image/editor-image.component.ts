@@ -1,15 +1,14 @@
 import { Component, inject, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { WindowComponent } from "@nanahoshi/mona-ui/window";
+import { WindowComponent, WindowContentTemplateDirective } from "@nanahoshi/mona-ui/window";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
 import { EditorService } from "../../services/editor.service";
 import { EditorImageInserterComponent } from "../editor-image-inserter/editor-image-inserter.component";
 
 @Component({
     selector: "mona-editor-image",
-    imports: [WindowComponent, EditorImageInserterComponent, ButtonDirective],
-    templateUrl: "./editor-image.component.html",
-    styleUrl: "./editor-image.component.scss"
+    imports: [WindowComponent, EditorImageInserterComponent, ButtonDirective, WindowContentTemplateDirective],
+    templateUrl: "./editor-image.component.html"
 })
 export class EditorImageComponent {
     readonly #editorService: EditorService = inject(EditorService);
@@ -41,8 +40,8 @@ export class EditorImageComponent {
             .chain()
             .setImage({
                 src: event.link,
-                alt: event.altText,
-                title: event.altText
+                alt: event.alt,
+                title: event.alt
             })
             .updateAttributes("extendedImage", {
                 width: event.width,

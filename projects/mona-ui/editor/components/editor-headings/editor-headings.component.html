@@ -1,7 +1,9 @@
 <mona-dropdown-list
     [data]="headingsDropdownListData"
-    [ngModel]="selectedHeadingsDropdownItem()"
-    (ngModelChange)="onFormatChange($event)"
+    [value]="selectedHeadingsDropdownItem()"
+    (valueChange)="onFormatChange($event)"
+    [size]="'small'"
+    [class]="dropdownListClass()"
     textField="text"
     valueField="value"
     title="Format">

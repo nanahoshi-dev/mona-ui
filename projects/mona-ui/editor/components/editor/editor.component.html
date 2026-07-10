@@ -1,4 +1,4 @@
-<div class="mona-editor-toolbar">
+<div [class]="toolbarClass()">
     <mona-editor-basic-text-styles></mona-editor-basic-text-styles>
     @if (editorService.settings().headings) {
         <mona-editor-headings></mona-editor-headings>
@@ -49,4 +49,4 @@
         <mona-editor-table></mona-editor-table>
     }
 </div>
-<div class="mona-editor-container" #editorContainer></div>
+<div [class]="containerClass()" #editorContainer></div>

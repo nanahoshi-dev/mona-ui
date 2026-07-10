@@ -9,8 +9,7 @@ import { EditorTableCreatorComponent } from "../editor-table-creator/editor-tabl
 @Component({
     selector: "mona-editor-table",
     imports: [ButtonGroupComponent, ButtonDirective, PopoverComponent, EditorTableCreatorComponent],
-    templateUrl: "./editor-table.component.html",
-    styleUrl: "./editor-table.component.scss"
+    templateUrl: "./editor-table.component.html"
 })
 export class EditorTableComponent {
     readonly #editorService: EditorService = inject(EditorService);
