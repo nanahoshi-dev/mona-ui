@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { Component, computed, inject, input, signal } from "@angular/core";
-import { EditorComponent, type EditorSettings } from "@nanahoshi/mona-ui/editor";
+import { type ContentChangeEvent, EditorComponent, type EditorSettings } from "@nanahoshi/mona-ui/editor";
+import type { JSONContent } from "@tiptap/core";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -14,7 +15,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> {
     readonly #injector = createFeatureInjector({
         alignment: {
-            active: false,
+            active: true,
             description: "Enable alignment buttons",
             name: "Alignment",
             type: "boolean"
@@ -44,7 +45,7 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
             type: "boolean"
         },
         fontFamily: {
-            active: false,
+            active: true,
             description: "Enable font family button",
             name: "Font Family",
             type: "boolean"
@@ -56,13 +57,13 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
             type: "boolean"
         },
         fontList: {
-            active: true,
-            description: "Enable font list button",
-            name: "Font List",
+            active: false,
+            description: "Enable custom font list",
+            name: "Custom Font List",
             type: "boolean"
         },
         fontSize: {
-            active: false,
+            active: true,
             description: "Enable font size button",
             name: "Font Size",
             type: "boolean"
@@ -116,7 +117,7 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
             type: "boolean"
         },
         strikethrough: {
-            active: false,
+            active: true,
             description: "Enable strikethrough button",
             name: "Strikethrough",
             type: "boolean"
@@ -171,10 +172,17 @@ export class EditorDemoComponent extends AbstractDemoComponent<EditorComponent> 
 
 @Component({
     imports: [EditorComponent],
-    template: ` <mona-editor [content]="content()" [settings]="editorSettings()" class="w-full h-96"></mona-editor> `
+    template: `
+        <mona-editor
+            [content]="editorContent()"
+            [settings]="editorSettings()"
+            (update)="onEditorUpdate($event)"
+            class="w-full h-96"></mona-editor>
+    `
 })
 class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent> {
     readonly #features = inject(FeatureConfigHandler).data;
+    protected readonly editorContent = signal<string | JSONContent>("");
     protected readonly editorSettings = computed<EditorSettings>(() => {
         const features = this.#features();
         const settings: EditorSettings = {
@@ -207,7 +215,10 @@ class EditorWrapperComponent implements ComponentInputsAsSignal<EditorComponent>
         };
         return settings;
     });
-
     public readonly content = input<ReturnType<EditorComponent["content"]>>("");
     public readonly settings = input<ReturnType<EditorComponent["settings"]>>(this.editorSettings());
+
+    protected onEditorUpdate(content: ContentChangeEvent) {
+        this.editorContent.set(content.json);
+    }
 }

@@ -1,16 +1,17 @@
 import {
+    afterNextRender,
     Component,
     computed,
+    DestroyRef,
     effect,
     ElementRef,
     inject,
     input,
-    OnDestroy,
-    OnInit,
     output,
     untracked,
     viewChild
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { JSONContent } from "@tiptap/core";
@@ -69,7 +70,8 @@ import { EditorTextAlignmentsComponent } from "../editor-text-alignments/editor-
         "[class]": "baseClass()"
     }
 })
-export class EditorComponent implements OnDestroy, OnInit {
+export class EditorComponent {
+    readonly #destroyRef = inject(DestroyRef);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -138,14 +140,10 @@ export class EditorComponent implements OnDestroy, OnInit {
                 this.loadEditorContent(content);
             });
         });
-    }
-
-    public ngOnDestroy(): void {
-        this.editorService.destroy();
-    }
-
-    public ngOnInit(): void {
-        this.setSubscriptions();
+        afterNextRender({
+            read: () => this.setSubscriptions()
+        });
+        this.#destroyRef.onDestroy(() => this.editorService.destroy());
     }
 
     private loadEditorContent(content: string | JSONContent): void {
@@ -160,19 +158,19 @@ export class EditorComponent implements OnDestroy, OnInit {
     }
 
     private setSubscriptions(): void {
-        this.editorService.blur$.subscribe(() => {
+        this.editorService.blur$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.blur.emit();
         });
-        this.editorService.create$.subscribe(() => {
+        this.editorService.create$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.create.emit();
         });
-        this.editorService.focus$.subscribe(() => {
+        this.editorService.focus$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.focus.emit();
         });
-        this.editorService.selectionUpdate$.subscribe(() => {
+        this.editorService.selectionUpdate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.selectionUpdate.emit();
         });
-        this.editorService.update$.subscribe(() => {
+        this.editorService.update$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
             this.update.emit({
                 html: this.html,
                 json: this.json

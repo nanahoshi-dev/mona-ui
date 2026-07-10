@@ -29,7 +29,7 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
         "[attr.aria-busy]": "loading() ? 'true' : undefined",
         "[attr.aria-disabled]": "effectiveDisabled() || loading() ? 'true' : undefined",
         "[attr.aria-haspopup]": "ariaHasPopup() !== 'false' ? ariaHasPopup() : null",
-        "[attr.aria-pressed]": "effectiveToggleable() ? (selected() ? 'true' : 'false') : undefined",
+        "[attr.aria-pressed]": "displaysPressedState() ? (selected() ? 'true' : 'false') : undefined",
         "[attr.data-look]": "effectiveLook()",
         "[attr.data-size]": "effectiveSize()",
         "[attr.disabled]": "effectiveDisabled() || loading() ? '' : undefined",
@@ -41,7 +41,7 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
 export class ButtonDirective implements ButtonVariantsInput {
     readonly #appRef = inject(ApplicationRef);
     readonly #buttonService = inject(ButtonService, { optional: true });
-    readonly #destroyRef: DestroyRef = inject(DestroyRef);
+    readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
     readonly #renderer = inject(Renderer2);
@@ -49,11 +49,12 @@ export class ButtonDirective implements ButtonVariantsInput {
     #loaderComponentRef: ComponentRef<IndicatorIconComponent> | null = null;
     #toggleSubscription: Subscription | null = null;
 
+    protected readonly displaysPressedState = computed(() => this.isInButtonGroup() || !!this.toggleable());
     protected readonly effectiveDisabled = computed(() => this.#buttonService?.groupDisabled() || this.disabled());
     protected readonly effectiveLook = computed(() => this.#buttonService?.groupLook() ?? this.look());
     protected readonly effectiveRounded = computed(() => this.#buttonService?.groupRounded() ?? this.rounded());
     protected readonly effectiveSize = computed(() => this.#buttonService?.groupSize() ?? this.size());
-    protected readonly effectiveToggleable = computed(() => this.isInButtonGroup() || this.toggleable());
+    protected readonly effectiveToggleable = computed(() => this.toggleable() ?? this.isInButtonGroup());
     protected readonly isInButtonGroup = computed(() => !!this.#buttonService);
 
     protected readonly baseClass = computed(() => {
@@ -150,9 +151,9 @@ export class ButtonDirective implements ButtonVariantsInput {
     /**
      * @description Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.
      * Must use `[toggleable]="true"` binding syntax, not bare attribute form.
-     * @default false
+     * @default undefined
      */
-    public readonly toggleable = input(false);
+    public readonly toggleable = input<boolean>();
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

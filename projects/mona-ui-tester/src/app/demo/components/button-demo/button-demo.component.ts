@@ -116,5 +116,5 @@ export class ButtonWrapperComponent implements ComponentInputsAsSignal<ButtonDir
     public readonly rounded = input<ReturnType<ButtonDirective["rounded"]>>("medium");
     public readonly selected = model<ReturnType<ButtonDirective["selected"]>>(false);
     public readonly size = input<ReturnType<ButtonDirective["size"]>>("medium");
-    public readonly toggleable = input<boolean>(false);
+    public readonly toggleable = input<boolean>();
 }

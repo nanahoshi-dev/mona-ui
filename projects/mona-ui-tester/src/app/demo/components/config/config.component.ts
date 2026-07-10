@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, effect, input, output, signal, untracked } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { LucideCode } from "@lucide/angular";
-import { where } from "@mirei/ts-collections";
+import { orderBy, where } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
@@ -71,7 +71,11 @@ export class ConfigComponent<C> {
     });
     public readonly templateProperties = computed(() => {
         const templateHandler = this.templateHandler();
-        return Object.entries(templateHandler?.data() || {});
+        const templateData = templateHandler?.data();
+        if (templateData) {
+            return orderBy(Object.entries(templateData), c => c[1].name).toArray();
+        }
+        return [];
     });
     public readonly valueChange = output<ComponentInputs<C>>();
 

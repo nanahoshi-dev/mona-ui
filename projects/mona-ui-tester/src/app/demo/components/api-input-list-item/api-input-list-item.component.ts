@@ -1,9 +1,9 @@
 import { DatePipe, JsonPipe } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
+import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { SwitchComponent } from "@nanahoshi/mona-ui/switch";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
@@ -26,8 +26,7 @@ import { ProcessedConfigItem } from "../../utils/componentConfig";
         DropdownListValueTemplateDirective,
         DatePipe
     ],
-    templateUrl: "./api-input-list-item.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./api-input-list-item.component.html"
 })
 export class ApiInputListItemComponent {
     public readonly entry = input.required<ProcessedConfigItem>();

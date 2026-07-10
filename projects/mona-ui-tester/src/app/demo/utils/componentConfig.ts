@@ -1,4 +1,5 @@
 import { InputSignal, InputSignalWithTransform, ModelSignal, OutputEmitterRef } from "@angular/core";
+import { orderBy } from "@mirei/ts-collections";
 import { FeatureConfigHandler } from "./featureInjection";
 
 type GetInputSignalValue<T> =
@@ -7,11 +8,9 @@ type GetInputSignalValue<T> =
 type GetOutputSignalValue<T> = T extends OutputEmitterRef<infer V> ? V : never;
 
 export type ComponentInputs<TComponent> = {
-    [K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any>
-        ? K
-        : never]?: TComponent[K] extends InputSignalWithTransform<any, any>
-        ? GetInputSignalValue<TComponent[K]>
-        : never;
+    [
+        K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any> ? K : never
+    ]?: TComponent[K] extends InputSignalWithTransform<any, any> ? GetInputSignalValue<TComponent[K]> : never;
 };
 
 export type ComponentOutputs<TComponent> = {
@@ -23,11 +22,13 @@ export type ComponentOutputs<TComponent> = {
 type GetSignalType<T> = T extends InputSignalWithTransform<any, any> ? T : T extends ModelSignal<any> ? T : never;
 
 export type ComponentInputsAsSignal<TComponent> = {
-    [K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any>
-        ? K
-        : TComponent[K] extends ModelSignal<any>
-          ? K
-          : never]?: GetSignalType<TComponent[K]>;
+    [
+        K in keyof TComponent as TComponent[K] extends InputSignalWithTransform<any, any>
+            ? K
+            : TComponent[K] extends ModelSignal<any>
+              ? K
+              : never
+    ]?: GetSignalType<TComponent[K]>;
 };
 
 export type ComponentConfigType =
@@ -216,7 +217,7 @@ export function createComponentInputConfigArray<TComponent>(
         }
     }
 
-    return processedArray;
+    return orderBy(processedArray, c => c.name).toArray();
 }
 
 /**

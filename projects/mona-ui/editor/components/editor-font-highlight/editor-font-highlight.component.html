@@ -7,7 +7,9 @@
     <ng-template monaColorPickerValueTemplate let-color>
         <div [class]="highlightValueClass()">
             <i class="ri-drop-fill"></i>
-            <span [class]="highlightPreviewClass()" [style.background-color]="color"></span>
+            @if (color) {
+                <span [class]="highlightPreviewClass()" [style.background-color]="color"></span>
+            }
         </div>
     </ng-template>
 </mona-color-picker>
