@@ -102,8 +102,7 @@ export function monaDarkThemeVariables(): ThemeVariables {
         "--color-scrollbar-track-hover": "#f4f5f7",
         "--color-scrollbar-track-active": "#e5e7eb",
         "--color-scrollbar-track-focus": "#f4f5f7",
-        "--color-scrollbar-corner": "#f9fafb",
-        "--page-background": "#1a1b1c",
+        "--color-scrollbar-corner": "#f9fafb"
     };
 }
 
@@ -210,9 +209,7 @@ export function monaLightThemeVariables(): ThemeVariables {
         "--color-scrollbar-track-hover": "#f4f5f7",
         "--color-scrollbar-track-active": "#e5e7eb",
         "--color-scrollbar-track-focus": "#f4f5f7",
-        "--color-scrollbar-corner": "#f9fafb",
-
-        "--page-background": "#fff",
+        "--color-scrollbar-corner": "#f9fafb"
     };
 }
 

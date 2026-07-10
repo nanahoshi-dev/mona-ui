@@ -69,8 +69,7 @@ export const reinaThemeDefinition: ThemeDefinition = {
 
         "--shadow-control": "0 1px 2px rgb(0 0 0 / 0.04)",
         "--shadow-raised": "0 4px 12px rgb(0 0 0 / 0.08)",
-        "--shadow-overlay": "0 20px 40px rgb(0 0 0 / 0.16)",
-
+        "--shadow-overlay": "0 20px 40px rgb(0 0 0 / 0.16)"
     },
     dark: {
         ...monaDarkThemeVariables(),
@@ -137,8 +136,6 @@ export const reinaThemeDefinition: ThemeDefinition = {
 
         "--shadow-control": "0 1px 2px rgb(0 0 0 / 0.30)",
         "--shadow-raised": "0 4px 16px rgb(0 0 0 / 0.45)",
-        "--shadow-overlay": "0 20px 48px rgb(0 0 0 / 0.55)",
-
-        "--page-background": "oklch(0.06 0 0)",
+        "--shadow-overlay": "0 20px 48px rgb(0 0 0 / 0.55)"
     }
 };

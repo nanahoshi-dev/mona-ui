@@ -10,7 +10,7 @@ describe("button style strategy", () => {
         const reinaClasses = strategy.resolve("reina")({ look: "primary" });
 
         expect(reinaClasses).not.toBe(monaClasses);
-        expect(reinaClasses).toContain("active:scale-[0.97]");
+        expect(reinaClasses).toContain("tracking-tight");
     });
 
     it("gives Reina a distinct radius per rounded value instead of collapsing to one shape", () => {

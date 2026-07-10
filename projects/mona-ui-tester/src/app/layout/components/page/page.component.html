@@ -1,4 +1,4 @@
-<div class="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
+<div class="flex h-screen w-full text-foreground overflow-hidden font-sans">
     <!-- Mobile Drawer Sidebar Backdrop -->
     @if (sidebarService.isOpen()) {
         <div
@@ -8,7 +8,7 @@
 
     <!-- Mobile Drawer Sidebar Container -->
     <div
-        class="fixed top-0 bottom-0 left-0 w-64 bg-background border-r border-border z-50 md:hidden flex flex-col h-full transform transition-transform duration-300 shadow-xl overflow-hidden"
+        class="fixed top-0 bottom-0 left-0 w-64 border-r border-border z-50 md:hidden flex flex-col h-full transform transition-transform duration-300 shadow-xl overflow-hidden"
         [class.translate-x-0]="sidebarService.isOpen()"
         [class.-translate-x-full]="!sidebarService.isOpen()">
         <div class="flex items-center justify-between px-4 py-4 border-b border-border">
@@ -30,7 +30,7 @@
     <app-sidebar class="hidden md:flex w-64 h-full border-r border-border flex-shrink-0 overflow-hidden"></app-sidebar>
 
     <!-- Main Content Area Wrapper -->
-    <div class="flex flex-col flex-1 h-full min-w-0 bg-background">
+    <div class="flex flex-col flex-1 h-full min-w-0">
         <!-- Breadcrumbs & Actions Header Bar (Desktop/Tablet) -->
         <div
             class="hidden md:flex items-center justify-between px-8 py-4 border-b border-border sticky top-0 bg-header-background/90 backdrop-blur-md z-20 h-16 flex-shrink-0 select-none">
@@ -80,7 +80,7 @@
                     <!-- Page Metadata Actions Bar -->
                     <div class="flex items-center justify-between border-b border-border pb-5 mb-8">
                         <div
-                            class="w-12 h-12 rounded-xl border border-border flex items-center justify-center text-primary bg-background shadow-xs">
+                            class="w-12 h-12 rounded-xl border border-border flex items-center justify-center text-primary shadow-xs">
                             <svg [lucideIcon]="pageIcon()" [size]="22"></svg>
                         </div>
                         <div class="flex items-center gap-2 select-none"></div>

@@ -3,13 +3,14 @@ import { describe, expect, it } from "vitest";
 import { BUTTON_GROUP_STYLE_STRATEGY, createButtonGroupStyleStrategy, provideButtonGroupStyles } from "./button-group.styles";
 
 describe("button group style strategy", () => {
-    it("uses the shared recipe for Reina when only tokens differ", () => {
+    it("uses a distinct segmented-control-style recipe for Reina", () => {
         const strategy = createButtonGroupStyleStrategy();
 
         const monaClasses = strategy.resolve("mona")({ look: "outline" });
         const reinaClasses = strategy.resolve("reina")({ look: "outline" });
 
-        expect(reinaClasses).toBe(monaClasses);
+        expect(reinaClasses).not.toBe(monaClasses);
+        expect(reinaClasses).toContain("[&>button]:rounded-full");
     });
 
     it("merges provider look overrides after the built-in recipe", () => {

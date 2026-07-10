@@ -4,7 +4,7 @@ export const tabListBaseVariants = cva(
     `
         w-fit max-w-full
         flex overflow-hidden
-        bg-accent
+        bg-header-background
         font-medium text-sm
     `,
     {
@@ -79,7 +79,6 @@ export const tabContentVariants = cva(
     `
         w-full overflow-auto flex-1
         border border-border shadow-sm
-        bg-background text-foreground
     `,
     {
         variants: {

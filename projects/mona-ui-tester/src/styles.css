@@ -4,6 +4,7 @@
 @import "@angular/cdk/overlay-prebuilt.css";
 @import "remixicon/fonts/remixicon.css";
 @import "tailwindcss";
+
 @plugin "@tailwindcss/typography";
 
 @source "./projects/mona-ui/";
@@ -46,14 +47,12 @@ body {
 }
 
 body {
-    font-family:
-        "proxima-nova",
-        "Geist",
-        Helvetica Neue,
-        Helvetica,
-        Arial,
-        sans-serif !important;
-    background-color: var(--page-background);
+    font-family: "proxima-nova",
+    "Geist",
+    Helvetica Neue,
+    Helvetica,
+    Arial,
+    sans-serif !important;
     color: var(--color-foreground);
 }
 
