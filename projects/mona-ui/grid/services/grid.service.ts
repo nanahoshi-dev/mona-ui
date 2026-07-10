@@ -20,17 +20,17 @@ import {
     KeyValuePair,
     select
 } from "@mirei/ts-collections";
-import { BehaviorSubject, Subject } from "rxjs";
-import { v4 } from "uuid";
 import { VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { PopupMenuItem } from "@nanahoshi/mona-ui/popup-menu";
 import {
-    Query,
     CompositeFilterDescriptor,
     FilterDescriptor,
+    Query,
     SortDescriptor,
     SortDirection
 } from "@nanahoshi/mona-ui/query";
+import { BehaviorSubject, Subject } from "rxjs";
+import { v4 } from "uuid";
 import type { AggregateFunction } from "../models/AggregateFunction";
 import { CellEditEvent } from "../models/CellEditEvent";
 import type { Column, ColumnConfig } from "../models/Column";
@@ -41,13 +41,17 @@ import type { ColumnSortEvent } from "../models/ColumnSortEvent";
 import { ColumnSortState } from "../models/ColumnSortState";
 import { EditableOptions } from "../models/EditableOptions";
 import type { FilterableOptions } from "../models/FilterableOptions";
+import { GridAddEvent } from "../models/GridAddEvent";
 import type { GridAggregateBucket, GridGroupAggregate } from "../models/GridAggregate";
+import { GridCancelEvent } from "../models/GridCancelEvent";
 import type { GridEditContext } from "../models/GridEditContext";
+import { GridEditEvent } from "../models/GridEditEvent";
 import type { GridEditFormContext } from "../models/GridEditFormContext";
 import type { GridEditSession } from "../models/GridEditSession";
 import { GridKeySelector } from "../models/GridKeySelector";
 import type { GridLockedColumnState } from "../models/GridLockedColumnState";
-import { SelectableOptions } from "../models/SelectableOptions";
+import { GridRemoveEvent } from "../models/GridRemoveEvent";
+import { GridSaveEvent } from "../models/GridSaveEvent";
 import type {
     GridState,
     GridStateCompositeFilterDescriptor,
@@ -59,16 +63,12 @@ import type {
 } from "../models/GridState";
 import { GroupableOptions } from "../models/GroupableOptions";
 import { GroupDescriptor } from "../models/GroupDescriptor";
-import { GridAddEvent } from "../models/GridAddEvent";
-import { GridCancelEvent } from "../models/GridCancelEvent";
-import { GridEditEvent } from "../models/GridEditEvent";
 import { PaginationState } from "../models/PaginationState";
 import type { ReorderableOptions } from "../models/ReorderableOptions";
 import type { ResizableOptions } from "../models/ResizableOptions";
 import { Row } from "../models/Row";
 import { RowEditEvent } from "../models/RowEditEvent";
-import { GridRemoveEvent } from "../models/GridRemoveEvent";
-import { GridSaveEvent } from "../models/GridSaveEvent";
+import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
 
 // Flat projection of a Row used as the IterablePatchStore item type.

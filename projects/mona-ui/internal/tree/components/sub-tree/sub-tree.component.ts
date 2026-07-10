@@ -10,9 +10,9 @@ import {
 import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, NgZone } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
-import { asapScheduler, take } from "rxjs";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { asapScheduler, take } from "rxjs";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
 import { NodeDragStartEvent } from "../../models/NodeDragStartEvent";

@@ -1,8 +1,8 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { FieldsetLegendTemplateDirective } from "../../directives/fieldset-legend-template.directive";
 
 import { FieldsetComponent } from "./fieldset.component";
-import { FieldsetLegendTemplateDirective } from "../../directives/fieldset-legend-template.directive";
 
 describe("FieldsetComponent", () => {
     let component: FieldsetComponent;

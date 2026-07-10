@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { SliderTick } from "../models/SliderTick";
 import { LabelStyleArgs } from "../models/LabelStyleArgs";
+import { SliderTick } from "../models/SliderTick";
 import { valueToPosition } from "../utils/valueToPosition";
 
 @Pipe({

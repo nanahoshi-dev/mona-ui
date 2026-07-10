@@ -17,9 +17,9 @@ import { exhaustMap, filter, fromEvent, merge, Subject, Subscription, take, take
 import { PopupWrapperComponent } from "../components/popup-wrapper/popup-wrapper.component";
 import { PopupCloseEvent, PopupCloseSource } from "../models/PopupCloseEvent";
 import { PopupDataInjectionToken, PopupSettingsInjectionToken } from "../models/PopupInjectionToken";
-import { PopupReferenceInjectionToken } from "../models/PopupReferenceInjectionToken";
 import { PopupRef } from "../models/PopupRef";
 import { PopupReference } from "../models/PopupReference";
+import { PopupReferenceInjectionToken } from "../models/PopupReferenceInjectionToken";
 import { PopupAnchor, PopupSettings } from "../models/PopupSettings";
 import { ConnectionPoint, connectionPosition } from "../utils/connectionPosition";
 

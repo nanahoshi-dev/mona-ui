@@ -1,5 +1,5 @@
-import type { FieldTree } from "@angular/forms/signals";
 import type { WritableSignal } from "@angular/core";
+import type { FieldTree } from "@angular/forms/signals";
 import type { Column } from "./Column";
 import type { GridEditOperation } from "./GridEditOperation";
 import type { Row } from "./Row";

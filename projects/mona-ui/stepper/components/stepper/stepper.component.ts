@@ -16,8 +16,8 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { select } from "@mirei/ts-collections";
-import { fromEvent } from "rxjs";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { fromEvent } from "rxjs";
 import { StepperIndicatorTemplateDirective } from "../../directives/stepper-indicator-template.directive";
 import { StepperIndicatorDirective } from "../../directives/stepper-indicator.directive";
 import { StepperLabelTemplateDirective } from "../../directives/stepper-label-template.directive";

@@ -1,10 +1,10 @@
-import { computed, Directive, effect, ElementRef, inject, input } from "@angular/core";
+import { computed, Directive, ElementRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { fromEvent } from "rxjs";
-import { listItemContentVariants } from "../styles/list.styles";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";
+import { listItemContentVariants } from "../styles/list.styles";
 
 @Directive({
     selector: "li[monaListItem]",

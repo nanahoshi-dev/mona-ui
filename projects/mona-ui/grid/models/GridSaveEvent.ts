@@ -1,6 +1,6 @@
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import type { GridEditSession } from "./GridEditSession";
 import type { GridEditOperation } from "./GridEditOperation";
+import type { GridEditSession } from "./GridEditSession";
 
 export type GridSaveOperation = GridEditOperation;
 

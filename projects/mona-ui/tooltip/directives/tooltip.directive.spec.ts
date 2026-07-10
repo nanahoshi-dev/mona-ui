@@ -1,11 +1,11 @@
+import { ConnectionPositionPair } from "@angular/cdk/overlay";
 import { Component, createComponent, EnvironmentInjector, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ConnectionPositionPair } from "@angular/cdk/overlay";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Observable, Subject } from "rxjs";
-import { Position } from "../../common/models/Position";
 import { PopupService } from "@nanahoshi/mona-ui/popup";
+import { Observable, Subject } from "rxjs";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Position } from "../../common/models/Position";
 import { TooltipVariantProps } from "../styles/tooltip.styles";
 import { TooltipDirective } from "./tooltip.directive";
 

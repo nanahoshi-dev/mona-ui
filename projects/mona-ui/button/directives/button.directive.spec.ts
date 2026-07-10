@@ -2,6 +2,7 @@ import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ButtonService } from "../services/button.service";
 import { ButtonVariantProps } from "../styles/button.styles";
 import { ButtonDirective } from "./button.directive";
 
@@ -563,8 +564,6 @@ describe("ButtonDirective", () => {
 // =============================================================================
 // ButtonService Integration Tests
 // =============================================================================
-
-import { ButtonService } from "../services/button.service";
 
 @Component({
     template: `

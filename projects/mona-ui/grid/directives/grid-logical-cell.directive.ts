@@ -12,8 +12,8 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter, fromEvent } from "rxjs";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { filter, fromEvent } from "rxjs";
 import {
     GridCellKind,
     GridNavigationSection,

@@ -18,6 +18,7 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { rotate, zip } from "@mirei/ts-collections";
 import {
     PopupMenuComponent,
     PopupMenuGroupTemplateDirective,
@@ -27,7 +28,6 @@ import {
     PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { rotate, zip } from "@mirei/ts-collections";
 import { pairwise, startWith, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MenuGroupTemplateDirective } from "../../directives/menu-group-template.directive";

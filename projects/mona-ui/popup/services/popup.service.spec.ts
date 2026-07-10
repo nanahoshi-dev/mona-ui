@@ -1,6 +1,6 @@
+import { Overlay } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { Overlay } from "@angular/cdk/overlay";
 import { PopupRef } from "../models/PopupRef";
 
 import { PopupService } from "./popup.service";

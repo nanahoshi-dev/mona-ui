@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ButtonDirective } from "../../../button/directives/button.directive";
 import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
+import { ButtonDirective } from "../../../button/directives/button.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
 
 import { WindowContentComponent } from "./window-content.component";

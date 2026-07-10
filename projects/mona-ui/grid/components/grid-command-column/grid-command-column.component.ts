@@ -1,4 +1,4 @@
-import { Component, contentChild, computed, forwardRef, input, TemplateRef } from "@angular/core";
+import { Component, computed, contentChild, forwardRef, input, TemplateRef } from "@angular/core";
 import { v4 } from "uuid";
 import { GridCellTemplateDirective } from "../../directives/grid-cell-template.directive";
 import { Column } from "../../models/Column";

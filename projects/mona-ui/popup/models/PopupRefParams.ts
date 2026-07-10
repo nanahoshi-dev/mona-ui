@@ -1,7 +1,7 @@
+import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
+import { ComponentRef } from "@angular/core";
 import { Observable } from "rxjs";
 import { PopupCloseEvent } from "./PopupCloseEvent";
-import { ComponentRef } from "@angular/core";
-import { ConnectionPositionPair, OverlayRef } from "@angular/cdk/overlay";
 
 export interface PopupRefParams {
     close: <R>(result?: R, delay?: number) => void;

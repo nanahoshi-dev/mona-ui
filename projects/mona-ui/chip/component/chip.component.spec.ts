@@ -1,4 +1,4 @@
-import { Component, signal, TemplateRef, viewChild } from "@angular/core";
+import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it, vi } from "vitest";

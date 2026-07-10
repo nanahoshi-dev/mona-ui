@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { validate, type FieldTree } from "@angular/forms/signals";
+import { type FieldTree, validate } from "@angular/forms/signals";
 import { ImmutableList } from "@mirei/ts-collections";
 import type { Column } from "../models/Column";
 import type { GridEditSchemaFactory } from "../models/GridEditFormContext";

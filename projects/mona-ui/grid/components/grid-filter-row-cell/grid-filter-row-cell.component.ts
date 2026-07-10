@@ -15,14 +15,12 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { LucideFunnel, LucideFunnelX } from "@lucide/angular";
-import { debounceTime, Subject } from "rxjs";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { PopupMenuCheckboxItemComponent, PopupMenuComponent } from "@nanahoshi/mona-ui/popup-menu";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
-import { FilterService, type FilterMenuDataItem, type FilterMenuValue } from "@nanahoshi/mona-ui/filter";
+import { type FilterMenuDataItem, type FilterMenuValue, FilterService } from "@nanahoshi/mona-ui/filter";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
-import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
+import { PopupMenuCheckboxItemComponent, PopupMenuComponent } from "@nanahoshi/mona-ui/popup-menu";
 import type {
     BooleanFilterOperators,
     CompositeFilterDescriptor,
@@ -31,7 +29,9 @@ import type {
     NumericFilterOperators,
     StringFilterOperators
 } from "@nanahoshi/mona-ui/query";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { debounceTime, Subject } from "rxjs";
 import { Column } from "../../models/Column";
 import type { ColumnFilterState } from "../../models/ColumnFilterState";
 import { GridService } from "../../services/grid.service";

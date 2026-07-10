@@ -1,6 +1,6 @@
 import { Component, computed, inject, viewChild } from "@angular/core";
-import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import { PopoverComponent } from "@nanahoshi/mona-ui/popover";
 import { EditorTableInsertEvent } from "../../models/EditorTableInsertEvent";
 import { EditorService } from "../../services/editor.service";

@@ -10,8 +10,9 @@ import {
     output,
     viewChild
 } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableSet, select } from "@mirei/ts-collections";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { twMerge } from "tailwind-merge";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
@@ -22,7 +23,6 @@ import {
     TabsVariantProps
 } from "../../styles/tabs.styles";
 import { TabListComponent } from "../tab-list/tab-list.component";
-import { twMerge } from "tailwind-merge";
 import { TabComponent } from "../tab/tab.component";
 
 @Component({

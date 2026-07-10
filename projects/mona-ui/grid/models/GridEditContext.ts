@@ -1,5 +1,5 @@
-import type { Row } from "./Row";
 import type { GridEditSession } from "./GridEditSession";
+import type { Row } from "./Row";
 
 export interface CellEditContext {
     readonly cellUid: string;

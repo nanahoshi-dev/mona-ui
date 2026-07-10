@@ -11,8 +11,8 @@ import {
     TemplateRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { take, takeUntil } from "rxjs";
 import { PopupCloseEvent, PopupCloseSource } from "@nanahoshi/mona-ui/popup";
+import { take, takeUntil } from "rxjs";
 import { DialogContentTemplateDirective } from "../../directives/dialog-content-template.directive";
 import { DialogDescriptionTemplateDirective } from "../../directives/dialog-description-template.directive";
 import { DialogFooterTemplateDirective } from "../../directives/dialog-footer-template.directive";

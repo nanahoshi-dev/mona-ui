@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { TestBed, type ComponentFixture } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 import { ImmutableList } from "@mirei/ts-collections";
 import type { Column } from "../models/Column";
 import type { GridColumnLockedPosition } from "../models/GridColumnLockedPosition";

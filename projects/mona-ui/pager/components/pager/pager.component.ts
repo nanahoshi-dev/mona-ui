@@ -26,6 +26,7 @@ import {
     LucideChevronsRight,
     LucideEllipsis
 } from "@lucide/angular";
+import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nanahoshi/mona-ui/dropdown-list";
@@ -33,7 +34,6 @@ import { DropdownVirtualScrollDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NavigationKeys } from "@nanahoshi/mona-ui/internal";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { range } from "@mirei/ts-collections";
 import { twMerge } from "tailwind-merge";
 import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";

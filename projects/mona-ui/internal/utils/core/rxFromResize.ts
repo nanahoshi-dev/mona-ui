@@ -1,5 +1,5 @@
 import { forEach } from "@mirei/ts-collections";
-import { Observable, of } from "rxjs";
+import { Observable } from "rxjs";
 
 export const rxFromResize = (
     target: Element | Iterable<Element>,

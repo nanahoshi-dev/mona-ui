@@ -10,9 +10,9 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { filter as rxFilter } from "rxjs";
-import { CompositeFilterDescriptor } from "@nanahoshi/mona-ui/query";
 import { deepEquals } from "@nanahoshi/mona-ui/common";
+import { CompositeFilterDescriptor } from "@nanahoshi/mona-ui/query";
+import { filter as rxFilter } from "rxjs";
 import type { FilterableOptions } from "../models/FilterableOptions";
 import { GridService } from "../services/grid.service";
 
