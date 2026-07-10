@@ -124,7 +124,6 @@ export class NotificationDemoComponent extends AbstractDemoComponent<never> {
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly NotificationWrapperComponent = NotificationWrapperComponent;
 }
 

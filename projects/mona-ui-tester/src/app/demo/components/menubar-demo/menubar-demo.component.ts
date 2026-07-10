@@ -228,14 +228,6 @@ export class MenubarDemoComponent extends AbstractDemoComponent<MenubarComponent
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MenubarComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
-        "MenuCheckboxItemComponent",
-        "MenuComponent",
-        "MenuGroupComponent",
-        "MenuItemComponent",
-        "MenuRadioGroupComponent",
-        "MenuRadioItemComponent"
-    ]);
     protected readonly MenubarWrapperComponent = MenubarWrapperComponent;
 }
 

@@ -1,8 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { disabled, form, FormField } from "@angular/forms/signals";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faMoon, faStar, faSun } from "@fortawesome/free-solid-svg-icons";
+import { LucideMoon, LucideStar, LucideSun } from "@lucide/angular";
 import {
     RangeSliderComponent,
     SliderHandleTemplateDirective,
@@ -108,7 +107,6 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("RangeSliderComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({
@@ -116,8 +114,10 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
         RangeSliderComponent,
         FormField,
         SliderTickValueTemplateDirective,
-        FaIconComponent,
-        SliderHandleTemplateDirective
+        SliderHandleTemplateDirective,
+        LucideStar,
+        LucideMoon,
+        LucideSun
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
     template: `
@@ -145,15 +145,15 @@ export class RangeSliderDemoComponent extends AbstractDemoComponent<RangeSliderC
                 @if (featureData && featureData["labelTemplate"].active) {
                     <ng-template monaSliderTickValueTemplate let-value>
                         @if (value < 8 || value > 20) {
-                            <fa-icon [icon]="moonIcon" style="color: mediumpurple;"></fa-icon>
+                            <svg lucideMoon [color]="'mediumpurple'"></svg>
                         } @else {
-                            <fa-icon [icon]="sunIcon" style="color: #fafd0f;"></fa-icon>
+                            <svg lucideSun [color]="'#fafd0f'"></svg>
                         }
                     </ng-template>
                 }
                 @if (featureData && featureData["handleTemplate"].active) {
                     <ng-template monaSliderHandleTemplate let-value>
-                        <fa-icon [icon]="starIcon" style="color: darkgoldenrod;" [title]="value"></fa-icon>
+                        <svg lucideStar [color]="'darkgoldenrod'" [title]="value"></svg>
                     </ng-template>
                 }
             </mona-range-slider>
@@ -166,12 +166,9 @@ export class RangeSliderWrapperComponent implements ComponentInputsAsSignal<Rang
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
     });
-    protected readonly moonIcon = faMoon;
     protected readonly size = computed(() =>
         this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
     );
-    protected readonly starIcon = faStar;
-    protected readonly sunIcon = faSun;
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<RangeSliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);

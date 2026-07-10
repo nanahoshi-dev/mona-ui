@@ -60,7 +60,6 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TabsComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["TabComponent"]);
     protected readonly TabsWrapperComponent = TabsWrapperComponent;
 }
 

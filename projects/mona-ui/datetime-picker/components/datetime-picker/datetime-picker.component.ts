@@ -21,7 +21,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { any } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ButtonGroupComponent } from "@nanahoshi/mona-ui/button-group";
 import {
@@ -56,7 +56,6 @@ import {
 } from "@nanahoshi/mona-ui/text-box";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
-import { any } from "@mirei/ts-collections";
 import { DateTime } from "luxon";
 import { fromEvent, mergeWith } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -83,7 +82,6 @@ import {
     ],
     imports: [
         ButtonDirective,
-        FontAwesomeModule,
         CalendarComponent,
         TimeSelectorComponent,
         TextBoxComponent,

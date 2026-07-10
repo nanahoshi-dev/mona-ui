@@ -46,10 +46,6 @@
         </div>
     }
     <div>
-        <app-config
-            [config]="config()"
-            [metadata]="metadata()"
-            [subComponentMetadata]="subComponentMetadata()"
-            (valueChange)="valueChange.emit($event)"></app-config>
+        <app-config [config]="config()" [metadata]="metadata()" (valueChange)="valueChange.emit($event)"></app-config>
     </div>
 </div>

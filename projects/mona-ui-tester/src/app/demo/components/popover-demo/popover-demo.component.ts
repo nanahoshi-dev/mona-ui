@@ -63,7 +63,6 @@ export class PopoverDemoComponent extends AbstractDemoComponent<PopoverComponent
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PopoverComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly PopoverWrapperComponent = PopoverWrapperComponent;
 }
 

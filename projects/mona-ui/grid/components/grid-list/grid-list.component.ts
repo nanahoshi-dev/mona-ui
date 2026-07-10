@@ -1,21 +1,10 @@
 import { NgTemplateOutlet } from "@angular/common";
-import {
-    afterNextRender,
-    ChangeDetectionStrategy,
-    Component,
-    computed,
-    DestroyRef,
-    ElementRef,
-    inject,
-    input,
-    viewChild
-} from "@angular/core";
+import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, input, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
 import { fromEvent } from "rxjs";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
@@ -46,11 +35,9 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 @Component({
     selector: "mona-grid-list",
     templateUrl: "./grid-list.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         GridAddRowComponent,
         GridCellComponent,
-        FontAwesomeModule,
         NgTemplateOutlet,
         ContextMenuComponent,
         GridRowDirective,

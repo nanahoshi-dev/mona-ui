@@ -18,7 +18,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { none } from "@mirei/ts-collections";
 import { ChipComponent } from "@nanahoshi/mona-ui/chip";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
 import {
@@ -56,7 +56,6 @@ import {
 } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { none } from "@mirei/ts-collections";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
@@ -91,7 +90,6 @@ import {
     imports: [
         ChipComponent,
         NgTemplateOutlet,
-        FontAwesomeModule,
         ListComponent,
         ListGroupHeaderTemplateDirective,
         ListItemTemplateDirective,

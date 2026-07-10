@@ -25,6 +25,10 @@
     "workspaces": [
         "projects/*"
     ],
+    "overrides": {
+        "marked": "^18.0.5",
+        "highlight.js": "^11.11.1"
+    },
     "release": {
         "plugins": [
             "@semantic-release/commit-analyzer",
@@ -60,9 +64,6 @@
         "@angular/platform-browser": "^22.0.1",
         "@angular/platform-browser-dynamic": "^22.0.1",
         "@angular/router": "^22.0.1",
-        "@fortawesome/angular-fontawesome": "^5.0.0",
-        "@fortawesome/fontawesome-svg-core": "^7.2.0",
-        "@fortawesome/free-solid-svg-icons": "^7.2.0",
         "@lucide/angular": "^1.21.0",
         "@mirei/ts-collections": "^17.5.6",
         "@tiptap/core": "^3.26.1",

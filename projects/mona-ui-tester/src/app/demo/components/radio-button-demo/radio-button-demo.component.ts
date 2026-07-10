@@ -161,7 +161,6 @@ export class RadioButtonDemoComponent extends AbstractDemoComponent<RadioButtonC
         }
     });
     protected readonly metadata = this.getMetadata("RadioButtonComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["RadioButtonDirective"]);
 }
 
 @Component({

@@ -166,14 +166,6 @@ export class SplitButtonDemoComponent extends AbstractDemoComponent<SplitButtonC
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SplitButtonComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
-        "SplitButtonCheckboxItemComponent",
-        "SplitButtonGroupComponent",
-        "SplitButtonItemComponent",
-        "SplitButtonRadioGroupComponent",
-        "SplitButtonRadioItemComponent",
-        "SplitButtonSeparatorComponent"
-    ]);
 }
 
 @Component({

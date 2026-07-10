@@ -17,18 +17,16 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
-import { faChevronDown, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { fromEvent, take, takeUntil } from "rxjs";
+import { LucideCircleX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { dropdownPopupAnimation } from "@nanahoshi/mona-ui/popup";
-import { PopupRef } from "@nanahoshi/mona-ui/popup";
-import { PopupService } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
+import { dropdownPopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { fromEvent, take, takeUntil } from "rxjs";
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
 import { ColorPickerView } from "../../models/ColorPickerView";
 import {
@@ -41,7 +39,14 @@ import {
 @Component({
     selector: "mona-color-picker",
     templateUrl: "./color-picker.component.html",
-    imports: [FontAwesomeModule, ButtonDirective, ColorPaletteComponent, ColorGradientComponent, NgTemplateOutlet],
+    imports: [
+        ButtonDirective,
+        ColorPaletteComponent,
+        ColorGradientComponent,
+        NgTemplateOutlet,
+        LucideCircleX,
+        IndicatorIconComponent
+    ],
     host: {
         "[class]": "baseClasses()",
         "[attr.tabindex]": "disabled() ? -1 : 0",
@@ -85,8 +90,6 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && !this.value())
     );
-    protected readonly noColorIcon = faTimes;
-    protected readonly dropdownIcon = faChevronDown;
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate: Signal<TemplateRef<any>> = viewChild.required("popupTemplate");
     protected readonly valueTemplate = contentChild(ColorPickerValueTemplateDirective, { read: TemplateRef });

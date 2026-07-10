@@ -2,8 +2,6 @@
     "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
     "dest": "../../dist/mona-ui",
     "allowedNonPeerDependencies": [
-        "^@fortawesome/fontawesome-svg-core$",
-        "^@fortawesome/free-solid-svg-icons$",
         "^@lucide/angular$",
         "^@mirei/ts-collections$",
         "^class-variance-authority$",

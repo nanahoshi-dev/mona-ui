@@ -66,7 +66,6 @@ export class BreadcrumbDemoComponent extends AbstractDemoComponent<BreadcrumbCom
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("BreadcrumbComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["BreadcrumbItemComponent"]);
 }
 
 @Component({

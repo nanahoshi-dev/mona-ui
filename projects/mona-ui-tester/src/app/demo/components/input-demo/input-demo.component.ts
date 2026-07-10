@@ -30,7 +30,6 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
         }
     });
     protected readonly metadata = this.getMetadata("TextBoxDirective");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

@@ -150,7 +150,6 @@ export class AutoCompleteDemoComponent extends AbstractDemoComponent<AutoComplet
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("AutoCompleteComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly AutoCompleteWrapperComponent = AutoCompleteWrapperComponent;
 }
 

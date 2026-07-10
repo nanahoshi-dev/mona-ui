@@ -117,7 +117,6 @@ export class TimePickerDemoComponent extends AbstractDemoComponent<TimePickerCom
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TimePickerComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

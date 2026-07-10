@@ -19,9 +19,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormValueControl } from "@angular/forms/signals";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import { PreventableEvent } from "@nanahoshi/mona-ui/common";
-import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import {
     DropdownDataHandlerDirective,
     DropdownDataInput,
@@ -42,7 +40,7 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import {
     ListComponent,
@@ -90,7 +88,6 @@ import {
     ],
     imports: [
         NgTemplateOutlet,
-        FontAwesomeModule,
         ListComponent,
         ListItemTemplateDirective,
         ListGroupHeaderTemplateDirective,

@@ -72,7 +72,6 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
         }
     });
     protected readonly metadata = this.getMetadata("CheckBoxComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly CheckBoxWrapperComponent = CheckBoxWrapperComponent;
 }
 

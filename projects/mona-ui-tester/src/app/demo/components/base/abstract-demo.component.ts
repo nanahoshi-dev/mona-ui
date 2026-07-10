@@ -14,7 +14,7 @@ import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { DemoService } from "../../services/demo.service";
 import { ComponentConfig, extractConfigValues } from "../../utils/componentConfig";
 
-@Component({ changeDetection: ChangeDetectionStrategy.Eager, template: "" })
+@Component({ template: "" })
 export abstract class AbstractDemoComponent<TComponent> {
     readonly #injector = inject(Injector);
     protected readonly demoService = inject(DemoService);
@@ -39,26 +39,6 @@ export abstract class AbstractDemoComponent<TComponent> {
         );
     }
 
-    protected getSubComponentsMetadata(names: string[]): Signal<Record<string, ComponentMetadata>> {
-        if (names.length === 0) {
-            return signal({} as Record<string, ComponentMetadata>);
-        }
-        return toSignal(
-            this.demoService.metadata$.pipe(
-                map(metadata => {
-                    const result: Record<string, ComponentMetadata> = {};
-                    names.forEach(name => {
-                        result[name] = metadata?.[name] ?? ({} as ComponentMetadata);
-                    });
-                    return result;
-                }),
-                filter(metadata => Object.keys(metadata).length > 0)
-            ),
-            { injector: this.#injector, initialValue: {} as Record<string, ComponentMetadata> }
-        );
-    }
-
     protected abstract config: WritableSignal<ComponentConfig<TComponent>>;
     protected abstract metadata: Signal<ComponentMetadata>;
-    protected abstract subComponentsMetadata: Signal<Record<string, ComponentMetadata>>;
 }

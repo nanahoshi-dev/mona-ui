@@ -54,58 +54,6 @@
                     </ng-template>
                 </mona-tab>
             }
-            @if (subComponentPropertyConfig().length > 0) {
-                <mona-tab title="Related Components">
-                    <ng-template monaTabContentTemplate>
-                        <div class="p-2">
-                            @if (subComponentPropertyConfig().length > 0) {
-                                @for (subComponentEntry of subComponentPropertyConfig(); track $index) {
-                                    <mona-expansion-panel rounded="none" [class.border-b-0]="!$last">
-                                        <ng-template monaExpansionPanelTitleTemplate>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-sm flex-1">{{ subComponentEntry[0] }}</span>
-                                            </div>
-                                        </ng-template>
-                                        <ul class="group">
-                                            @for (property of subComponentEntry[1].inputs; track $index) {
-                                                <li
-                                                    class="flex flex-col gap-2 py-2 border-b border-border group-last:last:border-b-0">
-                                                    <div class="flex flex-col px-2 text-sm gap-2">
-                                                        <div class="flex gap-1 items-center flex-wrap">
-                                                            <div class="font-semibold mr-4">{{ property.name }}</div>
-                                                            <div
-                                                                class="px-2 py-px flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
-                                                                {{
-                                                                    subComponentEntry[1].inputs
-                                                                        | inputProperty: property.name : "type"
-                                                                }}
-                                                            </div>
-                                                            <div
-                                                                class="px-2 py-px flex items-center justify-center rounded-sm shadow-md bg-primary/90 text-primary-foreground text-xs select-none">
-                                                                {{
-                                                                    subComponentEntry[1].inputs
-                                                                        | inputProperty: property.name : "kind"
-                                                                }}
-                                                            </div>
-                                                        </div>
-                                                        <div
-                                                            class="font-light text-gray-500 whitespace-pre-line text-sm/4">
-                                                            {{
-                                                                subComponentEntry[1].inputs
-                                                                    | inputProperty: property.name : "description"
-                                                            }}
-                                                        </div>
-                                                    </div>
-                                                </li>
-                                            }
-                                        </ul>
-                                    </mona-expansion-panel>
-                                }
-                            }
-                        </div>
-                    </ng-template>
-                </mona-tab>
-            }
         </mona-tabs>
     </div>
 </div>

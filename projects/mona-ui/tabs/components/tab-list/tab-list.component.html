@@ -9,7 +9,7 @@
         (pointerup)="stopScrolling()"
         [attr.aria-hidden]="true"
         tabindex="-1">
-        <fa-icon [icon]="scrollLeftIcon"></fa-icon>
+        <svg lucideChevronLeft [size]="16"></svg>
     </button>
 }
 <div class="w-full h-full overflow-hidden">
@@ -46,7 +46,7 @@
                         (click)="onTabClose(tab, $event)"
                         class="px-0 h-fit ml-1 w-min"
                         tabindex="-1">
-                        <fa-icon [icon]="tabCloseIcon" class="text-xs flex"></fa-icon>
+                        <svg lucideX [size]="16"></svg>
                     </button>
                 }
             </li>
@@ -64,6 +64,6 @@
         (pointerup)="stopScrolling()"
         [attr.aria-hidden]="true"
         tabindex="-1">
-        <fa-icon [icon]="scrollRightIcon"></fa-icon>
+        <svg lucideChevronRight [size]="16"></svg>
     </button>
 }

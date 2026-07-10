@@ -77,7 +77,6 @@ export class ButtonDemoComponent extends AbstractDemoComponent<ButtonDirective> 
         }
     });
     protected readonly metadata = this.getMetadata("ButtonDirective");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

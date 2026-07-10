@@ -76,7 +76,6 @@ export class ChipDemoComponent extends AbstractDemoComponent<ChipComponent> {
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ChipComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

@@ -352,7 +352,6 @@ export class ListViewDemoComponent extends AbstractDemoComponent<ListViewCompone
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ListViewComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly ListViewWrapperComponent = ListViewWrapperComponent;
 }
 

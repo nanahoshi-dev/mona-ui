@@ -59,7 +59,6 @@ export class ButtonGroupDemoComponent extends AbstractDemoComponent<ButtonGroupC
         }
     });
     protected readonly metadata = this.getMetadata("ButtonGroupComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

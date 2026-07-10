@@ -78,7 +78,6 @@ export class ColorPickerDemoComponent extends AbstractDemoComponent<ColorPickerC
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ColorPickerComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly ColorPickerWrapperComponent = ColorPickerWrapperComponent;
 }
 

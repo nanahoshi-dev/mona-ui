@@ -3,7 +3,6 @@ import { provideHttpClient, withXhr } from "@angular/common/http";
 import { ApplicationConfig, importProvidersFrom } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { provideRouter } from "@angular/router";
-import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
 import HighlightJS from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import json from "highlight.js/lib/languages/json";
@@ -22,7 +21,7 @@ HighlightJS.registerLanguage("plaintext", plaintext);
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        importProvidersFrom(FontAwesomeModule, FormsModule, NgOptimizedImage),
+        importProvidersFrom(FormsModule, NgOptimizedImage),
         provideHttpClient(withXhr()),
         provideRouter(routes),
         provideMarkdown({

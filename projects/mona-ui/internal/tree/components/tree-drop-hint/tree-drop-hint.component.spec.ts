@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { FontAwesomeTestingModule } from "@fortawesome/angular-fontawesome/testing";
 import { TreeService } from "../../services/tree.service";
 
 import { TreeDropHintComponent } from "./tree-drop-hint.component";
@@ -10,7 +9,7 @@ describe("TreeDropHintComponent", () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [TreeDropHintComponent, FontAwesomeTestingModule],
+            imports: [TreeDropHintComponent],
             providers: [TreeService]
         }).compileComponents();
 

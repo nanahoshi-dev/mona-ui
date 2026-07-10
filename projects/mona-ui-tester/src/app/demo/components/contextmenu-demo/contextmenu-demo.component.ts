@@ -173,14 +173,6 @@ export class ContextMenuDemoComponent extends AbstractDemoComponent<ContextMenuC
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ContextMenuComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
-        "ContextMenuItemComponent",
-        "ContextMenuGroupComponent",
-        "ContextMenuCheckboxItemComponent",
-        "ContextMenuRadioGroupComponent",
-        "ContextMenuRadioItemComponent",
-        "ContextMenuSeparatorComponent"
-    ]);
     protected readonly ContextMenuWrapperComponent = ContextMenuWrapperComponent;
 }
 

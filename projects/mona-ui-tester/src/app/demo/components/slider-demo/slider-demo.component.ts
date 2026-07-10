@@ -1,8 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, signal } from "@angular/core";
+import { Component, computed, effect, inject, input, model, signal } from "@angular/core";
 import { disabled, form, FormField } from "@angular/forms/signals";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faMoon, faStar, faSun } from "@fortawesome/free-solid-svg-icons";
+import { LucideMoon, LucideStar, LucideSun } from "@lucide/angular";
 import {
     SliderComponent,
     SliderHandleTemplateDirective,
@@ -107,7 +106,6 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("SliderComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly SliderWrapperComponent = SliderWrapperComponent;
 }
 
@@ -116,10 +114,11 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
         SliderComponent,
         FormField,
         SliderTickValueTemplateDirective,
-        FaIconComponent,
-        SliderHandleTemplateDirective
+        SliderHandleTemplateDirective,
+        LucideMoon,
+        LucideSun,
+        LucideStar
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <mona-slider
@@ -142,15 +141,15 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             @if (featureData && featureData["labelTemplate"].active) {
                 <ng-template monaSliderTickValueTemplate let-value>
                     @if (value < 8 || value > 20) {
-                        <fa-icon [icon]="moonIcon" style="color: mediumpurple;"></fa-icon>
+                        <svg lucideMoon [color]="'mediumpurple'"></svg>
                     } @else {
-                        <fa-icon [icon]="sunIcon" style="color: #fafd0f;"></fa-icon>
+                        <svg lucideSun [color]="'#fafd0f'"></svg>
                     }
                 </ng-template>
             }
             @if (featureData && featureData["handleTemplate"].active) {
                 <ng-template monaSliderHandleTemplate let-value>
-                    <fa-icon [icon]="starIcon" style="color: darkgoldenrod;" [title]="value"></fa-icon>
+                    <svg lucideStar [color]="'darkgoldenrod'" [title]="value"></svg>
                 </ng-template>
             }
         </mona-slider>
@@ -162,12 +161,9 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
     });
-    protected readonly moonIcon = faMoon;
     protected readonly size = computed(() =>
         this.orientation() === "horizontal" ? { width: "400px" } : { height: "400px" }
     );
-    protected readonly starIcon = faStar;
-    protected readonly sunIcon = faSun;
     public readonly disabled = input(false);
     public readonly labelPosition = input<ReturnType<SliderComponent["labelPosition"]>>("after");
     public readonly labelStep = input(1);

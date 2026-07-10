@@ -3,12 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, model, sig
 import { disabled, form, FormField, readonly, required } from "@angular/forms/signals";
 import { LucideBox, LucideSearch } from "@lucide/angular";
 import { range } from "@mirei/ts-collections";
-import {
-    MultiSelectComponent,
-    MultiSelectSummaryTagDirective,
-    MultiSelectSummaryTagTemplateDirective,
-    MultiSelectTagTemplateDirective
-} from "@nanahoshi/mona-ui/multi-select";
+import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import {
     DropdownFilterableDirective,
     DropdownFooterTemplateDirective,
@@ -19,9 +15,13 @@ import {
     DropdownPrefixTemplateDirective,
     DropdownVirtualScrollDirective
 } from "@nanahoshi/mona-ui/dropdowns";
-import { FilterableOptions, VirtualScrollOptions } from "@nanahoshi/mona-ui/common";
 import { GroupableOptions } from "@nanahoshi/mona-ui/internal/list";
-import type { PreventableEvent } from "@nanahoshi/mona-ui/common";
+import {
+    MultiSelectComponent,
+    MultiSelectSummaryTagDirective,
+    MultiSelectSummaryTagTemplateDirective,
+    MultiSelectTagTemplateDirective
+} from "@nanahoshi/mona-ui/multi-select";
 import { dropdownFoodData } from "../../../../assets/dropdown.data";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import {
@@ -171,7 +171,6 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("MultiSelectComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly MultiSelectWrapperComponent = MultiSelectWrapperComponent;
 }
 
@@ -194,7 +193,6 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
         LucideSearch,
         FormField
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         @let tagConfigData = tagConfig();

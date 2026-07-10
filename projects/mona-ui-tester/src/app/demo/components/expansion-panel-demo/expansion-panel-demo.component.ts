@@ -77,7 +77,6 @@ export class ExpansionPanelDemoComponent extends AbstractDemoComponent<Expansion
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ExpansionPanelComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly ExpansionPanelWrapperComponent = ExpansionPanelWrapperComponent;
 }
 

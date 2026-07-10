@@ -148,8 +148,8 @@ async function extractComponentMetadata() {
 
     const allComponentMetadata: { [componentName: string]: ComponentMetadata } = {};
 
-    // Get all TypeScript source files in the project's src directory
-    const pattern = `${path.resolve(__dirname, "../../mona-ui").replaceAll("\\", "/")}/src/lib/**/*.ts`;
+    // Get all TypeScript source files across the package's feature folders
+    const pattern = `${projectPath.replaceAll("\\", "/")}/**/*.ts`;
     const sourceFiles = project.getSourceFiles(pattern);
 
     for (const sourceFile of sourceFiles) {

@@ -183,7 +183,6 @@ export class DialogDemoComponent extends AbstractDemoComponent<DialogComponent> 
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DialogComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly DialogWrapperComponent = DialogWrapperComponent;
 }
 

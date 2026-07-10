@@ -2,7 +2,6 @@ import { NgTemplateOutlet } from "@angular/common";
 import {
     afterNextRender,
     afterRenderEffect,
-    ChangeDetectionStrategy,
     Component,
     computed,
     DestroyRef,
@@ -17,12 +16,11 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FaIconComponent } from "@fortawesome/angular-fontawesome";
-import { faChevronLeft, faChevronRight, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { LucideChevronLeft, LucideChevronRight, LucideX } from "@lucide/angular";
+import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ScrollDirection } from "@nanahoshi/mona-ui/common";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { firstOrDefault } from "@mirei/ts-collections";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { ScrollIntent } from "../../models/ScrollIntent";
@@ -39,9 +37,8 @@ import {
 
 @Component({
     selector: "mona-tab-list",
-    imports: [ButtonDirective, FaIconComponent, NgTemplateOutlet, TabListItemDirective],
+    imports: [ButtonDirective, NgTemplateOutlet, TabListItemDirective, LucideChevronLeft, LucideChevronRight, LucideX],
     templateUrl: "./tab-list.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()",
         "(keydown)": "onKeydown($event)"
@@ -67,10 +64,7 @@ export class TabListComponent implements TabListVariantInput {
         const theme = this.#themeService.theme();
         return tabListScrollButtonThemeVariants(theme)();
     });
-    protected readonly scrollLeftIcon = faChevronLeft;
-    protected readonly scrollRightIcon = faChevronRight;
     protected readonly scrollsVisible = signal(false);
-    protected readonly tabCloseIcon = faXmark;
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
     protected readonly tabListItems = viewChildren(TabListItemDirective, { read: ElementRef });
 

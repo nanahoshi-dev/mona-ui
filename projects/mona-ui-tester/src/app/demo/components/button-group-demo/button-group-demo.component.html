@@ -1,7 +1,3 @@
-<app-demo-container [config]="config()"
-                    [metadata]="metadata()"
-                    [subComponentMetadata]="subComponentsMetadata()"
-                    (valueChange)="onInputValueChange($event)">
-    <ng-container [ngComponentOutlet]="ButtonGroupWrapperComponent"
-                  [ngComponentOutletInputs]="inputs()"></ng-container>
+<app-demo-container [config]="config()" [metadata]="metadata()" (valueChange)="onInputValueChange($event)">
+    <ng-container [ngComponentOutlet]="ButtonGroupWrapperComponent" [ngComponentOutletInputs]="inputs()"></ng-container>
 </app-demo-container>

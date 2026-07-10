@@ -83,7 +83,6 @@ export class CircularProgressBarDemoComponent extends AbstractDemoComponent<Circ
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("CircularProgressBarComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly CircularProgressBarWrapperComponent = CircularProgressBarWrapperComponent;
 }
 

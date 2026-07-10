@@ -132,7 +132,6 @@ export class DatePickerDemoComponent extends AbstractDemoComponent<DatePickerCom
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DatePickerComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly DatePickerWrapperComponent = DatePickerWrapperComponent;
 }
 

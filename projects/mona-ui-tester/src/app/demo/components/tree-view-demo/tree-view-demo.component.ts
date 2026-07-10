@@ -86,8 +86,7 @@ let flatTreeData = generateCatalogData();
 @Component({
     selector: "app-tree-view-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./tree-view-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./tree-view-demo.component.html"
 })
 export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewComponent<TreeNodeDataItem>> {
     readonly #injector = createFeatureInjector({
@@ -274,7 +273,6 @@ export class TreeViewDemoComponent extends AbstractDemoComponent<TreeViewCompone
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TreeViewComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["TreeViewCheckableDirective"]);
     protected readonly TreeViewWrapperComponent = TreeViewWrapperComponent;
 }
 

@@ -159,10 +159,6 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DropdownListComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([
-        "DropdownFilterableDirective",
-        "DropdownGroupableDirective"
-    ]);
     protected readonly DropdownListWrapperComponent = DropdownListWrapperComponent;
 }
 

@@ -135,7 +135,6 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ComboBoxComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly ComboBoxWrapperComponent = ComboBoxWrapperComponent;
 }
 

@@ -60,7 +60,6 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
         }
     });
     protected readonly metadata = this.getMetadata("ColorGradientComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

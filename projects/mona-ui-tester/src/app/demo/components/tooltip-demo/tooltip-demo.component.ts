@@ -64,7 +64,6 @@ export class TooltipDemoComponent extends AbstractDemoComponent<TooltipComponent
         }
     });
     protected readonly metadata = this.getMetadata("TooltipComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata(["TooltipDirective"]);
     protected readonly TooltipWrapperComponent = TooltipWrapperComponent;
 }
 

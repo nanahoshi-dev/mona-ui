@@ -83,7 +83,6 @@ export class ScrollViewDemoComponent extends AbstractDemoComponent<ScrollViewCom
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ScrollViewComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly ScrollViewWrapperComponent = ScrollViewWrapperComponent;
 }
 

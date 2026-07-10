@@ -87,7 +87,6 @@ export class DemoContainerComponent<TComponent> {
     ]);
     public readonly config = input.required<ComponentConfig<TComponent>>();
     public readonly metadata = input.required<ComponentMetadata>();
-    public readonly subComponentMetadata = input<Record<string, ComponentMetadata>>();
     public readonly valueChange = output<Record<string, unknown>>();
 
     protected onCodeToggle(): void {

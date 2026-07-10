@@ -187,7 +187,6 @@ export class PopupMenuDemoComponent extends AbstractDemoComponent<PopupMenuCompo
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PopupMenuComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly PopupMenuWrapperComponent = PopupMenuWrapperComponent;
 }
 

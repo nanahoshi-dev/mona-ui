@@ -158,7 +158,6 @@ export class WindowDemoComponent extends AbstractDemoComponent<WindowComponent> 
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("WindowComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly WindowWrapperComponent = WindowWrapperComponent;
 }
 

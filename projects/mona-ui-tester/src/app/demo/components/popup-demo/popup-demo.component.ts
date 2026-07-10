@@ -170,7 +170,6 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
         }
     });
     protected readonly metadata = this.getMetadata("PopupComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly PopupWrapperComponent = PopupWrapperComponent;
 }
 

@@ -23,7 +23,6 @@ export class TextAreaDemoComponent extends AbstractDemoComponent<TextAreaDirecti
         }
     });
     protected readonly metadata = this.getMetadata("TextAreaDirective");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly TextAreaWrapperComponent = TextAreaWrapperComponent;
 }
 

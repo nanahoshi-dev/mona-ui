@@ -159,7 +159,6 @@ export class DateTimePickerDemoComponent extends AbstractDemoComponent<DateTimeP
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("DateTimePickerComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

@@ -65,11 +65,10 @@
                             "includePaths": [""]
                         },
                         "styles": [
-                            "node_modules/@fortawesome/fontawesome-free/css/all.css",
                             "node_modules/highlight.js/styles/nord.min.css",
                             "projects/mona-ui-tester/src/styles.css"
                         ],
-                        "scripts": ["node_modules/@fortawesome/fontawesome-free/js/all.js"],
+                        "scripts": [],
                         "browser": "projects/mona-ui-tester/src/main.ts"
                     },
                     "configurations": {

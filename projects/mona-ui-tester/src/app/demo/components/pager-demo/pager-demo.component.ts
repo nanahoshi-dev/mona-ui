@@ -146,7 +146,6 @@ export class PagerDemoComponent extends AbstractDemoComponent<PagerComponent> {
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("PagerComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly PagerWrapperComponent = PagerWrapperComponent;
 }
 

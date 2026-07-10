@@ -58,7 +58,6 @@ export class ColorPaletteDemoComponent extends AbstractDemoComponent<ColorPalett
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("ColorPaletteComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly ColorPaletteWrapperComponent = ColorPaletteWrapperComponent;
 }
 

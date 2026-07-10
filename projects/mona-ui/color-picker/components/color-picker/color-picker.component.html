@@ -5,15 +5,11 @@
 } @else {
     <div [style.background]="value()" [class]="colorClasses()">
         @if (!value()) {
-            <fa-icon [icon]="noColorIcon"></fa-icon>
+            <svg lucideXCircle [size]="16"></svg>
         }
     </div>
 }
-<div>
-    <button monaButton look="link" [tabindex]="-1" class="px-2 py-1">
-        <fa-icon [icon]="dropdownIcon"></fa-icon>
-    </button>
-</div>
+<mona-indicator-icon preset="dropdown" [size]="18"></mona-indicator-icon>
 
 <ng-template #popupTemplate>
     @if (view() === "palette") {

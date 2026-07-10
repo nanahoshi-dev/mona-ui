@@ -380,7 +380,6 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("GridComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly GridWrapperComponent = GridWrapperComponent;
 }
 

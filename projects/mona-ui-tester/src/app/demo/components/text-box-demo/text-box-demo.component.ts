@@ -91,7 +91,6 @@ export class TextBoxDemoComponent extends AbstractDemoComponent<TextBoxComponent
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("TextBoxComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
 }
 
 @Component({

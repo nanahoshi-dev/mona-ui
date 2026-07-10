@@ -94,13 +94,11 @@ export class NumericTextboxDemoComponent extends AbstractDemoComponent<NumericTe
     });
     protected readonly featureInjector = this.#injector;
     protected readonly metadata = this.getMetadata("NumericTextBoxComponent");
-    protected readonly subComponentsMetadata = this.getSubComponentsMetadata([]);
     protected readonly NumericTextboxWrapperComponent = NumericTextboxWrapperComponent;
 }
 
 @Component({
     imports: [NumericTextBoxComponent, NumericTextBoxPrefixTemplateDirective, LucideHash, FormField],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         @let featureData = features();
         <div class="flex flex-col gap-2">
