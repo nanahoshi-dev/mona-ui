@@ -346,9 +346,10 @@ describe("PagerComponent", () => {
     });
 
     describe("responsive behavior", () => {
-        it("should hide info, page-input, and numeric page buttons as the host narrows", () => {
+        it("should hide info, page-input, and numeric page buttons as the host narrows", async () => {
             fixture.componentRef.setInput("pageInput", true);
             setup(100, 10, 0);
+            await fixture.whenStable();
 
             resizeHost(300);
 
@@ -357,9 +358,10 @@ describe("PagerComponent", () => {
             expect(fixture.debugElement.query(By.directive(NumericTextBoxComponent))).toBeNull();
         });
 
-        it("should show all sections when the host is wide enough", () => {
+        it("should show all sections when the host is wide enough", async () => {
             fixture.componentRef.setInput("pageInput", true);
             setup(100, 10, 0);
+            await fixture.whenStable();
 
             resizeHost(900);
 
@@ -368,13 +370,17 @@ describe("PagerComponent", () => {
             expect(fixture.debugElement.query(By.directive(NumericTextBoxComponent))).toBeTruthy();
         });
 
-        it("should force all sections visible when responsive is set to false", () => {
+        it("should force all sections visible when responsive is set to false", async () => {
             fixture.componentRef.setInput("pageInput", true);
             setup(100, 10, 0);
+            await fixture.whenStable();
             resizeHost(300);
 
             fixture.componentRef.setInput("responsive", false);
             fixture.detectChanges();
+            await fixture.whenStable();
+            fixture.detectChanges();
+            await fixture.whenStable();
 
             expect(getInfoText()).toContain("1 - 10 of 100 items");
             expect(queryButtonByLabel("Page 1")).toBeTruthy();
@@ -403,8 +409,9 @@ describe("PagerComponent", () => {
     });
 
     describe("keyboard navigation", () => {
-        it("should make the host focusable and remove inner controls from the page tab order by default", () => {
+        it("should make the host focusable and remove inner controls from the page tab order by default", async () => {
             setup(100, 10, 0);
+            await fixture.whenStable();
 
             const host: HTMLElement = fixture.nativeElement;
 
