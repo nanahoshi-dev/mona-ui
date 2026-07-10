@@ -18,8 +18,8 @@
         "build:tester": "ng build mona-ui-tester --configuration production",
         "serve:tester": "ng serve mona-ui-tester",
         "watch": "ng build mona-ui --watch --configuration development",
-        "test:lib": "ng test mona-ui --watch=false",
-        "test:lib:watch": "ng test mona-ui --code-coverage --watch",
+        "test:lib": "ng test mona-ui",
+        "test:lib:watch": "ng test mona-ui --coverage --watch",
         "test:app": "ng test mona-ui-tester"
     },
     "workspaces": [
@@ -39,7 +39,10 @@
             [
                 "@semantic-release/git",
                 {
-                    "assets": ["projects/mona-ui/package.json", "CHANGELOG.md"]
+                    "assets": [
+                        "projects/mona-ui/package.json",
+                        "CHANGELOG.md"
+                    ]
                 }
             ],
             "@semantic-release/github"
