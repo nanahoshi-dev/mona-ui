@@ -31,7 +31,17 @@
     },
     "release": {
         "plugins": [
-            "@semantic-release/commit-analyzer",
+            [
+                "@semantic-release/commit-analyzer",
+                {
+                    "releaseRules": [
+                        {
+                            "breaking": true,
+                            "release": "minor"
+                        }
+                    ]
+                }
+            ],
             "@semantic-release/release-notes-generator",
             [
                 "@semantic-release/npm",
@@ -49,7 +59,14 @@
                     ]
                 }
             ],
-            "@semantic-release/github"
+            [
+                "@semantic-release/github",
+                {
+                    "successComment": false,
+                    "failComment": false,
+                    "failTitle": false
+                }
+            ]
         ],
         "branches": [
             "main"
