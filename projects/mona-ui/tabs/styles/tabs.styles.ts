@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     tabContentVariants as monaTabContentVariants,
@@ -11,68 +11,50 @@ import {
     tabsBaseVariants as monaTabsBaseVariants
 } from "./tabs.mona.styles";
 
-export const tabListBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabListBaseVariants;
-        default:
-            return monaTabListBaseVariants;
-    }
-};
+const tabListBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTabListBaseVariants },
+    monaTabListBaseVariants
+);
 
-export const tabListListWrapperThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabListListWrapperVariants;
-        default:
-            return monaTabListListWrapperVariants;
-    }
-};
+export const tabListBaseThemeVariants = (theme: ThemeStyle) => tabListBaseThemeVariantsStrategy.resolve(theme);
 
-export const tabListListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabListListVariants;
-        default:
-            return monaTabListListVariants;
-    }
-};
+const tabListListWrapperThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTabListListWrapperVariants },
+    monaTabListListWrapperVariants
+);
 
-export const tabListListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabListListItemVariants;
-        default:
-            return monaTabListListItemVariants;
-    }
-};
+export const tabListListWrapperThemeVariants = (theme: ThemeStyle) =>
+    tabListListWrapperThemeVariantsStrategy.resolve(theme);
 
-export const tabListScrollButtonThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabListScrollButtonVariants;
-        default:
-            return monaTabListScrollButtonVariants;
-    }
-};
+const tabListListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTabListListVariants },
+    monaTabListListVariants
+);
 
-export const tabContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabContentVariants;
-        default:
-            return monaTabContentVariants;
-    }
-};
+export const tabListListThemeVariants = (theme: ThemeStyle) => tabListListThemeVariantsStrategy.resolve(theme);
 
-export const tabsBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTabsBaseVariants;
-        default:
-            return monaTabsBaseVariants;
-    }
-};
+const tabListListItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTabListListItemVariants },
+    monaTabListListItemVariants
+);
+
+export const tabListListItemThemeVariants = (theme: ThemeStyle) => tabListListItemThemeVariantsStrategy.resolve(theme);
+
+const tabListScrollButtonThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTabListScrollButtonVariants },
+    monaTabListScrollButtonVariants
+);
+
+export const tabListScrollButtonThemeVariants = (theme: ThemeStyle) =>
+    tabListScrollButtonThemeVariantsStrategy.resolve(theme);
+
+const tabContentThemeVariantsStrategy = createThemeStrategy({ mona: monaTabContentVariants }, monaTabContentVariants);
+
+export const tabContentThemeVariants = (theme: ThemeStyle) => tabContentThemeVariantsStrategy.resolve(theme);
+
+const tabsBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaTabsBaseVariants }, monaTabsBaseVariants);
+
+export const tabsBaseThemeVariants = (theme: ThemeStyle) => tabsBaseThemeVariantsStrategy.resolve(theme);
 
 type TabListBaseVariantProps = VariantProps<ReturnType<typeof tabListBaseThemeVariants>>;
 type TabListBaseVariantInput = VariantInputs<TabListBaseVariantProps>;

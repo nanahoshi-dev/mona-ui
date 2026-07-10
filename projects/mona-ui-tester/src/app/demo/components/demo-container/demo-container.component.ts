@@ -71,7 +71,7 @@ export class DemoContainerComponent<TComponent> {
         if (customColor) {
             return customColor;
         }
-        return `var(--color-demo-background)`;
+        return null;
     });
     protected readonly codeVisible = signal(false);
     protected readonly customColor = signal<string | null>(null);
@@ -83,7 +83,9 @@ export class DemoContainerComponent<TComponent> {
         Array<{ text: string; theme: ThemeStyle; variant: ThemeVariant; id: ThemeId }>
     >([
         { text: "Mona Light", theme: "mona", variant: "light", id: "mona-light" },
-        { text: "Mona Dark", theme: "mona", variant: "dark", id: "mona-dark" }
+        { text: "Mona Dark", theme: "mona", variant: "dark", id: "mona-dark" },
+        { text: "Reina Light", theme: "reina", variant: "light", id: "reina-light" },
+        { text: "Reina Dark", theme: "reina", variant: "dark", id: "reina-dark" }
     ]);
     public readonly config = input.required<ComponentConfig<TComponent>>();
     public readonly metadata = input.required<ComponentMetadata>();

@@ -1,4 +1,4 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import {
     subTreeListItemVariants as monaSubTreeListItemVariants,
     subTreeListVariants as monaSubTreeListVariants,
@@ -11,83 +11,67 @@ import {
     treeNodeExpanderVariants as monaTreeNodeExpanderVariants
 } from "./tree.mona.styles";
 
-export const subTreeListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSubTreeListVariants;
-        default:
-            return monaSubTreeListVariants;
-    }
-};
+const subTreeListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSubTreeListVariants },
+    monaSubTreeListVariants
+);
 
-export const subTreeListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSubTreeListItemVariants;
-        default:
-            return monaSubTreeListItemVariants;
-    }
-};
+export const subTreeListThemeVariants = (theme: ThemeStyle) => subTreeListThemeVariantsStrategy.resolve(theme);
 
-export const treeBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeBaseVariants;
-        default:
-            return monaTreeBaseVariants;
-    }
-};
+const subTreeListItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSubTreeListItemVariants },
+    monaSubTreeListItemVariants
+);
 
-export const treeDropHintBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeDropHintBaseVariants;
-        default:
-            return monaTreeDropHintBaseVariants;
-    }
-};
+export const subTreeListItemThemeVariants = (theme: ThemeStyle) => subTreeListItemThemeVariantsStrategy.resolve(theme);
 
-export const treeDropHintIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeDropHintIconVariants;
-        default:
-            return monaTreeDropHintIconVariants;
-    }
-};
+const treeBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaTreeBaseVariants }, monaTreeBaseVariants);
 
-export const treeNodeBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeBaseVariants;
-        default:
-            return monaTreeNodeBaseVariants;
-    }
-};
+export const treeBaseThemeVariants = (theme: ThemeStyle) => treeBaseThemeVariantsStrategy.resolve(theme);
 
-export const treeNodeContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeContainerVariants;
-        default:
-            return monaTreeNodeContainerVariants;
-    }
-};
+const treeDropHintBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTreeDropHintBaseVariants },
+    monaTreeDropHintBaseVariants
+);
 
-export const treeNodeDraggingThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeDraggingVariants;
-        default:
-            return monaTreeNodeDraggingVariants;
-    }
-};
+export const treeDropHintBaseThemeVariants = (theme: ThemeStyle) =>
+    treeDropHintBaseThemeVariantsStrategy.resolve(theme);
 
-export const treeNodeExpanderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeExpanderVariants;
-        default:
-            return monaTreeNodeExpanderVariants;
-    }
-};
+const treeDropHintIconThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTreeDropHintIconVariants },
+    monaTreeDropHintIconVariants
+);
+
+export const treeDropHintIconThemeVariants = (theme: ThemeStyle) =>
+    treeDropHintIconThemeVariantsStrategy.resolve(theme);
+
+const treeNodeBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTreeNodeBaseVariants },
+    monaTreeNodeBaseVariants
+);
+
+export const treeNodeBaseThemeVariants = (theme: ThemeStyle) => treeNodeBaseThemeVariantsStrategy.resolve(theme);
+
+const treeNodeContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTreeNodeContainerVariants },
+    monaTreeNodeContainerVariants
+);
+
+export const treeNodeContainerThemeVariants = (theme: ThemeStyle) =>
+    treeNodeContainerThemeVariantsStrategy.resolve(theme);
+
+const treeNodeDraggingThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTreeNodeDraggingVariants },
+    monaTreeNodeDraggingVariants
+);
+
+export const treeNodeDraggingThemeVariants = (theme: ThemeStyle) =>
+    treeNodeDraggingThemeVariantsStrategy.resolve(theme);
+
+const treeNodeExpanderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTreeNodeExpanderVariants },
+    monaTreeNodeExpanderVariants
+);
+
+export const treeNodeExpanderThemeVariants = (theme: ThemeStyle) =>
+    treeNodeExpanderThemeVariantsStrategy.resolve(theme);

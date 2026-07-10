@@ -1,28 +1,25 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import {
     colorPickerBaseVariants as monaColorPickerBaseVariants,
     colorPickerColorVariants as monaColorPickerColorVariants
 } from "./color-picker.mona.styles";
 
-export const colorPickerBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorPickerBaseVariants;
-        default:
-            return monaColorPickerBaseVariants;
-    }
-};
+const colorPickerBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaColorPickerBaseVariants },
+    monaColorPickerBaseVariants
+);
 
-export const colorPickerColorThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorPickerColorVariants;
-        default:
-            return monaColorPickerColorVariants;
-    }
-};
+export const colorPickerBaseThemeVariants = (theme: ThemeStyle) => colorPickerBaseThemeVariantsStrategy.resolve(theme);
+
+const colorPickerColorThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaColorPickerColorVariants },
+    monaColorPickerColorVariants
+);
+
+export const colorPickerColorThemeVariants = (theme: ThemeStyle) =>
+    colorPickerColorThemeVariantsStrategy.resolve(theme);
 
 type ColorPickerBaseVariantProps = VariantProps<ReturnType<typeof colorPickerBaseThemeVariants>>;
 type ColorPickerBaseVariantInput = VariantInputs<ColorPickerBaseVariantProps>;

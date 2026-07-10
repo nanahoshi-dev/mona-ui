@@ -1,5 +1,5 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import {
     breadcrumbCurrentItemVariants as monaBreadcrumbCurrentItemVariants,
@@ -7,32 +7,28 @@ import {
     breadcrumbListItemVariants as monaBreadcrumbListItemVariants
 } from "./breadcrumb.mona.styles";
 
-export const breadcrumbListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaBreadcrumbListVariants;
-        default:
-            return monaBreadcrumbListVariants;
-    }
-};
+const breadcrumbListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaBreadcrumbListVariants },
+    monaBreadcrumbListVariants
+);
 
-export const breadcrumbListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaBreadcrumbListItemVariants;
-        default:
-            return monaBreadcrumbListItemVariants;
-    }
-};
+export const breadcrumbListThemeVariants = (theme: ThemeStyle) => breadcrumbListThemeVariantsStrategy.resolve(theme);
 
-export const breadcrumbCurrentItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaBreadcrumbCurrentItemVariants;
-        default:
-            return monaBreadcrumbCurrentItemVariants;
-    }
-};
+const breadcrumbListItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaBreadcrumbListItemVariants },
+    monaBreadcrumbListItemVariants
+);
+
+export const breadcrumbListItemThemeVariants = (theme: ThemeStyle) =>
+    breadcrumbListItemThemeVariantsStrategy.resolve(theme);
+
+const breadcrumbCurrentItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaBreadcrumbCurrentItemVariants },
+    monaBreadcrumbCurrentItemVariants
+);
+
+export const breadcrumbCurrentItemThemeVariants = (theme: ThemeStyle) =>
+    breadcrumbCurrentItemThemeVariantsStrategy.resolve(theme);
 
 type BreadcrumbListVariantProps = VariantProps<ReturnType<typeof breadcrumbListThemeVariants>>;
 type BreadcrumbListVariantInput = VariantInputs<BreadcrumbListVariantProps>;

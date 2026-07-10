@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { tooltipArrowThemeVariants } from "@nanahoshi/mona-ui/tooltip";
 import { VariantProps } from "class-variance-authority";
 import {
@@ -8,32 +8,26 @@ import {
     popoverHeaderVariants as monaPopoverHeaderVariants
 } from "./popover.mona.styles";
 
-export const popoverBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopoverBaseVariants;
-        default:
-            return monaPopoverBaseVariants;
-    }
-};
+const popoverBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaPopoverBaseVariants },
+    monaPopoverBaseVariants
+);
 
-export const popoverHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopoverHeaderVariants;
-        default:
-            return monaPopoverHeaderVariants;
-    }
-};
+export const popoverBaseThemeVariants = (theme: ThemeStyle) => popoverBaseThemeVariantsStrategy.resolve(theme);
 
-export const popoverContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopoverContentVariants;
-        default:
-            return monaPopoverContentVariants;
-    }
-};
+const popoverHeaderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaPopoverHeaderVariants },
+    monaPopoverHeaderVariants
+);
+
+export const popoverHeaderThemeVariants = (theme: ThemeStyle) => popoverHeaderThemeVariantsStrategy.resolve(theme);
+
+const popoverContentThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaPopoverContentVariants },
+    monaPopoverContentVariants
+);
+
+export const popoverContentThemeVariants = (theme: ThemeStyle) => popoverContentThemeVariantsStrategy.resolve(theme);
 
 export const popoverArrowThemeVariants = (theme: ThemeStyle) => {
     return tooltipArrowThemeVariants(theme);

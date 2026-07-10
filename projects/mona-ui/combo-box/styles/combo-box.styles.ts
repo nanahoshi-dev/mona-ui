@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     comboBoxAffixContainerVariants as monaComboBoxAffixContainerVariants,
@@ -7,32 +7,28 @@ import {
     comboBoxTextInputVariants as monaComboBoxTextInputVariants
 } from "./combo-box.mona.styles";
 
-export const comboBoxBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxBaseVariants;
-        default:
-            return monaComboBoxBaseVariants;
-    }
-};
+const comboBoxBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaComboBoxBaseVariants },
+    monaComboBoxBaseVariants
+);
 
-export const comboBoxTextInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxTextInputVariants;
-        default:
-            return monaComboBoxTextInputVariants;
-    }
-};
+export const comboBoxBaseThemeVariants = (theme: ThemeStyle) => comboBoxBaseThemeVariantsStrategy.resolve(theme);
 
-export const comboBoxAffixContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxAffixContainerVariants;
-        default:
-            return monaComboBoxAffixContainerVariants;
-    }
-};
+const comboBoxTextInputThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaComboBoxTextInputVariants },
+    monaComboBoxTextInputVariants
+);
+
+export const comboBoxTextInputThemeVariants = (theme: ThemeStyle) =>
+    comboBoxTextInputThemeVariantsStrategy.resolve(theme);
+
+const comboBoxAffixContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaComboBoxAffixContainerVariants },
+    monaComboBoxAffixContainerVariants
+);
+
+export const comboBoxAffixContainerThemeVariants = (theme: ThemeStyle) =>
+    comboBoxAffixContainerThemeVariantsStrategy.resolve(theme);
 
 type ComboBoxBaseVariantProps = VariantProps<ReturnType<typeof comboBoxBaseThemeVariants>>;
 type ComboBoxBaseVariantInput = VariantInputs<ComboBoxBaseVariantProps>;

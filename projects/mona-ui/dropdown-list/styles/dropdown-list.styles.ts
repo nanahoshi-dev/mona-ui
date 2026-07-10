@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     dropdownListAffixContainerVariants as monaDropdownListAffixContainerVariants,
@@ -7,32 +7,29 @@ import {
     dropdownListValueContainerVariants as monaDropdownListValueContainerVariants
 } from "./dropdown-list.mona.styles";
 
-export const dropdownListAffixContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDropdownListAffixContainerVariants;
-        default:
-            return monaDropdownListAffixContainerVariants;
-    }
-};
+const dropdownListAffixContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDropdownListAffixContainerVariants },
+    monaDropdownListAffixContainerVariants
+);
 
-export const dropdownListInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDropdownListInputVariants;
-        default:
-            return monaDropdownListInputVariants;
-    }
-};
+export const dropdownListAffixContainerThemeVariants = (theme: ThemeStyle) =>
+    dropdownListAffixContainerThemeVariantsStrategy.resolve(theme);
 
-export const dropdownListValueContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDropdownListValueContainerVariants;
-        default:
-            return monaDropdownListValueContainerVariants;
-    }
-};
+const dropdownListInputThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDropdownListInputVariants },
+    monaDropdownListInputVariants
+);
+
+export const dropdownListInputThemeVariants = (theme: ThemeStyle) =>
+    dropdownListInputThemeVariantsStrategy.resolve(theme);
+
+const dropdownListValueContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDropdownListValueContainerVariants },
+    monaDropdownListValueContainerVariants
+);
+
+export const dropdownListValueContainerThemeVariants = (theme: ThemeStyle) =>
+    dropdownListValueContainerThemeVariantsStrategy.resolve(theme);
 
 type DropdownListInputVariantProps = VariantProps<ReturnType<typeof dropdownListInputThemeVariants>>;
 type DropdownListInputVariantInput = VariantInputs<DropdownListInputVariantProps>;

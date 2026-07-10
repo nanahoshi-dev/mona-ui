@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     sliderBaseVariants as monaSliderBaseVariants,
@@ -12,77 +12,56 @@ import {
     sliderTrackVariants as monaSliderTrackVariants
 } from "./slider.mona.styles";
 
-export const sliderBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderBaseVariants;
-        default:
-            return monaSliderBaseVariants; // Default to Mona styles
-    }
-};
+const sliderBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaSliderBaseVariants }, monaSliderBaseVariants);
 
-export const sliderTrackThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderTrackVariants;
-        default:
-            return monaSliderTrackVariants; // Default to Mona styles
-    }
-};
+export const sliderBaseThemeVariants = (theme: ThemeStyle) => sliderBaseThemeVariantsStrategy.resolve(theme);
 
-export const sliderSelectionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderSelectionVariants;
-        default:
-            return monaSliderSelectionVariants; // Default to Mona styles
-    }
-};
+const sliderTrackThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSliderTrackVariants },
+    monaSliderTrackVariants
+);
 
-export const sliderTickListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderTickListVariants;
-        default:
-            return monaSliderTickListVariants; // Default to Mona styles
-    }
-};
+export const sliderTrackThemeVariants = (theme: ThemeStyle) => sliderTrackThemeVariantsStrategy.resolve(theme);
 
-export const sliderTickThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderTickVariants;
-        default:
-            return monaSliderTickVariants; // Default to Mona styles
-    }
-};
+const sliderSelectionThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSliderSelectionVariants },
+    monaSliderSelectionVariants
+);
 
-export const sliderTickLabelListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderTickLabelListVariants;
-        default:
-            return monaSliderTickLabelListVariants; // Default to Mona styles
-    }
-};
+export const sliderSelectionThemeVariants = (theme: ThemeStyle) => sliderSelectionThemeVariantsStrategy.resolve(theme);
 
-export const sliderTickLabelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderTickLabelVariants;
-        default:
-            return monaSliderTickLabelVariants; // Default to Mona styles
-    }
-};
+const sliderTickListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSliderTickListVariants },
+    monaSliderTickListVariants
+);
 
-export const sliderHandleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSliderHandleVariants;
-        default:
-            return monaSliderHandleVariants; // Default to Mona styles
-    }
-};
+export const sliderTickListThemeVariants = (theme: ThemeStyle) => sliderTickListThemeVariantsStrategy.resolve(theme);
+
+const sliderTickThemeVariantsStrategy = createThemeStrategy({ mona: monaSliderTickVariants }, monaSliderTickVariants);
+
+export const sliderTickThemeVariants = (theme: ThemeStyle) => sliderTickThemeVariantsStrategy.resolve(theme);
+
+const sliderTickLabelListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSliderTickLabelListVariants },
+    monaSliderTickLabelListVariants
+);
+
+export const sliderTickLabelListThemeVariants = (theme: ThemeStyle) =>
+    sliderTickLabelListThemeVariantsStrategy.resolve(theme);
+
+const sliderTickLabelThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSliderTickLabelVariants },
+    monaSliderTickLabelVariants
+);
+
+export const sliderTickLabelThemeVariants = (theme: ThemeStyle) => sliderTickLabelThemeVariantsStrategy.resolve(theme);
+
+const sliderHandleThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaSliderHandleVariants },
+    monaSliderHandleVariants
+);
+
+export const sliderHandleThemeVariants = (theme: ThemeStyle) => sliderHandleThemeVariantsStrategy.resolve(theme);
 
 export type SliderBaseVariantProps = VariantProps<ReturnType<typeof sliderBaseThemeVariants>>;
 export type SliderBaseVariantInputs = VariantInputs<SliderBaseVariantProps>;

@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     dialogBaseVariants as monaDialogBaseVariants,
@@ -16,113 +16,85 @@ import {
     dialogTitleVariants as monaDialogTitleVariants
 } from "./dialog.mona.styles";
 
-export const dialogBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogBaseVariants;
-        default:
-            return monaDialogBaseVariants;
-    }
-};
+const dialogBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaDialogBaseVariants }, monaDialogBaseVariants);
 
-export const dialogIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogIconVariants;
-        default:
-            return monaDialogIconVariants;
-    }
-};
+export const dialogBaseThemeVariants = (theme: ThemeStyle) => dialogBaseThemeVariantsStrategy.resolve(theme);
 
-export const dialogBodyThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogBodyVariants;
-        default:
-            return monaDialogBodyVariants;
-    }
-};
+const dialogIconThemeVariantsStrategy = createThemeStrategy({ mona: monaDialogIconVariants }, monaDialogIconVariants);
 
-export const dialogContentContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogContentContainerVariants;
-        default:
-            return monaDialogContentContainerVariants;
-    }
-};
+export const dialogIconThemeVariants = (theme: ThemeStyle) => dialogIconThemeVariantsStrategy.resolve(theme);
 
-export const dialogHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogHeaderVariants;
-        default:
-            return monaDialogHeaderVariants;
-    }
-};
+const dialogBodyThemeVariantsStrategy = createThemeStrategy({ mona: monaDialogBodyVariants }, monaDialogBodyVariants);
 
-export const dialogIconContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogIconContainerVariants;
-        default:
-            return monaDialogIconContainerVariants;
-    }
-};
+export const dialogBodyThemeVariants = (theme: ThemeStyle) => dialogBodyThemeVariantsStrategy.resolve(theme);
 
-export const dialogTitleContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogTitleContainerVariants;
-        default:
-            return monaDialogTitleContainerVariants;
-    }
-};
+const dialogContentContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogContentContainerVariants },
+    monaDialogContentContainerVariants
+);
 
-export const dialogCloseButtonContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogCloseButtonContainerVariants;
-        default:
-            return monaDialogCloseButtonContainerVariants;
-    }
-};
+export const dialogContentContainerThemeVariants = (theme: ThemeStyle) =>
+    dialogContentContainerThemeVariantsStrategy.resolve(theme);
 
-export const dialogTitleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogTitleVariants;
-        default:
-            return monaDialogTitleVariants;
-    }
-};
+const dialogHeaderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogHeaderVariants },
+    monaDialogHeaderVariants
+);
 
-export const dialogDescriptionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogDescriptionVariants;
-        default:
-            return monaDialogDescriptionVariants;
-    }
-};
+export const dialogHeaderThemeVariants = (theme: ThemeStyle) => dialogHeaderThemeVariantsStrategy.resolve(theme);
 
-export const dialogContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogContentVariants;
-        default:
-            return monaDialogContentVariants;
-    }
-};
+const dialogIconContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogIconContainerVariants },
+    monaDialogIconContainerVariants
+);
 
-export const dialogFooterThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogFooterVariants;
-        default:
-            return monaDialogFooterVariants;
-    }
-};
+export const dialogIconContainerThemeVariants = (theme: ThemeStyle) =>
+    dialogIconContainerThemeVariantsStrategy.resolve(theme);
+
+const dialogTitleContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogTitleContainerVariants },
+    monaDialogTitleContainerVariants
+);
+
+export const dialogTitleContainerThemeVariants = (theme: ThemeStyle) =>
+    dialogTitleContainerThemeVariantsStrategy.resolve(theme);
+
+const dialogCloseButtonContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogCloseButtonContainerVariants },
+    monaDialogCloseButtonContainerVariants
+);
+
+export const dialogCloseButtonContainerThemeVariants = (theme: ThemeStyle) =>
+    dialogCloseButtonContainerThemeVariantsStrategy.resolve(theme);
+
+const dialogTitleThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogTitleVariants },
+    monaDialogTitleVariants
+);
+
+export const dialogTitleThemeVariants = (theme: ThemeStyle) => dialogTitleThemeVariantsStrategy.resolve(theme);
+
+const dialogDescriptionThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogDescriptionVariants },
+    monaDialogDescriptionVariants
+);
+
+export const dialogDescriptionThemeVariants = (theme: ThemeStyle) =>
+    dialogDescriptionThemeVariantsStrategy.resolve(theme);
+
+const dialogContentThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogContentVariants },
+    monaDialogContentVariants
+);
+
+export const dialogContentThemeVariants = (theme: ThemeStyle) => dialogContentThemeVariantsStrategy.resolve(theme);
+
+const dialogFooterThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDialogFooterVariants },
+    monaDialogFooterVariants
+);
+
+export const dialogFooterThemeVariants = (theme: ThemeStyle) => dialogFooterThemeVariantsStrategy.resolve(theme);
 
 type DialogBaseVariantProps = VariantProps<ReturnType<typeof dialogBaseThemeVariants>>;
 type DialogBaseVariantInput = VariantInputs<DialogBaseVariantProps>;

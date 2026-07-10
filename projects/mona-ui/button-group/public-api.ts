@@ -3,4 +3,18 @@
  */
 
 export { ButtonGroupComponent } from "./components/button-group/button-group.component";
-export type { ButtonGroupVariantProps } from "./styles/button-group.styles";
+export {
+    BUTTON_GROUP_STYLE_OVERRIDES,
+    BUTTON_GROUP_STYLE_STRATEGY,
+    createButtonGroupStyleStrategy,
+    provideButtonGroupStyles
+} from "./styles/button-group.styles";
+export type {
+    ButtonGroupCompoundStyleOverride,
+    ButtonGroupStyleOverrides,
+    ButtonGroupStyleStrategy,
+    ButtonGroupStylesProviderConfig,
+    ButtonGroupVariantProps,
+    ButtonGroupVariantsFunction,
+    ButtonGroupVariantsInput
+} from "./styles/button-group.styles";

@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     gridBaseVariants as monaGridBaseVariants,
@@ -37,302 +37,244 @@ import {
     gridNoDataVariants as monaGridNoDataVariants
 } from "./grid.mona.styles";
 
-export const gridBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridBaseVariants;
-        default:
-            return monaGridBaseVariants;
-    }
-};
+const gridBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaGridBaseVariants }, monaGridBaseVariants);
 
-export const gridCellBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellBaseVariants;
-        default:
-            return monaGridCellBaseVariants;
-    }
-};
+export const gridBaseThemeVariants = (theme: ThemeStyle) => gridBaseThemeVariantsStrategy.resolve(theme);
 
-export const gridCellContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellContainerVariants;
-        default:
-            return monaGridCellContainerVariants;
-    }
-};
+const gridCellBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridCellBaseVariants },
+    monaGridCellBaseVariants
+);
 
-export const gridCellDirtyIndicatorThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellDirtyIndicatorVariants;
-        default:
-            return monaGridCellDirtyIndicatorVariants;
-    }
-};
+export const gridCellBaseThemeVariants = (theme: ThemeStyle) => gridCellBaseThemeVariantsStrategy.resolve(theme);
 
-export const gridCellEditorBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellEditorBaseVariants;
-        default:
-            return monaGridCellEditorBaseVariants;
-    }
-};
+const gridCellContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridCellContainerVariants },
+    monaGridCellContainerVariants
+);
 
-export const gridCellEditorInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellEditorInputVariants;
-        default:
-            return monaGridCellEditorInputVariants;
-    }
-};
+export const gridCellContainerThemeVariants = (theme: ThemeStyle) =>
+    gridCellContainerThemeVariantsStrategy.resolve(theme);
 
-export const gridCellTextThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridCellTextVariants;
-        default:
-            return monaGridCellTextVariants;
-    }
-};
+const gridCellDirtyIndicatorThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridCellDirtyIndicatorVariants },
+    monaGridCellDirtyIndicatorVariants
+);
 
-export const gridColumnActionsThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridColumnActionsVariants;
-        default:
-            return monaGridColumnActionsVariants;
-    }
-};
+export const gridCellDirtyIndicatorThemeVariants = (theme: ThemeStyle) =>
+    gridCellDirtyIndicatorThemeVariantsStrategy.resolve(theme);
 
-export const gridColumnDragPreviewThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridColumnDragPreviewVariants;
-        default:
-            return monaGridColumnDragPreviewVariants;
-    }
-};
+const gridCellEditorBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridCellEditorBaseVariants },
+    monaGridCellEditorBaseVariants
+);
 
-export const gridColumnResizerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridColumnResizerVariants;
-        default:
-            return monaGridColumnResizerVariants;
-    }
-};
+export const gridCellEditorBaseThemeVariants = (theme: ThemeStyle) =>
+    gridCellEditorBaseThemeVariantsStrategy.resolve(theme);
 
-export const gridColumnDropHintThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridColumnDropHintVariants;
-        default:
-            return monaGridColumnDropHintVariants;
-    }
-};
+const gridCellEditorInputThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridCellEditorInputVariants },
+    monaGridCellEditorInputVariants
+);
 
-export const gridFilterRowCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridFilterRowCellVariants;
-        default:
-            return monaGridFilterRowCellVariants;
-    }
-};
+export const gridCellEditorInputThemeVariants = (theme: ThemeStyle) =>
+    gridCellEditorInputThemeVariantsStrategy.resolve(theme);
 
-export const gridFooterThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridFooterVariants;
-        default:
-            return monaGridFooterVariants;
-    }
-};
+const gridCellTextThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridCellTextVariants },
+    monaGridCellTextVariants
+);
 
-export const gridFooterTableThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridFooterTableVariants;
-        default:
-            return monaGridFooterTableVariants;
-    }
-};
+export const gridCellTextThemeVariants = (theme: ThemeStyle) => gridCellTextThemeVariantsStrategy.resolve(theme);
 
-export const gridFooterTableRowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridFooterTableRowVariants;
-        default:
-            return monaGridFooterTableRowVariants;
-    }
-};
+const gridColumnActionsThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridColumnActionsVariants },
+    monaGridColumnActionsVariants
+);
 
-export const gridFooterTableCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridFooterTableCellVariants;
-        default:
-            return monaGridFooterTableCellVariants;
-    }
-};
+export const gridColumnActionsThemeVariants = (theme: ThemeStyle) =>
+    gridColumnActionsThemeVariantsStrategy.resolve(theme);
 
-export const gridGroupPanelPlaceholderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridGroupPanelPlaceholderVariants;
-        default:
-            return monaGridGroupPanelPlaceholderVariants;
-    }
-};
+const gridColumnDragPreviewThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridColumnDragPreviewVariants },
+    monaGridColumnDragPreviewVariants
+);
 
-export const gridGroupPanelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridGroupPanelVariants;
-        default:
-            return monaGridGroupPanelVariants;
-    }
-};
+export const gridColumnDragPreviewThemeVariants = (theme: ThemeStyle) =>
+    gridColumnDragPreviewThemeVariantsStrategy.resolve(theme);
 
-export const gridGroupRowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridGroupRowVariants;
-        default:
-            return monaGridGroupRowVariants;
-    }
-};
+const gridColumnResizerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridColumnResizerVariants },
+    monaGridColumnResizerVariants
+);
 
-export const gridHeaderTableCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridHeaderTableCellVariants;
-        default:
-            return monaGridHeaderTableCellVariants;
-    }
-};
+export const gridColumnResizerThemeVariants = (theme: ThemeStyle) =>
+    gridColumnResizerThemeVariantsStrategy.resolve(theme);
 
-export const gridHeaderTableColumnTitleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridHeaderTableColumnTitleVariants;
-        default:
-            return monaGridHeaderTableColumnTitleVariants;
-    }
-};
+const gridColumnDropHintThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridColumnDropHintVariants },
+    monaGridColumnDropHintVariants
+);
 
-export const gridHeaderTableColumnWrapThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridHeaderTableColumnWrapVariants;
-        default:
-            return monaGridHeaderTableColumnWrapVariants;
-    }
-};
+export const gridColumnDropHintThemeVariants = (theme: ThemeStyle) =>
+    gridColumnDropHintThemeVariantsStrategy.resolve(theme);
 
-export const gridHeaderTableRowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridHeaderTableRowVariants;
-        default:
-            return monaGridHeaderTableRowVariants;
-    }
-};
+const gridFilterRowCellThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridFilterRowCellVariants },
+    monaGridFilterRowCellVariants
+);
 
-export const gridHeaderTableThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridHeaderTableVariants;
-        default:
-            return monaGridHeaderTableVariants;
-    }
-};
+export const gridFilterRowCellThemeVariants = (theme: ThemeStyle) =>
+    gridFilterRowCellThemeVariantsStrategy.resolve(theme);
 
-export const gridHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridHeaderVariants;
-        default:
-            return monaGridHeaderVariants;
-    }
-};
+const gridFooterThemeVariantsStrategy = createThemeStrategy({ mona: monaGridFooterVariants }, monaGridFooterVariants);
 
-export const gridListTableCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridListTableCellVariants;
-        default:
-            return monaGridListTableCellVariants;
-    }
-};
+export const gridFooterThemeVariants = (theme: ThemeStyle) => gridFooterThemeVariantsStrategy.resolve(theme);
 
-export const gridListTableRowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridListTableRowVariants;
-        default:
-            return monaGridListTableRowVariants;
-    }
-};
+const gridFooterTableThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridFooterTableVariants },
+    monaGridFooterTableVariants
+);
 
-export const gridListTableThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridListTableVariants;
-        default:
-            return monaGridListTableVariants;
-    }
-};
+export const gridFooterTableThemeVariants = (theme: ThemeStyle) => gridFooterTableThemeVariantsStrategy.resolve(theme);
 
-export const gridListBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridListBaseVariants;
-        default:
-            return monaGridListBaseVariants;
-    }
-};
+const gridFooterTableRowThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridFooterTableRowVariants },
+    monaGridFooterTableRowVariants
+);
 
-export const gridNoDataThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridNoDataVariants;
-        default:
-            return monaGridNoDataVariants;
-    }
-};
+export const gridFooterTableRowThemeVariants = (theme: ThemeStyle) =>
+    gridFooterTableRowThemeVariantsStrategy.resolve(theme);
 
-export const gridDetailRowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridDetailRowVariants;
-        default:
-            return monaGridDetailRowVariants;
-    }
-};
+const gridFooterTableCellThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridFooterTableCellVariants },
+    monaGridFooterTableCellVariants
+);
 
-export const gridDetailIndentCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridDetailIndentCellVariants;
-        default:
-            return monaGridDetailIndentCellVariants;
-    }
-};
+export const gridFooterTableCellThemeVariants = (theme: ThemeStyle) =>
+    gridFooterTableCellThemeVariantsStrategy.resolve(theme);
 
-export const gridDetailContentCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaGridDetailContentCellVariants;
-        default:
-            return monaGridDetailContentCellVariants;
-    }
-};
+const gridGroupPanelPlaceholderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridGroupPanelPlaceholderVariants },
+    monaGridGroupPanelPlaceholderVariants
+);
+
+export const gridGroupPanelPlaceholderThemeVariants = (theme: ThemeStyle) =>
+    gridGroupPanelPlaceholderThemeVariantsStrategy.resolve(theme);
+
+const gridGroupPanelThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridGroupPanelVariants },
+    monaGridGroupPanelVariants
+);
+
+export const gridGroupPanelThemeVariants = (theme: ThemeStyle) => gridGroupPanelThemeVariantsStrategy.resolve(theme);
+
+const gridGroupRowThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridGroupRowVariants },
+    monaGridGroupRowVariants
+);
+
+export const gridGroupRowThemeVariants = (theme: ThemeStyle) => gridGroupRowThemeVariantsStrategy.resolve(theme);
+
+const gridHeaderTableCellThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridHeaderTableCellVariants },
+    monaGridHeaderTableCellVariants
+);
+
+export const gridHeaderTableCellThemeVariants = (theme: ThemeStyle) =>
+    gridHeaderTableCellThemeVariantsStrategy.resolve(theme);
+
+const gridHeaderTableColumnTitleThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridHeaderTableColumnTitleVariants },
+    monaGridHeaderTableColumnTitleVariants
+);
+
+export const gridHeaderTableColumnTitleThemeVariants = (theme: ThemeStyle) =>
+    gridHeaderTableColumnTitleThemeVariantsStrategy.resolve(theme);
+
+const gridHeaderTableColumnWrapThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridHeaderTableColumnWrapVariants },
+    monaGridHeaderTableColumnWrapVariants
+);
+
+export const gridHeaderTableColumnWrapThemeVariants = (theme: ThemeStyle) =>
+    gridHeaderTableColumnWrapThemeVariantsStrategy.resolve(theme);
+
+const gridHeaderTableRowThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridHeaderTableRowVariants },
+    monaGridHeaderTableRowVariants
+);
+
+export const gridHeaderTableRowThemeVariants = (theme: ThemeStyle) =>
+    gridHeaderTableRowThemeVariantsStrategy.resolve(theme);
+
+const gridHeaderTableThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridHeaderTableVariants },
+    monaGridHeaderTableVariants
+);
+
+export const gridHeaderTableThemeVariants = (theme: ThemeStyle) => gridHeaderTableThemeVariantsStrategy.resolve(theme);
+
+const gridHeaderThemeVariantsStrategy = createThemeStrategy({ mona: monaGridHeaderVariants }, monaGridHeaderVariants);
+
+export const gridHeaderThemeVariants = (theme: ThemeStyle) => gridHeaderThemeVariantsStrategy.resolve(theme);
+
+const gridListTableCellThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridListTableCellVariants },
+    monaGridListTableCellVariants
+);
+
+export const gridListTableCellThemeVariants = (theme: ThemeStyle) =>
+    gridListTableCellThemeVariantsStrategy.resolve(theme);
+
+const gridListTableRowThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridListTableRowVariants },
+    monaGridListTableRowVariants
+);
+
+export const gridListTableRowThemeVariants = (theme: ThemeStyle) =>
+    gridListTableRowThemeVariantsStrategy.resolve(theme);
+
+const gridListTableThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridListTableVariants },
+    monaGridListTableVariants
+);
+
+export const gridListTableThemeVariants = (theme: ThemeStyle) => gridListTableThemeVariantsStrategy.resolve(theme);
+
+const gridListBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridListBaseVariants },
+    monaGridListBaseVariants
+);
+
+export const gridListBaseThemeVariants = (theme: ThemeStyle) => gridListBaseThemeVariantsStrategy.resolve(theme);
+
+const gridNoDataThemeVariantsStrategy = createThemeStrategy({ mona: monaGridNoDataVariants }, monaGridNoDataVariants);
+
+export const gridNoDataThemeVariants = (theme: ThemeStyle) => gridNoDataThemeVariantsStrategy.resolve(theme);
+
+const gridDetailRowThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridDetailRowVariants },
+    monaGridDetailRowVariants
+);
+
+export const gridDetailRowThemeVariants = (theme: ThemeStyle) => gridDetailRowThemeVariantsStrategy.resolve(theme);
+
+const gridDetailIndentCellThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridDetailIndentCellVariants },
+    monaGridDetailIndentCellVariants
+);
+
+export const gridDetailIndentCellThemeVariants = (theme: ThemeStyle) =>
+    gridDetailIndentCellThemeVariantsStrategy.resolve(theme);
+
+const gridDetailContentCellThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaGridDetailContentCellVariants },
+    monaGridDetailContentCellVariants
+);
+
+export const gridDetailContentCellThemeVariants = (theme: ThemeStyle) =>
+    gridDetailContentCellThemeVariantsStrategy.resolve(theme);
 
 type GridBaseVariantProps = VariantProps<ReturnType<typeof gridBaseThemeVariants>>;
 type GridBaseVariantInput = VariantInputs<GridBaseVariantProps>;

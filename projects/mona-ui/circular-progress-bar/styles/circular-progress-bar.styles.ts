@@ -1,16 +1,15 @@
 import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import type { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import type { VariantProps } from "class-variance-authority";
 import { circularProgressBarBaseVariants as monaCircularProgressBarBaseVariants } from "./circular-progress-bar.mona.styles";
 
-export const circularProgressBarBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCircularProgressBarBaseVariants;
-        default:
-            return monaCircularProgressBarBaseVariants;
-    }
-};
+const circularProgressBarBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaCircularProgressBarBaseVariants },
+    monaCircularProgressBarBaseVariants
+);
+
+export const circularProgressBarBaseThemeVariants = (theme: ThemeStyle) =>
+    circularProgressBarBaseThemeVariantsStrategy.resolve(theme);
 
 type CircularProgressBarBaseVariantProps = VariantProps<ReturnType<typeof circularProgressBarBaseThemeVariants>>;
 export type CircularProgressBarBaseVariantInput = VariantInputs<CircularProgressBarBaseVariantProps>;

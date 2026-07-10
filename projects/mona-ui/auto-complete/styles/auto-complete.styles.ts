@@ -1,5 +1,5 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import {
     autoCompleteAffixContainerVariants as monaAutoCompleteAffixContainerVariants,
@@ -7,32 +7,29 @@ import {
     autoCompleteTextInputVariants as monaAutoCompleteTextInputVariants
 } from "./auto-complete.mona.styles";
 
-export const autoCompleteBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompleteBaseVariants;
-        default:
-            return monaAutoCompleteBaseVariants;
-    }
-};
+const autoCompleteBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaAutoCompleteBaseVariants },
+    monaAutoCompleteBaseVariants
+);
 
-export const autoCompleteTextInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompleteTextInputVariants;
-        default:
-            return monaAutoCompleteTextInputVariants;
-    }
-};
+export const autoCompleteBaseThemeVariants = (theme: ThemeStyle) =>
+    autoCompleteBaseThemeVariantsStrategy.resolve(theme);
 
-export const autoCompleteAffixContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompleteAffixContainerVariants;
-        default:
-            return monaAutoCompleteAffixContainerVariants;
-    }
-};
+const autoCompleteTextInputThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaAutoCompleteTextInputVariants },
+    monaAutoCompleteTextInputVariants
+);
+
+export const autoCompleteTextInputThemeVariants = (theme: ThemeStyle) =>
+    autoCompleteTextInputThemeVariantsStrategy.resolve(theme);
+
+const autoCompleteAffixContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaAutoCompleteAffixContainerVariants },
+    monaAutoCompleteAffixContainerVariants
+);
+
+export const autoCompleteAffixContainerThemeVariants = (theme: ThemeStyle) =>
+    autoCompleteAffixContainerThemeVariantsStrategy.resolve(theme);
 
 type AutoCompleteBaseVariantProps = VariantProps<ReturnType<typeof autoCompleteBaseThemeVariants>>;
 type AutoCompleteBaseVariantInput = VariantInputs<AutoCompleteBaseVariantProps>;

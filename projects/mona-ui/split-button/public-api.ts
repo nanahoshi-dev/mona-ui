@@ -15,3 +15,9 @@ export { SplitButtonMenuItemIconTemplateDirective } from "./directives/split-but
 export { SplitButtonMenuItemShortcutTemplateDirective } from "./directives/split-button-menu-item-shortcut-template.directive";
 export { SplitButtonMenuItemTextTemplateDirective } from "./directives/split-button-menu-item-text-template.directive";
 export { SplitButtonTextTemplateDirective } from "./directives/split-button-text-template.directive";
+export { SPLIT_BUTTON_STYLE_STRATEGY, provideSplitButtonStyles } from "./styles/split-button.styles";
+export type {
+    SplitButtonStyleStrategy,
+    SplitButtonVariantProps,
+    SplitButtonVariantsFunction
+} from "./styles/split-button.styles";

@@ -1,4 +1,4 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import {
     notificationActionVariants as monaNotificationActionVariants,
     notificationBaseVariants as monaNotificationBaseVariants,
@@ -10,77 +10,69 @@ import {
     notificationTextVariants as monaNotificationTextVariants
 } from "./notification.mona.styles";
 
-export const notificationContainerBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationContainerBaseVariants;
-        default:
-            return monaNotificationContainerBaseVariants;
-    }
-};
+const notificationContainerBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationContainerBaseVariants },
+    monaNotificationContainerBaseVariants
+);
 
-export const notificationActionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationActionVariants;
-        default:
-            return monaNotificationActionVariants;
-    }
-};
+export const notificationContainerBaseThemeVariants = (theme: ThemeStyle) =>
+    notificationContainerBaseThemeVariantsStrategy.resolve(theme);
 
-export const notificationBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationBaseVariants;
-        default:
-            return monaNotificationBaseVariants;
-    }
-};
+const notificationActionThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationActionVariants },
+    monaNotificationActionVariants
+);
 
-export const notificationBodyThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationBodyVariants;
-        default:
-            return monaNotificationBodyVariants;
-    }
-};
+export const notificationActionThemeVariants = (theme: ThemeStyle) =>
+    notificationActionThemeVariantsStrategy.resolve(theme);
 
-export const notificationContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationContentVariants;
-        default:
-            return monaNotificationContentVariants;
-    }
-};
+const notificationBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationBaseVariants },
+    monaNotificationBaseVariants
+);
 
-export const notificationHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationHeaderVariants;
-        default:
-            return monaNotificationHeaderVariants;
-    }
-};
+export const notificationBaseThemeVariants = (theme: ThemeStyle) =>
+    notificationBaseThemeVariantsStrategy.resolve(theme);
 
-export const notificationIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationIconVariants;
-        default:
-            return monaNotificationIconVariants;
-    }
-};
+const notificationBodyThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationBodyVariants },
+    monaNotificationBodyVariants
+);
 
-export const notificationTextThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationTextVariants;
-        default:
-            return monaNotificationTextVariants;
-    }
-};
+export const notificationBodyThemeVariants = (theme: ThemeStyle) =>
+    notificationBodyThemeVariantsStrategy.resolve(theme);
+
+const notificationContentThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationContentVariants },
+    monaNotificationContentVariants
+);
+
+export const notificationContentThemeVariants = (theme: ThemeStyle) =>
+    notificationContentThemeVariantsStrategy.resolve(theme);
+
+const notificationHeaderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationHeaderVariants },
+    monaNotificationHeaderVariants
+);
+
+export const notificationHeaderThemeVariants = (theme: ThemeStyle) =>
+    notificationHeaderThemeVariantsStrategy.resolve(theme);
+
+const notificationIconThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationIconVariants },
+    monaNotificationIconVariants
+);
+
+export const notificationIconThemeVariants = (theme: ThemeStyle) =>
+    notificationIconThemeVariantsStrategy.resolve(theme);
+
+const notificationTextThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNotificationTextVariants },
+    monaNotificationTextVariants
+);
+
+export const notificationTextThemeVariants = (theme: ThemeStyle) =>
+    notificationTextThemeVariantsStrategy.resolve(theme);
 
 // type NotificationBaseVariantProps = VariantProps<ReturnType<typeof notificationBaseThemeVariants>>;
 // type NotificationBaseVariantInput = VariantInputs<NotificationBaseVariantProps>;

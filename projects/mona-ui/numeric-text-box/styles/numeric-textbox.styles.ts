@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     numericTextboxButtonVariants as monaNumericTextboxButtonVariants,
@@ -7,32 +7,28 @@ import {
     numericTextboxVariants as monaNumericTextboxVariants
 } from "./numeric-textbox.mona.styles";
 
-export const numericTextboxThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNumericTextboxVariants;
-        default:
-            return monaNumericTextboxVariants; // Default to Mona styles
-    }
-};
+const numericTextboxThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNumericTextboxVariants },
+    monaNumericTextboxVariants
+);
 
-export const numericTextboxInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNumericTextboxInputVariants;
-        default:
-            return monaNumericTextboxInputVariants; // Default to Mona styles
-    }
-};
+export const numericTextboxThemeVariants = (theme: ThemeStyle) => numericTextboxThemeVariantsStrategy.resolve(theme);
 
-export const numericTextboxButtonThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNumericTextboxButtonVariants;
-        default:
-            return monaNumericTextboxButtonVariants; // Default to Mona styles
-    }
-};
+const numericTextboxInputThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNumericTextboxInputVariants },
+    monaNumericTextboxInputVariants
+);
+
+export const numericTextboxInputThemeVariants = (theme: ThemeStyle) =>
+    numericTextboxInputThemeVariantsStrategy.resolve(theme);
+
+const numericTextboxButtonThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaNumericTextboxButtonVariants },
+    monaNumericTextboxButtonVariants
+);
+
+export const numericTextboxButtonThemeVariants = (theme: ThemeStyle) =>
+    numericTextboxButtonThemeVariantsStrategy.resolve(theme);
 
 export type NumericTextboxVariantProps = VariantProps<ReturnType<typeof numericTextboxThemeVariants>>;
 export type NumericTextboxVariantInputs = VariantInputs<NumericTextboxVariantProps>;

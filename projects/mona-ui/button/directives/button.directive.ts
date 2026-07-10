@@ -21,7 +21,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonService } from "../services/button.service";
-import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "../styles/button.styles";
+import { BUTTON_STYLE_STRATEGY, ButtonVariantProps, ButtonVariantsInput } from "../styles/button.styles";
 
 @Directive({
     selector: "button[monaButton]",
@@ -45,6 +45,7 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
     readonly #renderer = inject(Renderer2);
+    readonly #styleStrategy = inject(BUTTON_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #loaderComponentRef: ComponentRef<IndicatorIconComponent> | null = null;
     #toggleSubscription: Subscription | null = null;
@@ -67,7 +68,7 @@ export class ButtonDirective implements ButtonVariantsInput {
         const selected = this.selected();
         const userClass = this.userClass();
         const theme = this.#themeService.theme();
-        const variants = buttonThemeVariants(theme);
+        const variants = this.#styleStrategy.resolve(theme);
         const variantClasses = variants({ disabled, iconOnly, loading, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });

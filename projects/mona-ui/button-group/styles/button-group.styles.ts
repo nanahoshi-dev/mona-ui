@@ -1,16 +1,11 @@
-import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { buttonGroupVariants as monaButtonGroupVariants } from "./button-group.mona.styles";
-
-export const buttonGroupThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaButtonGroupVariants;
-        default:
-            return monaButtonGroupVariants;
-    }
-};
-
-export type ButtonGroupVariantProps = VariantProps<ReturnType<typeof buttonGroupThemeVariants>>;
-export type ButtonGroupVariantsInput = VariantInputs<ButtonGroupVariantProps>;
+export { buttonGroupThemeVariants, createButtonGroupStyleStrategy } from "./button-group.style-strategy";
+export { BUTTON_GROUP_STYLE_OVERRIDES, BUTTON_GROUP_STYLE_STRATEGY, provideButtonGroupStyles } from "./button-group.style-provider";
+export type {
+    ButtonGroupCompoundStyleOverride,
+    ButtonGroupStyleOverrides,
+    ButtonGroupStyleStrategy,
+    ButtonGroupStylesProviderConfig,
+    ButtonGroupVariantProps,
+    ButtonGroupVariantsFunction,
+    ButtonGroupVariantsInput
+} from "./button-group.types";

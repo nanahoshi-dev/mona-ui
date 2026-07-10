@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     windowBaseVariants as monaWindowBaseVariants,
@@ -12,77 +12,61 @@ import {
     windowTitleVariants as monaWindowTitleVariants
 } from "./window.mona.styles";
 
-export const windowBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowBaseVariants;
-        default:
-            return monaWindowBaseVariants;
-    }
-};
+const windowBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaWindowBaseVariants }, monaWindowBaseVariants);
 
-export const windowContentContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowContentContainerVariants;
-        default:
-            return monaWindowContentContainerVariants;
-    }
-};
+export const windowBaseThemeVariants = (theme: ThemeStyle) => windowBaseThemeVariantsStrategy.resolve(theme);
 
-export const windowContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowContentVariants;
-        default:
-            return monaWindowContentVariants;
-    }
-};
+const windowContentContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowContentContainerVariants },
+    monaWindowContentContainerVariants
+);
 
-export const windowResizerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowResizerVariants;
-        default:
-            return monaWindowResizerVariants;
-    }
-};
+export const windowContentContainerThemeVariants = (theme: ThemeStyle) =>
+    windowContentContainerThemeVariantsStrategy.resolve(theme);
 
-export const windowTitleBarActionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleBarActionVariants;
-        default:
-            return monaWindowTitleBarActionVariants;
-    }
-};
+const windowContentThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowContentVariants },
+    monaWindowContentVariants
+);
 
-export const windowTitleBarThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleBarVariants;
-        default:
-            return monaWindowTitleBarVariants;
-    }
-};
+export const windowContentThemeVariants = (theme: ThemeStyle) => windowContentThemeVariantsStrategy.resolve(theme);
 
-export const windowTitleContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleContainerVariants;
-        default:
-            return monaWindowTitleContainerVariants;
-    }
-};
+const windowResizerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowResizerVariants },
+    monaWindowResizerVariants
+);
 
-export const windowTitleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleVariants;
-        default:
-            return monaWindowTitleVariants;
-    }
-};
+export const windowResizerThemeVariants = (theme: ThemeStyle) => windowResizerThemeVariantsStrategy.resolve(theme);
+
+const windowTitleBarActionThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowTitleBarActionVariants },
+    monaWindowTitleBarActionVariants
+);
+
+export const windowTitleBarActionThemeVariants = (theme: ThemeStyle) =>
+    windowTitleBarActionThemeVariantsStrategy.resolve(theme);
+
+const windowTitleBarThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowTitleBarVariants },
+    monaWindowTitleBarVariants
+);
+
+export const windowTitleBarThemeVariants = (theme: ThemeStyle) => windowTitleBarThemeVariantsStrategy.resolve(theme);
+
+const windowTitleContainerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowTitleContainerVariants },
+    monaWindowTitleContainerVariants
+);
+
+export const windowTitleContainerThemeVariants = (theme: ThemeStyle) =>
+    windowTitleContainerThemeVariantsStrategy.resolve(theme);
+
+const windowTitleThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaWindowTitleVariants },
+    monaWindowTitleVariants
+);
+
+export const windowTitleThemeVariants = (theme: ThemeStyle) => windowTitleThemeVariantsStrategy.resolve(theme);
 
 type WindowBaseVariantProps = VariantProps<ReturnType<typeof windowBaseThemeVariants>>;
 type WindowBaseVariantInput = VariantInputs<WindowBaseVariantProps>;

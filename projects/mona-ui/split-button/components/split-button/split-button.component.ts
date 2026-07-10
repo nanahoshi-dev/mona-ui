@@ -37,7 +37,7 @@ import { SplitButtonMenuItemShortcutTemplateDirective } from "../../directives/s
 import { SplitButtonMenuItemTextTemplateDirective } from "../../directives/split-button-menu-item-text-template.directive";
 import { SplitButtonTextTemplateDirective } from "../../directives/split-button-text-template.directive";
 import {
-    splitButtonThemeVariants,
+    SPLIT_BUTTON_STYLE_STRATEGY,
     SplitButtonVariantInputs,
     SplitButtonVariantProps
 } from "../../styles/split-button.styles";
@@ -61,6 +61,7 @@ import {
 })
 export class SplitButtonComponent implements SplitButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #styleStrategy = inject(SPLIT_BUTTON_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
     protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
@@ -70,7 +71,7 @@ export class SplitButtonComponent implements SplitButtonVariantInputs {
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = splitButtonThemeVariants(theme)({
+        const classes = this.#styleStrategy.resolve(theme)({
             look,
             rounded,
             size

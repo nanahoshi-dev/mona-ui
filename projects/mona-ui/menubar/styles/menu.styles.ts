@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     contextMenuContentVariants as monaContextMenuContentVariants,
@@ -15,104 +15,80 @@ import {
     menuItemVariants as monaMenuItemVariants
 } from "./menu.mona.styles";
 
-export const contextMenuContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaContextMenuContentVariants;
-        default:
-            return monaContextMenuContentVariants;
-    }
-};
+const contextMenuContentThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaContextMenuContentVariants },
+    monaContextMenuContentVariants
+);
 
-export const contextMenuDividerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaContextMenuDividerVariants;
-        default:
-            return monaContextMenuDividerVariants;
-    }
-};
+export const contextMenuContentThemeVariants = (theme: ThemeStyle) =>
+    contextMenuContentThemeVariantsStrategy.resolve(theme);
 
-export const menuItemGroupHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenuItemGroupHeaderVariants;
-        default:
-            return monaMenuItemGroupHeaderVariants;
-    }
-};
+const contextMenuDividerThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaContextMenuDividerVariants },
+    monaContextMenuDividerVariants
+);
 
-export const menuItemIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenuItemIconVariants;
-        default:
-            return monaMenuItemIconVariants;
-    }
-};
+export const contextMenuDividerThemeVariants = (theme: ThemeStyle) =>
+    contextMenuDividerThemeVariantsStrategy.resolve(theme);
 
-export const menuItemLinkThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenuItemLinkVariants;
-        default:
-            return monaMenuItemLinkVariants;
-    }
-};
+const menuItemGroupHeaderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenuItemGroupHeaderVariants },
+    monaMenuItemGroupHeaderVariants
+);
 
-export const menuItemShortcutThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenuItemShortcutVariants;
-        default:
-            return monaMenuItemShortcutVariants;
-    }
-};
+export const menuItemGroupHeaderThemeVariants = (theme: ThemeStyle) =>
+    menuItemGroupHeaderThemeVariantsStrategy.resolve(theme);
 
-export const menuItemTextThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenuItemTextVariants;
-        default:
-            return monaMenuItemTextVariants;
-    }
-};
+const menuItemIconThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenuItemIconVariants },
+    monaMenuItemIconVariants
+);
 
-export const menuItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenuItemVariants;
-        default:
-            return monaMenuItemVariants;
-    }
-};
+export const menuItemIconThemeVariants = (theme: ThemeStyle) => menuItemIconThemeVariantsStrategy.resolve(theme);
 
-export const menubarBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenubarVariants;
-        default:
-            return monaMenubarVariants;
-    }
-};
+const menuItemLinkThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenuItemLinkVariants },
+    monaMenuItemLinkVariants
+);
 
-export const menubarListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenubarListItemVariants;
-        default:
-            return monaMenubarListItemVariants;
-    }
-};
+export const menuItemLinkThemeVariants = (theme: ThemeStyle) => menuItemLinkThemeVariantsStrategy.resolve(theme);
 
-export const menubarListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMenubarListVariants;
-        default:
-            return monaMenubarListVariants;
-    }
-};
+const menuItemShortcutThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenuItemShortcutVariants },
+    monaMenuItemShortcutVariants
+);
+
+export const menuItemShortcutThemeVariants = (theme: ThemeStyle) =>
+    menuItemShortcutThemeVariantsStrategy.resolve(theme);
+
+const menuItemTextThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenuItemTextVariants },
+    monaMenuItemTextVariants
+);
+
+export const menuItemTextThemeVariants = (theme: ThemeStyle) => menuItemTextThemeVariantsStrategy.resolve(theme);
+
+const menuItemThemeVariantsStrategy = createThemeStrategy({ mona: monaMenuItemVariants }, monaMenuItemVariants);
+
+export const menuItemThemeVariants = (theme: ThemeStyle) => menuItemThemeVariantsStrategy.resolve(theme);
+
+const menubarBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaMenubarVariants }, monaMenubarVariants);
+
+export const menubarBaseThemeVariants = (theme: ThemeStyle) => menubarBaseThemeVariantsStrategy.resolve(theme);
+
+const menubarListItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenubarListItemVariants },
+    monaMenubarListItemVariants
+);
+
+export const menubarListItemThemeVariants = (theme: ThemeStyle) => menubarListItemThemeVariantsStrategy.resolve(theme);
+
+const menubarListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaMenubarListVariants },
+    monaMenubarListVariants
+);
+
+export const menubarListThemeVariants = (theme: ThemeStyle) => menubarListThemeVariantsStrategy.resolve(theme);
 
 export type ContextMenuContentVariantProps = VariantProps<ReturnType<typeof contextMenuContentThemeVariants>>;
 export type ContextMenuContentVariantInput = VariantInputs<ContextMenuContentVariantProps>;

@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     fieldsetBaseVariants as monaFieldsetBaseVariants,
@@ -7,32 +7,23 @@ import {
     fieldsetVariants as monaFieldsetVariants
 } from "./fieldset.mona.styles";
 
-export const fieldsetBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFieldsetBaseVariants;
-        default:
-            return monaFieldsetBaseVariants;
-    }
-};
+const fieldsetBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaFieldsetBaseVariants },
+    monaFieldsetBaseVariants
+);
 
-export const fieldsetThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFieldsetVariants;
-        default:
-            return monaFieldsetVariants;
-    }
-};
+export const fieldsetBaseThemeVariants = (theme: ThemeStyle) => fieldsetBaseThemeVariantsStrategy.resolve(theme);
 
-export const fieldsetLegendThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFieldsetLegendVariants;
-        default:
-            return monaFieldsetLegendVariants;
-    }
-};
+const fieldsetThemeVariantsStrategy = createThemeStrategy({ mona: monaFieldsetVariants }, monaFieldsetVariants);
+
+export const fieldsetThemeVariants = (theme: ThemeStyle) => fieldsetThemeVariantsStrategy.resolve(theme);
+
+const fieldsetLegendThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaFieldsetLegendVariants },
+    monaFieldsetLegendVariants
+);
+
+export const fieldsetLegendThemeVariants = (theme: ThemeStyle) => fieldsetLegendThemeVariantsStrategy.resolve(theme);
 
 type FieldsetBaseVariantProps = VariantProps<ReturnType<typeof fieldsetBaseThemeVariants>>;
 type FieldsetBaseVariantInput = VariantInputs<FieldsetBaseVariantProps>;

@@ -1,5 +1,5 @@
 import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import type { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import type { VariantProps } from "class-variance-authority";
 import {
     filterMenuActionVariants as monaFilterMenuActionVariants,
@@ -7,32 +7,27 @@ import {
     filterMenuItemVariants as monaFilterMenuItemVariants
 } from "./filter.mona.styles";
 
-export const filterMenuBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFilterMenuBaseVariants;
-        default:
-            return monaFilterMenuBaseVariants;
-    }
-};
+const filterMenuBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaFilterMenuBaseVariants },
+    monaFilterMenuBaseVariants
+);
 
-export const filterMenuActionsThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFilterMenuActionVariants;
-        default:
-            return monaFilterMenuActionVariants;
-    }
-};
+export const filterMenuBaseThemeVariants = (theme: ThemeStyle) => filterMenuBaseThemeVariantsStrategy.resolve(theme);
 
-export const filterMenuItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFilterMenuItemVariants;
-        default:
-            return monaFilterMenuItemVariants;
-    }
-};
+const filterMenuActionsThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaFilterMenuActionVariants },
+    monaFilterMenuActionVariants
+);
+
+export const filterMenuActionsThemeVariants = (theme: ThemeStyle) =>
+    filterMenuActionsThemeVariantsStrategy.resolve(theme);
+
+const filterMenuItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaFilterMenuItemVariants },
+    monaFilterMenuItemVariants
+);
+
+export const filterMenuItemThemeVariants = (theme: ThemeStyle) => filterMenuItemThemeVariantsStrategy.resolve(theme);
 
 type FilterMenuBaseVariantProps = VariantProps<ReturnType<typeof filterMenuBaseThemeVariants>>;
 type FilterMenuBaseVariantInput = VariantInputs<FilterMenuBaseVariantProps>;

@@ -19,7 +19,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
-import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
+import { CHIP_STYLE_STRATEGY, ChipVariantInputs, ChipVariantProps } from "../styles/chip.styles";
 
 @Component({
     selector: "mona-chip",
@@ -37,6 +37,7 @@ import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../style
 export class ChipComponent implements ChipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    readonly #styleStrategy = inject(CHIP_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly ariaChecked = computed(() => {
         if (!this.toggleable()) {
@@ -52,7 +53,8 @@ export class ChipComponent implements ChipVariantInputs {
         const size = this.size();
         const selected = this.selected();
         const userClass = this.userClass();
-        const variantClasses = chipThemeVariants(theme)({ disabled, look, rounded, size, selected });
+        const variants = this.#styleStrategy.resolve(theme);
+        const variantClasses = variants({ disabled, look, rounded, size, selected });
         return twMerge(variantClasses, userClass);
     });
     protected readonly effectiveAriaLabel = computed(() => {

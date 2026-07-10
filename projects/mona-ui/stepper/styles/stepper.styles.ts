@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     stepperBaseVariants as monaStepperBaseVariants,
@@ -10,59 +10,50 @@ import {
     stepperTrackVariants as monaStepperTrackVariants
 } from "./stepper.mona.styles";
 
-export const stepperBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaStepperBaseVariants;
-        default:
-            return monaStepperBaseVariants;
-    }
-};
+const stepperBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaStepperBaseVariants },
+    monaStepperBaseVariants
+);
 
-export const stepperStepListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaStepperStepListVariants;
-        default:
-            return monaStepperStepListVariants;
-    }
-};
+export const stepperBaseThemeVariants = (theme: ThemeStyle) => stepperBaseThemeVariantsStrategy.resolve(theme);
 
-export const stepperStepListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaStepperStepListItemVariants;
-        default:
-            return monaStepperStepListItemVariants;
-    }
-};
+const stepperStepListThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaStepperStepListVariants },
+    monaStepperStepListVariants
+);
 
-export const stepperStepIndicatorThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaStepperStepIndicatorVariants;
-        default:
-            return monaStepperStepIndicatorVariants;
-    }
-};
+export const stepperStepListThemeVariants = (theme: ThemeStyle) => stepperStepListThemeVariantsStrategy.resolve(theme);
 
-export const stepperTrackThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaStepperTrackVariants;
-        default:
-            return monaStepperTrackVariants;
-    }
-};
+const stepperStepListItemThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaStepperStepListItemVariants },
+    monaStepperStepListItemVariants
+);
 
-export const stepperTrackLineThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaStepperTrackLineVariants;
-        default:
-            return monaStepperTrackLineVariants;
-    }
-};
+export const stepperStepListItemThemeVariants = (theme: ThemeStyle) =>
+    stepperStepListItemThemeVariantsStrategy.resolve(theme);
+
+const stepperStepIndicatorThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaStepperStepIndicatorVariants },
+    monaStepperStepIndicatorVariants
+);
+
+export const stepperStepIndicatorThemeVariants = (theme: ThemeStyle) =>
+    stepperStepIndicatorThemeVariantsStrategy.resolve(theme);
+
+const stepperTrackThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaStepperTrackVariants },
+    monaStepperTrackVariants
+);
+
+export const stepperTrackThemeVariants = (theme: ThemeStyle) => stepperTrackThemeVariantsStrategy.resolve(theme);
+
+const stepperTrackLineThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaStepperTrackLineVariants },
+    monaStepperTrackLineVariants
+);
+
+export const stepperTrackLineThemeVariants = (theme: ThemeStyle) =>
+    stepperTrackLineThemeVariantsStrategy.resolve(theme);
 
 type StepperBaseVariantProps = VariantProps<ReturnType<typeof stepperBaseThemeVariants>>;
 type StepperBaseVariantInput = VariantInputs<StepperBaseVariantProps>;

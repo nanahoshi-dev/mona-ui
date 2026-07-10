@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     radioButtonCircleVariants as monaRadioButtonCircleVariants,
@@ -9,50 +9,44 @@ import {
     radioButtonVariants as monaRadioButtonVariants
 } from "./radio.mona.styles";
 
-export const radioButtonThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonVariants;
-        default:
-            return monaRadioButtonVariants; // Default to Mona styles
-    }
-};
+const radioButtonThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaRadioButtonVariants },
+    monaRadioButtonVariants
+);
 
-export const radioButtonCircleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonCircleVariants;
-        default:
-            return monaRadioButtonCircleVariants; // Default to Mona styles
-    }
-};
+export const radioButtonThemeVariants = (theme: ThemeStyle) => radioButtonThemeVariantsStrategy.resolve(theme);
 
-export const radioButtonIndicatorThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonIndicatorVariants;
-        default:
-            return monaRadioButtonIndicatorVariants; // Default to Mona styles
-    }
-};
+const radioButtonCircleThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaRadioButtonCircleVariants },
+    monaRadioButtonCircleVariants
+);
 
-export const radioButtonContainerLabelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonContainerLabelVariants;
-        default:
-            return monaRadioButtonContainerLabelVariants; // Default to Mona styles
-    }
-};
+export const radioButtonCircleThemeVariants = (theme: ThemeStyle) =>
+    radioButtonCircleThemeVariantsStrategy.resolve(theme);
 
-export const radioButtonDirectiveThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return radioButtonDirectiveVariants;
-        default:
-            return radioButtonDirectiveVariants; // Default to Mona styles
-    }
-};
+const radioButtonIndicatorThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaRadioButtonIndicatorVariants },
+    monaRadioButtonIndicatorVariants
+);
+
+export const radioButtonIndicatorThemeVariants = (theme: ThemeStyle) =>
+    radioButtonIndicatorThemeVariantsStrategy.resolve(theme);
+
+const radioButtonContainerLabelThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaRadioButtonContainerLabelVariants },
+    monaRadioButtonContainerLabelVariants
+);
+
+export const radioButtonContainerLabelThemeVariants = (theme: ThemeStyle) =>
+    radioButtonContainerLabelThemeVariantsStrategy.resolve(theme);
+
+const radioButtonDirectiveThemeVariantsStrategy = createThemeStrategy(
+    { mona: radioButtonDirectiveVariants },
+    radioButtonDirectiveVariants
+);
+
+export const radioButtonDirectiveThemeVariants = (theme: ThemeStyle) =>
+    radioButtonDirectiveThemeVariantsStrategy.resolve(theme);
 
 export type RadioButtonContainerLabelVariantProps = VariantProps<
     ReturnType<typeof radioButtonContainerLabelThemeVariants>

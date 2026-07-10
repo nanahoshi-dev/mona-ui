@@ -1,5 +1,5 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     dateTimePickerBaseVariants as monaDateTimePickerBaseVariants,
@@ -7,32 +7,29 @@ import {
     dateTimePickerHeaderVariants as monaDateTimePickerHeaderVariants
 } from "./datetime-picker.mona.styles";
 
-export const dateTimePickerBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDateTimePickerBaseVariants;
-        default:
-            return monaDateTimePickerBaseVariants;
-    }
-};
+const dateTimePickerBaseThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDateTimePickerBaseVariants },
+    monaDateTimePickerBaseVariants
+);
 
-export const dateTimePickerHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDateTimePickerHeaderVariants;
-        default:
-            return monaDateTimePickerHeaderVariants;
-    }
-};
+export const dateTimePickerBaseThemeVariants = (theme: ThemeStyle) =>
+    dateTimePickerBaseThemeVariantsStrategy.resolve(theme);
 
-export const dateTimePickerFooterThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDateTimePickerFooterVariants;
-        default:
-            return monaDateTimePickerFooterVariants;
-    }
-};
+const dateTimePickerHeaderThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDateTimePickerHeaderVariants },
+    monaDateTimePickerHeaderVariants
+);
+
+export const dateTimePickerHeaderThemeVariants = (theme: ThemeStyle) =>
+    dateTimePickerHeaderThemeVariantsStrategy.resolve(theme);
+
+const dateTimePickerFooterThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaDateTimePickerFooterVariants },
+    monaDateTimePickerFooterVariants
+);
+
+export const dateTimePickerFooterThemeVariants = (theme: ThemeStyle) =>
+    dateTimePickerFooterThemeVariantsStrategy.resolve(theme);
 
 type DateTimePickerBaseVariantProps = VariantProps<ReturnType<typeof dateTimePickerBaseThemeVariants>>;
 type DateTimePickerBaseVariantInput = VariantInputs<DateTimePickerBaseVariantProps>;

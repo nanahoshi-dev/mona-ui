@@ -1,28 +1,21 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
 import {
     tooltipArrowVariants as monaTooltipArrowVariants,
     tooltipBaseVariants as monaTooltipVariants
 } from "./tooltip.mona.styles";
 
-export const tooltipBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTooltipVariants;
-        default:
-            return monaTooltipVariants;
-    }
-};
+const tooltipBaseThemeVariantsStrategy = createThemeStrategy({ mona: monaTooltipVariants }, monaTooltipVariants);
 
-export const tooltipArrowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTooltipArrowVariants;
-        default:
-            return monaTooltipArrowVariants;
-    }
-};
+export const tooltipBaseThemeVariants = (theme: ThemeStyle) => tooltipBaseThemeVariantsStrategy.resolve(theme);
+
+const tooltipArrowThemeVariantsStrategy = createThemeStrategy(
+    { mona: monaTooltipArrowVariants },
+    monaTooltipArrowVariants
+);
+
+export const tooltipArrowThemeVariants = (theme: ThemeStyle) => tooltipArrowThemeVariantsStrategy.resolve(theme);
 
 type TooltipBaseVariantProps = VariantProps<ReturnType<typeof tooltipBaseThemeVariants>>;
 type TooltipBaseVariantInputs = VariantInputs<TooltipBaseVariantProps>;

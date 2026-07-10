@@ -18,6 +18,11 @@
             "input": "src/styles",
             "glob": "**/*.scss",
             "output": "styles"
+        },
+        {
+            "input": "theme",
+            "glob": "*.css",
+            "output": "theme"
         }
     ]
 }

@@ -20,13 +20,7 @@ import { twMerge } from "tailwind-merge";
 import { SwitchHandleContentTemplateDirective } from "../../directives/switch-handle-content-template.directive";
 import { SwitchOffLabelTemplateDirective } from "../../directives/switch-off-label-template.directive";
 import { SwitchOnLabelTemplateDirective } from "../../directives/switch-on-label-template.directive";
-import {
-    switchHandleThemeVariants,
-    switchLabelThemeVariants,
-    switchThemeVariants,
-    SwitchVariantInputs,
-    SwitchVariantProps
-} from "../../styles/switch.styles";
+import { SWITCH_STYLE_STRATEGY, SwitchVariantInputs, SwitchVariantProps } from "../../styles/switch.styles";
 
 @Component({
     selector: "mona-switch",
@@ -88,30 +82,29 @@ import {
 export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #styleStrategy = inject(SWITCH_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
+    protected readonly variants = computed(() => this.#styleStrategy.resolve(this.#themeService.theme()));
     protected readonly classes = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = switchThemeVariants(theme)({ rounded, size });
+        const classes = this.variants().track({ rounded, size });
         return twMerge(classes, this.userClass());
     });
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && !this.checked())
     );
     protected readonly handleClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = switchHandleThemeVariants(theme)({ rounded, size });
+        const classes = this.variants().handle({ rounded, size });
         return twMerge(classes);
     });
     protected readonly handleContentTemplate = contentChild(SwitchHandleContentTemplateDirective, {
         read: TemplateRef
     });
     protected readonly labelClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        const classes = switchLabelThemeVariants(theme)();
+        const classes = this.variants().label();
         return twMerge(classes);
     });
     protected readonly offLabelTemplate = contentChild(SwitchOffLabelTemplateDirective, { read: TemplateRef });
