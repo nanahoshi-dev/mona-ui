@@ -2,9 +2,8 @@ import { cva } from "class-variance-authority";
 
 export const windowBaseVariants = cva(
     `
-        flex flex-col
-        bg-background
-        w-full h-full
+        flex flex-col w-full h-full
+        bg-background text-foreground
     `,
     {
         variants: {

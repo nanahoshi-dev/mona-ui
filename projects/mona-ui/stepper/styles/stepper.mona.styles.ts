@@ -92,7 +92,7 @@ export const stepperStepIndicatorVariants = cva(
 export const stepperTrackVariants = cva(
     `
         relative grid
-        bg-background border border-border
+        bg-background text-foreground border border-border
     `,
     {
         variants: {

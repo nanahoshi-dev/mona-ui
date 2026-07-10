@@ -6,7 +6,7 @@ export const dropdownListInputVariants = cva(
 
         border border-input-border
         bg-background outline-none
-        shadow-xs
+        text-foreground shadow-xs
         cursor-pointer select-none
 
         hover:bg-accent hover:text-accent-foreground

@@ -4,7 +4,7 @@ export const filterMenuBaseVariants = cva(
     `
         w-full flex flex-col
         p-1 gap-2
-        bg-background-dark border border-border
+        bg-background-dark text-foreground border border-border
         shadow-lg
     `,
     {

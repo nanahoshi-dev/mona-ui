@@ -5,7 +5,7 @@ export const textBoxVariants = cva(
         flex items-center w-full min-w-0
         overflow-hidden
 
-        bg-input-background
+        bg-input-background text-foreground
         border border-input-border outline-none
         selection:bg-primary selection:text-primary-foreground
 

@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const editorBaseVariants = cva(
     `
-        flex flex-col bg-background
+        flex flex-col bg-background text-foreground
         border border-solid border-border
         transition-[border-color] duration-150 ease-in
         focus-visible:ring-2 focus-visible:ring-primary/40
@@ -183,6 +183,6 @@ export const editorTableCreatorCellVariants = cva(
 export const editorToolbarVariants = cva(
     `
         flex flex-wrap items-center justify-start gap-1 p-1
-        bg-background-dark border-b border-b-solid border-b-border
+        bg-background-dark text-foreground border-b border-b-solid border-b-border
     `
 );

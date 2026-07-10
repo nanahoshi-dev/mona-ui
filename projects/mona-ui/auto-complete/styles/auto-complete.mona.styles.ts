@@ -4,7 +4,7 @@ export const autoCompleteBaseVariants = cva(
     `
         flex
         border border-input-border outline-none
-        bg-background shadow-xs
+        bg-background shadow-xs text-foreground
         focus-within:ring-1 focus-within:ring-primary/40
         transition-[color,box-shadow,border] ease-in-out duration-300
     `,

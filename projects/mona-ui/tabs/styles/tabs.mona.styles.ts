@@ -79,7 +79,7 @@ export const tabContentVariants = cva(
     `
         w-full overflow-auto flex-1
         border border-border shadow-sm
-        bg-background
+        bg-background text-foreground
     `,
     {
         variants: {

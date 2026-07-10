@@ -46,7 +46,7 @@ export const switchHandleVariants = cva(
         items-center justify-center
         outline-none transition-[left,background] ease-in-out duration-300
         border border-border bg-secondary
-        data-[active='true']:bg-background
+        data-[active='true']:bg-background text-foreground
     `,
     {
         variants: {

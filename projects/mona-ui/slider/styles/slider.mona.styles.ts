@@ -23,7 +23,7 @@ export const sliderTrackVariants = cva(
     `
         relative z-2 cursor-pointer
         border border-input-border
-        bg-background
+        bg-background text-foreground
 
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:h-1.5

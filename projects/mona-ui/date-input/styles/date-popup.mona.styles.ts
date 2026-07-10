@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const datePopupVariants = cva(
     `
-        bg-background shadow-md
+        bg-background shadow-md text-foreground
         border border-input-border
         h-full overflow-auto
         [&_mona-calendar]:border-none

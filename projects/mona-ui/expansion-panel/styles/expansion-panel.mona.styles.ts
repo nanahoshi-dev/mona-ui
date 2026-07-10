@@ -3,7 +3,7 @@ import { cva } from "class-variance-authority";
 export const expansionPanelBaseVariants = cva(
     `
         block w-full bg-background overflow-hidden
-        border border-border
+        border border-border text-foreground
         not-last:border-b-transparent not-last:rounded-b-none
         not-first:rounded-t-none relative
     `,

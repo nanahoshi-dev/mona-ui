@@ -5,7 +5,7 @@ export const colorPickerBaseVariants = cva(
         flex items-center
         border border-input-border
         bg-background outline-none
-        shadow-xs
+        shadow-xs text-foreground
         cursor-pointer
 
         hover:bg-accent hover:text-accent-foreground

@@ -3,7 +3,7 @@ import { cva } from "class-variance-authority";
 export const popoverBaseVariants = cva(
     `
         flex flex-col items-center justify-center relative
-        bg-background border border-border
+        bg-background text-foreground border border-border
         shadow-[0_2px_8px_rgba(0,0,0,0.12)] z-1
     `,
     {
