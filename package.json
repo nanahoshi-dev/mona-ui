@@ -12,7 +12,7 @@
         "build": "npm run build:prod",
         "build:dev": "ng build mona-ui --configuration development",
         "build:prod": "ng build mona-ui --configuration production",
-        "postbuild:prod": "node -e \"require('fs').globSync('dist/mona-ui/**/*.map').forEach(f=>require('fs').rmSync(f))\" && node scripts/strip-internal-exports.js",
+        "postbuild:prod": "node -e \"require('fs').globSync('dist/mona-ui/**/*.map').forEach(f=>require('fs').rmSync(f))\"",
         "build:watch": "ng build mona-ui --watch --configuration development",
         "build:metadata": "tsx projects/mona-ui-tester/scripts/extract-metadata.ts",
         "build:tester": "ng build mona-ui-tester --configuration production",
