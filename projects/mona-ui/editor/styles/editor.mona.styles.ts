@@ -8,6 +8,13 @@ export const editorBaseVariants = cva(
         focus-visible:ring-2 focus-visible:ring-primary/40
         focus-visible:border-primary
 
+        prose prose-neutral max-w-none
+        prose-headings:text-foreground prose-headings:font-bold
+        prose-headings:mt-1 prose-headings:mb-1
+        prose-p:text-foreground prose-p:my-1
+        prose-strong:text-foreground
+        prose-a:text-primary
+
         [&_ol]:ps-8 [&_ul]:ps-8
 
         [&_blockquote]:border-l-4
@@ -130,7 +137,7 @@ export const editorFontSizeDropdownListVariants = cva(
 
 export const editorHeadingsDropdownListVariants = cva(
     `
-        w-[12em]
+        w-[14em]
     `
 );
 

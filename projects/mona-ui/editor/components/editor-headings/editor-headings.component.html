@@ -10,28 +10,28 @@
     <ng-template monaDropDownListItemTemplate let-dataItem>
         @switch (dataItem.value) {
             @case (HeadingType.Heading1) {
-                <h1>{{ dataItem.text }}</h1>
+                <h1 class="m-0 text-2xl font-bold">{{ dataItem.text }}</h1>
             }
             @case (HeadingType.Heading2) {
-                <h2>{{ dataItem.text }}</h2>
+                <h2 class="m-0 text-xl font-bold">{{ dataItem.text }}</h2>
             }
             @case (HeadingType.Heading3) {
-                <h3>{{ dataItem.text }}</h3>
+                <h3 class="m-0 text-lg font-bold">{{ dataItem.text }}</h3>
             }
             @case (HeadingType.Heading4) {
-                <h4>{{ dataItem.text }}</h4>
+                <h4 class="m-0 text-base font-bold">{{ dataItem.text }}</h4>
             }
             @case (HeadingType.Heading5) {
-                <h5>{{ dataItem.text }}</h5>
+                <h5 class="m-0 text-sm font-bold">{{ dataItem.text }}</h5>
             }
             @case (HeadingType.Heading6) {
-                <h6>{{ dataItem.text }}</h6>
+                <h6 class="m-0 text-xs font-bold">{{ dataItem.text }}</h6>
             }
             @case (HeadingType.Paragraph) {
-                <p>{{ dataItem.text }}</p>
+                <p class="m-0 text-sm">{{ dataItem.text }}</p>
             }
             @default {
-                <p>{{ dataItem.text }}</p>
+                <p class="m-0 text-sm">{{ dataItem.text }}</p>
             }
         }
     </ng-template>

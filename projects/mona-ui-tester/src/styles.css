@@ -4,6 +4,7 @@
 @import "@angular/cdk/overlay-prebuilt.css";
 @import "remixicon/fonts/remixicon.css";
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @source "./projects/mona-ui/";
 @source "./projects/mona-ui-tester/";
