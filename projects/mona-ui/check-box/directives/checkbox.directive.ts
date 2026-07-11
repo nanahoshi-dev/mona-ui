@@ -2,7 +2,7 @@ import { computed, Directive, inject, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
-    checkboxDirectiveThemeVariants,
+    CHECKBOX_STYLE_STRATEGY,
     CheckboxDirectiveVariantInput,
     CheckboxDirectiveVariantProps
 } from "../styles/checkbox.styles";
@@ -14,11 +14,12 @@ import {
     }
 })
 export class CheckboxDirective implements CheckboxDirectiveVariantInput {
+    readonly #styleStrategy = inject(CHECKBOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const variantClasses = checkboxDirectiveThemeVariants(theme)({ rounded });
+        const variantClasses = this.#styleStrategy.resolve(theme).directive({ rounded });
         const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });

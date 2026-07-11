@@ -5,11 +5,9 @@ import { type FormCheckboxControl } from "@angular/forms/signals";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import {
-    checkboxContainerLabelThemeVariants,
-    checkboxInputThemeVariants,
+    CHECKBOX_STYLE_STRATEGY,
     CheckboxVariantInput,
     CheckboxVariantProps,
-    checkmarkThemeVariants,
     CheckmarkVariantInput,
     CheckmarkVariantProps
 } from "../../styles/checkbox.styles";
@@ -26,21 +24,22 @@ import {
     }
 })
 export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl {
+    readonly #styleStrategy = inject(CHECKBOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly checkBoxClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return checkboxInputThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).input();
     });
     protected readonly checkMarkClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return checkmarkThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).checkmark({ rounded });
     });
     protected readonly containerLabelClasses = computed(() => {
         const theme = this.#themeService.theme();
         const labelSize = this.labelSize();
         const classes = this.userClass();
-        const variantClasses = checkboxContainerLabelThemeVariants(theme)({ labelSize });
+        const variantClasses = this.#styleStrategy.resolve(theme).containerLabel({ labelSize });
         return twMerge(variantClasses, classes);
     });
     protected readonly invalidState = computed(

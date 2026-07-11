@@ -5,10 +5,7 @@ import type { FormValueControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
-    radioButtonCircleThemeVariants,
-    radioButtonContainerLabelThemeVariants,
-    radioButtonIndicatorThemeVariants,
-    radioButtonThemeVariants,
+    RADIO_BUTTON_STYLE_STRATEGY,
     RadioButtonVariantInput,
     RadioButtonVariantProps
 } from "../../styles/radio.styles";
@@ -23,24 +20,25 @@ import {
     }
 })
 export class RadioButtonComponent implements RadioButtonVariantInput, FormValueControl<unknown> {
+    readonly #styleStrategy = inject(RADIO_BUTTON_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly containerLabelClasses = computed(() => {
         const theme = this.#themeService.theme();
         const labelSize = this.labelSize();
         const userClasses = this.userClass();
-        const variantClasses = radioButtonContainerLabelThemeVariants(theme)({ labelSize });
+        const variantClasses = this.#styleStrategy.resolve(theme).containerLabel({ labelSize });
         return twMerge(variantClasses, userClasses);
     });
     protected readonly radioButtonCircleClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return radioButtonCircleThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).circle({ rounded });
     });
-    protected readonly radioButtonClasses = computed(() => radioButtonThemeVariants(this.#themeService.theme())());
+    protected readonly radioButtonClasses = computed(() => this.#styleStrategy.resolve(this.#themeService.theme()).host());
     protected readonly radioButtonIndicatorClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return radioButtonIndicatorThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).indicator({ rounded });
     });
 
     /**

@@ -1,9 +1,9 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
+    RADIO_BUTTON_STYLE_STRATEGY,
     RadioButtonDirectiveInput,
-    RadioButtonDirectiveProps,
-    radioButtonDirectiveThemeVariants
+    RadioButtonDirectiveProps
 } from "../styles/radio.styles";
 
 @Directive({
@@ -14,11 +14,12 @@ import {
     }
 })
 export class RadioButtonDirective implements RadioButtonDirectiveInput {
+    readonly #styleStrategy = inject(RADIO_BUTTON_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return radioButtonDirectiveThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).directive({ rounded });
     });
 
     /**
