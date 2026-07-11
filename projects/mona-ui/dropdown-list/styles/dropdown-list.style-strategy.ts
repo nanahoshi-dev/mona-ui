@@ -38,10 +38,12 @@ const defaultDropdownListValueContainerStrategy = createThemeStrategy<DropdownLi
 
 export const dropdownListInputThemeVariants = (theme: ThemeStyle): DropdownListInputVariantsFunction =>
     defaultDropdownListInputStrategy.resolve(theme);
-export const dropdownListAffixContainerThemeVariants = (theme: ThemeStyle): DropdownListAffixContainerVariantsFunction =>
-    defaultDropdownListAffixContainerStrategy.resolve(theme);
-export const dropdownListValueContainerThemeVariants = (theme: ThemeStyle): DropdownListValueContainerVariantsFunction =>
-    defaultDropdownListValueContainerStrategy.resolve(theme);
+export const dropdownListAffixContainerThemeVariants = (
+    theme: ThemeStyle
+): DropdownListAffixContainerVariantsFunction => defaultDropdownListAffixContainerStrategy.resolve(theme);
+export const dropdownListValueContainerThemeVariants = (
+    theme: ThemeStyle
+): DropdownListValueContainerVariantsFunction => defaultDropdownListValueContainerStrategy.resolve(theme);
 
 export function createDropdownListStyleStrategy(
     overrides: readonly DropdownListStyleOverrides[] = []

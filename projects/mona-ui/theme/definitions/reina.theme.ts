@@ -6,7 +6,7 @@ import type { ThemeDefinition } from "../models/ThemeDefinition";
 export const reinaThemeDefinition: ThemeDefinition = {
     light: {
         ...monaLightThemeVariables(),
-        ...generatePrimaryColorPalette(themeColorMap.reina),
+        ...generatePrimaryColorPalette(themeColorMap.blue),
 
         "--color-canvas": "oklch(0.965 0.003 260)",
         "--color-surface": "oklch(1 0 0)",
@@ -73,7 +73,7 @@ export const reinaThemeDefinition: ThemeDefinition = {
     },
     dark: {
         ...monaDarkThemeVariables(),
-        ...generatePrimaryColorPalette(themeColorMap.reina),
+        ...generatePrimaryColorPalette(themeColorMap.blue),
 
         "--color-canvas": "oklch(0.08 0 0)",
         "--color-surface": "oklch(0.13 0.004 260)",

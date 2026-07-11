@@ -19,3 +19,23 @@ export * from "./directives/menu-item-icon-template.directive";
 export * from "./directives/menu-item-shortcut-template.directive";
 export * from "./directives/menu-item-text-template.directive";
 export * from "./directives/menu-text-template.directive";
+
+export {
+    createMenubarStyleStrategy,
+    MENUBAR_STYLE_OVERRIDES,
+    MENUBAR_STYLE_STRATEGY,
+    provideMenubarStyles
+} from "./styles/menu.styles";
+export type {
+    MenubarBaseStyleOverrides,
+    MenubarBaseVariantProps,
+    MenubarListItemStyleOverrides,
+    MenubarListItemVariantProps,
+    MenubarListStyleOverrides,
+    MenubarStyleOverrides,
+    MenubarStylesProviderConfig,
+    MenubarStyleStrategy,
+    MenubarVariantInput,
+    MenubarVariantProps,
+    MenubarVariantsFunctions
+} from "./styles/menu.styles";

@@ -5,7 +5,7 @@ import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
-import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-headings",
@@ -14,11 +14,12 @@ import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.sty
 })
 export class EditorHeadingsComponent {
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly HeadingType = HeadingType;
     protected readonly dropdownListClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorHeadingsDropdownListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).headingsDropdownList();
     });
     protected readonly headingsDropdownListData = [
         { text: "Paragraph", value: HeadingType.Paragraph },

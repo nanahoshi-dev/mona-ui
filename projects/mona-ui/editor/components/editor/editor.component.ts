@@ -19,11 +19,7 @@ import { twMerge } from "tailwind-merge";
 import { ContentChangeEvent } from "../../models/ContentChangeEvent";
 import { EditorSettings } from "../../models/EditorSettings";
 import { EditorService } from "../../services/editor.service";
-import {
-    editorBaseThemeVariants,
-    editorContainerThemeVariants,
-    editorToolbarThemeVariants
-} from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 import { EditorBasicTextStylesComponent } from "../editor-basic-text-styles/editor-basic-text-styles.component";
 import { EditorBlockquoteComponent } from "../editor-blockquote/editor-blockquote.component";
 import { EditorCodeBlockComponent } from "../editor-code-block/editor-code-block.component";
@@ -72,22 +68,23 @@ import { EditorTextAlignmentsComponent } from "../editor-text-alignments/editor-
 })
 export class EditorComponent {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const userClass = this.userClass();
-        const variantClass = editorBaseThemeVariants(theme)();
+        const variantClass = this.#styleStrategy.resolve(theme).base();
         return twMerge(variantClass, userClass);
     });
     protected readonly containerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).container();
     });
     protected readonly editorContainer = viewChild.required<ElementRef<HTMLDivElement>>("editorContainer");
     protected readonly editorService = inject(EditorService);
     protected readonly toolbarClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorToolbarThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).toolbar();
     });
 
     /**

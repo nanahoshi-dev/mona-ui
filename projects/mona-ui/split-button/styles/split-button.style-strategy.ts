@@ -2,7 +2,11 @@ import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { splitButtonVariants as monaSplitButtonVariants } from "./split-button.mona.styles";
 import { reinaSplitButtonVariants } from "./split-button.reina.styles";
 import { createSplitButtonVariants } from "./split-button.style-composition";
-import type { SplitButtonStyleOverrides, SplitButtonStyleStrategy, SplitButtonVariantsFunction } from "./split-button.types";
+import type {
+    SplitButtonStyleOverrides,
+    SplitButtonStyleStrategy,
+    SplitButtonVariantsFunction
+} from "./split-button.types";
 
 const defaultSplitButtonStrategy = createThemeStrategy<SplitButtonVariantsFunction>(
     { mona: monaSplitButtonVariants, reina: reinaSplitButtonVariants },

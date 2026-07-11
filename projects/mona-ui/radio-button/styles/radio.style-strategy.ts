@@ -68,7 +68,11 @@ export function createRadioButtonStyleStrategy(
 ): RadioButtonStyleStrategy {
     const mona: RadioButtonVariantsFunctions = {
         circle: createRadioButtonCircleVariants(monaRadioButtonCircleVariants, overrides, "mona"),
-        containerLabel: createRadioButtonContainerLabelVariants(monaRadioButtonContainerLabelVariants, overrides, "mona"),
+        containerLabel: createRadioButtonContainerLabelVariants(
+            monaRadioButtonContainerLabelVariants,
+            overrides,
+            "mona"
+        ),
         directive: createRadioButtonDirectiveVariants(monaRadioButtonDirectiveVariants, overrides, "mona"),
         host: createRadioButtonHostVariants(monaRadioButtonVariants, overrides, "mona"),
         indicator: createRadioButtonIndicatorVariants(monaRadioButtonIndicatorVariants, overrides, "mona")

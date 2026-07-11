@@ -51,7 +51,7 @@ export function monaDarkThemeVariables(): ThemeVariables {
         "--color-popover": "#fff",
         "--color-popover-foreground": "#09090b",
 
-        ...generatePrimaryColorPalette(themeColorMap.flora),
+        ...generatePrimaryColorPalette(themeColorMap.green),
 
         "--color-secondary": "oklch(0.27 0 0)",
         "--color-secondary-foreground": "oklch(97.7% 0.001 106.424)",

@@ -4,11 +4,7 @@ import {
     fieldsetLegendVariants as monaFieldsetLegendVariants,
     fieldsetVariants as monaFieldsetVariants
 } from "./fieldset.mona.styles";
-import {
-    reinaFieldsetBaseVariants,
-    reinaFieldsetLegendVariants,
-    reinaFieldsetVariants
-} from "./fieldset.reina.styles";
+import { reinaFieldsetBaseVariants, reinaFieldsetLegendVariants, reinaFieldsetVariants } from "./fieldset.reina.styles";
 import {
     createFieldsetBaseVariants,
     createFieldsetFieldsetVariants,

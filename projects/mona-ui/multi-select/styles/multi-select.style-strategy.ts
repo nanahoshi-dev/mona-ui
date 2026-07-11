@@ -83,11 +83,7 @@ export function createMultiSelectStyleStrategy(
             overrides,
             "reina"
         ),
-        itemContainer: createMultiSelectItemContainerVariants(
-            reinaMultiSelectItemContainerVariants,
-            overrides,
-            "reina"
-        )
+        itemContainer: createMultiSelectItemContainerVariants(reinaMultiSelectItemContainerVariants, overrides, "reina")
     };
     return createThemeStrategy<MultiSelectVariantsFunctions>({ mona, reina }, mona);
 }

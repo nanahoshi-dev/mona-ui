@@ -40,8 +40,9 @@ export const autoCompleteBaseThemeVariants = (theme: ThemeStyle): AutoCompleteBa
     defaultAutoCompleteBaseStrategy.resolve(theme);
 export const autoCompleteTextInputThemeVariants = (theme: ThemeStyle): AutoCompleteTextInputVariantsFunction =>
     defaultAutoCompleteTextInputStrategy.resolve(theme);
-export const autoCompleteAffixContainerThemeVariants = (theme: ThemeStyle): AutoCompleteAffixContainerVariantsFunction =>
-    defaultAutoCompleteAffixContainerStrategy.resolve(theme);
+export const autoCompleteAffixContainerThemeVariants = (
+    theme: ThemeStyle
+): AutoCompleteAffixContainerVariantsFunction => defaultAutoCompleteAffixContainerStrategy.resolve(theme);
 
 export function createAutoCompleteStyleStrategy(
     overrides: readonly AutoCompleteStyleOverrides[] = []

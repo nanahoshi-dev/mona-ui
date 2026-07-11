@@ -37,13 +37,8 @@ import { MenuItemShortcutTemplateDirective } from "../../directives/menu-item-sh
 import { MenuItemTextTemplateDirective } from "../../directives/menu-item-text-template.directive";
 import { MenuTextTemplateDirective } from "../../directives/menu-text-template.directive";
 import { MenuItemClickEvent } from "../../models/MenuItemClickEvent";
-import {
-    menubarBaseThemeVariants,
-    menubarListItemThemeVariants,
-    menubarListThemeVariants,
-    MenubarVariantInput,
-    MenubarVariantProps
-} from "../../styles/menu.styles";
+import { MENUBAR_STYLE_STRATEGY } from "../../styles/menu.style-provider";
+import { MenubarVariantInput, MenubarVariantProps } from "../../styles/menu.styles";
 import { MenuComponent } from "../menu/menu.component";
 
 @Component({
@@ -66,6 +61,7 @@ export class MenubarComponent implements MenubarVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #styleStrategy = inject(MENUBAR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly activeIndex = signal(0);
     protected readonly baseClasses = computed(() => {
@@ -73,7 +69,7 @@ export class MenubarComponent implements MenubarVariantInput {
         const rounded = this.rounded();
         const size = this.size();
         const userClasses = this.userClasses();
-        const variants = menubarBaseThemeVariants(theme)({ rounded, size });
+        const variants = this.#styleStrategy.resolve(theme).base({ rounded, size });
         return twMerge(variants, userClasses);
     });
     protected readonly currentPopupElement = signal<HTMLElement | null>(null);
@@ -88,12 +84,12 @@ export class MenubarComponent implements MenubarVariantInput {
     });
     protected readonly listClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return menubarListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).list();
     });
     protected readonly listItemClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return menubarListItemThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).listItem({ rounded });
     });
     protected readonly menuItemIconTemplate = contentChild(MenuItemIconTemplateDirective, {
         read: TemplateRef,

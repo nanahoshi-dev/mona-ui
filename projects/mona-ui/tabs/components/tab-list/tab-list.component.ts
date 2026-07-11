@@ -27,13 +27,8 @@ import { ScrollIntent } from "../../models/ScrollIntent";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
-import {
-    tabListBaseThemeVariants,
-    tabListListThemeVariants,
-    tabListScrollButtonThemeVariants,
-    TabListVariantInput,
-    TabListVariantProps
-} from "../../styles/tabs.styles";
+import { TABS_STYLE_STRATEGY } from "../../styles/tabs.style-provider";
+import { TabListVariantInput, TabListVariantProps } from "../../styles/tabs.styles";
 
 @Component({
     selector: "mona-tab-list",
@@ -46,6 +41,7 @@ import {
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #styleStrategy = inject(TABS_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #keydown$ = new Subject<KeyboardEvent>();
     #resizeObserver: ResizeObserver | null = null;
@@ -54,15 +50,15 @@ export class TabListComponent implements TabListVariantInput {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        return tabListBaseThemeVariants(theme)({ rounded, size });
+        return this.#styleStrategy.resolve(theme).listBase({ rounded, size });
     });
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
-        return tabListListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).list();
     });
     protected readonly scrollButtonClass = computed(() => {
         const theme = this.#themeService.theme();
-        return tabListScrollButtonThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).scrollButton();
     });
     protected readonly scrollsVisible = signal(false);
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");

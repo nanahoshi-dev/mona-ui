@@ -16,12 +16,8 @@ import { twMerge } from "tailwind-merge";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
-import {
-    tabContentThemeVariants,
-    tabsBaseThemeVariants,
-    TabsVariantInput,
-    TabsVariantProps
-} from "../../styles/tabs.styles";
+import { TABS_STYLE_STRATEGY } from "../../styles/tabs.style-provider";
+import { TabsVariantInput, TabsVariantProps } from "../../styles/tabs.styles";
 import { TabListComponent } from "../tab-list/tab-list.component";
 import { TabComponent } from "../tab/tab.component";
 
@@ -35,19 +31,20 @@ import { TabComponent } from "../tab/tab.component";
     }
 })
 export class TabsComponent implements TabsVariantInput {
+    readonly #styleStrategy = inject(TABS_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     private readonly tabListComponent = viewChild.required(TabListComponent);
     private readonly tabs = contentChildren(TabComponent);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const variantClass = tabsBaseThemeVariants(theme)();
+        const variantClass = this.#styleStrategy.resolve(theme).base();
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        return tabContentThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).content({ rounded });
     });
     protected readonly selectedTabId = linkedSignal<ImmutableSet<TabItem>, string | null>({
         source: () => this.tabList(),

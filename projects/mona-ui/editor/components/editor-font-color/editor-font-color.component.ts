@@ -2,7 +2,7 @@ import { Component, computed, DOCUMENT, inject } from "@angular/core";
 import { ColorPickerComponent, ColorPickerValueTemplateDirective } from "@nanahoshi/mona-ui/color-picker";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorService } from "../../services/editor.service";
-import { editorFontColorPreviewThemeVariants, editorFontColorValueThemeVariants } from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 import { htmlColorCode } from "../../utils/htmlColorCode";
 
 @Component({
@@ -13,15 +13,16 @@ import { htmlColorCode } from "../../utils/htmlColorCode";
 export class EditorFontColorComponent {
     readonly #document = inject(DOCUMENT);
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #lastColor: string = "";
     protected readonly colorPreviewClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorFontColorPreviewThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).fontColorPreview();
     });
     protected readonly colorValueClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorFontColorValueThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).fontColorValue();
     });
     protected readonly selectedColor = computed(() => {
         this.#editorService.state();

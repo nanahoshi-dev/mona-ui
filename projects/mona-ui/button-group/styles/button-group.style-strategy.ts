@@ -2,7 +2,11 @@ import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { buttonGroupVariants as monaButtonGroupVariants } from "./button-group.mona.styles";
 import { reinaButtonGroupVariants } from "./button-group.reina.styles";
 import { createButtonGroupVariants } from "./button-group.style-composition";
-import type { ButtonGroupStyleOverrides, ButtonGroupStyleStrategy, ButtonGroupVariantsFunction } from "./button-group.types";
+import type {
+    ButtonGroupStyleOverrides,
+    ButtonGroupStyleStrategy,
+    ButtonGroupVariantsFunction
+} from "./button-group.types";
 
 const defaultButtonGroupStrategy = createThemeStrategy<ButtonGroupVariantsFunction>(
     { mona: monaButtonGroupVariants, reina: reinaButtonGroupVariants },

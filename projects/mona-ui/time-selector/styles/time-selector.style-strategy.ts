@@ -90,9 +90,17 @@ export function createTimeSelectorStyleStrategy(
         base: createTimeSelectorBaseVariants(monaTimeSelectorBaseVariants, overrides, "mona"),
         footer: createTimeSelectorFooterVariants(monaTimeSelectorFooterVariants, overrides, "mona"),
         header: createTimeSelectorHeaderVariants(monaTimeSelectorHeaderVariants, overrides, "mona"),
-        infoContainer: createTimeSelectorInfoContainerVariants(monaTimeSelectorInfoContainerVariants, overrides, "mona"),
+        infoContainer: createTimeSelectorInfoContainerVariants(
+            monaTimeSelectorInfoContainerVariants,
+            overrides,
+            "mona"
+        ),
         list: createTimeSelectorListVariants(monaTimeSelectorListVariants, overrides, "mona"),
-        listContainer: createTimeSelectorListContainerVariants(monaTimeSelectorListContainerVariants, overrides, "mona"),
+        listContainer: createTimeSelectorListContainerVariants(
+            monaTimeSelectorListContainerVariants,
+            overrides,
+            "mona"
+        ),
         listItem: createTimeSelectorListItemVariants(monaTimeSelectorListItemVariants, overrides, "mona")
     };
     const reina: TimeSelectorVariantsFunctions = {

@@ -122,8 +122,9 @@ export const dialogIconContainerThemeVariants = (theme: ThemeStyle): DialogIconC
     defaultDialogIconContainerStrategy.resolve(theme);
 export const dialogTitleContainerThemeVariants = (theme: ThemeStyle): DialogTitleContainerVariantsFunction =>
     defaultDialogTitleContainerStrategy.resolve(theme);
-export const dialogCloseButtonContainerThemeVariants = (theme: ThemeStyle): DialogCloseButtonContainerVariantsFunction =>
-    defaultDialogCloseButtonContainerStrategy.resolve(theme);
+export const dialogCloseButtonContainerThemeVariants = (
+    theme: ThemeStyle
+): DialogCloseButtonContainerVariantsFunction => defaultDialogCloseButtonContainerStrategy.resolve(theme);
 export const dialogTitleThemeVariants = (theme: ThemeStyle): DialogTitleVariantsFunction =>
     defaultDialogTitleStrategy.resolve(theme);
 export const dialogDescriptionThemeVariants = (theme: ThemeStyle): DialogDescriptionVariantsFunction =>

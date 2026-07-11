@@ -1,5 +1,8 @@
 import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import { createMonaNumericTextboxVariants, createReinaNumericTextboxVariants } from "./numeric-textbox.style-composition";
+import {
+    createMonaNumericTextboxVariants,
+    createReinaNumericTextboxVariants
+} from "./numeric-textbox.style-composition";
 import type {
     NumericTextboxStyleOverrides,
     NumericTextboxStyleStrategy,

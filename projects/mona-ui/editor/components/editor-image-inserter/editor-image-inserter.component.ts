@@ -6,12 +6,7 @@ import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorImageInsertEvent } from "../../models/EditorImageInsertEvent";
 import type { ImageInsertFormModel } from "../../models/ImageInsertFormModel";
-import {
-    editorImageInserterActionsThemeVariants,
-    editorImageInserterFormThemeVariants,
-    editorImageInserterRowLabelThemeVariants,
-    editorImageInserterRowThemeVariants
-} from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-image-inserter",
@@ -25,14 +20,15 @@ export class EditorImageInserterComponent {
         link: "",
         width: null
     });
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly actionsClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorImageInserterActionsThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).imageInserterActions();
     });
     protected readonly formClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorImageInserterFormThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).imageInserterForm();
     });
     protected readonly iForm = form(this.#imageFormModel, schema => {
         required(schema.link);
@@ -40,11 +36,11 @@ export class EditorImageInserterComponent {
     });
     protected readonly rowClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorImageInserterRowThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).imageInserterRow();
     });
     protected readonly rowLabelClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorImageInserterRowLabelThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).imageInserterRowLabel();
     });
 
     public readonly cancel = output();

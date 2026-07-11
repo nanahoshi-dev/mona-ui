@@ -4,12 +4,12 @@ import {
     switchLabelVariants as monaSwitchLabelVariants,
     switchVariants as monaSwitchVariants
 } from "./switch.mona.styles";
+import { reinaSwitchHandleVariants, reinaSwitchLabelVariants, reinaSwitchVariants } from "./switch.reina.styles";
 import {
-    reinaSwitchHandleVariants,
-    reinaSwitchLabelVariants,
-    reinaSwitchVariants
-} from "./switch.reina.styles";
-import { createSwitchHandleVariants, createSwitchLabelVariants, createSwitchTrackVariants } from "./switch.style-composition";
+    createSwitchHandleVariants,
+    createSwitchLabelVariants,
+    createSwitchTrackVariants
+} from "./switch.style-composition";
 import type {
     SwitchHandleVariantsFunction,
     SwitchLabelVariantsFunction,

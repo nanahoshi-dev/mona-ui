@@ -2,10 +2,7 @@ import { Component, computed, inject } from "@angular/core";
 import { ColorPickerComponent, ColorPickerValueTemplateDirective } from "@nanahoshi/mona-ui/color-picker";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorService } from "../../services/editor.service";
-import {
-    editorFontHighlightPreviewThemeVariants,
-    editorFontHighlightValueThemeVariants
-} from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-font-highlight",
@@ -14,15 +11,16 @@ import {
 })
 export class EditorFontHighlightComponent {
     readonly #editorService: EditorService = inject(EditorService);
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #lastColor: string = "";
     protected readonly highlightPreviewClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorFontHighlightPreviewThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).fontHighlightPreview();
     });
     protected readonly highlightValueClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorFontHighlightValueThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).fontHighlightValue();
     });
     protected readonly selectedColor = computed(() => {
         const state = this.#editorService.state();

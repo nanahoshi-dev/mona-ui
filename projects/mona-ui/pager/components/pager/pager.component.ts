@@ -45,15 +45,8 @@ import { Page } from "../../models/Page";
 import { PageChangeEvent } from "../../models/PageChangeEvent";
 import { PagerType } from "../../models/PagerType";
 import { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
-import {
-    pagerBaseThemeVariants,
-    pagerInfoThemeVariants,
-    pagerInputThemeVariants,
-    pagerListItemThemeVariants,
-    pagerListThemeVariants,
-    type PagerVariantInputs,
-    type PagerVariantProps
-} from "../../styles/pager.styles";
+import { PAGER_STYLE_STRATEGY } from "../../styles/pager.style-provider";
+import type { PagerVariantInputs, PagerVariantProps } from "../../styles/pager.styles";
 
 const PAGER_FOCUSABLE_ATTRIBUTE = "data-mona-pager-focusable";
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
@@ -91,6 +84,7 @@ export class PagerComponent implements PagerVariantInputs {
     readonly #managedFocusTargets = new Set<HTMLElement>();
     readonly #originalTabIndices = new WeakMap<HTMLElement, string | null>();
     readonly #skip = linkedSignal(() => this.skip());
+    readonly #styleStrategy = inject(PAGER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #widthObserver: ResizeObserver | null = null;
     #previousPageSize = 10;
@@ -99,7 +93,7 @@ export class PagerComponent implements PagerVariantInputs {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const userClasses = this.userClasses();
-        const classes = pagerBaseThemeVariants(theme)({ rounded });
+        const classes = this.#styleStrategy.resolve(theme).base({ rounded });
         return twMerge(classes, userClasses);
     });
     protected readonly firstPageLabel = "First page";
@@ -122,7 +116,7 @@ export class PagerComponent implements PagerVariantInputs {
     });
     protected readonly infoClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return pagerInfoThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).info();
     });
     protected readonly infoVisible = computed(() => {
         const showInfo = this.showInfo();
@@ -131,7 +125,7 @@ export class PagerComponent implements PagerVariantInputs {
     });
     protected readonly inputClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return pagerInputThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).input();
     });
     protected readonly inputValue = linkedSignal(() => this.page());
     protected readonly jumpNextLabel = computed(() => `Jump forward ${this.visiblePages()} pages`);
@@ -143,7 +137,7 @@ export class PagerComponent implements PagerVariantInputs {
     });
     protected readonly listClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return pagerListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).list();
     });
     protected readonly nextJumperVisible = computed(() => {
         const pages = this.pages();
@@ -468,7 +462,7 @@ export class PagerComponent implements PagerVariantInputs {
     }
 
     protected pageItemClasses(active: boolean): string {
-        return pagerListItemThemeVariants(this.#themeService.theme())({ active });
+        return this.#styleStrategy.resolve(this.#themeService.theme()).listItem({ active });
     }
 
     private activateInnerNavigation(): void {

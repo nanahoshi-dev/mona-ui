@@ -4,7 +4,7 @@ import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorService } from "../../services/editor.service";
-import { editorFontFamilyDropdownListThemeVariants } from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-font-family",
@@ -12,10 +12,11 @@ import { editorFontFamilyDropdownListThemeVariants } from "../../styles/editor.s
     templateUrl: "./editor-font-family.component.html"
 })
 export class EditorFontFamilyComponent implements OnInit {
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly dropdownListClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorFontFamilyDropdownListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).fontFamilyDropdownList();
     });
     protected readonly editorService: EditorService = inject(EditorService);
     protected readonly selectedFontFamily = computed(() => {

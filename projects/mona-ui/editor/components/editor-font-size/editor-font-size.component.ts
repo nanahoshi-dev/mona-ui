@@ -3,7 +3,7 @@ import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorService } from "../../services/editor.service";
-import { editorFontSizeDropdownListThemeVariants } from "../../styles/editor.styles";
+import { EDITOR_STYLE_STRATEGY } from "../../styles/editor.styles";
 
 @Component({
     selector: "mona-editor-font-size",
@@ -12,10 +12,11 @@ import { editorFontSizeDropdownListThemeVariants } from "../../styles/editor.sty
 })
 export class EditorFontSizeComponent {
     protected readonly editorService: EditorService = inject(EditorService);
+    readonly #styleStrategy = inject(EDITOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly dropdownListClass = computed(() => {
         const theme = this.#themeService.theme();
-        return editorFontSizeDropdownListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).fontSizeDropdownList();
     });
     protected readonly selectedFontSize = computed(() => {
         this.editorService.state();
