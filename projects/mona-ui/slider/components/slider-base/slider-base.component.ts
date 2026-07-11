@@ -23,29 +23,19 @@ import { LabelStyleArgs } from "../../models/LabelStyleArgs";
 import { SliderLabelPosition } from "../../models/SliderLabelPosition";
 import { SliderTick } from "../../models/SliderTick";
 import { TickStyleArgs } from "../../models/TickStyleArgs";
-import {
-    sliderBaseThemeVariants,
-    sliderHandleThemeVariants,
-    sliderSelectionThemeVariants,
-    sliderTickLabelListThemeVariants,
-    sliderTickLabelThemeVariants,
-    sliderTickListThemeVariants,
-    sliderTickThemeVariants,
-    sliderTrackThemeVariants,
-    SliderVariantInputs,
-    SliderVariantProps
-} from "../../styles/slider.styles";
+import { SLIDER_STYLE_STRATEGY, SliderVariantInput, SliderVariantProps } from "../../styles/slider.styles";
 import { valueToPosition } from "../../utils/valueToPosition";
 
 @Directive()
-export abstract class SliderBaseComponent implements SliderVariantInputs {
+export abstract class SliderBaseComponent implements SliderVariantInput {
+    readonly #styleStrategy = inject(SLIDER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly destroyRef = inject(DestroyRef);
     protected readonly dragging = signal(false);
     protected readonly hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     protected readonly tickElements = viewChildren(SliderTickDirective);
     protected readonly zone: NgZone = inject(NgZone);
-    protected readonly baseClasses = computed(() => sliderBaseThemeVariants(this.#themeService.theme())());
+    protected readonly baseClasses = computed(() => this.#styleStrategy.resolve(this.#themeService.theme()).base());
     protected readonly effectiveDisabled = computed(() => this.disabled());
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
@@ -100,11 +90,13 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return typeof bg === "string" ? { background: bg } : bg;
     });
-    protected readonly selectionClasses = computed(() => sliderSelectionThemeVariants(this.#themeService.theme())());
+    protected readonly selectionClasses = computed(() =>
+        this.#styleStrategy.resolve(this.#themeService.theme()).selection()
+    );
     protected readonly sliderHandleClasses = computed(() => {
         const rounded = this.rounded();
         const handleClasses = this.handleClasses();
-        const variants = sliderHandleThemeVariants(this.#themeService.theme())({ rounded });
+        const variants = this.#styleStrategy.resolve(this.#themeService.theme()).handle({ rounded });
         return twMerge(variants ?? "", Array.isArray(handleClasses) ? handleClasses.join(" ") : handleClasses);
     });
     protected readonly sliderTrackSize = computed(() => {
@@ -121,12 +113,16 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return `${number}px`;
     });
-    protected readonly tickClasses = computed(() => sliderTickThemeVariants(this.#themeService.theme())());
-    protected readonly tickLabelClasses = computed(() => sliderTickLabelThemeVariants(this.#themeService.theme())());
-    protected readonly tickLabelListClasses = computed(() =>
-        sliderTickLabelListThemeVariants(this.#themeService.theme())()
+    protected readonly tickClasses = computed(() => this.#styleStrategy.resolve(this.#themeService.theme()).tick());
+    protected readonly tickLabelClasses = computed(() =>
+        this.#styleStrategy.resolve(this.#themeService.theme()).tickLabel()
     );
-    protected readonly tickListClasses = computed(() => sliderTickListThemeVariants(this.#themeService.theme())());
+    protected readonly tickLabelListClasses = computed(() =>
+        this.#styleStrategy.resolve(this.#themeService.theme()).tickLabelList()
+    );
+    protected readonly tickListClasses = computed(() =>
+        this.#styleStrategy.resolve(this.#themeService.theme()).tickList()
+    );
     protected readonly tickStyleArgs = computed<TickStyleArgs>(() => {
         const largeTickStep = this.largeTickStep();
         const max = this.maxValue();
@@ -158,7 +154,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return typeof bg === "string" ? { background: bg } : bg;
     });
-    protected readonly trackClasses = computed(() => sliderTrackThemeVariants(this.#themeService.theme())());
+    protected readonly trackClasses = computed(() => this.#styleStrategy.resolve(this.#themeService.theme()).track());
 
     /**
      * @description Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.
