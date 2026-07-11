@@ -5,11 +5,7 @@ import { twMerge } from "tailwind-merge";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
-import {
-    breadcrumbCurrentItemThemeVariants,
-    breadcrumbListThemeVariants,
-    BreadcrumbVariantInput
-} from "../../styles/breadcrumb.styles";
+import { BREADCRUMB_STYLE_STRATEGY, BreadcrumbVariantInput } from "../../styles/breadcrumb.styles";
 import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.component";
 
 @Component({
@@ -22,17 +18,18 @@ import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.comp
     }
 })
 export class BreadcrumbComponent implements BreadcrumbVariantInput {
+    readonly #styleStrategy = inject(BREADCRUMB_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly itemComponents = contentChildren(BreadcrumbItemComponent);
     protected readonly currentItemClass = computed(() => {
         const theme = this.#themeService.theme();
-        return breadcrumbCurrentItemThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).currentItem();
     });
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const userClass = this.userClass();
-        const variantClass = breadcrumbListThemeVariants(theme)({ disabled });
+        const variantClass = this.#styleStrategy.resolve(theme).list({ disabled });
         return twMerge(variantClass, userClass);
     });
     protected readonly separatorTemplate = contentChild(BreadcrumbSeparatorTemplateDirective, {

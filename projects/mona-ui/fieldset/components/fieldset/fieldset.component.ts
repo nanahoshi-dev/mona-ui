@@ -3,13 +3,7 @@ import { Component, computed, contentChild, inject, input, TemplateRef } from "@
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { FieldsetLegendTemplateDirective } from "../../directives/fieldset-legend-template.directive";
-import {
-    fieldsetBaseThemeVariants,
-    fieldsetLegendThemeVariants,
-    fieldsetThemeVariants,
-    FieldsetVariantInput,
-    FieldsetVariantProps
-} from "../../styles/fieldset.styles";
+import { FIELDSET_STYLE_STRATEGY, FieldsetVariantInput, FieldsetVariantProps } from "../../styles/fieldset.styles";
 
 @Component({
     selector: "mona-fieldset",
@@ -20,23 +14,24 @@ import {
     }
 })
 export class FieldsetComponent implements FieldsetVariantInput {
+    readonly #styleStrategy = inject(FIELDSET_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        return fieldsetBaseThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).base();
     });
     protected readonly fieldsetClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const disabled = this.disabled();
         const userClass = this.userClass();
-        return twMerge(fieldsetThemeVariants(theme)({ rounded, disabled }), userClass);
+        return twMerge(this.#styleStrategy.resolve(theme).fieldset({ rounded, disabled }), userClass);
     });
     protected readonly legendClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const hasTemplate = !!this.legendTemplate();
-        return fieldsetLegendThemeVariants(theme)({ hasTemplate, rounded });
+        return this.#styleStrategy.resolve(theme).legend({ hasTemplate, rounded });
     });
     protected readonly legendTemplate = contentChild(FieldsetLegendTemplateDirective, { read: TemplateRef });
     protected readonly legendVisible = computed(() => {

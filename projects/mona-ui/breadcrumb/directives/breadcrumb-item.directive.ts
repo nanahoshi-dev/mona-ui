@@ -1,7 +1,7 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { breadcrumbListItemThemeVariants, BreadcrumbListItemVariantInput } from "../styles/breadcrumb.styles";
+import { BREADCRUMB_STYLE_STRATEGY, BreadcrumbListItemVariantInput } from "../styles/breadcrumb.styles";
 
 @Directive({
     selector: "button[monaBreadcrumbItem]",
@@ -11,13 +11,14 @@ import { breadcrumbListItemThemeVariants, BreadcrumbListItemVariantInput } from 
     }
 })
 export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {
+    readonly #styleStrategy = inject(BREADCRUMB_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const listDisabled = this.listDisabled();
         const userClass = this.userClass();
-        return twMerge(breadcrumbListItemThemeVariants(theme)({ disabled, listDisabled }), userClass);
+        return twMerge(this.#styleStrategy.resolve(theme).listItem({ disabled, listDisabled }), userClass);
     });
     /**
      * @description Renders this item with reduced visual emphasis and removes pointer interaction.

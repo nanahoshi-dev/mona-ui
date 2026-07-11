@@ -1,11 +1,7 @@
 import { Component, computed, inject, input } from "@angular/core";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
-import {
-    placeholderBaseThemeVariants,
-    placeholderTextThemeVariants,
-    PlaceholderVariantInput
-} from "../../styles/placeholder.styles";
+import { PLACEHOLDER_STYLE_STRATEGY, PlaceholderVariantInput } from "../../styles/placeholder.styles";
 
 @Component({
     selector: "mona-placeholder",
@@ -15,16 +11,17 @@ import {
     }
 })
 export class PlaceholderComponent implements PlaceholderVariantInput {
+    readonly #styleStrategy = inject(PLACEHOLDER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        const variantClass = placeholderBaseThemeVariants(theme)();
+        const variantClass = this.#styleStrategy.resolve(theme).base();
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly textClass = computed(() => {
         const theme = this.#themeService.theme();
-        return placeholderTextThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).text();
     });
 
     /**
