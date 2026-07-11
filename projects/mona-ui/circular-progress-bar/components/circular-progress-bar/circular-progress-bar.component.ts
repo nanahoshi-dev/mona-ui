@@ -6,7 +6,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
-    circularProgressBarBaseThemeVariants,
+    CIRCULAR_PROGRESS_BAR_STYLE_STRATEGY,
     type CircularProgressBarBaseVariantInput
 } from "../../styles/circular-progress-bar.styles";
 
@@ -47,11 +47,12 @@ import {
     }
 })
 export class CircularProgressBarComponent implements CircularProgressBarBaseVariantInput {
+    readonly #styleStrategy = inject(CIRCULAR_PROGRESS_BAR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
-        const classes = circularProgressBarBaseThemeVariants(theme)({ disabled });
+        const classes = this.#styleStrategy.resolve(theme).base({ disabled });
         const animateClass = this.animate() ? "" : "[&_svg_circle]:transition-none";
         return twMerge(classes, this.userClass(), animateClass);
     });

@@ -1,58 +1,34 @@
-import { VariantProps } from "class-variance-authority";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import {
-    progressBarBaseVariants as monaProgressBarBaseVariants,
-    progressBarIndeterminateVariants as monaProgressBarIndeterminateVariants,
-    progressBarLabelVariants as monaProgressBarLabelVariants,
-    progressBarTrackVariants as monaProgressBarTrackVariants
-} from "./progress-bar.mona.styles";
-
-const progressBarBaseThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaProgressBarBaseVariants },
-    monaProgressBarBaseVariants
-);
-
-export const progressBarBaseThemeVariants = (theme: ThemeStyle) => progressBarBaseThemeVariantsStrategy.resolve(theme);
-
-const progressBarIndeterminateThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaProgressBarIndeterminateVariants },
-    monaProgressBarIndeterminateVariants
-);
-
-export const progressBarIndeterminateThemeVariants = (theme: ThemeStyle) =>
-    progressBarIndeterminateThemeVariantsStrategy.resolve(theme);
-
-const progressBarLabelThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaProgressBarLabelVariants },
-    monaProgressBarLabelVariants
-);
-
-export const progressBarLabelThemeVariants = (theme: ThemeStyle) =>
-    progressBarLabelThemeVariantsStrategy.resolve(theme);
-
-const progressBarTrackThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaProgressBarTrackVariants },
-    monaProgressBarTrackVariants
-);
-
-export const progressBarTrackThemeVariants = (theme: ThemeStyle) =>
-    progressBarTrackThemeVariantsStrategy.resolve(theme);
-
-type ProgressBarBaseVariantProps = VariantProps<ReturnType<typeof progressBarBaseThemeVariants>>;
-type ProgressBarBaseVariantInput = VariantInputs<ProgressBarBaseVariantProps>;
-type ProgressBarIndeterminateVariantProps = VariantProps<ReturnType<typeof progressBarIndeterminateThemeVariants>>;
-type ProgressBarIndeterminateVariantInput = VariantInputs<ProgressBarIndeterminateVariantProps>;
-type ProgressBarLabelVariantProps = VariantProps<ReturnType<typeof progressBarLabelThemeVariants>>;
-type ProgressBarLabelVariantInput = VariantInputs<ProgressBarLabelVariantProps>;
-type ProgressBarTrackVariantProps = VariantProps<ReturnType<typeof progressBarTrackThemeVariants>>;
-type ProgressBarTrackVariantInput = VariantInputs<ProgressBarTrackVariantProps>;
-
-export type ProgressBarVariantProps = ProgressBarBaseVariantProps &
-    ProgressBarIndeterminateVariantProps &
-    ProgressBarTrackVariantProps &
-    ProgressBarLabelVariantProps;
-export type ProgressBarVariantInput = ProgressBarBaseVariantInput &
-    ProgressBarIndeterminateVariantInput &
-    ProgressBarTrackVariantInput &
-    ProgressBarLabelVariantInput;
+export {
+    createProgressBarStyleStrategy,
+    progressBarBaseThemeVariants,
+    progressBarIndeterminateThemeVariants,
+    progressBarLabelThemeVariants,
+    progressBarTrackThemeVariants
+} from "./progress-bar.style-strategy";
+export {
+    PROGRESS_BAR_STYLE_OVERRIDES,
+    PROGRESS_BAR_STYLE_STRATEGY,
+    provideProgressBarStyles
+} from "./progress-bar.style-provider";
+export type {
+    ProgressBarBaseCompoundStyleOverride,
+    ProgressBarBaseStyleOverrides,
+    ProgressBarBaseVariantInput,
+    ProgressBarBaseVariantProps,
+    ProgressBarIndeterminateStyleOverrides,
+    ProgressBarIndeterminateVariantInput,
+    ProgressBarIndeterminateVariantProps,
+    ProgressBarLabelStyleOverrides,
+    ProgressBarLabelVariantInput,
+    ProgressBarLabelVariantProps,
+    ProgressBarStyleOverrides,
+    ProgressBarStylesProviderConfig,
+    ProgressBarStyleStrategy,
+    ProgressBarTrackCompoundStyleOverride,
+    ProgressBarTrackStyleOverrides,
+    ProgressBarTrackVariantInput,
+    ProgressBarTrackVariantProps,
+    ProgressBarVariantInput,
+    ProgressBarVariantProps,
+    ProgressBarVariantsFunctions
+} from "./progress-bar.types";

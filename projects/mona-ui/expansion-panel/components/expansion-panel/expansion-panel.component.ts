@@ -8,11 +8,7 @@ import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansi
 import { ExpansionPanelIconTemplateDirective } from "../../directives/expansion-panel-icon-template.directive";
 import { ExpansionPanelTitleTemplateDirective } from "../../directives/expansion-panel-title-template.directive";
 import {
-    expansionPanelBaseThemeVariants,
-    expansionPanelContentThemeVariants,
-    expansionPanelHeaderThemeVariants,
-    expansionPanelHeaderTitleThemeVariants,
-    expansionPanelIconContainerThemeVariants,
+    EXPANSION_PANEL_STYLE_STRATEGY,
     ExpansionPanelVariantInput,
     ExpansionPanelVariantProps
 } from "../../styles/expansion-panel.styles";
@@ -27,6 +23,7 @@ import {
     }
 })
 export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
+    readonly #styleStrategy = inject(EXPANSION_PANEL_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly actionsTemplateList = contentChildren(ExpansionPanelActionsTemplateDirective, {
         read: TemplateRef
@@ -34,29 +31,29 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const variantClass = expansionPanelBaseThemeVariants(theme)({ rounded });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ rounded });
         return twMerge(variantClass, this.userClass());
     });
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
         const expanded = this.expanded();
-        return expansionPanelContentThemeVariants(theme)({ expanded });
+        return this.#styleStrategy.resolve(theme).content({ expanded });
     });
     protected readonly contentId = createElementControlId();
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
         const collapsed = !this.expanded();
         const disabled = this.disabled();
-        return expansionPanelHeaderThemeVariants(theme)({ collapsed, disabled });
+        return this.#styleStrategy.resolve(theme).header({ collapsed, disabled });
     });
     protected readonly headerTitleClass = computed(() => {
         const theme = this.#themeService.theme();
-        return expansionPanelHeaderTitleThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).headerTitle();
     });
     protected readonly iconContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         const hasTemplate = !!this.iconTemplate();
-        return expansionPanelIconContainerThemeVariants(theme)({ hasTemplate });
+        return this.#styleStrategy.resolve(theme).iconContainer({ hasTemplate });
     });
     protected readonly iconTemplate = contentChild(ExpansionPanelIconTemplateDirective, { read: TemplateRef });
     protected readonly titleTemplate = contentChild(ExpansionPanelTitleTemplateDirective, { read: TemplateRef });

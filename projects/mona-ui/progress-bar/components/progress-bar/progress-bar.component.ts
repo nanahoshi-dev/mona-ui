@@ -8,10 +8,7 @@ import { twMerge } from "tailwind-merge";
 import { ProgressBarLabelTemplateDirective } from "../../directives/progress-bar-label-template.directive";
 import { LabelPosition } from "../../models/LabelPosition";
 import {
-    progressBarBaseThemeVariants,
-    progressBarIndeterminateThemeVariants,
-    progressBarLabelThemeVariants,
-    progressBarTrackThemeVariants,
+    PROGRESS_BAR_STYLE_STRATEGY,
     ProgressBarVariantInput,
     ProgressBarVariantProps
 } from "../../styles/progress-bar.styles";
@@ -52,21 +49,22 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         const progress = this.progress();
         return typeof color === "string" ? color : color?.(progress);
     });
+    readonly #styleStrategy = inject(PROGRESS_BAR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const classes = progressBarBaseThemeVariants(theme)({ rounded });
+        const classes = this.#styleStrategy.resolve(theme).base({ rounded });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
     protected readonly indeterminateClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return progressBarIndeterminateThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).indeterminate();
     });
     protected readonly labelClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return progressBarLabelThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).label();
     });
     protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
     protected readonly nextTrackClipPath = computed(() => {
@@ -86,7 +84,7 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     protected readonly trackClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const classes = progressBarTrackThemeVariants(theme)({ rounded });
+        const classes = this.#styleStrategy.resolve(theme).track({ rounded });
         return this.animate()
             ? classes
             : twMerge(classes, "data-[next='true']:transition-none data-[prev='true']:transition-none");
