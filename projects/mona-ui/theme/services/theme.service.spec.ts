@@ -25,11 +25,11 @@ describe("ThemeService", () => {
 
         expect(service.theme()).toBe("reina");
         expect(service.themeVariant()).toBe("dark");
-        expect(document.documentElement.style.getPropertyValue("--mona-page-background")).toBe("oklch(0.06 0 0)");
+        expect(document.documentElement.style.getPropertyValue("--mona-color-background")).toBe("oklch(0.08 0 0)");
 
         service.setThemeId("mona-light");
 
-        expect(document.documentElement.style.getPropertyValue("--mona-page-background")).toBe("#fff");
+        expect(document.documentElement.style.getPropertyValue("--mona-color-background")).toBe("oklch(1 0 0)");
     });
 
     it("should apply configured default themes and variable overrides", () => {

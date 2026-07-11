@@ -17,12 +17,13 @@ import {
     ViewContainerRef
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { take } from "rxjs";
-import { defaultPopupAnimation } from "../../models/PopupAnimationClasses";
 import { PopupCloseEvent } from "../../models/PopupCloseEvent";
 import { PopupSettingsInjectionToken } from "../../models/PopupInjectionToken";
 import { PopupReferenceInjectionToken } from "../../models/PopupReferenceInjectionToken";
 import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSettings";
+import { POPUP_STYLE_STRATEGY } from "../../styles/popup.styles";
 
 @Component({
     selector: "mona-popup-wrapper",
@@ -128,13 +129,47 @@ import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSetting
                 }
             }
 
+            .reina-popup-enter {
+                animation: reina-popup-scale-in 220ms cubic-bezier(0.34, 1.35, 0.64, 1);
+            }
+
+            .reina-popup-leave {
+                animation: reina-popup-scale-out 150ms cubic-bezier(0.32, 0, 0.67, 0);
+            }
+
+            @keyframes reina-popup-scale-in {
+                from {
+                    opacity: 0;
+                    transform: scale(0.92) translateY(-4px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+            }
+
+            @keyframes reina-popup-scale-out {
+                from {
+                    opacity: 1;
+                    transform: scale(1) translateY(0);
+                }
+
+                to {
+                    opacity: 0;
+                    transform: scale(0.92) translateY(-4px);
+                }
+            }
+
             @media (prefers-reduced-motion: reduce) {
                 .mona-popup-enter,
                 .mona-popup-leave,
                 .mona-dropdown-popup-enter,
                 .mona-dropdown-popup-leave,
                 .mona-popup-fade-enter,
-                .mona-popup-fade-leave {
+                .mona-popup-fade-leave,
+                .reina-popup-enter,
+                .reina-popup-leave {
                     animation-duration: 1ms;
                 }
             }
@@ -149,6 +184,8 @@ export class PopupWrapperComponent implements OnInit {
     readonly #document = inject(DOCUMENT);
     readonly #popupReference = inject(PopupReferenceInjectionToken);
     readonly #popupSettings = inject<PopupSettings>(PopupSettingsInjectionToken);
+    readonly #styleStrategy = inject(POPUP_STYLE_STRATEGY);
+    readonly #themeService = inject(ThemeService);
     #closeEvent: PopupCloseEvent | null = null;
     #fallbackTimer: number | null = null;
     #leaveCompleted = false;
@@ -217,11 +254,12 @@ export class PopupWrapperComponent implements OnInit {
             return null;
         }
         if (config == null || config === true) {
-            return defaultPopupAnimation;
+            return this.#styleStrategy.resolve(this.#themeService.theme());
         }
+        const themeDefault = this.#styleStrategy.resolve(this.#themeService.theme());
         return {
-            enter: config.enter ?? defaultPopupAnimation.enter,
-            leave: config.leave ?? defaultPopupAnimation.leave
+            enter: config.enter ?? themeDefault.enter,
+            leave: config.leave ?? themeDefault.leave
         };
     }
 

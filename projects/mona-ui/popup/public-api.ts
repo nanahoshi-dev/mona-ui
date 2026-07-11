@@ -12,3 +12,4 @@ export type { PopupAnchor, PopupAnimationSettings, PopupSettings } from "./model
 export * from "./models/PopupOffset";
 export { PopupDataInjectionToken } from "./models/PopupInjectionToken";
 export type { ConnectionPoint } from "./utils/connectionPosition";
+export * from "./styles/popup.styles";

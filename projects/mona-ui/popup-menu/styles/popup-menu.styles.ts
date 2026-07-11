@@ -1,71 +1,24 @@
-import { VariantProps } from "class-variance-authority";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import {
-    popupMenuBaseVariants as monaPopupMenuBaseVariants,
-    popupMenuContainerVariants as monaPopupMenuContainerVariants,
-    popupMenuGroupHeaderVariants as monaPopupMenuGroupHeaderVariants,
-    popupMenuIconContainerVariants as monaPopupMenuIconContainerVariants,
-    popupMenuItemVariants as monaPopupMenuItemVariants,
-    popupMenuLinkVariants as monaPopupMenuLinkVariants
-} from "./popup-menu.mona.styles";
-
-const popupMenuBaseThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaPopupMenuBaseVariants },
-    monaPopupMenuBaseVariants
-);
-
-export const popupMenuBaseThemeVariants = (theme: ThemeStyle) => popupMenuBaseThemeVariantsStrategy.resolve(theme);
-
-const popupMenuContainerThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaPopupMenuContainerVariants },
-    monaPopupMenuContainerVariants
-);
-
-export const popupMenuContainerThemeVariants = (theme: ThemeStyle) =>
-    popupMenuContainerThemeVariantsStrategy.resolve(theme);
-
-const popupMenuGroupHeaderThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaPopupMenuGroupHeaderVariants },
-    monaPopupMenuGroupHeaderVariants
-);
-
-export const popupMenuGroupHeaderThemeVariants = (theme: ThemeStyle) =>
-    popupMenuGroupHeaderThemeVariantsStrategy.resolve(theme);
-
-const popupMenuIconContainerThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaPopupMenuIconContainerVariants },
-    monaPopupMenuIconContainerVariants
-);
-
-export const popupMenuIconContainerThemeVariants = (theme: ThemeStyle) =>
-    popupMenuIconContainerThemeVariantsStrategy.resolve(theme);
-
-const popupMenuItemThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaPopupMenuItemVariants },
-    monaPopupMenuItemVariants
-);
-
-export const popupMenuItemThemeVariants = (theme: ThemeStyle) => popupMenuItemThemeVariantsStrategy.resolve(theme);
-
-const popupMenuLinkThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaPopupMenuLinkVariants },
-    monaPopupMenuLinkVariants
-);
-
-export const popupMenuLinkThemeVariants = (theme: ThemeStyle) => popupMenuLinkThemeVariantsStrategy.resolve(theme);
-
-type PopupMenuBaseVariantProps = VariantProps<ReturnType<typeof popupMenuBaseThemeVariants>>;
-type PopupMenuContainerVariantProps = VariantProps<ReturnType<typeof popupMenuContainerThemeVariants>>;
-type PopupMenuGroupHeaderVariantProps = VariantProps<ReturnType<typeof popupMenuGroupHeaderThemeVariants>>;
-type PopupMenuIconContainerVariantProps = VariantProps<ReturnType<typeof popupMenuIconContainerThemeVariants>>;
-type PopupMenuItemVariantProps = VariantProps<ReturnType<typeof popupMenuItemThemeVariants>>;
-type PopupMenuLinkVariantProps = VariantProps<ReturnType<typeof popupMenuLinkThemeVariants>>;
-
-export type PopupMenuVariantProps = PopupMenuBaseVariantProps &
-    PopupMenuContainerVariantProps &
-    PopupMenuGroupHeaderVariantProps &
-    PopupMenuIconContainerVariantProps &
-    PopupMenuItemVariantProps &
-    PopupMenuLinkVariantProps;
-export type PopupMenuVariantInput = VariantInputs<PopupMenuVariantProps>;
+export { createPopupMenuStyleStrategy, popupMenuThemeVariants } from "./popup-menu.style-strategy";
+export {
+    POPUP_MENU_STYLE_OVERRIDES,
+    POPUP_MENU_STYLE_STRATEGY,
+    providePopupMenuStyles
+} from "./popup-menu.style-provider";
+export type {
+    PopupMenuBaseStyleOverride,
+    PopupMenuBaseVariantProps,
+    PopupMenuContainerStyleOverride,
+    PopupMenuContainerVariantProps,
+    PopupMenuGroupHeaderStyleOverride,
+    PopupMenuGroupHeaderVariantProps,
+    PopupMenuIconContainerStyleOverride,
+    PopupMenuItemStyleOverride,
+    PopupMenuItemVariantProps,
+    PopupMenuLinkStyleOverride,
+    PopupMenuStyleOverrides,
+    PopupMenuStylesProviderConfig,
+    PopupMenuStyleStrategy,
+    PopupMenuVariantInput,
+    PopupMenuVariantProps,
+    PopupMenuVariantsBundle
+} from "./popup-menu.types";

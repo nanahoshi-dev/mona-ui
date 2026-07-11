@@ -11,14 +11,7 @@ import { twMerge } from "tailwind-merge";
 import { PopupMenuItem } from "../../models/PopupMenuItem";
 import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 import { PopupMenuListConfig } from "../../models/PopupMenuListConfig";
-import {
-    popupMenuBaseThemeVariants,
-    popupMenuContainerThemeVariants,
-    popupMenuGroupHeaderThemeVariants,
-    popupMenuIconContainerThemeVariants,
-    popupMenuItemThemeVariants,
-    popupMenuLinkThemeVariants
-} from "../../styles/popup-menu.styles";
+import { POPUP_MENU_STYLE_STRATEGY } from "../../styles/popup-menu.styles";
 
 @Component({
     selector: "mona-popup-menu-list",
@@ -70,6 +63,7 @@ export class PopupMenuListComponent implements OnInit {
     });
     readonly #parentConfig = inject<PopupMenuListConfig>(PopupDataInjectionToken);
     readonly #popupService = inject(PopupService);
+    readonly #styleStrategy = inject(POPUP_MENU_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey$ = new Subject<string>();
     readonly #viaKeyboardNavigation = signal(false);
@@ -77,18 +71,18 @@ export class PopupMenuListComponent implements OnInit {
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
-        return popupMenuBaseThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).base({ rounded });
     });
     protected readonly containerClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
-        return popupMenuContainerThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).container({ rounded });
     });
     protected readonly groupHeaderClasses = computed(() => {
         const theme = this.#themeService.theme();
         const size = this.#parentConfig.size();
         const hasIcon = this.iconAreaVisible();
-        const variantClasses = popupMenuGroupHeaderThemeVariants(theme)({ size });
+        const variantClasses = this.#styleStrategy.resolve(theme).groupHeader({ size });
         const iconClasses = hasIcon ? "pl-8" : "pl-2";
         return twMerge(variantClasses, iconClasses);
     });
@@ -101,11 +95,11 @@ export class PopupMenuListComponent implements OnInit {
     });
     protected readonly iconContainerClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return popupMenuIconContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).iconContainer();
     });
     protected readonly linkContainerClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return popupMenuLinkThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).link();
     });
     protected readonly menuId = computed(() => this.#parentConfig.menuId);
     protected readonly menuItemClasses = computed(() => {
@@ -113,7 +107,7 @@ export class PopupMenuListComponent implements OnInit {
         const rounded = this.#parentConfig.rounded();
         const size = this.#parentConfig.size();
         const hasIcon = this.iconAreaVisible();
-        const variantClasses = popupMenuItemThemeVariants(theme)({ rounded, size });
+        const variantClasses = this.#styleStrategy.resolve(theme).item({ rounded, size });
         const iconClasses = hasIcon ? "pl-8" : "pl-2";
         return twMerge(variantClasses, iconClasses);
     });

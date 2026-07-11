@@ -13,7 +13,7 @@ describe("theme runtime CSS", () => {
 
         expect(css).toContain(":root {");
         expect(css).toContain("--mona-color-chart-5: #f4a462;");
-        expect(css).toContain("--mona-page-background: #fff;");
+        expect(css).toContain("--mona-color-background: oklch(1 0 0);");
         expect(css).not.toContain("--color-chart-5:");
     });
 });
