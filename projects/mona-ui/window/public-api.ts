@@ -15,4 +15,42 @@ export * from "./models/ResizeEvent";
 export * from "./models/WindowActionTemplateContext";
 export { WindowRef } from "./models/WindowRef";
 export * from "./models/WindowSettings";
-export type { WindowVariantProps } from "./styles/window.styles";
+
+export { createWindowStyleStrategy, provideWindowStyles, WINDOW_STYLE_OVERRIDES, WINDOW_STYLE_STRATEGY } from "./styles/window.styles";
+export type {
+    WindowBaseCompoundStyleOverride,
+    WindowBaseStyleOverrides,
+    WindowBaseVariantInput,
+    WindowBaseVariantProps,
+    WindowContentContainerCompoundStyleOverride,
+    WindowContentContainerStyleOverrides,
+    WindowContentContainerVariantInput,
+    WindowContentContainerVariantProps,
+    WindowContentStyleOverrides,
+    WindowContentVariantInput,
+    WindowContentVariantProps,
+    WindowResizerCompoundStyleOverride,
+    WindowResizerStyleOverrides,
+    WindowResizerVariantInput,
+    WindowResizerVariantProps,
+    WindowStyleOverrides,
+    WindowStylesProviderConfig,
+    WindowStyleStrategy,
+    WindowTitleBarActionStyleOverrides,
+    WindowTitleBarActionVariantInput,
+    WindowTitleBarActionVariantProps,
+    WindowTitleBarCompoundStyleOverride,
+    WindowTitleBarStyleOverrides,
+    WindowTitleBarVariantInput,
+    WindowTitleBarVariantProps,
+    WindowTitleCompoundStyleOverride,
+    WindowTitleContainerStyleOverrides,
+    WindowTitleContainerVariantInput,
+    WindowTitleContainerVariantProps,
+    WindowTitleStyleOverrides,
+    WindowTitleVariantInput,
+    WindowTitleVariantProps,
+    WindowVariantInput,
+    WindowVariantProps,
+    WindowVariantsFunctions
+} from "./styles/window.styles";

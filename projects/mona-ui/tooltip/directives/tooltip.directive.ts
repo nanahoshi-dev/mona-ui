@@ -25,12 +25,7 @@ import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/p
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import {
-    tooltipArrowThemeVariants,
-    tooltipBaseThemeVariants,
-    TooltipVariantInputs,
-    TooltipVariantProps
-} from "../styles/tooltip.styles";
+import { TOOLTIP_STYLE_STRATEGY, TooltipVariantInputs, TooltipVariantProps } from "../styles/tooltip.styles";
 import {
     getArrowPositionFromConnectionPair,
     getOffsetForPosition,
@@ -332,16 +327,17 @@ export class TooltipDirective implements TooltipVariantInputs {
     `
 })
 class TooltipTemplateComponent {
+    readonly #styleStrategy = inject(TOOLTIP_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly arrowClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return tooltipArrowThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).arrow();
     });
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const userClasses = `p-2`;
-        const variants = tooltipBaseThemeVariants(theme)({ rounded });
+        const variants = this.#styleStrategy.resolve(theme).base({ rounded });
         return twMerge(variants, userClasses);
     });
     public readonly currentArrowPosition = linkedSignal(() => this.position());

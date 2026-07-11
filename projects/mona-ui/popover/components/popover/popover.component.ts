@@ -17,7 +17,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Position } from "@nanahoshi/mona-ui/common";
 import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { getOffsetForPosition, getPositionConnectionPoints } from "@nanahoshi/mona-ui/tooltip";
+import { getOffsetForPosition, getPositionConnectionPoints, TOOLTIP_STYLE_STRATEGY } from "@nanahoshi/mona-ui/tooltip";
 import { filter, fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
@@ -27,14 +27,7 @@ import { PopoverHideEvent } from "../../models/PopoverHideEvent";
 import { PopoverShowEvent } from "../../models/PopoverShowEvent";
 import { PopoverShownEvent } from "../../models/PopoverShownEvent";
 import { PopoverTrigger } from "../../models/PopoverTrigger";
-import {
-    popoverArrowThemeVariants,
-    popoverBaseThemeVariants,
-    popoverContentThemeVariants,
-    popoverHeaderThemeVariants,
-    PopoverVariantInputs,
-    PopoverVariantProps
-} from "../../styles/popover.styles";
+import { POPOVER_STYLE_STRATEGY, PopoverVariantInputs, PopoverVariantProps } from "../../styles/popover.styles";
 
 @Component({
     selector: "mona-popover",
@@ -46,20 +39,22 @@ export class PopoverComponent implements PopoverVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
+    readonly #styleStrategy = inject(POPOVER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
+    readonly #tooltipStyleStrategy = inject(TOOLTIP_STYLE_STRATEGY);
     #subscription: Subscription | null = null;
     protected readonly arrowClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return popoverArrowThemeVariants(theme)();
+        return this.#tooltipStyleStrategy.resolve(theme).arrow();
     });
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return popoverBaseThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).base({ rounded });
     });
     protected readonly contentClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return popoverContentThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).content();
     });
     protected readonly currentArrowPosition = computed(() => this.position());
     protected readonly footerTemplateRef = contentChild(PopoverFooterTemplateDirective, { read: TemplateRef });
@@ -68,7 +63,7 @@ export class PopoverComponent implements PopoverVariantInputs {
         const rounded = this.rounded();
         const hasTemplate = !!this.titleTemplateRef();
         const padding = hasTemplate ? "p-0" : "p-2";
-        const variants = popoverHeaderThemeVariants(theme)({ rounded });
+        const variants = this.#styleStrategy.resolve(theme).header({ rounded });
         return twMerge(variants, padding);
     });
     protected readonly headerId = computed(() =>

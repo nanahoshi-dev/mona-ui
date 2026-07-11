@@ -18,12 +18,7 @@ import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { fadePopupAnimation, PopupAnchor, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, take, takeUntil } from "rxjs";
-import {
-    tooltipArrowThemeVariants,
-    tooltipBaseThemeVariants,
-    TooltipVariantInputs,
-    TooltipVariantProps
-} from "../../styles/tooltip.styles";
+import { TOOLTIP_STYLE_STRATEGY, TooltipVariantInputs, TooltipVariantProps } from "../../styles/tooltip.styles";
 import {
     getArrowPositionFromConnectionPair,
     getOffsetForPosition,
@@ -46,6 +41,7 @@ export class TooltipComponent implements TooltipVariantInputs {
     readonly #document = inject(DOCUMENT);
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
+    readonly #styleStrategy = inject(TOOLTIP_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #currentAnchor: HTMLElement | null = null;
     #eventSubscription: Subscription | null = null;
@@ -55,12 +51,12 @@ export class TooltipComponent implements TooltipVariantInputs {
     #showTimeoutId: ReturnType<typeof setTimeout> | null = null;
     protected readonly arrowClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return tooltipArrowThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).arrow();
     });
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return tooltipBaseThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).base({ rounded });
     });
     protected readonly currentArrowPosition = linkedSignal(() => this.position());
     protected readonly templateRef = viewChild.required(TemplateRef);

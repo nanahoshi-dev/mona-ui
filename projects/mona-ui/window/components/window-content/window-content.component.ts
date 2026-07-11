@@ -25,16 +25,7 @@ import { WindowDragHandlerDirective } from "../../directives/window-drag-handler
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
 import { ResizePositionPipe } from "../../pipes/resize-position.pipe";
-import {
-    windowBaseThemeVariants,
-    windowContentContainerThemeVariants,
-    windowContentThemeVariants,
-    WindowContentVariantInput,
-    windowTitleBarActionThemeVariants,
-    windowTitleBarThemeVariants,
-    windowTitleContainerThemeVariants,
-    windowTitleThemeVariants
-} from "../../styles/window.styles";
+import { WINDOW_STYLE_STRATEGY, WindowContentVariantInput } from "../../styles/window.styles";
 
 @Component({
     selector: "mona-window-content",
@@ -65,13 +56,14 @@ export class WindowContentComponent implements WindowContentVariantInput {
 
     readonly #sizeBeforeMaximize = signal({ width: 0, height: 0, top: 0, left: 0 });
     readonly #sizeBeforeMinimize = signal(0);
+    readonly #styleStrategy = inject(WINDOW_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #trapFocus = inject(CdkTrapFocus);
     readonly #viewContainerRef = inject(ViewContainerRef);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.windowData.rounded;
-        return windowBaseThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).base({ rounded });
     });
     protected readonly componentAnchor = viewChild.required("componentAnchor", {
         read: ViewContainerRef
@@ -79,12 +71,12 @@ export class WindowContentComponent implements WindowContentVariantInput {
     protected readonly componentRef?: ComponentRef<unknown>;
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
-        return windowContentThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).content();
     });
     protected readonly contentContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.windowData.rounded;
-        return windowContentContainerThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).contentContainer({ rounded });
     });
     protected readonly contentTemplate = computed(() => {
         const content = this.windowData.content;
@@ -99,22 +91,22 @@ export class WindowContentComponent implements WindowContentVariantInput {
     protected readonly minimized = signal(false);
     protected readonly titleBarActionClass = computed(() => {
         const theme = this.#themeService.theme();
-        return windowTitleBarActionThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).titleBarAction();
     });
     protected readonly titleBarClass = computed(() => {
         const theme = this.#themeService.theme();
         const look = this.windowData.look;
         const rounded = this.windowData.rounded;
-        return windowTitleBarThemeVariants(theme)({ look, rounded });
+        return this.#styleStrategy.resolve(theme).titleBar({ look, rounded });
     });
     protected readonly titleClass = computed(() => {
         const theme = this.#themeService.theme();
         const look = this.windowData.look;
-        return windowTitleThemeVariants(theme)({ look });
+        return this.#styleStrategy.resolve(theme).title({ look });
     });
     protected readonly titleContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return windowTitleContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).titleContainer();
     });
     protected readonly windowData = inject<WindowInjectorData>(PopupDataInjectionToken);
 

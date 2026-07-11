@@ -17,4 +17,43 @@ export * from "./models/DialogActionEvent";
 export * from "./models/DialogRef";
 export type { DialogResult } from "./models/DialogResult";
 export * from "./models/DialogSettings";
-export type { DialogVariantProps } from "./styles/dialog.styles";
+
+export { createDialogStyleStrategy, DIALOG_STYLE_OVERRIDES, DIALOG_STYLE_STRATEGY, provideDialogStyles } from "./styles/dialog.styles";
+export type {
+    DialogBaseCompoundStyleOverride,
+    DialogBaseStyleOverrides,
+    DialogBaseVariantInput,
+    DialogBaseVariantProps,
+    DialogBodyCompoundStyleOverride,
+    DialogBodyStyleOverrides,
+    DialogBodyVariantProps,
+    DialogCloseButtonContainerStyleOverrides,
+    DialogContentContainerStyleOverrides,
+    DialogContentContainerVariantProps,
+    DialogContentStyleOverrides,
+    DialogContentVariantProps,
+    DialogDescriptionStyleOverrides,
+    DialogDescriptionVariantProps,
+    DialogFooterCompoundStyleOverride,
+    DialogFooterStyleOverrides,
+    DialogFooterVariantProps,
+    DialogHeaderStyleOverrides,
+    DialogHeaderVariantProps,
+    DialogIconCompoundStyleOverride,
+    DialogIconContainerStyleOverrides,
+    DialogIconContainerVariantInput,
+    DialogIconContainerVariantProps,
+    DialogIconStyleOverrides,
+    DialogIconVariantInput,
+    DialogIconVariantProps,
+    DialogStyleOverrides,
+    DialogStylesProviderConfig,
+    DialogStyleStrategy,
+    DialogTitleContainerStyleOverrides,
+    DialogTitleContainerVariantProps,
+    DialogTitleStyleOverrides,
+    DialogTitleVariantProps,
+    DialogVariantInput,
+    DialogVariantProps,
+    DialogVariantsFunctions
+} from "./styles/dialog.styles";

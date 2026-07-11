@@ -18,21 +18,7 @@ import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DialogAction } from "../../models/DialogAction";
 import { DialogInjectorData } from "../../models/DialogInjectorData";
-import {
-    dialogBaseThemeVariants,
-    dialogBodyThemeVariants,
-    dialogCloseButtonContainerThemeVariants,
-    dialogContentContainerThemeVariants,
-    dialogContentThemeVariants,
-    dialogDescriptionThemeVariants,
-    dialogFooterThemeVariants,
-    dialogHeaderThemeVariants,
-    dialogIconContainerThemeVariants,
-    dialogIconThemeVariants,
-    dialogTitleContainerThemeVariants,
-    dialogTitleThemeVariants,
-    DialogVariantProps
-} from "../../styles/dialog.styles";
+import { DIALOG_STYLE_STRATEGY, DialogVariantProps } from "../../styles/dialog.styles";
 
 type IconMap = Record<NonNullable<DialogVariantProps["type"]>, { color: string; icon: LucideIconInput }>;
 
@@ -58,29 +44,30 @@ export class DialogContentComponent {
         warning: { color: "var(--color-warning)", icon: LucideOctagonAlert }
     };
     readonly #injectedData = inject<DialogInjectorData>(PopupDataInjectionToken);
+    readonly #styleStrategy = inject(DIALOG_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #trapFocus = inject(CdkTrapFocus);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.dialogData().rounded;
-        return dialogBaseThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).base({ rounded });
     });
     protected readonly bodyClass = computed(() => {
         const theme = this.#themeService.theme();
         const hasIcon = this.dialogData().type != null;
-        return dialogBodyThemeVariants(theme)({ hasIcon });
+        return this.#styleStrategy.resolve(theme).body({ hasIcon });
     });
     protected readonly closeButtonContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogCloseButtonContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).closeButtonContainer();
     });
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogContentThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).content();
     });
     protected readonly contentContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogContentContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).contentContainer();
     });
     protected readonly describedById = computed(() => {
         const data = this.dialogData();
@@ -88,7 +75,7 @@ export class DialogContentComponent {
     });
     protected readonly descriptionClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogDescriptionThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).description();
     });
     protected readonly descriptionId = createElementControlId();
     protected readonly dialogData = computed(() => this.dialogReference.data());
@@ -97,11 +84,11 @@ export class DialogContentComponent {
         const theme = this.#themeService.theme();
         const layout = this.dialogData().actionsLayout;
         const rounded = this.dialogData().rounded;
-        return dialogFooterThemeVariants(theme)({ layout, rounded });
+        return this.#styleStrategy.resolve(theme).footer({ layout, rounded });
     });
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogHeaderThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).header();
     });
     protected readonly headerId = createElementControlId();
     protected readonly icon = computed(() => {
@@ -111,11 +98,11 @@ export class DialogContentComponent {
     protected readonly iconClass = computed(() => {
         const theme = this.#themeService.theme();
         const type = this.dialogData().type;
-        return dialogIconThemeVariants(theme)({ type });
+        return this.#styleStrategy.resolve(theme).icon({ type });
     });
     protected readonly iconContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogIconContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).iconContainer();
     });
     protected readonly role = computed(() => {
         const type = this.dialogData().type;
@@ -123,11 +110,11 @@ export class DialogContentComponent {
     });
     protected readonly titleClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogTitleThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).title();
     });
     protected readonly titleContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dialogTitleContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).titleContainer();
     });
 
     public constructor() {
