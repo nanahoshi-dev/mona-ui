@@ -56,15 +56,15 @@ export const reinaChipVariants = createChipRecipe({
         small: "rounded-xl"
     },
     selectedClass: {
-        default: "bg-selected text-foreground hover:opacity-90 active:opacity-80",
-        primary: "bg-primary-selected text-primary-foreground hover:opacity-90 active:opacity-80",
-        secondary: "bg-primary-selected text-primary-foreground hover:opacity-90 active:opacity-80",
-        success: "bg-success-selected text-success-foreground hover:opacity-90 active:opacity-80",
-        error: "bg-error-selected text-error-foreground hover:opacity-90 active:opacity-80",
-        warning: "bg-warning-selected text-warning-foreground hover:opacity-90 active:opacity-80",
-        info: "bg-info-selected text-info-foreground hover:opacity-90 active:opacity-80",
-        outline: "bg-primary-selected text-primary-foreground border-transparent hover:opacity-90 active:opacity-80",
-        ghost: "bg-secondary-selected text-secondary-foreground hover:opacity-90 active:opacity-80"
+        default: "bg-selected text-foreground hover:bg-selected/90 active:bg-selected/80",
+        primary: "bg-primary-selected text-primary-foreground hover:bg-primary-selected/90 active:bg-primary-selected/80",
+        secondary: "bg-primary-selected text-primary-foreground hover:bg-primary-selected/90 active:bg-primary-selected/80",
+        success: "bg-success-selected text-success-foreground hover:bg-success-selected/90 active:bg-success-selected/80",
+        error: "bg-error-selected text-error-foreground hover:bg-error-selected/90 active:bg-error-selected/80",
+        warning: "bg-warning-selected text-warning-foreground hover:bg-warning-selected/90 active:bg-warning-selected/80",
+        info: "bg-info-selected text-info-foreground hover:bg-info-selected/90 active:bg-info-selected/80",
+        outline: "bg-primary-selected text-primary-foreground border-transparent hover:bg-primary-selected/90 active:bg-primary-selected/80",
+        ghost: "bg-secondary-selected text-secondary-foreground hover:bg-secondary-selected/90 active:bg-secondary-selected/80"
     },
     sizes: {
         small: `

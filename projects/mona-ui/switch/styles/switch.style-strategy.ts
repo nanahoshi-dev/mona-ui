@@ -4,6 +4,11 @@ import {
     switchLabelVariants as monaSwitchLabelVariants,
     switchVariants as monaSwitchVariants
 } from "./switch.mona.styles";
+import {
+    reinaSwitchHandleVariants,
+    reinaSwitchLabelVariants,
+    reinaSwitchVariants
+} from "./switch.reina.styles";
 import { createSwitchHandleVariants, createSwitchLabelVariants, createSwitchTrackVariants } from "./switch.style-composition";
 import type {
     SwitchHandleVariantsFunction,
@@ -15,15 +20,15 @@ import type {
 } from "./switch.types";
 
 const defaultSwitchTrackStrategy = createThemeStrategy<SwitchTrackVariantsFunction>(
-    { mona: monaSwitchVariants },
+    { mona: monaSwitchVariants, reina: reinaSwitchVariants },
     monaSwitchVariants
 );
 const defaultSwitchHandleStrategy = createThemeStrategy<SwitchHandleVariantsFunction>(
-    { mona: monaSwitchHandleVariants },
+    { mona: monaSwitchHandleVariants, reina: reinaSwitchHandleVariants },
     monaSwitchHandleVariants
 );
 const defaultSwitchLabelStrategy = createThemeStrategy<SwitchLabelVariantsFunction>(
-    { mona: monaSwitchLabelVariants },
+    { mona: monaSwitchLabelVariants, reina: reinaSwitchLabelVariants },
     monaSwitchLabelVariants
 );
 
@@ -37,12 +42,15 @@ export const switchLabelThemeVariants = (theme: ThemeStyle): SwitchLabelVariants
     defaultSwitchLabelStrategy.resolve(theme);
 
 export function createSwitchStyleStrategy(overrides: readonly SwitchStyleOverrides[] = []): SwitchStyleStrategy {
-    const buildFor = (theme: ThemeStyle): SwitchVariantsFunctions => ({
-        track: createSwitchTrackVariants(monaSwitchVariants, overrides, theme),
-        handle: createSwitchHandleVariants(monaSwitchHandleVariants, overrides, theme),
-        label: createSwitchLabelVariants(monaSwitchLabelVariants, overrides, theme)
-    });
-    const mona = buildFor("mona");
-    const reina = buildFor("reina");
+    const mona: SwitchVariantsFunctions = {
+        track: createSwitchTrackVariants(monaSwitchVariants, overrides, "mona"),
+        handle: createSwitchHandleVariants(monaSwitchHandleVariants, overrides, "mona"),
+        label: createSwitchLabelVariants(monaSwitchLabelVariants, overrides, "mona")
+    };
+    const reina: SwitchVariantsFunctions = {
+        track: createSwitchTrackVariants(reinaSwitchVariants, overrides, "reina"),
+        handle: createSwitchHandleVariants(reinaSwitchHandleVariants, overrides, "reina"),
+        label: createSwitchLabelVariants(reinaSwitchLabelVariants, overrides, "reina")
+    };
     return createThemeStrategy<SwitchVariantsFunctions>({ mona, reina }, mona);
 }

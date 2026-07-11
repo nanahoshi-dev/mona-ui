@@ -1,34 +1,20 @@
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import { VariantProps } from "class-variance-authority";
-import {
-    numericTextboxButtonVariants as monaNumericTextboxButtonVariants,
-    numericTextboxInputVariants as monaNumericTextboxInputVariants,
-    numericTextboxVariants as monaNumericTextboxVariants
-} from "./numeric-textbox.mona.styles";
-
-const numericTextboxThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaNumericTextboxVariants },
-    monaNumericTextboxVariants
-);
-
-export const numericTextboxThemeVariants = (theme: ThemeStyle) => numericTextboxThemeVariantsStrategy.resolve(theme);
-
-const numericTextboxInputThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaNumericTextboxInputVariants },
-    monaNumericTextboxInputVariants
-);
-
-export const numericTextboxInputThemeVariants = (theme: ThemeStyle) =>
-    numericTextboxInputThemeVariantsStrategy.resolve(theme);
-
-const numericTextboxButtonThemeVariantsStrategy = createThemeStrategy(
-    { mona: monaNumericTextboxButtonVariants },
-    monaNumericTextboxButtonVariants
-);
-
-export const numericTextboxButtonThemeVariants = (theme: ThemeStyle) =>
-    numericTextboxButtonThemeVariantsStrategy.resolve(theme);
-
-export type NumericTextboxVariantProps = VariantProps<ReturnType<typeof numericTextboxThemeVariants>>;
-export type NumericTextboxVariantInputs = VariantInputs<NumericTextboxVariantProps>;
+export { numericTextboxThemeVariants, createNumericTextboxStyleStrategy } from "./numeric-textbox.style-strategy";
+export {
+    NUMERIC_TEXT_BOX_STYLE_OVERRIDES,
+    NUMERIC_TEXT_BOX_STYLE_STRATEGY,
+    provideNumericTextBoxStyles
+} from "./numeric-textbox.style-provider";
+export type {
+    NumericTextboxBaseStyleOverride,
+    NumericTextboxBaseVariantProps,
+    NumericTextboxButtonStyleOverride,
+    NumericTextboxButtonVariantProps,
+    NumericTextboxInputStyleOverride,
+    NumericTextboxInputVariantProps,
+    NumericTextboxStyleOverrides,
+    NumericTextboxStylesProviderConfig,
+    NumericTextboxStyleStrategy,
+    NumericTextboxVariantInputs,
+    NumericTextboxVariantProps,
+    NumericTextboxVariantsBundle
+} from "./numeric-textbox.types";

@@ -3,13 +3,30 @@ import { describe, expect, it } from "vitest";
 import { createSwitchStyleStrategy, provideSwitchStyles, SWITCH_STYLE_STRATEGY } from "./switch.styles";
 
 describe("switch style strategy", () => {
-    it("uses the shared recipe for Reina when only tokens differ", () => {
+    it("uses a distinct Apple-inspired recipe for Reina", () => {
         const strategy = createSwitchStyleStrategy();
 
         const monaTrack = strategy.resolve("mona").track({ size: "large" });
         const reinaTrack = strategy.resolve("reina").track({ size: "large" });
 
-        expect(reinaTrack).toBe(monaTrack);
+        expect(reinaTrack).not.toBe(monaTrack);
+        expect(reinaTrack).toContain("data-[active='true']:bg-primary");
+    });
+
+    it("scales Reina's track and handle radius per size instead of clipping to a pill", () => {
+        const strategy = createSwitchStyleStrategy();
+        const reina = strategy.resolve("reina");
+
+        const smallMedium = reina.track({ rounded: "medium", size: "small" });
+        const smallLarge = reina.track({ rounded: "large", size: "small" });
+        const smallFull = reina.track({ rounded: "full", size: "small" });
+        expect(smallMedium).not.toBe(smallLarge);
+        expect(smallLarge).not.toBe(smallFull);
+        expect(smallFull).toContain("rounded-full");
+
+        const handleLargeLarge = reina.handle({ rounded: "large", size: "large" });
+        expect(handleLargeLarge).toContain("rounded-[0.625rem]");
+        expect(handleLargeLarge).not.toContain("rounded-full");
     });
 
     it("merges provider track and handle overrides after the built-in recipe", () => {

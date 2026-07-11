@@ -23,7 +23,8 @@ import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/in
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
 import { TextBoxSuffixTemplateDirective } from "../../directives/text-box-suffix-template.directive";
 import { InputType } from "../../models/InputType";
-import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "../../styles/textbox.styles";
+import { TEXT_BOX_STYLE_STRATEGY } from "../../styles/textbox.style-provider";
+import { TextBoxVariantInput, TextBoxVariantProps } from "../../styles/textbox.styles";
 
 @Component({
     selector: "mona-text-box",
@@ -39,12 +40,13 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
 })
 export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<string> {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #styleStrategy = inject(TEXT_BOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = textBoxThemeVariants(theme)({ rounded, size });
+        const classes = this.#styleStrategy.resolve(theme).base({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });

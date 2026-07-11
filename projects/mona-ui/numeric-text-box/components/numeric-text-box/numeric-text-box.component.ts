@@ -39,13 +39,8 @@ import {
 import { twMerge } from "tailwind-merge";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { NumericTextBoxPrefixTemplateDirective } from "../../directives/numeric-text-box-prefix-template.directive";
-import {
-    numericTextboxButtonThemeVariants,
-    numericTextboxInputThemeVariants,
-    numericTextboxThemeVariants,
-    NumericTextboxVariantInputs,
-    NumericTextboxVariantProps
-} from "../../styles/numeric-textbox.styles";
+import { NUMERIC_TEXT_BOX_STYLE_STRATEGY } from "../../styles/numeric-textbox.style-provider";
+import { NumericTextboxVariantInputs, NumericTextboxVariantProps } from "../../styles/numeric-textbox.styles";
 
 type Sign = "-" | "+";
 
@@ -65,6 +60,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #styleStrategy = inject(NUMERIC_TEXT_BOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
 
     protected readonly beforeInput$ = new Subject<InputEvent>();
@@ -72,7 +68,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = numericTextboxThemeVariants(theme)({ rounded, size });
+        const classes = this.#styleStrategy.resolve(theme).base({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
@@ -81,7 +77,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         const hasPrefixTemplate = this.prefixTemplateList().length > 0;
         const leftRounded = hasPrefixTemplate ? "none" : this.rounded();
         const rightRounded = this.spinners() ? "none" : this.rounded();
-        const inputVariants = numericTextboxInputThemeVariants(theme)({ leftRounded, rightRounded });
+        const inputVariants = this.#styleStrategy.resolve(theme).input({ leftRounded, rightRounded });
         return twMerge(inputVariants);
     });
     protected readonly focused = signal(false);
@@ -99,7 +95,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
     protected readonly spinButtonClasses = computed(() => {
         const theme = this.#themeService.theme();
         const size = this.size();
-        return numericTextboxButtonThemeVariants(theme)({ size });
+        return this.#styleStrategy.resolve(theme).button({ size });
     });
     protected readonly spinButtonIconSize = computed(() => {
         const size = this.size();

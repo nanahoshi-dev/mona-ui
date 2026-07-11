@@ -1,6 +1,7 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { inputThemeVariants, InputVariantInput, InputVariantProps } from "../styles/textbox.styles";
+import { TEXT_BOX_STYLE_STRATEGY } from "../styles/textbox.style-provider";
+import { TextBoxInputVariantInput, TextBoxInputVariantProps } from "../styles/textbox.styles";
 import { twMerge } from "tailwind-merge";
 
 @Directive({
@@ -9,13 +10,14 @@ import { twMerge } from "tailwind-merge";
         "[class]": "classes()"
     }
 })
-export class TextBoxDirective implements InputVariantInput {
+export class TextBoxDirective implements TextBoxInputVariantInput {
+    readonly #styleStrategy = inject(TEXT_BOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
         const theme = this.#themeService.theme();
-        const classes = inputThemeVariants(theme)({ rounded, size });
+        const classes = this.#styleStrategy.resolve(theme).input({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
@@ -24,13 +26,13 @@ export class TextBoxDirective implements InputVariantInput {
      * @description Border-radius preset applied to the component.
      * @default "medium"
      */
-    public readonly rounded = input<InputVariantProps["rounded"]>("medium");
+    public readonly rounded = input<TextBoxInputVariantProps["rounded"]>("medium");
 
     /**
      * @description Size preset controlling the component's dimensions.
      * @default "medium"
      */
-    public readonly size = input<InputVariantProps["size"]>("medium");
+    public readonly size = input<TextBoxInputVariantProps["size"]>("medium");
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
      * @default ""
