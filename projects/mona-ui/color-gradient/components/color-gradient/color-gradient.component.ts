@@ -56,11 +56,7 @@ import { type ColorMode, type ColorOutputFormat } from "@nanahoshi/mona-ui/commo
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ColorInput } from "../../models/ColorInput";
 import {
-    colorGradientBaseThemeVariants,
-    colorGradientHsvRectangleHandleThemeVariants,
-    colorGradientHsvRectangleThemeVariants,
-    colorGradientPreviewThemeVariants,
-    colorGradientSliderHandleThemeVariants,
+    COLOR_GRADIENT_STYLE_STRATEGY,
     ColorGradientVariantInputs,
     ColorGradientVariantProps
 } from "../../styles/color-gradient.styles";
@@ -92,6 +88,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     readonly #clipboard = inject(Clipboard);
     readonly #destroyRef = inject(DestroyRef);
     readonly #injector = inject(Injector);
+    readonly #styleStrategy = inject(COLOR_GRADIENT_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #valueChange$ = new Subject<string | null>();
     readonly #viewReady = signal(false);
@@ -109,7 +106,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     });
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return colorGradientBaseThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).base();
     });
     protected readonly colorInputs = computed(() => {
         const mode = this.colorMode();
@@ -130,7 +127,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     protected readonly colorPreviewClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorGradientPreviewThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).preview({ rounded });
     });
     protected readonly colorPreviews = computed(() => [
         {
@@ -169,12 +166,12 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     protected readonly hsvRectangleClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        return colorGradientHsvRectangleThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).hsvRectangle({ rounded });
     });
     protected readonly hsvRectangleHandleClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorGradientHsvRectangleHandleThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).hsvRectangleHandle({ rounded });
     });
     protected readonly hueValue$ = new Subject<number>();
     protected readonly invalidState = computed(
@@ -191,7 +188,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     });
     protected readonly sliderHandleClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return colorGradientSliderHandleThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).sliderHandle();
     });
     protected readonly sliderHeight = 10;
 

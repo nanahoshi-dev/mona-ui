@@ -4,4 +4,24 @@
 
 export * from "./components/color-palette/color-palette.component";
 
-export type { ColorPaletteVariantProps } from "./styles/color-palette.styles";
+export {
+    COLOR_PALETTE_STYLE_OVERRIDES,
+    COLOR_PALETTE_STYLE_STRATEGY,
+    createColorPaletteStyleStrategy,
+    provideColorPaletteStyles
+} from "./styles/color-palette.styles";
+export type {
+    ColorPaletteBaseStyleOverrides,
+    ColorPaletteBaseVariantInput,
+    ColorPaletteBaseVariantProps,
+    ColorPaletteItemCompoundStyleOverride,
+    ColorPaletteItemStyleOverrides,
+    ColorPaletteItemVariantInput,
+    ColorPaletteItemVariantProps,
+    ColorPaletteStyleOverrides,
+    ColorPaletteStylesProviderConfig,
+    ColorPaletteStyleStrategy,
+    ColorPaletteVariantInput,
+    ColorPaletteVariantProps,
+    ColorPaletteVariantsFunctions
+} from "./styles/color-palette.styles";

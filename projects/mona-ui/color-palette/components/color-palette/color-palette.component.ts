@@ -4,12 +4,7 @@ import { PaletteType } from "@nanahoshi/mona-ui/common";
 import type { ColorScheme } from "@nanahoshi/mona-ui/internal";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { count } from "@mirei/ts-collections";
-import {
-    colorPaletteBaseThemeVariants,
-    colorPaletteItemThemeVariants,
-    ColorPaletteVariantInput,
-    ColorPaletteVariantProps
-} from "../../styles/color-palette.styles";
+import { COLOR_PALETTE_STYLE_STRATEGY, ColorPaletteVariantInput, ColorPaletteVariantProps } from "../../styles/color-palette.styles";
 import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../utils/colorSchemes";
 
 @Component({
@@ -33,10 +28,11 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
 })
 export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValueControl<string | null> {
     readonly #elementRef = inject(ElementRef<HTMLElement>);
+    readonly #styleStrategy = inject(COLOR_PALETTE_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
-        return colorPaletteBaseThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).base();
     });
     protected readonly colorScheme: Signal<ColorScheme> = computed(() => {
         const palette = this.palette();
@@ -59,7 +55,7 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
     protected readonly paletteItemClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorPaletteItemThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).item({ rounded });
     });
     protected readonly colorRows = computed(() => {
         const { colors, columns } = this.colorScheme();

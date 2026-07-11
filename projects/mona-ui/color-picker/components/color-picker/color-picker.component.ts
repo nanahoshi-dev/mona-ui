@@ -29,12 +29,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, take, takeUntil } from "rxjs";
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
 import { ColorPickerView } from "../../models/ColorPickerView";
-import {
-    colorPickerBaseThemeVariants,
-    colorPickerColorThemeVariants,
-    ColorPickerVariantInput,
-    ColorPickerVariantProps
-} from "../../styles/color-picker.styles";
+import { COLOR_PICKER_STYLE_STRATEGY, ColorPickerVariantInput, ColorPickerVariantProps } from "../../styles/color-picker.styles";
 
 @Component({
     selector: "mona-color-picker",
@@ -71,6 +66,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #popupService: PopupService = inject(PopupService);
     readonly #popupRef = signal<PopupRef | null>(null);
+    readonly #styleStrategy = inject(COLOR_PICKER_STYLE_STRATEGY);
 
     readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
@@ -78,13 +74,13 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         const expanded = this.expanded();
         const rounded = this.rounded();
         const size = this.size();
-        return colorPickerBaseThemeVariants(theme)({ expanded, rounded, size });
+        return this.#styleStrategy.resolve(theme).base({ expanded, rounded, size });
     });
     protected readonly colorClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        return colorPickerColorThemeVariants(theme)({ rounded, size });
+        return this.#styleStrategy.resolve(theme).color({ rounded, size });
     });
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly invalidState = computed(
