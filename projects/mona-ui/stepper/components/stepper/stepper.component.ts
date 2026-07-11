@@ -24,15 +24,7 @@ import { StepperLabelTemplateDirective } from "../../directives/stepper-label-te
 import { StepperStepTemplateDirective } from "../../directives/stepper-step-template.directive";
 import type { StepItem, StepOptions } from "../../models/Step";
 import type { StepperTemplateContext } from "../../models/StepperTemplateContext";
-import {
-    stepperBaseThemeVariants,
-    stepperStepListItemThemeVariants,
-    stepperStepListThemeVariants,
-    stepperTrackLineThemeVariants,
-    stepperTrackThemeVariants,
-    StepperVariantInput,
-    StepperVariantProps
-} from "../../styles/stepper.styles";
+import { STEPPER_STYLE_STRATEGY, StepperVariantInput, StepperVariantProps } from "../../styles/stepper.styles";
 
 @Component({
     selector: "mona-stepper",
@@ -48,6 +40,7 @@ import {
 export class StepperComponent implements StepperVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef);
+    readonly #styleStrategy = inject(STEPPER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #trackItemSize = computed(() => {
         const stepCount = this.viewSteps().length;
@@ -70,7 +63,7 @@ export class StepperComponent implements StepperVariantInput {
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return stepperBaseThemeVariants(theme)({ orientation });
+        return this.#styleStrategy.resolve(theme).base({ orientation });
     });
     protected readonly highlightedStep = signal<number>(0);
     protected readonly hostStyles = computed(() => {
@@ -90,12 +83,12 @@ export class StepperComponent implements StepperVariantInput {
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return stepperStepListThemeVariants(theme)({ orientation });
+        return this.#styleStrategy.resolve(theme).stepList({ orientation });
     });
     protected readonly listItemClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return stepperStepListItemThemeVariants(theme)({ orientation });
+        return this.#styleStrategy.resolve(theme).stepListItem({ orientation });
     });
     protected readonly progressMax = computed(() => Math.max(this.viewSteps().length - 1, 0));
     protected readonly stepTemplate = contentChild(StepperStepTemplateDirective, {
@@ -104,7 +97,7 @@ export class StepperComponent implements StepperVariantInput {
     protected readonly trackClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return stepperTrackThemeVariants(theme)({ orientation });
+        return this.#styleStrategy.resolve(theme).track({ orientation });
     });
     protected readonly trackInnerStyles = computed(() => {
         const orientation = this.orientation();
@@ -123,7 +116,7 @@ export class StepperComponent implements StepperVariantInput {
     protected readonly trackLineClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return stepperTrackLineThemeVariants(theme)({ orientation });
+        return this.#styleStrategy.resolve(theme).trackLine({ orientation });
     });
     protected readonly trackStyles = computed(() => {
         const orientation = this.orientation();

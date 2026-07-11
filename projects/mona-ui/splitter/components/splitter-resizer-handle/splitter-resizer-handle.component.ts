@@ -2,7 +2,7 @@ import { Component, computed, inject, input, output } from "@angular/core";
 import { LucideChevronDown, LucideChevronLeft, LucideChevronRight, LucideChevronUp } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
-import { splitterResizerHandleThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
+import { SPLITTER_STYLE_STRATEGY, SplitterVariantProps } from "../../styles/splitter.styles";
 
 @Component({
     selector: "mona-splitter-resizer-handle",
@@ -13,11 +13,12 @@ import { splitterResizerHandleThemeVariants, SplitterVariantProps } from "../../
     }
 })
 export class SplitterResizerHandleComponent {
+    readonly #styleStrategy = inject(SPLITTER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return splitterResizerHandleThemeVariants(theme)({ orientation });
+        return this.#styleStrategy.resolve(theme).resizerHandle({ orientation });
     });
 
     public readonly collapseNext = output<MouseEvent>();

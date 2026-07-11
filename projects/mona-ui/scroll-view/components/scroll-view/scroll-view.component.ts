@@ -36,18 +36,7 @@ import { twMerge } from "tailwind-merge";
 import { ScrollViewActivePageDirective } from "../../directives/scroll-view-active-page.directive";
 import { PagerOverlay } from "../../models/PagerOverlay";
 import { ScrollViewListItem } from "../../models/ScrollViewListItem";
-import {
-    scrollViewArrowThemeVariants,
-    scrollViewBaseThemeVariants,
-    scrollViewContentThemeVariants,
-    scrollViewListThemeVariants,
-    scrollViewPagerArrowThemeVariants,
-    scrollViewPagerListContainerThemeVariants,
-    scrollViewPagerListThemeVariants,
-    scrollViewPagerThemeVariants,
-    ScrollViewVariantInput,
-    ScrollViewVariantProps
-} from "../../styles/scroll-view.styles";
+import { SCROLL_VIEW_STYLE_STRATEGY, ScrollViewVariantInput, ScrollViewVariantProps } from "../../styles/scroll-view.styles";
 
 @Component({
     selector: "mona-scroll-view",
@@ -153,6 +142,7 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #styleStrategy = inject(SCROLL_VIEW_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
@@ -165,13 +155,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const variantClass = scrollViewBaseThemeVariants(theme)({ rounded });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ rounded });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly contentClass = computed(() => {
         const theme = this.#themeService.theme();
-        return scrollViewContentThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).content();
     });
     protected readonly contentTemplate = contentChild(TemplateRef);
     protected readonly enterAnimation = computed(() => {
@@ -184,35 +174,35 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
     protected readonly leftArrowClass = computed(() => {
         const theme = this.#themeService.theme();
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== 0);
-        return scrollViewArrowThemeVariants(theme)({ left: true, hidden });
+        return this.#styleStrategy.resolve(theme).arrow({ left: true, hidden });
     });
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
-        return scrollViewListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).list();
     });
     protected readonly pagerArrowClass = computed(() => {
         const theme = this.#themeService.theme();
-        return scrollViewPagerArrowThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).pagerArrow();
     });
     protected readonly pagerArrowVisible = signal(true);
     protected readonly pagerClass = computed(() => {
         const theme = this.#themeService.theme();
         const pagerOverlay = this.pagerOverlay();
-        return scrollViewPagerThemeVariants(theme)({ pagerOverlay });
+        return this.#styleStrategy.resolve(theme).pager({ pagerOverlay });
     });
     protected readonly pagerListClass = computed(() => {
         const theme = this.#themeService.theme();
-        return scrollViewPagerListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).pagerList();
     });
     protected readonly pagerListContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return scrollViewPagerListContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).pagerListContainer();
     });
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
     protected readonly rightArrowClass = computed(() => {
         const theme = this.#themeService.theme();
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== this.itemCount() - 1);
-        return scrollViewArrowThemeVariants(theme)({ right: true, hidden });
+        return this.#styleStrategy.resolve(theme).arrow({ right: true, hidden });
     });
     protected readonly scrollViewHeight = computed(() => {
         const height = this.height();
