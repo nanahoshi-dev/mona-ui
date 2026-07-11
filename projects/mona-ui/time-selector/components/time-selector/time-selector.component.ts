@@ -35,15 +35,7 @@ import { filter } from "rxjs/operators";
 import { TimeSelectorItemDirective } from "../../directives/time-selector-item.directive";
 import { TimeSelectorListDirective } from "../../directives/time-selector-list.directive";
 import { TimeListType } from "../../models/TimeListType";
-import {
-    timeSelectorBaseThemeVariants,
-    timeSelectorFooterThemeVariants,
-    timeSelectorHeaderThemeVariants,
-    timeSelectorInfoContainerThemeVariants,
-    timeSelectorListContainerThemeVariants,
-    TimeSelectorVariantInput,
-    TimeSelectorVariantProps
-} from "../../styles/time-selector.styles";
+import { TIME_SELECTOR_STYLE_STRATEGY, TimeSelectorVariantInput, TimeSelectorVariantProps } from "../../styles/time-selector.styles";
 
 @Component({
     selector: "mona-time-selector",
@@ -67,6 +59,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     readonly #destroyRef = inject(DestroyRef);
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
+    readonly #styleStrategy = inject(TIME_SELECTOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
 
@@ -77,17 +70,17 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const disabled = this.disabled();
-        return timeSelectorBaseThemeVariants(theme)({ disabled });
+        return this.#styleStrategy.resolve(theme).base({ disabled });
     });
     protected readonly computedPopupHeight = this.#height.asReadonly();
     protected readonly focusedList = signal<TimeListType>("hours");
     protected readonly footerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return timeSelectorFooterThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).footer();
     });
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return timeSelectorHeaderThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).header();
     });
     protected readonly hour = computed(() => {
         const hour = this.navigatedDate().hour;
@@ -101,11 +94,11 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly hourListRef = viewChild.required<ElementRef<HTMLOListElement>>("hourList");
     protected readonly infoContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return timeSelectorInfoContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).infoContainer();
     });
     protected readonly listContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return timeSelectorListContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).listContainer();
     });
     protected readonly maxDate = computed(() => {
         const max = this.max();

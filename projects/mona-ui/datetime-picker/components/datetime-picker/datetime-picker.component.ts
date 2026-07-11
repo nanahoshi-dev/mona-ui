@@ -60,12 +60,7 @@ import { DateTime } from "luxon";
 import { fromEvent, mergeWith } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ActiveView } from "../../models/ActiveView";
-import {
-    dateTimePickerBaseThemeVariants,
-    dateTimePickerFooterThemeVariants,
-    dateTimePickerHeaderThemeVariants,
-    DateTimePickerVariantProps
-} from "../../styles/datetime-picker.styles";
+import { DATETIME_PICKER_STYLE_STRATEGY, DateTimePickerVariantProps } from "../../styles/datetime-picker.styles";
 
 @Component({
     selector: "mona-datetime-picker",
@@ -110,6 +105,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
+    readonly #styleStrategy = inject(DATETIME_PICKER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #timeSelectorService = inject(TimeSelectorService);
 
@@ -119,7 +115,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         const focused = this.#dropdownService.popupRef() != null;
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = dateTimePickerBaseThemeVariants(theme)({ focused, rounded, size });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -135,11 +131,11 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
     protected readonly expanded = computed(() => this.#dropdownService.popupRef() !== null);
     protected readonly footerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dateTimePickerFooterThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).footer();
     });
     protected readonly headerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dateTimePickerHeaderThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).header();
     });
     protected readonly inputAttributes = computed<AttributeConfig>(() => {
         const controls = this.popupId;

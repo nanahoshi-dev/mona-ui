@@ -55,11 +55,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import {
-    datePickerBaseThemeVariants,
-    DatePickerVariantInput,
-    DatePickerVariantProps
-} from "../../styles/date-picker.styles";
+import { DATE_PICKER_STYLE_STRATEGY, DatePickerVariantInput, DatePickerVariantProps } from "../../styles/date-picker.styles";
 
 @Component({
     selector: "mona-date-picker",
@@ -102,13 +98,14 @@ export class DatePickerComponent
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
+    readonly #styleStrategy = inject(DATE_PICKER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = datePickerBaseThemeVariants(theme)({ focused, rounded, size });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });

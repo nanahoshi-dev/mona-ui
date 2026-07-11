@@ -38,11 +38,7 @@ import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import {
-    timePickerBaseThemeVariants,
-    TimePickerVariantInput,
-    TimePickerVariantProps
-} from "../../styles/time-picker.styles";
+import { TIME_PICKER_STYLE_STRATEGY, TimePickerVariantInput, TimePickerVariantProps } from "../../styles/time-picker.styles";
 
 @Component({
     selector: "mona-time-picker",
@@ -71,6 +67,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
+    readonly #styleStrategy = inject(TIME_PICKER_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
 
     protected readonly baseClass = computed(() => {
@@ -78,7 +75,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const focused = this.#dropdownService.popupRef() != null;
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = timePickerBaseThemeVariants(theme)({ focused, rounded, size });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });

@@ -2,7 +2,7 @@ import { computed, DestroyRef, Directive, effect, ElementRef, inject, input, sig
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
-    timeSelectorListItemThemeVariants,
+    TIME_SELECTOR_STYLE_STRATEGY,
     TimeSelectorListItemVariantInput,
     TimeSelectorListItemVariantProps
 } from "../styles/time-selector.styles";
@@ -20,12 +20,13 @@ export class TimeSelectorItemDirective implements TimeSelectorListItemVariantInp
     readonly #destroyRef = inject(DestroyRef);
     readonly #host = inject(ElementRef<HTMLLIElement>);
     readonly #scrollBehavior = signal<"auto" | "instant">("instant");
+    readonly #styleStrategy = inject(TIME_SELECTOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const selected = this.selected();
         const size = this.size();
-        return timeSelectorListItemThemeVariants(theme)({ selected, size });
+        return this.#styleStrategy.resolve(theme).listItem({ selected, size });
     });
     public readonly selected = input.required<boolean>();
     public readonly size = input.required<TimeSelectorListItemVariantProps["size"]>();

@@ -1,7 +1,7 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
-    timeSelectorListThemeVariants,
+    TIME_SELECTOR_STYLE_STRATEGY,
     TimeSelectorListVariantInput,
     TimeSelectorListVariantProps
 } from "../styles/time-selector.styles";
@@ -21,10 +21,11 @@ export class TimeSelectorListDirective implements TimeSelectorListVariantInput {
         const size = this.size();
         return size === "small" ? 24 : size === "medium" ? 28 : 32; // TODO: Get rid of magic numbers
     });
+    readonly #styleStrategy = inject(TIME_SELECTOR_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        return timeSelectorListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).list();
     });
     protected readonly listPadding = computed(() => {
         const itemHeight = this.#itemHeight();
