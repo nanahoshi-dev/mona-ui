@@ -64,9 +64,7 @@ import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 
 import {
-    autoCompleteAffixContainerThemeVariants,
-    autoCompleteBaseThemeVariants,
-    autoCompleteTextInputThemeVariants,
+    AUTO_COMPLETE_STYLE_STRATEGY,
     AutoCompleteVariantInput,
     AutoCompleteVariantProps
 } from "../styles/auto-complete.styles";
@@ -127,6 +125,7 @@ export class AutoCompleteComponent<TData = unknown>
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
+    readonly #styleStrategy = inject(AUTO_COMPLETE_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
 
     protected readonly activeDescendant = computed(() => {
@@ -135,7 +134,7 @@ export class AutoCompleteComponent<TData = unknown>
     });
     protected readonly affixClass = computed(() => {
         const theme = this.#themeService.theme();
-        return autoCompleteAffixContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).affixContainer();
     });
     protected readonly autoCompleteValue = linkedSignal(() => this.value() ?? "");
     protected readonly autoCompleteValue$ = new Subject<string | null>();
@@ -147,7 +146,7 @@ export class AutoCompleteComponent<TData = unknown>
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = autoCompleteBaseThemeVariants(theme)({
+        const variantClass = this.#styleStrategy.resolve(theme).base({
             disabled,
             expanded,
             focused,
@@ -171,7 +170,7 @@ export class AutoCompleteComponent<TData = unknown>
     protected readonly inputClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return autoCompleteTextInputThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).textInput({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(

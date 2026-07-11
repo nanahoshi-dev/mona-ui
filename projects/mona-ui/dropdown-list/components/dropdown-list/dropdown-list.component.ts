@@ -60,9 +60,7 @@ import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
 import {
-    dropdownListAffixContainerThemeVariants,
-    dropdownListInputThemeVariants,
-    dropdownListValueContainerThemeVariants,
+    DROPDOWN_LIST_STYLE_STRATEGY,
     DropDownListVariantInput,
     DropDownListVariantProps
 } from "../../styles/dropdown-list.styles";
@@ -125,6 +123,7 @@ export class DropdownListComponent<TData = unknown>
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #navigatedValue = linkedSignal(() => this.value());
     readonly #listService = inject<ListService<TData>>(ListService);
+    readonly #styleStrategy = inject(DROPDOWN_LIST_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey = new Subject<string>();
 
@@ -134,7 +133,7 @@ export class DropdownListComponent<TData = unknown>
     });
     protected readonly affixClass = computed(() => {
         const theme = this.#themeService.theme();
-        return dropdownListAffixContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).affixContainer();
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -144,7 +143,7 @@ export class DropdownListComponent<TData = unknown>
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = dropdownListInputThemeVariants(theme)({
+        const classes = this.#styleStrategy.resolve(theme).input({
             disabled,
             expanded,
             hasPrefix,
@@ -195,7 +194,7 @@ export class DropdownListComponent<TData = unknown>
     protected readonly valueContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         const hasTemplate = this.valueTemplate() != null;
-        return dropdownListValueContainerThemeVariants(theme)({ hasTemplate });
+        return this.#styleStrategy.resolve(theme).valueContainer({ hasTemplate });
     });
     protected readonly valueTemplate = contentChild(DropdownListValueTemplateDirective, { read: TemplateRef });
     protected readonly valueText = computed(() => {

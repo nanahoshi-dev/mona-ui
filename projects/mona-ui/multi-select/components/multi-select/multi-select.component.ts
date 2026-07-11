@@ -61,10 +61,7 @@ import { twMerge } from "tailwind-merge";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
 import { MultiSelectService } from "../../services/multi-select.service";
 import {
-    multiSelectAffixContainerThemeVariants,
-    multiSelectBaseThemeVariants,
-    multiSelectIndicatorContainerThemeVariants,
-    multiSelectItemContainerThemeVariants,
+    MULTI_SELECT_STYLE_STRATEGY,
     MultiSelectVariantInput,
     MultiSelectVariantProps
 } from "../../styles/multi-select.styles";
@@ -133,6 +130,7 @@ export class MultiSelectComponent<TData = unknown>
     readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
+    readonly #styleStrategy = inject(MULTI_SELECT_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
 
     protected readonly activeDescendant = computed(() => {
@@ -141,7 +139,7 @@ export class MultiSelectComponent<TData = unknown>
     });
     protected readonly affixClass = computed(() => {
         const theme = this.#themeService.theme();
-        return multiSelectAffixContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).affixContainer();
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -150,7 +148,7 @@ export class MultiSelectComponent<TData = unknown>
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = multiSelectBaseThemeVariants(theme)({ disabled, focused, invalid, rounded, size });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ disabled, focused, invalid, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -166,12 +164,12 @@ export class MultiSelectComponent<TData = unknown>
     protected readonly indicatorClass = computed(() => {
         const theme = this.#themeService.theme();
         const size = this.size();
-        return multiSelectIndicatorContainerThemeVariants(theme)({ size });
+        return this.#styleStrategy.resolve(theme).indicatorContainer({ size });
     });
     protected readonly itemContainerClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return multiSelectItemContainerThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).itemContainer({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();

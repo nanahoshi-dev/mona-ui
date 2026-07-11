@@ -65,9 +65,7 @@ import { debounceTime, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 
 import {
-    comboBoxAffixContainerThemeVariants,
-    comboBoxBaseThemeVariants,
-    comboBoxTextInputThemeVariants,
+    COMBO_BOX_STYLE_STRATEGY,
     ComboBoxVariantInput,
     ComboBoxVariantProps
 } from "../../styles/combo-box.styles";
@@ -130,6 +128,7 @@ export class ComboBoxComponent<TData = unknown>
     readonly #listService = inject(ListService);
     readonly #navigatedValue = linkedSignal(() => this.value());
     readonly #popupRef = this.#dropdownService.popupRef;
+    readonly #styleStrategy = inject(COMBO_BOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #userNavigatedViaArrows = signal(false);
 
@@ -139,7 +138,7 @@ export class ComboBoxComponent<TData = unknown>
     });
     protected readonly affixClass = computed(() => {
         const theme = this.#themeService.theme();
-        return comboBoxAffixContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).affixContainer();
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
@@ -148,7 +147,7 @@ export class ComboBoxComponent<TData = unknown>
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = comboBoxBaseThemeVariants(theme)({ disabled, focused, invalid, rounded, size });
+        const variantClass = this.#styleStrategy.resolve(theme).base({ disabled, focused, invalid, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -165,7 +164,7 @@ export class ComboBoxComponent<TData = unknown>
     protected readonly inputClass = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return comboBoxTextInputThemeVariants(theme)({ rounded });
+        return this.#styleStrategy.resolve(theme).textInput({ rounded });
     });
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && this.value() == null)
