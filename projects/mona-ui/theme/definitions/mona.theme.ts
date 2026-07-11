@@ -85,6 +85,9 @@ export function monaDarkThemeVariables(): ThemeVariables {
         "--color-muted": "#f4f4f5",
         "--color-muted-foreground": "#71717a",
 
+        "--color-destructive": "#ef4444",
+        "--color-destructive-foreground": "#fafafa",
+
         "--color-border": "oklch(0.1689 0.0021 286.18)",
         "--color-input": "#e4e4e7",
 

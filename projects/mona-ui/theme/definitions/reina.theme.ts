@@ -1,11 +1,9 @@
 import { generatePrimaryColorPalette } from "../utils/generateThemeColors";
 import { themeColorMap } from "../utils/themeColorMap";
-import { monaDarkThemeVariables, monaLightThemeVariables } from "./mona.theme";
 import type { ThemeDefinition } from "../models/ThemeDefinition";
 
 export const reinaThemeDefinition: ThemeDefinition = {
     light: {
-        ...monaLightThemeVariables(),
         ...generatePrimaryColorPalette(themeColorMap.blue),
 
         "--color-canvas": "oklch(0.965 0.003 260)",
@@ -37,6 +35,14 @@ export const reinaThemeDefinition: ThemeDefinition = {
         "--color-border-control-hover": "oklch(0.76 0.008 260)",
         "--color-focus-indicator": "oklch(0.60 0.192 259.4)",
         "--color-border": "oklch(0.87 0.005 260)",
+        "--color-disabled": "oklch(0.55 0.006 286.32)",
+        "--color-disabled-background": "oklch(0.94 0.003 286.32)",
+
+        "--color-header-background": "oklch(0.97 0 0)",
+        "--color-header-foreground": "oklch(0.99 0 0)",
+
+        "--color-popover": "#fff",
+        "--color-popover-foreground": "#09090b",
 
         "--color-secondary": "oklch(0.93 0.006 260)",
         "--color-secondary-foreground": "oklch(0.20 0.006 260)",
@@ -48,31 +54,60 @@ export const reinaThemeDefinition: ThemeDefinition = {
         "--color-success-hover": "oklch(0.76 0.19 149)",
         "--color-success-active": "oklch(0.65 0.19 149)",
         "--color-success-selected": "oklch(0.83 0.16 149)",
+        "--color-success-subtle": "oklch(93% 0.06 149.214)",
+        "--color-success-border": "oklch(76% 0.12 149.214)",
 
         "--color-error": "oklch(0.635 0.225 29)",
         "--color-error-foreground": "oklch(0.99 0.005 29)",
         "--color-error-hover": "oklch(0.675 0.225 29)",
         "--color-error-active": "oklch(0.575 0.225 29)",
         "--color-error-selected": "oklch(0.78 0.19 29)",
+        "--color-error-subtle": "oklch(94% 0.035 27.325)",
+        "--color-error-border": "oklch(76% 0.12 27.325)",
 
         "--color-warning": "oklch(0.75 0.17 58)",
         "--color-warning-foreground": "oklch(0.22 0.03 58)",
         "--color-warning-hover": "oklch(0.79 0.17 58)",
         "--color-warning-active": "oklch(0.68 0.17 58)",
         "--color-warning-selected": "oklch(0.85 0.15 58)",
+        "--color-warning-subtle": "oklch(94% 0.05 58.318)",
+        "--color-warning-border": "oklch(78% 0.11 58.318)",
 
         "--color-info": "oklch(0.585 0.19 263)",
         "--color-info-foreground": "oklch(0.99 0.005 263)",
         "--color-info-hover": "oklch(0.625 0.19 263)",
         "--color-info-active": "oklch(0.525 0.19 263)",
         "--color-info-selected": "oklch(0.75 0.15 263)",
+        "--color-info-subtle": "oklch(94% 0.03 262.881)",
+        "--color-info-border": "oklch(75% 0.10 262.881)",
+
+        "--color-muted": "#f4f4f5",
+        "--color-muted-foreground": "#71717a",
+        "--color-destructive": "#ef4444",
+        "--color-destructive-foreground": "#fafafa",
+        "--color-input": "#e4e4e7",
+
+        "--color-chart-1": "#e76e50",
+        "--color-chart-2": "#2a9d90",
+        "--color-chart-3": "#274754",
+        "--color-chart-4": "#e8c468",
+        "--color-chart-5": "#f4a462",
+
+        "--color-scrollbar-thumb": "#d1d5db",
+        "--color-scrollbar-thumb-hover": "#9ca3af",
+        "--color-scrollbar-thumb-active": "#6b7280",
+        "--color-scrollbar-thumb-focus": "#9ca3af",
+        "--color-scrollbar-track": "#f9fafb",
+        "--color-scrollbar-track-hover": "#f4f5f7",
+        "--color-scrollbar-track-active": "#e5e7eb",
+        "--color-scrollbar-track-focus": "#f4f5f7",
+        "--color-scrollbar-corner": "#f9fafb",
 
         "--shadow-control": "0 1px 2px rgb(0 0 0 / 0.04)",
         "--shadow-raised": "0 4px 12px rgb(0 0 0 / 0.08)",
         "--shadow-overlay": "0 20px 40px rgb(0 0 0 / 0.16)"
     },
     dark: {
-        ...monaDarkThemeVariables(),
         ...generatePrimaryColorPalette(themeColorMap.blue),
 
         "--color-canvas": "oklch(0.08 0 0)",
@@ -104,6 +139,14 @@ export const reinaThemeDefinition: ThemeDefinition = {
         "--color-border-control-hover": "oklch(0.40 0.009 260)",
         "--color-focus-indicator": "oklch(0.68 0.17 259.4)",
         "--color-border": "oklch(0.24 0.006 260)",
+        "--color-disabled": "oklch(0.55 0.006 286.32)",
+        "--color-disabled-background": "oklch(0.26 0.003 286.32)",
+
+        "--color-header-background": "oklch(0.18 0 0)",
+        "--color-header-foreground": "oklch(0.20 0 0)",
+
+        "--color-popover": "#fff",
+        "--color-popover-foreground": "#09090b",
 
         "--color-secondary": "oklch(0.20 0.008 260)",
         "--color-secondary-foreground": "oklch(0.96 0.003 260)",
@@ -115,24 +158,54 @@ export const reinaThemeDefinition: ThemeDefinition = {
         "--color-success-hover": "oklch(0.74 0.19 149)",
         "--color-success-active": "oklch(0.63 0.19 149)",
         "--color-success-selected": "oklch(0.80 0.16 149)",
+        "--color-success-subtle": "oklch(0.28 0.06 149.214)",
+        "--color-success-border": "oklch(0.45 0.12 149.214)",
 
         "--color-error": "oklch(0.65 0.22 29)",
         "--color-error-foreground": "oklch(0.13 0.02 29)",
         "--color-error-hover": "oklch(0.69 0.22 29)",
         "--color-error-active": "oklch(0.58 0.22 29)",
         "--color-error-selected": "oklch(0.79 0.18 29)",
+        "--color-error-subtle": "oklch(0.28 0.05 27.325)",
+        "--color-error-border": "oklch(0.45 0.12 27.325)",
 
         "--color-warning": "oklch(0.76 0.17 58)",
         "--color-warning-foreground": "oklch(0.16 0.02 58)",
         "--color-warning-hover": "oklch(0.80 0.17 58)",
         "--color-warning-active": "oklch(0.69 0.17 58)",
         "--color-warning-selected": "oklch(0.85 0.15 58)",
+        "--color-warning-subtle": "oklch(0.30 0.06 58.318)",
+        "--color-warning-border": "oklch(0.50 0.11 58.318)",
 
         "--color-info": "oklch(0.66 0.18 263)",
         "--color-info-foreground": "oklch(0.13 0.02 263)",
         "--color-info-hover": "oklch(0.70 0.18 263)",
         "--color-info-active": "oklch(0.60 0.18 263)",
         "--color-info-selected": "oklch(0.79 0.15 263)",
+        "--color-info-subtle": "oklch(0.27 0.06 262.881)",
+        "--color-info-border": "oklch(0.45 0.10 262.881)",
+
+        "--color-muted": "#f4f4f5",
+        "--color-muted-foreground": "#71717a",
+        "--color-destructive": "#ef4444",
+        "--color-destructive-foreground": "#fafafa",
+        "--color-input": "#e4e4e7",
+
+        "--color-chart-1": "#e76e50",
+        "--color-chart-2": "#2a9d90",
+        "--color-chart-3": "#274754",
+        "--color-chart-4": "#e8c468",
+        "--color-chart-5": "#f4a462",
+
+        "--color-scrollbar-thumb": "#d1d5db",
+        "--color-scrollbar-thumb-hover": "#9ca3af",
+        "--color-scrollbar-thumb-active": "#6b7280",
+        "--color-scrollbar-thumb-focus": "#9ca3af",
+        "--color-scrollbar-track": "#f9fafb",
+        "--color-scrollbar-track-hover": "#f4f5f7",
+        "--color-scrollbar-track-active": "#e5e7eb",
+        "--color-scrollbar-track-focus": "#f4f5f7",
+        "--color-scrollbar-corner": "#f9fafb",
 
         "--shadow-control": "0 1px 2px rgb(0 0 0 / 0.30)",
         "--shadow-raised": "0 4px 16px rgb(0 0 0 / 0.45)",
