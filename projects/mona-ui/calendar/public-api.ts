@@ -14,4 +14,26 @@ export type {
     MonthCellTemplateContext,
     YearCellTemplateContext
 } from "./models/CalendarTemplateContext";
-export type { CalendarVariantProps, CalendarVariantInput } from "./styles/calendar.styles";
+export {
+    CALENDAR_STYLE_OVERRIDES,
+    CALENDAR_STYLE_STRATEGY,
+    calendarThemeVariants,
+    createCalendarStyleStrategy,
+    provideCalendarStyles
+} from "./styles/calendar.styles";
+export type {
+    CalendarBaseStyleOverride,
+    CalendarBaseVariantProps,
+    CalendarCellStyleOverride,
+    CalendarDecadeViewCellVariantProps,
+    CalendarMonthViewDayStyleOverride,
+    CalendarMonthViewDayVariantProps,
+    CalendarSimpleStyleOverride,
+    CalendarStyleOverrides,
+    CalendarStylesProviderConfig,
+    CalendarStyleStrategy,
+    CalendarVariantInput,
+    CalendarVariantProps,
+    CalendarVariantsBundle,
+    CalendarYearViewCellVariantProps
+} from "./styles/calendar.styles";

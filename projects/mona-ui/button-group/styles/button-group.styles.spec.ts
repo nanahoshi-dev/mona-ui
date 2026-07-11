@@ -10,7 +10,17 @@ describe("button group style strategy", () => {
         const reinaClasses = strategy.resolve("reina")({ look: "outline" });
 
         expect(reinaClasses).not.toBe(monaClasses);
-        expect(reinaClasses).toContain("[&>button]:rounded-full");
+        expect(strategy.resolve("reina")({ look: "default" })).toContain("bg-accent");
+    });
+
+    it("only rounds the outer corners of the first/last child instead of every button", () => {
+        const strategy = createButtonGroupStyleStrategy();
+        const reinaClasses = strategy.resolve("reina")({ rounded: "medium" });
+
+        expect(reinaClasses).toContain("[&>button]:rounded-none");
+        expect(reinaClasses).not.toContain("[&>button]:rounded-full");
+        expect(reinaClasses).toContain("[&>button]:first:rounded-ss-2xl");
+        expect(reinaClasses).toContain("[&>button]:last:rounded-ee-2xl");
     });
 
     it("merges provider look overrides after the built-in recipe", () => {
