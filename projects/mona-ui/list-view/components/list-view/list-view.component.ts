@@ -36,7 +36,8 @@ import { ListViewGroupHeaderTemplateDirective } from "../../directives/list-view
 import { ListViewHeaderTemplateDirective } from "../../directives/list-view-header-template.directive";
 import { ListViewItemTemplateDirective } from "../../directives/list-view-item-template.directive";
 import { ListViewNoDataTemplateDirective } from "../../directives/list-view-no-data-template.directive";
-import { listViewBaseThemeVariants, ListViewVariantInputs, ListViewVariantProps } from "../../styles/list-view.styles";
+import { LIST_VIEW_STYLE_STRATEGY } from "../../styles/list-view.style-provider";
+import { ListViewVariantInputs, ListViewVariantProps } from "../../styles/list-view.styles";
 
 @Component({
     selector: "mona-list-view",
@@ -72,13 +73,14 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
         const pageableOptions = this.listService.pageableOptions();
         return !pageableOptions.enabled;
     });
+    readonly #styleStrategy = inject(LIST_VIEW_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     #scrollSubscription: Subscription | null = null;
     protected readonly baseClasses = computed(() => {
         const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClasses = listViewBaseThemeVariants(theme)({ rounded, size });
+        const variantClasses = this.#styleStrategy.resolve(theme).base({ rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });

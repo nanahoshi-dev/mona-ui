@@ -52,12 +52,8 @@ import { ListBoxRemoveEvent } from "../../models/ListBoxRemoveEvent";
 import { ListBoxSelectionEvent } from "../../models/ListBoxSelectionEvent";
 import { ListBoxTransferEvent } from "../../models/ListBoxTransferEvent";
 import { ToolbarAction, ToolbarOptions } from "../../models/ToolbarOptions";
-import {
-    listBoxBaseThemeVariants,
-    listBoxToolbarThemeVariants,
-    ListBoxVariantInputs,
-    ListBoxVariantProps
-} from "../../styles/list-box.styles";
+import { LIST_BOX_STYLE_STRATEGY } from "../../styles/list-box.style-provider";
+import { ListBoxVariantInputs, ListBoxVariantProps } from "../../styles/list-box.styles";
 
 @Component({
     selector: "mona-list-box",
@@ -95,6 +91,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService = inject<ListService<T>>(ListService);
     readonly #notifySelectionChange$ = new ReplaySubject<boolean>(1);
+    readonly #styleStrategy = inject(LIST_BOX_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     /**
      * The list box (`this` or the connected list box) that currently holds the selection; falling back to `this`
@@ -120,7 +117,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         const position = toolbarOptions?.position ?? "right";
         const direction = position === "left" || position === "right" ? "horizontal" : "vertical";
         const reversed = position === "left" || position === "top";
-        return listBoxBaseThemeVariants(theme)({ direction, reversed, rounded, size });
+        return this.#styleStrategy.resolve(theme).base({ direction, reversed, rounded, size });
     });
     protected readonly footerTemplate = contentChild(ListBoxFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListBoxHeaderTemplateDirective, { read: TemplateRef });
@@ -147,7 +144,7 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         const toolbarOptions = this.toolbarOptions();
         const position = toolbarOptions?.position ?? "right";
         const direction = position === "left" || position === "right" ? "vertical" : "horizontal";
-        return listBoxToolbarThemeVariants(theme)({ direction });
+        return this.#styleStrategy.resolve(theme).toolbar({ direction });
     });
     protected readonly toolbarOptions = computed(() => {
         const toolbar = this.toolbar();

@@ -12,7 +12,7 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
 import { TreeService } from "../../services/tree.service";
-import { treeDropHintBaseThemeVariants, treeDropHintIconThemeVariants } from "../../styles/tree.styles";
+import { TREE_STYLE_STRATEGY } from "../../styles/tree.style-provider";
 
 @Component({
     selector: "mona-tree-drop-hint",
@@ -30,10 +30,11 @@ export class TreeDropHintComponent<T> {
         }
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #styleStrategy = inject(TREE_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        return treeDropHintBaseThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).treeDropHintBase();
     });
     protected readonly dropHintStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
         const dropPositionData = this.#dropPositionChange();
@@ -72,7 +73,7 @@ export class TreeDropHintComponent<T> {
     protected readonly iconClass = computed(() => {
         const theme = this.#themeService.theme();
         const icon = "ri-arrow-right-s-fill";
-        const variantClass = treeDropHintIconThemeVariants(theme)();
+        const variantClass = this.#styleStrategy.resolve(theme).treeDropHintIcon();
         return twMerge(icon, variantClass);
     });
 

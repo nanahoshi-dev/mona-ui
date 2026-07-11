@@ -8,7 +8,7 @@ import { NodeClickEvent } from "../../models/NodeClickEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
-import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
+import { TREE_STYLE_STRATEGY } from "../../styles/tree.style-provider";
 
 @Component({
     selector: "mona-tree-node",
@@ -18,6 +18,7 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
 })
 export class TreeNodeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
+    readonly #styleStrategy = inject(TREE_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     protected readonly treeService = inject(TreeService<T>);
     readonly #dragging = toSignal(this.treeService.dragging$, {
@@ -28,7 +29,7 @@ export class TreeNodeComponent<T> {
         const disabled = this.disabled();
         const highlighted = this.navigated();
         const selected = this.selected();
-        return treeNodeBaseThemeVariants(theme)({ disabled, highlighted, selected });
+        return this.#styleStrategy.resolve(theme).treeNodeBase({ disabled, highlighted, selected });
     });
     public readonly checkable = computed(() => {
         const node = this.node();

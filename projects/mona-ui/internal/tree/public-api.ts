@@ -30,3 +30,35 @@ export * from "./models/TreeSelectors";
 export * from "./services/tree.service";
 export * from "./utils/moveFlatTreeNode";
 export * from "./utils/moveTreeNode";
+
+export {
+    createTreeStyleStrategy,
+    provideTreeStyles,
+    TREE_STYLE_OVERRIDES,
+    TREE_STYLE_STRATEGY
+} from "./styles/tree.styles";
+export type {
+    SubTreeListItemStyleOverrides,
+    SubTreeListItemVariantProps,
+    SubTreeListStyleOverrides,
+    SubTreeListVariantProps,
+    TreeBaseStyleOverrides,
+    TreeBaseVariantProps,
+    TreeDropHintBaseStyleOverrides,
+    TreeDropHintBaseVariantProps,
+    TreeDropHintIconStyleOverrides,
+    TreeDropHintIconVariantProps,
+    TreeNodeBaseCompoundStyleOverride,
+    TreeNodeBaseStyleOverrides,
+    TreeNodeBaseVariantProps,
+    TreeNodeContainerStyleOverrides,
+    TreeNodeContainerVariantProps,
+    TreeNodeDraggingStyleOverrides,
+    TreeNodeDraggingVariantProps,
+    TreeNodeExpanderStyleOverrides,
+    TreeNodeExpanderVariantProps,
+    TreeStyleOverrides,
+    TreeStylesProviderConfig,
+    TreeStyleStrategy,
+    TreeVariantsFunctions
+} from "./styles/tree.styles";

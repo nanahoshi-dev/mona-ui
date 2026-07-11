@@ -22,7 +22,7 @@ import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeSelectEvent } from "../../models/NodeSelectEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeService } from "../../services/tree.service";
-import { treeBaseThemeVariants } from "../../styles/tree.styles";
+import { TREE_STYLE_STRATEGY } from "../../styles/tree.style-provider";
 import { SubTreeComponent } from "../sub-tree/sub-tree.component";
 import { TreeDropHintComponent } from "../tree-drop-hint/tree-drop-hint.component";
 
@@ -44,6 +44,7 @@ export class TreeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #styleStrategy = inject(TREE_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
@@ -53,7 +54,7 @@ export class TreeComponent<T> {
     });
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        return treeBaseThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).treeBase();
     });
     public readonly ariaLabel = input<string>("");
     public readonly treeService: TreeService<T> = inject(TreeService);

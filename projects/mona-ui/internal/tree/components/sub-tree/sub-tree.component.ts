@@ -20,13 +20,7 @@ import { NodeDropEventSansTree } from "../../models/NodeDropEvent";
 import { TreeNode } from "../../models/TreeNode";
 import { TreeNodeElementIdPipe } from "../../pipes/tree-node-element-id.pipe";
 import { TreeService } from "../../services/tree.service";
-import {
-    subTreeListItemThemeVariants,
-    subTreeListThemeVariants,
-    treeNodeContainerThemeVariants,
-    treeNodeDraggingThemeVariants,
-    treeNodeExpanderThemeVariants
-} from "../../styles/tree.styles";
+import { TREE_STYLE_STRATEGY } from "../../styles/tree.style-provider";
 import { TreeNodeComponent } from "../tree-node/tree-node.component";
 
 @Component({
@@ -87,23 +81,24 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 })
 export class SubTreeComponent<T> {
     readonly #document = inject(DOCUMENT);
+    readonly #styleStrategy = inject(TREE_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
     readonly #zone = inject(NgZone);
     protected readonly listClass = computed(() => {
         const theme = this.#themeService.theme();
-        return subTreeListThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).subTreeList();
     });
     protected readonly listItemClass = computed(() => {
         const theme = this.#themeService.theme();
-        return subTreeListItemThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).subTreeListItem();
     });
     protected readonly nodeContainerClass = computed(() => {
         const theme = this.#themeService.theme();
-        return treeNodeContainerThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).treeNodeContainer();
     });
     protected readonly nodeDraggingClass = computed(() => {
         const theme = this.#themeService.theme();
-        return treeNodeDraggingThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).treeNodeDragging();
     });
     protected readonly nodeExpandEnterClass = computed(() =>
         this.nodeAnimationDisabled() ? "" : "mona-tree-node-expand-enter"
@@ -113,7 +108,7 @@ export class SubTreeComponent<T> {
     );
     protected readonly nodeExpanderClass = computed(() => {
         const theme = this.#themeService.theme();
-        return treeNodeExpanderThemeVariants(theme)();
+        return this.#styleStrategy.resolve(theme).treeNodeExpander();
     });
     protected readonly treeService = inject(TreeService);
     protected readonly visibleNodes = computed(() => {

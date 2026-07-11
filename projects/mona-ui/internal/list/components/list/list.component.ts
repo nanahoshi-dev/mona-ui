@@ -23,6 +23,7 @@ import { isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { FilterInputComponent } from "@nanahoshi/mona-ui/internal/filter-input";
 import { PlaceholderComponent } from "@nanahoshi/mona-ui/placeholder";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asyncScheduler, filter, fromEvent, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListFooterTemplateDirective } from "../../directives/list-footer-template.directive";
@@ -36,7 +37,7 @@ import { ListKeySelector } from "../../models/ListSelectors";
 import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
 import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
-import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.styles";
+import { LIST_STYLE_STRATEGY } from "../../styles/list.style-provider";
 import { cycleThroughMatchedItems } from "../../utils/cycleThroughMatchedItems";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
@@ -66,17 +67,21 @@ import { ListItemComponent } from "../list-item/list-item.component";
 export class ListComponent<TData> implements OnInit {
     readonly #destroyRef: DestroyRef = inject(DestroyRef);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
+    readonly #styleStrategy = inject(LIST_STYLE_STRATEGY);
+    readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey$ = new Subject<string>();
     private readonly filterInput = viewChild(FilterInputComponent);
     protected readonly classes = computed(() => {
-        const classes = listVariants();
+        const theme = this.#themeService.theme();
+        const classes = this.#styleStrategy.resolve(theme).list();
         return twMerge(classes);
     });
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderClasses = computed(() => {
+        const theme = this.#themeService.theme();
         const listItemClass = this.listItemClass();
         const hasTemplate = this.groupHeaderTemplate() != null;
-        const classes = listGroupHeaderVariants({ hasTemplate });
+        const classes = this.#styleStrategy.resolve(theme).groupHeader({ hasTemplate });
         return twMerge(classes, listItemClass);
     });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
@@ -84,7 +89,8 @@ export class ListComponent<TData> implements OnInit {
     protected readonly hostTabIndex = computed(() => (this.listService.focusableItem() ? -1 : 0));
     protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly innerListClasses = computed(() => {
-        const classes = listInnerListVariants();
+        const theme = this.#themeService.theme();
+        const classes = this.#styleStrategy.resolve(theme).innerList();
         const listClass = this.listClass();
         return twMerge(classes, listClass);
     });
