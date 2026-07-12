@@ -20,7 +20,7 @@ import {
 
 export const reinaEditorBaseVariants = createInheritedVariants(monaEditorBaseVariants, {
     add: "rounded-lg border-input-border ease-out focus-visible:ring-primary/35 prose-headings:font-semibold [&_hr]:border-input-border [&_pre]:border-input-border [&_table_th]:font-semibold",
-    remove: "border-border ease-in focus-visible:ring-primary/40 prose-headings:font-bold [&_hr]:border-border [&_pre]:border-border [&_table_th]:font-bold"
+    remove: "border-border ease-in focus-visible:border-focus-indicator prose-headings:font-bold [&_hr]:border-border [&_pre]:border-border [&_table_th]:font-bold"
 });
 
 export const reinaEditorContainerVariants = createInheritedVariants(monaEditorContainerVariants, {

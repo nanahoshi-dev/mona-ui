@@ -44,10 +44,10 @@ export const colorGradientHsvRectangleHandleVariants = cva(
         border border-foreground
         outline outline-background
         shadow-md
-        transition-[box-shadow,color,border-color,background-color] ease-in-out duration-150
+        transition-[box-shadow,color,border-color,background-color] ease-in-out duration-150 motion-reduce:transition-none
 
         focus-visible:ring-2
-        focus-visible:ring-primary/35
+        focus-visible:ring-focus-indicator/35
         focus-visible:ring-offset-2
     `,
     {

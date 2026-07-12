@@ -4,30 +4,30 @@ export const dropdownListInputVariants = cva(
     `
         inline-flex items-center
 
-        border border-input-border
-        bg-background outline-none
-        text-foreground shadow-xs
+        border border-border-control
+        bg-input-background outline-none
+        text-foreground shadow-control
         cursor-pointer select-none
 
         hover:bg-accent hover:text-accent-foreground
-        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
-        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
+        transition-[color,box-shadow,border-color,background-color] ease-in-out duration-150 motion-reduce:transition-none
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
     `,
     {
         variants: {
             disabled: {
-                true: "pointer-events-none cursor-not-allowed opacity-50",
+                true: "pointer-events-none cursor-not-allowed bg-disabled-background opacity-50 text-disabled border-border-subtle",
                 false: ""
             },
             expanded: {
-                true: "ring-2 ring-primary/35 border-primary",
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
                 false: ""
             },
             hasPrefix: {
                 false: "ps-2"
             },
             invalid: {
-                true: "border-error ring-2 ring-error/35",
+                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
                 false: ""
             },
             rounded: {

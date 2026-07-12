@@ -25,7 +25,7 @@ export const splitterResizerVariants = cva(
         active:bg-primary/35
         shrink-0 outline-none
         focus-visible:bg-primary
-        transition-colors duration-150 ease-in-out
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
     `,
     {
         variants: {

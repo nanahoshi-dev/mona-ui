@@ -7,7 +7,7 @@ import {
 
 export const reinaDropdownListInputVariants = createInheritedVariants(monaDropdownListInputVariants, {
     add: "border-border hover:bg-hover transition-[color,box-shadow,border,background-color] ease-out duration-150 focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary",
-    remove: "border-input-border hover:bg-accent hover:text-accent-foreground transition-[color,box-shadow,border] ease-in-out duration-300 focus-within:ring-1 focus-within:ring-primary/40",
+    remove: "border-border-control shadow-control hover:bg-accent hover:text-accent-foreground transition-[color,box-shadow,border-color,background-color] ease-in-out motion-reduce:transition-none focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35",
     variants: {
         disabled: {
             true: {
@@ -18,7 +18,7 @@ export const reinaDropdownListInputVariants = createInheritedVariants(monaDropdo
         expanded: {
             true: {
                 add: "ring-2 ring-primary/35 border-primary",
-                remove: "ring-1 ring-primary/40"
+                remove: "ring-2 ring-focus-indicator/35 border-focus-indicator"
             }
         },
         invalid: {

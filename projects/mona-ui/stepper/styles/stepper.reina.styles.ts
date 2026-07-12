@@ -16,7 +16,7 @@ export const reinaStepperStepListItemVariants = createInheritedVariants(monaStep
 
 export const reinaStepperStepIndicatorVariants = createInheritedVariants(monaStepperStepIndicatorVariants, {
     add: "bg-input-background border-input-border duration-150 ease-out",
-    remove: "bg-background border-border duration-400 ease-in-out",
+    remove: "bg-surface border-border duration-400 ease-in-out",
     variants: {
         focused: {
             true: {
@@ -29,7 +29,7 @@ export const reinaStepperStepIndicatorVariants = createInheritedVariants(monaSte
 
 export const reinaStepperTrackVariants = createInheritedVariants(monaStepperTrackVariants, {
     add: "bg-input-background border-input-border",
-    remove: "bg-background border-border"
+    remove: "bg-surface border-border"
 });
 
 export const reinaStepperTrackLineVariants = createInheritedVariants(monaStepperTrackLineVariants, {

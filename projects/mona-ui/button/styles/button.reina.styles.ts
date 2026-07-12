@@ -3,7 +3,7 @@ import { buttonVariants as monaButtonVariants } from "./button.mona.styles";
 
 export const reinaButtonVariants = createInheritedVariants(monaButtonVariants, {
     add: "font-semibold tracking-tight focus-visible:ring-2 focus-visible:ring-primary/35 transition-[background-color,color,opacity,transform] duration-150 ease-out",
-    remove: "font-medium shadow-xs focus-visible:shadow transition-colors duration-100 ease-in-out",
+    remove: "font-medium shadow-control focus-visible:shadow transition-colors duration-100 ease-in-out motion-reduce:transition-none",
     variants: {
         disabled: {
             true: {
@@ -14,7 +14,7 @@ export const reinaButtonVariants = createInheritedVariants(monaButtonVariants, {
         look: {
             default: {
                 add: "bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-active",
-                remove: "bg-background text-foreground border border-input-border hover:bg-hover active:bg-active focus-visible:ring-2 focus-visible:ring-primary/40"
+                remove: "bg-input-background text-foreground border border-border-control hover:bg-secondary active:bg-secondary-active focus-visible:ring-2 focus-visible:ring-focus-indicator"
             },
             primary: {
                 add: "hover:opacity-90 active:opacity-80",

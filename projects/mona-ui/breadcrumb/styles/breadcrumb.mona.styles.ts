@@ -24,8 +24,8 @@ export const breadcrumbListItemVariants = cva(
         bg-transparent border-0
         outline-none rounded-sm px-1
         hover:text-primary
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35
-        transition-colors duration-150 ease-in-out
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
     `,
     {
         variants: {

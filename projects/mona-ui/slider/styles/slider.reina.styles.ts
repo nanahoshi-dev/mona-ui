@@ -17,7 +17,7 @@ export const reinaSliderBaseVariants = createInheritedVariants(monaSliderBaseVar
 
 export const reinaSliderTrackVariants = createInheritedVariants(monaSliderTrackVariants, {
     add: "bg-input-background",
-    remove: "bg-background"
+    remove: "bg-input-background"
 });
 
 export const reinaSliderSelectionVariants = createInheritedVariants(monaSliderSelectionVariants, {

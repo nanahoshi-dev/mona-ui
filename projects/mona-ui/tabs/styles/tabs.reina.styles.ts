@@ -20,12 +20,12 @@ export const reinaTabListListVariants = createInheritedVariants(monaTabListListV
 
 export const reinaTabListListItemVariants = createInheritedVariants(monaTabListListItemVariants, {
     add: "transition-[color,box-shadow,background-color] duration-150 ease-out focus-visible:ring-primary/35",
-    remove: "focus-visible:ring-primary/40",
+    remove: "focus-visible:ring-focus-indicator",
     variants: {
         active: {
             true: {
                 add: "bg-background",
-                remove: "bg-background-dark"
+                remove: "bg-surface-muted"
             }
         },
         disabled: {

@@ -33,7 +33,7 @@ export const reinaTreeNodeBaseVariants = createInheritedVariants(monaTreeNodeBas
         highlighted: {
             true: {
                 add: "inset-ring-primary/40",
-                remove: "inset-ring-gray-400/70"
+                remove: "inset-ring-border-control-hover"
             }
         }
     }

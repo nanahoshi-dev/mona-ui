@@ -17,7 +17,7 @@ export const colorPaletteBaseVariants = cva(
 export const colorPaletteItemVariants = cva(
     `
         cursor-pointer
-        transition-[transform,border-color,outline-color] ease-in-out duration-150
+        transition-[transform,border-color,outline-color] ease-in-out duration-150 motion-reduce:transition-none
         data-[readonly='true']:cursor-default
         data-[selected='true']:border
         data-[selected='true']:border-border

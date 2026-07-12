@@ -3,7 +3,7 @@ import { buttonGroupVariants as monaButtonGroupVariants } from "./button-group.m
 
 export const reinaButtonGroupVariants = createInheritedVariants(monaButtonGroupVariants, {
     add: "bg-accent",
-    remove: "border border-border shadow-xs",
+    remove: "border border-border shadow-control",
     variants: {
         look: {
             ghost: {

@@ -22,8 +22,8 @@ export const sliderBaseVariants = cva(
 export const sliderTrackVariants = cva(
     `
         relative z-2 cursor-pointer
-        border border-input-border
-        bg-background text-foreground
+        border border-border-control
+        bg-input-background text-foreground
 
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:h-1.5
@@ -43,12 +43,12 @@ export const sliderSelectionVariants = cva(
 
         data-[orientation="horizontal"]:top-0
         data-[orientation="horizontal"]:bottom-0
-        data-[orientation="horizontal"]:transition-[left,right]
+        data-[orientation="horizontal"]:transition-[left,right] motion-reduce:transition-none
         data-[orientation="horizontal"]:data-[dragging="true"]:transition-none
 
         data-[orientation="vertical"]:left-0
         data-[orientation="vertical"]:right-0
-        data-[orientation="vertical"]:transition-[top,bottom]
+        data-[orientation="vertical"]:transition-[top,bottom] motion-reduce:transition-none
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
     `
 );
@@ -105,20 +105,20 @@ export const sliderHandleVariants = cva(
         cursor-pointer
         outline-none
         bg-primary border border-border
-        shadow-sm
+        shadow-control
 
         ease-in-out duration-150
 
         data-[orientation="horizontal"]:translate-x-[-50%]
-        data-[orientation="horizontal"]:transition-[left]
+        data-[orientation="horizontal"]:transition-[left] motion-reduce:transition-none
         data-[orientation="horizontal"]:data-[dragging="true"]:transition-none
 
         data-[orientation="vertical"]:translate-y-[50%]
-        data-[orientation="vertical"]:transition-[bottom]
+        data-[orientation="vertical"]:transition-[bottom] motion-reduce:transition-none
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
 
         data-[focused="true"]:ring-2
-        data-[focused="true"]:ring-primary/35
+        data-[focused="true"]:ring-focus-indicator/35
 
         data-[invalid="true"]:border-error
         data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/35

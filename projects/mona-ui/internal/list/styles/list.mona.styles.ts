@@ -41,7 +41,7 @@ export const listItemContentVariants = cva(
     `
         relative flex cursor-default select-none items-center
         outline-none px-3 py-1
-        transition-colors duration-150 ease-in-out
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
         hover:bg-accent hover:text-accent-foreground
         focus:bg-accent focus:text-accent-foreground
     `,
@@ -52,7 +52,7 @@ export const listItemContentVariants = cva(
                 false: ""
             },
             highlighted: {
-                true: "bg-accent text-accent-foreground rounded-none inset-ring-1 inset-ring-gray-400/70",
+                true: "bg-accent text-accent-foreground rounded-none inset-ring-1 inset-ring-border-control-hover",
                 false: ""
             },
             selected: {

@@ -64,9 +64,9 @@ export const stepperStepIndicatorVariants = cva(
     `
         w-8 h-8
         flex items-center justify-center
-        bg-background border border-border
+        bg-surface border border-border
         text-foreground outline-none
-        transition-colors duration-150 ease-in-out
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
     `,
     {
         variants: {
@@ -75,7 +75,7 @@ export const stepperStepIndicatorVariants = cva(
                 false: ""
             },
             focused: {
-                true: "ring-2 ring-primary/35",
+                true: "ring-2 ring-focus-indicator/35",
                 false: ""
             },
             rounded: {
@@ -92,7 +92,7 @@ export const stepperStepIndicatorVariants = cva(
 export const stepperTrackVariants = cva(
     `
         relative grid
-        bg-background text-foreground border border-border
+        bg-surface text-foreground border border-border
     `,
     {
         variants: {
@@ -114,8 +114,8 @@ export const stepperTrackLineVariants = cva(
     {
         variants: {
             orientation: {
-                horizontal: "h-full transition-[width] duration-150 ease-in-out",
-                vertical: "w-full transition-[height] duration-150 ease-in-out"
+                horizontal: "h-full transition-[width] duration-150 ease-in-out motion-reduce:transition-none",
+                vertical: "w-full transition-[height] duration-150 ease-in-out motion-reduce:transition-none"
             }
         },
         defaultVariants: {

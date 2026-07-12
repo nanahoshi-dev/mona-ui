@@ -3,22 +3,22 @@ import { cva } from "class-variance-authority";
 export const multiSelectBaseVariants = cva(
     `
         flex items-center justify-between
-        border border-input-border outline-none
-        bg-background text-foreground shadow-xs
+        border border-border-control outline-none
+        bg-input-background text-foreground shadow-control
         cursor-pointer
-        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
-        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
+        transition-[color,box-shadow,border-color] ease-in-out duration-150 motion-reduce:transition-none
     `,
     {
         variants: {
             disabled: {
-                true: "pointer-events-none opacity-50 cursor-not-allowed"
+                true: "pointer-events-none cursor-not-allowed bg-disabled-background opacity-50 text-disabled border-border-subtle"
             },
             focused: {
-                true: "ring-2 ring-primary/35 border-primary"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             invalid: {
-                true: "border-error ring-2 ring-error/35",
+                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
                 false: ""
             },
             rounded: {

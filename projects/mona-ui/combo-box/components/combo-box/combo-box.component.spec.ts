@@ -229,7 +229,7 @@ function getClearButton(fixture: ComponentFixture<unknown>): HTMLElement {
 }
 
 function getIndicator(fixture: ComponentFixture<unknown>, kind: "clear" | "loading" | "toggle"): HTMLElement | null {
-    const preset = kind === "toggle" ? "dropdown" : kind;
+    const preset = kind === "toggle" ? "editableDropdown" : kind;
     return fixture.nativeElement.querySelector(`mona-indicator-icon[preset='${preset}']`);
 }
 

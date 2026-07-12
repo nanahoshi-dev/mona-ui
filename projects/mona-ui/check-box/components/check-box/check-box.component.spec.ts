@@ -27,6 +27,8 @@ describe("CheckBoxComponent", () => {
         expect(inputElement.tabIndex).toBe(0);
         expect(inputElement.classList.contains("hidden")).toBe(false);
         expect(inputElement.classList.contains("sr-only")).toBe(true);
+        expect(checkmarkElement.classList.contains("peer-focus-visible:border-focus-indicator")).toBe(true);
         expect(checkmarkElement.classList.contains("peer-focus-visible:ring-2")).toBe(true);
+        expect(checkmarkElement.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
     });
 });

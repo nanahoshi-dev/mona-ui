@@ -3,7 +3,7 @@ import { cva } from "class-variance-authority";
 export const windowBaseVariants = cva(
     `
         flex flex-col w-full h-full
-        bg-background text-foreground
+        bg-surface-raised text-foreground
     `,
     {
         variants: {

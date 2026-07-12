@@ -10,14 +10,13 @@ export const checkmarkVariants = cva(
 
         bg-input-background border border-input-border
         cursor-pointer
-        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150
+        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150 motion-reduce:transition-none
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
 
-        peer-focus-visible:ring-2 peer-focus-visible:ring-primary/35
-        peer-focus-visible:border-primary
+        peer-focus-visible:border-focus-indicator peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
 
         peer-checked:bg-primary
         peer-checked:text-primary-foreground
@@ -80,7 +79,7 @@ export const checkboxDirectiveVariants = cva(
         bg-input-background border border-input-border
         cursor-pointer
         relative
-        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150
+        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150 motion-reduce:transition-none
 
         disabled:pointer-events-none
         disabled:cursor-not-allowed
@@ -91,8 +90,7 @@ export const checkboxDirectiveVariants = cva(
         indeterminate:bg-primary
         checked:bg-primary
 
-        focus-visible:ring-2 focus-visible:ring-primary/35
-        focus-visible:border-primary
+        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         checked:after:content-['']
         checked:after:absolute

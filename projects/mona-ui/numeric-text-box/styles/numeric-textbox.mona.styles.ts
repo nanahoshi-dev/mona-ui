@@ -3,24 +3,27 @@ import { cva } from "class-variance-authority";
 export const numericTextboxVariants = cva(
     `
         flex items-center w-full min-w-0
-        bg-transparent
-        border border-input-border p-0
+        bg-input-background shadow-control
+        border border-border-control p-0
         outline-none overflow-hidden
 
         placeholder:text-muted-foreground
 
         selection:bg-primary selection:text-primary-foreground
-        transition-[color,box-shadow,border] ease-in-out duration-150
+        transition-[color,box-shadow,border-color] ease-in-out duration-150 motion-reduce:transition-none
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:bg-disabled-background
         data-[disabled='true']:opacity-50
+        data-[disabled='true']:text-disabled
+        data-[disabled='true']:border-border-subtle
 
-        focus-within:ring-2 focus-within:ring-primary/35
-        focus-within:border-primary
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error data-[invalid='true']:focus-within:ring-error/35
     `,
     {
         variants: {

@@ -3,10 +3,9 @@ import { cva } from "class-variance-authority";
 export const calendarBaseVariants = cva(
     `
         flex flex-col gap-2 p-2 min-w-64
-        bg-background text-foreground
-        border border-input-border
-        shadow-sm select-none
-        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
+        bg-surface text-foreground
+        border border-border-control
+        shadow-raised select-none
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
@@ -45,7 +44,7 @@ export const calendarHeaderVariants = cva(
 export const calendarMonthViewDayVariants = cva(
     `
         hover:bg-hover cursor-pointer
-        transition-[color,background-color,box-shadow] ease-in-out duration-150
+        transition-[color,background-color,box-shadow] ease-in-out duration-150 motion-reduce:transition-none
     `,
     {
         variants: {
@@ -53,7 +52,7 @@ export const calendarMonthViewDayVariants = cva(
                 true: "opacity-50 cursor-not-allowed pointer-events-none"
             },
             focused: {
-                true: "ring-2 ring-inset ring-primary/35 bg-accent outline-none"
+                true: "ring-2 ring-inset ring-focus-indicator/35 bg-accent outline-none"
             },
             outside: {
                 true: "opacity-50"
@@ -123,12 +122,12 @@ export const calendarYearViewCellVariants = cva(
         py-2 cursor-pointer
         hover:bg-hover
         active:bg-active
-        transition-[color,background-color,box-shadow] ease-in-out duration-150
+        transition-[color,background-color,box-shadow] ease-in-out duration-150 motion-reduce:transition-none
     `,
     {
         variants: {
             focused: {
-                true: "ring-2 ring-inset ring-primary/35 bg-accent outline-none"
+                true: "ring-2 ring-inset ring-focus-indicator/35 bg-accent outline-none"
             },
             rounded: {
                 none: "rounded-none",
@@ -156,12 +155,12 @@ export const calendarDecadeViewCellVariants = cva(
         py-2 cursor-pointer
         hover:bg-hover
         active:bg-active
-        transition-[color,background-color,box-shadow] ease-in-out duration-150
+        transition-[color,background-color,box-shadow] ease-in-out duration-150 motion-reduce:transition-none
     `,
     {
         variants: {
             focused: {
-                true: "ring-2 ring-inset ring-primary/35 bg-accent outline-none"
+                true: "ring-2 ring-inset ring-focus-indicator/35 bg-accent outline-none"
             },
             rounded: {
                 none: "rounded-none",

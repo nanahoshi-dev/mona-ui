@@ -2,11 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const editorBaseVariants = cva(
     `
-        flex flex-col bg-background text-foreground
+        flex flex-col bg-surface text-foreground
         border border-solid border-border
-        transition-[border-color] duration-150 ease-in
-        focus-visible:ring-2 focus-visible:ring-primary/40
-        focus-visible:border-primary
+        transition-[border-color] duration-150 ease-in motion-reduce:transition-none
+        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         prose prose-neutral max-w-none
         prose-headings:text-foreground prose-headings:font-bold
@@ -22,7 +21,7 @@ export const editorBaseVariants = cva(
         [&_blockquote]:border-l-primary
         [&_blockquote]:px-4 [&_blockquote]:py-2
         [&_blockquote]:ms-4
-        [&_blockquote]:bg-background-light
+        [&_blockquote]:bg-surface-muted
 
         [&_hr]:border [&_hr]:border-solid [&_hr]:border-border
         [&_hr]:bg-background-dark [&_hr]:my-1
@@ -42,7 +41,7 @@ export const editorBaseVariants = cva(
         [&_img.ProseMirror-selectednode]:outline-3
         [&_img.ProseMirror-selectednode]:outline-primary
 
-        [&_pre]:bg-background-dark
+        [&_pre]:bg-surface-muted
         [&_pre]:border [&_pre]:border-solid [&_pre]:border-border
         [&_pre]:whitespace-pre-wrap
         [&_pre]:font-mono
@@ -62,7 +61,7 @@ export const editorBaseVariants = cva(
         [&_table_th]:border [&_table_th]:border-solid [&_table_th]:border-foreground/40
         [&_table_th]:p-2 [&_table_th]:align-top [&_table_th]:relative
 
-        [&_table_th]:bg-background-darker [&_table_th]:color-foreground [&_table_th]:font-bold
+        [&_table_th]:bg-surface-muted [&_table_th]:color-foreground [&_table_th]:font-bold
 
         [&_.selectedCell]:after:content-[''] [&_.selectedCell]:after:absolute [&_.selectedCell]:after:inset-0
         [&_.selectedCell]:after:pointer-events-none
@@ -84,7 +83,7 @@ export const editorBaseVariants = cva(
 
 export const editorContainerVariants = cva(
     `
-        bg-background w-full h-full
+        bg-surface w-full h-full
         [&_div:first-child[contenteditable='true']]:p-1.5
         [&_div:first-child[contenteditable='true']]:text-foreground
         [&_div:first-child[contenteditable='true']]:border-none
@@ -176,7 +175,7 @@ export const editorTableCreatorVariants = cva(
 export const editorTableCreatorCellVariants = cva(
     `
         flex border border-solid border-border
-        w-6 h-6 bg-background-light
+        w-6 h-6 bg-surface-muted
     `
 );
 

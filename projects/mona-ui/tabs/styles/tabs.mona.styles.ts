@@ -33,7 +33,7 @@ export const tabListListVariants = cva(
         list-none cursor-default
         select-none whitespace-nowrap
         p-[3px]
-        transition-colors duration-150 ease-in-out
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
     `
 );
 
@@ -42,13 +42,13 @@ export const tabListListItemVariants = cva(
         flex items-center justify-center
         cursor-pointer
         px-2 outline-none
-        transition-[color,background-color,box-shadow] ease-in-out duration-150
-        focus-visible:ring-2 focus-visible:ring-primary/35
+        transition-[color,background-color,box-shadow] ease-in-out duration-150 motion-reduce:transition-none
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
             active: {
-                true: "bg-background-dark text-foreground shadow-sm",
+                true: "bg-surface-muted text-foreground shadow-control",
                 false: ""
             },
             disabled: {
@@ -79,7 +79,7 @@ export const tabListScrollButtonVariants = cva(
 export const tabContentVariants = cva(
     `
         w-full overflow-auto flex-1
-        border border-border shadow-sm
+        border border-border shadow-raised
     `,
     {
         variants: {

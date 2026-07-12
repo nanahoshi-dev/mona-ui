@@ -4,7 +4,7 @@ export const dialogBaseVariants = cva(
     `
         flex flex-col gap-0.5
         w-full h-full
-        bg-background text-foreground
+        bg-surface-raised text-foreground
         border border-border shadow-overlay
         outline-none overflow-hidden
     `,
@@ -67,11 +67,11 @@ export const dialogIconVariants = cva(
     {
         variants: {
             type: {
-                confirm: "border-success/10 bg-success/10 [&>span]:border-success/5 [&>span]:bg-success/5",
-                error: "border-error/10 bg-error/10 [&>span]:border-error/5 [&>span]:bg-error/5",
-                warning: "border-warning/10 bg-warning/10 [&>span]:border-warning/5 [&>span]:bg-warning/5",
-                info: "border-info/10 bg-info/10 [&>span]:border-info/5 [&>span]:bg-info/5",
-                success: "border-success/10 bg-success/10 [&>span]:border-success/5 [&>span]:bg-success/5"
+                confirm: "border-success-border bg-success-subtle text-success [&>span]:border-success-border [&>span]:bg-success-subtle",
+                error: "border-error-border bg-error-subtle text-error [&>span]:border-error-border [&>span]:bg-error-subtle",
+                warning: "border-warning-border bg-warning-subtle text-warning [&>span]:border-warning-border [&>span]:bg-warning-subtle",
+                info: "border-info-border bg-info-subtle text-info [&>span]:border-info-border [&>span]:bg-info-subtle",
+                success: "border-success-border bg-success-subtle text-success [&>span]:border-success-border [&>span]:bg-success-subtle"
             }
         },
         defaultVariants: {

@@ -3,13 +3,13 @@ import { cva } from "class-variance-authority";
 export const switchVariants = cva(
     `
         relative flex items-center cursor-pointer select-none
-        transition-[background-color,border-color,box-shadow] ease-in-out duration-150
+        transition-[background-color,border-color,box-shadow] ease-in-out duration-150 motion-reduce:transition-none
 
         bg-input-background
-        border border-input-border
+        border border-border-control
         outline-none
 
-        focus-within:ring-2 focus-within:ring-primary/35
+        focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:opacity-50
@@ -44,10 +44,10 @@ export const switchHandleVariants = cva(
     `
         absolute inline-flex
         items-center justify-center
-        outline-none transition-[left,background-color,border-color,box-shadow] ease-in-out duration-150
-        border border-border bg-secondary
-        shadow-sm
-        data-[active='true']:bg-background text-foreground
+        outline-none transition-[left,background-color,border-color,box-shadow] ease-in-out duration-150 motion-reduce:transition-none
+        border border-border-control bg-input-background
+        shadow-control
+        data-[active='true']:bg-input-background text-foreground
     `,
     {
         variants: {

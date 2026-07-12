@@ -38,7 +38,7 @@ export const treeDropHintIconVariants = cva(
 export const treeNodeBaseVariants = cva(
     `
         px-2 py-1 cursor-default
-        transition-colors duration-150 ease-in-out
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
     `,
     {
         variants: {
@@ -47,7 +47,7 @@ export const treeNodeBaseVariants = cva(
                 false: ""
             },
             highlighted: {
-                true: "inset-ring-1 inset-ring-gray-400/70",
+                true: "inset-ring-1 inset-ring-border-control-hover",
                 false: ""
             },
             selected: {
@@ -80,7 +80,7 @@ export const treeNodeDraggingVariants = cva(
     `
         flex items-center justify-center
         px-2! py-1! top-3!
-        bg-background! text-foreground!
+        bg-surface-raised! text-foreground!
         border! border-border!
         shadow-raised
     `

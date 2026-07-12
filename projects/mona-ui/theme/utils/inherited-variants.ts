@@ -26,7 +26,7 @@ export interface InheritedVariantsConfig<TProps extends object> extends VariantC
  */
 export function createInheritedVariants<TProps extends object>(
     base: (props?: TProps) => string,
-    config: InheritedVariantsConfig<TProps>
+    config: InheritedVariantsConfig<TProps> = {}
 ): (props?: TProps) => string {
     return (props?: TProps) => {
         const resolvedProps = { ...config.defaultVariants, ...props } as TProps;

@@ -7,7 +7,15 @@ import {
 
 export const reinaNumericTextboxVariants = createInheritedVariants(monaNumericTextboxVariants, {
     add: "placeholder:text-foreground/40 transition-[color,box-shadow,border,background-color] ease-out duration-150 data-[disabled='true']:opacity-40 focus-within:ring-primary/35 data-[invalid='true']:ring-error/35",
-    remove: "placeholder:text-muted-foreground transition-[color,box-shadow,border] ease-in-out duration-300 data-[disabled='true']:opacity-50 focus-within:ring-primary/40 data-[invalid='true']:ring-error/40"
+    remove: "placeholder:text-muted-foreground transition-[color,box-shadow,border-color] ease-in-out motion-reduce:transition-none data-[disabled='true']:bg-disabled-background data-[disabled='true']:text-disabled data-[disabled='true']:border-border-subtle focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35 data-[invalid='true']:focus-within:border-error data-[invalid='true']:focus-within:ring-error/35",
+    variants: {
+        rounded: {
+            small: { add: "rounded-xl", remove: "rounded-sm" },
+            medium: { add: "rounded-2xl", remove: "rounded-md" },
+            large: { add: "rounded-3xl", remove: "rounded-lg" },
+            full: { add: "rounded-full", remove: "rounded-full" }
+        }
+    }
 });
 
 export const reinaNumericTextboxInputVariants = createInheritedVariants(monaNumericTextboxInputVariants, {

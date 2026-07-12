@@ -42,7 +42,7 @@ export const reinaListItemContentVariants = createInheritedVariants(monaListItem
         highlighted: {
             true: {
                 add: "inset-ring-primary/40",
-                remove: "rounded-none inset-ring-gray-400/70"
+                remove: "rounded-none inset-ring-border-control-hover"
             }
         },
         selected: {

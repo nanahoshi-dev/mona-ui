@@ -24,7 +24,7 @@
     --mona-color-border-subtle: oklch(0.93 0.003 286.32);
     --mona-color-border-control: oklch(0.84 0.004 286.32);
     --mona-color-border-control-hover: oklch(0.72 0.006 286.32);
-    --mona-color-focus-indicator: oklch(0.50 0.008 286.32);
+    --mona-color-focus-indicator: oklch(0.55 0.16 259.40);
     --mona-color-disabled: oklch(0.42 0.006 286.32);
     --mona-color-disabled-background: oklch(0.94 0.003 286.32);
     --mona-color-muted: oklch(0.95 0.003 286.32);

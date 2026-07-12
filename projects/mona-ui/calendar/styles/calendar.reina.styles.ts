@@ -13,7 +13,7 @@ import {
 
 export const reinaCalendarBaseVariants = createInheritedVariants(monaCalendarBaseVariants, {
     add: "p-3 bg-background/95 backdrop-blur-xl shadow-lg",
-    remove: "p-2 bg-background shadow-sm",
+    remove: "p-2 bg-surface shadow-raised",
     variants: {
         disabled: {
             true: {

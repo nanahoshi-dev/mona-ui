@@ -1,4 +1,6 @@
 import type { ThemeDefinition, ThemeVariables } from "../models/ThemeDefinition";
+import { generatePrimaryColorPalette } from "../utils/generateThemeColors";
+import { themeColorMap } from "../utils/themeColorMap";
 
 export function monaDarkThemeVariables(): ThemeVariables {
     return {
@@ -39,7 +41,7 @@ export function monaDarkThemeVariables(): ThemeVariables {
         "--color-border-control-hover": "oklch(0.40 0.008 286.32)",
 
         /* --- Global System Accessibility States --- */
-        "--color-focus-indicator": "oklch(0.65 0.16 259.40)" /* Vibrant brand-matching focus track */,
+        "--color-focus-indicator": "oklch(0.70 0.16 259.40)" /* Accessible brand-aligned focus indicator */,
         "--color-disabled": "oklch(0.45 0.005 286.32)" /* Visible but distinctly dead text */,
         "--color-disabled-background": "oklch(0.18 0.005 286.32)",
 
@@ -48,11 +50,13 @@ export function monaDarkThemeVariables(): ThemeVariables {
         "--color-muted-foreground": "oklch(0.62 0.006 286.32)",
 
         /* --- Main Brand/Primary Track (Slightly illuminated for dark mode glow) --- */
-        "--color-primary": "oklch(0.64 0.192 259.40)" /* Bumped lightness slightly to pop on dark */,
-        "--color-primary-foreground": "oklch(0.98 0.005 276.62)",
-        "--color-primary-hover": "oklch(0.70 0.192 259.40)" /* Hover brightens the control in dark mode */,
-        "--color-primary-active": "oklch(0.58 0.192 259.40)" /* Active compresses it down */,
-        "--color-primary-selected": "oklch(0.74 0.192 259.40)",
+        // "--color-primary": "oklch(0.64 0.192 259.40)" /* Bumped lightness slightly to pop on dark */,
+        // "--color-primary-foreground": "oklch(0.98 0.005 276.62)",
+        // "--color-primary-hover": "oklch(0.70 0.192 259.40)" /* Hover brightens the control in dark mode */,
+        // "--color-primary-active": "oklch(0.58 0.192 259.40)" /* Active compresses it down */,
+        // "--color-primary-selected": "oklch(0.74 0.192 259.40)",
+
+        ...generatePrimaryColorPalette(themeColorMap.green),
 
         /* --- Secondary State (Dark fill variant) --- */
         "--color-secondary": "oklch(0.20 0.008 286.32)",
@@ -163,24 +167,26 @@ export function monaLightThemeVariables(): ThemeVariables {
         /* --- Borders & Separation Rules --- */
         "--color-border": "oklch(0.88 0.004 286.32)" /* Standard hairline boundary divider */,
         "--color-border-subtle": "oklch(0.93 0.003 286.32)" /* Light table rules, interior dividers */,
-        "--color-border-control": "oklch(0.84 0.004 286.32)" /* Form control normal boundary */,
+        "--color-border-control": "oklch(0.90 0.004 286.32)" /* Form control normal boundary */,
         "--color-border-control-hover": "oklch(0.72 0.006 286.32)",
 
         /* --- Global System Accessibility States --- */
-        "--color-focus-indicator": "oklch(0.50 0.008 286.32)",
+        "--color-focus-indicator": "oklch(0.55 0.16 259.40)" /* Accessible brand-aligned focus indicator */,
         "--color-disabled": "oklch(0.42 0.006 286.32)" /* Darkened for WCAG AA 4.5:1 text contrast */,
-        "--color-disabled-background": "oklch(0.94 0.003 286.32)",
+        "--color-disabled-background": "oklch(0.97 0.003 286.32)",
 
         /* --- Muted Structural Tokens (Unified Hues) --- */
         "--color-muted": "oklch(0.95 0.003 286.32)" /* Fixed from warm hex to cool OKLCH */,
         "--color-muted-foreground": "oklch(0.52 0.01 286.32)" /* Fixed from warm hex to cool OKLCH */,
 
         /* --- Main Brand/Primary Track --- */
-        "--color-primary": "oklch(0.60 0.192 259.40)",
-        "--color-primary-foreground": "oklch(0.975 0.005 276.62)",
-        "--color-primary-hover": "oklch(0.54 0.192 259.40)" /* Swapped to properly darken on interaction */,
-        "--color-primary-active": "oklch(0.48 0.192 259.40)" /* Deeper compression value */,
-        "--color-primary-selected": "oklch(0.69 0.192 259.40)",
+        // "--color-primary": "oklch(0.60 0.192 259.40)",
+        // "--color-primary-foreground": "oklch(0.975 0.005 276.62)",
+        // "--color-primary-hover": "oklch(0.54 0.192 259.40)" /* Swapped to properly darken on interaction */,
+        // "--color-primary-active": "oklch(0.48 0.192 259.40)" /* Deeper compression value */,
+        // "--color-primary-selected": "oklch(0.69 0.192 259.40)",
+
+        ...generatePrimaryColorPalette(themeColorMap.green),
 
         /* --- Secondary State --- */
         "--color-secondary": "oklch(0.95 0.003 286.32)",

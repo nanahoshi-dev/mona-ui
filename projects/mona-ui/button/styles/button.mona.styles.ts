@@ -4,9 +4,9 @@ export const buttonVariants = cva(
     `
         inline-flex items-center justify-center gap-2
         text-sm font-medium cursor-pointer whitespace-nowrap
-        outline-none shadow-xs
+        outline-none shadow-control
         focus-visible:outline-none focus-visible:shadow
-        transition-colors duration-100 ease-in-out
+        transition-colors duration-100 ease-in-out motion-reduce:transition-none
     `,
 
     {
@@ -25,68 +25,68 @@ export const buttonVariants = cva(
             },
             look: {
                 default: `
-                    bg-background text-foreground
-                    border border-input-border
+                    bg-input-background text-foreground
+                    border border-border-control
                     hover:bg-secondary active:bg-secondary-active
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 primary: `
                     bg-primary text-primary-foreground
                     hover:bg-primary-hover active:bg-primary-active
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 success: `
                     bg-success text-success-foreground
                     hover:bg-success-hover
                     active:bg-success-active
-                    focus-visible:ring-2 focus-visible:ring-success/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 error: `
                     bg-error text-error-foreground
                     hover:bg-error-hover
                     active:bg-error-active
-                    focus-visible:ring-2 focus-visible:ring-error/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 warning: `
                     bg-warning text-warning-foreground
                     hover:bg-warning-hover
                     active:bg-warning-active
-                    focus-visible:ring-2 focus-visible:ring-warning/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 info: `
                     bg-info text-info-foreground
                     hover:bg-info-hover
                     active:bg-info-active
-                    focus-visible:ring-2 focus-visible:ring-info/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 outline: `
                     border border-border
                     hover:bg-accent hover:text-accent-foreground
                     active:bg-accent-dark active:text-accent-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 secondary: `
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover
                     active:bg-secondary-active
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 ghost: `
                     shadow-none
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 link: `
                     shadow-none
                     text-primary hover:text-primary-hover active:text-primary-active
                     underline-offset-4 hover:underline
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 clear: `
                     bg-transparent border-0 shadow-none
                     hover:bg-transparent active:bg-transparent
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `
             },
             rounded: {

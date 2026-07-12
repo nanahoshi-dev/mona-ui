@@ -6,7 +6,7 @@ export const gridBaseVariants = cva(
     `
         relative flex flex-col
         h-full overflow-hidden
-        bg-background border border-border
+        bg-surface border border-border
         text-foreground text-sm
     `,
     {
@@ -77,7 +77,7 @@ export const gridColumnActionsVariants = cva(`
 export const gridColumnDragPreviewVariants = cva(
     `
         flex items-center justify-center
-        bg-background! text-foreground!
+        bg-surface-raised! text-foreground!
         border! border-border! rounded-md
         shadow-sm! px-2! py-0.5!
     `
@@ -231,7 +231,7 @@ export const gridListTableVariants = cva(
 );
 
 export const gridListTableRowVariants = cva(`
-    transition-[color,background-color] duration-150 ease-in-out
+    transition-[color,background-color] duration-150 ease-in-out motion-reduce:transition-none
 `, {
     variants: {
         selected: {
@@ -239,7 +239,7 @@ export const gridListTableRowVariants = cva(`
                     ${gridRowHeightClass}
                     bg-primary text-primary-foreground
                 `,
-            false: `${gridRowHeightClass} odd:bg-background even:bg-background-dark `
+            false: `${gridRowHeightClass} odd:bg-surface even:bg-surface-muted `
         }
     }
 });

@@ -3,18 +3,19 @@ import { cva } from "class-variance-authority";
 export const timePickerBaseVariants = cva(
     `
         flex items-center w-full
-        border border-border
-        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
-        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
+        border border-border-control bg-input-background shadow-control
+        transition-[color,box-shadow,border-color] ease-in-out duration-150 motion-reduce:transition-none
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error data-[invalid='true']:focus-within:ring-error/35
         [&_mona-text-box]:h-full
         [&_mona-text-box]:border-none
     `,
     {
         variants: {
             focused: {
-                true: "ring-2 ring-primary/35 border-primary"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             rounded: {
                 full: "rounded-full",

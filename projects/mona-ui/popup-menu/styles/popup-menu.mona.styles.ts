@@ -14,10 +14,10 @@ export const popupMenuBaseVariants = cva(`w-full h-full overflow-hidden`, {
 export const popupMenuContainerVariants = cva(
     `
         flex flex-col
-        bg-background text-foreground
+        bg-surface-overlay text-foreground
         border border-border
         outline-none
-        p-1 shadow-md
+        p-1 shadow-overlay
     `,
     {
         variants: {
@@ -50,7 +50,7 @@ export const popupMenuItemVariants = cva(
         outline-none
 
         hover:bg-hover
-        hover:text-hover-foreground
+        hover:text-accent-foreground
 
         focus-within:bg-accent
         focus-within:text-accent-foreground
@@ -61,8 +61,8 @@ export const popupMenuItemVariants = cva(
         data-[disabled='true']:opacity-50
 
         data-[active='true']:bg-hover
-        data-[active='true']:text-hover-foreground
-        transition-colors duration-150 ease-in-out
+        data-[active='true']:text-accent-foreground
+        transition-colors duration-150 ease-in-out motion-reduce:transition-none
     `,
     {
         variants: {

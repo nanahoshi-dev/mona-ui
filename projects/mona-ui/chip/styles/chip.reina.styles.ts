@@ -3,7 +3,7 @@ import { chipVariants as monaChipVariants } from "./chip.mona.styles";
 
 export const reinaChipVariants = createInheritedVariants(monaChipVariants, {
     add: "font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 transition-[background-color,color,opacity] duration-150 ease-out",
-    remove: "font-medium shadow-xs transition-colors duration-200 ease-in-out",
+    remove: "font-medium shadow-control transition-colors duration-150 ease-in-out motion-reduce:transition-none",
     variants: {
         disabled: {
             true: {
@@ -14,7 +14,7 @@ export const reinaChipVariants = createInheritedVariants(monaChipVariants, {
         look: {
             default: {
                 add: "bg-accent text-accent-foreground hover:bg-accent-hover active:bg-accent-active",
-                remove: "bg-background text-foreground border border-border hover:bg-hover hover:text-accent-foreground active:bg-active active:text-accent-foreground focus-visible:ring-2 focus-visible:ring-primary/40"
+                remove: "bg-input-background text-foreground border border-border hover:bg-hover hover:text-accent-foreground active:bg-active active:text-accent-foreground focus-visible:ring-2 focus-visible:ring-focus-indicator"
             },
             primary: {
                 add: "hover:opacity-90 active:opacity-80",

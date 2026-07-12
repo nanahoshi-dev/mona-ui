@@ -93,7 +93,7 @@ export const reinaSwitchVariants = createInheritedVariants(monaSwitchVariants, {
 
 export const reinaSwitchHandleVariants = createInheritedVariants(monaSwitchHandleVariants, {
     add: "transition-[left,box-shadow] ease-out bg-background shadow-sm data-[active='true']:shadow-md",
-    remove: "transition-[left,background] ease-in-out border border-border bg-secondary data-[active='true']:bg-background",
+    remove: "transition-[left,background] ease-in-out border border-border-control bg-input-background data-[active='true']:bg-input-background",
     variants: {
         rounded: {
             large: {

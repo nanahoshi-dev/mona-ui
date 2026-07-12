@@ -8,7 +8,7 @@ import {
 
 export const reinaMultiSelectBaseVariants = createInheritedVariants(monaMultiSelectBaseVariants, {
     add: "bg-input-background focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary transition-[color,box-shadow,border,background-color] ease-out duration-150",
-    remove: "bg-background focus-within:ring-1 focus-within:ring-primary/40 transition-[color,box-shadow,border] ease-in-out duration-300",
+    remove: "shadow-control focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35 transition-[color,box-shadow,border-color] ease-in-out motion-reduce:transition-none",
     variants: {
         disabled: {
             true: {
@@ -19,7 +19,7 @@ export const reinaMultiSelectBaseVariants = createInheritedVariants(monaMultiSel
         focused: {
             true: {
                 add: "ring-2 ring-primary/35 border-primary",
-                remove: "ring-1 ring-primary/40"
+                remove: "ring-2 ring-focus-indicator/35 border-focus-indicator"
             }
         },
         invalid: {

@@ -3,31 +3,34 @@ import { cva } from "class-variance-authority";
 export const colorPickerBaseVariants = cva(
     `
         flex items-center
-        border border-input-border
-        bg-background outline-none
-        shadow-xs text-foreground
+        border border-border-control
+        bg-input-background outline-none
+        shadow-control text-foreground
         cursor-pointer
 
         hover:bg-accent hover:text-accent-foreground
 
-        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
+        transition-[color,box-shadow,border-color,background-color] ease-in-out duration-150 motion-reduce:transition-none
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:bg-disabled-background
         data-[disabled='true']:opacity-50
+        data-[disabled='true']:text-disabled
+        data-[disabled='true']:border-border-subtle
         data-[readonly='true']:cursor-default
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2
         data-[invalid='true']:ring-error/35
 
-        focus-within:ring-2 focus-within:ring-primary/35
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
     `,
     {
         variants: {
             expanded: {
-                true: "ring-2 ring-primary/35"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",

@@ -7,7 +7,7 @@ import {
 
 export const reinaComboBoxBaseVariants = createInheritedVariants(monaComboBoxBaseVariants, {
     add: "border-border bg-input-background focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary transition-[color,box-shadow,border,background-color] ease-out duration-150",
-    remove: "border-input-border bg-background focus-within:ring-1 focus-within:ring-primary/40 transition-[color,box-shadow,border] ease-in-out duration-300",
+    remove: "border-border-control shadow-control focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35 transition-[color,box-shadow,border-color] ease-in-out motion-reduce:transition-none",
     variants: {
         disabled: {
             true: {
@@ -18,7 +18,7 @@ export const reinaComboBoxBaseVariants = createInheritedVariants(monaComboBoxBas
         focused: {
             true: {
                 add: "ring-2 ring-primary/35 border-primary",
-                remove: "ring-1 ring-primary/40"
+                remove: "ring-2 ring-focus-indicator/35 border-focus-indicator"
             }
         },
         invalid: {

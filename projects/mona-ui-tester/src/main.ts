@@ -21,6 +21,16 @@ bootstrapApplication(AppComponent, {
             provide: Directionality,
             useClass: CustomDirectionalityService
         },
-        provideMonaUiTheme({ defaultThemeId: "mona-light" })
+        provideMonaUiTheme({
+            defaultThemeId: "mona-light",
+            variableOverrides: {
+                "mona-light": {
+                    "--color-page-bg": "#fafbfd"
+                },
+                "mona-dark": {
+                    "--color-page-bg": "#1e1e1e"
+                }
+            }
+        })
     ]
 }).catch(err => console.error(err));

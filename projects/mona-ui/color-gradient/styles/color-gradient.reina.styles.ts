@@ -21,7 +21,7 @@ export const reinaColorGradientHsvRectangleHandleVariants = createInheritedVaria
     monaColorGradientHsvRectangleHandleVariants,
     {
         add: "focus-visible:ring-primary/35",
-        remove: "focus-visible:ring-primary/40"
+        remove: "focus-visible:ring-focus-indicator"
     }
 );
 

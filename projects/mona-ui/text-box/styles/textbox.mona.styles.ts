@@ -6,26 +6,30 @@ export const textBoxVariants = cva(
         overflow-hidden
 
         bg-input-background text-foreground
-        border border-input-border outline-none
+        border border-border-control outline-none
+        bg-input-background shadow-control
         selection:bg-primary selection:text-primary-foreground
 
-        transition-[color,box-shadow,border] ease-in-out duration-150
+        transition-[color,box-shadow,border-color] ease-in-out duration-150 motion-reduce:transition-none
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:bg-disabled-background
         data-[disabled='true']:opacity-50
+        data-[disabled='true']:text-disabled
+        data-[disabled='true']:border-border-subtle
 
-        focus-within:ring-2 focus-within:ring-primary/35
-        focus-within:border-primary
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         [&>input]:w-full [&>input]:h-full
         [&>input]:bg-transparent
         [&>input]:border-0 [&>input]:outline-none
         [&>input]:placeholder:text-muted-foreground
-        [&>input]:px-3
+        [&>input]:px-2
 
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error data-[invalid='true']:focus-within:ring-error/35
     `,
     {
         variants: {
@@ -37,9 +41,9 @@ export const textBoxVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 text-md [&>input]:px-3",
-                medium: "h-9 text-sm [&>input]:px-3",
-                small: "h-8 text-xs [&>input]:px-2"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
         }
     }
@@ -48,14 +52,14 @@ export const textBoxVariants = cva(
 export const inputVariants = cva(
     `
         bg-input-background
-        px-3
+        px-2
 
-        border border-input-border outline-none
+        border border-border-control outline-none
         selection:bg-primary selection:text-primary-foreground
 
-        transition-[color,box-shadow,border] ease-in-out duration-150
+        transition-[color,box-shadow,border-color] ease-in-out duration-150 motion-reduce:transition-none
 
-        shadow-xs
+        shadow-control
 
         file:text-foreground
         file:inline-flex file:border-0
@@ -66,13 +70,16 @@ export const inputVariants = cva(
 
         disabled:pointer-events-none
         disabled:cursor-not-allowed
+        disabled:bg-disabled-background
         disabled:opacity-50
+        disabled:text-disabled
+        disabled:border-border-subtle
 
-        focus-visible:ring-2 focus-visible:ring-primary/35
-        focus-visible:border-primary
+        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/35
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
+        [&.ng-touched.ng-invalid]:focus-visible:border-error [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {
@@ -84,27 +91,10 @@ export const inputVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 text-md px-3",
-                medium: "h-9 text-sm px-3",
-                small: "h-8 text-xs px-2"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
-        },
-        compoundVariants: [
-            {
-                rounded: "full",
-                size: "large",
-                class: "px-4"
-            },
-            {
-                rounded: "full",
-                size: "medium",
-                class: "px-4"
-            },
-            {
-                rounded: "full",
-                size: "small",
-                class: "px-4"
-            }
-        ]
+        }
     }
 );

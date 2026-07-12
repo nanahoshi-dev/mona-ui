@@ -12,7 +12,7 @@ export const reinaMenubarBaseVariants = createInheritedVariants(monaMenubarBaseV
 
 export const reinaMenubarListItemVariants = createInheritedVariants(monaMenubarListItemVariants, {
     add: "transition-colors duration-100 ease-out hover:bg-accent hover:text-accent-foreground data-[disabled='true']:opacity-40",
-    remove: "hover:bg-hover hover:text-hover-foreground data-[disabled='true']:opacity-50"
+    remove: "hover:bg-hover hover:text-accent-foreground data-[disabled='true']:opacity-50 motion-reduce:transition-none"
 });
 
 export const reinaMenubarListVariants = createInheritedVariants(monaMenubarListVariants, {});

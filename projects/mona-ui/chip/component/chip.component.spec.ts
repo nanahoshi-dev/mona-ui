@@ -400,10 +400,10 @@ describe("ChipComponent", () => {
     // Look Input Tests
     // =========================================================================
     describe("look input", () => {
-        it("should apply default look with bg-background and text-foreground", () => {
+        it("should apply default look with the semantic input surface and foreground", () => {
             component.look.set("default");
             fixture.detectChanges();
-            expect(chipElement.classList.contains("bg-background")).toBe(true);
+            expect(chipElement.classList.contains("bg-input-background")).toBe(true);
             expect(chipElement.classList.contains("text-foreground")).toBe(true);
         });
 

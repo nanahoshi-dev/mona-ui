@@ -4,7 +4,7 @@ export const listViewBaseVariants = cva(
     `
         flex flex-col h-full
         outline-none overflow-hidden
-        bg-background text-foreground
+        bg-surface text-foreground
         border border-border
     `,
     {

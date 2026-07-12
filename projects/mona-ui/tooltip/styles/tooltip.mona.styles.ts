@@ -3,7 +3,7 @@ import { cva } from "class-variance-authority";
 export const tooltipBaseVariants = cva(
     `
         flex items-center justify-center relative
-        bg-background text-foreground border border-border
+        bg-surface-overlay text-foreground border border-border
         shadow-overlay z-1
     `,
     {
@@ -24,7 +24,7 @@ export const tooltipArrowVariants = cva(
         absolute w-3 h-3 box-border
         pointer-events-none
         transform-center rotate-45
-        z-0 bg-background text-foreground
+        z-0 bg-surface-overlay text-foreground
 
         border border-border
 
