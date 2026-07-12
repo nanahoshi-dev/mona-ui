@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     colorPickerBaseVariants as monaColorPickerBaseVariants,
     colorPickerColorVariants as monaColorPickerColorVariants
@@ -13,13 +13,13 @@ import type {
     ColorPickerVariantsFunctions
 } from "./color-picker.types";
 
-const defaultColorPickerBaseStrategy = createThemeStrategy<ColorPickerBaseVariantsFunction>(
-    { mona: monaColorPickerBaseVariants, reina: reinaColorPickerBaseVariants },
-    monaColorPickerBaseVariants
+const defaultColorPickerBaseStrategy = createInheritedThemeStrategy<ColorPickerBaseVariantsFunction>(
+    monaColorPickerBaseVariants,
+    { reina: reinaColorPickerBaseVariants }
 );
-const defaultColorPickerColorStrategy = createThemeStrategy<ColorPickerColorVariantsFunction>(
-    { mona: monaColorPickerColorVariants, reina: reinaColorPickerColorVariants },
-    monaColorPickerColorVariants
+const defaultColorPickerColorStrategy = createInheritedThemeStrategy<ColorPickerColorVariantsFunction>(
+    monaColorPickerColorVariants,
+    { reina: reinaColorPickerColorVariants }
 );
 
 export const colorPickerBaseThemeVariants = (theme: ThemeStyle): ColorPickerBaseVariantsFunction =>
@@ -38,5 +38,5 @@ export function createColorPickerStyleStrategy(
         base: createColorPickerBaseVariants(reinaColorPickerBaseVariants, overrides, "reina"),
         color: createColorPickerColorVariants(reinaColorPickerColorVariants, overrides, "reina")
     };
-    return createThemeStrategy<ColorPickerVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ColorPickerVariantsFunctions>(mona, { reina: reina });
 }

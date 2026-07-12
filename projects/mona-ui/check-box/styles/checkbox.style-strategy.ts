@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     checkboxContainerLabelVariants as monaCheckboxContainerLabelVariants,
     checkboxDirectiveVariants as monaCheckboxDirectiveVariants,
@@ -27,21 +27,19 @@ import type {
     CheckmarkVariantsFunction
 } from "./checkbox.types";
 
-const defaultCheckboxInputStrategy = createThemeStrategy<CheckboxInputVariantsFunction>(
-    { mona: monaCheckboxVariants, reina: reinaCheckboxVariants },
-    monaCheckboxVariants
+const defaultCheckboxInputStrategy = createInheritedThemeStrategy<CheckboxInputVariantsFunction>(monaCheckboxVariants, {
+    reina: reinaCheckboxVariants
+});
+const defaultCheckmarkStrategy = createInheritedThemeStrategy<CheckmarkVariantsFunction>(monaCheckmarkVariants, {
+    reina: reinaCheckmarkVariants
+});
+const defaultCheckboxContainerLabelStrategy = createInheritedThemeStrategy<CheckboxContainerLabelVariantsFunction>(
+    monaCheckboxContainerLabelVariants,
+    { reina: reinaCheckboxContainerLabelVariants }
 );
-const defaultCheckmarkStrategy = createThemeStrategy<CheckmarkVariantsFunction>(
-    { mona: monaCheckmarkVariants, reina: reinaCheckmarkVariants },
-    monaCheckmarkVariants
-);
-const defaultCheckboxContainerLabelStrategy = createThemeStrategy<CheckboxContainerLabelVariantsFunction>(
-    { mona: monaCheckboxContainerLabelVariants, reina: reinaCheckboxContainerLabelVariants },
-    monaCheckboxContainerLabelVariants
-);
-const defaultCheckboxDirectiveStrategy = createThemeStrategy<CheckboxDirectiveVariantsFunction>(
-    { mona: monaCheckboxDirectiveVariants, reina: reinaCheckboxDirectiveVariants },
-    monaCheckboxDirectiveVariants
+const defaultCheckboxDirectiveStrategy = createInheritedThemeStrategy<CheckboxDirectiveVariantsFunction>(
+    monaCheckboxDirectiveVariants,
+    { reina: reinaCheckboxDirectiveVariants }
 );
 
 export const checkboxInputThemeVariants = (theme: ThemeStyle): CheckboxInputVariantsFunction =>
@@ -66,5 +64,5 @@ export function createCheckboxStyleStrategy(overrides: readonly CheckboxStyleOve
         checkmark: createCheckmarkVariants(reinaCheckmarkVariants, overrides, "reina"),
         input: createCheckboxInputVariants(reinaCheckboxVariants, overrides, "reina")
     };
-    return createThemeStrategy<CheckboxVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<CheckboxVariantsFunctions>(mona, { reina: reina });
 }

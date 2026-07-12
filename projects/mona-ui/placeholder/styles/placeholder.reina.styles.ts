@@ -1,16 +1,12 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    placeholderBaseVariants as monaPlaceholderBaseVariants,
+    placeholderTextVariants as monaPlaceholderTextVariants
+} from "./placeholder.mona.styles";
 
-export const reinaPlaceholderBaseVariants = cva(
-    `
-        flex items-center justify-center
-        w-full h-full
-        p-2
-    `
-);
+export const reinaPlaceholderBaseVariants = createInheritedVariants(monaPlaceholderBaseVariants, {});
 
-export const reinaPlaceholderTextVariants = cva(
-    `
-        text-foreground/35
-        font-medium tracking-wide
-    `
-);
+export const reinaPlaceholderTextVariants = createInheritedVariants(monaPlaceholderTextVariants, {
+    add: "text-foreground/35 font-medium tracking-wide",
+    remove: "text-muted-foreground uppercase"
+});

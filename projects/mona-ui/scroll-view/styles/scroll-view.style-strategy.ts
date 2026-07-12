@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     scrollViewArrowVariants as monaScrollViewArrowVariants,
     scrollViewBaseVariants as monaScrollViewBaseVariants,
@@ -47,41 +47,42 @@ import type {
     ScrollViewVariantsFunctions
 } from "./scroll-view.types";
 
-const defaultScrollViewBaseStrategy = createThemeStrategy<ScrollViewBaseVariantsFunction>(
-    { mona: monaScrollViewBaseVariants, reina: reinaScrollViewBaseVariants },
-    monaScrollViewBaseVariants
+const defaultScrollViewBaseStrategy = createInheritedThemeStrategy<ScrollViewBaseVariantsFunction>(
+    monaScrollViewBaseVariants,
+    { reina: reinaScrollViewBaseVariants }
 );
-const defaultScrollViewContentStrategy = createThemeStrategy<ScrollViewContentVariantsFunction>(
-    { mona: monaScrollViewContentVariants, reina: reinaScrollViewContentVariants },
-    monaScrollViewContentVariants
+const defaultScrollViewContentStrategy = createInheritedThemeStrategy<ScrollViewContentVariantsFunction>(
+    monaScrollViewContentVariants,
+    { reina: reinaScrollViewContentVariants }
 );
-const defaultScrollViewListStrategy = createThemeStrategy<ScrollViewListVariantsFunction>(
-    { mona: monaScrollViewListVariants, reina: reinaScrollViewListVariants },
-    monaScrollViewListVariants
+const defaultScrollViewListStrategy = createInheritedThemeStrategy<ScrollViewListVariantsFunction>(
+    monaScrollViewListVariants,
+    { reina: reinaScrollViewListVariants }
 );
-const defaultScrollViewArrowStrategy = createThemeStrategy<ScrollViewArrowVariantsFunction>(
-    { mona: monaScrollViewArrowVariants, reina: reinaScrollViewArrowVariants },
-    monaScrollViewArrowVariants
+const defaultScrollViewArrowStrategy = createInheritedThemeStrategy<ScrollViewArrowVariantsFunction>(
+    monaScrollViewArrowVariants,
+    { reina: reinaScrollViewArrowVariants }
 );
-const defaultScrollViewPagerStrategy = createThemeStrategy<ScrollViewPagerVariantsFunction>(
-    { mona: monaScrollViewPagerVariants, reina: reinaScrollViewPagerVariants },
-    monaScrollViewPagerVariants
+const defaultScrollViewPagerStrategy = createInheritedThemeStrategy<ScrollViewPagerVariantsFunction>(
+    monaScrollViewPagerVariants,
+    { reina: reinaScrollViewPagerVariants }
 );
-const defaultScrollViewPagerListContainerStrategy = createThemeStrategy<ScrollViewPagerListContainerVariantsFunction>(
-    { mona: monaScrollViewPagerListContainerVariants, reina: reinaScrollViewPagerListContainerVariants },
-    monaScrollViewPagerListContainerVariants
+const defaultScrollViewPagerListContainerStrategy =
+    createInheritedThemeStrategy<ScrollViewPagerListContainerVariantsFunction>(
+        monaScrollViewPagerListContainerVariants,
+        { reina: reinaScrollViewPagerListContainerVariants }
+    );
+const defaultScrollViewPagerListStrategy = createInheritedThemeStrategy<ScrollViewPagerListVariantsFunction>(
+    monaScrollViewPagerListVariants,
+    { reina: reinaScrollViewPagerListVariants }
 );
-const defaultScrollViewPagerListStrategy = createThemeStrategy<ScrollViewPagerListVariantsFunction>(
-    { mona: monaScrollViewPagerListVariants, reina: reinaScrollViewPagerListVariants },
-    monaScrollViewPagerListVariants
+const defaultScrollViewPagerListItemStrategy = createInheritedThemeStrategy<ScrollViewPagerListItemVariantsFunction>(
+    monaScrollViewPagerListItemVariants,
+    { reina: reinaScrollViewPagerListItemVariants }
 );
-const defaultScrollViewPagerListItemStrategy = createThemeStrategy<ScrollViewPagerListItemVariantsFunction>(
-    { mona: monaScrollViewPagerListItemVariants, reina: reinaScrollViewPagerListItemVariants },
-    monaScrollViewPagerListItemVariants
-);
-const defaultScrollViewPagerArrowStrategy = createThemeStrategy<ScrollViewPagerArrowVariantsFunction>(
-    { mona: monaScrollViewPagerArrowVariants, reina: reinaScrollViewPagerArrowVariants },
-    monaScrollViewPagerArrowVariants
+const defaultScrollViewPagerArrowStrategy = createInheritedThemeStrategy<ScrollViewPagerArrowVariantsFunction>(
+    monaScrollViewPagerArrowVariants,
+    { reina: reinaScrollViewPagerArrowVariants }
 );
 
 export const scrollViewBaseThemeVariants = (theme: ThemeStyle): ScrollViewBaseVariantsFunction =>
@@ -137,5 +138,5 @@ export function createScrollViewStyleStrategy(
         ),
         pagerListItem: createScrollViewPagerListItemVariants(reinaScrollViewPagerListItemVariants, overrides, "reina")
     };
-    return createThemeStrategy<ScrollViewVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ScrollViewVariantsFunctions>(mona, { reina: reina });
 }

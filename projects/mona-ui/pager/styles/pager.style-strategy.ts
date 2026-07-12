@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     pagerBaseVariants as monaPagerBaseVariants,
     pagerInfoVariants as monaPagerInfoVariants,
@@ -37,5 +37,5 @@ export function createPagerStyleStrategy(overrides: readonly PagerStyleOverrides
         list: createPagerListVariants(reinaPagerListVariants, overrides, "reina"),
         listItem: createPagerListItemVariants(reinaPagerListItemVariants, overrides, "reina")
     };
-    return createThemeStrategy<PagerVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<PagerVariantsFunctions>(mona, { reina: reina });
 }

@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     comboBoxAffixContainerVariants as monaComboBoxAffixContainerVariants,
     comboBoxBaseVariants as monaComboBoxBaseVariants,
@@ -23,17 +23,17 @@ import type {
     ComboBoxVariantsFunctions
 } from "./combo-box.types";
 
-const defaultComboBoxBaseStrategy = createThemeStrategy<ComboBoxBaseVariantsFunction>(
-    { mona: monaComboBoxBaseVariants, reina: reinaComboBoxBaseVariants },
-    monaComboBoxBaseVariants
+const defaultComboBoxBaseStrategy = createInheritedThemeStrategy<ComboBoxBaseVariantsFunction>(
+    monaComboBoxBaseVariants,
+    { reina: reinaComboBoxBaseVariants }
 );
-const defaultComboBoxTextInputStrategy = createThemeStrategy<ComboBoxTextInputVariantsFunction>(
-    { mona: monaComboBoxTextInputVariants, reina: reinaComboBoxTextInputVariants },
-    monaComboBoxTextInputVariants
+const defaultComboBoxTextInputStrategy = createInheritedThemeStrategy<ComboBoxTextInputVariantsFunction>(
+    monaComboBoxTextInputVariants,
+    { reina: reinaComboBoxTextInputVariants }
 );
-const defaultComboBoxAffixContainerStrategy = createThemeStrategy<ComboBoxAffixContainerVariantsFunction>(
-    { mona: monaComboBoxAffixContainerVariants, reina: reinaComboBoxAffixContainerVariants },
-    monaComboBoxAffixContainerVariants
+const defaultComboBoxAffixContainerStrategy = createInheritedThemeStrategy<ComboBoxAffixContainerVariantsFunction>(
+    monaComboBoxAffixContainerVariants,
+    { reina: reinaComboBoxAffixContainerVariants }
 );
 
 export const comboBoxBaseThemeVariants = (theme: ThemeStyle): ComboBoxBaseVariantsFunction =>
@@ -54,5 +54,5 @@ export function createComboBoxStyleStrategy(overrides: readonly ComboBoxStyleOve
         base: createComboBoxBaseVariants(reinaComboBoxBaseVariants, overrides, "reina"),
         textInput: createComboBoxTextInputVariants(reinaComboBoxTextInputVariants, overrides, "reina")
     };
-    return createThemeStrategy<ComboBoxVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ComboBoxVariantsFunctions>(mona, { reina: reina });
 }

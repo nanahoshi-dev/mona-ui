@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     progressBarBaseVariants as monaProgressBarBaseVariants,
     progressBarIndeterminateVariants as monaProgressBarIndeterminateVariants,
@@ -27,21 +27,21 @@ import type {
     ProgressBarVariantsFunctions
 } from "./progress-bar.types";
 
-const defaultProgressBarBaseStrategy = createThemeStrategy<ProgressBarBaseVariantsFunction>(
-    { mona: monaProgressBarBaseVariants, reina: reinaProgressBarBaseVariants },
-    monaProgressBarBaseVariants
+const defaultProgressBarBaseStrategy = createInheritedThemeStrategy<ProgressBarBaseVariantsFunction>(
+    monaProgressBarBaseVariants,
+    { reina: reinaProgressBarBaseVariants }
 );
-const defaultProgressBarIndeterminateStrategy = createThemeStrategy<ProgressBarIndeterminateVariantsFunction>(
-    { mona: monaProgressBarIndeterminateVariants, reina: reinaProgressBarIndeterminateVariants },
-    monaProgressBarIndeterminateVariants
+const defaultProgressBarIndeterminateStrategy = createInheritedThemeStrategy<ProgressBarIndeterminateVariantsFunction>(
+    monaProgressBarIndeterminateVariants,
+    { reina: reinaProgressBarIndeterminateVariants }
 );
-const defaultProgressBarLabelStrategy = createThemeStrategy<ProgressBarLabelVariantsFunction>(
-    { mona: monaProgressBarLabelVariants, reina: reinaProgressBarLabelVariants },
-    monaProgressBarLabelVariants
+const defaultProgressBarLabelStrategy = createInheritedThemeStrategy<ProgressBarLabelVariantsFunction>(
+    monaProgressBarLabelVariants,
+    { reina: reinaProgressBarLabelVariants }
 );
-const defaultProgressBarTrackStrategy = createThemeStrategy<ProgressBarTrackVariantsFunction>(
-    { mona: monaProgressBarTrackVariants, reina: reinaProgressBarTrackVariants },
-    monaProgressBarTrackVariants
+const defaultProgressBarTrackStrategy = createInheritedThemeStrategy<ProgressBarTrackVariantsFunction>(
+    monaProgressBarTrackVariants,
+    { reina: reinaProgressBarTrackVariants }
 );
 
 export const progressBarBaseThemeVariants = (theme: ThemeStyle): ProgressBarBaseVariantsFunction =>
@@ -72,5 +72,5 @@ export function createProgressBarStyleStrategy(
         label: createProgressBarLabelVariants(reinaProgressBarLabelVariants, overrides, "reina"),
         track: createProgressBarTrackVariants(reinaProgressBarTrackVariants, overrides, "reina")
     };
-    return createThemeStrategy<ProgressBarVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ProgressBarVariantsFunctions>(mona, { reina: reina });
 }

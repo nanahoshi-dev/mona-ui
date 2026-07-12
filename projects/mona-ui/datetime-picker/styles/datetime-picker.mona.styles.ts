@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const dateTimePickerBaseVariants = cva(
     `
-        flex items-center w-full
+        flex items-center
         border border-border
         focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary
         data-[invalid='true']:border-error

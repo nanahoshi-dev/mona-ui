@@ -1,65 +1,21 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import { splitButtonVariants as monaSplitButtonVariants } from "./split-button.mona.styles";
 
-export const reinaSplitButtonVariants = cva(
-    `
-        inline-flex flex-nowrap items-center
-        [&>button]:focus-visible:z-10
-        [&_svg]:w-5 [&_svg]:h-5
-    `,
-    {
-        variants: {
-            look: {
-                default: "",
-                error: "",
-                ghost: "border-transparent",
-                info: "",
-                outline: "[&>button:not(:last-child)]:border-r",
-                primary: "",
-                secondary: "",
-                success: "",
-                warning: ""
+export const reinaSplitButtonVariants = createInheritedVariants(monaSplitButtonVariants, {
+    variants: {
+        rounded: {
+            large: {
+                add: "rounded-3xl [&>button]:first:rounded-tl-3xl [&>button]:first:rounded-bl-3xl [&>button]:last:rounded-tr-3xl [&>button]:last:rounded-br-3xl",
+                remove: "rounded-lg [&>button]:first:rounded-tl-lg [&>button]:first:rounded-bl-lg [&>button]:last:rounded-tr-lg [&>button]:last:rounded-br-lg"
             },
-            rounded: {
-                full: `
-                    rounded-full
-                    [&>button]:first:rounded-tl-full [&>button]:first:rounded-bl-full
-                    [&>button]:last:rounded-tr-full [&>button]:last:rounded-br-full
-                `,
-                large: `
-                    rounded-3xl
-                    [&>button]:first:rounded-tl-3xl [&>button]:first:rounded-bl-3xl
-                    [&>button]:last:rounded-tr-3xl [&>button]:last:rounded-br-3xl
-                `,
-                medium: `
-                    rounded-2xl
-                    [&>button]:first:rounded-tl-2xl [&>button]:first:rounded-bl-2xl
-                    [&>button]:last:rounded-tr-2xl [&>button]:last:rounded-br-2xl
-                `,
-                none: `
-                    rounded-none
-                `,
-                small: `
-                    rounded-xl
-                    [&>button]:first:rounded-tl-xl [&>button]:first:rounded-bl-xl
-                    [&>button]:last:rounded-tr-xl [&>button]:last:rounded-br-xl
-                `
+            medium: {
+                add: "rounded-2xl [&>button]:first:rounded-tl-2xl [&>button]:first:rounded-bl-2xl [&>button]:last:rounded-tr-2xl [&>button]:last:rounded-br-2xl",
+                remove: "rounded-md [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md [&>button]:last:rounded-tr-md [&>button]:last:rounded-br-md"
             },
-            size: {
-                large: `
-                    [&_svg]:w-5 [&_svg]:h-5
-                `,
-                medium: `
-                    [&_svg]:w-5 [&_svg]:h-5
-                `,
-                small: `
-                    [&_svg]:w-4 [&_svg]:h-4
-                `
+            small: {
+                add: "rounded-xl [&>button]:first:rounded-tl-xl [&>button]:first:rounded-bl-xl [&>button]:last:rounded-tr-xl [&>button]:last:rounded-br-xl",
+                remove: "rounded-sm [&>button]:first:rounded-tl-sm [&>button]:first:rounded-bl-sm [&>button]:last:rounded-tr-sm [&>button]:last:rounded-br-sm"
             }
-        },
-        defaultVariants: {
-            look: "default",
-            size: "medium",
-            rounded: "medium"
         }
     }
-);
+});

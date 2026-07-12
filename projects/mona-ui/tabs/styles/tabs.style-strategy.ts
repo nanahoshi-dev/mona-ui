@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     tabContentVariants as monaTabContentVariants,
     tabListBaseVariants as monaTabListBaseVariants,
@@ -47,5 +47,5 @@ export function createTabsStyleStrategy(overrides: readonly TabsStyleOverrides[]
         listItem: createTabListListItemVariants(reinaTabListListItemVariants, overrides, "reina"),
         scrollButton: createTabListScrollButtonVariants(reinaTabListScrollButtonVariants, overrides, "reina")
     };
-    return createThemeStrategy<TabsVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<TabsVariantsFunctions>(mona, { reina: reina });
 }

@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     subTreeListItemVariants as monaSubTreeListItemVariants,
     subTreeListVariants as monaSubTreeListVariants,
@@ -57,5 +57,5 @@ export function createTreeStyleStrategy(overrides: readonly TreeStyleOverrides[]
         treeNodeDragging: createTreeNodeDraggingVariants(reinaTreeNodeDraggingVariants, overrides, "reina"),
         treeNodeExpander: createTreeNodeExpanderVariants(reinaTreeNodeExpanderVariants, overrides, "reina")
     };
-    return createThemeStrategy<TreeVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<TreeVariantsFunctions>(mona, { reina: reina });
 }

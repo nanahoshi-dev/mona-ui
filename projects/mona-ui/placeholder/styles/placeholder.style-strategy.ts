@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     placeholderBaseVariants as monaPlaceholderBaseVariants,
     placeholderTextVariants as monaPlaceholderTextVariants
@@ -13,13 +13,13 @@ import type {
     PlaceholderVariantsFunctions
 } from "./placeholder.types";
 
-const defaultPlaceholderBaseStrategy = createThemeStrategy<PlaceholderBaseVariantsFunction>(
-    { mona: monaPlaceholderBaseVariants, reina: reinaPlaceholderBaseVariants },
-    monaPlaceholderBaseVariants
+const defaultPlaceholderBaseStrategy = createInheritedThemeStrategy<PlaceholderBaseVariantsFunction>(
+    monaPlaceholderBaseVariants,
+    { reina: reinaPlaceholderBaseVariants }
 );
-const defaultPlaceholderTextStrategy = createThemeStrategy<PlaceholderTextVariantsFunction>(
-    { mona: monaPlaceholderTextVariants, reina: reinaPlaceholderTextVariants },
-    monaPlaceholderTextVariants
+const defaultPlaceholderTextStrategy = createInheritedThemeStrategy<PlaceholderTextVariantsFunction>(
+    monaPlaceholderTextVariants,
+    { reina: reinaPlaceholderTextVariants }
 );
 
 export const placeholderBaseThemeVariants = (theme: ThemeStyle): PlaceholderBaseVariantsFunction =>
@@ -39,5 +39,5 @@ export function createPlaceholderStyleStrategy(
         base: createPlaceholderBaseVariants(reinaPlaceholderBaseVariants, overrides, "reina"),
         text: createPlaceholderTextVariants(reinaPlaceholderTextVariants, overrides, "reina")
     };
-    return createThemeStrategy<PlaceholderVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<PlaceholderVariantsFunctions>(mona, { reina: reina });
 }

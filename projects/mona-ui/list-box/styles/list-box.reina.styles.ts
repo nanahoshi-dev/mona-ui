@@ -1,58 +1,15 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    listBoxBaseVariants as monaListBoxBaseVariants,
+    listBoxToolbarVariants as monaListBoxToolbarVariants
+} from "./list-box.mona.styles";
 
-export const reinaListBoxBaseVariants = cva(
-    `
-        flex gap-1.5
-        [&_mona-list-view]:w-full
-    `,
-    {
-        variants: {
-            direction: {
-                horizontal: "flex-row",
-                vertical: "flex-col"
-            },
-            reversed: {
-                true: "",
-                false: ""
-            },
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                none: "rounded-none"
-            },
-            size: {
-                small: "text-sm",
-                medium: "text-base",
-                large: "text-lg"
-            }
-        },
-        compoundVariants: [
-            {
-                direction: "horizontal",
-                reversed: true,
-                class: "flex-row-reverse"
-            },
-            {
-                direction: "vertical",
-                reversed: true,
-                class: "flex-col-reverse"
-            }
-        ]
-    }
-);
+export const reinaListBoxBaseVariants = createInheritedVariants(monaListBoxBaseVariants, {
+    add: "gap-1.5",
+    remove: "gap-1"
+});
 
-export const reinaListBoxToolbarVariants = cva(
-    `
-        flex gap-1.5
-        items-center justify-center
-    `,
-    {
-        variants: {
-            direction: {
-                horizontal: "flex-row",
-                vertical: "flex-col"
-            }
-        }
-    }
-);
+export const reinaListBoxToolbarVariants = createInheritedVariants(monaListBoxToolbarVariants, {
+    add: "gap-1.5",
+    remove: "gap-1"
+});

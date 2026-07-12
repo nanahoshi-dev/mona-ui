@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     timeSelectorBaseVariants as monaTimeSelectorBaseVariants,
     timeSelectorFooterVariants as monaTimeSelectorFooterVariants,
@@ -39,33 +39,33 @@ import type {
     TimeSelectorVariantsFunctions
 } from "./time-selector.types";
 
-const defaultTimeSelectorBaseStrategy = createThemeStrategy<TimeSelectorBaseVariantsFunction>(
-    { mona: monaTimeSelectorBaseVariants, reina: reinaTimeSelectorBaseVariants },
-    monaTimeSelectorBaseVariants
+const defaultTimeSelectorBaseStrategy = createInheritedThemeStrategy<TimeSelectorBaseVariantsFunction>(
+    monaTimeSelectorBaseVariants,
+    { reina: reinaTimeSelectorBaseVariants }
 );
-const defaultTimeSelectorFooterStrategy = createThemeStrategy<TimeSelectorFooterVariantsFunction>(
-    { mona: monaTimeSelectorFooterVariants, reina: reinaTimeSelectorFooterVariants },
-    monaTimeSelectorFooterVariants
+const defaultTimeSelectorFooterStrategy = createInheritedThemeStrategy<TimeSelectorFooterVariantsFunction>(
+    monaTimeSelectorFooterVariants,
+    { reina: reinaTimeSelectorFooterVariants }
 );
-const defaultTimeSelectorHeaderStrategy = createThemeStrategy<TimeSelectorHeaderVariantsFunction>(
-    { mona: monaTimeSelectorHeaderVariants, reina: reinaTimeSelectorHeaderVariants },
-    monaTimeSelectorHeaderVariants
+const defaultTimeSelectorHeaderStrategy = createInheritedThemeStrategy<TimeSelectorHeaderVariantsFunction>(
+    monaTimeSelectorHeaderVariants,
+    { reina: reinaTimeSelectorHeaderVariants }
 );
-const defaultTimeSelectorInfoContainerStrategy = createThemeStrategy<TimeSelectorInfoContainerVariantsFunction>(
-    { mona: monaTimeSelectorInfoContainerVariants, reina: reinaTimeSelectorInfoContainerVariants },
-    monaTimeSelectorInfoContainerVariants
+const defaultTimeSelectorInfoContainerStrategy =
+    createInheritedThemeStrategy<TimeSelectorInfoContainerVariantsFunction>(monaTimeSelectorInfoContainerVariants, {
+        reina: reinaTimeSelectorInfoContainerVariants
+    });
+const defaultTimeSelectorListContainerStrategy =
+    createInheritedThemeStrategy<TimeSelectorListContainerVariantsFunction>(monaTimeSelectorListContainerVariants, {
+        reina: reinaTimeSelectorListContainerVariants
+    });
+const defaultTimeSelectorListStrategy = createInheritedThemeStrategy<TimeSelectorListVariantsFunction>(
+    monaTimeSelectorListVariants,
+    { reina: reinaTimeSelectorListVariants }
 );
-const defaultTimeSelectorListContainerStrategy = createThemeStrategy<TimeSelectorListContainerVariantsFunction>(
-    { mona: monaTimeSelectorListContainerVariants, reina: reinaTimeSelectorListContainerVariants },
-    monaTimeSelectorListContainerVariants
-);
-const defaultTimeSelectorListStrategy = createThemeStrategy<TimeSelectorListVariantsFunction>(
-    { mona: monaTimeSelectorListVariants, reina: reinaTimeSelectorListVariants },
-    monaTimeSelectorListVariants
-);
-const defaultTimeSelectorListItemStrategy = createThemeStrategy<TimeSelectorListItemVariantsFunction>(
-    { mona: monaTimeSelectorListItemVariants, reina: reinaTimeSelectorListItemVariants },
-    monaTimeSelectorListItemVariants
+const defaultTimeSelectorListItemStrategy = createInheritedThemeStrategy<TimeSelectorListItemVariantsFunction>(
+    monaTimeSelectorListItemVariants,
+    { reina: reinaTimeSelectorListItemVariants }
 );
 
 export const timeSelectorBaseThemeVariants = (theme: ThemeStyle): TimeSelectorBaseVariantsFunction =>
@@ -120,5 +120,5 @@ export function createTimeSelectorStyleStrategy(
         ),
         listItem: createTimeSelectorListItemVariants(reinaTimeSelectorListItemVariants, overrides, "reina")
     };
-    return createThemeStrategy<TimeSelectorVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<TimeSelectorVariantsFunctions>(mona, { reina: reina });
 }

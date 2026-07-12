@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     dateTimePickerBaseVariants as monaDateTimePickerBaseVariants,
     dateTimePickerFooterVariants as monaDateTimePickerFooterVariants,
@@ -23,17 +23,17 @@ import type {
     DateTimePickerVariantsFunctions
 } from "./datetime-picker.types";
 
-const defaultDateTimePickerBaseStrategy = createThemeStrategy<DateTimePickerBaseVariantsFunction>(
-    { mona: monaDateTimePickerBaseVariants, reina: reinaDateTimePickerBaseVariants },
-    monaDateTimePickerBaseVariants
+const defaultDateTimePickerBaseStrategy = createInheritedThemeStrategy<DateTimePickerBaseVariantsFunction>(
+    monaDateTimePickerBaseVariants,
+    { reina: reinaDateTimePickerBaseVariants }
 );
-const defaultDateTimePickerHeaderStrategy = createThemeStrategy<DateTimePickerHeaderVariantsFunction>(
-    { mona: monaDateTimePickerHeaderVariants, reina: reinaDateTimePickerHeaderVariants },
-    monaDateTimePickerHeaderVariants
+const defaultDateTimePickerHeaderStrategy = createInheritedThemeStrategy<DateTimePickerHeaderVariantsFunction>(
+    monaDateTimePickerHeaderVariants,
+    { reina: reinaDateTimePickerHeaderVariants }
 );
-const defaultDateTimePickerFooterStrategy = createThemeStrategy<DateTimePickerFooterVariantsFunction>(
-    { mona: monaDateTimePickerFooterVariants, reina: reinaDateTimePickerFooterVariants },
-    monaDateTimePickerFooterVariants
+const defaultDateTimePickerFooterStrategy = createInheritedThemeStrategy<DateTimePickerFooterVariantsFunction>(
+    monaDateTimePickerFooterVariants,
+    { reina: reinaDateTimePickerFooterVariants }
 );
 
 export const dateTimePickerBaseThemeVariants = (theme: ThemeStyle): DateTimePickerBaseVariantsFunction =>
@@ -56,5 +56,5 @@ export function createDateTimePickerStyleStrategy(
         footer: createDateTimePickerFooterVariants(reinaDateTimePickerFooterVariants, overrides, "reina"),
         header: createDateTimePickerHeaderVariants(reinaDateTimePickerHeaderVariants, overrides, "reina")
     };
-    return createThemeStrategy<DateTimePickerVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<DateTimePickerVariantsFunctions>(mona, { reina: reina });
 }

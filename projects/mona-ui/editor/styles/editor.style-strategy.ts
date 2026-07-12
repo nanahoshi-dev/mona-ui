@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     editorBaseVariants as monaEditorBaseVariants,
     editorContainerVariants as monaEditorContainerVariants,
@@ -210,5 +210,5 @@ export function createEditorStyleStrategy(overrides: readonly EditorStyleOverrid
         ),
         toolbar: createEditorVariants(reinaEditorToolbarVariants, overrides, "reina", override => override.toolbar)
     };
-    return createThemeStrategy<EditorVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<EditorVariantsFunctions>(mona, { reina: reina });
 }

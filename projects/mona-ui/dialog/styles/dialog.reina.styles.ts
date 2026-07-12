@@ -1,140 +1,108 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    dialogBaseVariants as monaDialogBaseVariants,
+    dialogContentContainerVariants as monaDialogContentContainerVariants,
+    dialogBodyVariants as monaDialogBodyVariants,
+    dialogHeaderVariants as monaDialogHeaderVariants,
+    dialogIconContainerVariants as monaDialogIconContainerVariants,
+    dialogIconVariants as monaDialogIconVariants,
+    dialogTitleContainerVariants as monaDialogTitleContainerVariants,
+    dialogCloseButtonContainerVariants as monaDialogCloseButtonContainerVariants,
+    dialogTitleVariants as monaDialogTitleVariants,
+    dialogDescriptionVariants as monaDialogDescriptionVariants,
+    dialogContentVariants as monaDialogContentVariants,
+    dialogFooterVariants as monaDialogFooterVariants
+} from "./dialog.mona.styles";
 
-export const reinaDialogBaseVariants = cva(
-    `
-        flex flex-col gap-0.5
-        w-full h-full
-        bg-background text-foreground
-        border border-border/60 shadow-xl
-        outline-none overflow-hidden
-    `,
-    {
-        variants: {
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-lg",
-                medium: "rounded-xl",
-                large: "rounded-2xl"
-            }
-        },
-        defaultVariants: {
-            rounded: "medium"
-        }
-    }
-);
-
-export const reinaDialogContentContainerVariants = cva(
-    `
-        flex flex-row gap-1 flex-1
-    `
-);
-
-export const reinaDialogBodyVariants = cva(
-    `
-        flex flex-col gap-0 pb-2
-        w-full h-full pr-2
-    `,
-    {
-        variants: {
-            hasIcon: {
-                true: "",
-                false: "pl-5"
-            }
-        }
-    }
-);
-
-export const reinaDialogHeaderVariants = cva(
-    `
-        flex flex-row gap-2
-        pt-4 select-none
-    `
-);
-
-export const reinaDialogIconContainerVariants = cva(
-    `
-        flex items-start justify-center pt-8 pr-4 pl-6
-    `
-);
-
-export const reinaDialogIconVariants = cva(
-    `
-        rounded-full w-fit h-fit p-1.5 border relative
-        [&>span]:absolute [&>span]:flex [&>span]:rounded-full
-        [&>span]:-top-3 [&>span]:-right-3 [&>span]:-bottom-3 [&>span]:-left-3
-        [&>span]:border [&>span]:min-w-full [&>span]:min-h-full
-    `,
-    {
-        variants: {
-            type: {
-                confirm: "border-success/15 bg-success/15 [&>span]:border-success/8 [&>span]:bg-success/8",
-                error: "border-error/15 bg-error/15 [&>span]:border-error/8 [&>span]:bg-error/8",
-                warning: "border-warning/15 bg-warning/15 [&>span]:border-warning/8 [&>span]:bg-warning/8",
-                info: "border-info/15 bg-info/15 [&>span]:border-info/8 [&>span]:bg-info/8",
-                success: "border-success/15 bg-success/15 [&>span]:border-success/8 [&>span]:bg-success/8"
-            }
-        },
-        defaultVariants: {
-            type: "info"
-        }
-    }
-);
-
-export const reinaDialogTitleContainerVariants = cva(
-    `
-        flex flex-1 items-center justify-start select-none p-1
-    `
-);
-
-export const reinaDialogCloseButtonContainerVariants = cva(
-    `
-        flex items-start justify-end
-    `
-);
-
-export const reinaDialogTitleVariants = cva(
-    `
-        text-lg font-semibold leading-none tracking-tight
-    `
-);
-
-export const reinaDialogDescriptionVariants = cva(
-    `
-        text-sm text-foreground/60
-        select-none
-    `
-);
-
-export const reinaDialogContentVariants = cva(
-    `
-        flex-1 overflow-auto p-1
-    `
-);
-
-export const reinaDialogFooterVariants = cva(
-    `
-        flex flex-row
-        gap-2 px-4 py-2
-        border-t border-border/60
-        select-none
-    `,
-    {
-        variants: {
-            layout: {
-                center: "justify-center",
-                end: "justify-end",
-                start: "justify-start",
-                stretched: "[&>*]:flex-1"
+export const reinaDialogBaseVariants = createInheritedVariants(monaDialogBaseVariants, {
+    add: "border-border/60 shadow-xl",
+    remove: "border-border shadow-sm",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-lg",
+                remove: "rounded-sm"
             },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-es-lg rounded-ee-lg",
-                medium: "rounded-es-xl rounded-ee-xl",
-                large: "rounded-es-2xl rounded-ee-2xl"
+            medium: {
+                add: "rounded-xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-2xl",
+                remove: "rounded-lg"
             }
-        },
-        defaultVariants: {
-            rounded: "medium"
         }
     }
+});
+
+export const reinaDialogContentContainerVariants = createInheritedVariants(monaDialogContentContainerVariants, {});
+
+export const reinaDialogBodyVariants = createInheritedVariants(monaDialogBodyVariants, {});
+
+export const reinaDialogHeaderVariants = createInheritedVariants(monaDialogHeaderVariants, {});
+
+export const reinaDialogIconContainerVariants = createInheritedVariants(monaDialogIconContainerVariants, {});
+
+export const reinaDialogIconVariants = createInheritedVariants(monaDialogIconVariants, {
+    variants: {
+        type: {
+            confirm: {
+                add: "border-success/15 bg-success/15 [&>span]:border-success/8 [&>span]:bg-success/8",
+                remove: "border-success/10 bg-success/10 [&>span]:border-success/5 [&>span]:bg-success/5"
+            },
+            error: {
+                add: "border-error/15 bg-error/15 [&>span]:border-error/8 [&>span]:bg-error/8",
+                remove: "border-error/10 bg-error/10 [&>span]:border-error/5 [&>span]:bg-error/5"
+            },
+            warning: {
+                add: "border-warning/15 bg-warning/15 [&>span]:border-warning/8 [&>span]:bg-warning/8",
+                remove: "border-warning/10 bg-warning/10 [&>span]:border-warning/5 [&>span]:bg-warning/5"
+            },
+            info: {
+                add: "border-info/15 bg-info/15 [&>span]:border-info/8 [&>span]:bg-info/8",
+                remove: "border-info/10 bg-info/10 [&>span]:border-info/5 [&>span]:bg-info/5"
+            },
+            success: {
+                add: "border-success/15 bg-success/15 [&>span]:border-success/8 [&>span]:bg-success/8",
+                remove: "border-success/10 bg-success/10 [&>span]:border-success/5 [&>span]:bg-success/5"
+            }
+        }
+    }
+});
+
+export const reinaDialogTitleContainerVariants = createInheritedVariants(monaDialogTitleContainerVariants, {});
+
+export const reinaDialogCloseButtonContainerVariants = createInheritedVariants(
+    monaDialogCloseButtonContainerVariants,
+    {}
 );
+
+export const reinaDialogTitleVariants = createInheritedVariants(monaDialogTitleVariants, {});
+
+export const reinaDialogDescriptionVariants = createInheritedVariants(monaDialogDescriptionVariants, {
+    add: "text-foreground/60",
+    remove: "text-muted-foreground"
+});
+
+export const reinaDialogContentVariants = createInheritedVariants(monaDialogContentVariants, {});
+
+export const reinaDialogFooterVariants = createInheritedVariants(monaDialogFooterVariants, {
+    add: "border-border/60",
+    remove: "border-border",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-es-lg rounded-ee-lg",
+                remove: "rounded-es-sm rounded-ee-sm"
+            },
+            medium: {
+                add: "rounded-es-xl rounded-ee-xl",
+                remove: "rounded-es-md rounded-ee-md"
+            },
+            large: {
+                add: "rounded-es-2xl rounded-ee-2xl",
+                remove: "rounded-es-lg rounded-ee-lg"
+            }
+        }
+    }
+});

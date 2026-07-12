@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     listGroupHeaderTextVariants as monaListGroupHeaderTextVariants,
     listGroupHeaderVariants as monaListGroupHeaderVariants,
@@ -42,5 +42,5 @@ export function createListStyleStrategy(overrides: readonly ListStylesOverrides[
         itemBase: createListItemBaseVariants(reinaListItemBaseVariants, overrides, "reina"),
         itemContent: createListItemContentVariants(reinaListItemContentVariants, overrides, "reina")
     };
-    return createThemeStrategy<ListStylesVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ListStylesVariantsFunctions>(mona, { reina: reina });
 }

@@ -42,7 +42,6 @@ describe("IndicatorIconComponent", () => {
         const fixture = await createFixture("dropdown");
 
         expect(getIndicator(fixture).querySelector("svg")).toBeTruthy();
-        expect(getIndicator(fixture).classList.contains("opacity-50")).toBe(true);
     });
 
     it("renders the loading preset with spinner class", async () => {

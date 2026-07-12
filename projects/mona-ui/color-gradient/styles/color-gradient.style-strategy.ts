@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     colorGradientBaseVariants as monaColorGradientBaseVariants,
     colorGradientHsvRectangleHandleVariants as monaColorGradientHsvRectangleHandleVariants,
@@ -31,27 +31,27 @@ import type {
     ColorGradientVariantsFunctions
 } from "./color-gradient.types";
 
-const defaultColorGradientBaseStrategy = createThemeStrategy<ColorGradientBaseVariantsFunction>(
-    { mona: monaColorGradientBaseVariants, reina: reinaColorGradientBaseVariants },
-    monaColorGradientBaseVariants
+const defaultColorGradientBaseStrategy = createInheritedThemeStrategy<ColorGradientBaseVariantsFunction>(
+    monaColorGradientBaseVariants,
+    { reina: reinaColorGradientBaseVariants }
 );
-const defaultColorGradientHsvRectangleStrategy = createThemeStrategy<ColorGradientHsvRectangleVariantsFunction>(
-    { mona: monaColorGradientHsvRectangleVariants, reina: reinaColorGradientHsvRectangleVariants },
-    monaColorGradientHsvRectangleVariants
-);
+const defaultColorGradientHsvRectangleStrategy =
+    createInheritedThemeStrategy<ColorGradientHsvRectangleVariantsFunction>(monaColorGradientHsvRectangleVariants, {
+        reina: reinaColorGradientHsvRectangleVariants
+    });
 const defaultColorGradientHsvRectangleHandleStrategy =
-    createThemeStrategy<ColorGradientHsvRectangleHandleVariantsFunction>(
-        { mona: monaColorGradientHsvRectangleHandleVariants, reina: reinaColorGradientHsvRectangleHandleVariants },
-        monaColorGradientHsvRectangleHandleVariants
+    createInheritedThemeStrategy<ColorGradientHsvRectangleHandleVariantsFunction>(
+        monaColorGradientHsvRectangleHandleVariants,
+        { reina: reinaColorGradientHsvRectangleHandleVariants }
     );
-const defaultColorGradientPreviewStrategy = createThemeStrategy<ColorGradientPreviewVariantsFunction>(
-    { mona: monaColorGradientPreviewVariants, reina: reinaColorGradientPreviewVariants },
-    monaColorGradientPreviewVariants
+const defaultColorGradientPreviewStrategy = createInheritedThemeStrategy<ColorGradientPreviewVariantsFunction>(
+    monaColorGradientPreviewVariants,
+    { reina: reinaColorGradientPreviewVariants }
 );
-const defaultColorGradientSliderHandleStrategy = createThemeStrategy<ColorGradientSliderHandleVariantsFunction>(
-    { mona: monaColorGradientSliderHandleVariants, reina: reinaColorGradientSliderHandleVariants },
-    monaColorGradientSliderHandleVariants
-);
+const defaultColorGradientSliderHandleStrategy =
+    createInheritedThemeStrategy<ColorGradientSliderHandleVariantsFunction>(monaColorGradientSliderHandleVariants, {
+        reina: reinaColorGradientSliderHandleVariants
+    });
 
 export const colorGradientBaseThemeVariants = (theme: ThemeStyle): ColorGradientBaseVariantsFunction =>
     defaultColorGradientBaseStrategy.resolve(theme);
@@ -98,5 +98,5 @@ export function createColorGradientStyleStrategy(
             "reina"
         )
     };
-    return createThemeStrategy<ColorGradientVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ColorGradientVariantsFunctions>(mona, { reina: reina });
 }

@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     splitterBaseVariants as monaSplitterBaseVariants,
     splitterResizerHandleVariants as monaSplitterResizerHandleVariants,
@@ -23,17 +23,17 @@ import type {
     SplitterVariantsFunctions
 } from "./splitter.types";
 
-const defaultSplitterBaseStrategy = createThemeStrategy<SplitterBaseVariantsFunction>(
-    { mona: monaSplitterBaseVariants, reina: reinaSplitterBaseVariants },
-    monaSplitterBaseVariants
+const defaultSplitterBaseStrategy = createInheritedThemeStrategy<SplitterBaseVariantsFunction>(
+    monaSplitterBaseVariants,
+    { reina: reinaSplitterBaseVariants }
 );
-const defaultSplitterResizerStrategy = createThemeStrategy<SplitterResizerVariantsFunction>(
-    { mona: monaSplitterResizerVariants, reina: reinaSplitterResizerVariants },
-    monaSplitterResizerVariants
+const defaultSplitterResizerStrategy = createInheritedThemeStrategy<SplitterResizerVariantsFunction>(
+    monaSplitterResizerVariants,
+    { reina: reinaSplitterResizerVariants }
 );
-const defaultSplitterResizerHandleStrategy = createThemeStrategy<SplitterResizerHandleVariantsFunction>(
-    { mona: monaSplitterResizerHandleVariants, reina: reinaSplitterResizerHandleVariants },
-    monaSplitterResizerHandleVariants
+const defaultSplitterResizerHandleStrategy = createInheritedThemeStrategy<SplitterResizerHandleVariantsFunction>(
+    monaSplitterResizerHandleVariants,
+    { reina: reinaSplitterResizerHandleVariants }
 );
 
 export const splitterBaseThemeVariants = (theme: ThemeStyle): SplitterBaseVariantsFunction =>
@@ -54,5 +54,5 @@ export function createSplitterStyleStrategy(overrides: readonly SplitterStyleOve
         resizer: createSplitterResizerVariants(reinaSplitterResizerVariants, overrides, "reina"),
         resizerHandle: createSplitterResizerHandleVariants(reinaSplitterResizerHandleVariants, overrides, "reina")
     };
-    return createThemeStrategy<SplitterVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<SplitterVariantsFunctions>(mona, { reina: reina });
 }

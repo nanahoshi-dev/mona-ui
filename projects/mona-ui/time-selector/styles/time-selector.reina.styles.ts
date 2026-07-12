@@ -1,98 +1,41 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    timeSelectorBaseVariants as monaTimeSelectorBaseVariants,
+    timeSelectorFooterVariants as monaTimeSelectorFooterVariants,
+    timeSelectorHeaderVariants as monaTimeSelectorHeaderVariants,
+    timeSelectorInfoContainerVariants as monaTimeSelectorInfoContainerVariants,
+    timeSelectorListContainerVariants as monaTimeSelectorListContainerVariants,
+    timeSelectorListVariants as monaTimeSelectorListVariants,
+    timeSelectorListItemVariants as monaTimeSelectorListItemVariants
+} from "./time-selector.mona.styles";
 
-export const reinaTimeSelectorBaseVariants = cva(
-    `
-        flex flex-col w-full h-full overflow-hidden
-        data-[invalid='true']:border data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
-        transition-[color,box-shadow,border] ease-out duration-150
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "opacity-40 cursor-not-allowed pointer-events-none",
-                false: ""
-            },
-            size: {
-                small: "text-xs",
-                medium: "text-sm",
-                large: "text-md"
+export const reinaTimeSelectorBaseVariants = createInheritedVariants(monaTimeSelectorBaseVariants, {
+    add: "data-[invalid='true']:ring-error/35 transition-[box-shadow,border] ease-out duration-150",
+    remove: "data-[invalid='true']:ring-error/40",
+    variants: {
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
             }
         }
     }
+});
+
+export const reinaTimeSelectorFooterVariants = createInheritedVariants(monaTimeSelectorFooterVariants, {});
+
+export const reinaTimeSelectorHeaderVariants = createInheritedVariants(monaTimeSelectorHeaderVariants, {});
+
+export const reinaTimeSelectorInfoContainerVariants = createInheritedVariants(
+    monaTimeSelectorInfoContainerVariants,
+    {}
 );
 
-export const reinaTimeSelectorFooterVariants = cva(
-    `
-        w-full flex items-center justify-end px-1 py-1 border-0 border-t border-input-border bg-accent
-    `
+export const reinaTimeSelectorListContainerVariants = createInheritedVariants(
+    monaTimeSelectorListContainerVariants,
+    {}
 );
 
-export const reinaTimeSelectorHeaderVariants = cva(
-    `
-        flex bg-accent text-accent-foreground
-        border-b border-input-border
-        text-xs font-semibold uppercase
-        [&>div]:flex-1 [&>div]:py-2 [&>div]:text-center
-    `
-);
+export const reinaTimeSelectorListVariants = createInheritedVariants(monaTimeSelectorListVariants, {});
 
-export const reinaTimeSelectorInfoContainerVariants = cva(
-    `
-        flex items-center justify-between
-        px-2 py-1 border-b border-input-border/40
-        [&>span]:text-xs [&>span]:font-medium [&>span]:select-none
-    `
-);
-
-export const reinaTimeSelectorListContainerVariants = cva(
-    `
-        flex flex-row w-full relative overflow-hidden
-    `
-);
-
-export const reinaTimeSelectorListVariants = cva(
-    `
-        flex-1 overflow-y-auto h-full
-        scrollbar-hide scroll-smooth
-        snap-y snap-mandatory
-        scrollbar-width:none
-        select-none outline-none
-        [&::-webkit-scrollbar]:hidden
-        focus-visible:bg-input-hover
-        focus-within:bg-input-hover
-    `,
-    {
-        variants: {
-            size: {
-                small: "h-24",
-                medium: "h-32",
-                large: "h-40"
-            }
-        }
-    }
-);
-
-export const reinaTimeSelectorListItemVariants = cva(
-    `
-        flex items-center justify-center cursor-pointer
-        snap-center relative z-10
-        transition-colors ease-out duration-150
-    `,
-    {
-        variants: {
-            selected: {
-                true: "bg-primary text-primary-foreground",
-                false: ""
-            },
-            size: {
-                small: "h-6",
-                medium: "h-7",
-                large: "h-8"
-            }
-        },
-        defaultVariants: {
-            selected: false
-        }
-    }
-);
+export const reinaTimeSelectorListItemVariants = createInheritedVariants(monaTimeSelectorListItemVariants, {});

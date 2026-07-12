@@ -1,58 +1,54 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    fieldsetBaseVariants as monaFieldsetBaseVariants,
+    fieldsetVariants as monaFieldsetVariants,
+    fieldsetLegendVariants as monaFieldsetLegendVariants
+} from "./fieldset.mona.styles";
 
-export const reinaFieldsetBaseVariants = cva(
-    `
-        block
-    `
-);
+export const reinaFieldsetBaseVariants = createInheritedVariants(monaFieldsetBaseVariants, {});
 
-export const reinaFieldsetVariants = cva(
-    `
-        bg-background
-        border border-border/60
-        text-foreground
-        shadow-xs
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-md",
-                medium: "rounded-xl",
-                large: "rounded-2xl",
-                full: "rounded-full",
-                none: "rounded-none"
+export const reinaFieldsetVariants = createInheritedVariants(monaFieldsetVariants, {
+    add: "border-border/60 shadow-xs",
+    remove: "border-border",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-md",
+                remove: "rounded-sm"
             },
-            disabled: {
-                true: "pointer-events-none opacity-40 cursor-not-allowed select-none",
-                false: ""
+            medium: {
+                add: "rounded-xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-2xl",
+                remove: "rounded-lg"
             }
         },
-        defaultVariants: {
-            disabled: false
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
+            }
         }
     }
-);
+});
 
-export const reinaFieldsetLegendVariants = cva(
-    `
-        ml-3 font-medium
-    `,
-    {
-        variants: {
-            hasTemplate: {
-                true: "",
-                false: "bg-background-dark text-foreground/70 border border-border/60 px-2.5 text-xs tracking-wide"
-            },
-            rounded: {
-                small: "rounded",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full",
-                none: "rounded-none"
+export const reinaFieldsetLegendVariants = createInheritedVariants(monaFieldsetLegendVariants, {
+    add: "ml-3 font-medium",
+    remove: "ml-2",
+    variants: {
+        hasTemplate: {
+            false: {
+                add: "text-foreground/70 border-border/60 px-2.5 text-xs tracking-wide",
+                remove: "text-foreground border-border px-2"
             }
         },
-        defaultVariants: {
-            hasTemplate: false
+        rounded: {
+            small: {
+                add: "rounded",
+                remove: "rounded-sm"
+            }
         }
     }
-);
+});

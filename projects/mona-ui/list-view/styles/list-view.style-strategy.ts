@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import { listViewBaseVariants as monaListViewBaseVariants } from "./list-view.mona.styles";
 import { reinaListViewBaseVariants } from "./list-view.reina.styles";
 import { createListViewBaseVariants } from "./list-view.style-composition";
@@ -11,5 +11,5 @@ export function createListViewStyleStrategy(overrides: readonly ListViewStyleOve
     const reina: ListViewVariantsFunctions = {
         base: createListViewBaseVariants(reinaListViewBaseVariants, overrides, "reina")
     };
-    return createThemeStrategy<ListViewVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ListViewVariantsFunctions>(mona, { reina: reina });
 }

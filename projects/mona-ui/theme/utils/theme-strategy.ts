@@ -12,3 +12,15 @@ export function createThemeStrategy<TStyle>(
         resolve: (theme: ThemeStyle) => styles[theme] ?? fallback
     };
 }
+
+/**
+ * Creates a strategy whose unspecified themes inherit the canonical Mona style.
+ * Theme-specific styles are expected to have already been composed from the
+ * Mona recipe, so application-provided style layers can be applied afterwards.
+ */
+export function createInheritedThemeStrategy<TStyle>(
+    mona: TStyle,
+    inheritedStyles: Partial<Record<Exclude<ThemeStyle, "mona">, TStyle>>
+): ThemeStrategy<TStyle> {
+    return createThemeStrategy({ mona, ...inheritedStyles }, mona);
+}

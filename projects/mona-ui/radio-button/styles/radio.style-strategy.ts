@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     radioButtonCircleVariants as monaRadioButtonCircleVariants,
     radioButtonContainerLabelVariants as monaRadioButtonContainerLabelVariants,
@@ -31,25 +31,25 @@ import type {
     RadioButtonVariantsFunctions
 } from "./radio.types";
 
-const defaultRadioButtonHostStrategy = createThemeStrategy<RadioButtonVariantsFunction>(
-    { mona: monaRadioButtonVariants, reina: reinaRadioButtonVariants },
-    monaRadioButtonVariants
+const defaultRadioButtonHostStrategy = createInheritedThemeStrategy<RadioButtonVariantsFunction>(
+    monaRadioButtonVariants,
+    { reina: reinaRadioButtonVariants }
 );
-const defaultRadioButtonCircleStrategy = createThemeStrategy<RadioButtonCircleVariantsFunction>(
-    { mona: monaRadioButtonCircleVariants, reina: reinaRadioButtonCircleVariants },
-    monaRadioButtonCircleVariants
+const defaultRadioButtonCircleStrategy = createInheritedThemeStrategy<RadioButtonCircleVariantsFunction>(
+    monaRadioButtonCircleVariants,
+    { reina: reinaRadioButtonCircleVariants }
 );
-const defaultRadioButtonIndicatorStrategy = createThemeStrategy<RadioButtonIndicatorVariantsFunction>(
-    { mona: monaRadioButtonIndicatorVariants, reina: reinaRadioButtonIndicatorVariants },
-    monaRadioButtonIndicatorVariants
+const defaultRadioButtonIndicatorStrategy = createInheritedThemeStrategy<RadioButtonIndicatorVariantsFunction>(
+    monaRadioButtonIndicatorVariants,
+    { reina: reinaRadioButtonIndicatorVariants }
 );
-const defaultRadioButtonContainerLabelStrategy = createThemeStrategy<RadioButtonContainerLabelVariantsFunction>(
-    { mona: monaRadioButtonContainerLabelVariants, reina: reinaRadioButtonContainerLabelVariants },
-    monaRadioButtonContainerLabelVariants
-);
-const defaultRadioButtonDirectiveStrategy = createThemeStrategy<RadioButtonDirectiveVariantsFunction>(
-    { mona: monaRadioButtonDirectiveVariants, reina: reinaRadioButtonDirectiveVariants },
-    monaRadioButtonDirectiveVariants
+const defaultRadioButtonContainerLabelStrategy =
+    createInheritedThemeStrategy<RadioButtonContainerLabelVariantsFunction>(monaRadioButtonContainerLabelVariants, {
+        reina: reinaRadioButtonContainerLabelVariants
+    });
+const defaultRadioButtonDirectiveStrategy = createInheritedThemeStrategy<RadioButtonDirectiveVariantsFunction>(
+    monaRadioButtonDirectiveVariants,
+    { reina: reinaRadioButtonDirectiveVariants }
 );
 
 export const radioButtonThemeVariants = (theme: ThemeStyle): RadioButtonVariantsFunction =>
@@ -88,5 +88,5 @@ export function createRadioButtonStyleStrategy(
         host: createRadioButtonHostVariants(reinaRadioButtonVariants, overrides, "reina"),
         indicator: createRadioButtonIndicatorVariants(reinaRadioButtonIndicatorVariants, overrides, "reina")
     };
-    return createThemeStrategy<RadioButtonVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<RadioButtonVariantsFunctions>(mona, { reina: reina });
 }

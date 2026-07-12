@@ -1,58 +1,41 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    dropdownListInputVariants as monaDropdownListInputVariants,
+    dropdownListValueContainerVariants as monaDropdownListValueContainerVariants,
+    dropdownListAffixContainerVariants as monaDropdownListAffixContainerVariants
+} from "./dropdown-list.mona.styles";
 
-export const reinaDropdownListInputVariants = cva(
-    `
-        inline-flex items-center
-
-        border border-input-border
-        bg-input-background outline-none
-        text-foreground shadow-xs
-        cursor-pointer select-none
-
-        hover:bg-input-hover
-        transition-[color,box-shadow,border,background-color] ease-out duration-150
-        focus-within:ring-2 focus-within:ring-primary/35
-        focus-within:border-primary
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "pointer-events-none cursor-not-allowed opacity-40",
-                false: ""
-            },
-            expanded: {
-                true: "ring-2 ring-primary/35 border-primary",
-                false: ""
-            },
-            hasPrefix: {
-                false: "ps-2"
-            },
-            invalid: {
-                true: "border-error ring-2 ring-error/35",
-                false: ""
-            },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full px-3"
-            },
-            size: {
-                large: "h-10 text-md",
-                medium: "h-9 text-sm",
-                small: "h-8 text-xs"
-            }
-        }
-    }
-);
-
-export const reinaDropdownListValueContainerVariants = cva(`overflow-hidden h-full w-full flex items-center`, {
+export const reinaDropdownListInputVariants = createInheritedVariants(monaDropdownListInputVariants, {
+    add: "border-border hover:bg-hover transition-[color,box-shadow,border,background-color] ease-out duration-150 focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary",
+    remove: "border-input-border hover:bg-accent hover:text-accent-foreground transition-[color,box-shadow,border] ease-in-out duration-300 focus-within:ring-1 focus-within:ring-primary/40",
     variants: {
-        hasTemplate: {
-            false: "[&>span]:truncate [&>span]:items-center [&>span]:inline-block"
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
+            }
+        },
+        expanded: {
+            true: {
+                add: "ring-2 ring-primary/35 border-primary",
+                remove: "ring-1 ring-primary/40"
+            }
+        },
+        invalid: {
+            true: {
+                add: "ring-2 ring-error/35",
+                remove: "ring-1 ring-error/40"
+            }
         }
     }
 });
 
-export const reinaDropdownListAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);
+export const reinaDropdownListValueContainerVariants = createInheritedVariants(
+    monaDropdownListValueContainerVariants,
+    {}
+);
+
+export const reinaDropdownListAffixContainerVariants = createInheritedVariants(
+    monaDropdownListAffixContainerVariants,
+    {}
+);

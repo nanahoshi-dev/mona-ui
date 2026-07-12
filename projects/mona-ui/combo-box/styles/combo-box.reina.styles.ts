@@ -1,70 +1,37 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    comboBoxBaseVariants as monaComboBoxBaseVariants,
+    comboBoxTextInputVariants as monaComboBoxTextInputVariants,
+    comboBoxAffixContainerVariants as monaComboBoxAffixContainerVariants
+} from "./combo-box.mona.styles";
 
-export const reinaComboBoxBaseVariants = cva(
-    `
-        flex items-center
-        border border-input-border outline-none
-        bg-input-background shadow-xs text-foreground
-        cursor-pointer
-        focus-within:ring-2 focus-within:ring-primary/35
-        focus-within:border-primary
-        transition-[color,box-shadow,border,background-color] ease-out duration-150
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "pointer-events-none opacity-40 cursor-not-allowed"
-            },
-            focused: {
-                true: "ring-2 ring-primary/35 border-primary"
-            },
-            invalid: {
-                true: "border-error ring-2 ring-error/35",
-                false: ""
-            },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full"
-            },
-            size: {
-                small: "h-8 text-xs",
-                medium: "h-9 text-sm",
-                large: "h-10 text-md"
+export const reinaComboBoxBaseVariants = createInheritedVariants(monaComboBoxBaseVariants, {
+    add: "border-border bg-input-background focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary transition-[color,box-shadow,border,background-color] ease-out duration-150",
+    remove: "border-input-border bg-background focus-within:ring-1 focus-within:ring-primary/40 transition-[color,box-shadow,border] ease-in-out duration-300",
+    variants: {
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
             }
         },
-        defaultVariants: {
-            disabled: false,
-            focused: false,
-            invalid: false,
-            rounded: "medium",
-            size: "medium"
-        }
-    }
-);
-
-export const reinaComboBoxTextInputVariants = cva(
-    `
-        border-none outline-none
-        bg-transparent shadow-none
-        px-2 h-full w-full text-ellipsis
-        focus-within:ring-0 focus-within:shadow-none
-        focus-visible:ring-0 focus-visible:shadow-none
-        placeholder:text-foreground/40
-    `,
-    {
-        variants: {
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full px-3"
+        focused: {
+            true: {
+                add: "ring-2 ring-primary/35 border-primary",
+                remove: "ring-1 ring-primary/40"
+            }
+        },
+        invalid: {
+            true: {
+                add: "ring-2 ring-error/35",
+                remove: "ring-1 ring-error/40"
             }
         }
     }
-);
+});
 
-export const reinaComboBoxAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);
+export const reinaComboBoxTextInputVariants = createInheritedVariants(monaComboBoxTextInputVariants, {
+    add: "placeholder:text-foreground/40"
+});
+
+export const reinaComboBoxAffixContainerVariants = createInheritedVariants(monaComboBoxAffixContainerVariants, {});

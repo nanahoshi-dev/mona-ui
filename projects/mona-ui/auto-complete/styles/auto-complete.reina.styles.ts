@@ -1,71 +1,46 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    autoCompleteBaseVariants as monaAutoCompleteBaseVariants,
+    autoCompleteTextInputVariants as monaAutoCompleteTextInputVariants,
+    autoCompleteAffixContainerVariants as monaAutoCompleteAffixContainerVariants
+} from "./auto-complete.mona.styles";
 
-export const reinaAutoCompleteBaseVariants = cva(
-    `
-        flex
-        border border-input-border outline-none
-        bg-input-background shadow-xs text-foreground
-        focus-within:ring-2 focus-within:ring-primary/35
-        focus-within:border-primary
-        transition-[color,box-shadow,border,background-color] ease-out duration-150
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "pointer-events-none opacity-40 cursor-not-allowed"
-            },
-            expanded: {
-                true: "ring-2 ring-primary/35 border-primary"
-            },
-            focused: {
-                true: "ring-2 ring-primary/35 border-primary"
-            },
-            invalid: {
-                true: "border-error ring-2 ring-error/35",
-                false: ""
-            },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full"
-            },
-            size: {
-                large: "h-10 text-md",
-                medium: "h-9 text-sm",
-                small: "h-8 text-xs"
+export const reinaAutoCompleteBaseVariants = createInheritedVariants(monaAutoCompleteBaseVariants, {
+    add: "border-border bg-input-background focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary transition-[color,box-shadow,border,background-color] ease-out duration-150",
+    remove: "border-input-border bg-background focus-within:ring-1 focus-within:ring-primary/40 transition-[color,box-shadow,border] ease-in-out duration-300",
+    variants: {
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
             }
         },
-        defaultVariants: {
-            disabled: false,
-            focused: false,
-            invalid: false,
-            rounded: "medium",
-            size: "medium"
-        }
-    }
-);
-
-export const reinaAutoCompleteTextInputVariants = cva(
-    `
-        border-none outline-none
-        bg-transparent shadow-none
-        px-2 h-full w-full text-ellipsis
-        focus-within:ring-0 focus-visible:ring-0
-        placeholder:text-foreground/40
-    `,
-    {
-        variants: {
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full px-3"
+        expanded: {
+            true: {
+                add: "ring-2 ring-primary/35 border-primary",
+                remove: "ring-1 ring-primary/40"
+            }
+        },
+        focused: {
+            true: {
+                add: "ring-2 ring-primary/35 border-primary",
+                remove: "ring-1 ring-primary/40"
+            }
+        },
+        invalid: {
+            true: {
+                add: "ring-2 ring-error/35",
+                remove: "ring-1 ring-error/40"
             }
         }
     }
-);
+});
 
-export const reinaAutoCompleteAffixContainerVariants = cva(`h-full flex flex-none items-center justify-center`);
+export const reinaAutoCompleteTextInputVariants = createInheritedVariants(monaAutoCompleteTextInputVariants, {
+    add: "placeholder:text-foreground/40"
+});
+
+export const reinaAutoCompleteAffixContainerVariants = createInheritedVariants(
+    monaAutoCompleteAffixContainerVariants,
+    {}
+);

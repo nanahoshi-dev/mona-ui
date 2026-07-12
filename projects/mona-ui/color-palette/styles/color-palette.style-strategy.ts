@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     colorPaletteBaseVariants as monaColorPaletteBaseVariants,
     colorPaletteItemVariants as monaColorPaletteItemVariants
@@ -13,13 +13,13 @@ import type {
     ColorPaletteVariantsFunctions
 } from "./color-palette.types";
 
-const defaultColorPaletteBaseStrategy = createThemeStrategy<ColorPaletteBaseVariantsFunction>(
-    { mona: monaColorPaletteBaseVariants, reina: reinaColorPaletteBaseVariants },
-    monaColorPaletteBaseVariants
+const defaultColorPaletteBaseStrategy = createInheritedThemeStrategy<ColorPaletteBaseVariantsFunction>(
+    monaColorPaletteBaseVariants,
+    { reina: reinaColorPaletteBaseVariants }
 );
-const defaultColorPaletteItemStrategy = createThemeStrategy<ColorPaletteItemVariantsFunction>(
-    { mona: monaColorPaletteItemVariants, reina: reinaColorPaletteItemVariants },
-    monaColorPaletteItemVariants
+const defaultColorPaletteItemStrategy = createInheritedThemeStrategy<ColorPaletteItemVariantsFunction>(
+    monaColorPaletteItemVariants,
+    { reina: reinaColorPaletteItemVariants }
 );
 
 export const colorPaletteBaseThemeVariants = (theme: ThemeStyle): ColorPaletteBaseVariantsFunction =>
@@ -38,5 +38,5 @@ export function createColorPaletteStyleStrategy(
         base: createColorPaletteBaseVariants(reinaColorPaletteBaseVariants, overrides, "reina"),
         item: createColorPaletteItemVariants(reinaColorPaletteItemVariants, overrides, "reina")
     };
-    return createThemeStrategy<ColorPaletteVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ColorPaletteVariantsFunctions>(mona, { reina: reina });
 }

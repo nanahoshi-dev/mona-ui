@@ -44,6 +44,7 @@ import {
     DropdownService
 } from "@nanahoshi/mona-ui/dropdowns";
 import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import {
@@ -55,7 +56,11 @@ import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
-import { DATE_PICKER_STYLE_STRATEGY, DatePickerVariantInput, DatePickerVariantProps } from "../../styles/date-picker.styles";
+import {
+    DATE_PICKER_STYLE_STRATEGY,
+    DatePickerVariantInput,
+    DatePickerVariantProps
+} from "../../styles/date-picker.styles";
 
 @Component({
     selector: "mona-date-picker",
@@ -79,7 +84,8 @@ import { DATE_PICKER_STYLE_STRATEGY, DatePickerVariantInput, DatePickerVariantPr
         CalendarYearCellTemplateDirective,
         TextBoxPrefixTemplateDirective,
         ButtonDirective,
-        CdkTrapFocus
+        CdkTrapFocus,
+        IndicatorIconComponent
     ],
     hostDirectives: [DropdownPopupHandlerDirective],
     host: {

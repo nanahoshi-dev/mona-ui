@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     expansionPanelBaseVariants as monaExpansionPanelBaseVariants,
     expansionPanelContentVariants as monaExpansionPanelContentVariants,
@@ -31,25 +31,25 @@ import type {
     ExpansionPanelVariantsFunctions
 } from "./expansion-panel.types";
 
-const defaultExpansionPanelBaseStrategy = createThemeStrategy<ExpansionPanelBaseVariantsFunction>(
-    { mona: monaExpansionPanelBaseVariants, reina: reinaExpansionPanelBaseVariants },
-    monaExpansionPanelBaseVariants
+const defaultExpansionPanelBaseStrategy = createInheritedThemeStrategy<ExpansionPanelBaseVariantsFunction>(
+    monaExpansionPanelBaseVariants,
+    { reina: reinaExpansionPanelBaseVariants }
 );
-const defaultExpansionPanelHeaderStrategy = createThemeStrategy<ExpansionPanelHeaderVariantsFunction>(
-    { mona: monaExpansionPanelHeaderVariants, reina: reinaExpansionPanelHeaderVariants },
-    monaExpansionPanelHeaderVariants
+const defaultExpansionPanelHeaderStrategy = createInheritedThemeStrategy<ExpansionPanelHeaderVariantsFunction>(
+    monaExpansionPanelHeaderVariants,
+    { reina: reinaExpansionPanelHeaderVariants }
 );
-const defaultExpansionPanelHeaderTitleStrategy = createThemeStrategy<ExpansionPanelHeaderTitleVariantsFunction>(
-    { mona: monaExpansionPanelHeaderTitleVariants, reina: reinaExpansionPanelHeaderTitleVariants },
-    monaExpansionPanelHeaderTitleVariants
-);
-const defaultExpansionPanelIconContainerStrategy = createThemeStrategy<ExpansionPanelIconContainerVariantsFunction>(
-    { mona: monaExpansionPanelIconContainerVariants, reina: reinaExpansionPanelIconContainerVariants },
-    monaExpansionPanelIconContainerVariants
-);
-const defaultExpansionPanelContentStrategy = createThemeStrategy<ExpansionPanelContentVariantsFunction>(
-    { mona: monaExpansionPanelContentVariants, reina: reinaExpansionPanelContentVariants },
-    monaExpansionPanelContentVariants
+const defaultExpansionPanelHeaderTitleStrategy =
+    createInheritedThemeStrategy<ExpansionPanelHeaderTitleVariantsFunction>(monaExpansionPanelHeaderTitleVariants, {
+        reina: reinaExpansionPanelHeaderTitleVariants
+    });
+const defaultExpansionPanelIconContainerStrategy =
+    createInheritedThemeStrategy<ExpansionPanelIconContainerVariantsFunction>(monaExpansionPanelIconContainerVariants, {
+        reina: reinaExpansionPanelIconContainerVariants
+    });
+const defaultExpansionPanelContentStrategy = createInheritedThemeStrategy<ExpansionPanelContentVariantsFunction>(
+    monaExpansionPanelContentVariants,
+    { reina: reinaExpansionPanelContentVariants }
 );
 
 export const expansionPanelBaseThemeVariants = (theme: ThemeStyle): ExpansionPanelBaseVariantsFunction =>
@@ -93,5 +93,5 @@ export function createExpansionPanelStyleStrategy(
             "reina"
         )
     };
-    return createThemeStrategy<ExpansionPanelVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ExpansionPanelVariantsFunctions>(mona, { reina: reina });
 }

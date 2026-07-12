@@ -1,97 +1,80 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    listVariants as monaListVariants,
+    listInnerListVariants as monaListInnerListVariants,
+    listGroupHeaderVariants as monaListGroupHeaderVariants,
+    listGroupHeaderTextVariants as monaListGroupHeaderTextVariants,
+    listItemBaseVariants as monaListItemBaseVariants,
+    listItemContentVariants as monaListItemContentVariants
+} from "./list.mona.styles";
 
-export const reinaListVariants = cva(
-    `
-        h-full flex flex-col overflow-hidden outline-none
-    `
-);
+export const reinaListVariants = createInheritedVariants(monaListVariants, {});
 
-export const reinaListInnerListVariants = cva(
-    `
-        list-none p-0 m-0 overflow-x-hidden overflow-y-auto
-        h-full outline-none
-    `
-);
+export const reinaListInnerListVariants = createInheritedVariants(monaListInnerListVariants, {});
 
-export const reinaListGroupHeaderVariants = cva(``, {
+export const reinaListGroupHeaderVariants = createInheritedVariants(monaListGroupHeaderVariants, {
     variants: {
         hasTemplate: {
-            true: "",
-            false: "py-1 font-semibold"
+            false: {
+                add: "font-semibold",
+                remove: "font-bold"
+            }
         }
     }
 });
 
-export const reinaListGroupHeaderTextVariants = cva(`select-none`, {
+export const reinaListGroupHeaderTextVariants = createInheritedVariants(monaListGroupHeaderTextVariants, {
     variants: {
         hasTemplate: {
-            true: "",
-            false: "font-semibold tracking-tight text-foreground/60 w-full px-3 py-1"
+            false: {
+                add: "font-semibold tracking-tight text-foreground/60",
+                remove: "font-bold"
+            }
         }
     }
 });
 
-export const reinaListItemBaseVariants = cva(
-    `
-        w-full h-full flex gap-2 items-center
-    `
-);
+export const reinaListItemBaseVariants = createInheritedVariants(monaListItemBaseVariants, {});
 
-export const reinaListItemContentVariants = cva(
-    `
-        relative flex cursor-default select-none items-center
-        outline-none px-3 py-1
-        rounded-md
-        transition-colors ease-out duration-150
-        hover:bg-accent hover:text-accent-foreground
-        focus:bg-accent focus:text-accent-foreground
-    `,
-    {
-        variants: {
-            checkboxes: {
-                true: "gap-2",
-                false: ""
-            },
-            highlighted: {
-                true: "bg-accent text-accent-foreground inset-ring-1 inset-ring-primary/40",
-                false: ""
-            },
-            selected: {
-                true: "bg-primary text-primary-foreground inset-ring-1 inset-ring-primary-foreground/35",
-                false: ""
-            },
-            disabled: {
-                true: "pointer-events-none opacity-40 cursor-default",
-                false: "cursor-pointer"
+export const reinaListItemContentVariants = createInheritedVariants(monaListItemContentVariants, {
+    add: "rounded-md transition-colors ease-out duration-150",
+    variants: {
+        highlighted: {
+            true: {
+                add: "inset-ring-primary/40",
+                remove: "rounded-none inset-ring-gray-400/70"
             }
         },
-        compoundVariants: [
-            {
+        selected: {
+            true: {
+                add: "inset-ring-primary-foreground/35",
+                remove: "inset-ring-primary-foreground/40"
+            }
+        },
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
+            }
+        }
+    },
+    compoundVariants: [
+        {
+            when: {
                 selected: true,
-                checkboxes: false,
-                class: `
-                    bg-primary text-primary-foreground
-                    inset-ring-1 inset-ring-primary-foreground/35
-                    hover:bg-primary hover:text-primary-foreground
-                    focus:bg-primary focus:text-primary-foreground
-                `
+                checkboxes: false
             },
-            {
+            add: "inset-ring-primary-foreground/35",
+            remove: "rounded-none inset-ring-primary-foreground/40"
+        },
+        {
+            when: {
                 highlighted: true,
                 selected: true,
-                checkboxes: false,
-                class: `
-                    bg-primary text-primary-foreground
-                    inset-ring-1 inset-ring-primary-foreground/35
-                    hover:bg-primary hover:text-primary-foreground
-                    focus:bg-primary focus:text-primary-foreground
-                `
+                checkboxes: false
             },
-            {
-                selected: true,
-                checkboxes: true,
-                class: `bg-transparent text-foreground`
-            }
-        ]
-    }
-);
+            add: "inset-ring-primary-foreground/35",
+            remove: "rounded-none inset-ring-primary-foreground/40"
+        }
+    ]
+});

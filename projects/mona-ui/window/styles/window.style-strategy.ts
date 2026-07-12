@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     windowBaseVariants as monaWindowBaseVariants,
     windowContentContainerVariants as monaWindowContentContainerVariants,
@@ -43,38 +43,36 @@ import type {
     WindowVariantsFunctions
 } from "./window.types";
 
-const defaultWindowBaseStrategy = createThemeStrategy<WindowBaseVariantsFunction>(
-    { mona: monaWindowBaseVariants, reina: reinaWindowBaseVariants },
-    monaWindowBaseVariants
+const defaultWindowBaseStrategy = createInheritedThemeStrategy<WindowBaseVariantsFunction>(monaWindowBaseVariants, {
+    reina: reinaWindowBaseVariants
+});
+const defaultWindowContentContainerStrategy = createInheritedThemeStrategy<WindowContentContainerVariantsFunction>(
+    monaWindowContentContainerVariants,
+    { reina: reinaWindowContentContainerVariants }
 );
-const defaultWindowContentContainerStrategy = createThemeStrategy<WindowContentContainerVariantsFunction>(
-    { mona: monaWindowContentContainerVariants, reina: reinaWindowContentContainerVariants },
-    monaWindowContentContainerVariants
+const defaultWindowContentStrategy = createInheritedThemeStrategy<WindowContentVariantsFunction>(
+    monaWindowContentVariants,
+    { reina: reinaWindowContentVariants }
 );
-const defaultWindowContentStrategy = createThemeStrategy<WindowContentVariantsFunction>(
-    { mona: monaWindowContentVariants, reina: reinaWindowContentVariants },
-    monaWindowContentVariants
+const defaultWindowResizerStrategy = createInheritedThemeStrategy<WindowResizerVariantsFunction>(
+    monaWindowResizerVariants,
+    { reina: reinaWindowResizerVariants }
 );
-const defaultWindowResizerStrategy = createThemeStrategy<WindowResizerVariantsFunction>(
-    { mona: monaWindowResizerVariants, reina: reinaWindowResizerVariants },
-    monaWindowResizerVariants
+const defaultWindowTitleBarActionStrategy = createInheritedThemeStrategy<WindowTitleBarActionVariantsFunction>(
+    monaWindowTitleBarActionVariants,
+    { reina: reinaWindowTitleBarActionVariants }
 );
-const defaultWindowTitleBarActionStrategy = createThemeStrategy<WindowTitleBarActionVariantsFunction>(
-    { mona: monaWindowTitleBarActionVariants, reina: reinaWindowTitleBarActionVariants },
-    monaWindowTitleBarActionVariants
+const defaultWindowTitleBarStrategy = createInheritedThemeStrategy<WindowTitleBarVariantsFunction>(
+    monaWindowTitleBarVariants,
+    { reina: reinaWindowTitleBarVariants }
 );
-const defaultWindowTitleBarStrategy = createThemeStrategy<WindowTitleBarVariantsFunction>(
-    { mona: monaWindowTitleBarVariants, reina: reinaWindowTitleBarVariants },
-    monaWindowTitleBarVariants
+const defaultWindowTitleContainerStrategy = createInheritedThemeStrategy<WindowTitleContainerVariantsFunction>(
+    monaWindowTitleContainerVariants,
+    { reina: reinaWindowTitleContainerVariants }
 );
-const defaultWindowTitleContainerStrategy = createThemeStrategy<WindowTitleContainerVariantsFunction>(
-    { mona: monaWindowTitleContainerVariants, reina: reinaWindowTitleContainerVariants },
-    monaWindowTitleContainerVariants
-);
-const defaultWindowTitleStrategy = createThemeStrategy<WindowTitleVariantsFunction>(
-    { mona: monaWindowTitleVariants, reina: reinaWindowTitleVariants },
-    monaWindowTitleVariants
-);
+const defaultWindowTitleStrategy = createInheritedThemeStrategy<WindowTitleVariantsFunction>(monaWindowTitleVariants, {
+    reina: reinaWindowTitleVariants
+});
 
 export const windowBaseThemeVariants = (theme: ThemeStyle): WindowBaseVariantsFunction =>
     defaultWindowBaseStrategy.resolve(theme);
@@ -114,5 +112,5 @@ export function createWindowStyleStrategy(overrides: readonly WindowStyleOverrid
         titleBarAction: createWindowTitleBarActionVariants(reinaWindowTitleBarActionVariants, overrides, "reina"),
         titleContainer: createWindowTitleContainerVariants(reinaWindowTitleContainerVariants, overrides, "reina")
     };
-    return createThemeStrategy<WindowVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<WindowVariantsFunctions>(mona, { reina: reina });
 }

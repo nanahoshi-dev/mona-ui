@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import { tooltipArrowThemeVariants } from "@nanahoshi/mona-ui/tooltip";
 import {
     popoverBaseVariants as monaPopoverBaseVariants,
@@ -24,17 +24,16 @@ import type {
     PopoverVariantsFunctions
 } from "./popover.types";
 
-const defaultPopoverBaseStrategy = createThemeStrategy<PopoverBaseVariantsFunction>(
-    { mona: monaPopoverBaseVariants, reina: reinaPopoverBaseVariants },
-    monaPopoverBaseVariants
+const defaultPopoverBaseStrategy = createInheritedThemeStrategy<PopoverBaseVariantsFunction>(monaPopoverBaseVariants, {
+    reina: reinaPopoverBaseVariants
+});
+const defaultPopoverHeaderStrategy = createInheritedThemeStrategy<PopoverHeaderVariantsFunction>(
+    monaPopoverHeaderVariants,
+    { reina: reinaPopoverHeaderVariants }
 );
-const defaultPopoverHeaderStrategy = createThemeStrategy<PopoverHeaderVariantsFunction>(
-    { mona: monaPopoverHeaderVariants, reina: reinaPopoverHeaderVariants },
-    monaPopoverHeaderVariants
-);
-const defaultPopoverContentStrategy = createThemeStrategy<PopoverContentVariantsFunction>(
-    { mona: monaPopoverContentVariants, reina: reinaPopoverContentVariants },
-    monaPopoverContentVariants
+const defaultPopoverContentStrategy = createInheritedThemeStrategy<PopoverContentVariantsFunction>(
+    monaPopoverContentVariants,
+    { reina: reinaPopoverContentVariants }
 );
 
 export const popoverBaseThemeVariants = (theme: ThemeStyle): PopoverBaseVariantsFunction =>
@@ -63,5 +62,5 @@ export function createPopoverStyleStrategy(overrides: readonly PopoverStyleOverr
         header: createPopoverHeaderVariants(reinaPopoverHeaderVariants, overrides, "reina"),
         content: createPopoverContentVariants(reinaPopoverContentVariants, overrides, "reina")
     };
-    return createThemeStrategy<PopoverVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<PopoverVariantsFunctions>(mona, { reina: reina });
 }

@@ -153,6 +153,24 @@ export default [
             "@typescript-eslint/no-inferrable-types": "off"
         }
     },
+    {
+        files: ["**/*.reina.styles.ts"],
+        rules: {
+            "no-restricted-imports": [
+                "error",
+                {
+                    paths: [
+                        {
+                            name: "class-variance-authority",
+                            importNames: ["cva"],
+                            message:
+                                "Reina styles inherit Mona recipes; export typed deltas with createInheritedVariants instead."
+                        }
+                    ]
+                }
+            ]
+        }
+    },
     ...compat.extends("plugin:@angular-eslint/template/recommended").map(config => ({
         ...config,
         files: ["**/*.html"]

@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import { timePickerBaseVariants as monaTimePickerBaseVariants } from "./time-picker.mona.styles";
 import { reinaTimePickerBaseVariants } from "./time-picker.reina.styles";
 import { createTimePickerBaseVariants } from "./time-picker.style-composition";
@@ -9,9 +9,9 @@ import type {
     TimePickerVariantsFunctions
 } from "./time-picker.types";
 
-const defaultTimePickerBaseStrategy = createThemeStrategy<TimePickerBaseVariantsFunction>(
-    { mona: monaTimePickerBaseVariants, reina: reinaTimePickerBaseVariants },
-    monaTimePickerBaseVariants
+const defaultTimePickerBaseStrategy = createInheritedThemeStrategy<TimePickerBaseVariantsFunction>(
+    monaTimePickerBaseVariants,
+    { reina: reinaTimePickerBaseVariants }
 );
 
 export const timePickerBaseThemeVariants = (theme: ThemeStyle): TimePickerBaseVariantsFunction =>
@@ -26,5 +26,5 @@ export function createTimePickerStyleStrategy(
     const reina: TimePickerVariantsFunctions = {
         base: createTimePickerBaseVariants(reinaTimePickerBaseVariants, overrides, "reina")
     };
-    return createThemeStrategy<TimePickerVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<TimePickerVariantsFunctions>(mona, { reina: reina });
 }

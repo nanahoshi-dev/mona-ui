@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     autoCompleteAffixContainerVariants as monaAutoCompleteAffixContainerVariants,
     autoCompleteBaseVariants as monaAutoCompleteBaseVariants,
@@ -23,18 +23,18 @@ import type {
     AutoCompleteVariantsFunctions
 } from "./auto-complete.types";
 
-const defaultAutoCompleteBaseStrategy = createThemeStrategy<AutoCompleteBaseVariantsFunction>(
-    { mona: monaAutoCompleteBaseVariants, reina: reinaAutoCompleteBaseVariants },
-    monaAutoCompleteBaseVariants
+const defaultAutoCompleteBaseStrategy = createInheritedThemeStrategy<AutoCompleteBaseVariantsFunction>(
+    monaAutoCompleteBaseVariants,
+    { reina: reinaAutoCompleteBaseVariants }
 );
-const defaultAutoCompleteTextInputStrategy = createThemeStrategy<AutoCompleteTextInputVariantsFunction>(
-    { mona: monaAutoCompleteTextInputVariants, reina: reinaAutoCompleteTextInputVariants },
-    monaAutoCompleteTextInputVariants
+const defaultAutoCompleteTextInputStrategy = createInheritedThemeStrategy<AutoCompleteTextInputVariantsFunction>(
+    monaAutoCompleteTextInputVariants,
+    { reina: reinaAutoCompleteTextInputVariants }
 );
-const defaultAutoCompleteAffixContainerStrategy = createThemeStrategy<AutoCompleteAffixContainerVariantsFunction>(
-    { mona: monaAutoCompleteAffixContainerVariants, reina: reinaAutoCompleteAffixContainerVariants },
-    monaAutoCompleteAffixContainerVariants
-);
+const defaultAutoCompleteAffixContainerStrategy =
+    createInheritedThemeStrategy<AutoCompleteAffixContainerVariantsFunction>(monaAutoCompleteAffixContainerVariants, {
+        reina: reinaAutoCompleteAffixContainerVariants
+    });
 
 export const autoCompleteBaseThemeVariants = (theme: ThemeStyle): AutoCompleteBaseVariantsFunction =>
     defaultAutoCompleteBaseStrategy.resolve(theme);
@@ -65,5 +65,5 @@ export function createAutoCompleteStyleStrategy(
         base: createAutoCompleteBaseVariants(reinaAutoCompleteBaseVariants, overrides, "reina"),
         textInput: createAutoCompleteTextInputVariants(reinaAutoCompleteTextInputVariants, overrides, "reina")
     };
-    return createThemeStrategy<AutoCompleteVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<AutoCompleteVariantsFunctions>(mona, { reina: reina });
 }

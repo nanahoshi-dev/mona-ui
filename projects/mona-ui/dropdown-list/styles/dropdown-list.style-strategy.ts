@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     dropdownListAffixContainerVariants as monaDropdownListAffixContainerVariants,
     dropdownListInputVariants as monaDropdownListInputVariants,
@@ -23,18 +23,18 @@ import type {
     DropdownListVariantsFunctions
 } from "./dropdown-list.types";
 
-const defaultDropdownListInputStrategy = createThemeStrategy<DropdownListInputVariantsFunction>(
-    { mona: monaDropdownListInputVariants, reina: reinaDropdownListInputVariants },
-    monaDropdownListInputVariants
+const defaultDropdownListInputStrategy = createInheritedThemeStrategy<DropdownListInputVariantsFunction>(
+    monaDropdownListInputVariants,
+    { reina: reinaDropdownListInputVariants }
 );
-const defaultDropdownListAffixContainerStrategy = createThemeStrategy<DropdownListAffixContainerVariantsFunction>(
-    { mona: monaDropdownListAffixContainerVariants, reina: reinaDropdownListAffixContainerVariants },
-    monaDropdownListAffixContainerVariants
-);
-const defaultDropdownListValueContainerStrategy = createThemeStrategy<DropdownListValueContainerVariantsFunction>(
-    { mona: monaDropdownListValueContainerVariants, reina: reinaDropdownListValueContainerVariants },
-    monaDropdownListValueContainerVariants
-);
+const defaultDropdownListAffixContainerStrategy =
+    createInheritedThemeStrategy<DropdownListAffixContainerVariantsFunction>(monaDropdownListAffixContainerVariants, {
+        reina: reinaDropdownListAffixContainerVariants
+    });
+const defaultDropdownListValueContainerStrategy =
+    createInheritedThemeStrategy<DropdownListValueContainerVariantsFunction>(monaDropdownListValueContainerVariants, {
+        reina: reinaDropdownListValueContainerVariants
+    });
 
 export const dropdownListInputThemeVariants = (theme: ThemeStyle): DropdownListInputVariantsFunction =>
     defaultDropdownListInputStrategy.resolve(theme);
@@ -74,5 +74,5 @@ export function createDropdownListStyleStrategy(
             "reina"
         )
     };
-    return createThemeStrategy<DropdownListVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<DropdownListVariantsFunctions>(mona, { reina: reina });
 }

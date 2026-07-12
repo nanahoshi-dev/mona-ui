@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     dialogBaseVariants as monaDialogBaseVariants,
     dialogBodyVariants as monaDialogBodyVariants,
@@ -59,53 +59,49 @@ import type {
     DialogVariantsFunctions
 } from "./dialog.types";
 
-const defaultDialogBaseStrategy = createThemeStrategy<DialogBaseVariantsFunction>(
-    { mona: monaDialogBaseVariants, reina: reinaDialogBaseVariants },
-    monaDialogBaseVariants
+const defaultDialogBaseStrategy = createInheritedThemeStrategy<DialogBaseVariantsFunction>(monaDialogBaseVariants, {
+    reina: reinaDialogBaseVariants
+});
+const defaultDialogIconStrategy = createInheritedThemeStrategy<DialogIconVariantsFunction>(monaDialogIconVariants, {
+    reina: reinaDialogIconVariants
+});
+const defaultDialogBodyStrategy = createInheritedThemeStrategy<DialogBodyVariantsFunction>(monaDialogBodyVariants, {
+    reina: reinaDialogBodyVariants
+});
+const defaultDialogContentContainerStrategy = createInheritedThemeStrategy<DialogContentContainerVariantsFunction>(
+    monaDialogContentContainerVariants,
+    { reina: reinaDialogContentContainerVariants }
 );
-const defaultDialogIconStrategy = createThemeStrategy<DialogIconVariantsFunction>(
-    { mona: monaDialogIconVariants, reina: reinaDialogIconVariants },
-    monaDialogIconVariants
+const defaultDialogHeaderStrategy = createInheritedThemeStrategy<DialogHeaderVariantsFunction>(
+    monaDialogHeaderVariants,
+    { reina: reinaDialogHeaderVariants }
 );
-const defaultDialogBodyStrategy = createThemeStrategy<DialogBodyVariantsFunction>(
-    { mona: monaDialogBodyVariants, reina: reinaDialogBodyVariants },
-    monaDialogBodyVariants
+const defaultDialogIconContainerStrategy = createInheritedThemeStrategy<DialogIconContainerVariantsFunction>(
+    monaDialogIconContainerVariants,
+    { reina: reinaDialogIconContainerVariants }
 );
-const defaultDialogContentContainerStrategy = createThemeStrategy<DialogContentContainerVariantsFunction>(
-    { mona: monaDialogContentContainerVariants, reina: reinaDialogContentContainerVariants },
-    monaDialogContentContainerVariants
+const defaultDialogTitleContainerStrategy = createInheritedThemeStrategy<DialogTitleContainerVariantsFunction>(
+    monaDialogTitleContainerVariants,
+    { reina: reinaDialogTitleContainerVariants }
 );
-const defaultDialogHeaderStrategy = createThemeStrategy<DialogHeaderVariantsFunction>(
-    { mona: monaDialogHeaderVariants, reina: reinaDialogHeaderVariants },
-    monaDialogHeaderVariants
+const defaultDialogCloseButtonContainerStrategy =
+    createInheritedThemeStrategy<DialogCloseButtonContainerVariantsFunction>(monaDialogCloseButtonContainerVariants, {
+        reina: reinaDialogCloseButtonContainerVariants
+    });
+const defaultDialogTitleStrategy = createInheritedThemeStrategy<DialogTitleVariantsFunction>(monaDialogTitleVariants, {
+    reina: reinaDialogTitleVariants
+});
+const defaultDialogDescriptionStrategy = createInheritedThemeStrategy<DialogDescriptionVariantsFunction>(
+    monaDialogDescriptionVariants,
+    { reina: reinaDialogDescriptionVariants }
 );
-const defaultDialogIconContainerStrategy = createThemeStrategy<DialogIconContainerVariantsFunction>(
-    { mona: monaDialogIconContainerVariants, reina: reinaDialogIconContainerVariants },
-    monaDialogIconContainerVariants
+const defaultDialogContentStrategy = createInheritedThemeStrategy<DialogContentVariantsFunction>(
+    monaDialogContentVariants,
+    { reina: reinaDialogContentVariants }
 );
-const defaultDialogTitleContainerStrategy = createThemeStrategy<DialogTitleContainerVariantsFunction>(
-    { mona: monaDialogTitleContainerVariants, reina: reinaDialogTitleContainerVariants },
-    monaDialogTitleContainerVariants
-);
-const defaultDialogCloseButtonContainerStrategy = createThemeStrategy<DialogCloseButtonContainerVariantsFunction>(
-    { mona: monaDialogCloseButtonContainerVariants, reina: reinaDialogCloseButtonContainerVariants },
-    monaDialogCloseButtonContainerVariants
-);
-const defaultDialogTitleStrategy = createThemeStrategy<DialogTitleVariantsFunction>(
-    { mona: monaDialogTitleVariants, reina: reinaDialogTitleVariants },
-    monaDialogTitleVariants
-);
-const defaultDialogDescriptionStrategy = createThemeStrategy<DialogDescriptionVariantsFunction>(
-    { mona: monaDialogDescriptionVariants, reina: reinaDialogDescriptionVariants },
-    monaDialogDescriptionVariants
-);
-const defaultDialogContentStrategy = createThemeStrategy<DialogContentVariantsFunction>(
-    { mona: monaDialogContentVariants, reina: reinaDialogContentVariants },
-    monaDialogContentVariants
-);
-const defaultDialogFooterStrategy = createThemeStrategy<DialogFooterVariantsFunction>(
-    { mona: monaDialogFooterVariants, reina: reinaDialogFooterVariants },
-    monaDialogFooterVariants
+const defaultDialogFooterStrategy = createInheritedThemeStrategy<DialogFooterVariantsFunction>(
+    monaDialogFooterVariants,
+    { reina: reinaDialogFooterVariants }
 );
 
 export const dialogBaseThemeVariants = (theme: ThemeStyle): DialogBaseVariantsFunction =>
@@ -171,5 +167,5 @@ export function createDialogStyleStrategy(overrides: readonly DialogStyleOverrid
         title: createDialogTitleVariants(reinaDialogTitleVariants, overrides, "reina"),
         titleContainer: createDialogTitleContainerVariants(reinaDialogTitleContainerVariants, overrides, "reina")
     };
-    return createThemeStrategy<DialogVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<DialogVariantsFunctions>(mona, { reina: reina });
 }

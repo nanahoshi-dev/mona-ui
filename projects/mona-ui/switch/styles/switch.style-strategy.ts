@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     switchHandleVariants as monaSwitchHandleVariants,
     switchLabelVariants as monaSwitchLabelVariants,
@@ -19,18 +19,16 @@ import type {
     SwitchVariantsFunctions
 } from "./switch.types";
 
-const defaultSwitchTrackStrategy = createThemeStrategy<SwitchTrackVariantsFunction>(
-    { mona: monaSwitchVariants, reina: reinaSwitchVariants },
-    monaSwitchVariants
+const defaultSwitchTrackStrategy = createInheritedThemeStrategy<SwitchTrackVariantsFunction>(monaSwitchVariants, {
+    reina: reinaSwitchVariants
+});
+const defaultSwitchHandleStrategy = createInheritedThemeStrategy<SwitchHandleVariantsFunction>(
+    monaSwitchHandleVariants,
+    { reina: reinaSwitchHandleVariants }
 );
-const defaultSwitchHandleStrategy = createThemeStrategy<SwitchHandleVariantsFunction>(
-    { mona: monaSwitchHandleVariants, reina: reinaSwitchHandleVariants },
-    monaSwitchHandleVariants
-);
-const defaultSwitchLabelStrategy = createThemeStrategy<SwitchLabelVariantsFunction>(
-    { mona: monaSwitchLabelVariants, reina: reinaSwitchLabelVariants },
-    monaSwitchLabelVariants
-);
+const defaultSwitchLabelStrategy = createInheritedThemeStrategy<SwitchLabelVariantsFunction>(monaSwitchLabelVariants, {
+    reina: reinaSwitchLabelVariants
+});
 
 export const switchThemeVariants = (theme: ThemeStyle): SwitchTrackVariantsFunction =>
     defaultSwitchTrackStrategy.resolve(theme);
@@ -52,5 +50,5 @@ export function createSwitchStyleStrategy(overrides: readonly SwitchStyleOverrid
         handle: createSwitchHandleVariants(reinaSwitchHandleVariants, overrides, "reina"),
         label: createSwitchLabelVariants(reinaSwitchLabelVariants, overrides, "reina")
     };
-    return createThemeStrategy<SwitchVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<SwitchVariantsFunctions>(mona, { reina: reina });
 }

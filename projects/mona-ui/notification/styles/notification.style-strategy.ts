@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     notificationActionVariants as monaNotificationActionVariants,
     notificationBaseVariants as monaNotificationBaseVariants,
@@ -58,5 +58,5 @@ export function createNotificationStyleStrategy(
         icon: createNotificationIconVariants(reinaNotificationIconVariants, overrides, "reina"),
         text: createNotificationTextVariants(reinaNotificationTextVariants, overrides, "reina")
     };
-    return createThemeStrategy<NotificationVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<NotificationVariantsFunctions>(mona, { reina: reina });
 }

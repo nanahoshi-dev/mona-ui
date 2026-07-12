@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import { circularProgressBarBaseVariants as monaCircularProgressBarBaseVariants } from "./circular-progress-bar.mona.styles";
 import { reinaCircularProgressBarBaseVariants } from "./circular-progress-bar.reina.styles";
 import { createCircularProgressBarBaseVariants } from "./circular-progress-bar.style-composition";
@@ -9,9 +9,9 @@ import type {
     CircularProgressBarVariantsFunctions
 } from "./circular-progress-bar.types";
 
-const defaultCircularProgressBarBaseStrategy = createThemeStrategy<CircularProgressBarBaseVariantsFunction>(
-    { mona: monaCircularProgressBarBaseVariants, reina: reinaCircularProgressBarBaseVariants },
-    monaCircularProgressBarBaseVariants
+const defaultCircularProgressBarBaseStrategy = createInheritedThemeStrategy<CircularProgressBarBaseVariantsFunction>(
+    monaCircularProgressBarBaseVariants,
+    { reina: reinaCircularProgressBarBaseVariants }
 );
 
 export const circularProgressBarBaseThemeVariants = (theme: ThemeStyle): CircularProgressBarBaseVariantsFunction =>
@@ -26,5 +26,5 @@ export function createCircularProgressBarStyleStrategy(
     const reina: CircularProgressBarVariantsFunctions = {
         base: createCircularProgressBarBaseVariants(reinaCircularProgressBarBaseVariants, overrides, "reina")
     };
-    return createThemeStrategy<CircularProgressBarVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<CircularProgressBarVariantsFunctions>(mona, { reina: reina });
 }

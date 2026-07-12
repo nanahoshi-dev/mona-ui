@@ -10,7 +10,8 @@ export const indicatorIconHostVariants = cva(
             },
             preset: {
                 clear: "",
-                dropdown: "opacity-50",
+                editableDropdown: "bg-background border-l border-l-solid border-l-border",
+                dropdown: "",
                 loading: ""
             }
         },

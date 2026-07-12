@@ -1,25 +1,7 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import { listViewBaseVariants as monaListViewBaseVariants } from "./list-view.mona.styles";
 
-export const reinaListViewBaseVariants = cva(
-    `
-        flex flex-col h-full
-        outline-none overflow-hidden
-        bg-background text-foreground
-        border border-input-border
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                none: "rounded-none"
-            },
-            size: {
-                small: "text-sm",
-                medium: "text-base",
-                large: "text-lg"
-            }
-        }
-    }
-);
+export const reinaListViewBaseVariants = createInheritedVariants(monaListViewBaseVariants, {
+    add: "border-input-border",
+    remove: "border-border"
+});

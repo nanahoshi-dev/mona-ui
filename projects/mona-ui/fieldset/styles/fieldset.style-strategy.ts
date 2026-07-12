@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     fieldsetBaseVariants as monaFieldsetBaseVariants,
     fieldsetLegendVariants as monaFieldsetLegendVariants,
@@ -19,17 +19,17 @@ import type {
     FieldsetVariantsFunctions
 } from "./fieldset.types";
 
-const defaultFieldsetBaseStrategy = createThemeStrategy<FieldsetBaseVariantsFunction>(
-    { mona: monaFieldsetBaseVariants, reina: reinaFieldsetBaseVariants },
-    monaFieldsetBaseVariants
+const defaultFieldsetBaseStrategy = createInheritedThemeStrategy<FieldsetBaseVariantsFunction>(
+    monaFieldsetBaseVariants,
+    { reina: reinaFieldsetBaseVariants }
 );
-const defaultFieldsetFieldsetStrategy = createThemeStrategy<FieldsetFieldsetVariantsFunction>(
-    { mona: monaFieldsetVariants, reina: reinaFieldsetVariants },
-    monaFieldsetVariants
+const defaultFieldsetFieldsetStrategy = createInheritedThemeStrategy<FieldsetFieldsetVariantsFunction>(
+    monaFieldsetVariants,
+    { reina: reinaFieldsetVariants }
 );
-const defaultFieldsetLegendStrategy = createThemeStrategy<FieldsetLegendVariantsFunction>(
-    { mona: monaFieldsetLegendVariants, reina: reinaFieldsetLegendVariants },
-    monaFieldsetLegendVariants
+const defaultFieldsetLegendStrategy = createInheritedThemeStrategy<FieldsetLegendVariantsFunction>(
+    monaFieldsetLegendVariants,
+    { reina: reinaFieldsetLegendVariants }
 );
 
 export const fieldsetBaseThemeVariants = (theme: ThemeStyle): FieldsetBaseVariantsFunction =>
@@ -52,5 +52,5 @@ export function createFieldsetStyleStrategy(overrides: readonly FieldsetStyleOve
         fieldset: createFieldsetFieldsetVariants(reinaFieldsetVariants, overrides, "reina"),
         legend: createFieldsetLegendVariants(reinaFieldsetLegendVariants, overrides, "reina")
     };
-    return createThemeStrategy<FieldsetVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<FieldsetVariantsFunctions>(mona, { reina: reina });
 }

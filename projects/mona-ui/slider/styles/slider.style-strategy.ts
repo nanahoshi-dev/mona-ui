@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     sliderBaseVariants as monaSliderBaseVariants,
     sliderHandleVariants as monaSliderHandleVariants,
@@ -43,37 +43,34 @@ import type {
     SliderVariantsFunctions
 } from "./slider.types";
 
-const defaultSliderBaseStrategy = createThemeStrategy<SliderBaseVariantsFunction>(
-    { mona: monaSliderBaseVariants, reina: reinaSliderBaseVariants },
-    monaSliderBaseVariants
+const defaultSliderBaseStrategy = createInheritedThemeStrategy<SliderBaseVariantsFunction>(monaSliderBaseVariants, {
+    reina: reinaSliderBaseVariants
+});
+const defaultSliderTrackStrategy = createInheritedThemeStrategy<SliderTrackVariantsFunction>(monaSliderTrackVariants, {
+    reina: reinaSliderTrackVariants
+});
+const defaultSliderSelectionStrategy = createInheritedThemeStrategy<SliderSelectionVariantsFunction>(
+    monaSliderSelectionVariants,
+    { reina: reinaSliderSelectionVariants }
 );
-const defaultSliderTrackStrategy = createThemeStrategy<SliderTrackVariantsFunction>(
-    { mona: monaSliderTrackVariants, reina: reinaSliderTrackVariants },
-    monaSliderTrackVariants
+const defaultSliderTickListStrategy = createInheritedThemeStrategy<SliderTickListVariantsFunction>(
+    monaSliderTickListVariants,
+    { reina: reinaSliderTickListVariants }
 );
-const defaultSliderSelectionStrategy = createThemeStrategy<SliderSelectionVariantsFunction>(
-    { mona: monaSliderSelectionVariants, reina: reinaSliderSelectionVariants },
-    monaSliderSelectionVariants
+const defaultSliderTickStrategy = createInheritedThemeStrategy<SliderTickVariantsFunction>(monaSliderTickVariants, {
+    reina: reinaSliderTickVariants
+});
+const defaultSliderTickLabelListStrategy = createInheritedThemeStrategy<SliderTickLabelListVariantsFunction>(
+    monaSliderTickLabelListVariants,
+    { reina: reinaSliderTickLabelListVariants }
 );
-const defaultSliderTickListStrategy = createThemeStrategy<SliderTickListVariantsFunction>(
-    { mona: monaSliderTickListVariants, reina: reinaSliderTickListVariants },
-    monaSliderTickListVariants
+const defaultSliderTickLabelStrategy = createInheritedThemeStrategy<SliderTickLabelVariantsFunction>(
+    monaSliderTickLabelVariants,
+    { reina: reinaSliderTickLabelVariants }
 );
-const defaultSliderTickStrategy = createThemeStrategy<SliderTickVariantsFunction>(
-    { mona: monaSliderTickVariants, reina: reinaSliderTickVariants },
-    monaSliderTickVariants
-);
-const defaultSliderTickLabelListStrategy = createThemeStrategy<SliderTickLabelListVariantsFunction>(
-    { mona: monaSliderTickLabelListVariants, reina: reinaSliderTickLabelListVariants },
-    monaSliderTickLabelListVariants
-);
-const defaultSliderTickLabelStrategy = createThemeStrategy<SliderTickLabelVariantsFunction>(
-    { mona: monaSliderTickLabelVariants, reina: reinaSliderTickLabelVariants },
-    monaSliderTickLabelVariants
-);
-const defaultSliderHandleStrategy = createThemeStrategy<SliderHandleVariantsFunction>(
-    { mona: monaSliderHandleVariants, reina: reinaSliderHandleVariants },
-    monaSliderHandleVariants
+const defaultSliderHandleStrategy = createInheritedThemeStrategy<SliderHandleVariantsFunction>(
+    monaSliderHandleVariants,
+    { reina: reinaSliderHandleVariants }
 );
 
 export const sliderBaseThemeVariants = (theme: ThemeStyle): SliderBaseVariantsFunction =>
@@ -114,5 +111,5 @@ export function createSliderStyleStrategy(overrides: readonly SliderStyleOverrid
         tickList: createSliderTickListVariants(reinaSliderTickListVariants, overrides, "reina"),
         track: createSliderTrackVariants(reinaSliderTrackVariants, overrides, "reina")
     };
-    return createThemeStrategy<SliderVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<SliderVariantsFunctions>(mona, { reina: reina });
 }

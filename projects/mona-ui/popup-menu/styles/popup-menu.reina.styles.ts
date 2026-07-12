@@ -1,88 +1,95 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    popupMenuBaseVariants as monaPopupMenuBaseVariants,
+    popupMenuContainerVariants as monaPopupMenuContainerVariants,
+    popupMenuGroupHeaderVariants as monaPopupMenuGroupHeaderVariants,
+    popupMenuIconContainerVariants as monaPopupMenuIconContainerVariants,
+    popupMenuItemVariants as monaPopupMenuItemVariants,
+    popupMenuLinkVariants as monaPopupMenuLinkVariants
+} from "./popup-menu.mona.styles";
 
-export const reinaPopupMenuBaseVariants = cva(`w-full h-full overflow-hidden`, {
+export const reinaPopupMenuBaseVariants = createInheritedVariants(monaPopupMenuBaseVariants, {
     variants: {
         rounded: {
-            small: "rounded-xl",
-            medium: "rounded-2xl",
-            large: "rounded-3xl",
-            none: "rounded-none"
+            small: {
+                add: "rounded-xl",
+                remove: "rounded-sm"
+            },
+            medium: {
+                add: "rounded-2xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-3xl",
+                remove: "rounded-lg"
+            }
         }
     }
 });
 
-export const reinaPopupMenuContainerVariants = cva(
-    `
-        flex flex-col
-        bg-background/95 backdrop-blur-xl text-foreground
-        border border-input-border
-        outline-none
-        p-1.5 shadow-lg
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-xl",
-                medium: "rounded-2xl",
-                large: "rounded-3xl",
-                none: "rounded-none"
-            }
-        }
-    }
-);
-
-export const reinaPopupMenuGroupHeaderVariants = cva(
-    `font-semibold tracking-tight text-foreground/50 select-none px-2 py-1 w-full`,
-    {
-        variants: {
-            size: {
-                small: "text-[11px]",
-                medium: "text-xs",
-                large: "text-sm"
-            }
-        }
-    }
-);
-
-export const reinaPopupMenuIconContainerVariants = cva(`absolute left-2 flex items-center justify-center`);
-
-export const reinaPopupMenuItemVariants = cva(
-    `
-        relative flex gap-2
-        cursor-pointer select-none items-center pl-8 pr-2 py-1.5
-        font-medium
-        outline-none
-        transition-colors duration-100 ease-out
-
-        hover:bg-accent
-        hover:text-accent-foreground
-
-        focus-within:bg-accent
-        focus-within:text-accent-foreground
-        focus-within:outline-none
-
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-40
-
-        data-[active='true']:bg-accent
-        data-[active='true']:text-accent-foreground
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-lg",
-                medium: "rounded-xl",
-                large: "rounded-2xl",
-                none: "rounded-none"
+export const reinaPopupMenuContainerVariants = createInheritedVariants(monaPopupMenuContainerVariants, {
+    add: "bg-background/95 backdrop-blur-xl border-input-border p-1.5 shadow-lg",
+    remove: "bg-background border-border p-1 shadow-md",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-xl",
+                remove: "rounded-sm"
             },
-            size: {
-                small: "text-xs",
-                medium: "text-sm",
-                large: "text-md"
+            medium: {
+                add: "rounded-2xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-3xl",
+                remove: "rounded-lg"
             }
         }
     }
-);
+});
 
-export const reinaPopupMenuLinkVariants = cva(`flex items-center justify-center`);
+export const reinaPopupMenuGroupHeaderVariants = createInheritedVariants(monaPopupMenuGroupHeaderVariants, {
+    add: "font-semibold tracking-tight text-foreground/50",
+    remove: "font-bold inline-flex",
+    variants: {
+        size: {
+            small: {
+                add: "text-[11px]",
+                remove: "text-xs"
+            },
+            medium: {
+                add: "text-xs",
+                remove: "text-sm"
+            },
+            large: {
+                add: "text-sm",
+                remove: "text-md"
+            }
+        }
+    }
+});
+
+export const reinaPopupMenuIconContainerVariants = createInheritedVariants(monaPopupMenuIconContainerVariants, {});
+
+export const reinaPopupMenuItemVariants = createInheritedVariants(monaPopupMenuItemVariants, {
+    add: "py-1.5 font-medium transition-colors duration-100 ease-out hover:bg-accent hover:text-accent-foreground data-[disabled='true']:opacity-40 data-[active='true']:bg-accent data-[active='true']:text-accent-foreground",
+    remove: "py-1 hover:bg-hover hover:text-hover-foreground data-[disabled='true']:opacity-50 data-[active='true']:bg-hover data-[active='true']:text-hover-foreground",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-lg",
+                remove: "rounded-sm"
+            },
+            medium: {
+                add: "rounded-xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-2xl",
+                remove: "rounded-lg"
+            }
+        }
+    }
+});
+
+export const reinaPopupMenuLinkVariants = createInheritedVariants(monaPopupMenuLinkVariants, {});

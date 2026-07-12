@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     stepperBaseVariants as monaStepperBaseVariants,
     stepperStepIndicatorVariants as monaStepperStepIndicatorVariants,
@@ -35,29 +35,28 @@ import type {
     StepperVariantsFunctions
 } from "./stepper.types";
 
-const defaultStepperBaseStrategy = createThemeStrategy<StepperBaseVariantsFunction>(
-    { mona: monaStepperBaseVariants, reina: reinaStepperBaseVariants },
-    monaStepperBaseVariants
+const defaultStepperBaseStrategy = createInheritedThemeStrategy<StepperBaseVariantsFunction>(monaStepperBaseVariants, {
+    reina: reinaStepperBaseVariants
+});
+const defaultStepperStepListStrategy = createInheritedThemeStrategy<StepperStepListVariantsFunction>(
+    monaStepperStepListVariants,
+    { reina: reinaStepperStepListVariants }
 );
-const defaultStepperStepListStrategy = createThemeStrategy<StepperStepListVariantsFunction>(
-    { mona: monaStepperStepListVariants, reina: reinaStepperStepListVariants },
-    monaStepperStepListVariants
+const defaultStepperStepListItemStrategy = createInheritedThemeStrategy<StepperStepListItemVariantsFunction>(
+    monaStepperStepListItemVariants,
+    { reina: reinaStepperStepListItemVariants }
 );
-const defaultStepperStepListItemStrategy = createThemeStrategy<StepperStepListItemVariantsFunction>(
-    { mona: monaStepperStepListItemVariants, reina: reinaStepperStepListItemVariants },
-    monaStepperStepListItemVariants
+const defaultStepperStepIndicatorStrategy = createInheritedThemeStrategy<StepperStepIndicatorVariantsFunction>(
+    monaStepperStepIndicatorVariants,
+    { reina: reinaStepperStepIndicatorVariants }
 );
-const defaultStepperStepIndicatorStrategy = createThemeStrategy<StepperStepIndicatorVariantsFunction>(
-    { mona: monaStepperStepIndicatorVariants, reina: reinaStepperStepIndicatorVariants },
-    monaStepperStepIndicatorVariants
+const defaultStepperTrackStrategy = createInheritedThemeStrategy<StepperTrackVariantsFunction>(
+    monaStepperTrackVariants,
+    { reina: reinaStepperTrackVariants }
 );
-const defaultStepperTrackStrategy = createThemeStrategy<StepperTrackVariantsFunction>(
-    { mona: monaStepperTrackVariants, reina: reinaStepperTrackVariants },
-    monaStepperTrackVariants
-);
-const defaultStepperTrackLineStrategy = createThemeStrategy<StepperTrackLineVariantsFunction>(
-    { mona: monaStepperTrackLineVariants, reina: reinaStepperTrackLineVariants },
-    monaStepperTrackLineVariants
+const defaultStepperTrackLineStrategy = createInheritedThemeStrategy<StepperTrackLineVariantsFunction>(
+    monaStepperTrackLineVariants,
+    { reina: reinaStepperTrackLineVariants }
 );
 
 export const stepperBaseThemeVariants = (theme: ThemeStyle): StepperBaseVariantsFunction =>
@@ -90,5 +89,5 @@ export function createStepperStyleStrategy(overrides: readonly StepperStyleOverr
         track: createStepperTrackVariants(reinaStepperTrackVariants, overrides, "reina"),
         trackLine: createStepperTrackLineVariants(reinaStepperTrackLineVariants, overrides, "reina")
     };
-    return createThemeStrategy<StepperVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<StepperVariantsFunctions>(mona, { reina: reina });
 }

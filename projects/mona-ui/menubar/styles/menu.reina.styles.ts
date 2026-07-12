@@ -1,67 +1,18 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    menubarBaseVariants as monaMenubarBaseVariants,
+    menubarListItemVariants as monaMenubarListItemVariants,
+    menubarListVariants as monaMenubarListVariants
+} from "./menu.mona.styles";
 
-export const reinaMenubarBaseVariants = cva(
-    `
-        flex items-center justify-center
-        gap-1 overflow-hidden
-        bg-background text-foreground
-        shadow-sm border border-input-border
+export const reinaMenubarBaseVariants = createInheritedVariants(monaMenubarBaseVariants, {
+    add: "border-input-border data-[disabled='true']:opacity-40",
+    remove: "border-border data-[disabled='true']:opacity-50"
+});
 
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-40
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                none: "rounded-none"
-            },
-            size: {
-                small: "h-8 text-xs",
-                medium: "h-10 text-sm",
-                large: "h-12 text-md"
-            }
-        }
-    }
-);
+export const reinaMenubarListItemVariants = createInheritedVariants(monaMenubarListItemVariants, {
+    add: "transition-colors duration-100 ease-out hover:bg-accent hover:text-accent-foreground data-[disabled='true']:opacity-40",
+    remove: "hover:bg-hover hover:text-hover-foreground data-[disabled='true']:opacity-50"
+});
 
-export const reinaMenubarListItemVariants = cva(
-    `
-        h-full flex items-center justify-center
-        px-2 py-1.5
-        cursor-pointer outline-none
-        transition-colors duration-100 ease-out
-
-        hover:bg-accent
-        hover:text-accent-foreground
-        focus-within:bg-accent
-        focus-within:text-accent-foreground
-        focus-within:outline-none
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-40
-        data-[active='true']:bg-accent
-        data-[active='true']:text-accent-foreground
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                none: "rounded-none"
-            }
-        }
-    }
-);
-
-export const reinaMenubarListVariants = cva(
-    `
-        w-full h-full list-none
-        flex items-center select-none
-        p-1
-    `
-);
+export const reinaMenubarListVariants = createInheritedVariants(monaMenubarListVariants, {});

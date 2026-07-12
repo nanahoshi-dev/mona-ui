@@ -1,24 +1,15 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import { circularProgressBarBaseVariants as monaCircularProgressBarBaseVariants } from "./circular-progress-bar.mona.styles";
 
-export const reinaCircularProgressBarBaseVariants = cva(
-    `
-        flex items-center justify-center
-        relative select-none
-        [&_svg]:w-full [&_svg]:h-full
-        [&_svg]:absolute [&_svg]:top-1/2
-        [&_svg]:left-1/2
-        [&_svg]:-translate-x-1/2 [&_svg]:-translate-y-1/2
-        [&_svg_circle]:origin-center
-        [&_svg_circle]:-rotate-90
-        [&_svg_circle]:transition-[stroke-dashoffset,stroke] duration-150 ease-out
-        [&_svg_circle]:data-[stroke-trail='true']:stroke-input-border
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "opacity-40 pointer-events-none cursor-not-allowed",
-                false: ""
+export const reinaCircularProgressBarBaseVariants = createInheritedVariants(monaCircularProgressBarBaseVariants, {
+    add: "duration-150 ease-out",
+    remove: "duration-200 ease-in",
+    variants: {
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
             }
         }
     }
-);
+});

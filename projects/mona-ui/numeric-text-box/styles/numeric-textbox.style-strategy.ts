@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     createMonaNumericTextboxVariants,
     createReinaNumericTextboxVariants
@@ -9,12 +9,9 @@ import type {
     NumericTextboxVariantsBundle
 } from "./numeric-textbox.types";
 
-const defaultNumericTextboxStrategy = createThemeStrategy<NumericTextboxVariantsBundle>(
-    {
-        mona: createMonaNumericTextboxVariants([], "mona"),
-        reina: createReinaNumericTextboxVariants([], "reina")
-    },
-    createMonaNumericTextboxVariants([], "mona")
+const defaultNumericTextboxStrategy = createInheritedThemeStrategy<NumericTextboxVariantsBundle>(
+    createMonaNumericTextboxVariants([], "mona"),
+    { reina: createReinaNumericTextboxVariants([], "reina") }
 );
 
 export const numericTextboxThemeVariants = (theme: ThemeStyle): NumericTextboxVariantsBundle =>
@@ -25,5 +22,5 @@ export function createNumericTextboxStyleStrategy(
 ): NumericTextboxStyleStrategy {
     const mona = createMonaNumericTextboxVariants(overrides, "mona");
     const reina = createReinaNumericTextboxVariants(overrides, "reina");
-    return createThemeStrategy<NumericTextboxVariantsBundle>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<NumericTextboxVariantsBundle>(mona, { reina: reina });
 }

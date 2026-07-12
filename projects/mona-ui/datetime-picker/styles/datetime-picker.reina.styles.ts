@@ -1,49 +1,29 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    dateTimePickerBaseVariants as monaDateTimePickerBaseVariants,
+    dateTimePickerHeaderVariants as monaDateTimePickerHeaderVariants,
+    dateTimePickerFooterVariants as monaDateTimePickerFooterVariants
+} from "./datetime-picker.mona.styles";
 
-export const reinaDateTimePickerBaseVariants = cva(
-    `
-        flex items-center w-full
-        border border-input-border
-        bg-input-background shadow-xs
-        transition-[color,box-shadow,border,background-color] ease-out duration-150
-        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
-        data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
-        [&_mona-text-box]:h-full
-        [&_mona-text-box]:border-none
-    `,
-    {
-        variants: {
-            focused: {
-                true: `ring-2 ring-primary/35 border-primary`
-            },
-            rounded: {
-                full: "rounded-full",
-                large: "rounded-lg",
-                medium: "rounded-md",
-                none: "rounded-none",
-                small: "rounded-sm"
-            },
-            size: {
-                large: "h-10 text-md",
-                medium: "h-9 text-sm",
-                small: "h-8 text-xs"
+export const reinaDateTimePickerBaseVariants = createInheritedVariants(monaDateTimePickerBaseVariants, {
+    add: "border-input-border bg-input-background shadow-xs transition-[color,box-shadow,border,background-color] ease-out duration-150 focus-within:ring-primary/35 data-[invalid='true']:ring-error/35",
+    remove: "border-border focus-within:ring-primary/40 data-[invalid='true']:ring-error/40",
+    variants: {
+        focused: {
+            true: {
+                add: "ring-primary/35",
+                remove: "ring-primary/40"
             }
         }
     }
-);
+});
 
-export const reinaDateTimePickerHeaderVariants = cva(
-    `
-        p-2 bg-accent border-b border-input-border flex items-center
-        [&>mona-button-group]:w-full
-        [&>mona-button-group>[monaButton]]:flex-1
-    `
-);
+export const reinaDateTimePickerHeaderVariants = createInheritedVariants(monaDateTimePickerHeaderVariants, {
+    add: "bg-accent border-input-border",
+    remove: "bg-accent/20 border-border"
+});
 
-export const reinaDateTimePickerFooterVariants = cva(
-    `
-        p-2 bg-accent border-t border-input-border flex items-center justify-between gap-2
-        [&>[monaButton]]:flex-1
-    `
-);
+export const reinaDateTimePickerFooterVariants = createInheritedVariants(monaDateTimePickerFooterVariants, {
+    add: "bg-accent border-input-border",
+    remove: "bg-accent/20 border-border"
+});

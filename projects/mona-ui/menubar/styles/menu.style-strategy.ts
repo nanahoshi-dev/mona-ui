@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     menubarBaseVariants as monaMenubarBaseVariants,
     menubarListItemVariants as monaMenubarListItemVariants,
@@ -23,5 +23,5 @@ export function createMenubarStyleStrategy(overrides: readonly MenubarStyleOverr
         list: createMenubarListVariants(reinaMenubarListVariants, overrides, "reina"),
         listItem: createMenubarListItemVariants(reinaMenubarListItemVariants, overrides, "reina")
     };
-    return createThemeStrategy<MenubarVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<MenubarVariantsFunctions>(mona, { reina: reina });
 }

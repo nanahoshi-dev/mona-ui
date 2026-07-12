@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     breadcrumbCurrentItemVariants as monaBreadcrumbCurrentItemVariants,
     breadcrumbListItemVariants as monaBreadcrumbListItemVariants,
@@ -23,17 +23,17 @@ import type {
     BreadcrumbVariantsFunctions
 } from "./breadcrumb.types";
 
-const defaultBreadcrumbListStrategy = createThemeStrategy<BreadcrumbListVariantsFunction>(
-    { mona: monaBreadcrumbListVariants, reina: reinaBreadcrumbListVariants },
-    monaBreadcrumbListVariants
+const defaultBreadcrumbListStrategy = createInheritedThemeStrategy<BreadcrumbListVariantsFunction>(
+    monaBreadcrumbListVariants,
+    { reina: reinaBreadcrumbListVariants }
 );
-const defaultBreadcrumbListItemStrategy = createThemeStrategy<BreadcrumbListItemVariantsFunction>(
-    { mona: monaBreadcrumbListItemVariants, reina: reinaBreadcrumbListItemVariants },
-    monaBreadcrumbListItemVariants
+const defaultBreadcrumbListItemStrategy = createInheritedThemeStrategy<BreadcrumbListItemVariantsFunction>(
+    monaBreadcrumbListItemVariants,
+    { reina: reinaBreadcrumbListItemVariants }
 );
-const defaultBreadcrumbCurrentItemStrategy = createThemeStrategy<BreadcrumbCurrentItemVariantsFunction>(
-    { mona: monaBreadcrumbCurrentItemVariants, reina: reinaBreadcrumbCurrentItemVariants },
-    monaBreadcrumbCurrentItemVariants
+const defaultBreadcrumbCurrentItemStrategy = createInheritedThemeStrategy<BreadcrumbCurrentItemVariantsFunction>(
+    monaBreadcrumbCurrentItemVariants,
+    { reina: reinaBreadcrumbCurrentItemVariants }
 );
 
 export const breadcrumbListThemeVariants = (theme: ThemeStyle): BreadcrumbListVariantsFunction =>
@@ -58,5 +58,5 @@ export function createBreadcrumbStyleStrategy(
         listItem: createBreadcrumbListItemVariants(reinaBreadcrumbListItemVariants, overrides, "reina"),
         currentItem: createBreadcrumbCurrentItemVariants(reinaBreadcrumbCurrentItemVariants, overrides, "reina")
     };
-    return createThemeStrategy<BreadcrumbVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<BreadcrumbVariantsFunctions>(mona, { reina: reina });
 }

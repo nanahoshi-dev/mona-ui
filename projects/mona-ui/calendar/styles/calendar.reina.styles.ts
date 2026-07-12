@@ -1,174 +1,141 @@
-import { cva } from "class-variance-authority";
+import { createInheritedVariants } from "@nanahoshi/mona-ui/theme";
+import {
+    calendarBaseVariants as monaCalendarBaseVariants,
+    calendarHeaderVariants as monaCalendarHeaderVariants,
+    calendarMonthViewDayVariants as monaCalendarMonthViewDayVariants,
+    calendarMonthViewGridVariants as monaCalendarMonthViewGridVariants,
+    calendarMonthViewGridHeaderVariants as monaCalendarMonthViewGridHeaderVariants,
+    calendarYearViewGridVariants as monaCalendarYearViewGridVariants,
+    calendarYearViewCellVariants as monaCalendarYearViewCellVariants,
+    calendarDecadeViewGridVariants as monaCalendarDecadeViewGridVariants,
+    calendarDecadeViewCellVariants as monaCalendarDecadeViewCellVariants
+} from "./calendar.mona.styles";
 
-export const reinaCalendarBaseVariants = cva(
-    `
-        flex flex-col gap-2 p-3 min-w-64
-        bg-background/95 backdrop-blur-xl text-foreground
-        border border-input-border
-        shadow-lg select-none
-        data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "opacity-40 cursor-not-allowed pointer-events-none"
-            },
-            readonly: {
-                true: "pointer-events-none"
-            },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-xl",
-                medium: "rounded-2xl",
-                large: "rounded-3xl",
-                full: "rounded-full"
-            }
-        }
-    }
-);
-
-export const reinaCalendarHeaderVariants = cva(
-    `
-        flex items-center justify-center
-        [&>button+button]:not-focus:border-s-0
-        [&>button:nth-of-type(2)]:flex-1
-        [&>button:nth-of-type(3)]:rounded-se-none
-        [&>button:nth-of-type(3)]:rounded-ee-none
-        [&>button:nth-of-type(4)]:rounded-ss-none
-        [&>button:nth-of-type(4)]:rounded-es-none
-        [&>button]:outline-none
-    `
-);
-
-export const reinaCalendarMonthViewDayVariants = cva(
-    `
-        hover:bg-accent cursor-pointer font-medium
-        transition-colors duration-100 ease-out
-    `,
-    {
-        variants: {
-            disabled: {
-                true: "opacity-40 cursor-not-allowed pointer-events-none"
-            },
-            focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
-            },
-            outside: {
-                true: "opacity-40"
-            },
-            rangePreview: {
-                true: "bg-primary/15 hover:bg-primary/25"
-            },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-lg",
-                medium: "rounded-xl",
-                large: "rounded-2xl",
-                full: "rounded-full"
-            },
-            selected: {
-                true: "bg-primary text-primary-foreground hover:bg-primary/90"
-            },
-            today: {
-                true: "font-bold text-primary"
+export const reinaCalendarBaseVariants = createInheritedVariants(monaCalendarBaseVariants, {
+    add: "p-3 bg-background/95 backdrop-blur-xl shadow-lg",
+    remove: "p-2 bg-background shadow-sm",
+    variants: {
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
             }
         },
-        compoundVariants: [
-            {
-                selected: true,
-                today: true,
-                class: "text-primary-foreground"
-            }
-        ],
-        defaultVariants: {
-            rounded: "medium"
-        }
-    }
-);
-
-export const reinaCalendarMonthViewGridVariants = cva(
-    `
-        grid gap-0.5
-        justify-center
-        [&>div]:h-full [&>div]:flex
-        [&>div]:items-center [&>div]:justify-center
-        [&>div]:aspect-square
-    `
-);
-
-export const reinaCalendarMonthViewGridHeaderVariants = cva(
-    `
-        grid justify-center
-        gap-0.5 font-semibold text-sm text-foreground/50 tracking-tight
-        [&>div]:h-full [&>div]:flex
-        [&>div]:items-center [&>div]:justify-center
-        [&>div]:aspect-square
-    `
-);
-
-export const reinaCalendarYearViewGridVariants = cva(
-    `
-        grid grid-cols-3 gap-0.5
-        justify-center
-        [&>div]:h-full [&>div]:flex
-        [&>div]:items-center [&>div]:justify-center
-        [&>div]:h-12
-    `
-);
-
-export const reinaCalendarYearViewCellVariants = cva(
-    `
-        py-2 cursor-pointer font-medium
-        transition-colors duration-100 ease-out
-        hover:bg-accent
-        active:bg-accent-active
-    `,
-    {
-        variants: {
-            focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+        rounded: {
+            small: {
+                add: "rounded-xl",
+                remove: "rounded-sm"
             },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-lg",
-                medium: "rounded-xl",
-                large: "rounded-2xl",
-                full: "rounded-full"
-            }
-        }
-    }
-);
-
-export const reinaCalendarDecadeViewGridVariants = cva(
-    `
-        grid grid-cols-4 gap-0.5
-        justify-center
-        [&>div]:h-full [&>div]:flex
-        [&>div]:items-center [&>div]:justify-center
-        [&>div]:h-12
-    `
-);
-
-export const reinaCalendarDecadeViewCellVariants = cva(
-    `
-        py-2 cursor-pointer font-medium
-        transition-colors duration-100 ease-out
-        hover:bg-accent
-        active:bg-accent-active
-    `,
-    {
-        variants: {
-            focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+            medium: {
+                add: "rounded-2xl",
+                remove: "rounded-md"
             },
-            rounded: {
-                none: "rounded-none",
-                small: "rounded-lg",
-                medium: "rounded-xl",
-                large: "rounded-2xl",
-                full: "rounded-full"
+            large: {
+                add: "rounded-3xl",
+                remove: "rounded-lg"
             }
         }
     }
+});
+
+export const reinaCalendarHeaderVariants = createInheritedVariants(monaCalendarHeaderVariants, {});
+
+export const reinaCalendarMonthViewDayVariants = createInheritedVariants(monaCalendarMonthViewDayVariants, {
+    add: "hover:bg-accent font-medium transition-colors duration-100 ease-out",
+    remove: "hover:bg-hover",
+    variants: {
+        disabled: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
+            }
+        },
+        outside: {
+            true: {
+                add: "opacity-40",
+                remove: "opacity-50"
+            }
+        },
+        rangePreview: {
+            true: {
+                add: "bg-primary/15 hover:bg-primary/25",
+                remove: "bg-primary/20 hover:bg-primary/30"
+            }
+        },
+        rounded: {
+            small: {
+                add: "rounded-lg",
+                remove: "rounded-sm"
+            },
+            medium: {
+                add: "rounded-xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-2xl",
+                remove: "rounded-lg"
+            }
+        },
+        selected: {
+            true: {
+                add: "hover:bg-primary/90",
+                remove: "hover:bg-primary-hover"
+            }
+        }
+    }
+});
+
+export const reinaCalendarMonthViewGridVariants = createInheritedVariants(monaCalendarMonthViewGridVariants, {});
+
+export const reinaCalendarMonthViewGridHeaderVariants = createInheritedVariants(
+    monaCalendarMonthViewGridHeaderVariants,
+    {
+        add: "text-foreground/50 tracking-tight"
+    }
 );
+
+export const reinaCalendarYearViewGridVariants = createInheritedVariants(monaCalendarYearViewGridVariants, {});
+
+export const reinaCalendarYearViewCellVariants = createInheritedVariants(monaCalendarYearViewCellVariants, {
+    add: "font-medium transition-colors duration-100 ease-out hover:bg-accent active:bg-accent-active",
+    remove: "hover:bg-hover active:bg-active",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-lg",
+                remove: "rounded-sm"
+            },
+            medium: {
+                add: "rounded-xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-2xl",
+                remove: "rounded-lg"
+            }
+        }
+    }
+});
+
+export const reinaCalendarDecadeViewGridVariants = createInheritedVariants(monaCalendarDecadeViewGridVariants, {});
+
+export const reinaCalendarDecadeViewCellVariants = createInheritedVariants(monaCalendarDecadeViewCellVariants, {
+    add: "font-medium transition-colors duration-100 ease-out hover:bg-accent active:bg-accent-active",
+    remove: "hover:bg-hover active:bg-active",
+    variants: {
+        rounded: {
+            small: {
+                add: "rounded-lg",
+                remove: "rounded-sm"
+            },
+            medium: {
+                add: "rounded-xl",
+                remove: "rounded-md"
+            },
+            large: {
+                add: "rounded-2xl",
+                remove: "rounded-lg"
+            }
+        }
+    }
+});

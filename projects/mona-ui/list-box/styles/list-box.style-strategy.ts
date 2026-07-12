@@ -1,4 +1,4 @@
-import { createThemeStrategy } from "@nanahoshi/mona-ui/theme";
+import { createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     listBoxBaseVariants as monaListBoxBaseVariants,
     listBoxToolbarVariants as monaListBoxToolbarVariants
@@ -16,5 +16,5 @@ export function createListBoxStyleStrategy(overrides: readonly ListBoxStyleOverr
         base: createListBoxBaseVariants(reinaListBoxBaseVariants, overrides, "reina"),
         toolbar: createListBoxToolbarVariants(reinaListBoxToolbarVariants, overrides, "reina")
     };
-    return createThemeStrategy<ListBoxVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<ListBoxVariantsFunctions>(mona, { reina: reina });
 }

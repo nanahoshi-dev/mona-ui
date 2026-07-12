@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     multiSelectAffixContainerVariants as monaMultiSelectAffixContainerVariants,
     multiSelectBaseVariants as monaMultiSelectBaseVariants,
@@ -27,22 +27,23 @@ import type {
     MultiSelectVariantsFunctions
 } from "./multi-select.types";
 
-const defaultMultiSelectBaseStrategy = createThemeStrategy<MultiSelectBaseVariantsFunction>(
-    { mona: monaMultiSelectBaseVariants, reina: reinaMultiSelectBaseVariants },
-    monaMultiSelectBaseVariants
+const defaultMultiSelectBaseStrategy = createInheritedThemeStrategy<MultiSelectBaseVariantsFunction>(
+    monaMultiSelectBaseVariants,
+    { reina: reinaMultiSelectBaseVariants }
 );
-const defaultMultiSelectItemContainerStrategy = createThemeStrategy<MultiSelectItemContainerVariantsFunction>(
-    { mona: monaMultiSelectItemContainerVariants, reina: reinaMultiSelectItemContainerVariants },
-    monaMultiSelectItemContainerVariants
+const defaultMultiSelectItemContainerStrategy = createInheritedThemeStrategy<MultiSelectItemContainerVariantsFunction>(
+    monaMultiSelectItemContainerVariants,
+    { reina: reinaMultiSelectItemContainerVariants }
 );
-const defaultMultiSelectAffixContainerStrategy = createThemeStrategy<MultiSelectAffixContainerVariantsFunction>(
-    { mona: monaMultiSelectAffixContainerVariants, reina: reinaMultiSelectAffixContainerVariants },
-    monaMultiSelectAffixContainerVariants
-);
-const defaultMultiSelectIndicatorContainerStrategy = createThemeStrategy<MultiSelectIndicatorContainerVariantsFunction>(
-    { mona: monaMultiSelectIndicatorContainerVariants, reina: reinaMultiSelectIndicatorContainerVariants },
-    monaMultiSelectIndicatorContainerVariants
-);
+const defaultMultiSelectAffixContainerStrategy =
+    createInheritedThemeStrategy<MultiSelectAffixContainerVariantsFunction>(monaMultiSelectAffixContainerVariants, {
+        reina: reinaMultiSelectAffixContainerVariants
+    });
+const defaultMultiSelectIndicatorContainerStrategy =
+    createInheritedThemeStrategy<MultiSelectIndicatorContainerVariantsFunction>(
+        monaMultiSelectIndicatorContainerVariants,
+        { reina: reinaMultiSelectIndicatorContainerVariants }
+    );
 
 export const multiSelectBaseThemeVariants = (theme: ThemeStyle): MultiSelectBaseVariantsFunction =>
     defaultMultiSelectBaseStrategy.resolve(theme);
@@ -85,5 +86,5 @@ export function createMultiSelectStyleStrategy(
         ),
         itemContainer: createMultiSelectItemContainerVariants(reinaMultiSelectItemContainerVariants, overrides, "reina")
     };
-    return createThemeStrategy<MultiSelectVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<MultiSelectVariantsFunctions>(mona, { reina: reina });
 }

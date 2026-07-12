@@ -1,4 +1,4 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { type ThemeStyle, createInheritedThemeStrategy } from "@nanahoshi/mona-ui/theme";
 import {
     tooltipArrowVariants as monaTooltipArrowVariants,
     tooltipBaseVariants as monaTooltipBaseVariants
@@ -13,13 +13,12 @@ import type {
     TooltipVariantsFunctions
 } from "./tooltip.types";
 
-const defaultTooltipBaseStrategy = createThemeStrategy<TooltipBaseVariantsFunction>(
-    { mona: monaTooltipBaseVariants, reina: reinaTooltipBaseVariants },
-    monaTooltipBaseVariants
-);
-const defaultTooltipArrowStrategy = createThemeStrategy<TooltipArrowVariantsFunction>(
-    { mona: monaTooltipArrowVariants, reina: reinaTooltipArrowVariants },
-    monaTooltipArrowVariants
+const defaultTooltipBaseStrategy = createInheritedThemeStrategy<TooltipBaseVariantsFunction>(monaTooltipBaseVariants, {
+    reina: reinaTooltipBaseVariants
+});
+const defaultTooltipArrowStrategy = createInheritedThemeStrategy<TooltipArrowVariantsFunction>(
+    monaTooltipArrowVariants,
+    { reina: reinaTooltipArrowVariants }
 );
 
 export const tooltipBaseThemeVariants = (theme: ThemeStyle): TooltipBaseVariantsFunction =>
@@ -37,5 +36,5 @@ export function createTooltipStyleStrategy(overrides: readonly TooltipStyleOverr
         base: createTooltipBaseVariants(reinaTooltipBaseVariants, overrides, "reina"),
         arrow: createTooltipArrowVariants(reinaTooltipArrowVariants, overrides, "reina")
     };
-    return createThemeStrategy<TooltipVariantsFunctions>({ mona, reina }, mona);
+    return createInheritedThemeStrategy<TooltipVariantsFunctions>(mona, { reina: reina });
 }

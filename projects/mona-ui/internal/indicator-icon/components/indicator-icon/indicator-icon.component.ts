@@ -13,9 +13,9 @@ import {
 import { LucideChevronDown, LucideDynamicIcon, type LucideIconInput, LucideLoader, LucideX } from "@lucide/angular";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
-import { indicatorIconHostThemeVariants, indicatorIconSvgThemeVariants } from "../../styles/indicator-icon.styles";
+import { INDICATOR_ICON_STYLE_STRATEGY, type IndicatorIconHostVariantProps } from "../../styles/indicator-icon.styles";
 
-export type IndicatorIconPreset = "clear" | "dropdown" | "loading";
+export type IndicatorIconPreset = IndicatorIconHostVariantProps["preset"];
 
 @Component({
     selector: "mona-indicator-icon",
@@ -34,25 +34,27 @@ export type IndicatorIconPreset = "clear" | "dropdown" | "loading";
     }
 })
 export class IndicatorIconComponent {
+    readonly #styleStrategy = inject(INDICATOR_ICON_STYLE_STRATEGY);
     readonly #themeService = inject(ThemeService);
 
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
         const interactive = this.interactive();
         const preset = this.preset();
-        return twMerge(indicatorIconHostThemeVariants(theme)({ interactive, preset }), this.userClass());
+        return twMerge(this.#styleStrategy.resolve(theme).host({ interactive, preset }), this.userClass());
     });
     protected readonly hasProjectedContent = signal(false);
     protected readonly iconClass = computed(() => {
         const theme = this.#themeService.theme();
         const loading = this.preset() === "loading";
-        return indicatorIconSvgThemeVariants(theme)({ loading });
+        return this.#styleStrategy.resolve(theme).svg({ loading });
     });
     protected readonly iconToRender = computed<LucideIconInput | null>(() => {
         switch (this.preset()) {
             case "clear":
                 return LucideX;
             case "dropdown":
+            case "editableDropdown":
                 return LucideChevronDown;
             case "loading":
                 return LucideLoader;
