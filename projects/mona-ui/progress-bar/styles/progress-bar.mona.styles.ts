@@ -46,14 +46,14 @@ export const progressBarTrackVariants = cva(
         text-xs font-medium
         bg-primary text-primary-foreground
         data-[prev='true']:transition-[background-color]
-        data-[prev='true']:duration-200
-        data-[prev='true']:ease-in
+        data-[prev='true']:duration-150
+        data-[prev='true']:ease-in-out
         data-[next='true']:absolute
         data-[next='true']:bg-background
         data-[next='true']:text-foreground
         data-[next='true']:transition-[clip-path]
-        data-[next='true']:duration-200
-        data-[next='true']:ease-in
+        data-[next='true']:duration-150
+        data-[next='true']:ease-in-out
         data-[value='0']:bg-transparent
         data-[left='true']:justify-start
         data-[right='true']:justify-end

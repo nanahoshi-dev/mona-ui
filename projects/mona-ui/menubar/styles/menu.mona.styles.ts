@@ -4,7 +4,7 @@ export const contextMenuContentVariants = cva(
     `
         w-full gap-4 overflow-hidden
         bg-background text-foreground
-        shadow-lg border border-border
+        shadow-overlay border border-border
     `,
     {
         variants: {
@@ -47,6 +47,7 @@ export const menuItemVariants = cva(
     `
         relative flex cursor-default select-none items-center px-2 py-1.5 gap-4
         outline-none
+        transition-colors duration-150 ease-in-out
 
         hover:bg-hover
         hover:text-hover-foreground
@@ -106,6 +107,7 @@ export const menubarListItemVariants = cva(
         h-full flex items-center justify-center
         px-2 py-1.5
         cursor-pointer outline-none
+        transition-colors duration-150 ease-in-out
 
         hover:bg-hover
         hover:text-hover-foreground

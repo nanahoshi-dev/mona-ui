@@ -33,7 +33,7 @@ export const tabListListVariants = cva(
         list-none cursor-default
         select-none whitespace-nowrap
         p-[3px]
-        transition-colors duration-300 ease-out
+        transition-colors duration-150 ease-in-out
     `
 );
 
@@ -42,7 +42,8 @@ export const tabListListItemVariants = cva(
         flex items-center justify-center
         cursor-pointer
         px-2 outline-none
-        focus-visible:ring-2 focus-visible:ring-primary/40
+        transition-[color,background-color,box-shadow] ease-in-out duration-150
+        focus-visible:ring-2 focus-visible:ring-primary/35
     `,
     {
         variants: {

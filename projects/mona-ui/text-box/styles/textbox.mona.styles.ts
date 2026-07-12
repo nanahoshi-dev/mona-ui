@@ -9,23 +9,23 @@ export const textBoxVariants = cva(
         border border-input-border outline-none
         selection:bg-primary selection:text-primary-foreground
 
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        transition-[color,box-shadow,border] ease-in-out duration-150
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
 
-        focus-within:ring-2 focus-within:ring-primary/40
+        focus-within:ring-2 focus-within:ring-primary/35
         focus-within:border-primary
 
         [&>input]:w-full [&>input]:h-full
         [&>input]:bg-transparent
         [&>input]:border-0 [&>input]:outline-none
         [&>input]:placeholder:text-muted-foreground
-        [&>input]:px-2
+        [&>input]:px-3
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -37,9 +37,9 @@ export const textBoxVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 text-md",
-                medium: "h-9 text-sm",
-                small: "h-8 text-xs"
+                large: "h-10 text-md [&>input]:px-3",
+                medium: "h-9 text-sm [&>input]:px-3",
+                small: "h-8 text-xs [&>input]:px-2"
             }
         }
     }
@@ -48,12 +48,12 @@ export const textBoxVariants = cva(
 export const inputVariants = cva(
     `
         bg-input-background
-        px-2
+        px-3
 
         border border-input-border outline-none
         selection:bg-primary selection:text-primary-foreground
 
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        transition-[color,box-shadow,border] ease-in-out duration-150
 
         shadow-xs
 
@@ -68,11 +68,11 @@ export const inputVariants = cva(
         disabled:cursor-not-allowed
         disabled:opacity-50
 
-        focus-visible:ring-2 focus-visible:ring-primary/40
+        focus-visible:ring-2 focus-visible:ring-primary/35
         focus-visible:border-primary
 
         [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
+        [&.ng-touched.ng-invalid]:ring-error/35
     `,
     {
         variants: {
@@ -84,9 +84,9 @@ export const inputVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-10 text-md",
-                medium: "h-9 text-sm",
-                small: "h-8 text-xs"
+                large: "h-10 text-md px-3",
+                medium: "h-9 text-sm px-3",
+                small: "h-8 text-xs px-2"
             }
         },
         compoundVariants: [

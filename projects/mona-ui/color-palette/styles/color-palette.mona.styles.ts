@@ -9,14 +9,15 @@ export const colorPaletteBaseVariants = cva(
         data-[readonly='true']:cursor-default
         data-[invalid='true']:border
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2
+        data-[invalid='true']:ring-error/35
     `
 );
 
 export const colorPaletteItemVariants = cva(
     `
         cursor-pointer
+        transition-[transform,border-color,outline-color] ease-in-out duration-150
         data-[readonly='true']:cursor-default
         data-[selected='true']:border
         data-[selected='true']:border-border

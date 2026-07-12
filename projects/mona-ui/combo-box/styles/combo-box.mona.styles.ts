@@ -6,8 +6,8 @@ export const comboBoxBaseVariants = cva(
         border border-input-border outline-none
         bg-background shadow-xs text-foreground
         cursor-pointer overflow-hidden
-        focus-within:ring-1 focus-within:ring-primary/40
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
     `,
     {
         variants: {
@@ -15,10 +15,10 @@ export const comboBoxBaseVariants = cva(
                 true: "pointer-events-none opacity-50 cursor-not-allowed"
             },
             focused: {
-                true: "ring-1 ring-primary/40"
+                true: "ring-2 ring-primary/35 border-primary"
             },
             invalid: {
-                true: "border-error ring-1 ring-error/40",
+                true: "border-error ring-2 ring-error/35",
                 false: ""
             },
             rounded: {

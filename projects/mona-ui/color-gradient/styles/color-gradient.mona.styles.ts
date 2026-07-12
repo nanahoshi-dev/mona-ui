@@ -12,8 +12,8 @@ export const colorGradientBaseVariants = cva(
 
         data-[invalid='true']:border
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2
+        data-[invalid='true']:ring-error/35
     `
 );
 
@@ -44,9 +44,10 @@ export const colorGradientHsvRectangleHandleVariants = cva(
         border border-foreground
         outline outline-background
         shadow-md
+        transition-[box-shadow,color,border-color,background-color] ease-in-out duration-150
 
         focus-visible:ring-2
-        focus-visible:ring-primary/40
+        focus-visible:ring-primary/35
         focus-visible:ring-offset-2
     `,
     {

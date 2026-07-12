@@ -10,24 +10,24 @@ export const colorPickerBaseVariants = cva(
 
         hover:bg-accent hover:text-accent-foreground
 
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
         data-[readonly='true']:cursor-default
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2
+        data-[invalid='true']:ring-error/35
 
-        focus-within:ring-1 focus-within:ring-primary/40
+        focus-within:ring-2 focus-within:ring-primary/35
 
         [&.ng-touched.ng-invalid]:border-error
     `,
     {
         variants: {
             expanded: {
-                true: "ring-1 ring-primary/40"
+                true: "ring-2 ring-primary/35"
             },
             rounded: {
                 none: "rounded-none",

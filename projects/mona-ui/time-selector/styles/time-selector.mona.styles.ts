@@ -3,8 +3,9 @@ import { cva } from "class-variance-authority";
 export const timeSelectorBaseVariants = cva(
     `
         flex flex-col w-full h-full overflow-hidden
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
         data-[invalid='true']:border data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -58,6 +59,7 @@ export const timeSelectorListVariants = cva(
         scrollbar-width:none
         select-none outline-none
         [&::-webkit-scrollbar]:hidden
+        transition-colors ease-in-out duration-150
         focus-visible:bg-accent
         focus-within:bg-accent
     `,
@@ -76,6 +78,7 @@ export const timeSelectorListItemVariants = cva(
     `
         flex items-center justify-center cursor-pointer
         snap-center relative z-10
+        transition-[color,background-color] ease-in-out duration-150
     `,
     {
         variants: {

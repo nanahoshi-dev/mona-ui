@@ -27,7 +27,7 @@ export const buttonVariants = cva(
                 default: `
                     bg-background text-foreground
                     border border-input-border
-                    hover:bg-hover active:bg-active
+                    hover:bg-secondary active:bg-secondary-active
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 primary: `
@@ -61,8 +61,8 @@ export const buttonVariants = cva(
                 `,
                 outline: `
                     border border-border
-                    hover:bg-accent
-                    active:bg-accent-dark
+                    hover:bg-accent hover:text-accent-foreground
+                    active:bg-accent-dark active:text-accent-foreground
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 secondary: `
@@ -73,12 +73,13 @@ export const buttonVariants = cva(
                 `,
                 ghost: `
                     shadow-none
-                    hover:bg-secondary-hover
-                    active:bg-secondary-active
+                    hover:bg-secondary-hover hover:text-secondary-foreground
+                    active:bg-secondary-active active:text-secondary-foreground
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,
                 link: `
                     shadow-none
+                    text-primary hover:text-primary-hover active:text-primary-active
                     underline-offset-4 hover:underline
                     focus-visible:ring-2 focus-visible:ring-primary/40
                 `,

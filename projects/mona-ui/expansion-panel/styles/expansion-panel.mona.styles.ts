@@ -28,9 +28,9 @@ export const expansionPanelHeaderVariants = cva(
         font-medium
         text-foreground
         select-none
-        transition-border-b duration-200
-        focus-visible:outline-primary/40 focus-visible:border-b-transparent
-        focus-visible:ring-1 focus-visible:ring-primary/40
+        transition-[border-color,box-shadow,background-color] duration-150 ease-in-out
+        focus-visible:outline-primary/35 focus-visible:border-b-transparent
+        focus-visible:ring-1 focus-visible:ring-primary/35
         focus-visible:z-10 focus-visible:relative
     `,
     {
@@ -66,7 +66,7 @@ export const expansionPanelContentVariants = cva(
     `
         text-foreground
         grid
-        transition-[grid-template-rows] duration-300 ease-out
+        transition-[grid-template-rows] duration-150 ease-in-out
         [&>div]:overflow-hidden
     `,
     {

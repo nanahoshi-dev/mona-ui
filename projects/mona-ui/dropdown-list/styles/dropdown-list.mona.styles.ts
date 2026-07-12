@@ -10,8 +10,8 @@ export const dropdownListInputVariants = cva(
         cursor-pointer select-none
 
         hover:bg-accent hover:text-accent-foreground
-        transition-[color,box-shadow,border] ease-in-out duration-300
-        focus-within:ring-1 focus-within:ring-primary/40
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
+        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
     `,
     {
         variants: {
@@ -20,14 +20,14 @@ export const dropdownListInputVariants = cva(
                 false: ""
             },
             expanded: {
-                true: "ring-1 ring-primary/40",
+                true: "ring-2 ring-primary/35 border-primary",
                 false: ""
             },
             hasPrefix: {
                 false: "ps-2"
             },
             invalid: {
-                true: "border-error ring-1 ring-error/40",
+                true: "border-error ring-2 ring-error/35",
                 false: ""
             },
             rounded: {

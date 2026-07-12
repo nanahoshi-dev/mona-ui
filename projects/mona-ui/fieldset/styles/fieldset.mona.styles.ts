@@ -11,6 +11,7 @@ export const fieldsetVariants = cva(
         bg-background
         border border-border
         text-foreground
+        transition-[opacity,background-color,border-color] duration-150 ease-in-out
     `,
     {
         variants: {

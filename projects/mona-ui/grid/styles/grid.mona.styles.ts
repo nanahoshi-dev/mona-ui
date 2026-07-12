@@ -56,13 +56,13 @@ export const gridCellDirtyIndicatorVariants = cva(`
 `);
 
 export const gridCellEditorBaseVariants = cva(`
-    w-full h-full border border-solid border-primary/40 flex items-center
+    w-full h-full border border-solid border-primary/35 flex items-center
 `);
 
 export const gridCellEditorInputVariants = cva(`
     w-full h-full border-transparent
     data-[expanded='true']:border-primary
-    data-[expanded='true']:focus-within:border-primary/40
+    data-[expanded='true']:focus-within:border-primary/35
 `);
 
 export const gridCellTextVariants = cva(`
@@ -189,7 +189,7 @@ export const gridHeaderTableCellVariants = cva(
         text-left overflow-visible
         outline-none border-r border-r-border
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/40
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/35
     `
 );
 
@@ -230,7 +230,9 @@ export const gridListTableVariants = cva(
     `
 );
 
-export const gridListTableRowVariants = cva(``, {
+export const gridListTableRowVariants = cva(`
+    transition-[color,background-color] duration-150 ease-in-out
+`, {
     variants: {
         selected: {
             true: `
@@ -250,7 +252,7 @@ export const gridListTableCellVariants = cva(
         align-top
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/40
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/35
     `,
     {
         variants: {

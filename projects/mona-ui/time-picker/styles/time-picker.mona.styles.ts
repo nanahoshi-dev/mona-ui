@@ -4,16 +4,17 @@ export const timePickerBaseVariants = cva(
     `
         flex items-center w-full
         border border-border
-        focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
+        focus-within:ring-2 focus-within:ring-primary/35 focus-within:border-primary
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         [&_mona-text-box]:h-full
         [&_mona-text-box]:border-none
     `,
     {
         variants: {
             focused: {
-                true: `ring-2 ring-primary/40 border-primary`
+                true: "ring-2 ring-primary/35 border-primary"
             },
             rounded: {
                 full: "rounded-full",

@@ -10,12 +10,13 @@ export const checkmarkVariants = cva(
 
         bg-input-background border border-input-border
         cursor-pointer
+        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
 
-        peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40
+        peer-focus-visible:ring-2 peer-focus-visible:ring-primary/35
         peer-focus-visible:border-primary
 
         peer-checked:bg-primary
@@ -34,7 +35,7 @@ export const checkmarkVariants = cva(
         [&.ng-touched.ng-invalid]:border-error
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -79,6 +80,7 @@ export const checkboxDirectiveVariants = cva(
         bg-input-background border border-input-border
         cursor-pointer
         relative
+        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150
 
         disabled:pointer-events-none
         disabled:cursor-not-allowed
@@ -89,7 +91,7 @@ export const checkboxDirectiveVariants = cva(
         indeterminate:bg-primary
         checked:bg-primary
 
-        focus-visible:ring-2 focus-visible:ring-primary/40
+        focus-visible:ring-2 focus-visible:ring-primary/35
         focus-visible:border-primary
 
         checked:after:content-['']

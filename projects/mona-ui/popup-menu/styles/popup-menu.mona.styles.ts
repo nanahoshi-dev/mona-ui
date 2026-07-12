@@ -62,6 +62,7 @@ export const popupMenuItemVariants = cva(
 
         data-[active='true']:bg-hover
         data-[active='true']:text-hover-foreground
+        transition-colors duration-150 ease-in-out
     `,
     {
         variants: {

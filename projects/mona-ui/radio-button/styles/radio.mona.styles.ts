@@ -19,12 +19,12 @@ export const radioButtonCircleVariants = cva(
         border border-input-border
         cursor-pointer
         relative
-        transition-colors duration-200
-        peer-focus:ring-2 peer-focus:ring-primary/40
+        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150
+        peer-focus:ring-2 peer-focus:ring-primary/35
         peer-disabled:opacity-50 peer-disabled:cursor-not-allowed
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -41,7 +41,7 @@ export const radioButtonCircleVariants = cva(
 
 export const radioButtonIndicatorVariants = cva(
     `
-        flex w-3 h-3 bg-primary transition-all duration-200
+        flex w-3 h-3 bg-primary transition-all duration-150
     `,
     {
         variants: {
@@ -88,6 +88,7 @@ export const radioButtonDirectiveVariants = cva(
         relative
         place-content-center
         flex items-center justify-center
+        transition-[background-color,border-color,box-shadow,color] ease-in-out duration-150
 
         disabled:pointer-events-none
         disabled:cursor-not-allowed
@@ -101,7 +102,7 @@ export const radioButtonDirectiveVariants = cva(
         checked:after:bg-primary
         checked:after:rounded-full
 
-        focus-visible:ring-2 focus-visible:ring-primary/40
+        focus-visible:ring-2 focus-visible:ring-primary/35
 
         [&.ng-touched.ng-invalid]:border-error
     `,

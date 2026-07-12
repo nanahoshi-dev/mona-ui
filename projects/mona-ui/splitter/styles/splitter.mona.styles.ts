@@ -22,9 +22,10 @@ export const splitterResizerVariants = cva(
         flex items-center justify-center
         relative bg-accent
         hover:bg-accent-hover
-        active:bg-primary/40
+        active:bg-primary/35
         shrink-0 outline-none
         focus-visible:bg-primary
+        transition-colors duration-150 ease-in-out
     `,
     {
         variants: {

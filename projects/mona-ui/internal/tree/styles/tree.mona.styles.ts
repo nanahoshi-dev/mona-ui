@@ -38,6 +38,7 @@ export const treeDropHintIconVariants = cva(
 export const treeNodeBaseVariants = cva(
     `
         px-2 py-1 cursor-default
+        transition-colors duration-150 ease-in-out
     `,
     {
         variants: {
@@ -81,7 +82,7 @@ export const treeNodeDraggingVariants = cva(
         px-2! py-1! top-3!
         bg-background! text-foreground!
         border! border-border!
-        shadow-md
+        shadow-raised
     `
 );
 

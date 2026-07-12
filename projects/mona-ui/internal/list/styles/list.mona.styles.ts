@@ -41,6 +41,7 @@ export const listItemContentVariants = cva(
     `
         relative flex cursor-default select-none items-center
         outline-none px-3 py-1
+        transition-colors duration-150 ease-in-out
         hover:bg-accent hover:text-accent-foreground
         focus:bg-accent focus:text-accent-foreground
     `,

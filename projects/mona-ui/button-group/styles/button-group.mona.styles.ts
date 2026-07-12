@@ -13,15 +13,41 @@ export const buttonGroupVariants = cva(
     {
         variants: {
             look: {
-                default: "",
-                error: "",
-                ghost: "border-transparent",
-                info: "",
-                outline: "[&>button:not(:last-child)]:border-r",
-                primary: "",
-                secondary: "",
-                success: "",
-                warning: ""
+                default: `
+                    border-input-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-input-border
+                `,
+                primary: `
+                    border-primary
+                    [&>button:not(:last-child)]:border-r [&>button]:border-primary-hover
+                `,
+                secondary: `
+                    border-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-border-subtle
+                `,
+                success: `
+                    border-success-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-success-border
+                `,
+                error: `
+                    border-error-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-error-border
+                `,
+                warning: `
+                    border-warning-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-warning-border
+                `,
+                info: `
+                    border-info-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-info-border
+                `,
+                outline: `
+                    border-border
+                    [&>button:not(:last-child)]:border-r [&>button]:border-border
+                `,
+                ghost: "border-transparent shadow-none",
+                link: "border-transparent shadow-none",
+                clear: "border-transparent shadow-none"
             },
             rounded: {
                 full: `

@@ -10,7 +10,7 @@ export const circularProgressBarBaseVariants = cva(
         [&_svg]:-translate-x-1/2 [&_svg]:-translate-y-1/2
         [&_svg_circle]:origin-center
         [&_svg_circle]:-rotate-90
-        [&_svg_circle]:transition-[stroke-dashoffset,stroke] duration-200 ease-in
+        [&_svg_circle]:transition-[stroke-dashoffset,stroke] duration-150 ease-in-out
         [&_svg_circle]:data-[stroke-trail='true']:stroke-input-border
     `,
     {

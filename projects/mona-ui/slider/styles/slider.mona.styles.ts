@@ -39,7 +39,7 @@ export const sliderSelectionVariants = cva(
         absolute
         bg-primary border-none
 
-        ease-out duration-200
+        ease-in-out duration-150
 
         data-[orientation="horizontal"]:top-0
         data-[orientation="horizontal"]:bottom-0
@@ -105,8 +105,9 @@ export const sliderHandleVariants = cva(
         cursor-pointer
         outline-none
         bg-primary border border-border
+        shadow-sm
 
-        ease-out duration-200
+        ease-in-out duration-150
 
         data-[orientation="horizontal"]:translate-x-[-50%]
         data-[orientation="horizontal"]:transition-[left]
@@ -117,10 +118,10 @@ export const sliderHandleVariants = cva(
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
 
         data-[focused="true"]:ring-2
-        data-[focused="true"]:ring-primary/40
+        data-[focused="true"]:ring-primary/35
 
         data-[invalid="true"]:border-error
-        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/40
+        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/35
     `,
     {
         variants: {

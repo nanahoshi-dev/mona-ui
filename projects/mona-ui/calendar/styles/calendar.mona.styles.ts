@@ -6,8 +6,9 @@ export const calendarBaseVariants = cva(
         bg-background text-foreground
         border border-input-border
         shadow-sm select-none
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -44,6 +45,7 @@ export const calendarHeaderVariants = cva(
 export const calendarMonthViewDayVariants = cva(
     `
         hover:bg-hover cursor-pointer
+        transition-[color,background-color,box-shadow] ease-in-out duration-150
     `,
     {
         variants: {
@@ -51,7 +53,7 @@ export const calendarMonthViewDayVariants = cva(
                 true: "opacity-50 cursor-not-allowed pointer-events-none"
             },
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+                true: "ring-2 ring-inset ring-primary/35 bg-accent outline-none"
             },
             outside: {
                 true: "opacity-50"
@@ -121,11 +123,12 @@ export const calendarYearViewCellVariants = cva(
         py-2 cursor-pointer
         hover:bg-hover
         active:bg-active
+        transition-[color,background-color,box-shadow] ease-in-out duration-150
     `,
     {
         variants: {
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+                true: "ring-2 ring-inset ring-primary/35 bg-accent outline-none"
             },
             rounded: {
                 none: "rounded-none",
@@ -153,11 +156,12 @@ export const calendarDecadeViewCellVariants = cva(
         py-2 cursor-pointer
         hover:bg-hover
         active:bg-active
+        transition-[color,background-color,box-shadow] ease-in-out duration-150
     `,
     {
         variants: {
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+                true: "ring-2 ring-inset ring-primary/35 bg-accent outline-none"
             },
             rounded: {
                 none: "rounded-none",

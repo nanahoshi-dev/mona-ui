@@ -10,14 +10,28 @@ export const splitButtonVariants = cva(
         variants: {
             look: {
                 default: "",
-                error: "",
-                ghost: "border-transparent",
-                info: "",
-                outline: "[&>button:not(:last-child)]:border-r",
-                primary: "",
-                secondary: "",
-                success: "",
-                warning: ""
+                outline: "",
+                primary: `
+                    [&>button:first-child]:border-r [&>button:first-child]:border-primary-hover
+                `,
+                secondary: `
+                    [&>button:first-child]:border-r [&>button:first-child]:border-border-subtle
+                `,
+                success: `
+                    [&>button:first-child]:border-r [&>button:first-child]:border-success-hover
+                `,
+                error: `
+                    [&>button:first-child]:border-r [&>button:first-child]:border-error-hover
+                `,
+                warning: `
+                    [&>button:first-child]:border-r [&>button:first-child]:border-warning-hover
+                `,
+                info: `
+                    [&>button:first-child]:border-r [&>button:first-child]:border-info-hover
+                `,
+                ghost: "border-transparent shadow-none",
+                link: "border-transparent shadow-none",
+                clear: "border-transparent shadow-none"
             },
             rounded: {
                 full: `

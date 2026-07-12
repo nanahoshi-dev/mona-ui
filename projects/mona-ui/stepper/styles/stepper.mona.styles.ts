@@ -66,7 +66,7 @@ export const stepperStepIndicatorVariants = cva(
         flex items-center justify-center
         bg-background border border-border
         text-foreground outline-none
-        transition-colors duration-400 ease-in-out
+        transition-colors duration-150 ease-in-out
     `,
     {
         variants: {
@@ -75,7 +75,7 @@ export const stepperStepIndicatorVariants = cva(
                 false: ""
             },
             focused: {
-                true: "ring-2 ring-primary/40",
+                true: "ring-2 ring-primary/35",
                 false: ""
             },
             rounded: {
@@ -114,8 +114,8 @@ export const stepperTrackLineVariants = cva(
     {
         variants: {
             orientation: {
-                horizontal: "h-full transition-width duration-300 ease-out",
-                vertical: "w-full transition-height duration-300 ease-out"
+                horizontal: "h-full transition-[width] duration-150 ease-in-out",
+                vertical: "w-full transition-[height] duration-150 ease-in-out"
             }
         },
         defaultVariants: {

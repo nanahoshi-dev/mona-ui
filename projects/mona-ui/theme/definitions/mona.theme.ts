@@ -59,6 +59,7 @@ export function monaDarkThemeVariables(): ThemeVariables {
         "--color-secondary-foreground": "oklch(0.93 0.004 286.32)",
         "--color-secondary-hover": "oklch(0.25 0.008 286.32)",
         "--color-secondary-active": "oklch(0.28 0.008 286.32)",
+        "--color-secondary-selected": "oklch(0.26 0.008 286.32)",
 
         /* --- Accent System --- */
         "--color-accent": "oklch(0.20 0.008 286.32)",
@@ -186,6 +187,7 @@ export function monaLightThemeVariables(): ThemeVariables {
         "--color-secondary-foreground": "oklch(0.21 0.005 286.32)",
         "--color-secondary-hover": "oklch(0.91 0.004 286.32)",
         "--color-secondary-active": "oklch(0.86 0.005 286.32)",
+        "--color-secondary-selected": "oklch(0.90 0.005 286.32)",
 
         /* --- Accent System (Standardized Context Layer) --- */
         "--color-accent": "oklch(0.95 0.003 286.32)",

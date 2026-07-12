@@ -6,6 +6,7 @@ export const pagerBaseVariants = cva(
         bg-background text-foreground
         border border-border
         text-sm
+        transition-[color,box-shadow,border,background-color] ease-in-out duration-150
         [&_mona-numeric-text-box]:ml-4
         [&_mona-numeric-text-box]:w-12
         [&_mona-numeric-text-box_input]:text-center

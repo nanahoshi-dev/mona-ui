@@ -10,17 +10,17 @@ export const numericTextboxVariants = cva(
         placeholder:text-muted-foreground
 
         selection:bg-primary selection:text-primary-foreground
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        transition-[color,box-shadow,border] ease-in-out duration-150
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
 
-        focus-within:ring-2 focus-within:ring-primary/40
+        focus-within:ring-2 focus-within:ring-primary/35
         focus-within:border-primary
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {

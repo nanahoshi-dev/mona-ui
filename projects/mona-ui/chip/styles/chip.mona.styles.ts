@@ -5,7 +5,7 @@ export const chipVariants = cva(
         inline-flex items-center justify-between gap-1.5
         text-xs font-medium cursor-pointer shrink-0
         outline-none shadow-xs
-        transition-colors duration-200 ease-in-out
+        transition-colors duration-150 ease-in-out
     `,
     {
         variants: {
@@ -19,54 +19,54 @@ export const chipVariants = cva(
                     border border-border
                     hover:bg-hover hover:text-accent-foreground
                     active:bg-active active:text-accent-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/35
                 `,
                 primary: `
                     bg-primary text-primary-foreground
                     hover:bg-primary-hover hover:text-primary-foreground
                     active:bg-primary-active active:text-primary-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/35
                 `,
                 success: `
                     bg-success text-success-foreground
                     hover:bg-success-hover hover:text-success-foreground
                     active:bg-success-active active:text-success-foreground
-                    focus-visible:ring-2 focus-visible:ring-success/40
+                    focus-visible:ring-2 focus-visible:ring-success/35
                 `,
                 error: `
                     bg-error text-error-foreground
                     hover:bg-error-hover hover:text-error-foreground
                     active:bg-error-active active:text-error-foreground
-                    focus-visible:ring-2 focus-visible:ring-error/40
+                    focus-visible:ring-2 focus-visible:ring-error/35
                 `,
                 warning: `
                     bg-warning text-warning-foreground
                     hover:bg-warning-hover hover:text-warning-foreground
                     active:bg-warning-active active:text-warning-foreground
-                    focus-visible:ring-2 focus-visible:ring-warning/40
+                    focus-visible:ring-2 focus-visible:ring-warning/35
                 `,
                 info: `
                     bg-info text-info-foreground
                     hover:bg-info-hover hover:text-info-foreground
                     active:bg-info-active active:text-info-foreground
-                    focus-visible:ring-2 focus-visible:ring-info/40
+                    focus-visible:ring-2 focus-visible:ring-info/35
                 `,
                 outline: `
                     border border-border
                     hover:bg-accent hover:text-accent-foreground
                     active:bg-accent-dark active:text-accent-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/35
                 `,
                 secondary: `
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/35
                 `,
                 ghost: `
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-primary/40
+                    focus-visible:ring-2 focus-visible:ring-primary/35
                 `
             },
             rounded: {

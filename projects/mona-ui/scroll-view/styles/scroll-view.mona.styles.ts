@@ -44,7 +44,7 @@ export const scrollViewArrowVariants = cva(
         [&_svg]:drop-shadow-[0_0_15px_#000]
         [&_svg]:opacity-40
         hover:[&_svg]:opacity-100
-        [&_svg]:transition-opacity duration-300 ease-out
+        [&_svg]:transition-opacity duration-150 ease-in-out
     `,
     {
         variants: {
@@ -102,6 +102,7 @@ export const scrollViewPagerListItemVariants = cva(
         cursor-pointer
         border border-border bg-white
         not-last:mr-3
+        transition-colors duration-150 ease-in-out
     `,
     {
         variants: {
@@ -124,13 +125,13 @@ export const scrollViewPagerArrowVariants = cva(
     `
         flex items-center justify-center
         p-2 cursor-pointer select-none
-        transition-opacity duration-300 ease-out
+        transition-opacity duration-150 ease-in-out
         opacity-70 hover:opacity-100
         font-medium
         [&_svg]:stroke-white
         [&_svg]:drop-shadow-[0_0_15px_#000]
         [&_svg]:opacity-40
         hover:[&_svg]:opacity-100
-        [&_svg]:transition-opacity duration-300 ease-out
+        [&_svg]:transition-opacity duration-150 ease-in-out
     `
 );

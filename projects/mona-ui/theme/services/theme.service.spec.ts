@@ -16,7 +16,7 @@ describe("ThemeService", () => {
     });
 
     it("should initialize Mona light runtime variables", () => {
-        expect(document.documentElement.style.getPropertyValue("--mona-color-background")).toBe("oklch(1 0 0)");
+        expect(document.documentElement.style.getPropertyValue("--mona-color-background")).toBe("oklch(0.99 0.002 286.32)");
         expect(service.themeId()).toBe("mona-light");
     });
 
@@ -29,7 +29,7 @@ describe("ThemeService", () => {
 
         service.setThemeId("mona-light");
 
-        expect(document.documentElement.style.getPropertyValue("--mona-color-background")).toBe("oklch(1 0 0)");
+        expect(document.documentElement.style.getPropertyValue("--mona-color-background")).toBe("oklch(0.99 0.002 286.32)");
     });
 
     it("should apply configured default themes and variable overrides", () => {
