@@ -73,7 +73,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
-            class="w-full max-w-90">
+            class="w-92 items-center">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
                     <div class="p-4 flex flex-col gap-3">

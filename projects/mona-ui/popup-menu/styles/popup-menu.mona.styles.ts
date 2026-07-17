@@ -14,7 +14,7 @@ export const popupMenuBaseVariants = cva(`w-full h-full overflow-hidden`, {
 export const popupMenuContainerVariants = cva(
     `
         flex flex-col
-        bg-background text-foreground
+        bg-surface-raised text-foreground
         border border-border
         outline-none
         p-1 shadow-md

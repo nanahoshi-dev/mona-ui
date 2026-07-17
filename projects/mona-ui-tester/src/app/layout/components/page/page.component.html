@@ -52,8 +52,9 @@
             <!-- Header Action Items -->
             <div class="flex items-center gap-2 text-muted-foreground">
                 <button
+                    (click)="toggleTheme()"
                     class="p-2 rounded-lg hover:bg-hover hover:text-foreground transition-colors cursor-pointer"
-                    aria-label="Toggle Dark Mode"
+                    [attr.aria-label]="themeToggleLabel()"
                     type="button">
                     <svg lucideMoon [size]="18"></svg>
                 </button>

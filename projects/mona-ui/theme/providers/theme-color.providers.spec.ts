@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import type { ThemeColorRegistration, ThemeColors } from "../models/ThemeDefinition";
 import { THEME_COLOR_REGISTRATIONS, THEME_COLOR_STRATEGY } from "../tokens/theme-color.tokens";
-import { provideThemeColors } from "./theme-color.providers";
+import { provideThemeColorPalette, provideThemeColors } from "./theme-color.providers";
 
 describe("provideThemeColors", () => {
     afterEach(() => TestBed.resetTestingModule());
@@ -63,5 +63,22 @@ describe("provideThemeColors", () => {
         } satisfies ThemeColors;
 
         expect(colors["--border-radius"]).toBe("4px");
+    });
+
+    it("registers generated colors through the ordered multi-provider", () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideThemeColorPalette({ theme: "mona", seeds: { primary: "#7444c3" } }),
+                provideThemeColors({
+                    theme: "mona",
+                    colors: { common: { "--color-primary": "explicit" } }
+                })
+            ]
+        });
+
+        const registrations = TestBed.inject(THEME_COLOR_REGISTRATIONS);
+        expect(registrations).toHaveLength(2);
+        expect(registrations[0]?.colors.light?.["--color-primary"]).toMatch(/^oklch\(/);
+        expect(TestBed.inject(THEME_COLOR_STRATEGY).resolve("mona", "dark")["--color-primary"]).toBe("explicit");
     });
 });

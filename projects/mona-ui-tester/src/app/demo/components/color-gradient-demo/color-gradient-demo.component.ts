@@ -23,7 +23,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
                 [showButtons]="showButtons()"
                 [showHexInput]="showHexInput()"
                 [showColorInputs]="showColorInputs()"
-                class="bg-accent-dark border border-border">
+                class="bg-surface-raised border border-border-subtle shadow-control">
             </mona-color-gradient>
         `,
         inputs: {
@@ -75,7 +75,7 @@ export class ColorGradientDemoComponent extends AbstractDemoComponent<ColorGradi
                 [showButtons]="showButtons()"
                 [showHexInput]="showHexInput()"
                 [showColorInputs]="showColorInputs()"
-                class="bg-accent-dark border border-border">
+                class="bg-surface-raised border border-border-subtle shadow-control">
             </mona-color-gradient>
         </div>
     `

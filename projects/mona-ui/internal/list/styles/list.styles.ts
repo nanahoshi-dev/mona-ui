@@ -51,11 +51,11 @@ export const listItemContentVariants = cva(
                 false: ""
             },
             highlighted: {
-                true: "bg-accent text-accent-foreground rounded-none inset-ring-1 inset-ring-gray-400/70",
+                true: "bg-accent-hover text-accent-foreground rounded-none inset-ring-1 inset-ring-focus-indicator/40",
                 false: ""
             },
             selected: {
-                true: "bg-primary text-primary-foreground inset-ring-1 inset-ring-primary-foreground/40",
+                true: "bg-accent-hover text-accent-foreground",
                 false: ""
             },
             disabled: {
@@ -68,10 +68,9 @@ export const listItemContentVariants = cva(
                 selected: true,
                 checkboxes: false,
                 class: `
-                    bg-primary text-primary-foreground rounded-none
-                    inset-ring-1 inset-ring-primary-foreground/40
-                    hover:bg-primary hover:text-primary-foreground
-                    focus:bg-primary focus:text-primary-foreground
+                    bg-accent-hover text-accent-foreground rounded-none
+                    hover:bg-accent-active hover:text-accent-foreground
+                    focus:bg-accent-active focus:text-accent-foreground
                 `
             },
             {
@@ -79,10 +78,10 @@ export const listItemContentVariants = cva(
                 selected: true,
                 checkboxes: false,
                 class: `
-                    bg-primary text-primary-foreground rounded-none
-                    inset-ring-1 inset-ring-primary-foreground/40
-                    hover:bg-primary hover:text-primary-foreground
-                    focus:bg-primary focus:text-primary-foreground
+                    bg-accent-active text-accent-foreground rounded-none
+                    inset-ring-1 inset-ring-focus-indicator/40
+                    hover:bg-accent-active hover:text-accent-foreground
+                    focus:bg-accent-active focus:text-accent-foreground
                 `
             },
             {

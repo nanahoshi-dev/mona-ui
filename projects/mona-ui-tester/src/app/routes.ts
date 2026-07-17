@@ -27,6 +27,11 @@ export const routes: Routes = [
                     import("./docs/installation-doc/installation-doc.component").then(m => m.InstallationDocComponent)
             },
             {
+                path: "theme-colors",
+                loadComponent: () =>
+                    import("./docs/theme-colors-doc/theme-colors-doc.component").then(m => m.ThemeColorsDocComponent)
+            },
+            {
                 path: "auto-complete",
                 loadComponent: () =>
                     import("./docs/components/auto-complete-doc/auto-complete-doc.component").then(

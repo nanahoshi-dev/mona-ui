@@ -29,12 +29,12 @@ export const appConfig: ApplicationConfig = {
             theme: "mona",
             colors: {
                 light: {
-                    "--color-page-background": "#fff",
-                    "--color-demo-background": "#f9fafb"
+                    "--color-page-background": "oklch(98.5% 0 0)",
+                    "--color-demo-background": "oklch(100% 0 0)"
                 },
                 dark: {
-                    "--color-page-background": "#1a1b1c",
-                    "--color-demo-background": "#202122"
+                    "--color-page-background": "oklch(14.1% 0.005 285.823)",
+                    "--color-demo-background": "oklch(18% 0.006 285.885)"
                 }
             }
         }),

@@ -47,7 +47,7 @@ export const tabListListItemVariants = cva(
     {
         variants: {
             active: {
-                true: "bg-background-dark text-foreground shadow-sm",
+                true: "bg-surface text-foreground font-semibold shadow-sm inset-ring-1 inset-ring-border-subtle",
                 false: ""
             },
             disabled: {

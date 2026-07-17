@@ -20,7 +20,8 @@
         "watch": "ng build mona-ui --watch --configuration development",
         "test:lib": "ng test mona-ui",
         "test:lib:watch": "ng test mona-ui --coverage --watch",
-        "test:app": "ng test mona-ui-tester"
+        "test:app": "ng test mona-ui-tester",
+        "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts"
     },
     "workspaces": [
         "projects/*"
@@ -125,12 +126,14 @@
         "@semantic-release/changelog": "^6.0.3",
         "@semantic-release/git": "^10.0.1",
         "@tailwindcss/typography": "^0.5.20",
+        "@types/culori": "^2.1.1",
         "@types/jasmine": "~6.0.0",
         "@types/luxon": "^3.7.1",
         "@typescript-eslint/eslint-plugin": "^8.61.0",
         "@typescript-eslint/parser": "^8.61.0",
         "@vitest/coverage-v8": "^4.1.8",
         "@vitest/ui": "^4.1.8",
+        "axe-core": "^4.12.1",
         "eslint": "^10.5.0",
         "jasmine-core": "~6.3.0",
         "jsdom": "^29.1.1",

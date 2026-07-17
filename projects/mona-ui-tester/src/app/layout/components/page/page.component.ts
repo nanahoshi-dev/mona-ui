@@ -1,6 +1,7 @@
 import { Component, computed, inject } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NavigationEnd, Router, RouterOutlet } from "@angular/router";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     LucideBookOpen,
     LucideDynamicIcon,
@@ -36,6 +37,7 @@ import { SidebarComponent } from "../sidebar/sidebar.component";
 })
 export class PageComponent {
     readonly #router = inject(Router);
+    readonly #themeService = inject(ThemeService);
     readonly #url = toSignal(
         this.#router.events.pipe(
             filter(e => e instanceof NavigationEnd),
@@ -63,5 +65,12 @@ export class PageComponent {
         if (url.includes("button")) return LucidePlay;
         return LucideTerminal;
     });
+    protected readonly themeToggleLabel = computed(() =>
+        this.#themeService.themeVariant() === "dark" ? "Switch to Mona Light" : "Switch to Mona Dark"
+    );
     protected readonly sidebarService = inject(SidebarService);
+
+    protected toggleTheme(): void {
+        this.#themeService.setThemeId(this.#themeService.themeVariant() === "dark" ? "mona-light" : "mona-dark");
+    }
 }

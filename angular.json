@@ -57,7 +57,7 @@
                             "base": "dist/mona-ui-tester"
                         },
                         "index": "projects/mona-ui-tester/src/index.html",
-                        "polyfills": ["projects/mona-ui-tester/src/polyfills.ts"],
+                        "polyfills": ["zone.js"],
                         "tsConfig": "projects/mona-ui-tester/tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
                         "assets": ["projects/mona-ui-tester/src/favicon.ico", "projects/mona-ui-tester/src/assets"],
