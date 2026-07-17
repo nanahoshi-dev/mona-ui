@@ -3,6 +3,7 @@ import { provideHttpClient, withXhr } from "@angular/common/http";
 import { ApplicationConfig, importProvidersFrom } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { provideRouter } from "@angular/router";
+import { provideThemeColors } from "@nanahoshi/mona-ui/theme";
 import HighlightJS from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import json from "highlight.js/lib/languages/json";
@@ -24,6 +25,19 @@ export const appConfig: ApplicationConfig = {
         importProvidersFrom(FormsModule, NgOptimizedImage),
         provideHttpClient(withXhr()),
         provideRouter(routes),
+        provideThemeColors({
+            theme: "mona",
+            colors: {
+                light: {
+                    "--color-page-background": "#fff",
+                    "--color-demo-background": "#f9fafb"
+                },
+                dark: {
+                    "--color-page-background": "#1a1b1c",
+                    "--color-demo-background": "#202122"
+                }
+            }
+        }),
         provideMarkdown({
             markedExtensions: [
                 {

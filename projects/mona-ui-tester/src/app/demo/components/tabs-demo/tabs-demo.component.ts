@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { Component, computed, inject, input, signal } from "@angular/core";
+import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     TabCloseEvent,
@@ -9,7 +10,6 @@ import {
     TabSelectEvent
 } from "@nanahoshi/mona-ui/tabs";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { range } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -122,11 +122,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                 </mona-tab>
             }
         </mona-tabs>
-    `,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    host: {
-        class: "w-full flex items-center justify-center"
-    }
+    `
 })
 export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;

@@ -22,7 +22,7 @@ export const editorBaseVariants = cva(
         [&_blockquote]:border-l-primary
         [&_blockquote]:px-4 [&_blockquote]:py-2
         [&_blockquote]:ms-4
-        [&_blockquote]:bg-background-light
+        [&_blockquote]:bg-surface-muted
 
         [&_hr]:border [&_hr]:border-solid [&_hr]:border-border
         [&_hr]:bg-background-dark [&_hr]:my-1
@@ -62,7 +62,7 @@ export const editorBaseVariants = cva(
         [&_table_th]:border [&_table_th]:border-solid [&_table_th]:border-foreground/40
         [&_table_th]:p-2 [&_table_th]:align-top [&_table_th]:relative
 
-        [&_table_th]:bg-background-darker [&_table_th]:color-foreground [&_table_th]:font-bold
+        [&_table_th]:bg-surface-muted [&_table_th]:text-foreground [&_table_th]:font-bold
 
         [&_.selectedCell]:after:content-[''] [&_.selectedCell]:after:absolute [&_.selectedCell]:after:inset-0
         [&_.selectedCell]:after:pointer-events-none
@@ -176,7 +176,7 @@ export const editorTableCreatorVariants = cva(
 export const editorTableCreatorCellVariants = cva(
     `
         flex border border-solid border-border
-        w-6 h-6 bg-background-light
+        w-6 h-6 bg-surface-muted
     `
 );
 

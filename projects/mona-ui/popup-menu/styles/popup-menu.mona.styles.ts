@@ -50,7 +50,7 @@ export const popupMenuItemVariants = cva(
         outline-none
 
         hover:bg-hover
-        hover:text-hover-foreground
+        hover:text-accent-foreground
 
         focus-within:bg-accent
         focus-within:text-accent-foreground
@@ -61,7 +61,7 @@ export const popupMenuItemVariants = cva(
         data-[disabled='true']:opacity-50
 
         data-[active='true']:bg-hover
-        data-[active='true']:text-hover-foreground
+        data-[active='true']:text-accent-foreground
     `,
     {
         variants: {

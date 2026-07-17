@@ -6,7 +6,7 @@
                 [style.background-color]="
                     rx <= highlightedCell.row && cx <= highlightedCell.col
                         ? 'var(--color-primary)'
-                        : 'var(--color-background-light)'
+                        : 'var(--color-surface-muted)'
                 "
                 (click)="onCellClick(rx, cx)"
                 (pointerenter)="onCellMouseEnter(rx, cx)"></div>

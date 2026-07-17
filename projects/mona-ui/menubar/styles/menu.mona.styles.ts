@@ -49,7 +49,7 @@ export const menuItemVariants = cva(
         outline-none
 
         hover:bg-hover
-        hover:text-hover-foreground
+        hover:text-accent-foreground
 
         focus-within:bg-accent
         focus-within:text-accent-foreground
@@ -108,7 +108,7 @@ export const menubarListItemVariants = cva(
         cursor-pointer outline-none
 
         hover:bg-hover
-        hover:text-hover-foreground
+        hover:text-accent-foreground
         focus-within:bg-accent
         focus-within:text-accent-foreground
         focus-within:outline-none
