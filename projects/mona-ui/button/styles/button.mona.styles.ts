@@ -210,6 +210,11 @@ export const buttonVariants = cva(
                 `
             },
             {
+                disabled: true,
+                look: "ghost",
+                class: "disabled:bg-transparent disabled:text-disabled-foreground"
+            },
+            {
                 iconOnly: true,
                 loading: false,
                 size: "small",

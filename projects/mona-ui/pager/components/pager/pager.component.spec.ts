@@ -395,6 +395,8 @@ describe("PagerComponent", () => {
 
             expect(getButtonByLabel("Previous page").disabled).toBe(true);
             expect(getButtonByLabel("First page").disabled).toBe(true);
+            expect(getButtonByLabel("Previous page").classList.contains("disabled:bg-transparent")).toBe(true);
+            expect(getButtonByLabel("First page").classList.contains("disabled:bg-transparent")).toBe(true);
             expect(getButtonByLabel("Next page").disabled).toBe(false);
             expect(getButtonByLabel("Last page").disabled).toBe(false);
         });

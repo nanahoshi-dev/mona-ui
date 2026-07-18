@@ -96,6 +96,14 @@ describe("RangeSliderComponent", () => {
             expect(fixture.debugElement.queryAll(By.css("[role='slider']")).length).toBe(2);
         });
 
+        it("should use a rounded muted track with primary range fill", () => {
+            const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
+            const selection = fixture.debugElement.query(By.css(".bg-primary")).nativeElement as HTMLElement;
+
+            expect(track.classList.contains("rounded-full")).toBe(true);
+            expect(selection).toBeTruthy();
+        });
+
         it("should expose range ARIA attributes", async () => {
             component.form.value().value.set([2, 8]);
             await waitForStable(fixture);

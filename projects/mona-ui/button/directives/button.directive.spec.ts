@@ -137,6 +137,16 @@ describe("ButtonDirective", () => {
             fixture.detectChanges();
             expect(buttonElement.getAttribute("aria-disabled")).toBeNull();
         });
+
+        it("should keep disabled ghost buttons transparent", () => {
+            component.look.set("ghost");
+            component.disabled.set(true);
+            fixture.detectChanges();
+
+            expect(buttonElement.classList.contains("disabled:bg-transparent")).toBe(true);
+            expect(buttonElement.classList.contains("disabled:bg-disabled-background")).toBe(false);
+            expect(buttonElement.classList.contains("disabled:text-disabled-foreground")).toBe(true);
+        });
     });
 
     // =========================================================================

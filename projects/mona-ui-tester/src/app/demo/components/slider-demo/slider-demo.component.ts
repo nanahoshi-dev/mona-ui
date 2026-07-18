@@ -91,7 +91,7 @@ export class SliderDemoComponent extends AbstractDemoComponent<SliderComponent> 
             },
             trackBackground: {
                 type: "color",
-                value: "var(--color-background)"
+                value: "var(--color-surface-muted)"
             },
             trackSize: {
                 type: "string",
@@ -177,7 +177,7 @@ export class SliderWrapperComponent implements ComponentInputsAsSignal<SliderCom
     public readonly showTicks = input(false);
     public readonly smallTickStep = input(1);
     public readonly step = input(1);
-    public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>("transparent");
+    public readonly trackBackground = input<ReturnType<SliderComponent["trackBackground"]>>(null);
     public readonly trackSize = input<string | number>();
     public readonly value = model(0);
 
