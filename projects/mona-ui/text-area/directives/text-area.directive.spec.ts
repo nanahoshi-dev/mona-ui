@@ -36,4 +36,17 @@ describe("TextAreaDirective", () => {
         expect(textArea.className).toContain("data-[invalid='true']:border-error");
         expect(textArea.className).toContain("custom-class");
     });
+
+    it("should use the shared input shell and keep invalid focus semantic", () => {
+        fixture.detectChanges();
+        const textArea = fixture.nativeElement.querySelector("textarea") as HTMLTextAreaElement;
+
+        expect(textArea.classList.contains("bg-input-background")).toBe(true);
+        expect(textArea.classList.contains("border-input-border")).toBe(true);
+        expect(textArea.classList.contains("shadow-xs")).toBe(true);
+        expect(textArea.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(textArea.classList.contains("disabled:bg-disabled-background")).toBe(true);
+        expect(textArea.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
+        expect(textArea.classList.contains("opacity-50")).toBe(false);
+    });
 });

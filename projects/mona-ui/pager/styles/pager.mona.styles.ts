@@ -2,15 +2,14 @@ import { cva } from "class-variance-authority";
 
 export const pagerBaseVariants = cva(
     `
-        flex py-1 px-2
-        bg-background text-foreground
-        border border-border
+        flex px-2 py-1
         text-sm
+        bg-surface-muted text-foreground
+        border border-border-subtle
         [&_mona-numeric-text-box]:ml-4
         [&_mona-numeric-text-box]:w-12
-        [&_mona-numeric-text-box_input]:text-center
         [&_mona-numeric-text-box_input]:bg-input-background
-
+        [&_mona-numeric-text-box_input]:text-center
         [&_mona-dropdown-list]:mx-1
         [&_mona-dropdown-list]:my-0
     `,
@@ -34,33 +33,30 @@ export const pagerBaseVariants = cva(
 
 export const pagerInfoVariants = cva(
     `
-        flex items-center justify-end
-        flex-1 pl-2 whitespace-nowrap
+        flex flex-1 items-center justify-end pl-2
+        whitespace-nowrap text-muted-foreground
     `
 );
 export const pagerInputVariants = cva(
     `
         flex items-center
-        [&_mona-numeric-text-box]:w-12
         [&_mona-numeric-text-box]:mx-1
-
+        [&_mona-numeric-text-box]:w-12
     `
 );
 
 export const pagerListVariants = cva(
     `
         flex flex-wrap
-        [&_li]:list-none
-        [&_li]:flex
-        [&_li]:items-center
-        [&_li]:justify-center
+        [&_li]:flex [&_li]:list-none
+        [&_li]:items-center [&_li]:justify-center
     `
 );
 
 export const pagerListItemVariants = cva("", {
     variants: {
         active: {
-            true: "font-semibold",
+            true: "font-semibold text-foreground",
             false: ""
         }
     },

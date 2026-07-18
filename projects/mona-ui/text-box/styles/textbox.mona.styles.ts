@@ -2,30 +2,35 @@ import { cva } from "class-variance-authority";
 
 export const textBoxVariants = cva(
     `
-        flex items-center w-full min-w-0
+        flex w-full min-w-0 items-center
         overflow-hidden
-
         bg-input-background text-foreground
-        border border-input-border outline-none
+        border border-input-border shadow-xs
+        outline-none
         selection:bg-primary selection:text-primary-foreground
-
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        transition-[color,box-shadow,border] duration-300 ease-in-out
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        data-[disabled='true']:border-disabled-border
+        data-[disabled='true']:bg-disabled-background
+        data-[disabled='true']:text-disabled-foreground
+        data-[disabled='true']:shadow-none
+        data-[readonly='true']:cursor-default
 
-        focus-within:ring-2 focus-within:ring-primary/40
-        focus-within:border-primary
+        focus-within:border-focus-indicator
+        focus-within:ring-2 focus-within:ring-focus-indicator/35
 
-        [&>input]:w-full [&>input]:h-full
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error
+        data-[invalid='true']:focus-within:ring-error/35
+
+        [&>input]:h-full [&>input]:w-full
+        [&>input]:px-2
         [&>input]:bg-transparent
         [&>input]:border-0 [&>input]:outline-none
         [&>input]:placeholder:text-muted-foreground
-        [&>input]:px-2
-
-        data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {
@@ -47,32 +52,30 @@ export const textBoxVariants = cva(
 
 export const inputVariants = cva(
     `
-        bg-input-background
         px-2
-
-        border border-input-border outline-none
+        bg-input-background text-foreground
+        border border-input-border shadow-xs
+        outline-none
         selection:bg-primary selection:text-primary-foreground
+        transition-[color,box-shadow,border] duration-300 ease-in-out
 
-        transition-[color,box-shadow,border] ease-in-out duration-300
-
-        shadow-xs
-
-        file:text-foreground
         file:inline-flex file:border-0
         file:bg-transparent file:text-xs
-        file:font-medium
-
+        file:font-medium file:text-foreground
         placeholder:text-muted-foreground
 
-        disabled:pointer-events-none
-        disabled:cursor-not-allowed
-        disabled:opacity-50
+        disabled:pointer-events-none disabled:cursor-not-allowed
+        disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground
+        disabled:shadow-none
+        read-only:cursor-default
 
-        focus-visible:ring-2 focus-visible:ring-primary/40
-        focus-visible:border-primary
+        focus-visible:border-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-error/40
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
+        [&.ng-touched.ng-invalid]:focus-visible:border-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {

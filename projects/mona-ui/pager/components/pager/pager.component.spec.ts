@@ -10,6 +10,7 @@ import { PagerNumericButtonsTemplateDirective } from "../../directives/pager-num
 import { PagerPageSizeTemplateDirective } from "../../directives/pager-page-size-template.directive";
 import type { PageChangeEvent } from "../../models/PageChangeEvent";
 import type { PageSizeChangeEvent } from "../../models/PageSizeChangeEvent";
+import { pagerBaseThemeVariants, pagerInfoThemeVariants } from "../../styles/pager.styles";
 import { PagerComponent } from "./pager.component";
 
 class MockResizeObserver implements ResizeObserver {
@@ -675,5 +676,17 @@ describe("PagerComponent with page-size template", () => {
         const custom = hostFixture.nativeElement.querySelector(".custom-page-size");
 
         expect(custom?.textContent?.trim()).toBe("5 options");
+    });
+});
+
+describe("Pager visual contract", () => {
+    it("uses a muted structural strip and neutral supporting text", () => {
+        const baseClasses = pagerBaseThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
+        const infoClasses = pagerInfoThemeVariants("mona")().split(/\s+/);
+
+        expect(baseClasses).toContain("bg-surface-muted");
+        expect(baseClasses).toContain("border-border-subtle");
+        expect(baseClasses).not.toContain("bg-primary");
+        expect(infoClasses).toContain("text-muted-foreground");
     });
 });

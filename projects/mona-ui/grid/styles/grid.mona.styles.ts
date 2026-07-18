@@ -6,8 +6,8 @@ export const gridBaseVariants = cva(
     `
         relative flex flex-col
         h-full overflow-hidden
-        bg-background border border-border
         text-foreground text-sm
+        bg-surface border border-border
     `,
     {
         variants: {
@@ -25,7 +25,7 @@ export const gridCellBaseVariants = cva(
     `
         absolute inset-0
         flex w-full
-        border-b border-b-border
+        shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]
     `
 );
 
@@ -56,13 +56,14 @@ export const gridCellDirtyIndicatorVariants = cva(`
 `);
 
 export const gridCellEditorBaseVariants = cva(`
-    w-full h-full border border-solid border-primary/40 flex items-center
+    flex h-full w-full items-center
+    bg-input-background border border-focus-indicator/40
 `);
 
 export const gridCellEditorInputVariants = cva(`
-    w-full h-full border-transparent
-    data-[expanded='true']:border-primary
-    data-[expanded='true']:focus-within:border-primary/40
+    h-full w-full border-transparent
+    data-[expanded='true']:border-focus-indicator
+    data-[expanded='true']:focus-within:border-focus-indicator/40
 `);
 
 export const gridCellTextVariants = cva(`
@@ -77,9 +78,9 @@ export const gridColumnActionsVariants = cva(`
 export const gridColumnDragPreviewVariants = cva(
     `
         flex items-center justify-center
-        bg-background! text-foreground!
-        border! border-border! rounded-md
-        shadow-sm! px-2! py-0.5!
+        px-2! py-0.5!
+        bg-surface-raised! text-foreground!
+        border! border-border! rounded-md shadow-sm!
     `
 );
 
@@ -91,7 +92,7 @@ export const gridColumnResizerVariants = cva(`
     absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -right-1.5
 `);
 
-export const gridDetailContentCellVariants = cva(`border-b border-b-border`, {
+export const gridDetailContentCellVariants = cva(`border-b border-b-border-subtle`, {
     variants: {
         nextIsGroup: {
             true: "",
@@ -102,7 +103,7 @@ export const gridDetailContentCellVariants = cva(`border-b border-b-border`, {
 
 export const gridDetailIndentCellVariants = cva(
     `
-        border-r border-r-border border-b border-b-border
+        border-r border-r-border-subtle border-b border-b-border-subtle
     `,
     {
         variants: {
@@ -115,7 +116,7 @@ export const gridDetailIndentCellVariants = cva(
 );
 
 export const gridDetailRowVariants = cva(`
-    border-b border-b-border
+    border-b border-b-border-subtle
 `);
 
 export const gridFilterRowCellVariants = cva(`flex items-center px-1 py-0.5 w-full`);
@@ -124,7 +125,7 @@ export const gridFooterVariants = cva(
     `
         flex flex-row grow-0 shrink-0 basis-auto
         overflow-hidden
-        bg-header-background border-r border-r-border border-t border-t-border
+        bg-surface-muted border-r border-r-border-subtle border-t border-t-border-subtle
     `
 );
 
@@ -140,28 +141,29 @@ export const gridFooterTableCellVariants = cva(
     `
         relative overflow-hidden
         text-left align-middle px-2 py-2
-        border-r border-r-border border-b border-b-border
-        bg-header-background font-medium
+        bg-surface-muted
+        border-r border-r-border-subtle border-b border-b-border-subtle
+        font-medium
     `
 );
 
 export const gridGroupPanelPlaceholderVariants = cva(`
-    truncate opacity-70
+    truncate text-muted-foreground
 `);
 
 export const gridGroupPanelVariants = cva(
     `
         flex items-center flex-wrap
         p-1 h-auto gap-1
-        border-b border-b-border
+        bg-surface-muted border-b border-b-border-subtle
     `
 );
 
 export const gridGroupRowVariants = cva(
     `
-        w-full bg-header-background
-        border-r border-r-border
         relative z-10
+        w-full
+        bg-surface-muted border-r border-r-border-subtle
     `
 );
 
@@ -169,7 +171,7 @@ export const gridHeaderVariants = cva(
     `
         flex flex-row grow-0 shrink-0 basis-auto
         overflow-hidden
-        bg-header-background border-r border-r-border
+        bg-surface-muted border-r border-r-border-subtle
     `
 );
 
@@ -180,16 +182,16 @@ export const gridHeaderTableVariants = cva(
 );
 
 export const gridHeaderTableRowVariants = cva(
-    `relative inline-flex not-first:border-t not-first:border-t-border [&>th:last-child]:border-r-0`
+    `relative inline-flex not-first:border-t not-first:border-t-border-subtle [&>th:last-child]:border-r-0`
 );
 
 export const gridHeaderTableCellVariants = cva(
     `
         relative select-none
         text-left overflow-visible
-        outline-none border-r border-r-border
+        outline-none border-r border-r-border-subtle
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/40
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
     `
 );
 
@@ -211,8 +213,8 @@ export const gridHeaderTableColumnTitleVariants = cva(
 export const gridListBaseVariants = cva(
     `
         w-full h-full
-        border-t border-t-border
         outline-none
+        border-t border-t-border-subtle
     `,
     {
         variants: {
@@ -235,9 +237,9 @@ export const gridListTableRowVariants = cva(``, {
         selected: {
             true: `
                     ${gridRowHeightClass}
-                    bg-primary text-primary-foreground
+                    bg-active text-foreground hover:bg-active
                 `,
-            false: `${gridRowHeightClass} odd:bg-background even:bg-background-dark `
+            false: `${gridRowHeightClass} bg-surface hover:bg-hover`
         }
     }
 });
@@ -250,7 +252,7 @@ export const gridListTableCellVariants = cva(
         align-top
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-primary/40
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -272,7 +274,7 @@ export const gridListTableCellVariants = cva(
             },
             lastInRow: {
                 true: "",
-                false: "border-r border-r-border"
+                false: "border-r border-r-border-subtle"
             },
             masterDetailContent: {
                 true: "",
@@ -325,12 +327,12 @@ export const gridListTableCellVariants = cva(
             {
                 grouped: true,
                 indentCell: true,
-                class: "bg-header-background border-b border-b-border"
+                class: "bg-surface-muted shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]"
             },
             {
                 grouped: true,
                 indentCell: false,
-                class: "border-b border-b-border"
+                class: "shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]"
             },
             {
                 grouped: true,
@@ -350,6 +352,6 @@ export const gridListTableCellVariants = cva(
 export const gridNoDataVariants = cva(
     `
         flex items-center justify-center h-full
-        border-t border-t-border
+        text-muted-foreground border-t border-t-border-subtle
     `
 );

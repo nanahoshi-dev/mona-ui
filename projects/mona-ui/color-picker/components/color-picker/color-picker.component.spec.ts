@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { form, FormField, readonly as fieldReadonly, required } from "@angular/forms/signals";
+import axe from "axe-core";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
@@ -104,6 +105,32 @@ describe("ColorPickerComponent", () => {
         fixture.detectChanges();
 
         expect(fixture.componentInstance).toBeTruthy();
+    });
+
+    it("uses the shared input shell and neutral interaction states", async () => {
+        const fixture = await createValueBindingFixture();
+        const picker = getPicker(fixture);
+
+        expect(picker.classList.contains("bg-input-background")).toBe(true);
+        expect(picker.classList.contains("border-input-border")).toBe(true);
+        expect(picker.classList.contains("shadow-xs")).toBe(true);
+        expect(picker.classList.contains("hover:bg-hover")).toBe(true);
+        expect(picker.classList.contains("active:bg-active")).toBe(true);
+        expect(picker.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(picker.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
+        expect(picker.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
+        expect(picker.classList.contains("hover:bg-accent")).toBe(false);
+    });
+
+    it("uses the overlay surface tier for palette content", async () => {
+        const fixture = await createValueBindingFixture();
+        await openPicker(fixture);
+        const popup = document.body.querySelector("[role='dialog']") as HTMLElement;
+
+        expect(popup.classList.contains("bg-surface-overlay")).toBe(true);
+        expect(popup.classList.contains("border-border")).toBe(true);
+        expect(popup.classList.contains("shadow-md")).toBe(true);
+        expect(popup.classList.contains("border-input-border")).toBe(false);
     });
 
     it("opens the gradient popup without requiring a control value accessor", async () => {
@@ -358,6 +385,20 @@ describe("ColorPickerComponent ARIA structure", () => {
         expect(picker.getAttribute("aria-controls")).toBe(dialog.id);
         expect(dialog.getAttribute("aria-label")).toBeTruthy();
         expect(document.body.querySelector("mona-color-gradient")).not.toBeNull();
+    });
+
+    it("has no AXE violations with the palette popup open", async () => {
+        const fixture = await createValueBindingFixture();
+        await openPicker(fixture);
+
+        const results = await axe.run(document.body, {
+            rules: {
+                "color-contrast": { enabled: false },
+                region: { enabled: false }
+            }
+        });
+
+        expect(results.violations).toEqual([]);
     });
 });
 

@@ -30,8 +30,7 @@ export const notificationContainerBaseVariants = cva(`p-2 z-40000`, {
 
 export const notificationActionVariants = cva(
     `
-        absolute top-0 right-0
-        flex items-start h-auto
+        absolute top-0 right-0 flex h-auto items-start
         [&>svg.lucide]:cursor-pointer
         [&>svg.lucide]:-mt-1
     `
@@ -39,10 +38,9 @@ export const notificationActionVariants = cva(
 
 export const notificationBaseVariants = cva(
     `
-        w-fit h-fit relative
-        overflow-hidden flex flex-col
-        mb-2 bg-background text-foreground shadow-md
-        border border-border
+        relative mb-2 flex h-fit w-fit flex-col overflow-hidden
+        bg-surface-overlay text-foreground
+        border border-border shadow-md
     `
 );
 
@@ -54,14 +52,14 @@ export const notificationBodyVariants = cva(
 
 export const notificationContentVariants = cva(
     `
-        flex flex-1 w-full items-center
+        flex w-full flex-1 items-center
     `
 );
 
 export const notificationHeaderVariants = cva(
     `
-        w-full flex flex-row items-center
-        flex-1 text-sm font-medium
+        flex w-full flex-1 flex-row items-center
+        text-sm font-medium
         select-none
     `
 );

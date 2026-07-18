@@ -322,6 +322,17 @@ describe("ColorPaletteComponent styling", () => {
 
         expect(getTile(fixture, 0).className).toContain("rounded-full");
     });
+
+    it("uses a dual black-and-white indicator for selection and keyboard focus", async () => {
+        const fixture = await createValueBindingFixture();
+        const tile = getTile(fixture, 1);
+
+        expect(tile.className).toContain("data-[selected='true']:border-black/90");
+        expect(tile.className).toContain("data-[selected='true']:outline-white/90");
+        expect(tile.className).toContain("focus-visible:not-data-[selected='true']:border-black/90");
+        expect(tile.className).toContain("focus-visible:not-data-[selected='true']:outline-white/90");
+        expect(tile.className).not.toContain("outline-foreground");
+    });
 });
 
 describe("ColorPaletteComponent ARIA structure", () => {

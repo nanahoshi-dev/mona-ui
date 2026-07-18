@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, required } from "@angular/forms/signals";
+import { datePopupThemeVariants } from "../../../date-input/styles/date-popup.styles";
 import { DatePickerComponent } from "./date-picker.component";
 
 describe("DatePickerComponent", () => {
@@ -16,6 +17,27 @@ describe("DatePickerComponent", () => {
 
     it("writes the signal-form value to the text box", () => {
         expect(getInput().value).toBe("02/01/2026");
+    });
+
+    it("uses one shared input shell without a nested focus ring", () => {
+        const picker = fixture.nativeElement.querySelector("mona-date-picker") as HTMLElement;
+
+        expect(picker.classList.contains("bg-input-background")).toBe(true);
+        expect(picker.classList.contains("border-input-border")).toBe(true);
+        expect(picker.classList.contains("shadow-xs")).toBe(true);
+        expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(picker.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
+        expect(picker.classList.contains("[&_mona-text-box]:focus-within:ring-0")).toBe(true);
+        expect(picker.classList.contains("[&_mona-text-box[data-invalid='true']]:ring-0")).toBe(true);
+    });
+
+    it("uses an overlay-tier popup instead of an input-tier surface", () => {
+        const classes = datePopupThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
+
+        expect(classes).toContain("bg-surface-overlay");
+        expect(classes).toContain("border-border");
+        expect(classes).toContain("shadow-md");
+        expect(classes).not.toContain("border-input-border");
     });
 
     it("updates the signal-form value from typed date text on blur", async () => {
@@ -37,6 +59,9 @@ describe("DatePickerComponent", () => {
         fixture.detectChanges();
 
         expect(getInput().disabled).toBe(true);
+        expect(
+            (fixture.nativeElement.querySelector("mona-date-picker") as HTMLElement).getAttribute("data-disabled")
+        ).toBe("true");
     });
 
     it("reflects required invalid state after the field is touched", async () => {

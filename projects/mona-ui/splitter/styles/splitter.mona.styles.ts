@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const splitterBaseVariants = cva(
     `
-        flex w-full h-full overflow-hidden min-w-0 min-h-0
+        flex h-full w-full min-h-0 min-w-0 overflow-hidden
     `,
     {
         variants: {
@@ -19,12 +19,12 @@ export const splitterBaseVariants = cva(
 
 export const splitterResizerVariants = cva(
     `
-        flex items-center justify-center
-        relative bg-accent
-        hover:bg-accent-hover
-        active:bg-primary/40
-        shrink-0 outline-none
-        focus-visible:bg-primary
+        relative flex shrink-0 items-center justify-center
+        bg-border-subtle outline-none
+        transition-colors
+        hover:bg-border-control active:bg-border-control-hover
+        focus-visible:bg-border-control
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -33,7 +33,7 @@ export const splitterResizerVariants = cva(
                 vertical: "h-0.5 flex-row"
             },
             resizing: {
-                true: "",
+                true: "bg-border-control-hover",
                 false: ""
             }
         },

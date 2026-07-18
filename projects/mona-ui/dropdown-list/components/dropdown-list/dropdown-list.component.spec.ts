@@ -60,6 +60,34 @@ describe("DropdownListComponent", () => {
         expect(fixture.componentInstance).toBeTruthy();
     });
 
+    it("uses a neutral input shell and keeps invalid focus precedence", async () => {
+        const fixture = await createSignalFormFixture();
+        const host = getHost(fixture);
+
+        expect(host.classList.contains("bg-input-background")).toBe(true);
+        expect(host.classList.contains("border-input-border")).toBe(true);
+        expect(host.classList.contains("hover:bg-hover")).toBe(true);
+        expect(host.classList.contains("active:bg-active")).toBe(true);
+        expect(host.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("hover:bg-accent")).toBe(false);
+    });
+
+    it("uses an overlay popup and neutral persistent option selection", async () => {
+        const fixture = await createSignalFormFixture();
+        await openPopup(fixture);
+
+        const popup = document.body.querySelector(".bg-surface-overlay") as HTMLElement;
+        const selectedOption = getOption("Banana");
+
+        expect(popup).not.toBeNull();
+        expect(popup.classList.contains("border-border")).toBe(true);
+        expect(popup.classList.contains("shadow-md")).toBe(true);
+        expect(popup.classList.contains("bg-surface-raised")).toBe(false);
+        expect(selectedOption.classList.contains("bg-active")).toBe(true);
+        expect(selectedOption.classList.contains("bg-primary")).toBe(false);
+        expect(selectedOption.classList.contains("bg-accent-hover")).toBe(false);
+    });
+
     it("hydrates the rendered selection from a signal form primitive valueField value", async () => {
         const fixture = await createSignalFormFixture();
 
@@ -97,6 +125,10 @@ describe("DropdownListComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-disabled")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
+        expect(getHost(fixture).classList.contains("bg-disabled-background")).toBe(true);
+        expect(getHost(fixture).classList.contains("border-disabled-border")).toBe(true);
+        expect(getHost(fixture).classList.contains("text-disabled-foreground")).toBe(true);
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe(2);
     });
@@ -110,6 +142,7 @@ describe("DropdownListComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-readonly")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-readonly")).toBe("true");
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe(2);
     });
@@ -154,6 +187,7 @@ describe("DropdownListComponent", () => {
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).getAttribute("aria-required")).toBe("true");
         expect(getHost(fixture).className).toContain("border-error");
+        expect(getHost(fixture).className).toContain("focus-visible:ring-error/35");
     });
 
     it("does not report a required field as invalid when a falsy primitive value is selected", async () => {

@@ -60,6 +60,17 @@ describe("ComboBoxComponent", () => {
         expect(fixture.componentInstance).toBeTruthy();
     });
 
+    it("uses the shared input shell and semantic state precedence", async () => {
+        const fixture = await createSignalFormFixture();
+        const host = getHost(fixture);
+
+        expect(host.classList.contains("bg-input-background")).toBe(true);
+        expect(host.classList.contains("border-input-border")).toBe(true);
+        expect(host.classList.contains("shadow-xs")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("opacity-50")).toBe(false);
+    });
+
     it("hydrates the input from a signal form primitive valueField value", async () => {
         const fixture = await createSignalFormFixture();
 
@@ -97,6 +108,10 @@ describe("ComboBoxComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-disabled")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
+        expect(getHost(fixture).classList.contains("bg-disabled-background")).toBe(true);
+        expect(getHost(fixture).classList.contains("border-disabled-border")).toBe(true);
+        expect(getHost(fixture).classList.contains("text-disabled-foreground")).toBe(true);
         expect(getInput(fixture).disabled).toBe(true);
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe(2);
@@ -111,6 +126,7 @@ describe("ComboBoxComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-readonly")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-readonly")).toBe("true");
         expect(getInput(fixture).readOnly).toBe(true);
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe(2);
@@ -157,6 +173,7 @@ describe("ComboBoxComponent", () => {
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getInput(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).className).toContain("border-error");
+        expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
 
     it("does not report a required field as invalid when a falsy primitive value is selected", async () => {

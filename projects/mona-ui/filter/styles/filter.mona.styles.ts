@@ -2,10 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const filterMenuBaseVariants = cva(
     `
-        w-full flex flex-col
-        p-1 gap-2
-        bg-background-dark text-foreground border border-border
-        shadow-lg
+        flex w-full flex-col
+        gap-2 p-1
+        bg-surface-overlay text-foreground
+        border border-border shadow-md
     `,
     {
         variants: {

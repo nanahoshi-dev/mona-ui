@@ -125,6 +125,14 @@ describe("monaThemeColors", () => {
         }
     });
 
+    it("keeps every solid selected role distinct from its resting role", () => {
+        for (const colors of Object.values(monaThemeColors)) {
+            for (const role of ["primary", "secondary", "success", "error", "warning", "info"] as const) {
+                expect(colors[`--color-${role}-selected`]).not.toBe(colors[`--color-${role}`]);
+            }
+        }
+    });
+
     it("meets text, interaction, and focus contrast targets", () => {
         for (const colors of Object.values(monaThemeColors)) {
             expectContrast(colors, "--color-foreground", "--color-surface", 4.5);
@@ -164,11 +172,7 @@ function expectContrast(
     expect(colorContrast(colors, foreground, background)).toBeGreaterThanOrEqual(minimum);
 }
 
-function colorContrast(
-    colors: ThemeColors,
-    foreground: `--color-${string}`,
-    background: `--color-${string}`
-): number {
+function colorContrast(colors: ThemeColors, foreground: `--color-${string}`, background: `--color-${string}`): number {
     return wcagContrast(resolveColor(colors, foreground), resolveColor(colors, background));
 }
 

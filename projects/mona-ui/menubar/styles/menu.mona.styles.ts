@@ -3,8 +3,8 @@ import { cva } from "class-variance-authority";
 export const contextMenuContentVariants = cva(
     `
         w-full gap-4 overflow-hidden
-        bg-background text-foreground
-        shadow-lg border border-border
+        bg-surface-overlay text-foreground
+        border border-border shadow-md
     `,
     {
         variants: {
@@ -23,44 +23,38 @@ export const contextMenuContentVariants = cva(
     }
 );
 
-export const contextMenuDividerVariants = cva(`-mx-0.5 my-1 h-px bg-border`);
+export const contextMenuDividerVariants = cva(`-mx-0.5 my-1 h-px bg-border-subtle`);
 
-export const menuItemGroupHeaderVariants = cva(`font-bold inline-flex select-none px-2 py-1 w-full`, {
-    variants: {
-        size: {
-            small: "text-xs",
-            medium: "text-sm",
-            large: "text-md"
+export const menuItemGroupHeaderVariants = cva(
+    `inline-flex w-full select-none px-2 py-1 font-bold text-muted-foreground`,
+    {
+        variants: {
+            size: {
+                small: "text-xs",
+                medium: "text-sm",
+                large: "text-md"
+            }
         }
     }
-});
+);
 
 export const menuItemIconVariants = cva(`absolute left-2 flex h-3.5 w-3.5 items-center justify-center`);
 
 export const menuItemLinkVariants = cva(`flex h-3.5 w-3.5 items-center justify-center`);
 
-export const menuItemShortcutVariants = cva(`flex items-center justify-end flex-1 opacity-60 text-xs`);
+export const menuItemShortcutVariants = cva(`flex flex-1 items-center justify-end text-xs text-muted-foreground`);
 
 export const menuItemTextVariants = cva(`flex flex-1 items-center justify-start gap-2`);
 
 export const menuItemVariants = cva(
     `
-        relative flex cursor-default select-none items-center px-2 py-1.5 gap-4
-        outline-none
-
-        hover:bg-hover
-        hover:text-accent-foreground
-
-        focus-within:bg-accent
-        focus-within:text-accent-foreground
-        focus-within:outline-none
-
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
-
-        data-[focused]:bg-accent
-        data-[focused]:text-accent-foreground
+        relative flex cursor-default select-none items-center gap-4 px-2 py-1.5
+        text-foreground outline-none
+        hover:bg-hover hover:text-foreground
+        focus-within:bg-hover focus-within:text-foreground focus-within:outline-none
+        data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:text-disabled-foreground
+        data-[focused]:bg-hover data-[focused]:text-foreground
     `,
     {
         variants: {
@@ -75,14 +69,11 @@ export const menuItemVariants = cva(
 
 export const menubarBaseVariants = cva(
     `
-        flex items-center justify-center
-        gap-1 overflow-hidden
-        bg-background text-foreground
-        shadow-sm border border-border
-
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        flex items-center justify-center gap-1 overflow-hidden
+        bg-surface-muted text-foreground
+        border border-border-subtle shadow-xs
+        data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:text-disabled-foreground
     `,
     {
         variants: {
@@ -103,20 +94,13 @@ export const menubarBaseVariants = cva(
 
 export const menubarListItemVariants = cva(
     `
-        h-full flex items-center justify-center
-        px-2 py-1.5
-        cursor-pointer outline-none
-
-        hover:bg-hover
-        hover:text-accent-foreground
-        focus-within:bg-accent
-        focus-within:text-accent-foreground
-        focus-within:outline-none
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
-        data-[active='true']:bg-accent
-        data-[active='true']:text-accent-foreground
+        flex h-full items-center justify-center px-2 py-1.5
+        cursor-pointer text-foreground outline-none
+        hover:bg-hover hover:text-foreground
+        focus-within:bg-hover focus-within:text-foreground focus-within:outline-none
+        data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:text-disabled-foreground
+        data-[active='true']:bg-active data-[active='true']:text-foreground
     `,
     {
         variants: {
@@ -132,8 +116,7 @@ export const menubarListItemVariants = cva(
 
 export const menubarListVariants = cva(
     `
-        w-full h-full list-none
-        flex items-center select-none
-        p-1
+        flex h-full w-full list-none items-center p-1
+        select-none
     `
 );

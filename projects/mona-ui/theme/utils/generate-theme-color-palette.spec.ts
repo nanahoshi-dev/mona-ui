@@ -49,6 +49,7 @@ describe("generateThemeColorPalette", () => {
         for (const variant of variants) {
             for (const role of Object.keys(seeds)) {
                 expect(palette[variant]).toHaveProperty(`--color-${role}`);
+                expect(palette[variant]).toHaveProperty(`--color-${role}-selected`);
                 expect(palette[variant]).toHaveProperty(`--color-${role}-subtle`);
                 expect(palette[variant]).toHaveProperty(`--color-${role}-border`);
             }
@@ -124,6 +125,24 @@ describe("generateThemeColorPalette", () => {
         expect(lightness(light["--color-primary-hover"])).toBeLessThan(lightness(light["--color-primary"]));
         expect(lightness(light["--color-primary-active"])).toBeLessThan(lightness(light["--color-primary-hover"]));
         expect(darknessOrder(dark)).toEqual(["base", "hover", "active"]);
+    });
+
+    it("generates a selected tone that is visibly distinct from the resting solid tone", () => {
+        const palette = generateThemeColorPalette({
+            primary: "#7444c3",
+            secondary: "#49627d",
+            success: "#2f855a",
+            error: "#c2413b",
+            warning: "#b36b00",
+            info: "#2f6fbd"
+        });
+
+        for (const variant of variants) {
+            for (const role of ["primary", "secondary", "success", "error", "warning", "info"] as const) {
+                expect(palette[variant][`--color-${role}-selected`]).toBe(palette[variant][`--color-${role}-active`]);
+                expect(palette[variant][`--color-${role}-selected`]).not.toBe(palette[variant][`--color-${role}`]);
+            }
+        }
     });
 });
 

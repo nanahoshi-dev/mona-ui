@@ -108,8 +108,9 @@ import {
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
         "[class]": "baseClass()"
     }

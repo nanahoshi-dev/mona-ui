@@ -2,25 +2,31 @@ import { cva } from "class-variance-authority";
 
 export const switchVariants = cva(
     `
-        relative flex items-center cursor-pointer select-none
-        transition-[background]
-
+        group relative flex items-center
+        cursor-pointer select-none
         bg-input-background
         border border-input-border
         outline-none
-
-        focus-within:ring-2 focus-within:ring-primary/40
+        transition-[background,border-color]
 
         data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:opacity-50
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:border-disabled-border
+        data-[disabled='true']:bg-disabled-background
+        data-[disabled='true']:text-disabled-foreground
 
         data-[active='true']:bg-primary
         data-[active='true']:text-primary-foreground
+        data-[disabled='true']:data-[active='true']:bg-disabled-background
+
+        focus-visible:border-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
-
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-visible:border-error
+        data-[invalid='true']:focus-visible:ring-error/35
     `,
     {
         variants: {
@@ -32,9 +38,9 @@ export const switchVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "w-14 h-7.5 text-md",
-                medium: "w-12 h-6.5 text-sm",
-                small: "w-10 h-5.5 text-xs"
+                large: "h-7.5 w-14 text-md",
+                medium: "h-6.5 w-12 text-sm",
+                small: "h-5.5 w-10 text-xs"
             }
         }
     }
@@ -42,11 +48,14 @@ export const switchVariants = cva(
 
 export const switchHandleVariants = cva(
     `
-        absolute inline-flex
-        items-center justify-center
-        outline-none transition-[left,background] ease-in-out duration-300
-        border border-border bg-secondary
-        data-[active='true']:bg-background text-foreground
+        absolute inline-flex items-center justify-center
+        bg-surface-raised text-foreground
+        border border-border-subtle shadow-xs
+        outline-none
+        transition-[left,background] duration-300 ease-in-out
+        data-[active='true']:bg-primary-foreground
+        group-data-[disabled='true']:border-disabled-border
+        group-data-[disabled='true']:bg-disabled-background
     `,
     {
         variants: {
@@ -59,17 +68,17 @@ export const switchHandleVariants = cva(
             },
             size: {
                 large: `
-                    w-6 h-6
+                    h-6 w-6
                     data-[active='true']:left-[calc(100%-26px)]
                     data-[active='false']:left-0.5
                 `,
                 medium: `
-                    w-5 h-5
+                    h-5 w-5
                     data-[active='true']:left-[calc(100%-22px)]
                     data-[active='false']:left-0.5
                 `,
                 small: `
-                    w-4 h-4
+                    h-4 w-4
                     data-[active='true']:left-[calc(100%-18px)]
                     data-[active='false']:left-0.5
                 `
@@ -80,6 +89,6 @@ export const switchHandleVariants = cva(
 
 export const switchLabelVariants = cva(
     `
-        h-full flex flex-1 items-center justify-center text-xs
+        flex h-full flex-1 items-center justify-center text-xs
     `
 );

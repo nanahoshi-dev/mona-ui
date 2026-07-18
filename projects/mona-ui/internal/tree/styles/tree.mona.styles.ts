@@ -2,7 +2,7 @@ import { cva } from "class-variance-authority";
 
 export const subTreeListVariants = cva(
     `
-        list-none flex flex-col
+        flex list-none flex-col
     `
 );
 
@@ -22,9 +22,9 @@ export const treeBaseVariants = cva(
 
 export const treeDropHintBaseVariants = cva(
     `
-        fixed z-1 w-10 h-0.5
-        bg-primary opacity-80
+        fixed z-1 h-0.5 w-10
         pointer-events-none
+        bg-primary opacity-80
     `
 );
 
@@ -37,20 +37,20 @@ export const treeDropHintIconVariants = cva(
 
 export const treeNodeBaseVariants = cva(
     `
-        px-2 py-1 cursor-default
+        cursor-default px-2 py-1 text-foreground
     `,
     {
         variants: {
             disabled: {
-                true: "pointer-events-none opacity-50 cursor-default",
+                true: "pointer-events-none cursor-default text-disabled-foreground",
                 false: ""
             },
             highlighted: {
-                true: "inset-ring-1 inset-ring-gray-400/70",
+                true: "inset-ring-1 inset-ring-focus-indicator/35",
                 false: ""
             },
             selected: {
-                true: "bg-primary text-primary-foreground",
+                true: "bg-active text-foreground",
                 false: ""
             }
         },
@@ -63,7 +63,7 @@ export const treeNodeBaseVariants = cva(
             {
                 disabled: false,
                 selected: true,
-                class: "hover:bg-primary-hover"
+                class: "hover:bg-active"
             }
         ]
     }
@@ -78,8 +78,8 @@ export const treeNodeContainerVariants = cva(
 export const treeNodeDraggingVariants = cva(
     `
         flex items-center justify-center
-        px-2! py-1! top-3!
-        bg-background! text-foreground!
+        top-3! px-2! py-1!
+        bg-surface-overlay! text-foreground!
         border! border-border!
         shadow-md
     `
@@ -87,8 +87,7 @@ export const treeNodeDraggingVariants = cva(
 
 export const treeNodeExpanderVariants = cva(
     `
-        min-w-6 h-full -ms-6
-        flex items-center justify-center
+        -ms-6 flex h-full min-w-6 items-center justify-center
         cursor-pointer text-sm text-foreground
     `
 );

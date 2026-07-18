@@ -2,11 +2,9 @@ import { cva } from "class-variance-authority";
 
 export const dialogBaseVariants = cva(
     `
-        flex flex-col gap-0.5
-        w-full h-full
-        bg-background text-foreground
-        border border-border shadow-sm
-        outline-none overflow-hidden
+        flex h-full w-full flex-col gap-0.5 overflow-hidden
+        bg-surface-overlay text-foreground
+        border border-border shadow-md outline-none
     `,
     {
         variants: {
@@ -25,14 +23,13 @@ export const dialogBaseVariants = cva(
 
 export const dialogContentContainerVariants = cva(
     `
-        flex flex-row gap-1 flex-1
+        flex flex-1 flex-row gap-1
     `
 );
 
 export const dialogBodyVariants = cva(
     `
-        flex flex-col gap-0 pb-2
-        w-full h-full pr-2
+        flex h-full w-full flex-col gap-0 pr-2 pb-2
     `,
     {
         variants: {
@@ -46,8 +43,8 @@ export const dialogBodyVariants = cva(
 
 export const dialogHeaderVariants = cva(
     `
-        flex flex-row gap-2
-        pt-4 select-none
+        flex flex-row gap-2 pt-4
+        select-none
     `
 );
 
@@ -59,10 +56,10 @@ export const dialogIconContainerVariants = cva(
 
 export const dialogIconVariants = cva(
     `
-        rounded-full w-fit h-fit p-1.5 border relative
+        relative h-fit w-fit rounded-full border p-1.5
         [&>span]:absolute [&>span]:flex [&>span]:rounded-full
         [&>span]:-top-3 [&>span]:-right-3 [&>span]:-bottom-3 [&>span]:-left-3
-        [&>span]:border [&>span]:min-w-full [&>span]:min-h-full
+        [&>span]:min-h-full [&>span]:min-w-full [&>span]:border
     `,
     {
         variants: {
@@ -82,7 +79,8 @@ export const dialogIconVariants = cva(
 
 export const dialogTitleContainerVariants = cva(
     `
-        flex flex-1 items-center justify-start select-none p-1
+        flex flex-1 items-center justify-start p-1
+        select-none
     `
 );
 
@@ -113,10 +111,10 @@ export const dialogContentVariants = cva(
 
 export const dialogFooterVariants = cva(
     `
-        flex flex-row
-        gap-2 px-4 py-2
-        border-t border-border
+        flex flex-row gap-2 px-4 py-2
         select-none
+        bg-surface-muted
+        border-t border-border-subtle
     `,
     {
         variants: {

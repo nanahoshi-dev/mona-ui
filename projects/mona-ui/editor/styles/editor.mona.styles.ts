@@ -2,11 +2,12 @@ import { cva } from "class-variance-authority";
 
 export const editorBaseVariants = cva(
     `
-        flex flex-col bg-background text-foreground
-        border border-solid border-border
-        transition-[border-color] duration-150 ease-in
-        focus-visible:ring-2 focus-visible:ring-primary/40
-        focus-visible:border-primary
+        flex flex-col
+        bg-surface text-foreground
+        border border-border
+        transition-[border-color,box-shadow] duration-150 ease-in
+        focus-within:border-focus-indicator
+        focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         prose prose-neutral max-w-none
         prose-headings:text-foreground prose-headings:font-bold
@@ -19,13 +20,13 @@ export const editorBaseVariants = cva(
 
         [&_blockquote]:border-l-4
         [&_blockquote]:border-l-solid
-        [&_blockquote]:border-l-primary
+        [&_blockquote]:border-l-border-control-hover
         [&_blockquote]:px-4 [&_blockquote]:py-2
         [&_blockquote]:ms-4
         [&_blockquote]:bg-surface-muted
 
-        [&_hr]:border [&_hr]:border-solid [&_hr]:border-border
-        [&_hr]:bg-background-dark [&_hr]:my-1
+        [&_hr]:my-1 [&_hr]:bg-border-subtle
+        [&_hr]:border [&_hr]:border-border-subtle
 
         [&_ul[data-type='taskList']_li]:flex
         [&_ul[data-type='taskList']_li]:py-0.5
@@ -40,10 +41,10 @@ export const editorBaseVariants = cva(
         [&_img]:max-w-full
         [&_img]:h-auto
         [&_img.ProseMirror-selectednode]:outline-3
-        [&_img.ProseMirror-selectednode]:outline-primary
+        [&_img.ProseMirror-selectednode]:outline-focus-indicator
 
-        [&_pre]:bg-background-dark
-        [&_pre]:border [&_pre]:border-solid [&_pre]:border-border
+        [&_pre]:bg-surface-muted
+        [&_pre]:border [&_pre]:border-border-subtle
         [&_pre]:whitespace-pre-wrap
         [&_pre]:font-mono
         [&_pre_code]:p-0
@@ -57,9 +58,9 @@ export const editorBaseVariants = cva(
         [&_table]:overflow-hidden
         [&_table]:table-fixed
         [&_table]:w-full
-        [&_table_td]:border [&_table_td]:border-solid [&_table_td]:border-foreground/40
+        [&_table_td]:border [&_table_td]:border-border-subtle
         [&_table_td]:p-2 [&_table_td]:align-top [&_table_td]:relative
-        [&_table_th]:border [&_table_th]:border-solid [&_table_th]:border-foreground/40
+        [&_table_th]:border [&_table_th]:border-border-subtle
         [&_table_th]:p-2 [&_table_th]:align-top [&_table_th]:relative
 
         [&_table_th]:bg-surface-muted [&_table_th]:text-foreground [&_table_th]:font-bold
@@ -67,10 +68,10 @@ export const editorBaseVariants = cva(
         [&_.selectedCell]:after:content-[''] [&_.selectedCell]:after:absolute [&_.selectedCell]:after:inset-0
         [&_.selectedCell]:after:pointer-events-none
         [&_.selectedCell]:after:z-2
-        [&_.selectedCell]:after:bg-primary
+        [&_.selectedCell]:after:bg-active/70
 
         [&_.column-resize-handle]:absolute
-        [&_.column-resize-handle]:bg-primary
+        [&_.column-resize-handle]:bg-focus-indicator
         [&_.column-resize-handle]:w-1
         [&_.column-resize-handle]:pointer-events-none
         [&_.column-resize-handle]:top-0
@@ -84,7 +85,7 @@ export const editorBaseVariants = cva(
 
 export const editorContainerVariants = cva(
     `
-        bg-background w-full h-full
+        h-full w-full bg-surface
         [&_div:first-child[contenteditable='true']]:p-1.5
         [&_div:first-child[contenteditable='true']]:text-foreground
         [&_div:first-child[contenteditable='true']]:border-none
@@ -144,8 +145,8 @@ export const editorHeadingsDropdownListVariants = cva(
 export const editorImageInserterActionsVariants = cva(
     `
         flex justify-end gap-1 px-2 py-1
-        bg-background-dark
-        border-t border-t-solid border-t-border
+        bg-surface-muted
+        border-t border-t-border-subtle
     `
 );
 
@@ -175,14 +176,14 @@ export const editorTableCreatorVariants = cva(
 
 export const editorTableCreatorCellVariants = cva(
     `
-        flex border border-solid border-border
-        w-6 h-6 bg-surface-muted
+        flex h-6 w-6
+        bg-input-background border border-input-border
     `
 );
 
 export const editorToolbarVariants = cva(
     `
         flex flex-wrap items-center justify-start gap-1 p-1
-        bg-background-dark text-foreground border-b border-b-solid border-b-border
+        bg-surface-muted text-foreground border-b border-b-border-subtle
     `
 );

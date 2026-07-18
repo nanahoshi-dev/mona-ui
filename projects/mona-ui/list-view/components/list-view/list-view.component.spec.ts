@@ -28,6 +28,14 @@ describe("ListViewComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("should use the content surface and quiet outer border", () => {
+        const host = fixture.nativeElement as HTMLElement;
+
+        expect(host.classList.contains("bg-surface")).toBe(true);
+        expect(host.classList.contains("border-border")).toBe(true);
+        expect(host.classList.contains("bg-background")).toBe(false);
+    });
+
     it("should update the page and skip in the list service on page change", () => {
         const listService = (component as any).listService as ListService<unknown>;
         (component as any).onPageChange({ page: 3, skip: 20, take: 10 });

@@ -18,6 +18,17 @@ describe("DateTimePickerComponent", () => {
         expect(getInput().value).toBe("02/01/2026 09:30");
     });
 
+    it("uses one shared input shell without a nested focus ring", () => {
+        const picker = fixture.nativeElement.querySelector("mona-datetime-picker") as HTMLElement;
+
+        expect(picker.classList.contains("bg-input-background")).toBe(true);
+        expect(picker.classList.contains("border-input-border")).toBe(true);
+        expect(picker.classList.contains("shadow-xs")).toBe(true);
+        expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(picker.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
+        expect(picker.classList.contains("[&_mona-text-box]:focus-within:ring-0")).toBe(true);
+    });
+
     it("updates the signal-form value from typed date-time text on blur", async () => {
         const input = getInput();
 
@@ -37,6 +48,9 @@ describe("DateTimePickerComponent", () => {
         fixture.detectChanges();
 
         expect(getInput().disabled).toBe(true);
+        expect(
+            (fixture.nativeElement.querySelector("mona-datetime-picker") as HTMLElement).getAttribute("data-disabled")
+        ).toBe("true");
     });
 
     it("reflects readonly state from the signal-form schema", async () => {
@@ -46,6 +60,9 @@ describe("DateTimePickerComponent", () => {
         fixture.detectChanges();
 
         expect(getInput().readOnly).toBe(true);
+        expect(
+            (fixture.nativeElement.querySelector("mona-datetime-picker") as HTMLElement).getAttribute("data-readonly")
+        ).toBe("true");
     });
 
     function getInput(): HTMLInputElement {

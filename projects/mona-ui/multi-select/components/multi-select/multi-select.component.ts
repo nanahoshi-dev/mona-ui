@@ -112,9 +112,11 @@ import {
         "[attr.aria-labelledby]": "ariaLabelledBy()",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
+        "[attr.data-disabled]": "disabled() || null",
+        "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly() || null",
         "[attr.role]": "'combobox'",
         "[attr.tabindex]": "disabled() ? null : 0",
-        "[attr.data-invalid]": "invalidState() || null",
         "[class]": "baseClass()",
         "(blur)": "onBlur()"
     }

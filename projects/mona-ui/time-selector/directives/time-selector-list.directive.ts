@@ -24,7 +24,8 @@ export class TimeSelectorListDirective implements TimeSelectorListVariantInput {
     readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const theme = this.#themeService.theme();
-        return timeSelectorListThemeVariants(theme)();
+        const size = this.size();
+        return timeSelectorListThemeVariants(theme)({ size });
     });
     protected readonly listPadding = computed(() => {
         const itemHeight = this.#itemHeight();

@@ -3,31 +3,39 @@ import { cva } from "class-variance-authority";
 export const colorPickerBaseVariants = cva(
     `
         flex items-center
-        border border-input-border
-        bg-background outline-none
-        shadow-xs text-foreground
         cursor-pointer
-
-        hover:bg-accent hover:text-accent-foreground
-
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        bg-input-background text-foreground
+        border border-input-border
+        shadow-xs outline-none
+        transition-[color,box-shadow,border] duration-300 ease-in-out
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        data-[disabled='true']:border-disabled-border
+        data-[disabled='true']:bg-disabled-background
+        data-[disabled='true']:text-disabled-foreground
+        data-[disabled='true']:shadow-none
         data-[readonly='true']:cursor-default
+
+        hover:bg-hover active:bg-active
+
+        focus-visible:border-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error
-
-        focus-within:ring-1 focus-within:ring-primary/40
-
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-visible:border-error
+        data-[invalid='true']:focus-visible:ring-error/35
         [&.ng-touched.ng-invalid]:border-error
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
+        [&.ng-touched.ng-invalid]:focus-visible:border-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {
             expanded: {
-                true: "ring-1 ring-primary/40"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
+                false: ""
             },
             rounded: {
                 none: "rounded-none",
@@ -41,7 +49,13 @@ export const colorPickerBaseVariants = cva(
                 medium: "h-9 text-sm",
                 small: "h-8 text-xs"
             }
-        }
+        },
+        compoundVariants: [
+            {
+                expanded: true,
+                class: "data-[invalid='true']:border-error data-[invalid='true']:ring-error/35"
+            }
+        ]
     }
 );
 
@@ -60,9 +74,9 @@ export const colorPickerColorVariants = cva(
                 full: "rounded-full"
             },
             size: {
-                large: "w-6 h-6 mx-2",
-                medium: "w-5 h-5 mx-2",
-                small: "w-4 h-4 mx-1"
+                large: "mx-2 h-6 w-6",
+                medium: "mx-2 h-5 w-5",
+                small: "mx-1 h-4 w-4"
             }
         }
     }

@@ -2,10 +2,9 @@ import { cva } from "class-variance-authority";
 
 export const tabListBaseVariants = cva(
     `
-        w-fit max-w-full
-        flex overflow-hidden
-        bg-accent
-        font-medium text-sm
+        flex w-fit max-w-full overflow-hidden
+        text-sm font-medium
+        bg-surface-muted
     `,
     {
         variants: {
@@ -25,33 +24,30 @@ export const tabListBaseVariants = cva(
     }
 );
 
-export const tabListListWrapperVariants = cva(`w-full h-full overflow-hidden`);
+export const tabListListWrapperVariants = cva(`h-full w-full overflow-hidden`);
 
 export const tabListListVariants = cva(
     `
-        flex h-full w-full overflow-hidden
-        list-none cursor-default
-        select-none whitespace-nowrap
-        p-[3px]
+        flex h-full w-full list-none overflow-hidden p-[3px]
+        cursor-default select-none whitespace-nowrap
         transition-colors duration-300 ease-out
     `
 );
 
 export const tabListListItemVariants = cva(
     `
-        flex items-center justify-center
-        cursor-pointer
-        px-2 outline-none
-        focus-visible:ring-2 focus-visible:ring-primary/40
+        flex items-center justify-center px-2
+        cursor-pointer outline-none
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
             active: {
-                true: "bg-surface text-foreground font-semibold shadow-sm inset-ring-1 inset-ring-border-subtle",
+                true: "bg-surface-raised font-semibold text-foreground shadow-xs inset-ring-1 inset-ring-border-subtle",
                 false: ""
             },
             disabled: {
-                true: "pointer-events-none cursor-not-allowed opacity-50 select-none",
+                true: "pointer-events-none cursor-not-allowed select-none text-disabled-foreground",
                 false: ""
             },
             rounded: {
@@ -70,16 +66,17 @@ export const tabListListItemVariants = cva(
 
 export const tabListScrollButtonVariants = cva(
     `
-        flex items-center justify-center
-        h-full px-2
+        flex h-full items-center justify-center px-2
+        text-muted-foreground
+        hover:bg-hover hover:text-foreground
+        active:bg-active
     `
 );
 
 export const tabContentVariants = cva(
     `
-        w-full overflow-auto flex-1
-        border border-border shadow-sm
-        bg-background text-foreground
+        flex-1 w-full overflow-auto
+        bg-surface text-foreground
     `,
     {
         variants: {
@@ -99,7 +96,6 @@ export const tabContentVariants = cva(
 
 export const tabsBaseVariants = cva(
     `
-        max-w-full
-        flex flex-col gap-2
+        flex max-w-full flex-col gap-2
     `
 );

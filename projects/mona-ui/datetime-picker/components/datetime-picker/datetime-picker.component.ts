@@ -98,8 +98,10 @@ import {
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        "[attr.data-disabled]": "disabled() || null",
         "[attr.data-expanded]": "expanded()",
         "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly() || null",
         "[class]": "baseClass()",
         "(blur)": "onDateInputBlur()"
     }

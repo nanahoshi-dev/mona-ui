@@ -8,9 +8,7 @@ export const fieldsetBaseVariants = cva(
 
 export const fieldsetVariants = cva(
     `
-        bg-background
-        border border-border
-        text-foreground
+        bg-surface text-foreground border border-border
     `,
     {
         variants: {
@@ -22,7 +20,7 @@ export const fieldsetVariants = cva(
                 none: "rounded-none"
             },
             disabled: {
-                true: "pointer-events-none opacity-50 cursor-not-allowed select-none",
+                true: "pointer-events-none cursor-not-allowed select-none bg-disabled-background text-disabled-foreground border-disabled-border",
                 false: ""
             }
         },
@@ -34,13 +32,13 @@ export const fieldsetVariants = cva(
 
 export const fieldsetLegendVariants = cva(
     `
-        ml-2
+        ms-2
     `,
     {
         variants: {
             hasTemplate: {
                 true: "",
-                false: "bg-background-dark text-foreground border border-border px-2"
+                false: "px-2 bg-surface-raised text-foreground border border-border-subtle"
             },
             rounded: {
                 small: "rounded-sm",

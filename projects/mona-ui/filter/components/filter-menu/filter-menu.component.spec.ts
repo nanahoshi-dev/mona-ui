@@ -22,4 +22,13 @@ describe("FilterMenuComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
+
+    it("uses the shared elevated overlay treatment", () => {
+        const host = fixture.nativeElement as HTMLElement;
+
+        expect(host.classList.contains("bg-surface-overlay")).toBe(true);
+        expect(host.classList.contains("border-border")).toBe(true);
+        expect(host.classList.contains("shadow-md")).toBe(true);
+        expect(host.classList.contains("bg-background-dark")).toBe(false);
+    });
 });

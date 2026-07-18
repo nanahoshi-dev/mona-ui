@@ -84,6 +84,17 @@ describe("ColorGradientComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("uses a dual-contrast handle and semantic keyboard focus over arbitrary hues", () => {
+        const handle = getHsvHandle(fixture);
+        const rectangle = handle.parentElement as HTMLElement;
+
+        expect(rectangle.classList.contains("border-border-subtle")).toBe(true);
+        expect(handle.classList.contains("border-black/90")).toBe(true);
+        expect(handle.classList.contains("outline-white/90")).toBe(true);
+        expect(handle.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(handle.classList.contains("focus-visible:ring-primary/40")).toBe(false);
+    });
+
     it("does not throw when the hsv rectangle click updates after render", async () => {
         await waitForStable(fixture);
 

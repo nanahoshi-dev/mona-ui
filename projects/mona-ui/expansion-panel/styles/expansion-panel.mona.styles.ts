@@ -2,10 +2,9 @@ import { cva } from "class-variance-authority";
 
 export const expansionPanelBaseVariants = cva(
     `
-        block w-full bg-background overflow-hidden
-        border border-border text-foreground
-        not-last:border-b-transparent not-last:rounded-b-none
-        not-first:rounded-t-none relative
+        relative block w-full overflow-hidden
+        bg-surface text-foreground border border-border
+        not-last:border-b-transparent not-last:rounded-b-none not-first:rounded-t-none
     `,
     {
         variants: {
@@ -21,26 +20,25 @@ export const expansionPanelBaseVariants = cva(
 
 export const expansionPanelHeaderVariants = cva(
     `
-        w-full flex items-center justify-between
+        relative flex w-full items-center justify-between
         px-2 py-1
-        bg-background-dark
         cursor-pointer
-        font-medium
-        text-foreground
         select-none
-        transition-border-b duration-200
-        focus-visible:outline-primary/40 focus-visible:border-b-transparent
-        focus-visible:ring-1 focus-visible:ring-primary/40
-        focus-visible:z-10 focus-visible:relative
+        font-medium text-foreground
+        bg-surface-muted
+        transition-colors duration-200
+        hover:bg-hover active:bg-active
+        focus-visible:z-10 focus-visible:outline-none
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
             collapsed: {
                 true: "border-b-transparent",
-                false: "border-0 border-b border-border border-solid"
+                false: "border-0 border-b border-border-subtle"
             },
             disabled: {
-                true: "pointer-events-none opacity-50 cursor-not-allowed select-none",
+                true: "pointer-events-none cursor-not-allowed select-none bg-disabled-background text-disabled-foreground",
                 false: ""
             }
         }

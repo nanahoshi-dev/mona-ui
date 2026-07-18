@@ -2,25 +2,30 @@ import { cva } from "class-variance-authority";
 
 export const numericTextboxVariants = cva(
     `
-        flex items-center w-full min-w-0
-        bg-transparent
-        border border-input-border p-0
-        outline-none overflow-hidden
-
-        placeholder:text-muted-foreground
-
+        flex w-full min-w-0 items-center
+        overflow-hidden p-0
+        bg-input-background text-foreground
+        border border-input-border shadow-xs
+        outline-none
         selection:bg-primary selection:text-primary-foreground
-        transition-[color,box-shadow,border] ease-in-out duration-300
+        transition-[color,box-shadow,border] duration-300 ease-in-out
+        placeholder:text-muted-foreground
 
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        data-[disabled='true']:border-disabled-border
+        data-[disabled='true']:bg-disabled-background
+        data-[disabled='true']:text-disabled-foreground
+        data-[disabled='true']:shadow-none
+        data-[readonly='true']:cursor-default
 
-        focus-within:ring-2 focus-within:ring-primary/40
-        focus-within:border-primary
+        focus-within:border-focus-indicator
+        focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error
+        data-[invalid='true']:focus-within:ring-error/35
     `,
     {
         variants: {
@@ -42,10 +47,12 @@ export const numericTextboxVariants = cva(
 
 export const numericTextboxInputVariants = cva(
     `
-        border-0 outline-none ring-0
         h-full w-full
-        focus-visible:ring-0 shadow-none
+        bg-transparent
+        border-0 shadow-none
         rounded-none
+        outline-none ring-0
+        focus-visible:border-transparent focus-visible:ring-0
     `,
     {
         variants: {
@@ -94,14 +101,12 @@ export const numericTextboxInputVariants = cva(
 
 export const numericTextboxButtonVariants = cva(
     `
-        h-full flex flex-col border-l border-input-border
+        flex h-full flex-col
         overflow-y-hidden
-        [&>button]:flex-1
-        [&>button]:flex
-        [&>button]:items-center
-        [&>button]:p-0
-        [&>button]:rounded-none
+        border-s border-border-subtle
 
+        [&>button]:flex [&>button]:flex-1 [&>button]:items-center
+        [&>button]:rounded-none [&>button]:p-0
         [&>button]:first:rounded-tl-none
         [&>button]:first:rounded-bl-none
         [&>button]:first:rounded-br-none
@@ -114,9 +119,9 @@ export const numericTextboxButtonVariants = cva(
     {
         variants: {
             size: {
-                large: "min-w-16 w-16",
-                medium: "min-w-10 w-10",
-                small: "min-w-8 w-8"
+                large: "w-16 min-w-16",
+                medium: "w-10 min-w-10",
+                small: "w-8 min-w-8"
             }
         }
     }

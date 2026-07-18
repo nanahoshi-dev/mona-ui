@@ -2,17 +2,17 @@ import { cva } from "class-variance-authority";
 
 export const calendarBaseVariants = cva(
     `
-        flex flex-col gap-2 p-2 min-w-64
-        bg-background text-foreground
-        border border-input-border
-        shadow-sm select-none
+        flex min-w-64 flex-col gap-2 p-2
+        select-none
+        bg-surface-raised text-foreground
+        border border-border shadow-xs
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
             disabled: {
-                true: "opacity-50 cursor-not-allowed pointer-events-none"
+                true: "pointer-events-none cursor-not-allowed opacity-50"
             },
             readonly: {
                 true: "pointer-events-none"
@@ -43,21 +43,22 @@ export const calendarHeaderVariants = cva(
 
 export const calendarMonthViewDayVariants = cva(
     `
-        hover:bg-hover cursor-pointer
+        cursor-pointer
+        hover:bg-hover active:bg-active
     `,
     {
         variants: {
             disabled: {
-                true: "opacity-50 cursor-not-allowed pointer-events-none"
+                true: "pointer-events-none cursor-not-allowed text-disabled-foreground"
             },
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
             },
             outside: {
-                true: "opacity-50"
+                true: "text-muted-foreground"
             },
             rangePreview: {
-                true: "bg-primary/20 hover:bg-primary/30"
+                true: "bg-active hover:bg-active"
             },
             rounded: {
                 none: "rounded-none",
@@ -70,7 +71,7 @@ export const calendarMonthViewDayVariants = cva(
                 true: "bg-primary text-primary-foreground hover:bg-primary-hover"
             },
             today: {
-                true: "font-bold text-primary"
+                true: "font-bold text-foreground"
             }
         },
         compoundVariants: [
@@ -88,44 +89,40 @@ export const calendarMonthViewDayVariants = cva(
 
 export const calendarMonthViewGridVariants = cva(
     `
-        grid gap-0.5
-        justify-center
-        [&>div]:h-full [&>div]:flex
-        [&>div]:items-center [&>div]:justify-center
+        grid justify-center gap-0.5
         [&>div]:aspect-square
+        [&>div]:flex [&>div]:h-full
+        [&>div]:items-center [&>div]:justify-center
     `
 );
 
 export const calendarMonthViewGridHeaderVariants = cva(
     `
-        grid justify-center
-        gap-0.5 font-semibold text-sm
-        [&>div]:h-full [&>div]:flex
-        [&>div]:items-center [&>div]:justify-center
+        grid justify-center gap-0.5
+        text-sm font-semibold text-muted-foreground
         [&>div]:aspect-square
+        [&>div]:flex [&>div]:h-full
+        [&>div]:items-center [&>div]:justify-center
     `
 );
 
 export const calendarYearViewGridVariants = cva(
     `
-        grid grid-cols-3 gap-0.5
-        justify-center
-        [&>div]:h-full [&>div]:flex
+        grid grid-cols-3 justify-center gap-0.5
+        [&>div]:flex [&>div]:h-12
         [&>div]:items-center [&>div]:justify-center
-        [&>div]:h-12
     `
 );
 
 export const calendarYearViewCellVariants = cva(
     `
-        py-2 cursor-pointer
-        hover:bg-hover
-        active:bg-active
+        cursor-pointer py-2
+        hover:bg-hover active:bg-active
     `,
     {
         variants: {
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",
@@ -140,24 +137,21 @@ export const calendarYearViewCellVariants = cva(
 
 export const calendarDecadeViewGridVariants = cva(
     `
-        grid grid-cols-4 gap-0.5
-        justify-center
-        [&>div]:h-full [&>div]:flex
+        grid grid-cols-4 justify-center gap-0.5
+        [&>div]:flex [&>div]:h-12
         [&>div]:items-center [&>div]:justify-center
-        [&>div]:h-12
     `
 );
 
 export const calendarDecadeViewCellVariants = cva(
     `
-        py-2 cursor-pointer
-        hover:bg-hover
-        active:bg-active
+        cursor-pointer py-2
+        hover:bg-hover active:bg-active
     `,
     {
         variants: {
             focused: {
-                true: "ring-1 ring-inset ring-primary/40 bg-accent outline-none"
+                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",

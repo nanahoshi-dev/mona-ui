@@ -1,5 +1,5 @@
 @for (prefixTemplate of prefixTemplateList(); track $index) {
-    <span class="flex items-center flex-none flex-wrap h-full overflow-hidden border-none">
+    <span class="flex h-full flex-none flex-wrap items-center overflow-hidden border-none">
         <ng-container *ngTemplateOutlet="prefixTemplate"></ng-container>
     </span>
 }
@@ -40,7 +40,7 @@
             monaButton
             [disabled]="disabled()"
             [tabindex]="-1"
-            look="secondary"
+            look="ghost"
             [size]="size()"
             (mousedown)="$event.preventDefault()"
             (pointerdown)="spin$.next('+')"
@@ -53,7 +53,7 @@
             monaButton
             [disabled]="disabled()"
             [tabindex]="-1"
-            look="secondary"
+            look="ghost"
             [size]="size()"
             (mousedown)="$event.preventDefault()"
             (pointerdown)="spin$.next('-')"

@@ -24,7 +24,7 @@
             [iconOnly]="true"
             [size]="size()"
             [rounded]="'none'"
-            class="h-full w-auto aspect-square"
+            class="aspect-square h-full w-auto"
             [attr.aria-label]="'Open date and time picker'"
             [attr.aria-expanded]="expanded()"
             [attr.aria-controls]="popupId"
@@ -40,7 +40,7 @@
     <div
         [class]="pickerPopupClass()"
         [id]="popupId"
-        class="flex flex-col h-68"
+        class="flex h-68 flex-col"
         aria-modal="true"
         role="dialog"
         cdkTrapFocus>
@@ -63,7 +63,7 @@
         </div>
         <div class="overflow-hidden">
             @if (activeView() === "date") {
-                <div class="h-full flex items-center justify-center" aria-label="Calendar">
+                <div class="flex h-full items-center justify-center" aria-label="Calendar">
                     <mona-calendar
                         [disabledDates]="disabledDates()"
                         [minDate]="min()"
@@ -75,7 +75,7 @@
                         [readonly]="readonly()"
                         [rounded]="rounded()"
                         (valueChange)="onCalendarValueChange($event)"
-                        class="shadow-none border-none flex-1">
+                        class="flex-1 border-none shadow-none">
                         @if (decadeCellTemplate()) {
                             <ng-template monaCalendarDecadeCellTemplate let-year>
                                 <ng-container
@@ -101,7 +101,7 @@
                 </div>
             }
             @if (activeView() === "time") {
-                <div class="h-full flex items-center justify-center max-h-64" aria-label="Time picker">
+                <div class="flex h-full max-h-64 items-center justify-center" aria-label="Time picker">
                     <mona-time-selector
                         [value]="navigatedDate()"
                         (valueChange)="onTimeSelectorValueChange($event)"

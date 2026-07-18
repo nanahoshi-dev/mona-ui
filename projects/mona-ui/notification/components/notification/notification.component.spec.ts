@@ -2,6 +2,7 @@ import { Component, signal, TemplateRef, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
 import { NotificationData } from "../../models/NotificationData";
+import { notificationBaseThemeVariants, notificationIconThemeVariants } from "../../styles/notification.styles";
 import { NotificationComponent } from "./notification.component";
 
 function createNotificationData(overrides: Partial<NotificationData["options"]> = {}): NotificationData {
@@ -44,6 +45,17 @@ describe("NotificationComponent", () => {
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("uses an overlay surface while keeping semantic color on the status icon", () => {
+        const notificationClasses = notificationBaseThemeVariants("mona")().split(/\s+/);
+        const errorIconClasses = notificationIconThemeVariants("mona")({ type: "error" }).split(/\s+/);
+
+        expect(notificationClasses).toContain("bg-surface-overlay");
+        expect(notificationClasses).toContain("border-border");
+        expect(notificationClasses).toContain("shadow-md");
+        expect(notificationClasses).not.toContain("bg-error");
+        expect(errorIconClasses).toContain("text-error");
     });
 
     it("should emit on componentDestroy$ when close() is called", () => {

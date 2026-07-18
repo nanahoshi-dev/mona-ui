@@ -3,14 +3,14 @@ import { cva } from "class-variance-authority";
 export const placeholderBaseVariants = cva(
     `
         flex items-center justify-center
-        w-full h-full
+        h-full w-full
         p-2
+        bg-surface-muted/50
     `
 );
 
 export const placeholderTextVariants = cva(
     `
-        text-muted-foreground
-        uppercase
+        uppercase text-muted-foreground
     `
 );

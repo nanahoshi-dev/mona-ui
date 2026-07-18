@@ -49,7 +49,7 @@
     --color-primary-foreground: oklch(98.5% 0 0);
     --color-primary-hover: oklch(26.9% 0.006 285.885);
     --color-primary-active: oklch(14.1% 0.005 285.823);
-    --color-primary-selected: oklch(20.5% 0.006 285.885);
+    --color-primary-selected: oklch(14.1% 0.005 285.823);
     --color-primary-subtle: oklch(96.7% 0.001 286.375);
     --color-primary-subtle-foreground: oklch(26.9% 0.006 285.885);
     --color-primary-border: oklch(55.2% 0.01 285.938);
@@ -66,7 +66,7 @@
     --color-secondary-foreground: oklch(20.5% 0.006 285.885);
     --color-secondary-hover: oklch(87.1% 0.006 286.286);
     --color-secondary-active: oklch(80.5% 0.008 286.067);
-    --color-secondary-selected: oklch(92.2% 0.004 286.32);
+    --color-secondary-selected: oklch(80.5% 0.008 286.067);
     --color-secondary-subtle: oklch(96.7% 0.001 286.375);
     --color-secondary-subtle-foreground: oklch(26.9% 0.006 285.885);
     --color-secondary-border: oklch(55.2% 0.01 285.938);
@@ -75,7 +75,7 @@
     --color-success-foreground: oklch(98% 0.004 150);
     --color-success-hover: oklch(44.5% 0.1225 150);
     --color-success-active: oklch(41% 0.1129 150);
-    --color-success-selected: oklch(48% 0.1322 150);
+    --color-success-selected: oklch(41% 0.1129 150);
     --color-success-subtle: oklch(94.5% 0.0308 150);
     --color-success-subtle-foreground: oklch(34% 0.0936 150);
     --color-success-border: oklch(62% 0.077 150);
@@ -84,7 +84,7 @@
     --color-error-foreground: oklch(98% 0.004 25);
     --color-error-hover: oklch(44.5% 0.16 25);
     --color-error-active: oklch(41% 0.16 25);
-    --color-error-selected: oklch(48% 0.16 25);
+    --color-error-selected: oklch(41% 0.16 25);
     --color-error-subtle: oklch(94.5% 0.0274 25);
     --color-error-subtle-foreground: oklch(34% 0.12 25);
     --color-error-border: oklch(63.5% 0.088 25);
@@ -93,7 +93,7 @@
     --color-warning-foreground: oklch(98% 0.004 75);
     --color-warning-hover: oklch(44.5% 0.0939 75);
     --color-warning-active: oklch(41% 0.0865 75);
-    --color-warning-selected: oklch(48% 0.1012 75);
+    --color-warning-selected: oklch(41% 0.0865 75);
     --color-warning-subtle: oklch(94.5% 0.0308 75);
     --color-warning-subtle-foreground: oklch(34% 0.0717 75);
     --color-warning-border: oklch(63% 0.077 75);
@@ -102,7 +102,7 @@
     --color-info-foreground: oklch(98% 0.004 255);
     --color-info-hover: oklch(44.5% 0.1465 255);
     --color-info-active: oklch(41% 0.135 255);
-    --color-info-selected: oklch(48% 0.15 255);
+    --color-info-selected: oklch(41% 0.135 255);
     --color-info-subtle: oklch(94.5% 0.0266 255);
     --color-info-subtle-foreground: oklch(34% 0.1119 255);
     --color-info-border: oklch(62.75% 0.0825 255);

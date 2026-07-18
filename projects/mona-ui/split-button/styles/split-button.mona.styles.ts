@@ -4,7 +4,7 @@ export const splitButtonVariants = cva(
     `
         inline-flex flex-nowrap items-center
         [&>button]:focus-visible:z-10
-        [&_svg]:w-5 [&_svg]:h-5
+        [&_svg]:h-5 [&_svg]:w-5
     `,
     {
         variants: {
@@ -13,7 +13,7 @@ export const splitButtonVariants = cva(
                 error: "",
                 ghost: "border-transparent",
                 info: "",
-                outline: "[&>button:not(:last-child)]:border-r",
+                outline: "[&>button:not(:last-child)]:border-r [&>button:not(:last-child)]:border-input-border",
                 primary: "",
                 secondary: "",
                 success: "",
@@ -46,13 +46,13 @@ export const splitButtonVariants = cva(
             },
             size: {
                 large: `
-                    [&_svg]:w-5 [&_svg]:h-5
+                    [&_svg]:h-5 [&_svg]:w-5
                 `,
                 medium: `
-                    [&_svg]:w-5 [&_svg]:h-5
+                    [&_svg]:h-5 [&_svg]:w-5
                 `,
                 small: `
-                    [&_svg]:w-4 [&_svg]:h-4
+                    [&_svg]:h-4 [&_svg]:w-4
                 `
             }
         },

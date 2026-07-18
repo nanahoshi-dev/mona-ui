@@ -153,7 +153,7 @@ function createRolePalette(
         [`${prefix}-foreground`]: formatOklch(foreground),
         [`${prefix}-hover`]: formatOklch(hover),
         [`${prefix}-active`]: formatOklch(active),
-        [`${prefix}-selected`]: formatOklch(base),
+        [`${prefix}-selected`]: formatOklch(active),
         [`${prefix}-subtle`]: formatOklch(subtle),
         [`${prefix}-subtle-foreground`]: formatOklch(subtleForeground),
         [`${prefix}-border`]: formatOklch(border)

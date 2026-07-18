@@ -2,28 +2,28 @@ import { cva } from "class-variance-authority";
 
 export const sliderBaseVariants = cva(
     `
-        flex relative select-none
+        relative flex select-none
 
-        data-[orientation="horizontal"]:h-6
         data-[orientation="horizontal"]:w-full
+        data-[orientation="horizontal"]:h-6
         data-[orientation="horizontal"]:min-w-[200px]
         data-[orientation="horizontal"]:items-center
 
-        data-[orientation="vertical"]:w-6
         data-[orientation="vertical"]:h-[200px]
+        data-[orientation="vertical"]:w-6
         data-[orientation="vertical"]:justify-center
 
         data-[disabled="true"]:pointer-events-none
-        data-[disabled="true"]:opacity-50
         data-[disabled="true"]:cursor-not-allowed
+        data-[disabled="true"]:opacity-50
     `
 );
 
 export const sliderTrackVariants = cva(
     `
         relative z-2 cursor-pointer
-        border border-input-border
-        bg-background text-foreground
+        overflow-hidden
+        bg-surface-muted text-foreground
 
         data-[orientation="horizontal"]:w-full
         data-[orientation="horizontal"]:h-1.5
@@ -37,9 +37,9 @@ export const sliderTrackVariants = cva(
 export const sliderSelectionVariants = cva(
     `
         absolute
-        bg-primary border-none
-
-        ease-out duration-200
+        bg-primary
+        border-none
+        transition duration-200 ease-out
 
         data-[orientation="horizontal"]:top-0
         data-[orientation="horizontal"]:bottom-0
@@ -72,41 +72,36 @@ export const sliderTickListVariants = cva(
 export const sliderTickVariants = cva(
     `
         cursor-pointer
-        bg-input-border
-        brightness-75
+        bg-border-control-hover
     `
 );
 
 export const sliderTickLabelListVariants = cva(
     `
-        absolute
-        w-full h-full
+        absolute h-full w-full
         select-none
     `
 );
 
 export const sliderTickLabelVariants = cva(
     `
-        absolute flex
-        items-center justify-center
+        absolute flex items-center justify-center
+        text-xs/[1.667] text-foreground
 
-        text-xs/[1.667]
-        text-foreground
-
-        data-[orientation="vertical"]:w-4.25
         data-[orientation="vertical"]:h-auto
+        data-[orientation="vertical"]:w-4.25
     `
 );
 
 export const sliderHandleVariants = cva(
     `
         absolute z-2 flex items-center justify-center
-        w-4.25 h-4.25
+        h-4.25 w-4.25
         cursor-pointer
+        bg-surface-raised
+        border border-focus-indicator/50 shadow-xs
         outline-none
-        bg-primary border border-border
-
-        ease-out duration-200
+        transition duration-200 ease-out
 
         data-[orientation="horizontal"]:translate-x-[-50%]
         data-[orientation="horizontal"]:transition-[left]
@@ -116,11 +111,14 @@ export const sliderHandleVariants = cva(
         data-[orientation="vertical"]:transition-[bottom]
         data-[orientation="vertical"]:data-[dragging="true"]:transition-none
 
+        data-[focused="true"]:border-focus-indicator
         data-[focused="true"]:ring-2
-        data-[focused="true"]:ring-primary/40
+        data-[focused="true"]:ring-focus-indicator/35
 
         data-[invalid="true"]:border-error
-        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/40
+        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/35
+        data-[invalid="true"]:data-[focused="true"]:border-error
+        data-[invalid="true"]:data-[focused="true"]:ring-error/35
     `,
     {
         variants: {

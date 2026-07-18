@@ -26,10 +26,12 @@ describe("PopupMenuComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("uses the raised surface and quiet default border", () => {
-        const classes = popupMenuContainerVariants({ rounded: "medium" });
+    it("uses the overlay surface, quiet border, and floating shadow", () => {
+        const classes = popupMenuContainerVariants({ rounded: "medium" }).split(/\s+/);
 
-        expect(classes).toContain("bg-surface-raised");
+        expect(classes).toContain("bg-surface-overlay");
         expect(classes).toContain("border-border");
+        expect(classes).toContain("shadow-md");
+        expect(classes).not.toContain("bg-surface-raised");
     });
 });

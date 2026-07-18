@@ -20,6 +20,20 @@ describe("TimeSelectorComponent", () => {
         expect(getSelectedOption("Minutes").textContent?.trim()).toBe("30");
     });
 
+    it("uses muted structure and neutral selected time values", () => {
+        const host = getHost();
+        const header = host.firstElementChild as HTMLElement;
+        const selectedHour = getSelectedOption("Hours");
+        const hourList = host.querySelector("ol[aria-label='Hours']") as HTMLElement;
+
+        expect(header.classList.contains("bg-surface-muted")).toBe(true);
+        expect(header.classList.contains("border-border-subtle")).toBe(true);
+        expect(selectedHour.classList.contains("bg-active")).toBe(true);
+        expect(selectedHour.classList.contains("bg-primary")).toBe(false);
+        expect(hourList.classList.contains("h-32")).toBe(true);
+        expect(hourList.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+    });
+
     it("updates the signal-form value when an option is selected without a footer", () => {
         getOption("Minutes", "45").click();
         fixture.detectChanges();

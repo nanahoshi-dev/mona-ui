@@ -2,14 +2,14 @@ import { cva } from "class-variance-authority";
 
 export const timeSelectorBaseVariants = cva(
     `
-        flex flex-col w-full h-full overflow-hidden
+        flex h-full w-full flex-col overflow-hidden
         data-[invalid='true']:border data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
             disabled: {
-                true: "opacity-50 cursor-not-allowed pointer-events-none",
+                true: "pointer-events-none cursor-not-allowed text-disabled-foreground",
                 false: ""
             },
             size: {
@@ -23,15 +23,18 @@ export const timeSelectorBaseVariants = cva(
 
 export const timeSelectorFooterVariants = cva(
     `
-        w-full flex items-center justify-end px-1 py-1 border-0 border-t border-input-border bg-accent
+        flex w-full items-center justify-end px-1 py-1
+        bg-surface-muted
+        border-0 border-t border-border-subtle
     `
 );
 
 export const timeSelectorHeaderVariants = cva(
     `
-        flex bg-accent text-accent-foreground
-        border-b border-input-border
+        flex
         text-xs font-semibold uppercase
+        bg-surface-muted text-foreground
+        border-b border-border-subtle
         [&>div]:flex-1 [&>div]:py-2 [&>div]:text-center
     `
 );
@@ -39,27 +42,27 @@ export const timeSelectorHeaderVariants = cva(
 export const timeSelectorInfoContainerVariants = cva(
     `
         flex items-center justify-between
-        px-2 py-1 border-b border-input-border/40
+        px-2 py-1
+        border-b border-border-subtle
         [&>span]:text-xs [&>span]:font-medium [&>span]:select-none
     `
 );
 
 export const timeSelectorListContainerVariants = cva(
     `
-        flex flex-row w-full relative overflow-hidden
+        relative flex w-full flex-row overflow-hidden
     `
 );
 
 export const timeSelectorListVariants = cva(
     `
-        flex-1 overflow-y-auto h-full
+        h-full flex-1 overflow-y-auto
         scrollbar-hide scroll-smooth
         snap-y snap-mandatory
         scrollbar-width:none
         select-none outline-none
         [&::-webkit-scrollbar]:hidden
-        focus-visible:bg-accent
-        focus-within:bg-accent
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -74,13 +77,14 @@ export const timeSelectorListVariants = cva(
 
 export const timeSelectorListItemVariants = cva(
     `
-        flex items-center justify-center cursor-pointer
-        snap-center relative z-10
+        relative z-10 flex cursor-pointer snap-center items-center justify-center
+        text-foreground
+        hover:bg-hover active:bg-active
     `,
     {
         variants: {
             selected: {
-                true: "bg-primary text-primary-foreground",
+                true: "bg-active font-medium text-foreground hover:bg-active",
                 false: ""
             },
             size: {

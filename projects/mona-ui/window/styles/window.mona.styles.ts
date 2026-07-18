@@ -2,8 +2,8 @@ import { cva } from "class-variance-authority";
 
 export const windowBaseVariants = cva(
     `
-        flex flex-col w-full h-full
-        bg-background text-foreground
+        flex h-full w-full flex-col
+        bg-surface-overlay text-foreground
     `,
     {
         variants: {
@@ -22,10 +22,9 @@ export const windowBaseVariants = cva(
 
 export const windowContentContainerVariants = cva(
     `
-        flex flex-col
-        relative w-full h-full
+        relative flex h-full w-full flex-col
         border border-border
-        shadow-sm
+        shadow-md
     `,
     {
         variants: {
@@ -67,20 +66,20 @@ export const windowResizerVariants = cva(
 
 export const windowTitleBarActionVariants = cva(
     `
-        flex items-center space-evenly
+        flex items-center justify-evenly
     `
 );
 
 export const windowTitleBarVariants = cva(
     `
         flex items-center justify-start
-        px-2 py-1 text-sm overflow-hidden
-        border-b border-border
+        overflow-hidden px-2 py-1 text-sm
+        border-b border-border-subtle
     `,
     {
         variants: {
             look: {
-                default: "bg-secondary text-foreground",
+                default: "bg-surface-muted text-foreground",
                 primary: "bg-primary text-primary-foreground"
             },
             rounded: {
@@ -95,16 +94,14 @@ export const windowTitleBarVariants = cva(
 
 export const windowTitleContainerVariants = cva(
     `
-        flex items-center flex-1
-        h-full cursor-default select-none
-        overflow-hidden text-ellipsis
+        flex h-full flex-1 items-center overflow-hidden
+        cursor-default select-none text-ellipsis
     `
 );
 
 export const windowTitleVariants = cva(
     `
-        font-semibold
-        overflow-hidden text-ellipsis whitespace-nowrap
+        overflow-hidden text-ellipsis whitespace-nowrap font-semibold
     `,
     {
         variants: {

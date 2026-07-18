@@ -2,18 +2,38 @@ import { cva } from "class-variance-authority";
 
 export const timePickerBaseVariants = cva(
     `
-        flex items-center w-full
-        border border-border
-        focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary
+        flex w-full items-center
+        bg-input-background text-foreground
+        border border-input-border shadow-xs
+        outline-none
+
+        data-[disabled='true']:pointer-events-none
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:border-disabled-border
+        data-[disabled='true']:bg-disabled-background
+        data-[disabled='true']:text-disabled-foreground
+        data-[disabled='true']:shadow-none
+        data-[readonly='true']:cursor-default
+
+        focus-within:border-focus-indicator
+        focus-within:ring-2 focus-within:ring-focus-indicator/35
+
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-within:border-error
+        data-[invalid='true']:focus-within:ring-error/35
+
         [&_mona-text-box]:h-full
         [&_mona-text-box]:border-none
+        [&_mona-text-box]:shadow-none
+        [&_mona-text-box]:focus-within:ring-0
+        [&_mona-text-box[data-invalid='true']]:ring-0
     `,
     {
         variants: {
             focused: {
-                true: `ring-2 ring-primary/40 border-primary`
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
+                false: ""
             },
             rounded: {
                 full: "rounded-full",
@@ -27,6 +47,12 @@ export const timePickerBaseVariants = cva(
                 medium: "h-9 text-sm",
                 small: "h-8 text-xs"
             }
-        }
+        },
+        compoundVariants: [
+            {
+                focused: true,
+                class: "data-[invalid='true']:border-error data-[invalid='true']:ring-error/35"
+            }
+        ]
     }
 );

@@ -2,9 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const dropdownPopupVariants = cva(
     `
-        bg-surface-raised shadow-md text-foreground
-        border border-border
         h-full max-h-64 overflow-auto
+        text-foreground
+        bg-surface-overlay
+        border border-border shadow-md
     `,
     {
         variants: {

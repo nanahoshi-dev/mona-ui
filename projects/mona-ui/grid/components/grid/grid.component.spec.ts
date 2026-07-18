@@ -7,6 +7,7 @@ import type { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GridService } from "../../services/grid.service";
+import { gridBaseVariants, gridHeaderTableCellVariants } from "../../styles/grid.mona.styles";
 
 import { GridComponent } from "./grid.component";
 
@@ -67,6 +68,17 @@ describe("GridComponent", () => {
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("uses a neutral surface, quiet boundary, and semantic header focus", () => {
+        const gridClasses = gridBaseVariants();
+        const headerCellClasses = gridHeaderTableCellVariants();
+
+        expect(gridClasses).toContain("bg-surface");
+        expect(gridClasses).toContain("border-border");
+        expect(headerCellClasses).toContain("border-r-border-subtle");
+        expect(headerCellClasses).toContain("focus:after:ring-focus-indicator/35");
+        expect(headerCellClasses).not.toContain("ring-primary");
     });
 
     describe("onColumnSort", () => {

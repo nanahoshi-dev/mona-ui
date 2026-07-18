@@ -3,25 +3,27 @@ import { cva } from "class-variance-authority";
 export const buttonGroupVariants = cva(
     `
         inline-flex items-center justify-center
-        border border-border shadow-xs
+        border border-input-border
         [&>button]:border-0
+        [&>button]:shadow-none
+        [&>button:not(:last-child)]:border-r
+        [&>button:not(:last-child)]:border-border-subtle
+        [&>button]:rounded-none
         [&>button]:focus-visible:ring-2
         [&>button]:focus-visible:z-10
-        [&>button]:rounded-none
-        [&>button]:shadow-none
     `,
     {
         variants: {
             look: {
                 default: "",
-                error: "",
-                ghost: "border-transparent",
-                info: "",
-                outline: "[&>button:not(:last-child)]:border-r",
-                primary: "",
-                secondary: "",
-                success: "",
-                warning: ""
+                error: "border-transparent",
+                ghost: "border-transparent [&>button:not(:last-child)]:border-r-0",
+                info: "border-transparent",
+                outline: "",
+                primary: "border-transparent",
+                secondary: "border-transparent",
+                success: "border-transparent",
+                warning: "border-transparent"
             },
             rounded: {
                 full: `

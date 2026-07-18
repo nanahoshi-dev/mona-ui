@@ -5,36 +5,34 @@ export const checkboxVariants = cva(`sr-only appearance-none outline-none peer`)
 export const checkmarkVariants = cva(
     `
         flex items-center justify-center
-        w-4.5 h-4.5 pl-0.25
-        overflow-hidden outline-none
+        h-4.5 w-4.5 pl-0.25
+        cursor-pointer overflow-hidden
+        bg-input-background
+        border border-input-border
+        outline-none
 
-        bg-input-background border border-input-border
-        cursor-pointer
+        peer-disabled:pointer-events-none peer-disabled:cursor-not-allowed
+        peer-disabled:border-disabled-border peer-disabled:bg-disabled-background peer-disabled:text-disabled-foreground
 
-        data-[disabled='true']:pointer-events-none
-        data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground
+        peer-indeterminate:border-primary peer-indeterminate:bg-primary peer-indeterminate:text-primary-foreground
 
-        peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40
-        peer-focus-visible:border-primary
+        peer-focus-visible:border-focus-indicator
+        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
 
-        peer-checked:bg-primary
-        peer-checked:text-primary-foreground
+        [&.ng-touched.ng-invalid]:border-error
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:peer-focus-visible:border-error
+        data-[invalid='true']:peer-focus-visible:ring-error/35
 
-        peer-indeterminate:bg-primary
-        peer-indeterminate:text-primary-foreground
-        peer-indeterminate:after:content-['']
         peer-indeterminate:after:absolute
         peer-indeterminate:after:inset-[3px_0_3px_0]
+        peer-indeterminate:after:content-['']
+        peer-indeterminate:after:bg-current
         peer-indeterminate:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14'%2F%3E%3C%2Fsvg%3E")]
         peer-indeterminate:after:[mask-repeat:no-repeat]
         peer-indeterminate:after:[mask-size:contain]
-        peer-indeterminate:after:bg-current
-
-        [&.ng-touched.ng-invalid]:border-error
-
-        data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/40
     `,
     {
         variants: {
@@ -51,15 +49,11 @@ export const checkmarkVariants = cva(
 
 export const checkboxContainerLabelVariants = cva(
     `
-        w-full h-full
-        inline-flex items-center gap-2
-        relative
-
+        relative inline-flex h-full w-full items-center gap-2
         select-none
-
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
-        data-[disabled='true']:opacity-50
+        data-[disabled='true']:text-disabled-foreground
     `,
     {
         variants: {
@@ -74,41 +68,41 @@ export const checkboxContainerLabelVariants = cva(
 
 export const checkboxDirectiveVariants = cva(
     `
-        appearance-none outline-none
-        w-4.5 h-4.5
-        bg-input-background border border-input-border
-        cursor-pointer
-        relative
+        relative h-4.5 w-4.5
+        cursor-pointer appearance-none
+        bg-input-background
+        border border-input-border
+        outline-none
 
-        disabled:pointer-events-none
-        disabled:cursor-not-allowed
-        disabled:opacity-50
+        disabled:pointer-events-none disabled:cursor-not-allowed
+        disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground
 
-        checked:text-primary-foreground
-        indeterminate:text-primary-foreground
-        indeterminate:bg-primary
-        checked:bg-primary
+        checked:border-primary checked:bg-primary checked:text-primary-foreground
+        indeterminate:border-primary indeterminate:bg-primary indeterminate:text-primary-foreground
 
-        focus-visible:ring-2 focus-visible:ring-primary/40
-        focus-visible:border-primary
+        focus-visible:border-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
-        checked:after:content-['']
         checked:after:absolute
         checked:after:inset-[1px_0_0_1px]
+        checked:after:content-['']
+        checked:after:bg-current
         checked:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M18%206%209%2017l-5-5'/%3E%3C/svg%3E")]
         checked:after:[mask-repeat:no-repeat]
         checked:after:[mask-size:contain]
-        checked:after:bg-current
 
-        indeterminate:after:content-['']
         indeterminate:after:absolute
         indeterminate:after:inset-[1px_0_1px_1px]
+        indeterminate:after:content-['']
+        indeterminate:after:bg-current
         indeterminate:after:[mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23FFFFFF'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14'%2F%3E%3C%2Fsvg%3E")]
         indeterminate:after:[mask-repeat:no-repeat]
         indeterminate:after:[mask-size:contain]
-        indeterminate:after:bg-current
 
         [&.ng-touched.ng-invalid]:border-error
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
+        [&.ng-touched.ng-invalid]:focus-visible:border-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {

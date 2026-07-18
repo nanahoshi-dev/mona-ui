@@ -5,7 +5,11 @@ export const indicatorIconHostVariants = cva(
     {
         variants: {
             interactive: {
-                true: "opacity-50 hover:opacity-90 focus:ring-1 focus:ring-primary/40 focus:outline-none",
+                true: `
+                    opacity-50
+                    hover:opacity-90
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:outline-none
+                `,
                 false: ""
             },
             preset: {

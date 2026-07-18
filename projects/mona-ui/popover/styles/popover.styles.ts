@@ -1,8 +1,8 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import { tooltipArrowThemeVariants } from "@nanahoshi/mona-ui/tooltip";
 import { VariantProps } from "class-variance-authority";
 import {
+    popoverArrowVariants as monaPopoverArrowVariants,
     popoverBaseVariants as monaPopoverBaseVariants,
     popoverContentVariants as monaPopoverContentVariants,
     popoverHeaderVariants as monaPopoverHeaderVariants
@@ -36,7 +36,12 @@ export const popoverContentThemeVariants = (theme: ThemeStyle) => {
 };
 
 export const popoverArrowThemeVariants = (theme: ThemeStyle) => {
-    return tooltipArrowThemeVariants(theme);
+    switch (theme) {
+        case "mona":
+            return monaPopoverArrowVariants;
+        default:
+            return monaPopoverArrowVariants;
+    }
 };
 
 type PopoverBaseVariantProps = VariantProps<ReturnType<typeof popoverBaseThemeVariants>>;

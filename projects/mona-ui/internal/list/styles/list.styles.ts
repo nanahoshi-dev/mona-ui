@@ -2,14 +2,13 @@ import { cva } from "class-variance-authority";
 
 export const listVariants = cva(
     `
-        h-full flex flex-col overflow-hidden outline-none
+        flex h-full flex-col overflow-hidden outline-none
     `
 );
 
 export const listInnerListVariants = cva(
     `
-        list-none p-0 m-0 overflow-x-hidden overflow-y-auto
-        h-full outline-none
+        m-0 h-full list-none overflow-x-hidden overflow-y-auto p-0 outline-none
     `
 );
 
@@ -22,27 +21,26 @@ export const listGroupHeaderVariants = cva(``, {
     }
 });
 
-export const listGroupHeaderTextVariants = cva(`select-none`, {
+export const listGroupHeaderTextVariants = cva(`select-none text-muted-foreground`, {
     variants: {
         hasTemplate: {
             true: "",
-            false: "font-bold w-full px-3 py-1"
+            false: "w-full px-3 py-1 font-bold"
         }
     }
 });
 
 export const listItemBaseVariants = cva(
     `
-        w-full h-full flex gap-2 items-center
+        flex h-full w-full items-center gap-2
     `
 );
 
 export const listItemContentVariants = cva(
     `
-        relative flex cursor-default select-none items-center
-        outline-none px-3 py-1
-        hover:bg-accent hover:text-accent-foreground
-        focus:bg-accent focus:text-accent-foreground
+        relative flex cursor-default select-none items-center px-3 py-1
+        text-foreground outline-none
+        hover:bg-hover focus:bg-hover
     `,
     {
         variants: {
@@ -51,15 +49,15 @@ export const listItemContentVariants = cva(
                 false: ""
             },
             highlighted: {
-                true: "bg-accent-hover text-accent-foreground rounded-none inset-ring-1 inset-ring-focus-indicator/40",
+                true: "bg-hover text-foreground inset-ring-1 inset-ring-focus-indicator/35",
                 false: ""
             },
             selected: {
-                true: "bg-accent-hover text-accent-foreground",
+                true: "bg-active text-foreground",
                 false: ""
             },
             disabled: {
-                true: "pointer-events-none opacity-50 cursor-default",
+                true: "pointer-events-none cursor-default text-disabled-foreground",
                 false: "cursor-pointer"
             }
         },
@@ -68,9 +66,9 @@ export const listItemContentVariants = cva(
                 selected: true,
                 checkboxes: false,
                 class: `
-                    bg-accent-hover text-accent-foreground rounded-none
-                    hover:bg-accent-active hover:text-accent-foreground
-                    focus:bg-accent-active focus:text-accent-foreground
+                    bg-active text-foreground
+                    hover:bg-active hover:text-foreground
+                    focus:bg-active focus:text-foreground
                 `
             },
             {
@@ -78,10 +76,10 @@ export const listItemContentVariants = cva(
                 selected: true,
                 checkboxes: false,
                 class: `
-                    bg-accent-active text-accent-foreground rounded-none
-                    inset-ring-1 inset-ring-focus-indicator/40
-                    hover:bg-accent-active hover:text-accent-foreground
-                    focus:bg-accent-active focus:text-accent-foreground
+                    bg-active text-foreground
+                    inset-ring-1 inset-ring-focus-indicator/35
+                    hover:bg-active hover:text-foreground
+                    focus:bg-active focus:text-foreground
                 `
             },
             {

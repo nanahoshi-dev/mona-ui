@@ -94,6 +94,13 @@ describe("ButtonDirective", () => {
             expect(buttonElement.classList.length).toBeGreaterThan(0);
             expect(buttonElement.getAttribute("data-look")).toBe("default");
             expect(buttonElement.getAttribute("data-size")).toBe("medium");
+            expect(buttonElement.classList.contains("bg-input-background")).toBe(true);
+            expect(buttonElement.classList.contains("border-input-border")).toBe(true);
+            expect(buttonElement.classList.contains("hover:bg-hover")).toBe(true);
+            expect(buttonElement.classList.contains("active:bg-active")).toBe(true);
+            expect(buttonElement.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+            expect(buttonElement.classList.contains("bg-accent")).toBe(false);
+            expect(buttonElement.classList.contains("shadow-xs")).toBe(false);
         });
     });
 
@@ -220,6 +227,8 @@ describe("ButtonDirective", () => {
             component.look.set("primary");
             fixture.detectChanges();
             expect(buttonElement.getAttribute("data-look")).toBe("primary");
+            expect(buttonElement.classList.contains("bg-primary")).toBe(true);
+            expect(buttonElement.classList.contains("hover:bg-primary-hover")).toBe(true);
         });
 
         it("should update data-look when look changes to 'success'", () => {
@@ -480,8 +489,24 @@ describe("ButtonDirective", () => {
         it("should apply selected styles when selected=true", () => {
             component.selected.set(true);
             fixture.detectChanges();
-            // Selected buttons get specific background classes
-            expect(buttonElement.classList.toString()).toContain("bg-");
+            expect(buttonElement.classList.contains("bg-active")).toBe(true);
+            expect(buttonElement.classList.contains("bg-primary-selected")).toBe(false);
+        });
+
+        it.each([
+            ["primary", "bg-primary-selected"],
+            ["secondary", "bg-secondary-selected"],
+            ["success", "bg-success-selected"],
+            ["error", "bg-error-selected"],
+            ["warning", "bg-warning-selected"],
+            ["info", "bg-info-selected"]
+        ] as const)("should preserve the %s selected fill through hover", (look, selectedClass) => {
+            component.look.set(look);
+            component.selected.set(true);
+            fixture.detectChanges();
+
+            expect(buttonElement.classList.contains(selectedClass)).toBe(true);
+            expect(buttonElement.classList.contains(`hover:${selectedClass}`)).toBe(true);
         });
     });
 

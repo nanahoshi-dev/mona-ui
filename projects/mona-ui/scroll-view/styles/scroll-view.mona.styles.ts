@@ -2,9 +2,10 @@ import { cva } from "class-variance-authority";
 
 export const scrollViewBaseVariants = cva(
     `
-        block relative w-full h-full outline-none
-        overflow-hidden
-        border border-border border-2
+        relative block h-full w-full overflow-hidden
+        bg-surface outline-none
+        border border-border-subtle
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -26,7 +27,7 @@ export const scrollViewContentVariants = cva(
 
 export const scrollViewListVariants = cva(
     `
-        relative list-none h-full
+        relative h-full list-none
         [&_li]:absolute
         [&_li]:inset-0
         [&_li]:outline-none
@@ -35,16 +36,14 @@ export const scrollViewListVariants = cva(
 
 export const scrollViewArrowVariants = cva(
     `
-        absolute top-0 bottom-0 px-1
-        flex items-center justify-center
+        absolute top-0 bottom-0 flex items-center justify-center
+        px-1
         cursor-pointer select-none
-
-        text-foreground
-        [&_svg]:stroke-white
-        [&_svg]:drop-shadow-[0_0_15px_#000]
-        [&_svg]:opacity-40
-        hover:[&_svg]:opacity-100
-        [&_svg]:transition-opacity duration-300 ease-out
+        bg-surface-overlay/65 text-foreground
+        transition-colors duration-300 ease-out
+        hover:bg-hover/90 active:bg-active/90
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        [&_svg]:stroke-current
     `,
     {
         variants: {
@@ -66,13 +65,13 @@ export const scrollViewArrowVariants = cva(
 
 export const scrollViewPagerVariants = cva(
     `
-        absolute left-0 right-0 bottom-0 flex items-center justify-center
+        absolute right-0 bottom-0 left-0 flex items-center justify-center
     `,
     {
         variants: {
             pagerOverlay: {
-                dark: "border-0 border-t border-border/20 bg-background-dark/20",
-                light: "border-0 border-t border-border/20 bg-background/20",
+                dark: "bg-canvas/85 border-0 border-t border-border-subtle",
+                light: "bg-surface-overlay/85 border-0 border-t border-border-subtle",
                 none: ""
             }
         }
@@ -81,32 +80,32 @@ export const scrollViewPagerVariants = cva(
 
 export const scrollViewPagerListContainerVariants = cva(
     `
-        flex items-center justify-center
-        flex-1 overflow-hidden
+        flex flex-1 items-center justify-center overflow-hidden
     `
 );
 
 export const scrollViewPagerListVariants = cva(
     `
-        flex items-center gap-2
-        list-none overflow-hidden
-        flex-nowrap px-1 py-3
+        flex flex-nowrap items-center gap-2
+        overflow-hidden list-none
+        px-1 py-3
     `
 );
 
 export const scrollViewPagerListItemVariants = cva(
     `
-        w-3 h-3
-        content-[' ']
-        flex-grow-0 flex-shrink-0 flex-basis-3
+        h-3 w-3 flex-none basis-3
         cursor-pointer
-        border border-border bg-white
-        not-last:mr-3
+        bg-muted-foreground/40 border border-border-subtle
+        transition-colors
+        not-last:me-3
+        hover:bg-muted-foreground/60 active:bg-foreground
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
             active: {
-                true: "!bg-primary",
+                true: "!bg-foreground hover:!bg-foreground",
                 false: ""
             },
             pagerRounded: {
@@ -123,14 +122,12 @@ export const scrollViewPagerListItemVariants = cva(
 export const scrollViewPagerArrowVariants = cva(
     `
         flex items-center justify-center
-        p-2 cursor-pointer select-none
-        transition-opacity duration-300 ease-out
-        opacity-70 hover:opacity-100
-        font-medium
-        [&_svg]:stroke-white
-        [&_svg]:drop-shadow-[0_0_15px_#000]
-        [&_svg]:opacity-40
-        hover:[&_svg]:opacity-100
-        [&_svg]:transition-opacity duration-300 ease-out
+        p-2
+        cursor-pointer select-none
+        font-medium text-muted-foreground
+        transition-colors duration-300 ease-out
+        hover:bg-hover hover:text-foreground active:bg-active
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        [&_svg]:stroke-current
     `
 );

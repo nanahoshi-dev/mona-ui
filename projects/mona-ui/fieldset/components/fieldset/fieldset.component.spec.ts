@@ -80,7 +80,8 @@ describe("FieldsetComponent", () => {
 
             const legend = getFieldset(fixture).querySelector("legend");
 
-            expect(legend?.className).toContain("bg-background-dark");
+            expect(legend?.className).toContain("bg-surface-raised");
+            expect(legend?.className).toContain("border-border-subtle");
         });
     });
 
@@ -96,7 +97,10 @@ describe("FieldsetComponent", () => {
             fixture.componentRef.setInput("disabled", true);
             fixture.detectChanges();
 
-            expect(getFieldset(fixture).className).toContain("opacity-50");
+            expect(getFieldset(fixture).className).toContain("bg-disabled-background");
+            expect(getFieldset(fixture).className).toContain("text-disabled-foreground");
+            expect(getFieldset(fixture).className).toContain("border-disabled-border");
+            expect(getFieldset(fixture).className).not.toContain("opacity-50");
         });
 
         it("should leave the rendered <fieldset> enabled by default", () => {
@@ -151,6 +155,6 @@ describe("FieldsetComponent with legend template", () => {
     it("should not apply the string-legend styling classes when a template is used", () => {
         const legendEl: HTMLElement = hostFixture.nativeElement.querySelector("fieldset legend");
 
-        expect(legendEl.className).not.toContain("bg-background-dark");
+        expect(legendEl.className).not.toContain("bg-surface-raised");
     });
 });

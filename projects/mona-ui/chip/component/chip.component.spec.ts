@@ -400,11 +400,12 @@ describe("ChipComponent", () => {
     // Look Input Tests
     // =========================================================================
     describe("look input", () => {
-        it("should apply default look with bg-background and text-foreground", () => {
+        it("should apply default look with a raised neutral surface", () => {
             component.look.set("default");
             fixture.detectChanges();
-            expect(chipElement.classList.contains("bg-background")).toBe(true);
+            expect(chipElement.classList.contains("bg-surface-raised")).toBe(true);
             expect(chipElement.classList.contains("text-foreground")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
         });
 
         it("should apply primary look with bg-primary and text-primary-foreground", () => {
@@ -442,10 +443,11 @@ describe("ChipComponent", () => {
             expect(chipElement.classList.contains("text-info-foreground")).toBe(true);
         });
 
-        it("should apply outline look with border-border class", () => {
+        it("should apply outline look with a control boundary and neutral interaction", () => {
             component.look.set("outline");
             fixture.detectChanges();
-            expect(chipElement.classList.contains("border-border")).toBe(true);
+            expect(chipElement.classList.contains("border-input-border")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
         });
 
         it("should apply secondary look with bg-secondary and text-secondary-foreground", () => {
@@ -455,11 +457,31 @@ describe("ChipComponent", () => {
             expect(chipElement.classList.contains("text-secondary-foreground")).toBe(true);
         });
 
-        it("should apply ghost look without explicit background", () => {
+        it("should apply ghost look with neutral interaction", () => {
             component.look.set("ghost");
             fixture.detectChanges();
-            // Ghost look doesn't have bg-* class by default, only hover states
-            expect(chipElement.classList.contains("hover:bg-secondary-hover")).toBe(true);
+            expect(chipElement.classList.contains("bg-transparent")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
+            expect(chipElement.classList.contains("hover:bg-secondary-hover")).toBe(false);
+        });
+
+        it.each(["default", "outline", "ghost"] as const)("uses neutral selection for the %s look", look => {
+            component.look.set(look);
+            component.selected.set(true);
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("bg-active")).toBe(true);
+            expect(chipElement.classList.contains("text-foreground")).toBe(true);
+            expect(chipElement.classList.contains("bg-primary-selected")).toBe(false);
+        });
+
+        it("keeps primary selection for the explicit primary look", () => {
+            component.look.set("primary");
+            component.selected.set(true);
+            fixture.detectChanges();
+
+            expect(chipElement.classList.contains("bg-primary-selected")).toBe(true);
+            expect(chipElement.classList.contains("text-primary-foreground")).toBe(true);
         });
     });
 
