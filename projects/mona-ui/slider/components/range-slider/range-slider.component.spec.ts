@@ -4,6 +4,7 @@ import { disabled as fieldDisabled, form, FormField } from "@angular/forms/signa
 import { By } from "@angular/platform-browser";
 import { beforeEach, describe, expect, it } from "vitest";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
+import type { SliderVariantProps } from "../../styles/slider.styles";
 import { RangeSliderComponent } from "./range-slider.component";
 
 @Component({
@@ -14,6 +15,7 @@ import { RangeSliderComponent } from "./range-slider.component";
             [maxValue]="maxValue()"
             [step]="step()"
             [orientation]="orientation()"
+            [rounded]="rounded()"
             [showTicks]="showTicks()"
             [showLabels]="showLabels()">
         </mona-range-slider>
@@ -29,6 +31,7 @@ class SignalFormRangeSliderHostComponent {
     public readonly maxValue = signal(10);
     public readonly minValue = signal(0);
     public readonly orientation = signal<"horizontal" | "vertical">("horizontal");
+    public readonly rounded = signal<SliderVariantProps["rounded"]>("full");
     public readonly showLabels = signal(false);
     public readonly showTicks = signal(false);
     public readonly step = signal(1);
@@ -102,6 +105,17 @@ describe("RangeSliderComponent", () => {
 
             expect(track.classList.contains("rounded-full")).toBe(true);
             expect(selection).toBeTruthy();
+        });
+
+        it("should apply the rounded input to the track and both handles", async () => {
+            component.rounded.set("none");
+            await waitForStable(fixture);
+
+            const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
+
+            expect(track.classList.contains("rounded-none")).toBe(true);
+            expect(getPrimaryHandle(fixture).classList.contains("rounded-none")).toBe(true);
+            expect(getSecondaryHandle(fixture).classList.contains("rounded-none")).toBe(true);
         });
 
         it("should expose range ARIA attributes", async () => {

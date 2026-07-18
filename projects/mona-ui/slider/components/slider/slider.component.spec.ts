@@ -160,6 +160,7 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             expect(getHandle(fixture).classList.contains("rounded-sm")).toBe(true);
+            expect(fixture.debugElement.query(By.css(".bg-surface-muted")).classes["rounded-sm"]).toBe(true);
         });
 
         it("should use a muted track, primary progress, and a neutral semantic-focus handle", async () => {

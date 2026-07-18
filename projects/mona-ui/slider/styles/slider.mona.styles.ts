@@ -31,7 +31,18 @@ export const sliderTrackVariants = cva(
         data-[orientation="vertical"]:h-full
         data-[orientation="vertical"]:w-1.5
 
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-lg",
+                medium: "rounded-md",
+                none: "rounded-none",
+                small: "rounded-sm"
+            }
+        }
+    }
 );
 
 export const sliderSelectionVariants = cva(

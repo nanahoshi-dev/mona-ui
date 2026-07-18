@@ -158,7 +158,10 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return typeof bg === "string" ? { background: bg } : bg;
     });
-    protected readonly trackClasses = computed(() => sliderTrackThemeVariants(this.#themeService.theme())());
+    protected readonly trackClasses = computed(() => {
+        const rounded = this.rounded();
+        return sliderTrackThemeVariants(this.#themeService.theme())({ rounded });
+    });
 
     /**
      * @description Human-readable override for the `aria-valuenow` announcement. Pass a function that receives the current value and returns the string to announce.
