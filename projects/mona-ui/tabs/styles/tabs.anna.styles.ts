@@ -16,9 +16,9 @@ export const tabListBaseVariants = cva(
                 none: "rounded-none"
             },
             size: {
-                small: "h-6.5",
-                medium: "h-7.5",
-                large: "h-8.5"
+                small: "h-8",
+                medium: "h-9",
+                large: "h-10"
             }
         }
     }

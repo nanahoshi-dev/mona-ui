@@ -14,14 +14,14 @@ export const listGroupHeaderVariants = cva(``, {
 
 export const listGroupHeaderTextVariants = cva(`select-none text-muted-foreground`, {
     variants: {
-        hasTemplate: { true: "", false: "w-full px-2 py-1 font-semibold" }
+        hasTemplate: { true: "", false: "w-full px-3 py-1 font-semibold" }
     }
 });
 
 export const listItemBaseVariants = cva(`flex h-full w-full items-center gap-2`);
 
 export const listItemContentVariants = cva(
-    `relative flex min-h-7 cursor-default select-none items-center px-2 py-1 text-foreground outline-none hover:bg-hover focus:bg-hover`,
+    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none hover:bg-hover focus:bg-hover`,
     {
         variants: {
             checkboxes: { true: "gap-2", false: "" },

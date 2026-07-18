@@ -43,9 +43,9 @@ export const dateTimePickerBaseVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-8.5 text-md",
-                medium: "h-7.5 text-sm",
-                small: "h-6.5 text-xs"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
         },
         compoundVariants: [

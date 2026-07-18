@@ -102,9 +102,9 @@ export const buttonVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-8.5 px-6",
-                medium: "h-7.5 px-4",
-                small: "h-6.5 px-3 text-xs"
+                large: "h-10 px-6",
+                medium: "h-9 px-4",
+                small: "h-8 px-3 text-xs"
             },
             selected: {
                 true: ""
@@ -218,19 +218,19 @@ export const buttonVariants = cva(
                 iconOnly: true,
                 loading: false,
                 size: "small",
-                class: "h-6.5 w-6.5 p-0"
+                class: "h-8 w-8 p-0"
             },
             {
                 iconOnly: true,
                 loading: false,
                 size: "medium",
-                class: "h-7.5 w-7.5 p-0"
+                class: "h-9 w-9 p-0"
             },
             {
                 iconOnly: true,
                 loading: false,
                 size: "large",
-                class: "h-8.5 w-8.5 p-0"
+                class: "h-10 w-10 p-0"
             }
         ],
         defaultVariants: {

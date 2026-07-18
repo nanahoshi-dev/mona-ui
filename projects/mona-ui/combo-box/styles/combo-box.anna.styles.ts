@@ -34,9 +34,9 @@ export const comboBoxBaseVariants = cva(
                 full: "rounded-full"
             },
             size: {
-                small: "h-6.5 text-xs",
-                medium: "h-7.5 text-sm",
-                large: "h-8.5 text-md"
+                small: "h-8 text-xs",
+                medium: "h-9 text-sm",
+                large: "h-10 text-md"
             }
         },
         compoundVariants: [

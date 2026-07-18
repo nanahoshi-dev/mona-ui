@@ -35,7 +35,7 @@ export const multiSelectBaseVariants = cva(
             },
             size: {
                 small: "min-h-8 text-xs",
-                medium: "min-h-7.5 text-sm",
+                medium: "min-h-9 text-sm",
                 large: "min-h-10 text-md"
             }
         },
@@ -71,9 +71,9 @@ export const multiSelectAffixContainerVariants = cva(`flex h-full flex-none item
 export const multiSelectIndicatorContainerVariants = cva(`self-center`, {
     variants: {
         size: {
-            small: "h-6.5",
-            medium: "h-7.5",
-            large: "h-8.5"
+            small: "h-8",
+            medium: "h-9",
+            large: "h-10"
         }
     }
 });

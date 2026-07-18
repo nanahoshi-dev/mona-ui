@@ -62,7 +62,7 @@ export const colorGradientHsvRectangleHandleVariants = cva(
 
 export const colorGradientPreviewVariants = cva(
     `
-        flex h-8.5 w-8.5
+        flex h-10 w-10
         border border-border-subtle
     `,
     {

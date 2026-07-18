@@ -84,8 +84,8 @@ export const menubarBaseVariants = cva(
                 none: "rounded-none"
             },
             size: {
-                small: "h-6.5 text-xs",
-                medium: "h-8.5 text-sm",
+                small: "h-8 text-xs",
+                medium: "h-10 text-sm",
                 large: "h-12 text-md"
             }
         }

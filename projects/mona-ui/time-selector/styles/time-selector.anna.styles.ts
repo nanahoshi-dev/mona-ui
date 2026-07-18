@@ -91,7 +91,7 @@ export const timeSelectorListItemVariants = cva(
             size: {
                 small: "h-6",
                 medium: "h-7",
-                large: "h-6.5"
+                large: "h-8"
             }
         },
         defaultVariants: {

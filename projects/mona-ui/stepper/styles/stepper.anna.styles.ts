@@ -60,7 +60,7 @@ export const stepperStepListItemVariants = cva(
 
 export const stepperStepIndicatorVariants = cva(
     `
-        flex h-6.5 w-6.5 items-center justify-center
+        flex h-8 w-8 items-center justify-center
         bg-surface-raised text-foreground
         border border-border outline-none
         transition-colors duration-400 ease-in-out

@@ -22,7 +22,7 @@ export const treeBaseVariants = cva(
 
 export const treeDropHintBaseVariants = cva(
     `
-        fixed z-1 h-0.5 w-8.5
+        fixed z-1 h-0.5 w-10
         pointer-events-none
         bg-primary opacity-80
     `

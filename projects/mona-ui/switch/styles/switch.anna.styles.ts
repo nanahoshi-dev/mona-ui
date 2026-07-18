@@ -40,7 +40,7 @@ export const switchVariants = cva(
             size: {
                 large: "h-7.5 w-14 text-md",
                 medium: "h-6.5 w-12 text-sm",
-                small: "h-5.5 w-8.5 text-xs"
+                small: "h-5.5 w-10 text-xs"
             }
         }
     }

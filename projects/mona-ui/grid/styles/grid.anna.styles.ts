@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-const gridRowHeightClass = "h-7.5";
+const gridRowHeightClass = "h-9";
 
 export const gridBaseVariants = cva(
     `

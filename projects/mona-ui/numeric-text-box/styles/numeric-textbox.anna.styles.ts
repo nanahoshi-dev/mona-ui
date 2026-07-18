@@ -37,9 +37,9 @@ export const numericTextboxVariants = cva(
                 small: "rounded-sm"
             },
             size: {
-                large: "h-8.5 text-md",
-                medium: "h-7.5 text-sm",
-                small: "h-6.5 text-xs"
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
             }
         }
     }
@@ -120,8 +120,8 @@ export const numericTextboxButtonVariants = cva(
         variants: {
             size: {
                 large: "w-16 min-w-16",
-                medium: "w-8.5 min-w-10",
-                small: "w-6.5 min-w-8"
+                medium: "w-10 min-w-10",
+                small: "w-8 min-w-8"
             }
         }
     }
