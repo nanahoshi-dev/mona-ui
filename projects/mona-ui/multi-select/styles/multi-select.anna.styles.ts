@@ -8,7 +8,7 @@ export const multiSelectBaseVariants = cva(
         border border-input-border shadow-none outline-none
         transition-[color,box-shadow,border] duration-150 ease-in-out
         data-[readonly='true']:cursor-default
-        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -23,7 +23,7 @@ export const multiSelectBaseVariants = cva(
                 true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             invalid: {
-                true: "border-error ring-2 ring-error/35 focus-visible:border-error focus-visible:ring-error/35",
+                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
                 false: ""
             },
             rounded: {

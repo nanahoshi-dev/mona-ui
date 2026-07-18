@@ -116,9 +116,9 @@ describe("ColorPickerComponent", () => {
         expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("hover:bg-hover")).toBe(true);
         expect(picker.classList.contains("active:bg-active")).toBe(true);
-        expect(picker.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
         expect(picker.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
-        expect(picker.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
+        expect(picker.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
         expect(picker.classList.contains("hover:bg-accent")).toBe(false);
     });
 

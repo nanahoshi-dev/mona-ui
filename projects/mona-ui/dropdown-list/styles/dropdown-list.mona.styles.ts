@@ -9,7 +9,7 @@ export const dropdownListInputVariants = cva(
         transition-[color,box-shadow,border] duration-300 ease-in-out
         data-[readonly='true']:cursor-default
         hover:bg-hover active:bg-active
-        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -29,7 +29,7 @@ export const dropdownListInputVariants = cva(
                 false: "ps-2"
             },
             invalid: {
-                true: "border-error ring-2 ring-error/35 focus-visible:border-error focus-visible:ring-error/35",
+                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
                 false: ""
             },
             rounded: {

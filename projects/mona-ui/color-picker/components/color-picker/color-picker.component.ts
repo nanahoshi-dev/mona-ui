@@ -27,6 +27,7 @@ import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-ic
 import { dropdownPopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, take, takeUntil } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
 import { ColorPickerView } from "../../models/ColorPickerView";
 import {
@@ -78,7 +79,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
         const expanded = this.expanded();
         const rounded = this.rounded();
         const size = this.size();
-        return colorPickerBaseThemeVariants(theme)({ expanded, rounded, size });
+        return twMerge(colorPickerBaseThemeVariants(theme)({ expanded, rounded, size }));
     });
     protected readonly colorClasses = computed(() => {
         const theme = this.#themeService.theme();

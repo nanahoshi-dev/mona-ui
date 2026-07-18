@@ -68,7 +68,7 @@ describe("DropdownListComponent", () => {
         expect(host.classList.contains("border-input-border")).toBe(true);
         expect(host.classList.contains("hover:bg-hover")).toBe(true);
         expect(host.classList.contains("active:bg-active")).toBe(true);
-        expect(host.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
         expect(host.classList.contains("hover:bg-accent")).toBe(false);
     });
 
@@ -187,7 +187,7 @@ describe("DropdownListComponent", () => {
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).getAttribute("aria-required")).toBe("true");
         expect(getHost(fixture).className).toContain("border-error");
-        expect(getHost(fixture).className).toContain("focus-visible:ring-error/35");
+        expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
 
     it("does not report a required field as invalid when a falsy primitive value is selected", async () => {
