@@ -215,6 +215,7 @@ export const gridListBaseVariants = cva(
         w-full h-full
         outline-none
         border-t border-t-border-subtle
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
     `,
     {
         variants: {

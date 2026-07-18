@@ -41,6 +41,10 @@ export const appConfig: ApplicationConfig = {
         provideThemeColors({
             theme: "anna",
             colors: {
+                light: {
+                    "--color-page-background": "#E7E7EA",
+                    "--color-demo-background": "#F0F0F2"
+                },
                 dark: {
                     "--color-page-background": "#202123",
                     "--color-demo-background": "#1D1E20"

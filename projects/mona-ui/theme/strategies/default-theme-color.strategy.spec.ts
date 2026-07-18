@@ -12,22 +12,21 @@ describe("DefaultThemeColorStrategy", () => {
         expect(strategy.resolve("mona", "dark")).toEqual(monaThemeColors.dark);
     });
 
-    it("resolves Anna dark and rejects an unsupported Anna light variant", () => {
+    it("resolves the built-in Anna light and dark colors", () => {
         const strategy = new DefaultThemeColorStrategy([]);
 
+        expect(strategy.resolve("anna", "light")).toEqual(annaThemeColors.light);
         expect(strategy.resolve("anna", "dark")).toEqual(annaThemeColors.dark);
-        expect(() => strategy.resolve("anna", "light")).toThrowError(
-            'Mona UI theme "anna" does not support the "light" variant.'
-        );
     });
 
     it("keeps Anna overrides isolated from Mona", () => {
         const strategy = new DefaultThemeColorStrategy([
-            { theme: "anna", colors: { dark: { "--color-primary": "anna-override" } } }
+            { theme: "anna", colors: { light: { "--color-primary": "anna-override" } } }
         ]);
 
-        expect(strategy.resolve("anna", "dark")["--color-primary"]).toBe("anna-override");
-        expect(strategy.resolve("mona", "dark")["--color-primary"]).toBe(monaThemeColors.dark["--color-primary"]);
+        expect(strategy.resolve("anna", "light")["--color-primary"]).toBe("anna-override");
+        expect(strategy.resolve("anna", "dark")["--color-primary"]).toBe(annaThemeColors.dark["--color-primary"]);
+        expect(strategy.resolve("mona", "light")["--color-primary"]).toBe(monaThemeColors.light["--color-primary"]);
     });
 
     it("returns a fresh record without mutating the built-in definition", () => {

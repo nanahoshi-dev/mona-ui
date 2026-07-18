@@ -42,6 +42,22 @@ describe("provideThemeColors", () => {
         expect(strategy.resolve("mona", "dark")["--color-primary"]).toBe("second");
     });
 
+    it("applies Anna Light overrides without affecting Anna Dark or Mona", () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideThemeColors({
+                    theme: "anna",
+                    colors: { light: { "--color-primary": "anna-light-override" } }
+                })
+            ]
+        });
+
+        const strategy = TestBed.inject(THEME_COLOR_STRATEGY);
+        expect(strategy.resolve("anna", "light")["--color-primary"]).toBe("anna-light-override");
+        expect(strategy.resolve("anna", "dark")["--color-primary"]).not.toBe("anna-light-override");
+        expect(strategy.resolve("mona", "light")["--color-primary"]).not.toBe("anna-light-override");
+    });
+
     it("does not mutate the supplied registration", () => {
         const registration = Object.freeze({
             theme: "mona" as const,

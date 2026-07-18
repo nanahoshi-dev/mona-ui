@@ -25,21 +25,26 @@ describe("PageComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("offers all built-in themes and switches to Anna Dark", () => {
+    it("offers all built-in themes and switches to Anna Light", () => {
         const themeService = TestBed.inject(ThemeService);
-        expect(component["themeOptions"].map(theme => theme.id)).toEqual(["mona-light", "mona-dark", "anna-dark"]);
+        expect(component["themeOptions"].map(theme => theme.id)).toEqual([
+            "mona-light",
+            "mona-dark",
+            "anna-dark",
+            "anna-light"
+        ]);
 
-        component["onThemeChange"](THEME_OPTIONS[2]!);
+        component["onThemeChange"](THEME_OPTIONS.find(theme => theme.id === "anna-light")!);
         fixture.detectChanges();
 
-        expect(themeService.themeId()).toBe("anna-dark");
+        expect(themeService.themeId()).toBe("anna-light");
         expect(themeService.theme()).toBe("anna");
-        expect(themeService.themeVariant()).toBe("dark");
+        expect(themeService.themeVariant()).toBe("light");
     });
 
-    it("has no AXE violations with Anna Dark active", async () => {
+    it("has no AXE violations with Anna Light active", async () => {
         const themeService = TestBed.inject(ThemeService);
-        themeService.setThemeId("anna-dark");
+        themeService.setThemeId("anna-light");
         fixture.detectChanges();
 
         // jsdom has no canvas implementation; theme specs verify Anna contrast pairs numerically.

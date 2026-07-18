@@ -57,6 +57,7 @@ export const timeSelectorListContainerVariants = cva(
 export const timeSelectorListVariants = cva(
     `
         h-full flex-1 overflow-y-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
         scrollbar-hide scroll-smooth
         snap-y snap-mandatory
         scrollbar-width:none

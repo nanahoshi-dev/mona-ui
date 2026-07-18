@@ -94,6 +94,7 @@ export const editorContainerVariants = cva(
         [&_div:first-child[contenteditable='true']]:h-full
         [&_div:first-child[contenteditable='true']]:overflow-auto
         [&_div:first-child[contenteditable='true']]:resize-none
+        [&_div:first-child[contenteditable='true']]:[scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)]
         [&_div:first-child[contenteditable='true']]:[scrollbar-width:thin]
     `
 );

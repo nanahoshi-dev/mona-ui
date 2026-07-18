@@ -106,6 +106,7 @@ export const dialogDescriptionVariants = cva(
 export const dialogContentVariants = cva(
     `
         flex-1 overflow-auto p-1
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
     `
 );
 

@@ -41,6 +41,7 @@ export const windowContentContainerVariants = cva(
 export const windowContentVariants = cva(
     `
         flex-1 overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
     `
 );
 

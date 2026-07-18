@@ -23,7 +23,6 @@ const tailwindShadows = Object.fromEntries(
 const testerOwnedColors = new Set(["--color-page-background", "--color-demo-background"]);
 const runtimeColors = monaThemeColors.light;
 const runtimeKeys = Object.keys(runtimeColors).sort();
-const annaRuntimeKeys = Object.keys(annaThemeColors.dark).sort();
 const tailwindKeys = Object.keys(tailwindColors)
     .filter(key => !testerOwnedColors.has(key))
     .sort();
@@ -37,13 +36,21 @@ if (JSON.stringify(tailwindKeys) !== JSON.stringify(runtimeKeys)) {
     );
 }
 
-if (JSON.stringify(annaRuntimeKeys) !== JSON.stringify(runtimeKeys)) {
-    const missing = runtimeKeys.filter(key => !annaRuntimeKeys.includes(key));
-    const unexpected = annaRuntimeKeys.filter(key => !runtimeKeys.includes(key));
-    throw new Error(
-        `Anna Dark does not match the built-in runtime color contract. Missing: ${missing.join(", ") || "none"}. ` +
-            `Unexpected: ${unexpected.join(", ") || "none"}.`
-    );
+for (const [name, colors] of Object.entries({
+    "Mona Light": monaThemeColors.light,
+    "Mona Dark": monaThemeColors.dark,
+    "Anna Light": annaThemeColors.light,
+    "Anna Dark": annaThemeColors.dark
+})) {
+    const keys = Object.keys(colors).sort();
+    if (JSON.stringify(keys) !== JSON.stringify(runtimeKeys)) {
+        const missing = runtimeKeys.filter(key => !keys.includes(key));
+        const unexpected = keys.filter(key => !runtimeKeys.includes(key));
+        throw new Error(
+            `${name} does not match the built-in runtime color contract. Missing: ${missing.join(", ") || "none"}. ` +
+                `Unexpected: ${unexpected.join(", ") || "none"}.`
+        );
+    }
 }
 
 for (const [name, value] of Object.entries(runtimeColors)) {
@@ -60,6 +67,7 @@ const tailwindShadowKeys = Object.keys(tailwindShadows).sort();
 
 for (const [name, shadows] of Object.entries({
     "Mona Dark": monaThemeShadows.dark,
+    "Anna Light": annaThemeShadows.light,
     "Anna Dark": annaThemeShadows.dark
 })) {
     const keys = Object.keys(shadows).sort();

@@ -3,6 +3,7 @@ import { cva } from "class-variance-authority";
 export const datePopupVariants = cva(
     `
         h-full overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
         bg-surface-overlay text-foreground
         border border-border shadow-(--shadow-overlay)
         [&_mona-calendar]:border-none

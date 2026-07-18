@@ -10,5 +10,6 @@ export interface ThemeOption {
 export const THEME_OPTIONS: readonly ThemeOption[] = Object.freeze([
     { text: "Mona Light", theme: "mona", variant: "light", id: "mona-light" },
     { text: "Mona Dark", theme: "mona", variant: "dark", id: "mona-dark" },
-    { text: "Anna Dark", theme: "anna", variant: "dark", id: "anna-dark" }
+    { text: "Anna Dark", theme: "anna", variant: "dark", id: "anna-dark" },
+    { text: "Anna Light", theme: "anna", variant: "light", id: "anna-light" }
 ]);
