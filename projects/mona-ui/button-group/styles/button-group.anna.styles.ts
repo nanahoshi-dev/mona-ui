@@ -32,12 +32,12 @@ export const buttonGroupVariants = cva(
                     [&>button]:last:rounded-se-full [&>button]:last:rounded-ee-full
                 `,
                 large: `
-                    rounded-[4px]
+                    rounded-lg
                     [&>button]:first:rounded-ss-lg [&>button]:first:rounded-es-lg
                     [&>button]:last:rounded-se-lg [&>button]:last:rounded-ee-lg
                 `,
                 medium: `
-                    rounded-[2px]
+                    rounded-md
                     [&>button]:first:rounded-ss-md [&>button]:first:rounded-es-md
                     [&>button]:last:rounded-se-md [&>button]:last:rounded-ee-md
                 `,
@@ -45,7 +45,7 @@ export const buttonGroupVariants = cva(
                     rounded-none
                 `,
                 small: `
-                    rounded-[1px]
+                    rounded-sm
                     [&>button]:first:rounded-ss-sm [&>button]:first:rounded-es-sm
                     [&>button]:last:rounded-se-sm [&>button]:last:rounded-ee-sm
                 `

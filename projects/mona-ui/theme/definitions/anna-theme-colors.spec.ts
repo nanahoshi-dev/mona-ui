@@ -1,4 +1,4 @@
-import { wcagContrast } from "culori";
+import { converter, parse, wcagContrast } from "culori";
 import type { ThemeColors } from "../models/ThemeDefinition";
 import { annaThemeColors } from "./anna-theme-colors";
 import { monaThemeColors } from "./mona-theme-colors";
@@ -17,6 +17,8 @@ describe("annaThemeColors", () => {
                 "--color-canvas": "#202123",
                 "--color-surface": "#1D1E20",
                 "--color-surface-muted": "#161718",
+                "--color-border-control": "#0F0F10",
+                "--color-border-control-hover": "#17181A",
                 "--color-primary": "#583573",
                 "--color-selected": "var(--color-accent)",
                 "--color-focus-indicator": "#A174C2"
@@ -46,6 +48,13 @@ describe("annaThemeColors", () => {
         expectContrast(colors, "--color-disabled-foreground", "--color-disabled-background", 4.5);
         expectContrast(colors, "--color-primary-foreground", "--color-primary", 4.5);
     });
+
+    it("keeps resting and hovered control borders darker than their control surface", () => {
+        expectDarker(colors, "--color-border-control", "--color-input-background");
+        expectDarker(colors, "--color-border-control-hover", "--color-input-background");
+        expectDarker(colors, "--color-border-control", "--color-border-control-hover");
+        expectDarker(colors, "--color-disabled-border", "--color-disabled-background");
+    });
 });
 
 function expectContrast(
@@ -63,4 +72,16 @@ function resolveColor(colors: ThemeColors, name: `--color-${string}`): string {
     const value = colors[name];
     const alias = /^var\((--color-[^)]+)\)$/.exec(value);
     return alias?.[1] ? resolveColor(colors, alias[1] as `--color-${string}`) : value;
+}
+
+function expectDarker(colors: ThemeColors, darker: `--color-${string}`, lighter: `--color-${string}`): void {
+    const toOklch = converter("oklch");
+    const darkerColor = toOklch(parse(resolveColor(colors, darker)));
+    const lighterColor = toOklch(parse(resolveColor(colors, lighter)));
+
+    if (!darkerColor || !lighterColor) {
+        throw new Error(`Expected parsable colors for ${darker} and ${lighter}.`);
+    }
+
+    expect(darkerColor.l).toBeLessThan(lighterColor.l);
 }

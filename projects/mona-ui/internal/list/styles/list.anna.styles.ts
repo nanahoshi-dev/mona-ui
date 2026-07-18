@@ -26,7 +26,7 @@ export const listItemContentVariants = cva(
         variants: {
             checkboxes: { true: "gap-2", false: "" },
             highlighted: {
-                true: "bg-hover text-foreground inset-ring-1 inset-ring-focus-indicator",
+                true: "bg-hover text-foreground inset-ring-1 inset-ring-focus-indicator/35",
                 false: ""
             },
             selected: { true: "bg-primary text-primary-foreground", false: "" },
@@ -45,7 +45,7 @@ export const listItemContentVariants = cva(
                 highlighted: true,
                 selected: true,
                 checkboxes: false,
-                class: "bg-primary text-primary-foreground inset-ring-1 inset-ring-focus-indicator hover:bg-primary-hover hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground"
+                class: "bg-primary text-primary-foreground inset-ring-1 inset-ring-focus-indicator/35 hover:bg-primary-hover hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground"
             },
             { selected: true, checkboxes: true, class: "bg-transparent text-foreground" }
         ]

@@ -10,10 +10,10 @@ export const tooltipBaseVariants = cva(
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }

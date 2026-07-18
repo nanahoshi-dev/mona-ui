@@ -17,9 +17,9 @@ export const pagerBaseVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             },
             size: {

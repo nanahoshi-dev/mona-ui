@@ -3,9 +3,9 @@ import { cva } from "class-variance-authority";
 export const popupMenuBaseVariants = cva(`h-full w-full overflow-hidden`, {
     variants: {
         rounded: {
-            small: "rounded-[1px]",
-            medium: "rounded-[2px]",
-            large: "rounded-[4px]",
+            small: "rounded-sm",
+            medium: "rounded-md",
+            large: "rounded-lg",
             none: "rounded-none"
         }
     }
@@ -20,9 +20,9 @@ export const popupMenuContainerVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 none: "rounded-none"
             }
         }
@@ -57,9 +57,9 @@ export const popupMenuItemVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 none: "rounded-none"
             },
             size: {

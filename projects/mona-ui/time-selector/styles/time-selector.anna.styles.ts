@@ -4,7 +4,7 @@ export const timeSelectorBaseVariants = cva(
     `
         flex h-full w-full flex-col overflow-hidden
         data-[invalid='true']:border data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -63,7 +63,7 @@ export const timeSelectorListVariants = cva(
         scrollbar-width:none
         select-none outline-none
         [&::-webkit-scrollbar]:hidden
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {

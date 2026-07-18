@@ -20,22 +20,22 @@ export const switchVariants = cva(
         data-[disabled='true']:data-[active='true']:bg-disabled-background
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:focus-visible:border-error
-        data-[invalid='true']:focus-visible:ring-error
+        data-[invalid='true']:focus-visible:ring-error/35
     `,
     {
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             },
             size: {
                 large: "h-7.5 w-14 text-md",
@@ -61,10 +61,10 @@ export const switchHandleVariants = cva(
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             },
             size: {
                 large: `

@@ -9,9 +9,9 @@ export const tabListBaseVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             },
@@ -38,7 +38,7 @@ export const tabListListItemVariants = cva(
     `
         flex items-center justify-center px-2
         cursor-pointer outline-none
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -51,9 +51,9 @@ export const tabListListItemVariants = cva(
                 false: ""
             },
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             }
@@ -82,9 +82,9 @@ export const tabContentVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             }

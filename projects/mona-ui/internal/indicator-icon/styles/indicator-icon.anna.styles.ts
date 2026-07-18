@@ -8,7 +8,7 @@ export const indicatorIconHostVariants = cva(
                 true: `
                     opacity-50
                     hover:opacity-90
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator focus-visible:outline-none
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:outline-none
                 `,
                 false: ""
             },

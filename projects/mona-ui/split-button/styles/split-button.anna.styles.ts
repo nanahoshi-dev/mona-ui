@@ -26,12 +26,12 @@ export const splitButtonVariants = cva(
                     [&>button]:last:rounded-tr-full [&>button]:last:rounded-br-full
                 `,
                 large: `
-                    rounded-[4px]
+                    rounded-lg
                     [&>button]:first:rounded-tl-lg [&>button]:first:rounded-bl-lg
                     [&>button]:last:rounded-tr-lg [&>button]:last:rounded-br-lg
                 `,
                 medium: `
-                    rounded-[2px]
+                    rounded-md
                     [&>button]:first:rounded-tl-md [&>button]:first:rounded-bl-md
                     [&>button]:last:rounded-tr-md [&>button]:last:rounded-br-md
                 `,
@@ -39,7 +39,7 @@ export const splitButtonVariants = cva(
                     rounded-none
                 `,
                 small: `
-                    rounded-[1px]
+                    rounded-sm
                     [&>button]:first:rounded-tl-sm [&>button]:first:rounded-bl-sm
                     [&>button]:last:rounded-tr-sm [&>button]:last:rounded-br-sm
                 `

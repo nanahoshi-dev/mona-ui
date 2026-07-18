@@ -5,14 +5,14 @@ export const scrollViewBaseVariants = cva(
         relative block h-full w-full overflow-hidden
         bg-surface outline-none
         border border-border-subtle
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 none: "rounded-none"
             }
         }
@@ -42,7 +42,7 @@ export const scrollViewArrowVariants = cva(
         bg-surface-overlay/65 text-foreground
         transition-colors duration-150 ease-out
         hover:bg-hover/90 active:bg-active/90
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
         [&_svg]:stroke-current
     `,
     {
@@ -100,7 +100,7 @@ export const scrollViewPagerListItemVariants = cva(
         transition-colors
         not-last:me-3
         hover:bg-muted-foreground/60 active:bg-foreground
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -109,9 +109,9 @@ export const scrollViewPagerListItemVariants = cva(
                 false: ""
             },
             pagerRounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             }
@@ -127,7 +127,7 @@ export const scrollViewPagerArrowVariants = cva(
         font-medium text-muted-foreground
         transition-colors duration-150 ease-out
         hover:bg-hover hover:text-foreground active:bg-active
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
         [&_svg]:stroke-current
     `
 );

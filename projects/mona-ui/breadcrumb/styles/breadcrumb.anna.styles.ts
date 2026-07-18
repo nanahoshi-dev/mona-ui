@@ -20,11 +20,11 @@ export const breadcrumbListItemVariants = cva(
         flex h-full items-center truncate px-1
         cursor-pointer
         text-muted-foreground
-        bg-transparent border-0 rounded-[1px] outline-none
+        bg-transparent border-0 rounded-sm outline-none
         transition-colors duration-100 ease-in-out
         hover:bg-hover hover:text-foreground
         active:bg-active active:text-foreground
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {

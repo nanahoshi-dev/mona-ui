@@ -7,7 +7,7 @@ export const editorBaseVariants = cva(
         border border-border
         transition-[border-color,box-shadow] duration-150 ease-in
         focus-within:border-focus-indicator
-        focus-within:ring-2 focus-within:ring-focus-indicator
+        focus-within:ring-2 focus-within:ring-focus-indicator/35
 
         prose prose-neutral max-w-none
         prose-headings:text-foreground prose-headings:font-bold

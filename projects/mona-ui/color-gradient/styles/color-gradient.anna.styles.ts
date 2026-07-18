@@ -13,7 +13,7 @@ export const colorGradientBaseVariants = cva(
         data-[invalid='true']:border
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-error/35
     `
 );
 
@@ -27,10 +27,10 @@ export const colorGradientHsvRectangleVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
-                full: "rounded-[4px]" // Full is not suitable for color gradient rectangle.
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-lg" // Full is not suitable for color gradient rectangle.
             }
         }
     }
@@ -44,16 +44,16 @@ export const colorGradientHsvRectangleHandleVariants = cva(
         bg-transparent
         border-2 border-black/90 outline outline-white/90 shadow-sm
 
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
         focus-visible:ring-offset-2 focus-visible:ring-offset-surface
     `,
     {
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }
@@ -69,9 +69,9 @@ export const colorGradientPreviewVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }

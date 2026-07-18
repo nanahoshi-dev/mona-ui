@@ -21,21 +21,21 @@ export const radioButtonCircleVariants = cva(
         peer-disabled:border-disabled-border peer-disabled:bg-disabled-background peer-disabled:text-disabled-foreground
 
         peer-focus-visible:border-focus-indicator
-        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator
+        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:peer-focus-visible:border-error
-        data-[invalid='true']:peer-focus-visible:ring-error
+        data-[invalid='true']:peer-focus-visible:ring-error/35
     `,
     {
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }
@@ -51,10 +51,10 @@ export const radioButtonIndicatorVariants = cva(
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }
@@ -102,21 +102,21 @@ export const radioButtonDirectiveVariants = cva(
         checked:after:rounded-full
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
         [&.ng-touched.ng-invalid]:focus-visible:border-error
-        [&.ng-touched.ng-invalid]:focus-visible:ring-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         },
         compoundVariants: [
@@ -126,11 +126,11 @@ export const radioButtonDirectiveVariants = cva(
             },
             {
                 rounded: "large",
-                class: "checked:after:rounded-[4px]"
+                class: "checked:after:rounded-lg"
             },
             {
                 rounded: "medium",
-                class: "checked:after:rounded-[2px]"
+                class: "checked:after:rounded-md"
             },
             {
                 rounded: "none",
@@ -138,7 +138,7 @@ export const radioButtonDirectiveVariants = cva(
             },
             {
                 rounded: "small",
-                class: "checked:after:rounded-[1px]"
+                class: "checked:after:rounded-sm"
             }
         ]
     }

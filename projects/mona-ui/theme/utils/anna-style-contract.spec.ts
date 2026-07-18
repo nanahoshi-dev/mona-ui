@@ -24,14 +24,27 @@ describe("Anna style contract", () => {
             "clear"
         ] as const;
         const sizes = ["small", "medium", "large"] as const;
-        const roundedValues = ["none", "small", "medium", "large", "full"] as const;
+        const roundedValues = {
+            none: "rounded-none",
+            small: "rounded-sm",
+            medium: "rounded-md",
+            large: "rounded-lg",
+            full: "rounded-full"
+        } as const;
 
         for (const look of looks) {
             for (const size of sizes) {
-                for (const rounded of roundedValues) {
-                    expect(
-                        buttonVariants({ disabled: false, loading: false, look, rounded, selected: true, size })
-                    ).toContain("inline-flex");
+                for (const [rounded, roundedClass] of Object.entries(roundedValues)) {
+                    const classes = buttonVariants({
+                        disabled: false,
+                        loading: false,
+                        look,
+                        rounded: rounded as keyof typeof roundedValues,
+                        selected: true,
+                        size
+                    });
+                    expect(classes).toContain("inline-flex");
+                    expect(classes).toContain(roundedClass);
                 }
             }
         }
@@ -47,8 +60,10 @@ describe("Anna style contract", () => {
     });
 
     it("keeps invalid focus treatments stronger than ordinary focus treatments", () => {
-        expect(textBoxVariants()).toContain("data-[invalid='true']:focus-within:ring-error");
-        expect(checkmarkVariants()).toContain("data-[invalid='true']:peer-focus-visible:ring-error");
+        expect(textBoxVariants()).toContain("focus-within:ring-focus-indicator/35");
+        expect(textBoxVariants()).toContain("data-[invalid='true']:focus-within:ring-error/35");
+        expect(checkmarkVariants()).toContain("peer-focus-visible:ring-focus-indicator/35");
+        expect(checkmarkVariants()).toContain("data-[invalid='true']:peer-focus-visible:ring-error/35");
     });
 
     it("uses violet bands for selected list, grid, and calendar states", () => {

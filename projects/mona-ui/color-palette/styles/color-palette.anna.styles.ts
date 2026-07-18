@@ -10,7 +10,7 @@ export const colorPaletteBaseVariants = cva(
         data-[invalid='true']:border
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-1
-        data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-error/35
     `
 );
 
@@ -35,9 +35,9 @@ export const colorPaletteItemVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
+                small: "rounded-sm",
                 medium: "rounded",
-                large: "rounded-[4px]",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }

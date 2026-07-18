@@ -32,74 +32,74 @@ export const buttonVariants = cva(
                     bg-input-background text-foreground
                     border border-input-border
                     hover:bg-hover active:bg-active
-                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 primary: `
                     bg-primary text-primary-foreground
                     hover:bg-primary-hover active:bg-primary-active
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 success: `
                     bg-success text-success-foreground
                     hover:bg-success-hover
                     active:bg-success-active
-                    focus-visible:ring-2 focus-visible:ring-success
+                    focus-visible:ring-2 focus-visible:ring-success/35
                 `,
                 error: `
                     bg-error text-error-foreground
                     hover:bg-error-hover
                     active:bg-error-active
-                    focus-visible:ring-2 focus-visible:ring-error
+                    focus-visible:ring-2 focus-visible:ring-error/35
                 `,
                 warning: `
                     bg-warning text-warning-foreground
                     hover:bg-warning-hover
                     active:bg-warning-active
-                    focus-visible:ring-2 focus-visible:ring-warning
+                    focus-visible:ring-2 focus-visible:ring-warning/35
                 `,
                 info: `
                     bg-info text-info-foreground
                     hover:bg-info-hover
                     active:bg-info-active
-                    focus-visible:ring-2 focus-visible:ring-info
+                    focus-visible:ring-2 focus-visible:ring-info/35
                 `,
                 outline: `
                     bg-input-background text-foreground
                     border border-input-border
                     hover:bg-hover active:bg-active
-                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 secondary: `
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover
                     active:bg-secondary-active
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 ghost: `
                     bg-transparent text-foreground
                     shadow-none
                     hover:bg-hover active:bg-active
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 link: `
                     bg-transparent text-foreground
                     shadow-none
                     underline-offset-4 hover:underline
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 clear: `
                     bg-transparent
                     border-0 shadow-none
                     hover:bg-transparent active:bg-transparent
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `
             },
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             },
             size: {
                 large: "h-8.5 px-6",

@@ -20,28 +20,28 @@ export const colorPickerBaseVariants = cva(
         hover:bg-hover active:bg-active
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:focus-visible:border-error
-        data-[invalid='true']:focus-visible:ring-error
+        data-[invalid='true']:focus-visible:ring-error/35
         [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
         [&.ng-touched.ng-invalid]:focus-visible:border-error
-        [&.ng-touched.ng-invalid]:focus-visible:ring-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {
             expanded: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator",
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
                 false: ""
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             },
             size: {
@@ -53,7 +53,7 @@ export const colorPickerBaseVariants = cva(
         compoundVariants: [
             {
                 expanded: true,
-                class: "data-[invalid='true']:border-error data-[invalid='true']:ring-error"
+                class: "data-[invalid='true']:border-error data-[invalid='true']:ring-error/35"
             }
         ]
     }
@@ -68,9 +68,9 @@ export const colorPickerColorVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             },
             size: {

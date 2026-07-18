@@ -23,16 +23,16 @@ const dark: ThemeColors = Object.freeze({
     "--color-input-background": "#1D1E20",
     "--color-input-foreground": "var(--color-foreground)",
     "--color-border-subtle": "#0F0F10",
-    "--color-border": "#17181A",
-    "--color-border-control": "#393A3E",
-    "--color-border-control-hover": "#53545A",
+    "--color-border": "#131416",
+    "--color-border-control": "#0F0F10",
+    "--color-border-control-hover": "#17181A",
 
     "--color-hover": "#242528",
     "--color-active": "#2A2B2E",
 
     "--color-disabled-foreground": "#9A9AA0",
     "--color-disabled-background": "#1A1B1D",
-    "--color-disabled-border": "#2A2B2E",
+    "--color-disabled-border": "#111214",
 
     ...generatedRoles.dark,
 

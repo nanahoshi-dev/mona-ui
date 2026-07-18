@@ -7,7 +7,7 @@ export const autoCompleteBaseVariants = cva(
         border border-input-border shadow-none outline-none
         transition-[color,box-shadow,border] duration-150 ease-in-out
         data-[readonly='true']:cursor-default
-        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -19,20 +19,20 @@ export const autoCompleteBaseVariants = cva(
                 `
             },
             expanded: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             focused: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             invalid: {
-                true: "border-error ring-2 ring-error focus-within:border-error focus-within:ring-error",
+                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
                 false: ""
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             },
             size: {
@@ -45,12 +45,12 @@ export const autoCompleteBaseVariants = cva(
             {
                 expanded: true,
                 invalid: true,
-                class: "border-error ring-error"
+                class: "border-error ring-error/35"
             },
             {
                 focused: true,
                 invalid: true,
-                class: "border-error ring-error"
+                class: "border-error ring-error/35"
             }
         ],
         defaultVariants: {
@@ -73,9 +73,9 @@ export const autoCompleteTextInputVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full px-3"
             }
         }

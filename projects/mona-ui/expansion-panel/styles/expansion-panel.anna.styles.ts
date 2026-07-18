@@ -9,9 +9,9 @@ export const expansionPanelBaseVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 none: "rounded-none"
             }
         }
@@ -29,7 +29,7 @@ export const expansionPanelHeaderVariants = cva(
         transition-colors duration-150
         hover:bg-hover active:bg-active
         focus-visible:z-10 focus-visible:outline-none
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {

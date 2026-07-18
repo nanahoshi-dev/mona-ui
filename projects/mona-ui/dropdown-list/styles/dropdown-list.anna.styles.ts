@@ -9,7 +9,7 @@ export const dropdownListInputVariants = cva(
         transition-[color,box-shadow,border] duration-150 ease-in-out
         data-[readonly='true']:cursor-default
         hover:bg-hover active:bg-active
-        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -22,21 +22,21 @@ export const dropdownListInputVariants = cva(
                 false: ""
             },
             expanded: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator",
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
                 false: ""
             },
             hasPrefix: {
                 false: "ps-2"
             },
             invalid: {
-                true: "border-error ring-2 ring-error focus-visible:border-error focus-visible:ring-error",
+                true: "border-error ring-2 ring-error/35 focus-visible:border-error focus-visible:ring-error/35",
                 false: ""
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full px-3"
             },
             size: {
@@ -49,7 +49,7 @@ export const dropdownListInputVariants = cva(
             {
                 expanded: true,
                 invalid: true,
-                class: "border-error ring-error"
+                class: "border-error ring-error/35"
             }
         ]
     }

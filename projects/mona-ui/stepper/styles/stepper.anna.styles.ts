@@ -72,13 +72,13 @@ export const stepperStepIndicatorVariants = cva(
                 false: ""
             },
             focused: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator",
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
                 false: ""
             },
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             }

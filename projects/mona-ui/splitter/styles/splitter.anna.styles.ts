@@ -24,7 +24,7 @@ export const splitterResizerVariants = cva(
         transition-colors
         hover:bg-border-control active:bg-border-control-hover
         focus-visible:bg-border-control
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {

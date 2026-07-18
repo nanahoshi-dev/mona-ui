@@ -8,7 +8,7 @@ export const multiSelectBaseVariants = cva(
         border border-input-border shadow-none outline-none
         transition-[color,box-shadow,border] duration-150 ease-in-out
         data-[readonly='true']:cursor-default
-        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
     `,
     {
         variants: {
@@ -20,17 +20,17 @@ export const multiSelectBaseVariants = cva(
                 `
             },
             focused: {
-                true: "border-focus-indicator ring-2 ring-focus-indicator"
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35"
             },
             invalid: {
-                true: "border-error ring-2 ring-error focus-visible:border-error focus-visible:ring-error",
+                true: "border-error ring-2 ring-error/35 focus-visible:border-error focus-visible:ring-error/35",
                 false: ""
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             },
             size: {
@@ -43,7 +43,7 @@ export const multiSelectBaseVariants = cva(
             {
                 focused: true,
                 invalid: true,
-                class: "border-error ring-error"
+                class: "border-error ring-error/35"
             }
         ]
     }
@@ -57,9 +57,9 @@ export const multiSelectItemContainerVariants = cva(
         variants: {
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }

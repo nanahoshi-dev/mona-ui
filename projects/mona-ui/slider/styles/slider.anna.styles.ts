@@ -36,10 +36,10 @@ export const sliderTrackVariants = cva(
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }
@@ -124,21 +124,21 @@ export const sliderHandleVariants = cva(
 
         data-[focused="true"]:border-focus-indicator
         data-[focused="true"]:ring-2
-        data-[focused="true"]:ring-focus-indicator
+        data-[focused="true"]:ring-focus-indicator/35
 
         data-[invalid="true"]:border-error
-        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error
+        data-[invalid="true"]:ring-2 data-[invalid="true"]:ring-error/35
         data-[invalid="true"]:data-[focused="true"]:border-error
-        data-[invalid="true"]:data-[focused="true"]:ring-error
+        data-[invalid="true"]:data-[focused="true"]:ring-error/35
     `,
     {
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }

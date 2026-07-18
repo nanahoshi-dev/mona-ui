@@ -7,7 +7,7 @@ export const calendarBaseVariants = cva(
         bg-surface-raised text-foreground
         border border-border shadow-none
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,
     {
         variants: {
@@ -19,9 +19,9 @@ export const calendarBaseVariants = cva(
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }
@@ -52,7 +52,7 @@ export const calendarMonthViewDayVariants = cva(
                 true: "pointer-events-none cursor-not-allowed text-disabled-foreground"
             },
             focused: {
-                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator"
+                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
             },
             outside: {
                 true: "text-muted-foreground"
@@ -62,9 +62,9 @@ export const calendarMonthViewDayVariants = cva(
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             },
             selected: {
@@ -122,13 +122,13 @@ export const calendarYearViewCellVariants = cva(
     {
         variants: {
             focused: {
-                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator"
+                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }
@@ -151,13 +151,13 @@ export const calendarDecadeViewCellVariants = cva(
     {
         variants: {
             focused: {
-                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator"
+                true: "bg-hover outline-none ring-2 ring-inset ring-focus-indicator/35"
             },
             rounded: {
                 none: "rounded-none",
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full"
             }
         }

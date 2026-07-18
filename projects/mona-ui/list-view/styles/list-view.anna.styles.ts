@@ -10,9 +10,9 @@ export const listViewBaseVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 none: "rounded-none"
             },
             size: {

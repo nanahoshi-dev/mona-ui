@@ -12,9 +12,9 @@ export const gridBaseVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 none: "rounded-none"
             }
         }
@@ -80,7 +80,7 @@ export const gridColumnDragPreviewVariants = cva(
         flex items-center justify-center
         px-2! py-0.5!
         bg-surface-raised! text-foreground!
-        border! border-border! rounded-[2px] shadow-sm!
+        border! border-border! rounded-md shadow-sm!
     `
 );
 
@@ -191,7 +191,7 @@ export const gridHeaderTableCellVariants = cva(
         text-left overflow-visible
         outline-none border-r border-r-border-subtle
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
     `
 );
 
@@ -253,7 +253,7 @@ export const gridListTableCellVariants = cva(
         align-top
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
-        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
     `,
     {
         variants: {

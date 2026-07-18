@@ -46,7 +46,7 @@ export const treeNodeBaseVariants = cva(
                 false: ""
             },
             highlighted: {
-                true: "inset-ring-1 inset-ring-focus-indicator",
+                true: "inset-ring-1 inset-ring-focus-indicator/35",
                 false: ""
             },
             selected: {

@@ -72,7 +72,7 @@ export class DemoContainerComponent<TComponent> {
         if (customColor) {
             return customColor;
         }
-        return `var(--color-demo-background)`;
+        return ``;
     });
     protected readonly codeVisible = signal(false);
     protected readonly customColor = signal<string | null>(null);

@@ -14,17 +14,17 @@ export const checkmarkVariants = cva(
         peer-disabled:pointer-events-none peer-disabled:cursor-not-allowed
         peer-disabled:border-disabled-border peer-disabled:bg-disabled-background peer-disabled:text-disabled-foreground
 
-        peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground
-        peer-indeterminate:border-primary peer-indeterminate:bg-primary peer-indeterminate:text-primary-foreground
+        peer-checked:border-border-subtle peer-checked:bg-primary peer-checked:text-primary-foreground
+        peer-indeterminate:border-border-subtle peer-indeterminate:bg-primary peer-indeterminate:text-primary-foreground
 
         peer-focus-visible:border-focus-indicator
-        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator
+        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
 
         [&.ng-touched.ng-invalid]:border-error
         data-[invalid='true']:border-error
-        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:peer-focus-visible:border-error
-        data-[invalid='true']:peer-focus-visible:ring-error
+        data-[invalid='true']:peer-focus-visible:ring-error/35
 
         peer-indeterminate:after:absolute
         peer-indeterminate:after:inset-[3px_0_3px_0]
@@ -38,10 +38,10 @@ export const checkmarkVariants = cva(
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }
@@ -77,11 +77,11 @@ export const checkboxDirectiveVariants = cva(
         disabled:pointer-events-none disabled:cursor-not-allowed
         disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground
 
-        checked:border-primary checked:bg-primary checked:text-primary-foreground
-        indeterminate:border-primary indeterminate:bg-primary indeterminate:text-primary-foreground
+        checked:border-border-subtle checked:bg-primary checked:text-primary-foreground
+        indeterminate:border-border-subtle indeterminate:bg-primary indeterminate:text-primary-foreground
 
         focus-visible:border-focus-indicator
-        focus-visible:ring-2 focus-visible:ring-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
         checked:after:absolute
         checked:after:inset-[1px_0_0_1px]
@@ -100,18 +100,18 @@ export const checkboxDirectiveVariants = cva(
         indeterminate:after:[mask-size:contain]
 
         [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
         [&.ng-touched.ng-invalid]:focus-visible:border-error
-        [&.ng-touched.ng-invalid]:focus-visible:ring-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
     `,
     {
         variants: {
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             }
         }
     }

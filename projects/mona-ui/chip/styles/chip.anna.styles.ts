@@ -19,64 +19,64 @@ export const chipVariants = cva(
                     border border-border
                     hover:bg-hover hover:text-foreground
                     active:bg-active active:text-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 primary: `
                     bg-primary text-primary-foreground
                     hover:bg-primary-hover hover:text-primary-foreground
                     active:bg-primary-active active:text-primary-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 success: `
                     bg-success text-success-foreground
                     hover:bg-success-hover hover:text-success-foreground
                     active:bg-success-active active:text-success-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 error: `
                     bg-error text-error-foreground
                     hover:bg-error-hover hover:text-error-foreground
                     active:bg-error-active active:text-error-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 warning: `
                     bg-warning text-warning-foreground
                     hover:bg-warning-hover hover:text-warning-foreground
                     active:bg-warning-active active:text-warning-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 info: `
                     bg-info text-info-foreground
                     hover:bg-info-hover hover:text-info-foreground
                     active:bg-info-active active:text-info-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 outline: `
                     bg-transparent text-foreground
                     border border-input-border
                     hover:bg-hover hover:text-foreground
                     active:bg-active active:text-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 secondary: `
                     bg-secondary text-secondary-foreground
                     hover:bg-secondary-hover hover:text-secondary-foreground
                     active:bg-secondary-active active:text-secondary-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `,
                 ghost: `
                     bg-transparent text-foreground shadow-none
                     hover:bg-hover hover:text-foreground
                     active:bg-active active:text-foreground
-                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35
                 `
             },
             rounded: {
                 full: "rounded-full",
-                large: "rounded-[4px]",
-                medium: "rounded-[2px]",
+                large: "rounded-lg",
+                medium: "rounded-md",
                 none: "rounded-none",
-                small: "rounded-[1px]"
+                small: "rounded-sm"
             },
             size: {
                 small: `

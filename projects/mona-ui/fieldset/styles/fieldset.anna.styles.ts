@@ -13,9 +13,9 @@ export const fieldsetVariants = cva(
     {
         variants: {
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             },
@@ -41,9 +41,9 @@ export const fieldsetLegendVariants = cva(
                 false: "px-2 bg-surface-raised text-foreground border border-border-subtle"
             },
             rounded: {
-                small: "rounded-[1px]",
-                medium: "rounded-[2px]",
-                large: "rounded-[4px]",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
                 full: "rounded-full",
                 none: "rounded-none"
             }
