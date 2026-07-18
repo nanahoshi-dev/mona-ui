@@ -1,38 +1,31 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    breadcrumbCurrentItemVariants as annaBreadcrumbCurrentItemVariants,
+    breadcrumbListVariants as annaBreadcrumbListVariants,
+    breadcrumbListItemVariants as annaBreadcrumbListItemVariants
+} from "./breadcrumb.anna.styles";
 import {
     breadcrumbCurrentItemVariants as monaBreadcrumbCurrentItemVariants,
     breadcrumbListVariants as monaBreadcrumbListVariants,
     breadcrumbListItemVariants as monaBreadcrumbListItemVariants
 } from "./breadcrumb.mona.styles";
 
-export const breadcrumbListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaBreadcrumbListVariants;
-        default:
-            return monaBreadcrumbListVariants;
-    }
-};
+export const breadcrumbListThemeVariants = createThemeStrategy({
+    anna: annaBreadcrumbListVariants,
+    mona: monaBreadcrumbListVariants
+});
 
-export const breadcrumbListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaBreadcrumbListItemVariants;
-        default:
-            return monaBreadcrumbListItemVariants;
-    }
-};
+export const breadcrumbListItemThemeVariants = createThemeStrategy({
+    anna: annaBreadcrumbListItemVariants,
+    mona: monaBreadcrumbListItemVariants
+});
 
-export const breadcrumbCurrentItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaBreadcrumbCurrentItemVariants;
-        default:
-            return monaBreadcrumbCurrentItemVariants;
-    }
-};
+export const breadcrumbCurrentItemThemeVariants = createThemeStrategy({
+    anna: annaBreadcrumbCurrentItemVariants,
+    mona: monaBreadcrumbCurrentItemVariants
+});
 
 type BreadcrumbListVariantProps = VariantProps<ReturnType<typeof breadcrumbListThemeVariants>>;
 type BreadcrumbListVariantInput = VariantInputs<BreadcrumbListVariantProps>;

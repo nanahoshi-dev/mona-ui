@@ -1,6 +1,12 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    checkboxContainerLabelVariants as annaCheckboxContainerLabelVariants,
+    checkboxDirectiveVariants as annaCheckboxDirectiveVariants,
+    checkboxVariants as annaCheckboxVariants,
+    checkmarkVariants as annaCheckmarkVariants
+} from "./checkbox.anna.styles";
 import {
     checkboxContainerLabelVariants as monaCheckboxContainerLabelVariants,
     checkboxDirectiveVariants as monaCheckboxDirectiveVariants,
@@ -8,41 +14,25 @@ import {
     checkmarkVariants as monaCheckmarkVariants
 } from "./checkbox.mona.styles";
 
-export const checkboxInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCheckboxVariants;
-        default:
-            return monaCheckboxVariants;
-    }
-};
+export const checkboxInputThemeVariants = createThemeStrategy({
+    anna: annaCheckboxVariants,
+    mona: monaCheckboxVariants
+});
 
-export const checkmarkThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCheckmarkVariants;
-        default:
-            return monaCheckmarkVariants;
-    }
-};
+export const checkmarkThemeVariants = createThemeStrategy({
+    anna: annaCheckmarkVariants,
+    mona: monaCheckmarkVariants
+});
 
-export const checkboxContainerLabelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCheckboxContainerLabelVariants;
-        default:
-            return monaCheckboxContainerLabelVariants;
-    }
-};
+export const checkboxContainerLabelThemeVariants = createThemeStrategy({
+    anna: annaCheckboxContainerLabelVariants,
+    mona: monaCheckboxContainerLabelVariants
+});
 
-export const checkboxDirectiveThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCheckboxDirectiveVariants;
-        default:
-            return monaCheckboxDirectiveVariants;
-    }
-};
+export const checkboxDirectiveThemeVariants = createThemeStrategy({
+    anna: annaCheckboxDirectiveVariants,
+    mona: monaCheckboxDirectiveVariants
+});
 
 export type CheckboxVariantProps = VariantProps<ReturnType<typeof checkboxContainerLabelThemeVariants>>;
 export type CheckboxVariantInput = VariantInputs<CheckboxVariantProps>;

@@ -1,4 +1,15 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import {
+    scrollViewBaseVariants as annaScrollViewBaseVariants,
+    scrollViewContentVariants as annaScrollViewContentVariants,
+    scrollViewListVariants as annaScrollViewListVariants,
+    scrollViewArrowVariants as annaScrollViewArrowVariants,
+    scrollViewPagerVariants as annaScrollViewPagerVariants,
+    scrollViewPagerListContainerVariants as annaScrollViewPagerListContainerVariants,
+    scrollViewPagerListVariants as annaScrollViewPagerListVariants,
+    scrollViewPagerListItemVariants as annaScrollViewPagerListItemVariants,
+    scrollViewPagerArrowVariants as annaScrollViewPagerArrowVariants
+} from "./scroll-view.anna.styles";
 import {
     scrollViewBaseVariants as monaScrollViewBaseVariants,
     scrollViewContentVariants as monaScrollViewContentVariants,
@@ -13,86 +24,50 @@ import {
 import { VariantProps } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 
-export const scrollViewBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewBaseVariants;
-        default:
-            return monaScrollViewBaseVariants;
-    }
-};
+export const scrollViewBaseThemeVariants = createThemeStrategy({
+    anna: annaScrollViewBaseVariants,
+    mona: monaScrollViewBaseVariants
+});
 
-export const scrollViewContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewContentVariants;
-        default:
-            return monaScrollViewContentVariants;
-    }
-};
+export const scrollViewContentThemeVariants = createThemeStrategy({
+    anna: annaScrollViewContentVariants,
+    mona: monaScrollViewContentVariants
+});
 
-export const scrollViewListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewListVariants;
-        default:
-            return monaScrollViewListVariants;
-    }
-};
+export const scrollViewListThemeVariants = createThemeStrategy({
+    anna: annaScrollViewListVariants,
+    mona: monaScrollViewListVariants
+});
 
-export const scrollViewArrowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewArrowVariants;
-        default:
-            return monaScrollViewArrowVariants;
-    }
-};
+export const scrollViewArrowThemeVariants = createThemeStrategy({
+    anna: annaScrollViewArrowVariants,
+    mona: monaScrollViewArrowVariants
+});
 
-export const scrollViewPagerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewPagerVariants;
-        default:
-            return monaScrollViewPagerVariants;
-    }
-};
+export const scrollViewPagerThemeVariants = createThemeStrategy({
+    anna: annaScrollViewPagerVariants,
+    mona: monaScrollViewPagerVariants
+});
 
-export const scrollViewPagerListContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewPagerListContainerVariants;
-        default:
-            return monaScrollViewPagerListContainerVariants;
-    }
-};
+export const scrollViewPagerListContainerThemeVariants = createThemeStrategy({
+    anna: annaScrollViewPagerListContainerVariants,
+    mona: monaScrollViewPagerListContainerVariants
+});
 
-export const scrollViewPagerListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewPagerListVariants;
-        default:
-            return monaScrollViewPagerListVariants;
-    }
-};
+export const scrollViewPagerListThemeVariants = createThemeStrategy({
+    anna: annaScrollViewPagerListVariants,
+    mona: monaScrollViewPagerListVariants
+});
 
-export const scrollViewPagerListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewPagerListItemVariants;
-        default:
-            return monaScrollViewPagerListItemVariants;
-    }
-};
+export const scrollViewPagerListItemThemeVariants = createThemeStrategy({
+    anna: annaScrollViewPagerListItemVariants,
+    mona: monaScrollViewPagerListItemVariants
+});
 
-export const scrollViewPagerArrowThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaScrollViewPagerArrowVariants;
-        default:
-            return monaScrollViewPagerArrowVariants;
-    }
-};
+export const scrollViewPagerArrowThemeVariants = createThemeStrategy({
+    anna: annaScrollViewPagerArrowVariants,
+    mona: monaScrollViewPagerArrowVariants
+});
 
 type ScrollViewBaseVariantProps = VariantProps<ReturnType<typeof scrollViewBaseThemeVariants>>;
 type ScrollViewBaseVariantInput = VariantInputs<ScrollViewBaseVariantProps>;

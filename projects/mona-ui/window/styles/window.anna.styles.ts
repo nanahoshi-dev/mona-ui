@@ -1,0 +1,115 @@
+import { cva } from "class-variance-authority";
+
+export const windowBaseVariants = cva(
+    `
+        flex h-full w-full flex-col
+        bg-surface-overlay text-foreground
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-[1px]",
+                medium: "rounded-[2px]",
+                large: "rounded-[4px]"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium"
+        }
+    }
+);
+
+export const windowContentContainerVariants = cva(
+    `
+        relative flex h-full w-full flex-col
+        border border-border
+        shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)]
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-[1px]",
+                medium: "rounded-[2px]",
+                large: "rounded-[4px]"
+            }
+        }
+    }
+);
+
+export const windowContentVariants = cva(
+    `
+        flex-1 overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+    `
+);
+
+export const windowResizerVariants = cva(
+    `
+        absolute flex
+    `,
+    {
+        variants: {
+            position: {
+                east: "top-0 bottom-0 -right-0.5 w-2 cursor-ew-resize",
+                north: "left-0 right-0 -top-0.5 h-2 cursor-ns-resize",
+                south: "left-0 right-0 -bottom-0.5 h-2 cursor-ns-resize",
+                west: "top-0 bottom-0 -left-0.5 w-2 cursor-ew-resize",
+                northeast: "-top-0.5 -right-0.5 w-2 h-2 cursor-nesw-resize",
+                northwest: "-top-0.5 -left-0.5 w-2 h-2 cursor-nwse-resize",
+                southeast: "-bottom-0.5 -right-0.5 w-2 h-2 cursor-nwse-resize",
+                southwest: "-bottom-0.5 -left-0.5 w-2 h-2 cursor-nesw-resize"
+            }
+        }
+    }
+);
+
+export const windowTitleBarActionVariants = cva(
+    `
+        flex items-center justify-evenly
+    `
+);
+
+export const windowTitleBarVariants = cva(
+    `
+        flex items-center justify-start
+        overflow-hidden px-2 py-1 text-sm
+        border-b border-border-subtle
+    `,
+    {
+        variants: {
+            look: {
+                default: "bg-surface-muted text-foreground",
+                primary: "bg-primary text-primary-foreground"
+            },
+            rounded: {
+                none: "rounded-ss-none rounded-se-none",
+                small: "rounded-ss-sm rounded-se-sm",
+                medium: "rounded-ss-md rounded-se-md",
+                large: "rounded-ss-lg rounded-se-lg"
+            }
+        }
+    }
+);
+
+export const windowTitleContainerVariants = cva(
+    `
+        flex h-full flex-1 items-center overflow-hidden
+        cursor-default select-none text-ellipsis
+    `
+);
+
+export const windowTitleVariants = cva(
+    `
+        overflow-hidden text-ellipsis whitespace-nowrap font-semibold
+    `,
+    {
+        variants: {
+            look: {
+                default: "text-foreground",
+                primary: "text-primary-foreground"
+            }
+        }
+    }
+);

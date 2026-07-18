@@ -53,6 +53,23 @@ describe("ThemeService", () => {
         }).toEqual({ id: "mona-dark", style: "mona", variant: "dark" });
     });
 
+    it("supports Anna Dark as a distinct style", () => {
+        service.setThemeId("anna-dark");
+
+        expect({ id: service.themeId(), style: service.theme(), variant: service.themeVariant() }).toEqual({
+            id: "anna-dark",
+            style: "anna",
+            variant: "dark"
+        });
+    });
+
+    it("rejects the unsupported Anna Light identifier", () => {
+        expect(() => service.setThemeId("anna-light" as ThemeId)).toThrowError(
+            'Unknown Mona UI theme identifier: "anna-light".'
+        );
+        expect(service.themeId()).toBe("mona-light");
+    });
+
     it("replaces values and removes variables missing from the next result", () => {
         service.setThemeId("mona-dark");
 

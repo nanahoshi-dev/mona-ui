@@ -1,38 +1,31 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    comboBoxAffixContainerVariants as annaComboBoxAffixContainerVariants,
+    comboBoxBaseVariants as annaComboBoxBaseVariants,
+    comboBoxTextInputVariants as annaComboBoxTextInputVariants
+} from "./combo-box.anna.styles";
 import {
     comboBoxAffixContainerVariants as monaComboBoxAffixContainerVariants,
     comboBoxBaseVariants as monaComboBoxBaseVariants,
     comboBoxTextInputVariants as monaComboBoxTextInputVariants
 } from "./combo-box.mona.styles";
 
-export const comboBoxBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxBaseVariants;
-        default:
-            return monaComboBoxBaseVariants;
-    }
-};
+export const comboBoxBaseThemeVariants = createThemeStrategy({
+    anna: annaComboBoxBaseVariants,
+    mona: monaComboBoxBaseVariants
+});
 
-export const comboBoxTextInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxTextInputVariants;
-        default:
-            return monaComboBoxTextInputVariants;
-    }
-};
+export const comboBoxTextInputThemeVariants = createThemeStrategy({
+    anna: annaComboBoxTextInputVariants,
+    mona: monaComboBoxTextInputVariants
+});
 
-export const comboBoxAffixContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaComboBoxAffixContainerVariants;
-        default:
-            return monaComboBoxAffixContainerVariants;
-    }
-};
+export const comboBoxAffixContainerThemeVariants = createThemeStrategy({
+    anna: annaComboBoxAffixContainerVariants,
+    mona: monaComboBoxAffixContainerVariants
+});
 
 type ComboBoxBaseVariantProps = VariantProps<ReturnType<typeof comboBoxBaseThemeVariants>>;
 type ComboBoxBaseVariantInput = VariantInputs<ComboBoxBaseVariantProps>;

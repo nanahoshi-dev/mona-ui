@@ -38,6 +38,15 @@ export const appConfig: ApplicationConfig = {
                 }
             }
         }),
+        provideThemeColors({
+            theme: "anna",
+            colors: {
+                dark: {
+                    "--color-page-background": "#202123",
+                    "--color-demo-background": "#1D1E20"
+                }
+            }
+        }),
         provideMarkdown({
             markedExtensions: [
                 {

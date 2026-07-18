@@ -1,6 +1,13 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
+import {
+    expansionPanelBaseVariants as annaExpansionPanelBaseVariants,
+    expansionPanelContentVariants as annaExpansionPanelContentVariants,
+    expansionPanelHeaderTitleVariants as annaExpansionPanelHeaderTitleVariants,
+    expansionPanelHeaderVariants as annaExpansionPanelHeaderVariants,
+    expansionPanelIconContainerVariants as annaExpansionPanelIconContainerVariants
+} from "./expansion-panel.anna.styles";
 import {
     expansionPanelBaseVariants as monaExpansionPanelBaseVariants,
     expansionPanelContentVariants as monaExpansionPanelContentVariants,
@@ -9,50 +16,30 @@ import {
     expansionPanelIconContainerVariants as monaExpansionPanelIconContainerVariants
 } from "./expansion-panel.mona.styles";
 
-export const expansionPanelBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaExpansionPanelBaseVariants;
-        default:
-            return monaExpansionPanelBaseVariants;
-    }
-};
+export const expansionPanelBaseThemeVariants = createThemeStrategy({
+    anna: annaExpansionPanelBaseVariants,
+    mona: monaExpansionPanelBaseVariants
+});
 
-export const expansionPanelHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaExpansionPanelHeaderVariants;
-        default:
-            return monaExpansionPanelHeaderVariants;
-    }
-};
+export const expansionPanelHeaderThemeVariants = createThemeStrategy({
+    anna: annaExpansionPanelHeaderVariants,
+    mona: monaExpansionPanelHeaderVariants
+});
 
-export const expansionPanelHeaderTitleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaExpansionPanelHeaderTitleVariants;
-        default:
-            return monaExpansionPanelHeaderTitleVariants;
-    }
-};
+export const expansionPanelHeaderTitleThemeVariants = createThemeStrategy({
+    anna: annaExpansionPanelHeaderTitleVariants,
+    mona: monaExpansionPanelHeaderTitleVariants
+});
 
-export const expansionPanelIconContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaExpansionPanelIconContainerVariants;
-        default:
-            return monaExpansionPanelIconContainerVariants;
-    }
-};
+export const expansionPanelIconContainerThemeVariants = createThemeStrategy({
+    anna: annaExpansionPanelIconContainerVariants,
+    mona: monaExpansionPanelIconContainerVariants
+});
 
-export const expansionPanelContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaExpansionPanelContentVariants;
-        default:
-            return monaExpansionPanelContentVariants;
-    }
-};
+export const expansionPanelContentThemeVariants = createThemeStrategy({
+    anna: annaExpansionPanelContentVariants,
+    mona: monaExpansionPanelContentVariants
+});
 type ExpansionPanelBaseVariantProps = VariantProps<ReturnType<typeof expansionPanelBaseThemeVariants>>;
 type ExpansionPanelBaseVariantInput = VariantInputs<ExpansionPanelBaseVariantProps>;
 type ExpansionPanelHeaderVariantProps = VariantProps<ReturnType<typeof expansionPanelHeaderThemeVariants>>;

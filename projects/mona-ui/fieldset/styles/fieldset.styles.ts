@@ -1,38 +1,31 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    fieldsetBaseVariants as annaFieldsetBaseVariants,
+    fieldsetLegendVariants as annaFieldsetLegendVariants,
+    fieldsetVariants as annaFieldsetVariants
+} from "./fieldset.anna.styles";
 import {
     fieldsetBaseVariants as monaFieldsetBaseVariants,
     fieldsetLegendVariants as monaFieldsetLegendVariants,
     fieldsetVariants as monaFieldsetVariants
 } from "./fieldset.mona.styles";
 
-export const fieldsetBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFieldsetBaseVariants;
-        default:
-            return monaFieldsetBaseVariants;
-    }
-};
+export const fieldsetBaseThemeVariants = createThemeStrategy({
+    anna: annaFieldsetBaseVariants,
+    mona: monaFieldsetBaseVariants
+});
 
-export const fieldsetThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFieldsetVariants;
-        default:
-            return monaFieldsetVariants;
-    }
-};
+export const fieldsetThemeVariants = createThemeStrategy({
+    anna: annaFieldsetVariants,
+    mona: monaFieldsetVariants
+});
 
-export const fieldsetLegendThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaFieldsetLegendVariants;
-        default:
-            return monaFieldsetLegendVariants;
-    }
-};
+export const fieldsetLegendThemeVariants = createThemeStrategy({
+    anna: annaFieldsetLegendVariants,
+    mona: monaFieldsetLegendVariants
+});
 
 type FieldsetBaseVariantProps = VariantProps<ReturnType<typeof fieldsetBaseThemeVariants>>;
 type FieldsetBaseVariantInput = VariantInputs<FieldsetBaseVariantProps>;

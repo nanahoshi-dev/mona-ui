@@ -1,28 +1,24 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    listBoxBaseVariants as annaListBoxBaseVariants,
+    listBoxToolbarVariants as annaListBoxToolbarVariants
+} from "./list-box.anna.styles";
 import {
     listBoxBaseVariants as monaListBoxBaseVariants,
     listBoxToolbarVariants as monaListBoxToolbarVariants
 } from "./list-box.mona.styles";
 
-export const listBoxBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaListBoxBaseVariants;
-        default:
-            return monaListBoxBaseVariants;
-    }
-};
+export const listBoxBaseThemeVariants = createThemeStrategy({
+    anna: annaListBoxBaseVariants,
+    mona: monaListBoxBaseVariants
+});
 
-export const listBoxToolbarThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaListBoxToolbarVariants;
-        default:
-            return monaListBoxToolbarVariants;
-    }
-};
+export const listBoxToolbarThemeVariants = createThemeStrategy({
+    anna: annaListBoxToolbarVariants,
+    mona: monaListBoxToolbarVariants
+});
 
 type ListBoxBaseVariantProps = VariantProps<ReturnType<typeof listBoxBaseThemeVariants>>;
 type ListBoxBaseVariantInputs = Omit<VariantInputs<ListBoxBaseVariantProps>, "direction" | "reversed">;

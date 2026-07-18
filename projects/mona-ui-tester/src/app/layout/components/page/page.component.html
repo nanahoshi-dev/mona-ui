@@ -51,13 +51,14 @@
 
             <!-- Header Action Items -->
             <div class="flex items-center gap-2 text-muted-foreground">
-                <button
-                    (click)="toggleTheme()"
-                    class="p-2 rounded-lg hover:bg-hover hover:text-foreground transition-colors cursor-pointer"
-                    [attr.aria-label]="themeToggleLabel()"
-                    type="button">
-                    <svg lucideMoon [size]="18"></svg>
-                </button>
+                <mona-dropdown-list
+                    aria-label="Theme"
+                    class="w-28"
+                    [data]="themeOptions"
+                    textField="text"
+                    [ngModel]="selectedTheme()"
+                    size="small"
+                    (ngModelChange)="onThemeChange($event)"></mona-dropdown-list>
                 <a
                     href="https://github.com/phrolovia/mona-ui"
                     target="_blank"

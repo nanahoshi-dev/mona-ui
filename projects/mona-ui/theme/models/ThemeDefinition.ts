@@ -31,5 +31,5 @@ export interface ThemeColorPaletteRegistration {
 }
 
 export type ThemeVariables = Readonly<Record<`--${string}`, string>>;
-export type ThemeDefinition = Readonly<Record<ThemeVariant, ThemeColors>>;
+export type ThemeDefinition = Readonly<Partial<Record<ThemeVariant, ThemeColors>>>;
 export type ThemeDefinitionRegistry = Readonly<Record<ThemeStyle, ThemeDefinition>>;

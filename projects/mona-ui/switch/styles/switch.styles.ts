@@ -1,38 +1,31 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    switchHandleVariants as annaSwitchHandleVariants,
+    switchLabelVariants as annaSwitchLabelVariants,
+    switchVariants as annaSwitchVariants
+} from "./switch.anna.styles";
 import {
     switchHandleVariants as monaSwitchHandleVariants,
     switchLabelVariants as monaSwitchLabelVariants,
     switchVariants as monaSwitchVariants
 } from "./switch.mona.styles";
 
-export const switchThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSwitchVariants;
-        default:
-            return monaSwitchVariants; // Default to Mona styles
-    }
-};
+export const switchThemeVariants = createThemeStrategy({
+    anna: annaSwitchVariants,
+    mona: monaSwitchVariants
+});
 
-export const switchHandleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSwitchHandleVariants;
-        default:
-            return monaSwitchHandleVariants; // Default to Mona styles
-    }
-};
+export const switchHandleThemeVariants = createThemeStrategy({
+    anna: annaSwitchHandleVariants,
+    mona: monaSwitchHandleVariants
+});
 
-export const switchLabelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSwitchLabelVariants;
-        default:
-            return monaSwitchLabelVariants; // Default to Mona styles
-    }
-};
+export const switchLabelThemeVariants = createThemeStrategy({
+    anna: annaSwitchLabelVariants,
+    mona: monaSwitchLabelVariants
+});
 
 type SwitchBaseVariantProps = VariantProps<ReturnType<typeof switchThemeVariants>>;
 type SwitchBaseVariantInput = VariantInputs<SwitchBaseVariantProps>;

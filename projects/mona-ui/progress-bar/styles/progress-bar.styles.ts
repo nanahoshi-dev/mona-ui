@@ -1,6 +1,12 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    progressBarBaseVariants as annaProgressBarBaseVariants,
+    progressBarIndeterminateVariants as annaProgressBarIndeterminateVariants,
+    progressBarLabelVariants as annaProgressBarLabelVariants,
+    progressBarTrackVariants as annaProgressBarTrackVariants
+} from "./progress-bar.anna.styles";
 import {
     progressBarBaseVariants as monaProgressBarBaseVariants,
     progressBarIndeterminateVariants as monaProgressBarIndeterminateVariants,
@@ -8,41 +14,25 @@ import {
     progressBarTrackVariants as monaProgressBarTrackVariants
 } from "./progress-bar.mona.styles";
 
-export const progressBarBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaProgressBarBaseVariants;
-        default:
-            return monaProgressBarBaseVariants;
-    }
-};
+export const progressBarBaseThemeVariants = createThemeStrategy({
+    anna: annaProgressBarBaseVariants,
+    mona: monaProgressBarBaseVariants
+});
 
-export const progressBarIndeterminateThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaProgressBarIndeterminateVariants;
-        default:
-            return monaProgressBarIndeterminateVariants;
-    }
-};
+export const progressBarIndeterminateThemeVariants = createThemeStrategy({
+    anna: annaProgressBarIndeterminateVariants,
+    mona: monaProgressBarIndeterminateVariants
+});
 
-export const progressBarLabelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaProgressBarLabelVariants;
-        default:
-            return monaProgressBarLabelVariants;
-    }
-};
+export const progressBarLabelThemeVariants = createThemeStrategy({
+    anna: annaProgressBarLabelVariants,
+    mona: monaProgressBarLabelVariants
+});
 
-export const progressBarTrackThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaProgressBarTrackVariants;
-        default:
-            return monaProgressBarTrackVariants;
-    }
-};
+export const progressBarTrackThemeVariants = createThemeStrategy({
+    anna: annaProgressBarTrackVariants,
+    mona: monaProgressBarTrackVariants
+});
 
 type ProgressBarBaseVariantProps = VariantProps<ReturnType<typeof progressBarBaseThemeVariants>>;
 type ProgressBarBaseVariantInput = VariantInputs<ProgressBarBaseVariantProps>;

@@ -11,11 +11,12 @@ import {
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { CheckboxDirective } from "@nanahoshi/mona-ui/check-box";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
 import { ListService } from "../../services/list.service";
-import { listGroupHeaderTextVariants, listItemBaseVariants } from "../../styles/list.styles";
+import { listGroupHeaderTextThemeVariants, listItemBaseThemeVariants } from "../../styles/list.styles";
 
 @Component({
     selector: "mona-list-item",
@@ -27,12 +28,13 @@ import { listGroupHeaderTextVariants, listItemBaseVariants } from "../../styles/
     }
 })
 export class ListItemComponent<TData> {
+    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
         const isHeader = this.isHeader();
         if (isHeader) {
             return ``;
         }
-        return listItemBaseVariants();
+        return listItemBaseThemeVariants(this.#themeService.theme())();
     });
     protected readonly checkboxes = computed(() => {
         return this.listService.selectableOptions().checkboxes && !this.isHeader();
@@ -55,7 +57,7 @@ export class ListItemComponent<TData> {
         const isHeader = this.isHeader();
         if (isHeader) {
             const hasTemplate = this.template() != null;
-            const classes = listGroupHeaderTextVariants({ hasTemplate });
+            const classes = listGroupHeaderTextThemeVariants(this.#themeService.theme())({ hasTemplate });
             return twMerge(classes);
         }
         return ``; // TODO

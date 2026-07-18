@@ -1,6 +1,13 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    colorGradientBaseVariants as annaColorGradientBaseVariants,
+    colorGradientHsvRectangleHandleVariants as annaColorGradientHsvRectangleHandleVariants,
+    colorGradientHsvRectangleVariants as annaColorGradientHsvRectangleVariants,
+    colorGradientPreviewVariants as annaColorGradientPreviewVariants,
+    colorGradientSliderHandleVariants as annaColorGradientSliderHandleVariants
+} from "./color-gradient.anna.styles";
 import {
     colorGradientBaseVariants as monaColorGradientBaseVariants,
     colorGradientHsvRectangleHandleVariants as monaColorGradientHsvRectangleHandleVariants,
@@ -9,50 +16,30 @@ import {
     colorGradientSliderHandleVariants as monaColorGradientSliderHandleVariants
 } from "./color-gradient.mona.styles";
 
-export const colorGradientBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorGradientBaseVariants;
-        default:
-            return monaColorGradientBaseVariants;
-    }
-};
+export const colorGradientBaseThemeVariants = createThemeStrategy({
+    anna: annaColorGradientBaseVariants,
+    mona: monaColorGradientBaseVariants
+});
 
-export const colorGradientHsvRectangleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorGradientHsvRectangleVariants;
-        default:
-            return monaColorGradientHsvRectangleVariants;
-    }
-};
+export const colorGradientHsvRectangleThemeVariants = createThemeStrategy({
+    anna: annaColorGradientHsvRectangleVariants,
+    mona: monaColorGradientHsvRectangleVariants
+});
 
-export const colorGradientHsvRectangleHandleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorGradientHsvRectangleHandleVariants;
-        default:
-            return monaColorGradientHsvRectangleHandleVariants;
-    }
-};
+export const colorGradientHsvRectangleHandleThemeVariants = createThemeStrategy({
+    anna: annaColorGradientHsvRectangleHandleVariants,
+    mona: monaColorGradientHsvRectangleHandleVariants
+});
 
-export const colorGradientPreviewThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorGradientPreviewVariants;
-        default:
-            return monaColorGradientPreviewVariants;
-    }
-};
+export const colorGradientPreviewThemeVariants = createThemeStrategy({
+    anna: annaColorGradientPreviewVariants,
+    mona: monaColorGradientPreviewVariants
+});
 
-export const colorGradientSliderHandleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaColorGradientSliderHandleVariants;
-        default:
-            return monaColorGradientSliderHandleVariants;
-    }
-};
+export const colorGradientSliderHandleThemeVariants = createThemeStrategy({
+    anna: annaColorGradientSliderHandleVariants,
+    mona: monaColorGradientSliderHandleVariants
+});
 
 type ColorGradientBaseVariantProps = VariantProps<ReturnType<typeof colorGradientBaseThemeVariants>>;
 type ColorGradientVaseVariantInput = VariantInputs<ColorGradientBaseVariantProps>;

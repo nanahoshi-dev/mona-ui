@@ -1,0 +1,242 @@
+import { cva } from "class-variance-authority";
+
+export const buttonVariants = cva(
+    `
+        inline-flex items-center justify-center gap-2
+        cursor-pointer whitespace-nowrap
+        text-sm font-medium
+        outline-none
+        transition-colors duration-100 ease-in-out
+    `,
+
+    {
+        variants: {
+            disabled: {
+                true: `
+                    pointer-events-none cursor-not-allowed select-none
+                    disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground
+                    disabled:shadow-none
+                `,
+                false: ""
+            },
+            iconOnly: {
+                true: "aspect-square",
+                false: "aspect-auto"
+            },
+            loading: {
+                true: "pointer-events-none",
+                false: ""
+            },
+            look: {
+                default: `
+                    bg-input-background text-foreground
+                    border border-input-border
+                    hover:bg-hover active:bg-active
+                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `,
+                primary: `
+                    bg-primary text-primary-foreground
+                    hover:bg-primary-hover active:bg-primary-active
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `,
+                success: `
+                    bg-success text-success-foreground
+                    hover:bg-success-hover
+                    active:bg-success-active
+                    focus-visible:ring-2 focus-visible:ring-success
+                `,
+                error: `
+                    bg-error text-error-foreground
+                    hover:bg-error-hover
+                    active:bg-error-active
+                    focus-visible:ring-2 focus-visible:ring-error
+                `,
+                warning: `
+                    bg-warning text-warning-foreground
+                    hover:bg-warning-hover
+                    active:bg-warning-active
+                    focus-visible:ring-2 focus-visible:ring-warning
+                `,
+                info: `
+                    bg-info text-info-foreground
+                    hover:bg-info-hover
+                    active:bg-info-active
+                    focus-visible:ring-2 focus-visible:ring-info
+                `,
+                outline: `
+                    bg-input-background text-foreground
+                    border border-input-border
+                    hover:bg-hover active:bg-active
+                    focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `,
+                secondary: `
+                    bg-secondary text-secondary-foreground
+                    hover:bg-secondary-hover
+                    active:bg-secondary-active
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `,
+                ghost: `
+                    bg-transparent text-foreground
+                    shadow-none
+                    hover:bg-hover active:bg-active
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `,
+                link: `
+                    bg-transparent text-foreground
+                    shadow-none
+                    underline-offset-4 hover:underline
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `,
+                clear: `
+                    bg-transparent
+                    border-0 shadow-none
+                    hover:bg-transparent active:bg-transparent
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator
+                `
+            },
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-[4px]",
+                medium: "rounded-[2px]",
+                none: "rounded-none",
+                small: "rounded-[1px]"
+            },
+            size: {
+                large: "h-8.5 px-6",
+                medium: "h-7.5 px-4",
+                small: "h-6.5 px-3 text-xs"
+            },
+            selected: {
+                true: ""
+            }
+        },
+        compoundVariants: [
+            {
+                look: "default",
+                selected: true,
+                class: `
+                    bg-primary text-primary-foreground
+                    hover:bg-primary-hover hover:text-primary-foreground
+                    active:bg-active active:text-foreground
+                `
+            },
+            {
+                look: "primary",
+                selected: true,
+                class: `
+                    bg-primary-selected text-primary-foreground
+                    hover:bg-primary-selected hover:text-primary-foreground
+                    active:bg-primary-active active:text-primary-foreground
+                `
+            },
+            {
+                look: "secondary",
+                selected: true,
+                class: `
+                    bg-secondary-selected text-secondary-foreground
+                    hover:bg-secondary-selected hover:text-secondary-foreground
+                    active:bg-secondary-active active:text-secondary-foreground
+                `
+            },
+            {
+                look: "success",
+                selected: true,
+                class: `
+                    bg-success-selected text-success-foreground
+                    hover:bg-success-selected hover:text-success-foreground
+                    active:bg-success-active active:text-success-foreground
+                `
+            },
+            {
+                look: "error",
+                selected: true,
+                class: `
+                    bg-error-selected text-error-foreground
+                    hover:bg-error-selected hover:text-error-foreground
+                    active:bg-error-active active:text-error-foreground
+                `
+            },
+            {
+                look: "warning",
+                selected: true,
+                class: `
+                    bg-warning-selected text-warning-foreground
+                    hover:bg-warning-selected hover:text-warning-foreground
+                    active:bg-warning-active active:text-warning-foreground
+                `
+            },
+            {
+                look: "info",
+                selected: true,
+                class: `
+                    bg-info-selected text-info-foreground
+                    hover:bg-info-selected hover:text-info-foreground
+                    active:bg-info-active active:text-info-foreground
+                `
+            },
+            {
+                look: "outline",
+                selected: true,
+                class: `
+                    bg-primary text-primary-foreground
+                    hover:bg-primary-hover hover:text-primary-foreground
+                    active:bg-active active:text-foreground
+                `
+            },
+            {
+                look: "ghost",
+                selected: true,
+                class: `
+                    bg-primary text-primary-foreground
+                    hover:bg-primary-hover hover:text-primary-foreground
+                    active:bg-active active:text-foreground
+                `
+            },
+            {
+                look: "link",
+                selected: true,
+                class: `
+                    bg-primary text-primary-foreground
+                    hover:bg-primary-hover hover:text-primary-foreground
+                    active:bg-active active:text-foreground
+                `
+            },
+            {
+                look: "clear",
+                selected: true,
+                class: `
+                    bg-transparent border-0
+                    hover:bg-transparent active:bg-transparent
+                `
+            },
+            {
+                disabled: true,
+                look: "ghost",
+                class: "disabled:bg-transparent disabled:text-disabled-foreground"
+            },
+            {
+                iconOnly: true,
+                loading: false,
+                size: "small",
+                class: "h-6.5 w-6.5 p-0"
+            },
+            {
+                iconOnly: true,
+                loading: false,
+                size: "medium",
+                class: "h-7.5 w-7.5 p-0"
+            },
+            {
+                iconOnly: true,
+                loading: false,
+                size: "large",
+                class: "h-8.5 w-8.5 p-0"
+            }
+        ],
+        defaultVariants: {
+            look: "default",
+            rounded: "medium",
+            size: "medium"
+        }
+    }
+);

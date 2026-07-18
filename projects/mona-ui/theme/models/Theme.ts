@@ -1,3 +1,3 @@
-export type ThemeStyle = "mona";
+export type ThemeStyle = "anna" | "mona";
 export type ThemeVariant = "light" | "dark";
-export type ThemeId = `${ThemeStyle}-${ThemeVariant}`;
+export type ThemeId = "anna-dark" | "mona-dark" | "mona-light";

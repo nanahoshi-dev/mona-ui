@@ -1,28 +1,24 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    indicatorIconHostVariants as annaIndicatorIconHostVariants,
+    indicatorIconSvgVariants as annaIndicatorIconSvgVariants
+} from "./indicator-icon.anna.styles";
 import {
     indicatorIconHostVariants as monaIndicatorIconHostVariants,
     indicatorIconSvgVariants as monaIndicatorIconSvgVariants
 } from "./indicator-icon.mona.styles";
 
-export const indicatorIconHostThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaIndicatorIconHostVariants;
-        default:
-            return monaIndicatorIconHostVariants;
-    }
-};
+export const indicatorIconHostThemeVariants = createThemeStrategy({
+    anna: annaIndicatorIconHostVariants,
+    mona: monaIndicatorIconHostVariants
+});
 
-export const indicatorIconSvgThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaIndicatorIconSvgVariants;
-        default:
-            return monaIndicatorIconSvgVariants;
-    }
-};
+export const indicatorIconSvgThemeVariants = createThemeStrategy({
+    anna: annaIndicatorIconSvgVariants,
+    mona: monaIndicatorIconSvgVariants
+});
 
 type IndicatorIconHostVariantProps = VariantProps<ReturnType<typeof indicatorIconHostThemeVariants>>;
 type IndicatorIconHostVariantInput = VariantInputs<IndicatorIconHostVariantProps>;

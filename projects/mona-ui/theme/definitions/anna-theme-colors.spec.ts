@@ -1,0 +1,66 @@
+import { wcagContrast } from "culori";
+import type { ThemeColors } from "../models/ThemeDefinition";
+import { annaThemeColors } from "./anna-theme-colors";
+import { monaThemeColors } from "./mona-theme-colors";
+
+describe("annaThemeColors", () => {
+    const colors = annaThemeColors.dark;
+
+    it("ships dark only and matches the complete Mona runtime color contract", () => {
+        expect(annaThemeColors).not.toHaveProperty("light");
+        expect(Object.keys(colors).sort()).toEqual(Object.keys(monaThemeColors.dark).sort());
+    });
+
+    it("owns the graphite canvas and violet identity independently", () => {
+        expect(colors).toEqual(
+            expect.objectContaining({
+                "--color-canvas": "#202123",
+                "--color-surface": "#1D1E20",
+                "--color-surface-muted": "#161718",
+                "--color-primary": "#583573",
+                "--color-selected": "var(--color-accent)",
+                "--color-focus-indicator": "#A174C2"
+            })
+        );
+        expect(colors).not.toBe(monaThemeColors.dark);
+    });
+
+    it("defines charts, scrollbars, compatibility aliases, and no tester-owned colors", () => {
+        expect(colors).toEqual(
+            expect.objectContaining({
+                "--color-background": "var(--color-surface)",
+                "--color-popover": "var(--color-surface-overlay)",
+                "--color-chart-5": "#FFDA6B",
+                "--color-scrollbar-track": "#161718"
+            })
+        );
+        expect(colors).not.toHaveProperty("--color-page-background");
+        expect(colors).not.toHaveProperty("--color-demo-background");
+    });
+
+    it("meets text and focus contrast targets", () => {
+        expectContrast(colors, "--color-foreground", "--color-surface", 4.5);
+        expectContrast(colors, "--color-muted-foreground", "--color-canvas", 4.5);
+        expectContrast(colors, "--color-input-foreground", "--color-input-background", 4.5);
+        expectContrast(colors, "--color-focus-indicator", "--color-input-background", 3);
+        expectContrast(colors, "--color-disabled-foreground", "--color-disabled-background", 4.5);
+        expectContrast(colors, "--color-primary-foreground", "--color-primary", 4.5);
+    });
+});
+
+function expectContrast(
+    colors: ThemeColors,
+    foreground: `--color-${string}`,
+    background: `--color-${string}`,
+    minimum: number
+): void {
+    expect(wcagContrast(resolveColor(colors, foreground), resolveColor(colors, background))).toBeGreaterThanOrEqual(
+        minimum
+    );
+}
+
+function resolveColor(colors: ThemeColors, name: `--color-${string}`): string {
+    const value = colors[name];
+    const alias = /^var\((--color-[^)]+)\)$/.exec(value);
+    return alias?.[1] ? resolveColor(colors, alias[1] as `--color-${string}`) : value;
+}

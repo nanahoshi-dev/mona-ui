@@ -1,38 +1,31 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    splitterBaseVariants as annaSplitterBaseVariants,
+    splitterResizerHandleVariants as annaSplitterResizerHandleVariants,
+    splitterResizerVariants as annaSplitterResizerVariants
+} from "./splitter.anna.styles";
 import {
     splitterBaseVariants as monaSplitterBaseVariants,
     splitterResizerHandleVariants as monaSplitterResizerHandleVariants,
     splitterResizerVariants as monaSplitterResizerVariants
 } from "./splitter.mona.styles";
 
-export const splitterBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSplitterBaseVariants;
-        default:
-            return monaSplitterBaseVariants;
-    }
-};
+export const splitterBaseThemeVariants = createThemeStrategy({
+    anna: annaSplitterBaseVariants,
+    mona: monaSplitterBaseVariants
+});
 
-export const splitterResizerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSplitterResizerVariants;
-        default:
-            return monaSplitterResizerVariants;
-    }
-};
+export const splitterResizerThemeVariants = createThemeStrategy({
+    anna: annaSplitterResizerVariants,
+    mona: monaSplitterResizerVariants
+});
 
-export const splitterResizerHandleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSplitterResizerHandleVariants;
-        default:
-            return monaSplitterResizerHandleVariants;
-    }
-};
+export const splitterResizerHandleThemeVariants = createThemeStrategy({
+    anna: annaSplitterResizerHandleVariants,
+    mona: monaSplitterResizerHandleVariants
+});
 
 type SplitterBaseVariantProps = VariantProps<ReturnType<typeof splitterBaseThemeVariants>>;
 type SplitterBaseVariantInput = VariantInputs<SplitterBaseVariantProps>;

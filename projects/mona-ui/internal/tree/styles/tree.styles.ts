@@ -1,4 +1,15 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import {
+    subTreeListItemVariants as annaSubTreeListItemVariants,
+    subTreeListVariants as annaSubTreeListVariants,
+    treeBaseVariants as annaTreeBaseVariants,
+    treeDropHintBaseVariants as annaTreeDropHintBaseVariants,
+    treeDropHintIconVariants as annaTreeDropHintIconVariants,
+    treeNodeBaseVariants as annaTreeNodeBaseVariants,
+    treeNodeContainerVariants as annaTreeNodeContainerVariants,
+    treeNodeDraggingVariants as annaTreeNodeDraggingVariants,
+    treeNodeExpanderVariants as annaTreeNodeExpanderVariants
+} from "./tree.anna.styles";
 import {
     subTreeListItemVariants as monaSubTreeListItemVariants,
     subTreeListVariants as monaSubTreeListVariants,
@@ -11,83 +22,47 @@ import {
     treeNodeExpanderVariants as monaTreeNodeExpanderVariants
 } from "./tree.mona.styles";
 
-export const subTreeListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSubTreeListVariants;
-        default:
-            return monaSubTreeListVariants;
-    }
-};
+export const subTreeListThemeVariants = createThemeStrategy({
+    anna: annaSubTreeListVariants,
+    mona: monaSubTreeListVariants
+});
 
-export const subTreeListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSubTreeListItemVariants;
-        default:
-            return monaSubTreeListItemVariants;
-    }
-};
+export const subTreeListItemThemeVariants = createThemeStrategy({
+    anna: annaSubTreeListItemVariants,
+    mona: monaSubTreeListItemVariants
+});
 
-export const treeBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeBaseVariants;
-        default:
-            return monaTreeBaseVariants;
-    }
-};
+export const treeBaseThemeVariants = createThemeStrategy({
+    anna: annaTreeBaseVariants,
+    mona: monaTreeBaseVariants
+});
 
-export const treeDropHintBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeDropHintBaseVariants;
-        default:
-            return monaTreeDropHintBaseVariants;
-    }
-};
+export const treeDropHintBaseThemeVariants = createThemeStrategy({
+    anna: annaTreeDropHintBaseVariants,
+    mona: monaTreeDropHintBaseVariants
+});
 
-export const treeDropHintIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeDropHintIconVariants;
-        default:
-            return monaTreeDropHintIconVariants;
-    }
-};
+export const treeDropHintIconThemeVariants = createThemeStrategy({
+    anna: annaTreeDropHintIconVariants,
+    mona: monaTreeDropHintIconVariants
+});
 
-export const treeNodeBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeBaseVariants;
-        default:
-            return monaTreeNodeBaseVariants;
-    }
-};
+export const treeNodeBaseThemeVariants = createThemeStrategy({
+    anna: annaTreeNodeBaseVariants,
+    mona: monaTreeNodeBaseVariants
+});
 
-export const treeNodeContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeContainerVariants;
-        default:
-            return monaTreeNodeContainerVariants;
-    }
-};
+export const treeNodeContainerThemeVariants = createThemeStrategy({
+    anna: annaTreeNodeContainerVariants,
+    mona: monaTreeNodeContainerVariants
+});
 
-export const treeNodeDraggingThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeDraggingVariants;
-        default:
-            return monaTreeNodeDraggingVariants;
-    }
-};
+export const treeNodeDraggingThemeVariants = createThemeStrategy({
+    anna: annaTreeNodeDraggingVariants,
+    mona: monaTreeNodeDraggingVariants
+});
 
-export const treeNodeExpanderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeExpanderVariants;
-        default:
-            return monaTreeNodeExpanderVariants;
-    }
-};
+export const treeNodeExpanderThemeVariants = createThemeStrategy({
+    anna: annaTreeNodeExpanderVariants,
+    mona: monaTreeNodeExpanderVariants
+});

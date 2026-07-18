@@ -1,6 +1,14 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    popupMenuBaseVariants as annaPopupMenuBaseVariants,
+    popupMenuContainerVariants as annaPopupMenuContainerVariants,
+    popupMenuGroupHeaderVariants as annaPopupMenuGroupHeaderVariants,
+    popupMenuIconContainerVariants as annaPopupMenuIconContainerVariants,
+    popupMenuItemVariants as annaPopupMenuItemVariants,
+    popupMenuLinkVariants as annaPopupMenuLinkVariants
+} from "./popup-menu.anna.styles";
 import {
     popupMenuBaseVariants as monaPopupMenuBaseVariants,
     popupMenuContainerVariants as monaPopupMenuContainerVariants,
@@ -10,59 +18,35 @@ import {
     popupMenuLinkVariants as monaPopupMenuLinkVariants
 } from "./popup-menu.mona.styles";
 
-export const popupMenuBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopupMenuBaseVariants;
-        default:
-            return monaPopupMenuBaseVariants;
-    }
-};
+export const popupMenuBaseThemeVariants = createThemeStrategy({
+    anna: annaPopupMenuBaseVariants,
+    mona: monaPopupMenuBaseVariants
+});
 
-export const popupMenuContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopupMenuContainerVariants;
-        default:
-            return monaPopupMenuContainerVariants;
-    }
-};
+export const popupMenuContainerThemeVariants = createThemeStrategy({
+    anna: annaPopupMenuContainerVariants,
+    mona: monaPopupMenuContainerVariants
+});
 
-export const popupMenuGroupHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopupMenuGroupHeaderVariants;
-        default:
-            return monaPopupMenuGroupHeaderVariants;
-    }
-};
+export const popupMenuGroupHeaderThemeVariants = createThemeStrategy({
+    anna: annaPopupMenuGroupHeaderVariants,
+    mona: monaPopupMenuGroupHeaderVariants
+});
 
-export const popupMenuIconContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopupMenuIconContainerVariants;
-        default:
-            return monaPopupMenuIconContainerVariants;
-    }
-};
+export const popupMenuIconContainerThemeVariants = createThemeStrategy({
+    anna: annaPopupMenuIconContainerVariants,
+    mona: monaPopupMenuIconContainerVariants
+});
 
-export const popupMenuItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopupMenuItemVariants;
-        default:
-            return monaPopupMenuItemVariants;
-    }
-};
+export const popupMenuItemThemeVariants = createThemeStrategy({
+    anna: annaPopupMenuItemVariants,
+    mona: monaPopupMenuItemVariants
+});
 
-export const popupMenuLinkThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPopupMenuLinkVariants;
-        default:
-            return monaPopupMenuLinkVariants;
-    }
-};
+export const popupMenuLinkThemeVariants = createThemeStrategy({
+    anna: annaPopupMenuLinkVariants,
+    mona: monaPopupMenuLinkVariants
+});
 
 type PopupMenuBaseVariantProps = VariantProps<ReturnType<typeof popupMenuBaseThemeVariants>>;
 type PopupMenuContainerVariantProps = VariantProps<ReturnType<typeof popupMenuContainerThemeVariants>>;

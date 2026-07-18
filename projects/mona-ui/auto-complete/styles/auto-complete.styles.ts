@@ -1,38 +1,31 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    autoCompleteAffixContainerVariants as annaAutoCompleteAffixContainerVariants,
+    autoCompleteBaseVariants as annaAutoCompleteBaseVariants,
+    autoCompleteTextInputVariants as annaAutoCompleteTextInputVariants
+} from "./auto-complete.anna.styles";
 import {
     autoCompleteAffixContainerVariants as monaAutoCompleteAffixContainerVariants,
     autoCompleteBaseVariants as monaAutoCompleteBaseVariants,
     autoCompleteTextInputVariants as monaAutoCompleteTextInputVariants
 } from "./auto-complete.mona.styles";
 
-export const autoCompleteBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompleteBaseVariants;
-        default:
-            return monaAutoCompleteBaseVariants;
-    }
-};
+export const autoCompleteBaseThemeVariants = createThemeStrategy({
+    anna: annaAutoCompleteBaseVariants,
+    mona: monaAutoCompleteBaseVariants
+});
 
-export const autoCompleteTextInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompleteTextInputVariants;
-        default:
-            return monaAutoCompleteTextInputVariants;
-    }
-};
+export const autoCompleteTextInputThemeVariants = createThemeStrategy({
+    anna: annaAutoCompleteTextInputVariants,
+    mona: monaAutoCompleteTextInputVariants
+});
 
-export const autoCompleteAffixContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaAutoCompleteAffixContainerVariants;
-        default:
-            return monaAutoCompleteAffixContainerVariants;
-    }
-};
+export const autoCompleteAffixContainerThemeVariants = createThemeStrategy({
+    anna: annaAutoCompleteAffixContainerVariants,
+    mona: monaAutoCompleteAffixContainerVariants
+});
 
 type AutoCompleteBaseVariantProps = VariantProps<ReturnType<typeof autoCompleteBaseThemeVariants>>;
 type AutoCompleteBaseVariantInput = VariantInputs<AutoCompleteBaseVariantProps>;

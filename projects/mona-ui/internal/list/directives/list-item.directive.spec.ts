@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";
-import { listItemContentVariants } from "../styles/list.styles";
+import { listItemContentThemeVariants } from "../styles/list.styles";
 import { ListItemDirective } from "./list-item.directive";
 
 @Component({
@@ -41,7 +41,7 @@ describe("ListItemDirective", () => {
     });
 
     it("uses neutral persistent and highlighted states", () => {
-        const classes = listItemContentVariants({
+        const classes = listItemContentThemeVariants("mona")({
             checkboxes: false,
             disabled: false,
             highlighted: true,

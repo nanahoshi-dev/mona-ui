@@ -1,6 +1,20 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    dialogBaseVariants as annaDialogBaseVariants,
+    dialogBodyVariants as annaDialogBodyVariants,
+    dialogCloseButtonContainerVariants as annaDialogCloseButtonContainerVariants,
+    dialogContentContainerVariants as annaDialogContentContainerVariants,
+    dialogContentVariants as annaDialogContentVariants,
+    dialogDescriptionVariants as annaDialogDescriptionVariants,
+    dialogFooterVariants as annaDialogFooterVariants,
+    dialogHeaderVariants as annaDialogHeaderVariants,
+    dialogIconContainerVariants as annaDialogIconContainerVariants,
+    dialogIconVariants as annaDialogIconVariants,
+    dialogTitleContainerVariants as annaDialogTitleContainerVariants,
+    dialogTitleVariants as annaDialogTitleVariants
+} from "./dialog.anna.styles";
 import {
     dialogBaseVariants as monaDialogBaseVariants,
     dialogBodyVariants as monaDialogBodyVariants,
@@ -16,113 +30,65 @@ import {
     dialogTitleVariants as monaDialogTitleVariants
 } from "./dialog.mona.styles";
 
-export const dialogBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogBaseVariants;
-        default:
-            return monaDialogBaseVariants;
-    }
-};
+export const dialogBaseThemeVariants = createThemeStrategy({
+    anna: annaDialogBaseVariants,
+    mona: monaDialogBaseVariants
+});
 
-export const dialogIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogIconVariants;
-        default:
-            return monaDialogIconVariants;
-    }
-};
+export const dialogIconThemeVariants = createThemeStrategy({
+    anna: annaDialogIconVariants,
+    mona: monaDialogIconVariants
+});
 
-export const dialogBodyThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogBodyVariants;
-        default:
-            return monaDialogBodyVariants;
-    }
-};
+export const dialogBodyThemeVariants = createThemeStrategy({
+    anna: annaDialogBodyVariants,
+    mona: monaDialogBodyVariants
+});
 
-export const dialogContentContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogContentContainerVariants;
-        default:
-            return monaDialogContentContainerVariants;
-    }
-};
+export const dialogContentContainerThemeVariants = createThemeStrategy({
+    anna: annaDialogContentContainerVariants,
+    mona: monaDialogContentContainerVariants
+});
 
-export const dialogHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogHeaderVariants;
-        default:
-            return monaDialogHeaderVariants;
-    }
-};
+export const dialogHeaderThemeVariants = createThemeStrategy({
+    anna: annaDialogHeaderVariants,
+    mona: monaDialogHeaderVariants
+});
 
-export const dialogIconContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogIconContainerVariants;
-        default:
-            return monaDialogIconContainerVariants;
-    }
-};
+export const dialogIconContainerThemeVariants = createThemeStrategy({
+    anna: annaDialogIconContainerVariants,
+    mona: monaDialogIconContainerVariants
+});
 
-export const dialogTitleContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogTitleContainerVariants;
-        default:
-            return monaDialogTitleContainerVariants;
-    }
-};
+export const dialogTitleContainerThemeVariants = createThemeStrategy({
+    anna: annaDialogTitleContainerVariants,
+    mona: monaDialogTitleContainerVariants
+});
 
-export const dialogCloseButtonContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogCloseButtonContainerVariants;
-        default:
-            return monaDialogCloseButtonContainerVariants;
-    }
-};
+export const dialogCloseButtonContainerThemeVariants = createThemeStrategy({
+    anna: annaDialogCloseButtonContainerVariants,
+    mona: monaDialogCloseButtonContainerVariants
+});
 
-export const dialogTitleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogTitleVariants;
-        default:
-            return monaDialogTitleVariants;
-    }
-};
+export const dialogTitleThemeVariants = createThemeStrategy({
+    anna: annaDialogTitleVariants,
+    mona: monaDialogTitleVariants
+});
 
-export const dialogDescriptionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogDescriptionVariants;
-        default:
-            return monaDialogDescriptionVariants;
-    }
-};
+export const dialogDescriptionThemeVariants = createThemeStrategy({
+    anna: annaDialogDescriptionVariants,
+    mona: monaDialogDescriptionVariants
+});
 
-export const dialogContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogContentVariants;
-        default:
-            return monaDialogContentVariants;
-    }
-};
+export const dialogContentThemeVariants = createThemeStrategy({
+    anna: annaDialogContentVariants,
+    mona: monaDialogContentVariants
+});
 
-export const dialogFooterThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDialogFooterVariants;
-        default:
-            return monaDialogFooterVariants;
-    }
-};
+export const dialogFooterThemeVariants = createThemeStrategy({
+    anna: annaDialogFooterVariants,
+    mona: monaDialogFooterVariants
+});
 
 type DialogBaseVariantProps = VariantProps<ReturnType<typeof dialogBaseThemeVariants>>;
 type DialogBaseVariantInput = VariantInputs<DialogBaseVariantProps>;

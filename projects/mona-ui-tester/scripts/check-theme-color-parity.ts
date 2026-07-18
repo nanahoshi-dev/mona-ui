@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { converter, parse } from "culori";
+import { annaThemeColors } from "../../mona-ui/theme/definitions/anna-theme-colors";
 import { monaThemeColors } from "../../mona-ui/theme/definitions/mona-theme-colors";
 
 const stylesPath = resolve("projects/mona-ui-tester/src/styles.css");
@@ -17,6 +18,7 @@ const tailwindColors = Object.fromEntries(
 const testerOwnedColors = new Set(["--color-page-background", "--color-demo-background"]);
 const runtimeColors = monaThemeColors.light;
 const runtimeKeys = Object.keys(runtimeColors).sort();
+const annaRuntimeKeys = Object.keys(annaThemeColors.dark).sort();
 const tailwindKeys = Object.keys(tailwindColors)
     .filter(key => !testerOwnedColors.has(key))
     .sort();
@@ -30,6 +32,15 @@ if (JSON.stringify(tailwindKeys) !== JSON.stringify(runtimeKeys)) {
     );
 }
 
+if (JSON.stringify(annaRuntimeKeys) !== JSON.stringify(runtimeKeys)) {
+    const missing = runtimeKeys.filter(key => !annaRuntimeKeys.includes(key));
+    const unexpected = annaRuntimeKeys.filter(key => !runtimeKeys.includes(key));
+    throw new Error(
+        `Anna Dark does not match the built-in runtime color contract. Missing: ${missing.join(", ") || "none"}. ` +
+            `Unexpected: ${unexpected.join(", ") || "none"}.`
+    );
+}
+
 for (const [name, value] of Object.entries(runtimeColors)) {
     if (!colorsEqual(tailwindColors[name], value)) {
         throw new Error(
@@ -38,7 +49,7 @@ for (const [name, value] of Object.entries(runtimeColors)) {
     }
 }
 
-console.log(`Theme color parity verified for ${runtimeKeys.length} runtime variables.`);
+console.log(`Theme color parity verified for Mona Light and Anna Dark across ${runtimeKeys.length} variables.`);
 
 function colorsEqual(left: string | undefined, right: string): boolean {
     if (!left) {

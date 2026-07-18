@@ -1,6 +1,12 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    multiSelectAffixContainerVariants as annaMultiSelectAffixContainerVariants,
+    multiSelectBaseVariants as annaMultiSelectBaseVariants,
+    multiSelectIndicatorContainerVariants as annaMultiSelectIndicatorContainerVariants,
+    multiSelectItemContainerVariants as annaMultiSelectItemContainerVariants
+} from "./multi-select.anna.styles";
 import {
     multiSelectAffixContainerVariants as monaMultiSelectAffixContainerVariants,
     multiSelectBaseVariants as monaMultiSelectBaseVariants,
@@ -8,41 +14,25 @@ import {
     multiSelectItemContainerVariants as monaMultiSelectItemContainerVariants
 } from "./multi-select.mona.styles";
 
-export const multiSelectBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMultiSelectBaseVariants;
-        default:
-            return monaMultiSelectBaseVariants;
-    }
-};
+export const multiSelectBaseThemeVariants = createThemeStrategy({
+    anna: annaMultiSelectBaseVariants,
+    mona: monaMultiSelectBaseVariants
+});
 
-export const multiSelectItemContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMultiSelectItemContainerVariants;
-        default:
-            return monaMultiSelectItemContainerVariants;
-    }
-};
+export const multiSelectItemContainerThemeVariants = createThemeStrategy({
+    anna: annaMultiSelectItemContainerVariants,
+    mona: monaMultiSelectItemContainerVariants
+});
 
-export const multiSelectAffixContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMultiSelectAffixContainerVariants;
-        default:
-            return monaMultiSelectAffixContainerVariants;
-    }
-};
+export const multiSelectAffixContainerThemeVariants = createThemeStrategy({
+    anna: annaMultiSelectAffixContainerVariants,
+    mona: monaMultiSelectAffixContainerVariants
+});
 
-export const multiSelectIndicatorContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaMultiSelectIndicatorContainerVariants;
-        default:
-            return monaMultiSelectIndicatorContainerVariants;
-    }
-};
+export const multiSelectIndicatorContainerThemeVariants = createThemeStrategy({
+    anna: annaMultiSelectIndicatorContainerVariants,
+    mona: monaMultiSelectIndicatorContainerVariants
+});
 
 type MultiSelectBaseVariantProps = VariantProps<ReturnType<typeof multiSelectBaseThemeVariants>>;
 type MultiSelectBaseVariantInput = VariantInputs<MultiSelectBaseVariantProps>;

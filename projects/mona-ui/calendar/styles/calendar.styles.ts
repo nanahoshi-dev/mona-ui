@@ -1,6 +1,17 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
+import {
+    calendarBaseVariants as annaCalendarBaseVariants,
+    calendarDecadeViewCellVariants as annaCalendarDecadeViewCellVariants,
+    calendarDecadeViewGridVariants as annaCalendarDecadeViewGridVariants,
+    calendarHeaderVariants as annaCalendarHeaderVariants,
+    calendarMonthViewDayVariants as annaCalendarMonthViewDayVariants,
+    calendarMonthViewGridHeaderVariants as annaCalendarMonthViewGridHeaderVariants,
+    calendarMonthViewGridVariants as annaCalendarMonthViewGridVariants,
+    calendarYearViewCellVariants as annaCalendarYearViewCellVariants,
+    calendarYearViewGridVariants as annaCalendarYearViewGridVariants
+} from "./calendar.anna.styles";
 import {
     calendarBaseVariants as monaCalendarBaseVariants,
     calendarDecadeViewCellVariants as monaCalendarDecadeViewCellVariants,
@@ -13,86 +24,50 @@ import {
     calendarYearViewGridVariants as monaCalendarYearViewGridVariants
 } from "./calendar.mona.styles";
 
-export const calendarBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarBaseVariants;
-        default:
-            return monaCalendarBaseVariants;
-    }
-};
+export const calendarBaseThemeVariants = createThemeStrategy({
+    anna: annaCalendarBaseVariants,
+    mona: monaCalendarBaseVariants
+});
 
-export const calendarHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarHeaderVariants;
-        default:
-            return monaCalendarHeaderVariants;
-    }
-};
+export const calendarHeaderThemeVariants = createThemeStrategy({
+    anna: annaCalendarHeaderVariants,
+    mona: monaCalendarHeaderVariants
+});
 
-export const calendarDecadeViewGridThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarDecadeViewGridVariants;
-        default:
-            return monaCalendarDecadeViewGridVariants;
-    }
-};
+export const calendarDecadeViewGridThemeVariants = createThemeStrategy({
+    anna: annaCalendarDecadeViewGridVariants,
+    mona: monaCalendarDecadeViewGridVariants
+});
 
-export const calendarDecadeViewCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarDecadeViewCellVariants;
-        default:
-            return monaCalendarDecadeViewCellVariants;
-    }
-};
+export const calendarDecadeViewCellThemeVariants = createThemeStrategy({
+    anna: annaCalendarDecadeViewCellVariants,
+    mona: monaCalendarDecadeViewCellVariants
+});
 
-export const calendarMonthViewDayThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarMonthViewDayVariants;
-        default:
-            return monaCalendarMonthViewDayVariants;
-    }
-};
+export const calendarMonthViewDayThemeVariants = createThemeStrategy({
+    anna: annaCalendarMonthViewDayVariants,
+    mona: monaCalendarMonthViewDayVariants
+});
 
-export const calendarMonthViewGridThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarMonthViewGridVariants;
-        default:
-            return monaCalendarMonthViewGridVariants;
-    }
-};
+export const calendarMonthViewGridThemeVariants = createThemeStrategy({
+    anna: annaCalendarMonthViewGridVariants,
+    mona: monaCalendarMonthViewGridVariants
+});
 
-export const calendarMonthViewGridHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarMonthViewGridHeaderVariants;
-        default:
-            return monaCalendarMonthViewGridHeaderVariants;
-    }
-};
+export const calendarMonthViewGridHeaderThemeVariants = createThemeStrategy({
+    anna: annaCalendarMonthViewGridHeaderVariants,
+    mona: monaCalendarMonthViewGridHeaderVariants
+});
 
-export const calendarYearViewGridThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarYearViewGridVariants;
-        default:
-            return monaCalendarYearViewGridVariants;
-    }
-};
+export const calendarYearViewGridThemeVariants = createThemeStrategy({
+    anna: annaCalendarYearViewGridVariants,
+    mona: monaCalendarYearViewGridVariants
+});
 
-export const calendarYearViewCellThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaCalendarYearViewCellVariants;
-        default:
-            return monaCalendarYearViewCellVariants;
-    }
-};
+export const calendarYearViewCellThemeVariants = createThemeStrategy({
+    anna: annaCalendarYearViewCellVariants,
+    mona: monaCalendarYearViewCellVariants
+});
 
 type CalendarBaseVariantProps = VariantProps<ReturnType<typeof calendarBaseThemeVariants>>;
 type CalendarBaseVariantInput = VariantInputs<CalendarBaseVariantProps>;

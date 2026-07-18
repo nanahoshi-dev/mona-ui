@@ -5,7 +5,8 @@ import { LucideCode } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
-import { type ThemeId, ThemeService, ThemeStyle, type ThemeVariant } from "@nanahoshi/mona-ui/theme";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
 import { ComponentConfig } from "../../utils/componentConfig";
 import { CodeViewerComponent } from "../code-viewer/code-viewer.component";
@@ -77,14 +78,9 @@ export class DemoContainerComponent<TComponent> {
     protected readonly customColor = signal<string | null>(null);
     protected readonly direction = signal<"ltr" | "rtl">("ltr");
     protected readonly selectedTheme = computed(() => {
-        return this.themeDropdownData().find(theme => theme.id === this.#themeService.themeId());
+        return this.themeDropdownData.find(theme => theme.id === this.#themeService.themeId());
     });
-    protected readonly themeDropdownData = signal<
-        Array<{ text: string; theme: ThemeStyle; variant: ThemeVariant; id: ThemeId }>
-    >([
-        { text: "Mona Light", theme: "mona", variant: "light", id: "mona-light" },
-        { text: "Mona Dark", theme: "mona", variant: "dark", id: "mona-dark" }
-    ]);
+    protected readonly themeDropdownData = THEME_OPTIONS;
     public readonly config = input.required<ComponentConfig<TComponent>>();
     public readonly metadata = input.required<ComponentMetadata>();
     public readonly valueChange = output<Record<string, unknown>>();
@@ -99,7 +95,7 @@ export class DemoContainerComponent<TComponent> {
         this.#directionality.change.emit(direction);
     }
 
-    protected onThemeChange(item: { text: string; theme: ThemeStyle; variant: ThemeVariant; id: ThemeId }): void {
+    protected onThemeChange(item: ThemeOption): void {
         this.#themeService.setThemeId(item.id);
     }
 }

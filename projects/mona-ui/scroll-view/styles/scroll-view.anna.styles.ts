@@ -1,0 +1,133 @@
+import { cva } from "class-variance-authority";
+
+export const scrollViewBaseVariants = cva(
+    `
+        relative block h-full w-full overflow-hidden
+        bg-surface outline-none
+        border border-border-subtle
+        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-[1px]",
+                medium: "rounded-[2px]",
+                large: "rounded-[4px]",
+                none: "rounded-none"
+            }
+        }
+    }
+);
+
+export const scrollViewContentVariants = cva(
+    `
+        absolute inset-0 overflow-hidden
+    `
+);
+
+export const scrollViewListVariants = cva(
+    `
+        relative h-full list-none
+        [&_li]:absolute
+        [&_li]:inset-0
+        [&_li]:outline-none
+    `
+);
+
+export const scrollViewArrowVariants = cva(
+    `
+        absolute top-0 bottom-0 flex items-center justify-center
+        px-1
+        cursor-pointer select-none
+        bg-surface-overlay/65 text-foreground
+        transition-colors duration-150 ease-out
+        hover:bg-hover/90 active:bg-active/90
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        [&_svg]:stroke-current
+    `,
+    {
+        variants: {
+            hidden: {
+                true: "hidden",
+                false: ""
+            },
+            left: {
+                true: "left-0",
+                false: ""
+            },
+            right: {
+                true: "right-0",
+                false: ""
+            }
+        }
+    }
+);
+
+export const scrollViewPagerVariants = cva(
+    `
+        absolute right-0 bottom-0 left-0 flex items-center justify-center
+    `,
+    {
+        variants: {
+            pagerOverlay: {
+                dark: "bg-canvas/85 border-0 border-t border-border-subtle",
+                light: "bg-surface-overlay/85 border-0 border-t border-border-subtle",
+                none: ""
+            }
+        }
+    }
+);
+
+export const scrollViewPagerListContainerVariants = cva(
+    `
+        flex flex-1 items-center justify-center overflow-hidden
+    `
+);
+
+export const scrollViewPagerListVariants = cva(
+    `
+        flex flex-nowrap items-center gap-2
+        overflow-hidden list-none
+        px-1 py-3
+    `
+);
+
+export const scrollViewPagerListItemVariants = cva(
+    `
+        h-3 w-3 flex-none basis-3
+        cursor-pointer
+        bg-muted-foreground/40 border border-border-subtle
+        transition-colors
+        not-last:me-3
+        hover:bg-muted-foreground/60 active:bg-foreground
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-indicator
+    `,
+    {
+        variants: {
+            active: {
+                true: "!bg-foreground hover:!bg-foreground",
+                false: ""
+            },
+            pagerRounded: {
+                small: "rounded-[1px]",
+                medium: "rounded-[2px]",
+                large: "rounded-[4px]",
+                full: "rounded-full",
+                none: "rounded-none"
+            }
+        }
+    }
+);
+
+export const scrollViewPagerArrowVariants = cva(
+    `
+        flex items-center justify-center
+        p-2
+        cursor-pointer select-none
+        font-medium text-muted-foreground
+        transition-colors duration-150 ease-out
+        hover:bg-hover hover:text-foreground active:bg-active
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator
+        [&_svg]:stroke-current
+    `
+);

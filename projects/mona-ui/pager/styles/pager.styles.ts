@@ -1,6 +1,13 @@
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import type { VariantProps } from "class-variance-authority";
+import {
+    pagerBaseVariants as annaPagerBaseVariants,
+    pagerInfoVariants as annaPagerInfoVariants,
+    pagerInputVariants as annaPagerInputVariants,
+    pagerListItemVariants as annaPagerListItemVariants,
+    pagerListVariants as annaPagerListVariants
+} from "./pager.anna.styles";
 import {
     pagerBaseVariants as monaPagerBaseVariants,
     pagerInfoVariants as monaPagerInfoVariants,
@@ -9,50 +16,30 @@ import {
     pagerListVariants as monaPagerListVariants
 } from "./pager.mona.styles";
 
-export const pagerBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPagerBaseVariants;
-        default:
-            return monaPagerBaseVariants;
-    }
-};
+export const pagerBaseThemeVariants = createThemeStrategy({
+    anna: annaPagerBaseVariants,
+    mona: monaPagerBaseVariants
+});
 
-export const pagerInfoThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPagerInfoVariants;
-        default:
-            return monaPagerInfoVariants;
-    }
-};
+export const pagerInfoThemeVariants = createThemeStrategy({
+    anna: annaPagerInfoVariants,
+    mona: monaPagerInfoVariants
+});
 
-export const pagerInputThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPagerInputVariants;
-        default:
-            return monaPagerInputVariants;
-    }
-};
+export const pagerInputThemeVariants = createThemeStrategy({
+    anna: annaPagerInputVariants,
+    mona: monaPagerInputVariants
+});
 
-export const pagerListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPagerListVariants;
-        default:
-            return monaPagerListVariants;
-    }
-};
+export const pagerListThemeVariants = createThemeStrategy({
+    anna: annaPagerListVariants,
+    mona: monaPagerListVariants
+});
 
-export const pagerListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaPagerListItemVariants;
-        default:
-            return monaPagerListItemVariants;
-    }
-};
+export const pagerListItemThemeVariants = createThemeStrategy({
+    anna: annaPagerListItemVariants,
+    mona: monaPagerListItemVariants
+});
 
 type PagerBaseVariantProps = VariantProps<ReturnType<typeof pagerBaseThemeVariants>>;
 type PagerBaseVariantInputs = VariantInputs<PagerBaseVariantProps>;

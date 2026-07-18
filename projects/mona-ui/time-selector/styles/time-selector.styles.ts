@@ -1,6 +1,15 @@
 import { VariantProps } from "class-variance-authority";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import {
+    timeSelectorBaseVariants as annaTimeSelectorBaseVariants,
+    timeSelectorFooterVariants as annaTimeSelectorFooterVariants,
+    timeSelectorHeaderVariants as annaTimeSelectorHeaderVariants,
+    timeSelectorInfoContainerVariants as annaTimeSelectorInfoContainerVariants,
+    timeSelectorListContainerVariants as annaTimeSelectorListContainerVariants,
+    timeSelectorListItemVariants as annaTimeSelectorListItemVariants,
+    timeSelectorListVariants as annaTimeSelectorListVariants
+} from "./time-selector.anna.styles";
 import {
     timeSelectorBaseVariants as monaTimeSelectorBaseVariants,
     timeSelectorFooterVariants as monaTimeSelectorFooterVariants,
@@ -11,68 +20,40 @@ import {
     timeSelectorListVariants as monaTimeSelectorListVariants
 } from "./time-selector.mona.styles";
 
-export const timeSelectorBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorBaseVariants;
-        default:
-            return monaTimeSelectorBaseVariants;
-    }
-};
+export const timeSelectorBaseThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorBaseVariants,
+    mona: monaTimeSelectorBaseVariants
+});
 
-export const timeSelectorFooterThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorFooterVariants;
-        default:
-            return monaTimeSelectorFooterVariants;
-    }
-};
+export const timeSelectorFooterThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorFooterVariants,
+    mona: monaTimeSelectorFooterVariants
+});
 
-export const timeSelectorHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorHeaderVariants;
-        default:
-            return monaTimeSelectorHeaderVariants;
-    }
-};
+export const timeSelectorHeaderThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorHeaderVariants,
+    mona: monaTimeSelectorHeaderVariants
+});
 
-export const timeSelectorInfoContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorInfoContainerVariants;
-        default:
-            return monaTimeSelectorInfoContainerVariants;
-    }
-};
+export const timeSelectorInfoContainerThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorInfoContainerVariants,
+    mona: monaTimeSelectorInfoContainerVariants
+});
 
-export const timeSelectorListContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorListContainerVariants;
-        default:
-            return monaTimeSelectorListContainerVariants;
-    }
-};
+export const timeSelectorListContainerThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorListContainerVariants,
+    mona: monaTimeSelectorListContainerVariants
+});
 
-export const timeSelectorListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorListVariants;
-        default:
-            return monaTimeSelectorListVariants;
-    }
-};
+export const timeSelectorListThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorListVariants,
+    mona: monaTimeSelectorListVariants
+});
 
-export const timeSelectorListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTimeSelectorListItemVariants;
-        default:
-            return monaTimeSelectorListItemVariants;
-    }
-};
+export const timeSelectorListItemThemeVariants = createThemeStrategy({
+    anna: annaTimeSelectorListItemVariants,
+    mona: monaTimeSelectorListItemVariants
+});
 
 type TimeSelectorBaseVariantProps = VariantProps<ReturnType<typeof timeSelectorBaseThemeVariants>>;
 type TimeSelectorBaseVariantInput = VariantInputs<TimeSelectorBaseVariantProps>;
