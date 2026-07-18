@@ -11,6 +11,10 @@ export type {
     ThemeColorRegistration,
     ThemeColors,
     ThemeColorVariable,
+    ThemeShadows,
+    ThemeShadowVariable,
+    ThemeVariable,
+    ThemeVariables,
     GeneratedThemeColorPalette
 } from "./models/ThemeDefinition";
 export * from "./providers/theme-color.providers";

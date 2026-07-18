@@ -5,7 +5,7 @@ export const comboBoxBaseVariants = cva(
         flex items-center
         cursor-pointer
         bg-input-background text-foreground
-        border border-input-border shadow-xs outline-none
+        border border-input-border shadow-(--shadow-control) outline-none
         transition-[color,box-shadow,border] duration-300 ease-in-out
         data-[readonly='true']:cursor-default
         focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35

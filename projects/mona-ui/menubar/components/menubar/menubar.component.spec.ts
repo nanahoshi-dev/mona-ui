@@ -32,6 +32,6 @@ describe("MenubarComponent", () => {
         expect(barClasses).toContain("border-border-subtle");
         expect(menuClasses).toContain("bg-surface-overlay");
         expect(menuClasses).toContain("border-border");
-        expect(menuClasses).toContain("shadow-md");
+        expect(menuClasses).toContain("shadow-(--shadow-overlay)");
     });
 });

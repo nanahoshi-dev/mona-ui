@@ -106,13 +106,15 @@ describe("NumericTextBoxComponent", () => {
 
         it("should use the shared input shell with neutral spinner actions", async () => {
             await waitForStable(fixture);
-            const element = fixture.debugElement.query(By.directive(NumericTextBoxComponent)).nativeElement as HTMLElement;
-            const spinnerContainer = fixture.debugElement.query(By.css(".border-border-subtle")).nativeElement as HTMLElement;
+            const element = fixture.debugElement.query(By.directive(NumericTextBoxComponent))
+                .nativeElement as HTMLElement;
+            const spinnerContainer = fixture.debugElement.query(By.css(".border-border-subtle"))
+                .nativeElement as HTMLElement;
             const spinnerButtons = fixture.debugElement.queryAll(By.css("button"));
 
             expect(element.classList.contains("bg-input-background")).toBe(true);
             expect(element.classList.contains("border-input-border")).toBe(true);
-            expect(element.classList.contains("shadow-xs")).toBe(true);
+            expect(element.classList.contains("shadow-(--shadow-control)")).toBe(true);
             expect(element.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
             expect(element.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
             expect(element.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);

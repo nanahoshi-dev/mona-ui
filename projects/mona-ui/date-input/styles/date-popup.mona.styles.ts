@@ -4,7 +4,7 @@ export const datePopupVariants = cva(
     `
         h-full overflow-auto
         bg-surface-overlay text-foreground
-        border border-border shadow-md
+        border border-border shadow-(--shadow-overlay)
         [&_mona-calendar]:border-none
         [&_mona-calendar]:shadow-none
     `,

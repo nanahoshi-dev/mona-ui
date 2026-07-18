@@ -68,7 +68,7 @@ describe("MultiSelectComponent", () => {
 
         expect(host.classList.contains("bg-input-background")).toBe(true);
         expect(host.classList.contains("border-input-border")).toBe(true);
-        expect(host.classList.contains("shadow-xs")).toBe(true);
+        expect(host.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(host.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
         expect(host.classList.contains("opacity-50")).toBe(false);
     });

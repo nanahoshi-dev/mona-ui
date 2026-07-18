@@ -100,7 +100,7 @@ describe("ButtonDirective", () => {
             expect(buttonElement.classList.contains("active:bg-active")).toBe(true);
             expect(buttonElement.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
             expect(buttonElement.classList.contains("bg-accent")).toBe(false);
-            expect(buttonElement.classList.contains("shadow-xs")).toBe(false);
+            expect(buttonElement.classList.contains("shadow-(--shadow-control)")).toBe(false);
         });
     });
 

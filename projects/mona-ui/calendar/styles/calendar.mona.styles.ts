@@ -5,7 +5,7 @@ export const calendarBaseVariants = cva(
         flex min-w-64 flex-col gap-2 p-2
         select-none
         bg-surface-raised text-foreground
-        border border-border shadow-xs
+        border border-border shadow-(--shadow-raised)
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
     `,

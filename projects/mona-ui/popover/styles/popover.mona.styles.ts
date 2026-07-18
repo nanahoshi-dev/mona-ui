@@ -4,7 +4,7 @@ export const popoverBaseVariants = cva(
     `
         relative z-1 flex flex-col items-center justify-center
         bg-surface-overlay text-foreground
-        border border-border shadow-md
+        border border-border shadow-(--shadow-overlay)
     `,
     {
         variants: {

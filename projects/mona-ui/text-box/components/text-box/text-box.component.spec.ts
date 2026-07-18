@@ -24,7 +24,7 @@ describe("TextBoxComponent", () => {
 
         expect(element.classList.contains("bg-input-background")).toBe(true);
         expect(element.classList.contains("border-input-border")).toBe(true);
-        expect(element.classList.contains("shadow-xs")).toBe(true);
+        expect(element.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(element.classList.contains("focus-within:border-focus-indicator")).toBe(true);
         expect(element.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
         expect(element.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);

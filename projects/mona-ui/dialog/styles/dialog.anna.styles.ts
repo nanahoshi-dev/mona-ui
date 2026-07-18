@@ -4,7 +4,7 @@ export const dialogBaseVariants = cva(
     `
         flex h-full w-full flex-col gap-0.5 overflow-hidden
         bg-surface-overlay text-foreground
-        border border-border shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)] outline-none
+        border border-border shadow-(--shadow-overlay) outline-none
     `,
     {
         variants: {

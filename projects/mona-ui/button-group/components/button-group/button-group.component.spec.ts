@@ -119,10 +119,8 @@ describe("ButtonGroupComponent", () => {
             it("should apply variant classes to host element", () => {
                 expect(groupElement.classList.length).toBeGreaterThan(0);
                 expect(groupElement.classList.contains("border-input-border")).toBe(true);
-                expect(groupElement.classList.contains("[&>button:not(:last-child)]:border-border-subtle")).toBe(
-                    true
-                );
-                expect(groupElement.classList.contains("shadow-xs")).toBe(false);
+                expect(groupElement.classList.contains("[&>button:not(:last-child)]:border-border-subtle")).toBe(true);
+                expect(groupElement.classList.contains("shadow-(--shadow-control)")).toBe(false);
             });
         });
 

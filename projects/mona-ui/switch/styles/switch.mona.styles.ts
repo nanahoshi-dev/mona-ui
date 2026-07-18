@@ -50,7 +50,7 @@ export const switchHandleVariants = cva(
     `
         absolute inline-flex items-center justify-center
         bg-surface-raised text-foreground
-        border border-border-subtle shadow-xs
+        border border-border-subtle shadow-(--shadow-control)
         outline-none
         transition-[left,background] duration-300 ease-in-out
         data-[active='true']:bg-primary-foreground

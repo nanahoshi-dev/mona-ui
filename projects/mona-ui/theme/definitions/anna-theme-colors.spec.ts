@@ -17,6 +17,7 @@ describe("annaThemeColors", () => {
                 "--color-canvas": "#202123",
                 "--color-surface": "#1D1E20",
                 "--color-surface-muted": "#161718",
+                "--color-surface-overlay": "#161718",
                 "--color-border-control": "#0F0F10",
                 "--color-border-control-hover": "#17181A",
                 "--color-primary": "#583573",
@@ -54,6 +55,11 @@ describe("annaThemeColors", () => {
         expectDarker(colors, "--color-border-control-hover", "--color-input-background");
         expectDarker(colors, "--color-border-control", "--color-border-control-hover");
         expectDarker(colors, "--color-disabled-border", "--color-disabled-background");
+    });
+
+    it("keeps overlay surfaces darker than the controls they contain", () => {
+        expectDarker(colors, "--color-surface-overlay", "--color-input-background");
+        expectDarker(colors, "--color-surface-overlay", "--color-surface-raised");
     });
 });
 

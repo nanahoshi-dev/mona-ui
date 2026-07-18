@@ -5,7 +5,7 @@ export const datePopupVariants = cva(
         h-full overflow-auto
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
         bg-surface-overlay text-foreground
-        border border-border shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)]
+        border border-border shadow-(--shadow-overlay)
         [&_mona-calendar]:border-none
         [&_mona-calendar]:shadow-none
     `,

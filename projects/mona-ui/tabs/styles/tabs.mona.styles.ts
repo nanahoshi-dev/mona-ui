@@ -43,7 +43,7 @@ export const tabListListItemVariants = cva(
     {
         variants: {
             active: {
-                true: "bg-surface-raised font-semibold text-foreground shadow-xs inset-ring-1 inset-ring-border-subtle",
+                true: "bg-surface-raised font-semibold text-foreground shadow-(--shadow-control) inset-ring-1 inset-ring-border-subtle",
                 false: ""
             },
             disabled: {
@@ -77,6 +77,7 @@ export const tabContentVariants = cva(
     `
         flex-1 w-full overflow-auto
         bg-surface text-foreground
+        border border-border shadow-(--shadow-raised)
     `,
     {
         variants: {

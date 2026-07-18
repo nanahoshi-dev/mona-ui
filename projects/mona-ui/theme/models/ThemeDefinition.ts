@@ -2,6 +2,8 @@ import type { ThemeStyle, ThemeVariant } from "./Theme";
 
 export type ThemeColorVariable = `--color-${string}`;
 export type ThemeColors = Readonly<Record<ThemeColorVariable, string>>;
+export type ThemeShadowVariable = `--shadow-${string}`;
+export type ThemeShadows = Readonly<Record<ThemeShadowVariable, string>>;
 
 export interface ThemeColorOverrides {
     readonly common?: ThemeColors;
@@ -30,6 +32,9 @@ export interface ThemeColorPaletteRegistration {
     readonly seeds: ThemeColorPaletteSeeds;
 }
 
-export type ThemeVariables = Readonly<Record<`--${string}`, string>>;
+export type ThemeVariable = `--${string}`;
+export type ThemeVariables = Readonly<Record<ThemeVariable, string>>;
 export type ThemeDefinition = Readonly<Partial<Record<ThemeVariant, ThemeColors>>>;
 export type ThemeDefinitionRegistry = Readonly<Record<ThemeStyle, ThemeDefinition>>;
+export type ThemeShadowDefinition = Readonly<Partial<Record<ThemeVariant, ThemeShadows>>>;
+export type ThemeShadowDefinitionRegistry = Readonly<Record<ThemeStyle, ThemeShadowDefinition>>;

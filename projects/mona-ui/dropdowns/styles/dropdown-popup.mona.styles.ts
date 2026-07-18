@@ -5,7 +5,7 @@ export const dropdownPopupVariants = cva(
         h-full max-h-64 overflow-auto
         text-foreground
         bg-surface-overlay
-        border border-border shadow-md
+        border border-border shadow-(--shadow-overlay)
     `,
     {
         variants: {

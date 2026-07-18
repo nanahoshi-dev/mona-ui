@@ -4,7 +4,7 @@ export const chipVariants = cva(
     `
         inline-flex shrink-0 items-center justify-between gap-1.5
         cursor-pointer text-xs font-medium
-        shadow-xs outline-none
+        shadow-(--shadow-control) outline-none
         transition-colors duration-200 ease-in-out
     `,
     {

@@ -4,7 +4,7 @@ export const contextMenuContentVariants = cva(
     `
         w-full gap-4 overflow-hidden
         bg-surface-overlay text-foreground
-        border border-border shadow-md
+        border border-border shadow-(--shadow-overlay)
     `,
     {
         variants: {
@@ -71,7 +71,7 @@ export const menubarBaseVariants = cva(
     `
         flex items-center justify-center gap-1 overflow-hidden
         bg-surface-muted text-foreground
-        border border-border-subtle shadow-xs
+        border border-border-subtle shadow-(--shadow-raised)
         data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground
     `,

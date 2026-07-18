@@ -5,7 +5,7 @@ export const multiSelectBaseVariants = cva(
         flex items-center justify-between
         cursor-pointer
         bg-input-background text-foreground
-        border border-input-border shadow-xs outline-none
+        border border-input-border shadow-(--shadow-control) outline-none
         transition-[color,box-shadow,border] duration-300 ease-in-out
         data-[readonly='true']:cursor-default
         focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35

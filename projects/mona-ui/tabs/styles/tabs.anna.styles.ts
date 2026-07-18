@@ -77,7 +77,8 @@ export const tabContentVariants = cva(
     `
         flex-1 w-full overflow-auto
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
-        bg-surface text-foreground
+        text-foreground
+        border border-border shadow-(--shadow-raised)
     `,
     {
         variants: {

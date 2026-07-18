@@ -2,6 +2,8 @@ import { DOCUMENT } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import type { ThemeId } from "../models/Theme";
 import type { ThemeColors } from "../models/ThemeDefinition";
+import { annaThemeShadows } from "../definitions/anna-theme-shadows";
+import { monaThemeShadows } from "../definitions/mona-theme-shadows";
 import type { ThemeColorStrategy } from "../strategies/theme-color.strategy";
 import { THEME_COLOR_STRATEGY } from "../tokens/theme-color.tokens";
 import { ThemeService } from "./theme.service";
@@ -41,6 +43,7 @@ describe("ThemeService", () => {
         expect(service.themeVariant()).toBe("light");
         expect(root.style.getPropertyValue("--color-primary")).toBe("light-primary");
         expect(root.style.getPropertyValue("--color-light-only")).toBe("light-only");
+        expect(root.style.getPropertyValue("--shadow-raised")).toBe(monaThemeShadows.light["--shadow-raised"]);
     });
 
     it("updates all derived theme state atomically", () => {
@@ -51,6 +54,7 @@ describe("ThemeService", () => {
             style: service.theme(),
             variant: service.themeVariant()
         }).toEqual({ id: "mona-dark", style: "mona", variant: "dark" });
+        expect(root.style.getPropertyValue("--shadow-overlay")).toBe(monaThemeShadows.dark["--shadow-overlay"]);
     });
 
     it("supports Anna Dark as a distinct style", () => {
@@ -61,6 +65,7 @@ describe("ThemeService", () => {
             style: "anna",
             variant: "dark"
         });
+        expect(root.style.getPropertyValue("--shadow-raised")).toBe(annaThemeShadows.dark["--shadow-raised"]);
     });
 
     it("rejects the unsupported Anna Light identifier", () => {

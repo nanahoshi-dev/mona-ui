@@ -5,7 +5,7 @@ export const textAreaVariants = cva(
         px-2 py-1
         text-sm text-foreground
         bg-input-background
-        border border-input-border shadow-xs
+        border border-input-border shadow-(--shadow-control)
         outline-none
         selection:bg-primary selection:text-primary-foreground
         transition-[color,box-shadow,border] duration-300 ease-in-out

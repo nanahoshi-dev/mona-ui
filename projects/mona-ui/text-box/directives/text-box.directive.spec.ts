@@ -22,15 +22,14 @@ describe("TextBoxDirective", () => {
     });
 
     it("should use the shared input surface, focus, disabled, and invalid roles", () => {
-        const fixture: ComponentFixture<TextBoxDirectiveHostComponent> = TestBed.createComponent(
-            TextBoxDirectiveHostComponent
-        );
+        const fixture: ComponentFixture<TextBoxDirectiveHostComponent> =
+            TestBed.createComponent(TextBoxDirectiveHostComponent);
         fixture.detectChanges();
         const element = fixture.nativeElement.querySelector("input") as HTMLInputElement;
 
         expect(element.classList.contains("bg-input-background")).toBe(true);
         expect(element.classList.contains("border-input-border")).toBe(true);
-        expect(element.classList.contains("shadow-xs")).toBe(true);
+        expect(element.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(element.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
         expect(element.classList.contains("disabled:bg-disabled-background")).toBe(true);
         expect(element.classList.contains("[&.ng-touched.ng-invalid]:focus-visible:ring-error/35")).toBe(true);

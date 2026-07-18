@@ -81,7 +81,7 @@ export const treeNodeDraggingVariants = cva(
         top-3! px-2! py-1!
         bg-surface-overlay! text-foreground!
         border! border-border!
-        shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)]
+        shadow-(--shadow-overlay)
     `
 );
 

@@ -171,9 +171,9 @@ describe("Anna style contract", () => {
         expect(sliderSelectionVariants()).toContain("bg-primary");
     });
 
-    it("limits elevation to crisp overlay surfaces", () => {
-        expect(dropdownPopupVariants()).toContain("shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)]");
-        expect(dialogBaseVariants()).toContain("shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)]");
-        expect(buttonVariants()).not.toContain("shadow-xs");
+    it("uses semantic elevation while keeping ordinary controls flat", () => {
+        expect(dropdownPopupVariants()).toContain("shadow-(--shadow-overlay)");
+        expect(dialogBaseVariants()).toContain("shadow-(--shadow-overlay)");
+        expect(buttonVariants()).not.toContain("shadow-(--shadow-control)");
     });
 });

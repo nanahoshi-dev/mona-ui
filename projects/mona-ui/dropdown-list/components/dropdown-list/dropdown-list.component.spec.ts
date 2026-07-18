@@ -81,7 +81,7 @@ describe("DropdownListComponent", () => {
 
         expect(popup).not.toBeNull();
         expect(popup.classList.contains("border-border")).toBe(true);
-        expect(popup.classList.contains("shadow-md")).toBe(true);
+        expect(popup.classList.contains("shadow-(--shadow-overlay)")).toBe(true);
         expect(popup.classList.contains("bg-surface-raised")).toBe(false);
         expect(selectedOption.classList.contains("bg-active")).toBe(true);
         expect(selectedOption.classList.contains("bg-primary")).toBe(false);

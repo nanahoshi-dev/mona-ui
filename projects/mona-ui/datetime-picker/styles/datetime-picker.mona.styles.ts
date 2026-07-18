@@ -4,7 +4,7 @@ export const dateTimePickerBaseVariants = cva(
     `
         flex w-full items-center
         bg-input-background text-foreground
-        border border-input-border shadow-xs
+        border border-input-border shadow-(--shadow-control)
         outline-none
 
         data-[disabled='true']:pointer-events-none

@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { converter, parse } from "culori";
 import { annaThemeColors } from "../../mona-ui/theme/definitions/anna-theme-colors";
+import { annaThemeShadows } from "../../mona-ui/theme/definitions/anna-theme-shadows";
 import { monaThemeColors } from "../../mona-ui/theme/definitions/mona-theme-colors";
+import { monaThemeShadows } from "../../mona-ui/theme/definitions/mona-theme-shadows";
 
 const stylesPath = resolve("projects/mona-ui-tester/src/styles.css");
 const styles = readFileSync(stylesPath, "utf8");
@@ -14,6 +16,9 @@ if (!themeBlock) {
 
 const tailwindColors = Object.fromEntries(
     [...themeBlock.matchAll(/^\s*(--color-[\w-]+):\s*([^;]+);/gm)].map(match => [match[1], match[2]])
+);
+const tailwindShadows = Object.fromEntries(
+    [...themeBlock.matchAll(/^\s*(--shadow-[\w-]+):\s*([^;]+);/gm)].map(match => [match[1], match[2]])
 );
 const testerOwnedColors = new Set(["--color-page-background", "--color-demo-background"]);
 const runtimeColors = monaThemeColors.light;
@@ -49,7 +54,39 @@ for (const [name, value] of Object.entries(runtimeColors)) {
     }
 }
 
-console.log(`Theme color parity verified for Mona Light and Anna Dark across ${runtimeKeys.length} variables.`);
+const runtimeShadows = monaThemeShadows.light;
+const runtimeShadowKeys = Object.keys(runtimeShadows).sort();
+const tailwindShadowKeys = Object.keys(tailwindShadows).sort();
+
+for (const [name, shadows] of Object.entries({
+    "Mona Dark": monaThemeShadows.dark,
+    "Anna Dark": annaThemeShadows.dark
+})) {
+    const keys = Object.keys(shadows).sort();
+    if (JSON.stringify(keys) !== JSON.stringify(runtimeShadowKeys)) {
+        throw new Error(`${name} does not match the built-in runtime shadow contract.`);
+    }
+}
+
+if (JSON.stringify(tailwindShadowKeys) !== JSON.stringify(runtimeShadowKeys)) {
+    throw new Error("Tailwind shadow keys do not match the built-in runtime shadow contract.");
+}
+
+for (const [name, value] of Object.entries(runtimeShadows)) {
+    if (normalizeCssValue(tailwindShadows[name]) !== normalizeCssValue(value)) {
+        throw new Error(
+            `Tailwind light fallback for ${name} is "${tailwindShadows[name]}"; expected runtime value "${value}".`
+        );
+    }
+}
+
+console.log(
+    `Theme parity verified across ${runtimeKeys.length} color variables and ${runtimeShadowKeys.length} shadow variables.`
+);
+
+function normalizeCssValue(value: string | undefined): string {
+    return value?.replace(/\s+/g, " ").trim() ?? "";
+}
 
 function colorsEqual(left: string | undefined, right: string): boolean {
     if (!left) {

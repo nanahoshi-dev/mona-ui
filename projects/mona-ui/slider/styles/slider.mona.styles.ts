@@ -110,7 +110,7 @@ export const sliderHandleVariants = cva(
         h-4.25 w-4.25
         cursor-pointer
         bg-surface-raised
-        border border-focus-indicator/50 shadow-xs
+        border border-focus-indicator/50 shadow-(--shadow-control)
         outline-none
         transition duration-200 ease-out
 

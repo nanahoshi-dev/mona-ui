@@ -53,7 +53,7 @@ describe("NotificationComponent", () => {
 
         expect(notificationClasses).toContain("bg-surface-overlay");
         expect(notificationClasses).toContain("border-border");
-        expect(notificationClasses).toContain("shadow-md");
+        expect(notificationClasses).toContain("shadow-(--shadow-overlay)");
         expect(notificationClasses).not.toContain("bg-error");
         expect(errorIconClasses).toContain("text-error");
     });

@@ -40,7 +40,7 @@ export const notificationBaseVariants = cva(
     `
         relative mb-2 flex h-fit w-fit flex-col overflow-hidden
         bg-surface-overlay text-foreground
-        border border-border shadow-md
+        border border-border shadow-(--shadow-overlay)
     `
 );
 

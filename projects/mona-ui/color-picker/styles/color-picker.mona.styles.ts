@@ -6,7 +6,7 @@ export const colorPickerBaseVariants = cva(
         cursor-pointer
         bg-input-background text-foreground
         border border-input-border
-        shadow-xs outline-none
+        shadow-(--shadow-control) outline-none
         transition-[color,box-shadow,border] duration-300 ease-in-out
 
         data-[disabled='true']:pointer-events-none

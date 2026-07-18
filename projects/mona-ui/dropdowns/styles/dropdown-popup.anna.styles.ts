@@ -6,7 +6,7 @@ export const dropdownPopupVariants = cva(
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
         text-foreground
         bg-surface-overlay
-        border border-border shadow-[0_6px_14px_-4px_rgb(0_0_0/0.65)]
+        border border-border shadow-(--shadow-overlay)
     `,
     {
         variants: {

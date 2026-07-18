@@ -4,7 +4,7 @@ export const tooltipBaseVariants = cva(
     `
         relative z-1 flex items-center justify-center
         bg-primary text-primary-foreground
-        border border-primary shadow-md
+        border border-primary shadow-(--shadow-overlay)
     `,
     {
         variants: {

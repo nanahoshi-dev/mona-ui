@@ -15,7 +15,7 @@ export const popupMenuContainerVariants = cva(
     `
         flex flex-col p-1
         bg-surface-overlay text-foreground
-        border border-border shadow-md outline-none
+        border border-border shadow-(--shadow-overlay) outline-none
     `,
     {
         variants: {

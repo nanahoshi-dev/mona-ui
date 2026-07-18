@@ -26,7 +26,7 @@ describe("DialogComponent", () => {
 
         expect(dialogClasses).toContain("bg-surface-overlay");
         expect(dialogClasses).toContain("border-border");
-        expect(dialogClasses).toContain("shadow-md");
+        expect(dialogClasses).toContain("shadow-(--shadow-overlay)");
         expect(footerClasses).toContain("bg-surface-muted");
         expect(footerClasses).toContain("border-border-subtle");
     });

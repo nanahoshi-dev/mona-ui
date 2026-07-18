@@ -31,7 +31,7 @@ describe("PopupMenuComponent", () => {
 
         expect(classes).toContain("bg-surface-overlay");
         expect(classes).toContain("border-border");
-        expect(classes).toContain("shadow-md");
+        expect(classes).toContain("shadow-(--shadow-overlay)");
         expect(classes).not.toContain("bg-surface-raised");
     });
 });

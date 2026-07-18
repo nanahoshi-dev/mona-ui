@@ -23,7 +23,7 @@ describe("TimePickerComponent", () => {
 
         expect(picker.classList.contains("bg-input-background")).toBe(true);
         expect(picker.classList.contains("border-input-border")).toBe(true);
-        expect(picker.classList.contains("shadow-xs")).toBe(true);
+        expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
         expect(picker.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
         expect(picker.classList.contains("[&_mona-text-box]:focus-within:ring-0")).toBe(true);
@@ -50,9 +50,9 @@ describe("TimePickerComponent", () => {
         fixture.detectChanges();
 
         expect(getInput().disabled).toBe(true);
-        expect((fixture.nativeElement.querySelector("mona-time-picker") as HTMLElement).getAttribute("data-disabled")).toBe(
-            "true"
-        );
+        expect(
+            (fixture.nativeElement.querySelector("mona-time-picker") as HTMLElement).getAttribute("data-disabled")
+        ).toBe("true");
     });
 
     it("reflects readonly state from the signal-form schema", async () => {
@@ -62,9 +62,9 @@ describe("TimePickerComponent", () => {
         fixture.detectChanges();
 
         expect(getInput().readOnly).toBe(true);
-        expect((fixture.nativeElement.querySelector("mona-time-picker") as HTMLElement).getAttribute("data-readonly")).toBe(
-            "true"
-        );
+        expect(
+            (fixture.nativeElement.querySelector("mona-time-picker") as HTMLElement).getAttribute("data-readonly")
+        ).toBe("true");
     });
 
     function getInput(): HTMLInputElement {

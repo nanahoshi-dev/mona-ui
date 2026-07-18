@@ -24,7 +24,7 @@ describe("DatePickerComponent", () => {
 
         expect(picker.classList.contains("bg-input-background")).toBe(true);
         expect(picker.classList.contains("border-input-border")).toBe(true);
-        expect(picker.classList.contains("shadow-xs")).toBe(true);
+        expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
         expect(picker.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
         expect(picker.classList.contains("[&_mona-text-box]:focus-within:ring-0")).toBe(true);
@@ -36,7 +36,7 @@ describe("DatePickerComponent", () => {
 
         expect(classes).toContain("bg-surface-overlay");
         expect(classes).toContain("border-border");
-        expect(classes).toContain("shadow-md");
+        expect(classes).toContain("shadow-(--shadow-overlay)");
         expect(classes).not.toContain("border-input-border");
     });
 

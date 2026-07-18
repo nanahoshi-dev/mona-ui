@@ -43,7 +43,7 @@ describe("TextAreaDirective", () => {
 
         expect(textArea.classList.contains("bg-input-background")).toBe(true);
         expect(textArea.classList.contains("border-input-border")).toBe(true);
-        expect(textArea.classList.contains("shadow-xs")).toBe(true);
+        expect(textArea.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(textArea.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
         expect(textArea.classList.contains("disabled:bg-disabled-background")).toBe(true);
         expect(textArea.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);

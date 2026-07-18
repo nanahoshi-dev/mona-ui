@@ -103,7 +103,7 @@ describe("Popover visual contract", () => {
 
         expect(popoverClasses).toContain("bg-surface-overlay");
         expect(popoverClasses).toContain("border-border");
-        expect(popoverClasses).toContain("shadow-md");
+        expect(popoverClasses).toContain("shadow-(--shadow-overlay)");
         expect(arrowClasses).toContain("bg-surface-overlay");
         expect(arrowClasses).toContain("border-border");
         expect(arrowClasses).not.toContain("bg-primary");

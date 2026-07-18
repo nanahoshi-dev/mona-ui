@@ -32,7 +32,7 @@ describe("WindowComponent", () => {
 
         expect(windowClasses).toContain("bg-surface-overlay");
         expect(contentClasses).toContain("border-border");
-        expect(contentClasses).toContain("shadow-md");
+        expect(contentClasses).toContain("shadow-(--shadow-overlay)");
         expect(titleClasses).toContain("bg-surface-muted");
         expect(titleClasses).toContain("border-border-subtle");
         expect(titleClasses).not.toContain("bg-secondary");

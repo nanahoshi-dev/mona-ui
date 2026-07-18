@@ -80,7 +80,7 @@ export const gridColumnDragPreviewVariants = cva(
         flex items-center justify-center
         px-2! py-0.5!
         bg-surface-raised! text-foreground!
-        border! border-border! rounded-md shadow-sm!
+        border! border-border! rounded-md shadow-(--shadow-overlay)!
     `
 );
 

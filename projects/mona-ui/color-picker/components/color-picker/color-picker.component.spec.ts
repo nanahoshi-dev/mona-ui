@@ -113,7 +113,7 @@ describe("ColorPickerComponent", () => {
 
         expect(picker.classList.contains("bg-input-background")).toBe(true);
         expect(picker.classList.contains("border-input-border")).toBe(true);
-        expect(picker.classList.contains("shadow-xs")).toBe(true);
+        expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("hover:bg-hover")).toBe(true);
         expect(picker.classList.contains("active:bg-active")).toBe(true);
         expect(picker.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
@@ -129,7 +129,7 @@ describe("ColorPickerComponent", () => {
 
         expect(popup.classList.contains("bg-surface-overlay")).toBe(true);
         expect(popup.classList.contains("border-border")).toBe(true);
-        expect(popup.classList.contains("shadow-md")).toBe(true);
+        expect(popup.classList.contains("shadow-(--shadow-overlay)")).toBe(true);
         expect(popup.classList.contains("border-input-border")).toBe(false);
     });
 

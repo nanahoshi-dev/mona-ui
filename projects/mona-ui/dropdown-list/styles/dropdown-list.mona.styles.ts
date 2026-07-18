@@ -5,7 +5,7 @@ export const dropdownListInputVariants = cva(
         inline-flex items-center
         cursor-pointer select-none
         bg-input-background text-foreground
-        border border-input-border shadow-xs outline-none
+        border border-input-border shadow-(--shadow-control) outline-none
         transition-[color,box-shadow,border] duration-300 ease-in-out
         data-[readonly='true']:cursor-default
         hover:bg-hover active:bg-active

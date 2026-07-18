@@ -24,7 +24,7 @@ export const windowContentContainerVariants = cva(
     `
         relative flex h-full w-full flex-col
         border border-border
-        shadow-md
+        shadow-(--shadow-overlay)
     `,
     {
         variants: {
