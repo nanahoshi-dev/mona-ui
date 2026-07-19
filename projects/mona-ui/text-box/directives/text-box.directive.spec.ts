@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { TextBoxDirective } from "./text-box.directive";
 
 @Component({
@@ -12,9 +11,6 @@ class TextBoxDirectiveHostComponent {}
 describe("TextBoxDirective", () => {
     let directive: TextBoxDirective;
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [ThemeService]
-        });
         directive = TestBed.runInInjectionContext(() => new TextBoxDirective());
     });
     it("should create an instance", () => {

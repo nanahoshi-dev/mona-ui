@@ -70,7 +70,7 @@ describe("monaThemeColors", () => {
             "--color-muted": "var(--color-surface-muted)",
             "--color-destructive": "var(--color-error)",
             "--color-destructive-foreground": "var(--color-error-foreground)",
-            "--color-selected": "var(--color-accent)"
+            "--color-selected": "var(--color-active)"
         };
 
         for (const colors of Object.values(monaThemeColors)) {

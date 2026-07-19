@@ -15,7 +15,6 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { AnyPipe } from "@nanahoshi/mona-ui/common";
 import { createElementControlId, focusElement } from "@nanahoshi/mona-ui/internal";
 import { PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DialogAction } from "../../models/DialogAction";
 import { DialogInjectorData } from "../../models/DialogInjectorData";
 import {
@@ -58,50 +57,41 @@ export class DialogContentComponent {
         warning: { color: "var(--color-warning)", icon: LucideOctagonAlert }
     };
     readonly #injectedData = inject<DialogInjectorData>(PopupDataInjectionToken);
-    readonly #themeService = inject(ThemeService);
     readonly #trapFocus = inject(CdkTrapFocus);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.dialogData().rounded;
-        return dialogBaseThemeVariants(theme)({ rounded });
+        return dialogBaseThemeVariants({ rounded });
     });
     protected readonly bodyClass = computed(() => {
-        const theme = this.#themeService.theme();
         const hasIcon = this.dialogData().type != null;
-        return dialogBodyThemeVariants(theme)({ hasIcon });
+        return dialogBodyThemeVariants({ hasIcon });
     });
     protected readonly closeButtonContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogCloseButtonContainerThemeVariants(theme)();
+        return dialogCloseButtonContainerThemeVariants();
     });
     protected readonly contentClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogContentThemeVariants(theme)();
+        return dialogContentThemeVariants();
     });
     protected readonly contentContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogContentContainerThemeVariants(theme)();
+        return dialogContentContainerThemeVariants();
     });
     protected readonly describedById = computed(() => {
         const data = this.dialogData();
         return data.descriptionTemplate || data.description ? this.descriptionId : null;
     });
     protected readonly descriptionClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogDescriptionThemeVariants(theme)();
+        return dialogDescriptionThemeVariants();
     });
     protected readonly descriptionId = createElementControlId();
     protected readonly dialogData = computed(() => this.dialogReference.data());
     protected readonly dialogReference = this.#injectedData.dialogReference;
     protected readonly footerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const layout = this.dialogData().actionsLayout;
         const rounded = this.dialogData().rounded;
-        return dialogFooterThemeVariants(theme)({ layout, rounded });
+        return dialogFooterThemeVariants({ layout, rounded });
     });
     protected readonly headerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogHeaderThemeVariants(theme)();
+        return dialogHeaderThemeVariants();
     });
     protected readonly headerId = createElementControlId();
     protected readonly icon = computed(() => {
@@ -109,25 +99,21 @@ export class DialogContentComponent {
         return type ? this.#iconMap[type] : undefined;
     });
     protected readonly iconClass = computed(() => {
-        const theme = this.#themeService.theme();
         const type = this.dialogData().type;
-        return dialogIconThemeVariants(theme)({ type });
+        return dialogIconThemeVariants({ type });
     });
     protected readonly iconContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogIconContainerThemeVariants(theme)();
+        return dialogIconContainerThemeVariants();
     });
     protected readonly role = computed(() => {
         const type = this.dialogData().type;
         return type === "confirm" || type === "error" || type === "warning" ? "alertdialog" : "dialog";
     });
     protected readonly titleClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogTitleThemeVariants(theme)();
+        return dialogTitleThemeVariants();
     });
     protected readonly titleContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dialogTitleContainerThemeVariants(theme)();
+        return dialogTitleContainerThemeVariants();
     });
 
     public constructor() {

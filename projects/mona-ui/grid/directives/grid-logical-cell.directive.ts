@@ -12,7 +12,6 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, fromEvent } from "rxjs";
 import {
     GridCellKind,
@@ -56,14 +55,12 @@ export class GridLogicalCellDirective {
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #gridService = inject(GridService);
     readonly #hostElementRef = inject(ElementRef<HTMLTableCellElement>);
-    readonly #themeService = inject(ThemeService);
     protected readonly ariaColIndex = computed(() => this.colIndex() + this.#gridService.groupColumns().length + 1);
     protected readonly baseClass = computed(() => {
         if (this.#hostElementRef.nativeElement.tagName === "TH") {
             return "";
         }
-        const theme = this.#themeService.theme();
-        return gridListTableCellThemeVariants(theme)({
+        return gridListTableCellThemeVariants({
             groupHeader: this.groupHeader(),
             lastInRow: this.lastInRow() || this.groupHeader()
         });

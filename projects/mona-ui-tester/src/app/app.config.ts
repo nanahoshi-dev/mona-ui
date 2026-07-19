@@ -3,7 +3,12 @@ import { provideHttpClient, withXhr } from "@angular/common/http";
 import { ApplicationConfig, importProvidersFrom } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { provideRouter } from "@angular/router";
-import { provideThemeColorPalette, provideThemeColors } from "@nanahoshi/mona-ui/theme";
+import {
+    generateThemeColorPalette,
+    provideThemeColorPalette,
+    provideThemeFamily,
+    provideThemeOverrides
+} from "@nanahoshi/mona-ui/theme";
 import HighlightJS from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import json from "highlight.js/lib/languages/json";
@@ -13,6 +18,7 @@ import plaintext from "highlight.js/lib/languages/plaintext";
 import { markedHighlight } from "marked-highlight";
 import { MARKED_EXTENSIONS, provideMarkdown } from "ngx-markdown";
 import { routes } from "./routes";
+import { auroraTheme } from "./aurora.theme";
 
 HighlightJS.registerLanguage("bash", bash);
 HighlightJS.registerLanguage("html", xml);
@@ -25,25 +31,29 @@ export const appConfig: ApplicationConfig = {
         importProvidersFrom(FormsModule, NgOptimizedImage),
         provideHttpClient(withXhr()),
         provideRouter(routes),
-        provideThemeColors({
+        provideThemeFamily(auroraTheme),
+        provideThemeOverrides({
             theme: "mona",
-            colors: {
-                light: {
+            light: {
+                colors: {
                     "--color-page-background": "oklch(98.5% 0 0)",
                     "--color-demo-background": "oklch(100% 0 0)"
-                },
-                dark: {
+                }
+            },
+            dark: {
+                colors: {
                     "--color-page-background": "oklch(14.1% 0.005 285.823)",
                     "--color-demo-background": "oklch(18% 0.006 285.885)"
                 }
             }
         }),
-        provideThemeColors({
+        provideThemeOverrides({
             theme: "anna",
-            colors: {
-                dark: {
+            dark: {
+                colors: {
                     "--color-page-background": "#202123",
-                    "--color-demo-background": "#1D1E20"
+                    "--color-demo-background": "#1D1E20",
+                    ...generateThemeColorPalette({ primary: "#83e06c" }).dark
                 }
             }
         }),
@@ -60,12 +70,6 @@ export const appConfig: ApplicationConfig = {
                     })
                 }
             ]
-        }),
-        provideThemeColorPalette({
-            theme: "anna",
-            seeds: {
-                primary: "#83e06c"
-            }
         }),
         provideThemeColorPalette({
             theme: "mona",

@@ -26,7 +26,6 @@ describe("generateThemeColorPalette", () => {
                 expect.objectContaining({
                     "--color-primary": expect.stringMatching(/^oklch\(/),
                     "--color-accent": expect.stringMatching(/^oklch\(/),
-                    "--color-selected": "var(--color-accent)",
                     "--color-focus-indicator": "var(--color-primary)"
                 })
             );

@@ -7,7 +7,7 @@ import type { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GridService } from "../../services/grid.service";
-import { gridBaseVariants, gridHeaderTableCellVariants } from "../../styles/grid.mona.styles";
+import { gridBaseThemeVariants, gridHeaderTableCellThemeVariants } from "../../styles/grid.styles";
 
 import { GridComponent } from "./grid.component";
 
@@ -71,8 +71,8 @@ describe("GridComponent", () => {
     });
 
     it("uses a neutral surface, quiet boundary, and semantic header focus", () => {
-        const gridClasses = gridBaseVariants();
-        const headerCellClasses = gridHeaderTableCellVariants();
+        const gridClasses = gridBaseThemeVariants();
+        const headerCellClasses = gridHeaderTableCellThemeVariants();
 
         expect(gridClasses).toContain("bg-surface");
         expect(gridClasses).toContain("border-border");

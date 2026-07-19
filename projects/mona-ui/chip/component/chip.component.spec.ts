@@ -470,8 +470,8 @@ describe("ChipComponent", () => {
             component.selected.set(true);
             fixture.detectChanges();
 
-            expect(chipElement.classList.contains("bg-active")).toBe(true);
-            expect(chipElement.classList.contains("text-foreground")).toBe(true);
+            expect(chipElement.classList.contains("bg-(--color-selected)")).toBe(true);
+            expect(chipElement.classList.contains("text-(--color-selected-foreground)")).toBe(true);
             expect(chipElement.classList.contains("bg-primary-selected")).toBe(false);
         });
 

@@ -55,7 +55,6 @@ import {
     ListSizeInputType
 } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MultiSelectTagTemplateDirective } from "../../directives/multi-select-tag-template.directive";
@@ -135,24 +134,21 @@ export class MultiSelectComponent<TData = unknown>
     readonly #listService = inject(ListService<TData>);
     readonly #multiSelectService = inject(MultiSelectService);
     readonly #popupRef = this.#dropdownService.popupRef;
-    readonly #themeService = inject(ThemeService);
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
         return highlightedItem ? highlightedItem.uid : null;
     });
     protected readonly affixClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return multiSelectAffixContainerThemeVariants(theme)();
+        return multiSelectAffixContainerThemeVariants();
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const focused = this.#popupRef() != null;
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = multiSelectBaseThemeVariants(theme)({ disabled, focused, invalid, rounded, size });
+        const variantClass = multiSelectBaseThemeVariants({ disabled, focused, invalid, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -166,23 +162,20 @@ export class MultiSelectComponent<TData = unknown>
         () => this.invalid() || (this.required() && this.touched() && none(this.value()))
     );
     protected readonly indicatorClass = computed(() => {
-        const theme = this.#themeService.theme();
         const size = this.size();
-        return multiSelectIndicatorContainerThemeVariants(theme)({ size });
+        return multiSelectIndicatorContainerThemeVariants({ size });
     });
     protected readonly itemContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return multiSelectItemContainerThemeVariants(theme)({ rounded });
+        return multiSelectItemContainerThemeVariants({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });

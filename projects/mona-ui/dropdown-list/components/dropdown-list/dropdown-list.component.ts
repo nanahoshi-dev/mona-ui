@@ -55,7 +55,6 @@ import {
     SelectionChangeEvent
 } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { Subject } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { DropdownListValueTemplateDirective } from "../../directives/dropdown-list-value-template.directive";
@@ -127,7 +126,6 @@ export class DropdownListComponent<TData = unknown>
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #navigatedValue = linkedSignal(() => this.value());
     readonly #listService = inject<ListService<TData>>(ListService);
-    readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey = new Subject<string>();
 
     protected readonly activeDescendant = computed(() => {
@@ -135,18 +133,16 @@ export class DropdownListComponent<TData = unknown>
         return highlightedItem ? highlightedItem.uid : null;
     });
     protected readonly affixClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return dropdownListAffixContainerThemeVariants(theme)();
+        return dropdownListAffixContainerThemeVariants();
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const expanded = this.expanded();
         const hasPrefix = this.prefixTemplate() != null;
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = dropdownListInputThemeVariants(theme)({
+        const classes = dropdownListInputThemeVariants({
             disabled,
             expanded,
             hasPrefix,
@@ -173,11 +169,10 @@ export class DropdownListComponent<TData = unknown>
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });
@@ -195,9 +190,8 @@ export class DropdownListComponent<TData = unknown>
         return this.#listService.selectedListItems().firstOrDefault();
     });
     protected readonly valueContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const hasTemplate = this.valueTemplate() != null;
-        return dropdownListValueContainerThemeVariants(theme)({ hasTemplate });
+        return dropdownListValueContainerThemeVariants({ hasTemplate });
     });
     protected readonly valueTemplate = contentChild(DropdownListValueTemplateDirective, { read: TemplateRef });
     protected readonly valueText = computed(() => {

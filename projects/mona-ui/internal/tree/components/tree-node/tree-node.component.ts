@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, map, Subject, tap } from "rxjs";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
 import { NodeClickEvent } from "../../models/NodeClickEvent";
@@ -18,17 +17,15 @@ import { treeNodeBaseThemeVariants } from "../../styles/tree.styles";
 })
 export class TreeNodeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly treeService = inject(TreeService<T>);
     readonly #dragging = toSignal(this.treeService.dragging$, {
         initialValue: false
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const highlighted = this.navigated();
         const selected = this.selected();
-        return treeNodeBaseThemeVariants(theme)({ disabled, highlighted, selected });
+        return treeNodeBaseThemeVariants({ disabled, highlighted, selected });
     });
     public readonly checkable = computed(() => {
         const node = this.node();

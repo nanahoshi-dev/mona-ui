@@ -1,11 +1,9 @@
 import { DOCUMENT } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import type { ThemeId } from "../models/Theme";
-import type { ThemeColors } from "../models/ThemeDefinition";
-import { annaThemeShadows } from "../definitions/anna-theme-shadows";
-import { monaThemeShadows } from "../definitions/mona-theme-shadows";
-import type { ThemeColorStrategy } from "../strategies/theme-color.strategy";
-import { THEME_COLOR_STRATEGY } from "../tokens/theme-color.tokens";
+import type { ThemeSelection } from "../models/Theme";
+import type { ThemeProfile } from "../models/ThemeDefinition";
+import type { ThemeStrategy } from "../strategies/theme.strategy";
+import { THEME_OPTIONS, THEME_STRATEGY } from "../tokens/theme.tokens";
 import { ThemeService } from "./theme.service";
 
 describe("ThemeService", () => {
@@ -14,22 +12,10 @@ describe("ThemeService", () => {
 
     beforeEach(() => {
         root = document.createElement("html");
-        const lightColors: ThemeColors = {
-            "--color-primary": "light-primary",
-            "--color-light-only": "light-only"
-        };
-        const darkColors: ThemeColors = {
-            "--color-primary": "dark-primary",
-            "--color-dark-only": "dark-only"
-        };
-        const strategy: ThemeColorStrategy = {
-            resolve: (_theme, variant) => (variant === "light" ? lightColors : darkColors)
-        };
-
         TestBed.configureTestingModule({
             providers: [
                 { provide: DOCUMENT, useValue: { documentElement: root } },
-                { provide: THEME_COLOR_STRATEGY, useValue: strategy }
+                { provide: THEME_STRATEGY, useValue: createStrategy() }
             ]
         });
         service = TestBed.inject(ThemeService);
@@ -37,67 +23,64 @@ describe("ThemeService", () => {
 
     afterEach(() => TestBed.resetTestingModule());
 
-    it("starts with Mona light and applies its resolved colors", () => {
-        expect(service.themeId()).toBe("mona-light");
-        expect(service.theme()).toBe("mona");
+    it("defaults to Mona Light and applies its complete profile", () => {
+        expect(service.selection()).toEqual({ name: "mona", variant: "light" });
+        expect(service.themeName()).toBe("mona");
         expect(service.themeVariant()).toBe("light");
-        expect(root.style.getPropertyValue("--color-primary")).toBe("light-primary");
-        expect(root.style.getPropertyValue("--color-light-only")).toBe("light-only");
-        expect(root.style.getPropertyValue("--shadow-raised")).toBe(monaThemeShadows.light["--shadow-raised"]);
+        expect(root.style.getPropertyValue("--color-primary")).toBe("mona-light");
+        expect(root.style.getPropertyValue("--mona-motion-fast")).toBe("200ms");
+        expect(root.getAttribute("data-mona-theme")).toBe("mona");
+        expect(root.getAttribute("data-mona-variant")).toBe("light");
     });
 
-    it("updates all derived theme state atomically", () => {
-        service.setThemeId("mona-dark");
-
-        expect({
-            id: service.themeId(),
-            style: service.theme(),
-            variant: service.themeVariant()
-        }).toEqual({ id: "mona-dark", style: "mona", variant: "dark" });
-        expect(root.style.getPropertyValue("--shadow-overlay")).toBe(monaThemeShadows.dark["--shadow-overlay"]);
-    });
-
-    it("supports Anna Dark as a distinct style and variant", () => {
-        service.setThemeId("anna-dark");
-
-        expect({ id: service.themeId(), style: service.theme(), variant: service.themeVariant() }).toEqual({
-            id: "anna-dark",
-            style: "anna",
-            variant: "dark"
+    it("uses a configured initial selection", () => {
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DOCUMENT, useValue: { documentElement: root } },
+                { provide: THEME_OPTIONS, useValue: { initialTheme: { name: "anna", variant: "dark" } } },
+                { provide: THEME_STRATEGY, useValue: createStrategy() }
+            ]
         });
-        expect(root.style.getPropertyValue("--shadow-raised")).toBe(annaThemeShadows.dark["--shadow-raised"]);
+
+        const configured = TestBed.inject(ThemeService);
+
+        expect(configured.selection()).toEqual({ name: "anna", variant: "dark" });
+        expect(root.style.getPropertyValue("--color-primary")).toBe("anna-dark");
     });
 
-    it("replaces values and removes variables missing from the next result", () => {
-        service.setThemeId("mona-dark");
+    it("switches signals, variables, and root attributes together", () => {
+        service.setTheme({ name: "mona", variant: "dark" });
 
-        expect(root.style.getPropertyValue("--color-primary")).toBe("dark-primary");
-        expect(root.style.getPropertyValue("--color-light-only")).toBe("");
-        expect(root.style.getPropertyValue("--color-dark-only")).toBe("dark-only");
+        expect(service.selection()).toEqual({ name: "mona", variant: "dark" });
+        expect(service.profile().colors["--color-primary"]).toBe("mona-dark");
+        expect(root.style.getPropertyValue("--color-primary")).toBe("mona-dark");
+        expect(root.getAttribute("data-mona-theme")).toBe("mona");
+        expect(root.getAttribute("data-mona-variant")).toBe("dark");
     });
 
-    it("rejects invalid runtime identifiers without changing active state", () => {
-        expect(() => service.setThemeId("future-theme" as ThemeId)).toThrowError(
-            'Unknown Mona UI theme identifier: "future-theme".'
-        );
-        expect(service.themeId()).toBe("mona-light");
+    it("removes variables absent from the next profile", () => {
+        expect(root.style.getPropertyValue("--example-light-only")).toBe("present");
+
+        service.setTheme({ name: "mona", variant: "dark" });
+
+        expect(root.style.getPropertyValue("--example-light-only")).toBe("");
     });
 
-    it("rejects the removed Anna Light identifier without changing active state", () => {
-        // @ts-expect-error Anna Light is no longer a supported built-in theme identifier.
-        const removedThemeId: ThemeId = "anna-light";
+    it("leaves state and the DOM unchanged when resolution fails", () => {
+        const beforeStyle = root.getAttribute("style");
+        const beforeSelection = service.selection();
 
-        expect(() => service.setThemeId(removedThemeId)).toThrowError(
-            'Unknown Mona UI theme identifier: "anna-light".'
-        );
-        expect(service.themeId()).toBe("mona-light");
-        expect(root.style.getPropertyValue("--color-primary")).toBe("light-primary");
-        expect(root.style.getPropertyValue("--shadow-raised")).toBe(monaThemeShadows.light["--shadow-raised"]);
+        expect(() => service.setTheme({ name: "unknown", variant: "light" })).toThrowError("Unknown selection");
+        expect(service.selection()).toEqual(beforeSelection);
+        expect(root.getAttribute("style")).toBe(beforeStyle);
+        expect(root.getAttribute("data-mona-theme")).toBe("mona");
     });
 
     it("exposes read-only signals", () => {
-        expect("set" in service.themeId).toBe(false);
-        expect("set" in service.theme).toBe(false);
+        expect("set" in service.selection).toBe(false);
+        expect("set" in service.profile).toBe(false);
+        expect("set" in service.themeName).toBe(false);
         expect("set" in service.themeVariant).toBe(false);
     });
 
@@ -106,13 +89,42 @@ describe("ThemeService", () => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: DOCUMENT, useValue: { documentElement: null } },
-                {
-                    provide: THEME_COLOR_STRATEGY,
-                    useValue: { resolve: () => ({ "--color-primary": "value" }) } satisfies ThemeColorStrategy
-                }
+                { provide: THEME_STRATEGY, useValue: createStrategy() }
             ]
         });
 
         expect(() => TestBed.inject(ThemeService)).not.toThrow();
     });
 });
+
+function createStrategy(): ThemeStrategy {
+    return {
+        resolve(selection: ThemeSelection): ThemeProfile {
+            const key = `${selection.name}-${selection.variant}`;
+            if (!new Set(["mona-light", "mona-dark", "anna-dark"]).has(key)) {
+                throw new Error("Unknown selection");
+            }
+            return createProfile(key, key === "mona-light");
+        }
+    };
+}
+
+function createProfile(primary: string, includeLightOnly = false): ThemeProfile {
+    return {
+        colors: { "--color-primary": primary },
+        shadows: { "--shadow-control": "none" },
+        motion: { "--mona-motion-fast": "200ms", "--mona-motion-standard": "300ms" },
+        components: {
+            "--mona-calendar-shadow": "none",
+            "--mona-list-background": "transparent",
+            "--mona-list-disabled-background": "transparent",
+            "--mona-list-group-background": "transparent",
+            "--mona-list-group-border-width": "0px",
+            "--mona-list-group-font-weight": "700",
+            "--mona-menubar-shadow": "none",
+            "--mona-slider-handle-border-color": "transparent",
+            "--mona-tab-content-background": "transparent"
+        },
+        custom: includeLightOnly ? { "--example-light-only": "present" } : undefined
+    };
+}

@@ -69,12 +69,15 @@ export class PageComponent {
         return LucideTerminal;
     });
     protected readonly selectedTheme = computed(() =>
-        this.themeOptions.find(theme => theme.id === this.#themeService.themeId())
+        this.themeOptions.find(
+            theme =>
+                theme.name === this.#themeService.themeName() && theme.variant === this.#themeService.themeVariant()
+        )
     );
     protected readonly themeOptions = THEME_OPTIONS;
     protected readonly sidebarService = inject(SidebarService);
 
     protected onThemeChange(theme: ThemeOption): void {
-        this.#themeService.setThemeId(theme.id);
+        this.#themeService.setTheme(theme);
     }
 }

@@ -1,7 +1,6 @@
 import { computed, Directive, inject, input, output } from "@angular/core";
 import { any, exactly, KeyValuePair } from "@mirei/ts-collections";
 import { DateDisabledType } from "@nanahoshi/mona-ui/date-input";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { calendarMonthViewDayThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 import { compareDates } from "../utils/compareDates";
 
@@ -19,9 +18,7 @@ import { compareDates } from "../utils/compareDates";
     }
 })
 export class MonthDayDirective {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.dayDisabled();
         const focused = this.focused();
         const outside = this.outside();
@@ -29,7 +26,7 @@ export class MonthDayDirective {
         const rounded = this.rounded();
         const selected = this.selected();
         const today = this.isToday();
-        return calendarMonthViewDayThemeVariants(theme)({
+        return calendarMonthViewDayThemeVariants({
             disabled,
             focused,
             outside,

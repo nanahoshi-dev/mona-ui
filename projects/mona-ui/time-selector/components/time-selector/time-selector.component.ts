@@ -28,7 +28,6 @@ import {
     TimeSelectorService
 } from "@nanahoshi/mona-ui/date-input";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent, tap } from "rxjs";
 import { filter } from "rxjs/operators";
@@ -67,7 +66,6 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     readonly #destroyRef = inject(DestroyRef);
     readonly #height = signal(0);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #themeService = inject(ThemeService);
     readonly #timeSelectorService = inject(TimeSelectorService, { optional: true });
 
     protected readonly amMeridiemVisible = computed(() => {
@@ -75,19 +73,16 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
         return !(min && min.getHours() >= 12);
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
-        return timeSelectorBaseThemeVariants(theme)({ disabled });
+        return timeSelectorBaseThemeVariants({ disabled });
     });
     protected readonly computedPopupHeight = this.#height.asReadonly();
     protected readonly focusedList = signal<TimeListType>("hours");
     protected readonly footerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return timeSelectorFooterThemeVariants(theme)();
+        return timeSelectorFooterThemeVariants();
     });
     protected readonly headerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return timeSelectorHeaderThemeVariants(theme)();
+        return timeSelectorHeaderThemeVariants();
     });
     protected readonly hour = computed(() => {
         const hour = this.navigatedDate().hour;
@@ -100,12 +95,10 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly hourListId = createElementControlId();
     protected readonly hourListRef = viewChild.required<ElementRef<HTMLOListElement>>("hourList");
     protected readonly infoContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return timeSelectorInfoContainerThemeVariants(theme)();
+        return timeSelectorInfoContainerThemeVariants();
     });
     protected readonly listContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return timeSelectorListContainerThemeVariants(theme)();
+        return timeSelectorListContainerThemeVariants();
     });
     protected readonly maxDate = computed(() => {
         const max = this.max();

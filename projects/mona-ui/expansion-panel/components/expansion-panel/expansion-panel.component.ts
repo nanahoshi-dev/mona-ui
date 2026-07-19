@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, contentChildren, inject, input, model, TemplateRef } from "@angular/core";
 import { LucideMinus, LucidePlus } from "@lucide/angular";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
@@ -27,36 +26,30 @@ import {
     }
 })
 export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly actionsTemplateList = contentChildren(ExpansionPanelActionsTemplateDirective, {
         read: TemplateRef
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const variantClass = expansionPanelBaseThemeVariants(theme)({ rounded });
+        const variantClass = expansionPanelBaseThemeVariants({ rounded });
         return twMerge(variantClass, this.userClass());
     });
     protected readonly contentClass = computed(() => {
-        const theme = this.#themeService.theme();
         const expanded = this.expanded();
-        return expansionPanelContentThemeVariants(theme)({ expanded });
+        return expansionPanelContentThemeVariants({ expanded });
     });
     protected readonly contentId = createElementControlId();
     protected readonly headerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const collapsed = !this.expanded();
         const disabled = this.disabled();
-        return expansionPanelHeaderThemeVariants(theme)({ collapsed, disabled });
+        return expansionPanelHeaderThemeVariants({ collapsed, disabled });
     });
     protected readonly headerTitleClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return expansionPanelHeaderTitleThemeVariants(theme)();
+        return expansionPanelHeaderTitleThemeVariants();
     });
     protected readonly iconContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const hasTemplate = !!this.iconTemplate();
-        return expansionPanelIconContainerThemeVariants(theme)({ hasTemplate });
+        return expansionPanelIconContainerThemeVariants({ hasTemplate });
     });
     protected readonly iconTemplate = contentChild(ExpansionPanelIconTemplateDirective, { read: TemplateRef });
     protected readonly titleTemplate = contentChild(ExpansionPanelTitleTemplateDirective, { read: TemplateRef });

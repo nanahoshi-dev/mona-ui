@@ -1,6 +1,5 @@
 import { DecimalPipe, NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { getPercentage } from "@nanahoshi/mona-ui/common";
 import { Action } from "@nanahoshi/mona-ui/internal";
 
@@ -52,21 +51,17 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
         const progress = this.progress();
         return typeof color === "string" ? color : color?.(progress);
     });
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const classes = progressBarBaseThemeVariants(theme)({ rounded });
+        const classes = progressBarBaseThemeVariants({ rounded });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });
     protected readonly indeterminateClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return progressBarIndeterminateThemeVariants(theme)();
+        return progressBarIndeterminateThemeVariants();
     });
     protected readonly labelClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return progressBarLabelThemeVariants(theme)();
+        return progressBarLabelThemeVariants();
     });
     protected readonly labelTemplate = contentChild(ProgressBarLabelTemplateDirective);
     protected readonly nextTrackClipPath = computed(() => {
@@ -84,9 +79,8 @@ export class ProgressBarComponent implements ProgressBarVariantInput {
     });
     protected readonly progress = computed(() => getPercentage(this.value(), this.min(), this.max()));
     protected readonly trackClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const classes = progressBarTrackThemeVariants(theme)({ rounded });
+        const classes = progressBarTrackThemeVariants({ rounded });
         return this.animate()
             ? classes
             : twMerge(classes, "data-[next='true']:transition-none data-[prev='true']:transition-none");

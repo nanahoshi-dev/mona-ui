@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { CheckboxDirective } from "./checkbox.directive";
 
 @Component({
@@ -12,9 +11,6 @@ class CheckboxDirectiveHostComponent {}
 describe("CheckboxDirective", () => {
     let directive: CheckboxDirective;
     beforeEach(() => {
-        TestBed.configureTestingModule({
-            providers: [ThemeService]
-        });
         directive = TestBed.runInInjectionContext(() => new CheckboxDirective());
     });
     it("should create an instance", () => {
@@ -22,9 +18,8 @@ describe("CheckboxDirective", () => {
     });
 
     it("should use primary selection with semantic focus, disabled, and invalid states", () => {
-        const fixture: ComponentFixture<CheckboxDirectiveHostComponent> = TestBed.createComponent(
-            CheckboxDirectiveHostComponent
-        );
+        const fixture: ComponentFixture<CheckboxDirectiveHostComponent> =
+            TestBed.createComponent(CheckboxDirectiveHostComponent);
         fixture.detectChanges();
         const element = fixture.nativeElement.querySelector("input") as HTMLInputElement;
 

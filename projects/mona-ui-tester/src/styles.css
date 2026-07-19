@@ -59,7 +59,16 @@
     --color-accent-hover: oklch(92.2% 0.004 286.32);
     --color-accent-active: oklch(87.1% 0.006 286.286);
     --color-accent-dark: var(--color-accent-active);
-    --color-selected: var(--color-accent);
+    --color-selected: var(--color-active);
+    --color-selected-foreground: var(--color-foreground);
+    --color-selected-hover: var(--color-active);
+    --color-selected-hover-foreground: var(--color-foreground);
+    --color-selected-active: var(--color-active);
+    --color-selected-active-foreground: var(--color-foreground);
+    --color-selected-focus: var(--color-active);
+    --color-selected-focus-foreground: var(--color-foreground);
+    --color-selected-border: var(--color-primary);
+    --color-focus-surface: var(--color-surface-muted);
     --color-focus-indicator: var(--color-primary);
 
     --color-secondary: oklch(92.2% 0.004 286.32);
@@ -138,6 +147,17 @@
 
 :root {
     --mona-border-radius: 0;
+    --mona-motion-fast: 200ms;
+    --mona-motion-standard: 300ms;
+    --mona-calendar-shadow: var(--shadow-raised);
+    --mona-list-background: transparent;
+    --mona-list-disabled-background: transparent;
+    --mona-list-group-background: transparent;
+    --mona-list-group-border-width: 0px;
+    --mona-list-group-font-weight: 700;
+    --mona-menubar-shadow: var(--shadow-raised);
+    --mona-slider-handle-border-color: color-mix(in srgb, var(--color-focus-indicator) 50%, transparent);
+    --mona-tab-content-background: var(--color-surface);
 }
 
 /*::-webkit-scrollbar {*/

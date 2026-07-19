@@ -1,67 +1,87 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import {
-    notificationActionVariants as annaNotificationActionVariants,
-    notificationBaseVariants as annaNotificationBaseVariants,
-    notificationBodyVariants as annaNotificationBodyVariants,
-    notificationContainerBaseVariants as annaNotificationContainerBaseVariants,
-    notificationContentVariants as annaNotificationContentVariants,
-    notificationHeaderVariants as annaNotificationHeaderVariants,
-    notificationIconVariants as annaNotificationIconVariants,
-    notificationTextVariants as annaNotificationTextVariants
-} from "./notification.anna.styles";
-import {
-    notificationActionVariants as monaNotificationActionVariants,
-    notificationBaseVariants as monaNotificationBaseVariants,
-    notificationBodyVariants as monaNotificationBodyVariants,
-    notificationContainerBaseVariants as monaNotificationContainerBaseVariants,
-    notificationContentVariants as monaNotificationContentVariants,
-    notificationHeaderVariants as monaNotificationHeaderVariants,
-    notificationIconVariants as monaNotificationIconVariants,
-    notificationTextVariants as monaNotificationTextVariants
-} from "./notification.mona.styles";
+import { cva } from "class-variance-authority";
 
-export const notificationContainerBaseThemeVariants = createThemeStrategy({
-    anna: annaNotificationContainerBaseVariants,
-    mona: monaNotificationContainerBaseVariants
+//---------------------------------
+// Notification Container Component
+//---------------------------------
+
+export const notificationContainerBaseThemeVariants = cva(`p-2 z-40000`, {
+    variants: {
+        position: {
+            bottom: "bottom-0 left-1/2 -translate-x-1/2",
+            bottomleft: "bottom-0 left-0",
+            bottomright: "bottom-0 right-0",
+            top: "top-0 left-1/2 -translate-x-1/2",
+            topleft: "top-0 left-0",
+            topright: "top-0 right-0"
+        },
+        positionType: {
+            fixed: "fixed",
+            absolute: "absolute"
+        }
+    },
+    defaultVariants: {
+        positionType: "fixed"
+    }
 });
 
-export const notificationActionThemeVariants = createThemeStrategy({
-    anna: annaNotificationActionVariants,
-    mona: monaNotificationActionVariants
-});
+//-----------------------
+// Notification Component
+//-----------------------
 
-export const notificationBaseThemeVariants = createThemeStrategy({
-    anna: annaNotificationBaseVariants,
-    mona: monaNotificationBaseVariants
-});
+export const notificationActionThemeVariants = cva(
+    `
+        absolute top-0 right-0 flex h-auto items-start
+        [&>svg.lucide]:cursor-pointer
+        [&>svg.lucide]:-mt-1
+    `
+);
 
-export const notificationBodyThemeVariants = createThemeStrategy({
-    anna: annaNotificationBodyVariants,
-    mona: monaNotificationBodyVariants
-});
+export const notificationBaseThemeVariants = cva(
+    `
+        relative mb-2 flex h-fit w-fit flex-col overflow-hidden
+        bg-surface-overlay text-foreground
+        border border-border shadow-(--shadow-overlay)
+    `
+);
 
-export const notificationContentThemeVariants = createThemeStrategy({
-    anna: annaNotificationContentVariants,
-    mona: monaNotificationContentVariants
-});
+export const notificationBodyThemeVariants = cva(
+    `
+        flex flex-1 p-2 ps-0 pe-8
+    `
+);
 
-export const notificationHeaderThemeVariants = createThemeStrategy({
-    anna: annaNotificationHeaderVariants,
-    mona: monaNotificationHeaderVariants
-});
+export const notificationContentThemeVariants = cva(
+    `
+        flex w-full flex-1 items-center
+    `
+);
 
-export const notificationIconThemeVariants = createThemeStrategy({
-    anna: annaNotificationIconVariants,
-    mona: monaNotificationIconVariants
-});
+export const notificationHeaderThemeVariants = cva(
+    `
+        flex w-full flex-1 flex-row items-center
+        text-sm font-medium
+        select-none
+    `
+);
 
-export const notificationTextThemeVariants = createThemeStrategy({
-    anna: annaNotificationTextVariants,
-    mona: monaNotificationTextVariants
-});
+export const notificationIconThemeVariants = cva(
+    `
+        flex items-center justify-center px-4
+    `,
+    {
+        variants: {
+            type: {
+                info: "text-info",
+                success: "text-success",
+                warning: "text-warning",
+                error: "text-error"
+            }
+        }
+    }
+);
 
-// type NotificationBaseVariantProps = VariantProps<ReturnType<typeof notificationBaseThemeVariants>>;
-// type NotificationBaseVariantInput = VariantInputs<NotificationBaseVariantProps>;
-//
-// export type NotificationVariantProps = NotificationBaseVariantProps;
-// export type NotificationVariantInput = NotificationBaseVariantInput;
+export const notificationTextThemeVariants = cva(
+    `
+        text-sm text-foreground
+    `
+);

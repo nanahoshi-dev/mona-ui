@@ -1,6 +1,5 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
@@ -26,7 +25,6 @@ import { listItemContentThemeVariants } from "../styles/list.styles";
 })
 export class ListItemDirective<TData> {
     readonly #listService = inject(ListService<TData>);
-    readonly #themeService = inject(ThemeService);
     protected readonly disabled = computed(() => this.#listService.isDisabled(this.item()));
     protected readonly highlighted = computed(() => this.#listService.isHighlighted(this.item()));
     protected readonly position = computed(() => {
@@ -44,7 +42,7 @@ export class ListItemDirective<TData> {
         const highlighted = this.highlighted();
         const selected = this.selected();
         const checkboxes = this.#listService.selectableOptions().checkboxes;
-        const classes = listItemContentThemeVariants(this.#themeService.theme())({
+        const classes = listItemContentThemeVariants({
             disabled,
             highlighted,
             selected,

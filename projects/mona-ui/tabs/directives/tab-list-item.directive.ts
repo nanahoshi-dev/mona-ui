@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     tabListListItemThemeVariants,
     TabListListItemVariantInput,
@@ -13,13 +12,11 @@ import {
     }
 })
 export class TabListItemDirective implements TabListListItemVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly listItemClass = computed(() => {
-        const theme = this.#themeService.theme();
         const active = this.active();
         const disabled = this.disabled();
         const rounded = this.rounded();
-        return tabListListItemThemeVariants(theme)({ active, disabled, rounded });
+        return tabListListItemThemeVariants({ active, disabled, rounded });
     });
     public readonly active = input.required<boolean>();
     public readonly disabled = input.required<boolean>();

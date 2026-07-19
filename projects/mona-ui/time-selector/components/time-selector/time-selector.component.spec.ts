@@ -31,8 +31,8 @@ describe("TimeSelectorComponent", () => {
         expect(selectedHour.classList.contains("bg-active")).toBe(true);
         expect(selectedHour.classList.contains("bg-primary")).toBe(false);
         expect(hourList.classList.contains("h-32")).toBe(true);
-        expect(hourList.classList.contains("focus-visible:bg-surface-muted")).toBe(true);
-        expect(hourList.classList.contains("focus-within:bg-surface-muted")).toBe(true);
+        expect(hourList.classList.contains("focus-visible:bg-(--color-focus-surface)")).toBe(true);
+        expect(hourList.classList.contains("focus-within:bg-(--color-focus-surface)")).toBe(true);
     });
 
     it("updates the signal-form value when an option is selected without a footer", () => {

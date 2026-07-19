@@ -3,7 +3,6 @@ import { Component, computed, inject, input, model, output } from "@angular/core
 import { FormsModule } from "@angular/forms";
 import type { FormValueControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import {
     radioButtonCircleThemeVariants,
     radioButtonContainerLabelThemeVariants,
@@ -23,24 +22,20 @@ import {
     }
 })
 export class RadioButtonComponent implements RadioButtonVariantInput, FormValueControl<unknown> {
-    readonly #themeService = inject(ThemeService);
     protected readonly containerLabelClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const labelSize = this.labelSize();
         const userClasses = this.userClass();
-        const variantClasses = radioButtonContainerLabelThemeVariants(theme)({ labelSize });
+        const variantClasses = radioButtonContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, userClasses);
     });
     protected readonly radioButtonCircleClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return radioButtonCircleThemeVariants(theme)({ rounded });
+        return radioButtonCircleThemeVariants({ rounded });
     });
-    protected readonly radioButtonClasses = computed(() => radioButtonThemeVariants(this.#themeService.theme())());
+    protected readonly radioButtonClasses = computed(() => radioButtonThemeVariants());
     protected readonly radioButtonIndicatorClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return radioButtonIndicatorThemeVariants(theme)({ rounded });
+        return radioButtonIndicatorThemeVariants({ rounded });
     });
 
     /**

@@ -57,26 +57,30 @@ Seeds may use opaque CSS Color Level 4 syntax, including hex, RGB, HSL, and OKLC
 
 You can also call `generateThemeColorPalette()` directly when you need to inspect the immutable light and dark color maps before registration.
 
-## Add Explicit Color Overrides
+## Add Explicit Overrides
 
 Register application-wide color additions and overrides in your root bootstrap providers:
 
 ```ts
-import { provideThemeColors } from "@nanahoshi/mona-ui/theme";
+import { provideThemeOverrides } from "@nanahoshi/mona-ui/theme";
 
 bootstrapApplication(AppComponent, {
     providers: [
-        provideThemeColors({
+        provideThemeOverrides({
             theme: "mona",
-            colors: {
-                common: {
+            common: {
+                colors: {
                     "--color-brand": "oklch(62% 0.18 280)"
-                },
-                light: {
+                }
+            },
+            light: {
+                colors: {
                     "--color-primary": "oklch(48% 0.16 280)",
                     "--color-primary-foreground": "white"
-                },
-                dark: {
+                }
+            },
+            dark: {
+                colors: {
                     "--color-primary": "oklch(72% 0.14 280)",
                     "--color-primary-foreground": "oklch(18% 0.02 280)"
                 }
@@ -88,19 +92,49 @@ bootstrapApplication(AppComponent, {
 
 `common` values apply to light and dark variants. Variant-specific values override `common` values. You can register the helper more than once; later providers override earlier providers while preserving unrelated values.
 
-Generated palettes use the same ordered provider pipeline. Place `provideThemeColors()` after `provideThemeColorPalette()` to fine-tune any generated token:
+Generated palettes use the same ordered provider pipeline. Place `provideThemeOverrides()` after `provideThemeColorPalette()` to fine-tune any generated token:
 
 ```ts
 providers: [
     provideThemeColorPalette({ theme: "mona", seeds: { primary: "#7444c3" } }),
-    provideThemeColors({
+    provideThemeOverrides({
         theme: "mona",
-        colors: { dark: { "--color-primary": "oklch(74% 0.14 308.49)" } }
+        dark: { colors: { "--color-primary": "oklch(74% 0.14 308.49)" } }
     })
 ];
 ```
 
-Theme color registrations are static root-level configuration. They customize the global theme written by `ThemeService`; component-level providers do not create independently scoped themes.
+Theme registrations are static root-level configuration. They customize the global theme written by `ThemeService`; component-level providers do not create independently scoped themes.
+
+## Select the Initial Theme
+
+Mona Light is the default. Configure a different registered selection at bootstrap:
+
+```ts
+import { provideThemeOptions } from "@nanahoshi/mona-ui/theme";
+
+providers: [provideThemeOptions({ initialTheme: { name: "anna", variant: "dark" } })];
+```
+
+At runtime, call `themeService.setTheme({ name, variant })`. Unknown families and undeclared variants throw without changing the active signals or root styles.
+
+## Register a Theme Family
+
+Custom families provide one or both variants. Every declared variant is a complete, independent `ThemeProfile` with `colors`, `shadows`, `motion`, and `components` sections:
+
+```ts
+import { provideThemeFamily, type ThemeFamilyRegistration } from "@nanahoshi/mona-ui/theme";
+import { auroraDarkProfile } from "./aurora-dark-profile";
+
+const auroraTheme = {
+    name: "aurora",
+    variants: { dark: auroraDarkProfile }
+} satisfies ThemeFamilyRegistration;
+
+providers: [provideThemeFamily(auroraTheme)];
+```
+
+The profile must declare the full canonical token contract. Optional custom variables may not collide with required profile variables.
 
 ### Using New Color Names with Tailwind
 
@@ -112,8 +146,8 @@ Registering `--color-brand` creates the runtime CSS variable, but Tailwind disco
 }
 ```
 
-Alternatively, use `bg-[var(--color-brand)]` or ordinary CSS such as `color: var(--color-brand)` without adding a named Tailwind token.
+Alternatively, use `bg-(--color-brand)` or ordinary CSS such as `color: var(--color-brand)` without adding a named Tailwind token.
 
-### Replacing Color Resolution
+### Replacing Profile Resolution
 
-Advanced integrations can provide a custom implementation of `ThemeColorStrategy` through `THEME_COLOR_STRATEGY`. Most applications should use `provideThemeColors()` instead.
+Advanced integrations can provide a custom implementation of `ThemeStrategy` through `THEME_STRATEGY`. Most applications should use the family and override providers instead.

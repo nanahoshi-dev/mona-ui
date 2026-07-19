@@ -1,5 +1,4 @@
 import { afterRenderEffect, computed, Directive, ElementRef, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../styles/stepper.styles";
 
 @Directive({
@@ -11,13 +10,11 @@ import { stepperStepIndicatorThemeVariants, StepperVariantProps } from "../style
 export class StepperIndicatorDirective {
     #wasFocused = false;
     readonly #host = inject(ElementRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly stepIndicatorClass = computed(() => {
-        const theme = this.#themeService.theme();
         const active = this.active();
         const focused = this.focused();
         const rounded = this.rounded();
-        return stepperStepIndicatorThemeVariants(theme)({ active, focused, rounded });
+        return stepperStepIndicatorThemeVariants({ active, focused, rounded });
     });
     public readonly active = input.required<boolean>();
     public readonly focused = input.required<boolean>();

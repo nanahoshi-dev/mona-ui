@@ -22,8 +22,8 @@ describe("MenubarComponent", () => {
     });
 
     it("uses a muted bar and an elevated overlay menu", () => {
-        const barClasses = menubarBaseThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
-        const menuClasses = contextMenuContentThemeVariants("mona")({
+        const barClasses = menubarBaseThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
+        const menuClasses = contextMenuContentThemeVariants({
             rounded: "medium",
             size: "medium"
         }).split(/\s+/);

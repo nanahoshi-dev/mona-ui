@@ -1,13 +1,38 @@
+import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
-import { datePopupVariants as annaDatePopupVariants } from "./date-popup.anna.styles";
-import { datePopupVariants as monaDatePopupVariants } from "./date-popup.mona.styles";
 
-export const datePopupThemeVariants = createThemeStrategy({
-    anna: annaDatePopupVariants,
-    mona: monaDatePopupVariants
-});
+export const datePopupThemeVariants = cva(
+    `
+        h-full overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+        bg-surface-overlay text-foreground
+        border border-border shadow-(--shadow-overlay)
+        [&_mona-calendar]:border-none
+        [&_mona-calendar]:shadow-none
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-lg"
+            },
+            size: {
+                large: "text-lg",
+                medium: "text-md",
+                small: "text-sm"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium",
+            size: "medium"
+        }
+    }
+);
 
-export type DatePopupVariantProps = VariantProps<ReturnType<typeof datePopupThemeVariants>>;
+export type DatePopupVariantProps = VariantProps<typeof datePopupThemeVariants>;
+
 export type DatePopupVariantInput = VariantInputs<DatePopupVariantProps>;

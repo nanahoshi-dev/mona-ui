@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChildren, inject, input } from "@angular/core";
 import { from } from "@mirei/ts-collections";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { SplitterPaneStyleDirective } from "../../directives/splitter-pane-style.directive";
 import { splitterBaseThemeVariants, SplitterVariantInput, SplitterVariantProps } from "../../styles/splitter.styles";
 import { SplitterPaneComponent } from "../splitter-pane/splitter-pane.component";
@@ -16,11 +15,9 @@ import { SplitterResizerComponent } from "../splitter-resizer/splitter-resizer.c
     }
 })
 export class SplitterComponent implements SplitterVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const orientation = this.orientation();
-        return splitterBaseThemeVariants(theme)({ orientation });
+        return splitterBaseThemeVariants({ orientation });
     });
     protected readonly paneList = contentChildren(SplitterPaneComponent);
     /**

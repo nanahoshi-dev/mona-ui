@@ -33,7 +33,6 @@ import { DropdownListComponent, DropdownListValueTemplateDirective } from "@nana
 import { DropdownVirtualScrollDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { NavigationKeys } from "@nanahoshi/mona-ui/internal";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { PagerFocusableDirective } from "../../directives/pager-focusable.directive";
 import { PagerInfoTemplateDirective } from "../../directives/pager-info-template.directive";
@@ -91,15 +90,13 @@ export class PagerComponent implements PagerVariantInputs {
     readonly #managedFocusTargets = new Set<HTMLElement>();
     readonly #originalTabIndices = new WeakMap<HTMLElement, string | null>();
     readonly #skip = linkedSignal(() => this.skip());
-    readonly #themeService = inject(ThemeService);
     #widthObserver: ResizeObserver | null = null;
     #previousPageSize = 10;
     private readonly navigationButtonsTemplateList = contentChildren(PagerNavigationButtonsTemplateDirective);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const userClasses = this.userClasses();
-        const classes = pagerBaseThemeVariants(theme)({ rounded });
+        const classes = pagerBaseThemeVariants({ rounded });
         return twMerge(classes, userClasses);
     });
     protected readonly firstPageLabel = "First page";
@@ -121,8 +118,7 @@ export class PagerComponent implements PagerVariantInputs {
         }
     });
     protected readonly infoClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return pagerInfoThemeVariants(theme)();
+        return pagerInfoThemeVariants();
     });
     protected readonly infoVisible = computed(() => {
         const showInfo = this.showInfo();
@@ -130,8 +126,7 @@ export class PagerComponent implements PagerVariantInputs {
         return showInfo && visible;
     });
     protected readonly inputClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return pagerInputThemeVariants(theme)();
+        return pagerInputThemeVariants();
     });
     protected readonly inputValue = linkedSignal(() => this.page());
     protected readonly jumpNextLabel = computed(() => `Jump forward ${this.visiblePages()} pages`);
@@ -142,8 +137,7 @@ export class PagerComponent implements PagerVariantInputs {
         return navigationTemplates.find(t => t.type() === "last");
     });
     protected readonly listClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return pagerListThemeVariants(theme)();
+        return pagerListThemeVariants();
     });
     protected readonly nextJumperVisible = computed(() => {
         const pages = this.pages();
@@ -468,7 +462,7 @@ export class PagerComponent implements PagerVariantInputs {
     }
 
     protected pageItemClasses(active: boolean): string {
-        return pagerListItemThemeVariants(this.#themeService.theme())({ active });
+        return pagerListItemThemeVariants({ active });
     }
 
     private activateInnerNavigation(): void {

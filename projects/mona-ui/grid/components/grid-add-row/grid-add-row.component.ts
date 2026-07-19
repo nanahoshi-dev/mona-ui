@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { ImmutableList } from "@mirei/ts-collections";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridLockedCellDirective } from "../../directives/grid-locked-cell.directive";
 import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
@@ -28,10 +27,8 @@ import { GridEditorComponent } from "../grid-editor/grid-editor.component";
     }
 })
 export class GridAddRowComponent {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridListTableRowThemeVariants(theme)({ selected: false });
+        return gridListTableRowThemeVariants({ selected: false });
     });
     protected readonly gridService = inject(GridService);
 

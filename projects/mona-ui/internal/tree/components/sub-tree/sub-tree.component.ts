@@ -11,7 +11,6 @@ import { ChangeDetectionStrategy, Component, computed, DOCUMENT, inject, input, 
 import { FormsModule } from "@angular/forms";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asapScheduler, take } from "rxjs";
 import { NodeDragEndEvent } from "../../models/NodeDragEndEvent";
 import { InternalNodeDragEvent, NodeDragEvent } from "../../models/NodeDragEvent";
@@ -87,23 +86,18 @@ import { TreeNodeComponent } from "../tree-node/tree-node.component";
 })
 export class SubTreeComponent<T> {
     readonly #document = inject(DOCUMENT);
-    readonly #themeService = inject(ThemeService);
     readonly #zone = inject(NgZone);
     protected readonly listClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return subTreeListThemeVariants(theme)();
+        return subTreeListThemeVariants();
     });
     protected readonly listItemClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return subTreeListItemThemeVariants(theme)();
+        return subTreeListItemThemeVariants();
     });
     protected readonly nodeContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return treeNodeContainerThemeVariants(theme)();
+        return treeNodeContainerThemeVariants();
     });
     protected readonly nodeDraggingClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return treeNodeDraggingThemeVariants(theme)();
+        return treeNodeDraggingThemeVariants();
     });
     protected readonly nodeExpandEnterClass = computed(() =>
         this.nodeAnimationDisabled() ? "" : "mona-tree-node-expand-enter"
@@ -112,8 +106,7 @@ export class SubTreeComponent<T> {
         this.nodeAnimationDisabled() ? "" : "mona-tree-node-expand-leave"
     );
     protected readonly nodeExpanderClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return treeNodeExpanderThemeVariants(theme)();
+        return treeNodeExpanderThemeVariants();
     });
     protected readonly treeService = inject(TreeService);
     protected readonly visibleNodes = computed(() => {

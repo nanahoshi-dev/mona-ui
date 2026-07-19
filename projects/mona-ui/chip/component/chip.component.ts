@@ -15,7 +15,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCircleX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ChipPrefixTemplateDirective } from "../directives/chip-prefix-template.directive";
@@ -37,7 +36,6 @@ import { chipThemeVariants, ChipVariantInputs, ChipVariantProps } from "../style
 export class ChipComponent implements ChipVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly ariaChecked = computed(() => {
         if (!this.toggleable()) {
             return undefined;
@@ -45,14 +43,13 @@ export class ChipComponent implements ChipVariantInputs {
         return this.selected() ? "true" : "false";
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
         const selected = this.selected();
         const userClass = this.userClass();
-        const variantClasses = chipThemeVariants(theme)({ disabled, look, rounded, size, selected });
+        const variantClasses = chipThemeVariants({ disabled, look, rounded, size, selected });
         return twMerge(variantClasses, userClass);
     });
     protected readonly effectiveAriaLabel = computed(() => {

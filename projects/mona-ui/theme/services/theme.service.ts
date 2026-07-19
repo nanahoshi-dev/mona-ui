@@ -1,88 +1,60 @@
 import { computed, DOCUMENT, inject, Injectable, signal } from "@angular/core";
-import { builtInThemeShadows } from "../definitions/built-in-theme-shadows";
-import type { ThemeId, ThemeStyle, ThemeVariant } from "../models/Theme";
-import type {
-    ThemeColors,
-    ThemeShadowDefinition,
-    ThemeShadows,
-    ThemeVariable,
-    ThemeVariables
-} from "../models/ThemeDefinition";
-import { THEME_COLOR_STRATEGY } from "../tokens/theme-color.tokens";
+import type { ThemeSelection } from "../models/Theme";
+import { flattenThemeProfile, type ThemeProfile, type ThemeVariable } from "../models/ThemeDefinition";
+import { THEME_OPTIONS, THEME_STRATEGY } from "../tokens/theme.tokens";
 
-interface ActiveTheme {
-    readonly id: ThemeId;
-    readonly style: ThemeStyle;
-    readonly variant: ThemeVariant;
-}
-
-function parseThemeId(themeId: string): ActiveTheme {
-    switch (themeId) {
-        case "anna-dark":
-            return { id: themeId, style: "anna", variant: "dark" };
-        case "mona-light":
-            return { id: themeId, style: "mona", variant: "light" };
-        case "mona-dark":
-            return { id: themeId, style: "mona", variant: "dark" };
-        default:
-            throw new Error(`Unknown Mona UI theme identifier: "${themeId}".`);
-    }
-}
-
-@Injectable({
-    providedIn: "root"
-})
+@Injectable({ providedIn: "root" })
 export class ThemeService {
     readonly #document = inject(DOCUMENT);
-    readonly #strategy = inject(THEME_COLOR_STRATEGY);
-    readonly #activeTheme = signal<ActiveTheme>(parseThemeId("mona-light"));
+    readonly #options = inject(THEME_OPTIONS);
+    readonly #strategy = inject(THEME_STRATEGY);
+    readonly #initialSelection = normalizeSelection(this.#options.initialTheme);
+    readonly #activeSelection = signal<ThemeSelection>(this.#initialSelection);
+    readonly #activeProfile = signal<ThemeProfile>(this.#strategy.resolve(this.#initialSelection));
     readonly #appliedVariables = new Set<ThemeVariable>();
 
-    public readonly themeId = computed(() => this.#activeTheme().id);
-    public readonly theme = computed(() => this.#activeTheme().style);
-    public readonly themeVariant = computed(() => this.#activeTheme().variant);
+    public readonly profile = this.#activeProfile.asReadonly();
+    public readonly selection = this.#activeSelection.asReadonly();
+    public readonly themeName = computed(() => this.#activeSelection().name);
+    public readonly themeVariant = computed(() => this.#activeSelection().variant);
 
     public constructor() {
-        this.#applyThemeVariables(this.#resolveThemeVariables("mona", "light"));
+        this.#applyTheme(this.#initialSelection, this.#activeProfile());
     }
 
-    public setThemeId(themeId: ThemeId): void {
-        const nextTheme = parseThemeId(themeId);
-        const variables = this.#resolveThemeVariables(nextTheme.style, nextTheme.variant);
-
-        this.#activeTheme.set(nextTheme);
-        this.#applyThemeVariables(variables);
+    public setTheme(selection: ThemeSelection): void {
+        const normalized = normalizeSelection(selection);
+        const profile = this.#strategy.resolve(normalized);
+        this.#applyTheme(normalized, profile);
+        this.#activeProfile.set(profile);
+        this.#activeSelection.set(normalized);
     }
 
-    #applyThemeVariables(variables: ThemeVariables): void {
+    #applyTheme(selection: ThemeSelection, profile: ThemeProfile): void {
         const root = this.#document.documentElement;
         if (!root) {
             return;
         }
 
+        const variables = flattenThemeProfile(profile);
         for (const previousName of this.#appliedVariables) {
             if (!(previousName in variables)) {
                 root.style.removeProperty(previousName);
             }
         }
-
         for (const [name, value] of Object.entries(variables)) {
             root.style.setProperty(name, value);
         }
 
+        root.setAttribute("data-mona-theme", selection.name);
+        root.setAttribute("data-mona-variant", selection.variant);
         this.#appliedVariables.clear();
         for (const name of Object.keys(variables)) {
             this.#appliedVariables.add(name as ThemeVariable);
         }
     }
+}
 
-    #resolveThemeVariables(theme: ThemeStyle, variant: ThemeVariant): ThemeVariables {
-        const colors: ThemeColors = this.#strategy.resolve(theme, variant);
-        const definition: ThemeShadowDefinition = builtInThemeShadows[theme];
-        const shadows: ThemeShadows | undefined = definition[variant];
-        if (!shadows) {
-            throw new Error(`Mona UI theme "${theme}" does not define shadows for the "${variant}" variant.`);
-        }
-        return { ...colors, ...shadows };
-    }
+function normalizeSelection(selection: ThemeSelection): ThemeSelection {
+    return Object.freeze({ name: selection.name, variant: selection.variant });
 }

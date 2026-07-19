@@ -32,7 +32,7 @@ describe("DatePickerComponent", () => {
     });
 
     it("uses an overlay-tier popup instead of an input-tier surface", () => {
-        const classes = datePopupThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
+        const classes = datePopupThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
 
         expect(classes).toContain("bg-surface-overlay");
         expect(classes).toContain("border-border");

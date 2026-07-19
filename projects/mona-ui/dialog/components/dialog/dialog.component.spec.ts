@@ -21,8 +21,8 @@ describe("DialogComponent", () => {
     });
 
     it("uses an overlay surface with a muted footer", () => {
-        const dialogClasses = dialogBaseThemeVariants("mona")({ rounded: "medium" }).split(/\s+/);
-        const footerClasses = dialogFooterThemeVariants("mona")({ layout: "end", rounded: "medium" }).split(/\s+/);
+        const dialogClasses = dialogBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const footerClasses = dialogFooterThemeVariants({ layout: "end", rounded: "medium" }).split(/\s+/);
 
         expect(dialogClasses).toContain("bg-surface-overlay");
         expect(dialogClasses).toContain("border-border");

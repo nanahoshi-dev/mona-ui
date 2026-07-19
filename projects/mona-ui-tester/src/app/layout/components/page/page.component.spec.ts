@@ -25,21 +25,26 @@ describe("PageComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("offers all built-in themes and switches to Anna Dark", () => {
+    it("offers built-in and custom themes and switches to Anna Dark", () => {
         const themeService = TestBed.inject(ThemeService);
-        expect(component["themeOptions"].map(theme => theme.id)).toEqual(["mona-light", "mona-dark", "anna-dark"]);
+        expect(component["themeOptions"].map(theme => `${theme.name}-${theme.variant}`)).toEqual([
+            "mona-light",
+            "mona-dark",
+            "anna-dark",
+            "aurora-dark"
+        ]);
 
-        component["onThemeChange"](THEME_OPTIONS.find(theme => theme.id === "anna-dark")!);
+        component["onThemeChange"](THEME_OPTIONS.find(theme => theme.name === "anna" && theme.variant === "dark")!);
         fixture.detectChanges();
 
-        expect(themeService.themeId()).toBe("anna-dark");
-        expect(themeService.theme()).toBe("anna");
+        expect(themeService.selection()).toEqual({ name: "anna", variant: "dark" });
+        expect(themeService.themeName()).toBe("anna");
         expect(themeService.themeVariant()).toBe("dark");
     });
 
     it("has no AXE violations with Anna Dark active", async () => {
         const themeService = TestBed.inject(ThemeService);
-        themeService.setThemeId("anna-dark");
+        themeService.setTheme({ name: "anna", variant: "dark" });
         fixture.detectChanges();
 
         // jsdom has no canvas implementation; theme specs verify Anna contrast pairs numerically.

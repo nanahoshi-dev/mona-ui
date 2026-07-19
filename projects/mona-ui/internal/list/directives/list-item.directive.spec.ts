@@ -41,15 +41,15 @@ describe("ListItemDirective", () => {
     });
 
     it("uses neutral persistent and highlighted states", () => {
-        const classes = listItemContentThemeVariants("mona")({
+        const classes = listItemContentThemeVariants({
             checkboxes: false,
             disabled: false,
             highlighted: true,
             selected: true
         });
 
-        expect(classes).toContain("bg-active");
-        expect(classes).toContain("text-foreground");
+        expect(classes).toContain("bg-(--color-selected)");
+        expect(classes).toContain("text-(--color-selected-foreground)");
         expect(classes).toContain("inset-ring-focus-indicator/35");
         expect(classes).not.toContain("bg-primary");
         expect(classes).not.toContain("bg-accent-hover");

@@ -13,7 +13,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { JSONContent } from "@tiptap/core";
 import { twMerge } from "tailwind-merge";
 import { ContentChangeEvent } from "../../models/ContentChangeEvent";
@@ -72,22 +71,18 @@ import { EditorTextAlignmentsComponent } from "../editor-text-alignments/editor-
 })
 export class EditorComponent {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const userClass = this.userClass();
-        const variantClass = editorBaseThemeVariants(theme)();
+        const variantClass = editorBaseThemeVariants();
         return twMerge(variantClass, userClass);
     });
     protected readonly containerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return editorContainerThemeVariants(theme)();
+        return editorContainerThemeVariants();
     });
     protected readonly editorContainer = viewChild.required<ElementRef<HTMLDivElement>>("editorContainer");
     protected readonly editorService = inject(EditorService);
     protected readonly toolbarClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return editorToolbarThemeVariants(theme)();
+        return editorToolbarThemeVariants();
     });
 
     /**

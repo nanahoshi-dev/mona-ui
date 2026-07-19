@@ -2,7 +2,6 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input } from "@angular/core";
 import { getPercentage } from "@nanahoshi/mona-ui/common";
 import type { Action } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
@@ -47,11 +46,9 @@ import {
     }
 })
 export class CircularProgressBarComponent implements CircularProgressBarBaseVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
-        const classes = circularProgressBarBaseThemeVariants(theme)({ disabled });
+        const classes = circularProgressBarBaseThemeVariants({ disabled });
         const animateClass = this.animate() ? "" : "[&_svg_circle]:transition-none";
         return twMerge(classes, this.userClass(), animateClass);
     });

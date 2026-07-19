@@ -1,59 +1,91 @@
+import { cva } from "class-variance-authority";
 import { VariantProps } from "class-variance-authority";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import {
-    popupMenuBaseVariants as annaPopupMenuBaseVariants,
-    popupMenuContainerVariants as annaPopupMenuContainerVariants,
-    popupMenuGroupHeaderVariants as annaPopupMenuGroupHeaderVariants,
-    popupMenuIconContainerVariants as annaPopupMenuIconContainerVariants,
-    popupMenuItemVariants as annaPopupMenuItemVariants,
-    popupMenuLinkVariants as annaPopupMenuLinkVariants
-} from "./popup-menu.anna.styles";
-import {
-    popupMenuBaseVariants as monaPopupMenuBaseVariants,
-    popupMenuContainerVariants as monaPopupMenuContainerVariants,
-    popupMenuGroupHeaderVariants as monaPopupMenuGroupHeaderVariants,
-    popupMenuIconContainerVariants as monaPopupMenuIconContainerVariants,
-    popupMenuItemVariants as monaPopupMenuItemVariants,
-    popupMenuLinkVariants as monaPopupMenuLinkVariants
-} from "./popup-menu.mona.styles";
 
-export const popupMenuBaseThemeVariants = createThemeStrategy({
-    anna: annaPopupMenuBaseVariants,
-    mona: monaPopupMenuBaseVariants
+export const popupMenuBaseThemeVariants = cva(`h-full w-full overflow-hidden`, {
+    variants: {
+        rounded: {
+            small: "rounded-sm",
+            medium: "rounded-md",
+            large: "rounded-lg",
+            none: "rounded-none"
+        }
+    }
 });
 
-export const popupMenuContainerThemeVariants = createThemeStrategy({
-    anna: annaPopupMenuContainerVariants,
-    mona: monaPopupMenuContainerVariants
-});
+export const popupMenuContainerThemeVariants = cva(
+    `
+        flex flex-col p-1
+        bg-surface-overlay text-foreground
+        border border-border shadow-(--shadow-overlay) outline-none
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                none: "rounded-none"
+            }
+        }
+    }
+);
 
-export const popupMenuGroupHeaderThemeVariants = createThemeStrategy({
-    anna: annaPopupMenuGroupHeaderVariants,
-    mona: monaPopupMenuGroupHeaderVariants
-});
+export const popupMenuGroupHeaderThemeVariants = cva(
+    `inline-flex w-full select-none px-2 py-1 font-bold text-muted-foreground`,
+    {
+        variants: {
+            size: {
+                small: "text-xs",
+                medium: "text-sm",
+                large: "text-md"
+            }
+        }
+    }
+);
 
-export const popupMenuIconContainerThemeVariants = createThemeStrategy({
-    anna: annaPopupMenuIconContainerVariants,
-    mona: monaPopupMenuIconContainerVariants
-});
+export const popupMenuIconContainerThemeVariants = cva(`absolute left-2 flex items-center justify-center`);
 
-export const popupMenuItemThemeVariants = createThemeStrategy({
-    anna: annaPopupMenuItemVariants,
-    mona: monaPopupMenuItemVariants
-});
+export const popupMenuItemThemeVariants = cva(
+    `
+        relative flex cursor-pointer select-none items-center gap-2 py-1 pr-2 pl-8
+        text-foreground outline-none
+        hover:bg-hover hover:text-foreground
+        focus-within:bg-hover focus-within:text-foreground focus-within:outline-none
+        data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:text-disabled-foreground
+        data-[active='true']:bg-(--color-selected) data-[active='true']:text-(--color-selected-foreground)
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                none: "rounded-none"
+            },
+            size: {
+                small: "text-xs",
+                medium: "text-sm",
+                large: "text-md"
+            }
+        }
+    }
+);
 
-export const popupMenuLinkThemeVariants = createThemeStrategy({
-    anna: annaPopupMenuLinkVariants,
-    mona: monaPopupMenuLinkVariants
-});
+export const popupMenuLinkThemeVariants = cva(`flex items-center justify-center`);
 
-type PopupMenuBaseVariantProps = VariantProps<ReturnType<typeof popupMenuBaseThemeVariants>>;
-type PopupMenuContainerVariantProps = VariantProps<ReturnType<typeof popupMenuContainerThemeVariants>>;
-type PopupMenuGroupHeaderVariantProps = VariantProps<ReturnType<typeof popupMenuGroupHeaderThemeVariants>>;
-type PopupMenuIconContainerVariantProps = VariantProps<ReturnType<typeof popupMenuIconContainerThemeVariants>>;
-type PopupMenuItemVariantProps = VariantProps<ReturnType<typeof popupMenuItemThemeVariants>>;
-type PopupMenuLinkVariantProps = VariantProps<ReturnType<typeof popupMenuLinkThemeVariants>>;
+type PopupMenuBaseVariantProps = VariantProps<typeof popupMenuBaseThemeVariants>;
+
+type PopupMenuContainerVariantProps = VariantProps<typeof popupMenuContainerThemeVariants>;
+
+type PopupMenuGroupHeaderVariantProps = VariantProps<typeof popupMenuGroupHeaderThemeVariants>;
+
+type PopupMenuIconContainerVariantProps = VariantProps<typeof popupMenuIconContainerThemeVariants>;
+
+type PopupMenuItemVariantProps = VariantProps<typeof popupMenuItemThemeVariants>;
+
+type PopupMenuLinkVariantProps = VariantProps<typeof popupMenuLinkThemeVariants>;
 
 export type PopupMenuVariantProps = PopupMenuBaseVariantProps &
     PopupMenuContainerVariantProps &
@@ -61,4 +93,5 @@ export type PopupMenuVariantProps = PopupMenuBaseVariantProps &
     PopupMenuIconContainerVariantProps &
     PopupMenuItemVariantProps &
     PopupMenuLinkVariantProps;
+
 export type PopupMenuVariantInput = VariantInputs<PopupMenuVariantProps>;

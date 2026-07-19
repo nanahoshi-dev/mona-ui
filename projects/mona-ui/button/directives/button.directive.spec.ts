@@ -499,7 +499,8 @@ describe("ButtonDirective", () => {
         it("should apply selected styles when selected=true", () => {
             component.selected.set(true);
             fixture.detectChanges();
-            expect(buttonElement.classList.contains("bg-active")).toBe(true);
+            expect(buttonElement.classList.contains("bg-(--color-selected)")).toBe(true);
+            expect(buttonElement.classList.contains("text-(--color-selected-foreground)")).toBe(true);
             expect(buttonElement.classList.contains("bg-primary-selected")).toBe(false);
         });
 

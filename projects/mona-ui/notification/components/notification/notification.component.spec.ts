@@ -48,8 +48,8 @@ describe("NotificationComponent", () => {
     });
 
     it("uses an overlay surface while keeping semantic color on the status icon", () => {
-        const notificationClasses = notificationBaseThemeVariants("mona")().split(/\s+/);
-        const errorIconClasses = notificationIconThemeVariants("mona")({ type: "error" }).split(/\s+/);
+        const notificationClasses = notificationBaseThemeVariants().split(/\s+/);
+        const errorIconClasses = notificationIconThemeVariants({ type: "error" }).split(/\s+/);
 
         expect(notificationClasses).toContain("bg-surface-overlay");
         expect(notificationClasses).toContain("border-border");

@@ -51,7 +51,6 @@ import {
     TextBoxPrefixTemplateDirective,
     TextBoxSuffixTemplateDirective
 } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { type ColorMode, type ColorOutputFormat } from "@nanahoshi/mona-ui/common";
 import { distinctUntilChanged, fromEvent, Subject, switchMap, takeUntil } from "rxjs";
 import { ColorInput } from "../../models/ColorInput";
@@ -92,7 +91,6 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     readonly #clipboard = inject(Clipboard);
     readonly #destroyRef = inject(DestroyRef);
     readonly #injector = inject(Injector);
-    readonly #themeService = inject(ThemeService);
     readonly #valueChange$ = new Subject<string | null>();
     readonly #viewReady = signal(false);
     readonly #zone = inject(NgZone);
@@ -108,8 +106,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         return `linear-gradient(to right, transparent, ${color})`;
     });
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return colorGradientBaseThemeVariants(theme)();
+        return colorGradientBaseThemeVariants();
     });
     protected readonly colorInputs = computed(() => {
         const mode = this.colorMode();
@@ -128,9 +125,8 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     });
     protected readonly colorMode = signal<ColorMode>("rgb");
     protected readonly colorPreviewClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorGradientPreviewThemeVariants(theme)({ rounded });
+        return colorGradientPreviewThemeVariants({ rounded });
     });
     protected readonly colorPreviews = computed(() => [
         {
@@ -167,14 +163,12 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
     });
     protected readonly hsvRectangleClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        return colorGradientHsvRectangleThemeVariants(theme)({ rounded });
+        return colorGradientHsvRectangleThemeVariants({ rounded });
     });
     protected readonly hsvRectangleHandleClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorGradientHsvRectangleHandleThemeVariants(theme)({ rounded });
+        return colorGradientHsvRectangleHandleThemeVariants({ rounded });
     });
     protected readonly hueValue$ = new Subject<number>();
     protected readonly invalidState = computed(
@@ -190,8 +184,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
         return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${this.alpha() / 255})`;
     });
     protected readonly sliderHandleClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return colorGradientSliderHandleThemeVariants(theme)();
+        return colorGradientSliderHandleThemeVariants();
     });
     protected readonly sliderHeight = 10;
 

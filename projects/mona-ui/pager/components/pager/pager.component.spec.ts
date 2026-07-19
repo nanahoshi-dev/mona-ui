@@ -683,8 +683,8 @@ describe("PagerComponent with page-size template", () => {
 
 describe("Pager visual contract", () => {
     it("uses a muted structural strip and neutral supporting text", () => {
-        const baseClasses = pagerBaseThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
-        const infoClasses = pagerInfoThemeVariants("mona")().split(/\s+/);
+        const baseClasses = pagerBaseThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
+        const infoClasses = pagerInfoThemeVariants().split(/\s+/);
 
         expect(baseClasses).toContain("bg-surface-muted");
         expect(baseClasses).toContain("border-border-subtle");

@@ -1,5 +1,5 @@
 import { Component, computed, inject } from "@angular/core";
-import { ThemeService, THEME_COLOR_STRATEGY, type ThemeColorVariable } from "@nanahoshi/mona-ui/theme";
+import { ThemeService, type ThemeColorVariable } from "@nanahoshi/mona-ui/theme";
 import { wcagContrast } from "culori";
 
 interface ColorRolePreview {
@@ -17,12 +17,10 @@ interface ColorRolePreview {
 })
 export class ThemeColorsDocComponent {
     readonly #themeService = inject(ThemeService);
-    readonly #strategy = inject(THEME_COLOR_STRATEGY);
-
-    protected readonly themeId = this.#themeService.themeId;
-    protected readonly colors = computed(() =>
-        this.#strategy.resolve(this.#themeService.theme(), this.#themeService.themeVariant())
+    protected readonly themeLabel = computed(
+        () => `${this.#themeService.themeName()}-${this.#themeService.themeVariant()}`
     );
+    protected readonly colors = computed(() => this.#themeService.profile().colors);
     protected readonly roles: readonly ColorRolePreview[] = [
         { label: "Primary", token: "primary" },
         { label: "Secondary", token: "secondary" },

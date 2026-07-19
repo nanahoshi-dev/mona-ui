@@ -68,7 +68,7 @@ mona-dropdown-button
 Templates placed directly inside `<mona-dropdown-button>` apply globally to all matching items. Templates nested inside a specific item override only that item.
 
 | Directive attribute                          | Scope          | Template context                                     |
-|----------------------------------------------|----------------|------------------------------------------------------|
+| -------------------------------------------- | -------------- | ---------------------------------------------------- |
 | `monaDropdownButtonTextTemplate`             | Button label   | `$implicit: string` — the current `text` input value |
 | `monaDropdownButtonMenuGroupTemplate`        | Global / Group | `$implicit: string` — the group title                |
 | `monaDropdownButtonMenuItemIconTemplate`     | Global / Item  | `$implicit` — menu item object (`label`, `disabled`) |
@@ -129,10 +129,7 @@ Templates placed directly inside `<mona-dropdown-button>` apply globally to all 
 
 ```html
 <mona-dropdown-button text="Settings">
-    <mona-dropdown-button-checkbox-item
-        label="Dark Mode"
-        [checked]="darkMode()"
-        (checkedChange)="darkMode.set($event)">
+    <mona-dropdown-button-checkbox-item label="Dark Mode" [checked]="darkMode()" (checkedChange)="darkMode.set($event)">
     </mona-dropdown-button-checkbox-item>
     <mona-dropdown-button-checkbox-item
         label="Notifications"
@@ -146,9 +143,7 @@ Templates placed directly inside `<mona-dropdown-button>` apply globally to all 
 
 ```html
 <mona-dropdown-button text="Priority">
-    <mona-dropdown-button-radio-group
-        title="Set priority"
-        [(value)]="priority">
+    <mona-dropdown-button-radio-group title="Set priority" [(value)]="priority">
         <mona-dropdown-button-radio-item label="Low" value="low"></mona-dropdown-button-radio-item>
         <mona-dropdown-button-radio-item label="Medium" value="medium"></mona-dropdown-button-radio-item>
         <mona-dropdown-button-radio-item label="High" value="high"></mona-dropdown-button-radio-item>
@@ -199,7 +194,7 @@ Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-bu
 ### Keyboard navigation
 
 | Key                                         | Action                                         |
-|---------------------------------------------|------------------------------------------------|
+| ------------------------------------------- | ---------------------------------------------- |
 | `Tab`                                       | Move focus to / from the button                |
 | `ArrowDown` / `ArrowUp` / `Enter` / `Space` | Open the popup menu                            |
 | `Escape` (while menu open)                  | Close the popup and return focus to the button |
@@ -211,7 +206,7 @@ Calling `event.preventDefault()` on the `menuClick` event of a `mona-dropdown-bu
 The button element carries the following attributes:
 
 | Attribute         | When present                       | Value                                                                         |
-|-------------------|------------------------------------|-------------------------------------------------------------------------------|
+| ----------------- | ---------------------------------- | ----------------------------------------------------------------------------- |
 | `aria-haspopup`   | Always                             | `"menu"`                                                                      |
 | `aria-expanded`   | Always                             | `"true"` when the menu is open, `"false"` when closed                         |
 | `aria-controls`   | Always                             | The popup element's auto-generated ID                                         |
@@ -232,7 +227,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name             | Type                                                                                                                                | Default     | Description                                                                                                                                                         |
-|------------------|-------------------------------------------------------------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `aria-label`     | `string`                                                                                                                            | `""`        | Accessible name for the dropdown button. Falls back to `"{text} dropdown button"` when empty; provide an explicit value when no visible text is present.            |
 | `ariaLabelledby` | `string`                                                                                                                            | `""`        | ID of an external element that provides the accessible name for the dropdown button. Takes precedence over `aria-label` when both are set.                          |
 | `class`          | `string`                                                                                                                            | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                           |
@@ -247,7 +242,7 @@ The button element carries the following attributes:
 #### Outputs
 
 | Name            | Type                 | Description                                            |
-|-----------------|----------------------|--------------------------------------------------------|
+| --------------- | -------------------- | ------------------------------------------------------ |
 | `menuItemClick` | `MenuItemClickEvent` | Emitted when any item in the dropdown menu is clicked. |
 
 ---
@@ -259,14 +254,14 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name       | Type      | Default | Description                                                                |
-|------------|-----------|---------|----------------------------------------------------------------------------|
+| ---------- | --------- | ------- | -------------------------------------------------------------------------- |
 | `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection. |
 | `label`    | `string`  | `""`    | Display text of the menu item.                                             |
 
 #### Outputs
 
 | Name        | Type                 | Description                                             |
-|-------------|----------------------|---------------------------------------------------------|
+| ----------- | -------------------- | ------------------------------------------------------- |
 | `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected by mouse or keyboard. |
 
 ---
@@ -278,7 +273,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name    | Type     | Default | Description                                                      |
-|---------|----------|---------|------------------------------------------------------------------|
+| ------- | -------- | ------- | ---------------------------------------------------------------- |
 | `title` | `string` | —       | Required. Section header text displayed above the group's items. |
 
 ---
@@ -290,7 +285,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name       | Type      | Default | Description                                                                 |
-|------------|-----------|---------|-----------------------------------------------------------------------------|
+| ---------- | --------- | ------- | --------------------------------------------------------------------------- |
 | `checked`  | `boolean` | `false` | Whether the item is checked. Bind `(checkedChange)` to track state changes. |
 | `disabled` | `boolean` | `false` | Renders the menu item with reduced visual emphasis and prevents selection.  |
 | `label`    | `string`  | `""`    | Display text of the menu item.                                              |
@@ -298,7 +293,7 @@ The button element carries the following attributes:
 #### Outputs
 
 | Name            | Type                 | Description                                                                                                               |
-|-----------------|----------------------|---------------------------------------------------------------------------------------------------------------------------|
+| --------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `checkedChange` | `boolean`            | Emitted when the checked state changes after a click. Not emitted when `event.preventDefault()` is called on `menuClick`. |
 | `menuClick`     | `MenuItemClickEvent` | Emitted when the item is clicked. Call `event.preventDefault()` to suppress the state change.                             |
 
@@ -311,7 +306,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name    | Type     | Default | Description                                                                                                                                                                          |
-|---------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `title` | `string` | `""`    | Section header text displayed above the radio items. When empty, the items are still grouped logically but no header is rendered.                                                    |
 | `value` | `string` | `""`    | Two-way bindable selected value. Use `[(value)]` to synchronize with a signal or property. The matching `mona-dropdown-button-radio-item` with the same `value` renders as selected. |
 
@@ -324,7 +319,7 @@ The button element carries the following attributes:
 #### Inputs
 
 | Name       | Type      | Default | Description                                                                                              |
-|------------|-----------|---------|----------------------------------------------------------------------------------------------------------|
+| ---------- | --------- | ------- | -------------------------------------------------------------------------------------------------------- |
 | `disabled` | `boolean` | `false` | Renders the radio item with reduced visual emphasis and prevents selection.                              |
 | `label`    | `string`  | `""`    | Display text of the radio item.                                                                          |
 | `value`    | `string`  | —       | Required. The value emitted to the parent `mona-dropdown-button-radio-group` when this item is selected. |
@@ -332,7 +327,7 @@ The button element carries the following attributes:
 #### Outputs
 
 | Name        | Type                 | Description                        |
-|-------------|----------------------|------------------------------------|
+| ----------- | -------------------- | ---------------------------------- |
 | `menuClick` | `MenuItemClickEvent` | Emitted when the item is selected. |
 
 ---
@@ -359,7 +354,7 @@ Renders a horizontal visual divider between sections. Has no inputs or outputs.
 - [x] ariaLabel suppressed when ariaLabelledby is set — documented in ARIA table
 - [x] No internal or unexported APIs exposed
 - [x] Basic examples compile against the public API surface
-- [x] clear and link look variants included (present in button.mona.styles.ts)
+- [x] clear and link look variants included (present in button.styles.ts)
 -->
 
 <!-- TODO(owner-review): Verify the full keyboard navigation map inside the popup (arrow key item traversal, Enter to select, Escape for nested submenus). -->

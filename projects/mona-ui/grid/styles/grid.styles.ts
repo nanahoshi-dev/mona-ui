@@ -1,283 +1,413 @@
+import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
-import {
-    gridBaseVariants as annaGridBaseVariants,
-    gridCellBaseVariants as annaGridCellBaseVariants,
-    gridCellContainerVariants as annaGridCellContainerVariants,
-    gridCellDirtyIndicatorVariants as annaGridCellDirtyIndicatorVariants,
-    gridCellEditorBaseVariants as annaGridCellEditorBaseVariants,
-    gridCellEditorInputVariants as annaGridCellEditorInputVariants,
-    gridCellTextVariants as annaGridCellTextVariants,
-    gridColumnActionsVariants as annaGridColumnActionsVariants,
-    gridColumnDragPreviewVariants as annaGridColumnDragPreviewVariants,
-    gridColumnDropHintVariants as annaGridColumnDropHintVariants,
-    gridColumnResizerVariants as annaGridColumnResizerVariants,
-    gridDetailContentCellVariants as annaGridDetailContentCellVariants,
-    gridDetailIndentCellVariants as annaGridDetailIndentCellVariants,
-    gridDetailRowVariants as annaGridDetailRowVariants,
-    gridFilterRowCellVariants as annaGridFilterRowCellVariants,
-    gridFooterTableCellVariants as annaGridFooterTableCellVariants,
-    gridFooterTableRowVariants as annaGridFooterTableRowVariants,
-    gridFooterTableVariants as annaGridFooterTableVariants,
-    gridFooterVariants as annaGridFooterVariants,
-    gridGroupPanelPlaceholderVariants as annaGridGroupPanelPlaceholderVariants,
-    gridGroupPanelVariants as annaGridGroupPanelVariants,
-    gridGroupRowVariants as annaGridGroupRowVariants,
-    gridHeaderTableCellVariants as annaGridHeaderTableCellVariants,
-    gridHeaderTableColumnTitleVariants as annaGridHeaderTableColumnTitleVariants,
-    gridHeaderTableColumnWrapVariants as annaGridHeaderTableColumnWrapVariants,
-    gridHeaderTableRowVariants as annaGridHeaderTableRowVariants,
-    gridHeaderTableVariants as annaGridHeaderTableVariants,
-    gridHeaderVariants as annaGridHeaderVariants,
-    gridListBaseVariants as annaGridListBaseVariants,
-    gridListTableCellVariants as annaGridListTableCellVariants,
-    gridListTableRowVariants as annaGridListTableRowVariants,
-    gridListTableVariants as annaGridListTableVariants,
-    gridNoDataVariants as annaGridNoDataVariants
-} from "./grid.anna.styles";
-import {
-    gridBaseVariants as monaGridBaseVariants,
-    gridCellBaseVariants as monaGridCellBaseVariants,
-    gridCellContainerVariants as monaGridCellContainerVariants,
-    gridCellDirtyIndicatorVariants as monaGridCellDirtyIndicatorVariants,
-    gridCellEditorBaseVariants as monaGridCellEditorBaseVariants,
-    gridCellEditorInputVariants as monaGridCellEditorInputVariants,
-    gridCellTextVariants as monaGridCellTextVariants,
-    gridColumnActionsVariants as monaGridColumnActionsVariants,
-    gridColumnDragPreviewVariants as monaGridColumnDragPreviewVariants,
-    gridColumnDropHintVariants as monaGridColumnDropHintVariants,
-    gridColumnResizerVariants as monaGridColumnResizerVariants,
-    gridDetailContentCellVariants as monaGridDetailContentCellVariants,
-    gridDetailIndentCellVariants as monaGridDetailIndentCellVariants,
-    gridDetailRowVariants as monaGridDetailRowVariants,
-    gridFilterRowCellVariants as monaGridFilterRowCellVariants,
-    gridFooterTableCellVariants as monaGridFooterTableCellVariants,
-    gridFooterTableRowVariants as monaGridFooterTableRowVariants,
-    gridFooterTableVariants as monaGridFooterTableVariants,
-    gridFooterVariants as monaGridFooterVariants,
-    gridGroupPanelPlaceholderVariants as monaGridGroupPanelPlaceholderVariants,
-    gridGroupPanelVariants as monaGridGroupPanelVariants,
-    gridGroupRowVariants as monaGridGroupRowVariants,
-    gridHeaderTableCellVariants as monaGridHeaderTableCellVariants,
-    gridHeaderTableColumnTitleVariants as monaGridHeaderTableColumnTitleVariants,
-    gridHeaderTableColumnWrapVariants as monaGridHeaderTableColumnWrapVariants,
-    gridHeaderTableRowVariants as monaGridHeaderTableRowVariants,
-    gridHeaderTableVariants as monaGridHeaderTableVariants,
-    gridHeaderVariants as monaGridHeaderVariants,
-    gridListBaseVariants as monaGridListBaseVariants,
-    gridListTableCellVariants as monaGridListTableCellVariants,
-    gridListTableRowVariants as monaGridListTableRowVariants,
-    gridListTableVariants as monaGridListTableVariants,
-    gridNoDataVariants as monaGridNoDataVariants
-} from "./grid.mona.styles";
 
-export const gridBaseThemeVariants = createThemeStrategy({
-    anna: annaGridBaseVariants,
-    mona: monaGridBaseVariants
+const gridRowHeightClass = "h-9";
+
+export const gridBaseThemeVariants = cva(
+    `
+        relative flex flex-col
+        h-full overflow-hidden
+        text-foreground text-sm
+        bg-surface border border-border
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                none: "rounded-none"
+            }
+        }
+    }
+);
+
+export const gridCellBaseThemeVariants = cva(
+    `
+        absolute inset-0
+        flex w-full
+        shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]
+    `
+);
+
+export const gridCellContainerThemeVariants = cva(
+    `
+        flex h-full w-full items-center
+        flex-1 outline-none
+        overflow-hidden
+    `,
+    {
+        variants: {
+            editing: {
+                true: "px-0",
+                false: "px-2"
+            }
+        },
+        defaultVariants: {
+            editing: false
+        }
+    }
+);
+
+export const gridCellDirtyIndicatorThemeVariants = cva(`
+    absolute top-0 right-0 w-0 h-0
+    border-t-[8px] border-l-[8px]
+    border-t-destructive border-l-transparent
+    pointer-events-none
+`);
+
+export const gridCellEditorBaseThemeVariants = cva(`
+    flex h-full w-full items-center
+    bg-input-background border border-focus-indicator/40
+`);
+
+export const gridCellEditorInputThemeVariants = cva(`
+    h-full w-full border-transparent
+    data-[expanded='true']:border-focus-indicator
+    data-[expanded='true']:focus-within:border-focus-indicator/40
+`);
+
+export const gridCellTextThemeVariants = cva(`
+    truncate cursor-default select-none
+`);
+
+export const gridColumnActionsThemeVariants = cva(`
+    flex items-center justify-center
+    text-xs [&_i]:text-xs
+`);
+
+export const gridColumnDragPreviewThemeVariants = cva(
+    `
+        flex items-center justify-center
+        px-2! py-0.5!
+        bg-surface-raised! text-foreground!
+        border! border-border! rounded-md shadow-(--shadow-overlay)!
+    `
+);
+
+export const gridColumnDropHintThemeVariants = cva(`
+    absolute flex w-1 h-full bg-primary z-10! top-0 bottom-0
+`);
+
+export const gridColumnResizerThemeVariants = cva(`
+    absolute top-0 bottom-0 w-3 bg-transparent cursor-col-resize z-10 -right-1.5
+`);
+
+export const gridDetailContentCellThemeVariants = cva(`border-b border-b-border-subtle`, {
+    variants: {
+        nextIsGroup: {
+            true: "",
+            false: ""
+        }
+    }
 });
 
-export const gridCellBaseThemeVariants = createThemeStrategy({
-    anna: annaGridCellBaseVariants,
-    mona: monaGridCellBaseVariants
+export const gridDetailIndentCellThemeVariants = cva(
+    `
+        border-r border-r-border-subtle border-b border-b-border-subtle
+    `,
+    {
+        variants: {
+            nextIsGroup: {
+                true: "",
+                false: ""
+            }
+        }
+    }
+);
+
+export const gridDetailRowThemeVariants = cva(`
+    border-b border-b-border-subtle
+`);
+
+export const gridFilterRowCellThemeVariants = cva(`flex items-center px-1 py-0.5 w-full`);
+
+export const gridFooterThemeVariants = cva(
+    `
+        flex flex-row grow-0 shrink-0 basis-auto
+        overflow-hidden
+        bg-surface-muted border-r border-r-border-subtle border-t border-t-border-subtle
+    `
+);
+
+export const gridFooterTableThemeVariants = cva(
+    `
+        border-separate border-spacing-0 table-fixed
+    `
+);
+
+export const gridFooterTableRowThemeVariants = cva(`relative inline-flex [&>td:last-child]:border-r-0`);
+
+export const gridFooterTableCellThemeVariants = cva(
+    `
+        relative overflow-hidden
+        text-left align-middle px-2 py-2
+        bg-surface-muted
+        border-r border-r-border-subtle border-b border-b-border-subtle
+        font-medium
+    `
+);
+
+export const gridGroupPanelPlaceholderThemeVariants = cva(`
+    truncate text-muted-foreground
+`);
+
+export const gridGroupPanelThemeVariants = cva(
+    `
+        flex items-center flex-wrap
+        p-1 h-auto gap-1
+        bg-surface-muted border-b border-b-border-subtle
+    `
+);
+
+export const gridGroupRowThemeVariants = cva(
+    `
+        relative z-10
+        w-full
+        bg-surface-muted border-r border-r-border-subtle
+    `
+);
+
+export const gridHeaderThemeVariants = cva(
+    `
+        flex flex-row grow-0 shrink-0 basis-auto
+        overflow-hidden
+        bg-surface-muted border-r border-r-border-subtle
+    `
+);
+
+export const gridHeaderTableThemeVariants = cva(
+    `
+        border-separate border-spacing-0 table-fixed
+    `
+);
+
+export const gridHeaderTableRowThemeVariants = cva(
+    `relative inline-flex not-first:border-t not-first:border-t-border-subtle [&>th:last-child]:border-r-0`
+);
+
+export const gridHeaderTableCellThemeVariants = cva(
+    `
+        relative select-none
+        text-left overflow-visible
+        outline-none border-r border-r-border-subtle
+        after:absolute after:inset-0 after:pointer-events-none
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
+    `
+);
+
+export const gridHeaderTableColumnWrapThemeVariants = cva(
+    `
+        w-full h-full px-1
+        flex items-center justify-between
+        cursor-pointer overflow-hidden
+    `
+);
+
+export const gridHeaderTableColumnTitleThemeVariants = cva(
+    `
+        flex-1 px-1 py-2 truncate
+        font-medium
+    `
+);
+
+export const gridListBaseThemeVariants = cva(
+    `
+        w-full h-full
+        outline-none
+        border-t border-t-border-subtle
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+    `,
+    {
+        variants: {
+            virtual: {
+                true: "overflow-x-hidden overflow-y-hidden flex flex-col min-h-0",
+                false: "overflow-x-auto overflow-y-scroll"
+            }
+        }
+    }
+);
+
+export const gridListTableThemeVariants = cva(
+    `
+        border-separate border-spacing-0 w-full table-fixed
+    `
+);
+
+export const gridListTableRowThemeVariants = cva(``, {
+    variants: {
+        selected: {
+            true: `
+                    ${gridRowHeightClass}
+                    bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-active)
+                `,
+            false: `${gridRowHeightClass} bg-surface hover:bg-hover`
+        }
+    }
 });
 
-export const gridCellContainerThemeVariants = createThemeStrategy({
-    anna: annaGridCellContainerVariants,
-    mona: monaGridCellContainerVariants
-});
+export const gridListTableCellThemeVariants = cva(
+    `
+        relative
+        ${gridRowHeightClass}
+        outline-none z-1
+        align-top
+        after:content-[''] after:block
+        after:absolute after:inset-0 after:pointer-events-none
+        focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
+    `,
+    {
+        variants: {
+            groupHeader: {
+                true: "",
+                false: ""
+            },
+            groupToggle: {
+                true: "",
+                false: ""
+            },
+            grouped: {
+                true: "",
+                false: ""
+            },
+            indentCell: {
+                true: "",
+                false: ""
+            },
+            lastInRow: {
+                true: "",
+                false: "border-r border-r-border-subtle"
+            },
+            masterDetailContent: {
+                true: "",
+                false: ""
+            },
+            masterDetailToggle: {
+                true: "",
+                false: ""
+            },
+            dataCell: {
+                true: "",
+                false: ""
+            }
+        },
+        compoundVariants: [
+            {
+                grouped: false,
+                masterDetailToggle: true,
+                class: ""
+            },
+            {
+                grouped: false,
+                dataCell: true,
+                class: ""
+            },
+            {
+                grouped: false,
+                indentCell: true,
+                class: ""
+            },
+            {
+                grouped: false,
+                masterDetailContent: true,
+                class: ""
+            },
+            {
+                groupHeader: true,
+                class: ""
+            },
+            {
+                grouped: true,
+                masterDetailToggle: true,
+                class: ""
+            },
+            {
+                grouped: true,
+                dataCell: true,
+                class: ""
+            },
+            {
+                grouped: true,
+                indentCell: true,
+                class: "bg-surface-muted shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]"
+            },
+            {
+                grouped: true,
+                indentCell: false,
+                class: "shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]"
+            },
+            {
+                grouped: true,
+                indentCell: true,
+                masterDetailToggle: true,
+                class: ""
+            },
+            {
+                grouped: true,
+                groupToggle: true,
+                class: ""
+            }
+        ]
+    }
+);
 
-export const gridCellDirtyIndicatorThemeVariants = createThemeStrategy({
-    anna: annaGridCellDirtyIndicatorVariants,
-    mona: monaGridCellDirtyIndicatorVariants
-});
+export const gridNoDataThemeVariants = cva(
+    `
+        flex items-center justify-center h-full
+        text-muted-foreground border-t border-t-border-subtle
+    `
+);
 
-export const gridCellEditorBaseThemeVariants = createThemeStrategy({
-    anna: annaGridCellEditorBaseVariants,
-    mona: monaGridCellEditorBaseVariants
-});
+type GridBaseVariantProps = VariantProps<typeof gridBaseThemeVariants>;
 
-export const gridCellEditorInputThemeVariants = createThemeStrategy({
-    anna: annaGridCellEditorInputVariants,
-    mona: monaGridCellEditorInputVariants
-});
-
-export const gridCellTextThemeVariants = createThemeStrategy({
-    anna: annaGridCellTextVariants,
-    mona: monaGridCellTextVariants
-});
-
-export const gridColumnActionsThemeVariants = createThemeStrategy({
-    anna: annaGridColumnActionsVariants,
-    mona: monaGridColumnActionsVariants
-});
-
-export const gridColumnDragPreviewThemeVariants = createThemeStrategy({
-    anna: annaGridColumnDragPreviewVariants,
-    mona: monaGridColumnDragPreviewVariants
-});
-
-export const gridColumnResizerThemeVariants = createThemeStrategy({
-    anna: annaGridColumnResizerVariants,
-    mona: monaGridColumnResizerVariants
-});
-
-export const gridColumnDropHintThemeVariants = createThemeStrategy({
-    anna: annaGridColumnDropHintVariants,
-    mona: monaGridColumnDropHintVariants
-});
-
-export const gridFilterRowCellThemeVariants = createThemeStrategy({
-    anna: annaGridFilterRowCellVariants,
-    mona: monaGridFilterRowCellVariants
-});
-
-export const gridFooterThemeVariants = createThemeStrategy({
-    anna: annaGridFooterVariants,
-    mona: monaGridFooterVariants
-});
-
-export const gridFooterTableThemeVariants = createThemeStrategy({
-    anna: annaGridFooterTableVariants,
-    mona: monaGridFooterTableVariants
-});
-
-export const gridFooterTableRowThemeVariants = createThemeStrategy({
-    anna: annaGridFooterTableRowVariants,
-    mona: monaGridFooterTableRowVariants
-});
-
-export const gridFooterTableCellThemeVariants = createThemeStrategy({
-    anna: annaGridFooterTableCellVariants,
-    mona: monaGridFooterTableCellVariants
-});
-
-export const gridGroupPanelPlaceholderThemeVariants = createThemeStrategy({
-    anna: annaGridGroupPanelPlaceholderVariants,
-    mona: monaGridGroupPanelPlaceholderVariants
-});
-
-export const gridGroupPanelThemeVariants = createThemeStrategy({
-    anna: annaGridGroupPanelVariants,
-    mona: monaGridGroupPanelVariants
-});
-
-export const gridGroupRowThemeVariants = createThemeStrategy({
-    anna: annaGridGroupRowVariants,
-    mona: monaGridGroupRowVariants
-});
-
-export const gridHeaderTableCellThemeVariants = createThemeStrategy({
-    anna: annaGridHeaderTableCellVariants,
-    mona: monaGridHeaderTableCellVariants
-});
-
-export const gridHeaderTableColumnTitleThemeVariants = createThemeStrategy({
-    anna: annaGridHeaderTableColumnTitleVariants,
-    mona: monaGridHeaderTableColumnTitleVariants
-});
-
-export const gridHeaderTableColumnWrapThemeVariants = createThemeStrategy({
-    anna: annaGridHeaderTableColumnWrapVariants,
-    mona: monaGridHeaderTableColumnWrapVariants
-});
-
-export const gridHeaderTableRowThemeVariants = createThemeStrategy({
-    anna: annaGridHeaderTableRowVariants,
-    mona: monaGridHeaderTableRowVariants
-});
-
-export const gridHeaderTableThemeVariants = createThemeStrategy({
-    anna: annaGridHeaderTableVariants,
-    mona: monaGridHeaderTableVariants
-});
-
-export const gridHeaderThemeVariants = createThemeStrategy({
-    anna: annaGridHeaderVariants,
-    mona: monaGridHeaderVariants
-});
-
-export const gridListTableCellThemeVariants = createThemeStrategy({
-    anna: annaGridListTableCellVariants,
-    mona: monaGridListTableCellVariants
-});
-
-export const gridListTableRowThemeVariants = createThemeStrategy({
-    anna: annaGridListTableRowVariants,
-    mona: monaGridListTableRowVariants
-});
-
-export const gridListTableThemeVariants = createThemeStrategy({
-    anna: annaGridListTableVariants,
-    mona: monaGridListTableVariants
-});
-
-export const gridListBaseThemeVariants = createThemeStrategy({
-    anna: annaGridListBaseVariants,
-    mona: monaGridListBaseVariants
-});
-
-export const gridNoDataThemeVariants = createThemeStrategy({
-    anna: annaGridNoDataVariants,
-    mona: monaGridNoDataVariants
-});
-
-export const gridDetailRowThemeVariants = createThemeStrategy({
-    anna: annaGridDetailRowVariants,
-    mona: monaGridDetailRowVariants
-});
-
-export const gridDetailIndentCellThemeVariants = createThemeStrategy({
-    anna: annaGridDetailIndentCellVariants,
-    mona: monaGridDetailIndentCellVariants
-});
-
-export const gridDetailContentCellThemeVariants = createThemeStrategy({
-    anna: annaGridDetailContentCellVariants,
-    mona: monaGridDetailContentCellVariants
-});
-
-type GridBaseVariantProps = VariantProps<ReturnType<typeof gridBaseThemeVariants>>;
 type GridBaseVariantInput = VariantInputs<GridBaseVariantProps>;
 
-export type GridHeaderTableCellVariantProps = VariantProps<ReturnType<typeof gridHeaderTableCellThemeVariants>>;
+export type GridHeaderTableCellVariantProps = VariantProps<typeof gridHeaderTableCellThemeVariants>;
+
 export type GridHeaderTableCellVariantInput = VariantInputs<GridHeaderTableCellVariantProps>;
 
-export type GridHeaderTableColumnTitleVariantProps = VariantProps<
-    ReturnType<typeof gridHeaderTableColumnTitleThemeVariants>
->;
+export type GridHeaderTableColumnTitleVariantProps = VariantProps<typeof gridHeaderTableColumnTitleThemeVariants>;
+
 export type GridHeaderTableColumnTitleVariantInput = VariantInputs<GridHeaderTableColumnTitleVariantProps>;
 
-export type GridHeaderTableColumnWrapVariantProps = VariantProps<
-    ReturnType<typeof gridHeaderTableColumnWrapThemeVariants>
->;
+export type GridHeaderTableColumnWrapVariantProps = VariantProps<typeof gridHeaderTableColumnWrapThemeVariants>;
+
 export type GridHeaderTableColumnWrapVariantInput = VariantInputs<GridHeaderTableColumnWrapVariantProps>;
 
-export type GridHeaderTableRowVariantProps = VariantProps<ReturnType<typeof gridHeaderTableRowThemeVariants>>;
+export type GridHeaderTableRowVariantProps = VariantProps<typeof gridHeaderTableRowThemeVariants>;
+
 export type GridHeaderTableRowVariantInput = VariantInputs<GridHeaderTableRowVariantProps>;
 
-export type GridHeaderTableVariantProps = VariantProps<ReturnType<typeof gridHeaderTableThemeVariants>>;
+export type GridHeaderTableVariantProps = VariantProps<typeof gridHeaderTableThemeVariants>;
+
 export type GridHeaderTableVariantInput = VariantInputs<GridHeaderTableVariantProps>;
 
-export type GridHeaderVariantProps = VariantProps<ReturnType<typeof gridHeaderThemeVariants>>;
+export type GridHeaderVariantProps = VariantProps<typeof gridHeaderThemeVariants>;
+
 export type GridHeaderVariantInput = VariantInputs<GridHeaderVariantProps>;
 
-export type GridListTableCellVariantProps = VariantProps<ReturnType<typeof gridListTableCellThemeVariants>>;
+export type GridListTableCellVariantProps = VariantProps<typeof gridListTableCellThemeVariants>;
+
 export type GridListTableCellVariantInput = VariantInputs<GridListTableCellVariantProps>;
 
-type GridListTableRowVariantProps = VariantProps<ReturnType<typeof gridListTableRowThemeVariants>>;
+type GridListTableRowVariantProps = VariantProps<typeof gridListTableRowThemeVariants>;
+
 type GridListTableRowVariantInput = VariantInputs<GridListTableRowVariantProps>;
 
-export type GridListTableVariantProps = VariantProps<ReturnType<typeof gridListTableThemeVariants>>;
+export type GridListTableVariantProps = VariantProps<typeof gridListTableThemeVariants>;
+
 export type GridListTableVariantInput = VariantInputs<GridListTableVariantProps>;
 
-type GridListBaseVariantProps = VariantProps<ReturnType<typeof gridListBaseThemeVariants>>;
+type GridListBaseVariantProps = VariantProps<typeof gridListBaseThemeVariants>;
+
 type GridListBaseVariantInput = VariantInputs<GridListBaseVariantProps>;
 
-export type GridListVariantProps = VariantProps<ReturnType<typeof gridListBaseThemeVariants>> &
+export type GridListVariantProps = VariantProps<typeof gridListBaseThemeVariants> &
     GridListTableVariantProps &
     GridListTableRowVariantProps &
     GridListTableCellVariantProps;
+
 export type GridListVariantInput = Omit<GridListBaseVariantInput, "virtual"> &
     GridListTableVariantInput &
     Omit<GridListTableRowVariantInput, "selected">;
@@ -289,6 +419,7 @@ export type GridVariantProps = GridBaseVariantProps &
     GridHeaderTableRowVariantProps &
     GridHeaderTableVariantProps &
     GridHeaderVariantProps;
+
 export type GridVariantInput = GridBaseVariantInput &
     GridHeaderTableCellVariantInput &
     GridHeaderTableColumnTitleVariantInput &

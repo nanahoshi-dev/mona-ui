@@ -35,18 +35,18 @@ describe("StepperIndicatorDirective", () => {
     });
 
     it("keeps inactive structure neutral while reserving primary for progress", () => {
-        const inactive = stepperStepIndicatorThemeVariants("mona")({
+        const inactive = stepperStepIndicatorThemeVariants({
             active: false,
             focused: false,
             rounded: "medium"
         }).split(/\s+/);
-        const active = stepperStepIndicatorThemeVariants("mona")({
+        const active = stepperStepIndicatorThemeVariants({
             active: true,
             focused: true,
             rounded: "medium"
         }).split(/\s+/);
-        const track = stepperTrackThemeVariants("mona")({ orientation: "horizontal" }).split(/\s+/);
-        const progress = stepperTrackLineThemeVariants("mona")({ orientation: "horizontal" }).split(/\s+/);
+        const track = stepperTrackThemeVariants({ orientation: "horizontal" }).split(/\s+/);
+        const progress = stepperTrackLineThemeVariants({ orientation: "horizontal" }).split(/\s+/);
 
         expect(inactive).toContain("bg-surface-raised");
         expect(inactive).not.toContain("bg-primary");

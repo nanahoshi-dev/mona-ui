@@ -1,6 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { breadcrumbListItemThemeVariants, BreadcrumbListItemVariantInput } from "../styles/breadcrumb.styles";
 
 @Directive({
@@ -11,13 +10,11 @@ import { breadcrumbListItemThemeVariants, BreadcrumbListItemVariantInput } from 
     }
 })
 export class BreadcrumbItemDirective implements BreadcrumbListItemVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const listDisabled = this.listDisabled();
         const userClass = this.userClass();
-        return twMerge(breadcrumbListItemThemeVariants(theme)({ disabled, listDisabled }), userClass);
+        return twMerge(breadcrumbListItemThemeVariants({ disabled, listDisabled }), userClass);
     });
     /**
      * @description Renders this item with reduced visual emphasis and removes pointer interaction.

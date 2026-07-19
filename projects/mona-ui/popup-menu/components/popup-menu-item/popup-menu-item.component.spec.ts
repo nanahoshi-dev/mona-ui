@@ -22,11 +22,12 @@ describe("PopupMenuItemComponent", () => {
     });
 
     it("uses neutral row states", () => {
-        const classes = popupMenuItemThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
+        const classes = popupMenuItemThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
 
         expect(classes).toContain("hover:bg-hover");
         expect(classes).toContain("focus-within:bg-hover");
-        expect(classes).toContain("data-[active='true']:bg-active");
+        expect(classes).toContain("data-[active='true']:bg-(--color-selected)");
+        expect(classes).toContain("data-[active='true']:text-(--color-selected-foreground)");
         expect(classes).toContain("data-[disabled='true']:text-disabled-foreground");
         expect(classes).not.toContain("focus-within:bg-accent");
         expect(classes).not.toContain("text-accent-foreground");

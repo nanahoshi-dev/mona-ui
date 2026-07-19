@@ -1,30 +1,59 @@
+import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
-import {
-    colorPaletteBaseVariants as annaColorPaletteBaseVariants,
-    colorPaletteItemVariants as annaColorPaletteItemVariants
-} from "./color-palette.anna.styles";
-import {
-    colorPaletteBaseVariants as monaColorPaletteBaseVariants,
-    colorPaletteItemVariants as monaColorPaletteItemVariants
-} from "./color-palette.mona.styles";
 
-export const colorPaletteBaseThemeVariants = createThemeStrategy({
-    anna: annaColorPaletteBaseVariants,
-    mona: monaColorPaletteBaseVariants
-});
+export const colorPaletteBaseThemeVariants = cva(
+    `
+        grid gap-0.125 p-0.0625
+        data-[disabled='true']:pointer-events-none
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:opacity-50
+        data-[readonly='true']:cursor-default
+        data-[invalid='true']:border
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-1
+        data-[invalid='true']:ring-error/35
+    `
+);
 
-export const colorPaletteItemThemeVariants = createThemeStrategy({
-    anna: annaColorPaletteItemVariants,
-    mona: monaColorPaletteItemVariants
-});
+export const colorPaletteItemThemeVariants = cva(
+    `
+        cursor-pointer
+        transition-transform
+        data-[readonly='true']:cursor-default
+        data-[selected='true']:scale-90
+        data-[selected='true']:border-2 data-[selected='true']:border-black/90
+        data-[selected='true']:outline data-[selected='true']:outline-2 data-[selected='true']:outline-white/90
+        hover:scale-95
 
-type ColorPaletteBaseVariantProps = VariantProps<ReturnType<typeof colorPaletteBaseThemeVariants>>;
+        focus-visible:z-1
+        focus-visible:not-data-[selected='true']:border-2
+        focus-visible:not-data-[selected='true']:border-black/90
+        focus-visible:not-data-[selected='true']:outline
+        focus-visible:not-data-[selected='true']:outline-2
+        focus-visible:not-data-[selected='true']:outline-white/90
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded",
+                large: "rounded-lg",
+                full: "rounded-full"
+            }
+        }
+    }
+);
+
+type ColorPaletteBaseVariantProps = VariantProps<typeof colorPaletteBaseThemeVariants>;
+
 type ColorPaletteBaseVariantInput = VariantInputs<ColorPaletteBaseVariantProps>;
 
-type ColorPaletteItemVariantProps = VariantProps<ReturnType<typeof colorPaletteItemThemeVariants>>;
+type ColorPaletteItemVariantProps = VariantProps<typeof colorPaletteItemThemeVariants>;
+
 type ColorPaletteItemVariantInput = VariantInputs<ColorPaletteItemVariantProps>;
 
 export type ColorPaletteVariantProps = ColorPaletteBaseVariantProps & ColorPaletteItemVariantProps;
+
 export type ColorPaletteVariantInput = ColorPaletteBaseVariantInput & ColorPaletteItemVariantInput;

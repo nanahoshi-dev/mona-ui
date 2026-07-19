@@ -19,7 +19,7 @@ describe("annaThemeColors", () => {
                 "--color-border-control": "#0F0F10",
                 "--color-border-control-hover": "#17181A",
                 "--color-primary": "#583573",
-                "--color-selected": "var(--color-accent)",
+                "--color-selected": "var(--color-primary)",
                 "--color-focus-indicator": "#A174C2"
             })
         );

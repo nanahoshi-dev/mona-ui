@@ -8,7 +8,6 @@ import {
     Signal
 } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { DropPositionChangeEvent } from "../../models/DropPositionChangeEvent";
 import { TreeService } from "../../services/tree.service";
@@ -30,10 +29,8 @@ export class TreeDropHintComponent<T> {
         }
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return treeDropHintBaseThemeVariants(theme)();
+        return treeDropHintBaseThemeVariants();
     });
     protected readonly dropHintStyles: Signal<Partial<CSSStyleDeclaration>> = computed(() => {
         const dropPositionData = this.#dropPositionChange();
@@ -70,9 +67,8 @@ export class TreeDropHintComponent<T> {
         }
     });
     protected readonly iconClass = computed(() => {
-        const theme = this.#themeService.theme();
         const icon = "ri-arrow-right-s-fill";
-        const variantClass = treeDropHintIconThemeVariants(theme)();
+        const variantClass = treeDropHintIconThemeVariants();
         return twMerge(icon, variantClass);
     });
 

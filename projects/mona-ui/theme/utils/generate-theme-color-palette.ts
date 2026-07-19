@@ -193,7 +193,6 @@ function createPrimaryEmphasisPalette(
         "--color-accent-hover": formatOklch(hover),
         "--color-accent-active": formatOklch(active),
         "--color-accent-dark": "var(--color-accent-active)",
-        "--color-selected": "var(--color-accent)",
         "--color-focus-indicator": "var(--color-primary)"
     };
 }

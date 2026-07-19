@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { gridCellBaseVariants, gridListTableCellVariants } from "../styles/grid.mona.styles";
+import { gridCellBaseThemeVariants, gridListTableCellThemeVariants } from "../styles/grid.styles";
 import { GridCellDirective } from "./grid-cell.directive";
 
 describe("GridCellDirective", () => {
@@ -10,8 +10,8 @@ describe("GridCellDirective", () => {
     });
 
     it("uses layout-neutral subtle separators and a semantic cell focus indicator", () => {
-        const cellContentClasses = gridCellBaseVariants();
-        const tableCellClasses = gridListTableCellVariants({ lastInRow: false });
+        const cellContentClasses = gridCellBaseThemeVariants();
+        const tableCellClasses = gridListTableCellThemeVariants({ lastInRow: false });
 
         expect(cellContentClasses).toContain("shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]");
         expect(cellContentClasses).not.toContain("border-b");

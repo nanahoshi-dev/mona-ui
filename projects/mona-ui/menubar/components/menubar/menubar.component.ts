@@ -27,7 +27,6 @@ import {
     PopupMenuShortcutTemplateDirective,
     PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { pairwise, startWith, Subject, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { MenuGroupTemplateDirective } from "../../directives/menu-group-template.directive";
@@ -66,14 +65,12 @@ export class MenubarComponent implements MenubarVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #document = inject(DOCUMENT);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #themeService = inject(ThemeService);
     protected readonly activeIndex = signal(0);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClasses = this.userClasses();
-        const variants = menubarBaseThemeVariants(theme)({ rounded, size });
+        const variants = menubarBaseThemeVariants({ rounded, size });
         return twMerge(variants, userClasses);
     });
     protected readonly currentPopupElement = signal<HTMLElement | null>(null);
@@ -87,13 +84,11 @@ export class MenubarComponent implements MenubarVariantInput {
         descendants: false
     });
     protected readonly listClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return menubarListThemeVariants(theme)();
+        return menubarListThemeVariants();
     });
     protected readonly listItemClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return menubarListItemThemeVariants(theme)({ rounded });
+        return menubarListItemThemeVariants({ rounded });
     });
     protected readonly menuItemIconTemplate = contentChild(MenuItemIconTemplateDirective, {
         read: TemplateRef,

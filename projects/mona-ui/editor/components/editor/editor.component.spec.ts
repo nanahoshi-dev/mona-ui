@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { editorBaseVariants } from "../../styles/editor.mona.styles";
+import { editorBaseThemeVariants } from "../../styles/editor.styles";
 
 import { EditorComponent } from "./editor.component";
 
@@ -23,7 +23,7 @@ describe("EditorComponent", () => {
 
     it("uses neutral editor structure, selection, and semantic focus styling", () => {
         const host = fixture.nativeElement as HTMLElement;
-        const editorClasses = editorBaseVariants();
+        const editorClasses = editorBaseThemeVariants();
         const toolbar = host.querySelector(":scope > div") as HTMLElement;
 
         expect(host.classList.contains("bg-surface")).toBe(true);

@@ -94,6 +94,16 @@ const light: ThemeColors = Object.freeze({
 
     ...generatedRoles.light,
     ...lightNeutralRoles,
+    "--color-selected": "var(--color-active)",
+    "--color-selected-foreground": "var(--color-foreground)",
+    "--color-selected-hover": "var(--color-active)",
+    "--color-selected-hover-foreground": "var(--color-foreground)",
+    "--color-selected-active": "var(--color-active)",
+    "--color-selected-active-foreground": "var(--color-foreground)",
+    "--color-selected-focus": "var(--color-active)",
+    "--color-selected-focus-foreground": "var(--color-foreground)",
+    "--color-selected-border": "var(--color-primary)",
+    "--color-focus-surface": "var(--color-surface-muted)",
 
     "--color-background": "var(--color-surface)",
     "--color-background-dark": "var(--color-surface-muted)",
@@ -153,6 +163,16 @@ const dark: ThemeColors = Object.freeze({
 
     ...generatedRoles.dark,
     ...darkNeutralRoles,
+    "--color-selected": "var(--color-active)",
+    "--color-selected-foreground": "var(--color-foreground)",
+    "--color-selected-hover": "var(--color-active)",
+    "--color-selected-hover-foreground": "var(--color-foreground)",
+    "--color-selected-active": "var(--color-active)",
+    "--color-selected-active-foreground": "var(--color-foreground)",
+    "--color-selected-focus": "var(--color-active)",
+    "--color-selected-focus-foreground": "var(--color-foreground)",
+    "--color-selected-border": "var(--color-primary)",
+    "--color-focus-surface": "var(--color-surface-muted)",
 
     "--color-background": "var(--color-surface)",
     "--color-background-dark": "var(--color-surface-muted)",

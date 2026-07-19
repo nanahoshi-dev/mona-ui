@@ -83,7 +83,8 @@ describe("DropdownListComponent", () => {
         expect(popup.classList.contains("border-border")).toBe(true);
         expect(popup.classList.contains("shadow-(--shadow-overlay)")).toBe(true);
         expect(popup.classList.contains("bg-surface-raised")).toBe(false);
-        expect(selectedOption.classList.contains("bg-active")).toBe(true);
+        expect(selectedOption.classList.contains("bg-(--color-selected)")).toBe(true);
+        expect(selectedOption.classList.contains("text-(--color-selected-foreground)")).toBe(true);
         expect(selectedOption.classList.contains("bg-primary")).toBe(false);
         expect(selectedOption.classList.contains("bg-accent-hover")).toBe(false);
     });

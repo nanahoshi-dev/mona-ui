@@ -25,7 +25,6 @@ import { PaletteType } from "@nanahoshi/mona-ui/common";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import { dropdownPopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, take, takeUntil } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ColorPickerValueTemplateDirective } from "../../directives/color-picker-value-template.directive";
@@ -72,20 +71,16 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #popupService: PopupService = inject(PopupService);
     readonly #popupRef = signal<PopupRef | null>(null);
-
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const expanded = this.expanded();
         const rounded = this.rounded();
         const size = this.size();
-        return twMerge(colorPickerBaseThemeVariants(theme)({ expanded, rounded, size }));
+        return twMerge(colorPickerBaseThemeVariants({ expanded, rounded, size }));
     });
     protected readonly colorClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        return colorPickerColorThemeVariants(theme)({ rounded, size });
+        return colorPickerColorThemeVariants({ rounded, size });
     });
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly invalidState = computed(

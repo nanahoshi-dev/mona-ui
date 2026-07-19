@@ -38,7 +38,6 @@ import {
     ListViewNoDataTemplateDirective,
     ListViewSelectableDirective
 } from "@nanahoshi/mona-ui/list-view";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { delay, filter, Observable, ReplaySubject, sample, scan, startWith, Subject, switchMap, tap } from "rxjs";
 import { ListBoxFooterTemplateDirective } from "../../directives/list-box-footer-template.directive";
@@ -95,7 +94,6 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #listService = inject<ListService<T>>(ListService);
     readonly #notifySelectionChange$ = new ReplaySubject<boolean>(1);
-    readonly #themeService = inject(ThemeService);
     /**
      * The list box (`this` or the connected list box) that currently holds the selection; falling back to `this`
      * when neither side has a selection. Used by actions that make sense to run on `this` even with no selection
@@ -113,14 +111,13 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         return this;
     });
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const toolbarOptions = this.toolbarOptions();
         const position = toolbarOptions?.position ?? "right";
         const direction = position === "left" || position === "right" ? "horizontal" : "vertical";
         const reversed = position === "left" || position === "top";
-        return listBoxBaseThemeVariants(theme)({ direction, reversed, rounded, size });
+        return listBoxBaseThemeVariants({ direction, reversed, rounded, size });
     });
     protected readonly footerTemplate = contentChild(ListBoxFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerTemplate = contentChild(ListBoxHeaderTemplateDirective, { read: TemplateRef });
@@ -143,11 +140,10 @@ export class ListBoxComponent<T = unknown, K = unknown> implements ListBoxVarian
         return { enabled, mode, toggleable: this.singleSelectionToggleable() };
     });
     protected readonly toolbarClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const toolbarOptions = this.toolbarOptions();
         const position = toolbarOptions?.position ?? "right";
         const direction = position === "left" || position === "right" ? "vertical" : "horizontal";
-        return listBoxToolbarThemeVariants(theme)({ direction });
+        return listBoxToolbarThemeVariants({ direction });
     });
     protected readonly toolbarOptions = computed(() => {
         const toolbar = this.toolbar();

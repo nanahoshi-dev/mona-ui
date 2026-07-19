@@ -1,68 +1,93 @@
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import {
-    subTreeListItemVariants as annaSubTreeListItemVariants,
-    subTreeListVariants as annaSubTreeListVariants,
-    treeBaseVariants as annaTreeBaseVariants,
-    treeDropHintBaseVariants as annaTreeDropHintBaseVariants,
-    treeDropHintIconVariants as annaTreeDropHintIconVariants,
-    treeNodeBaseVariants as annaTreeNodeBaseVariants,
-    treeNodeContainerVariants as annaTreeNodeContainerVariants,
-    treeNodeDraggingVariants as annaTreeNodeDraggingVariants,
-    treeNodeExpanderVariants as annaTreeNodeExpanderVariants
-} from "./tree.anna.styles";
-import {
-    subTreeListItemVariants as monaSubTreeListItemVariants,
-    subTreeListVariants as monaSubTreeListVariants,
-    treeBaseVariants as monaTreeBaseVariants,
-    treeDropHintBaseVariants as monaTreeDropHintBaseVariants,
-    treeDropHintIconVariants as monaTreeDropHintIconVariants,
-    treeNodeBaseVariants as monaTreeNodeBaseVariants,
-    treeNodeContainerVariants as monaTreeNodeContainerVariants,
-    treeNodeDraggingVariants as monaTreeNodeDraggingVariants,
-    treeNodeExpanderVariants as monaTreeNodeExpanderVariants
-} from "./tree.mona.styles";
+import { cva } from "class-variance-authority";
 
-export const subTreeListThemeVariants = createThemeStrategy({
-    anna: annaSubTreeListVariants,
-    mona: monaSubTreeListVariants
-});
+export const subTreeListThemeVariants = cva(
+    `
+        flex list-none flex-col
+    `
+);
 
-export const subTreeListItemThemeVariants = createThemeStrategy({
-    anna: annaSubTreeListItemVariants,
-    mona: monaSubTreeListItemVariants
-});
+export const subTreeListItemThemeVariants = cva(
+    `
+        relative overflow-hidden outline-none
+        ps-6
+    `
+);
 
-export const treeBaseThemeVariants = createThemeStrategy({
-    anna: annaTreeBaseVariants,
-    mona: monaTreeBaseVariants
-});
+export const treeBaseThemeVariants = cva(
+    `
+        relative outline-none select-none
+        text-md
+    `
+);
 
-export const treeDropHintBaseThemeVariants = createThemeStrategy({
-    anna: annaTreeDropHintBaseVariants,
-    mona: monaTreeDropHintBaseVariants
-});
+export const treeDropHintBaseThemeVariants = cva(
+    `
+        fixed z-1 h-0.5 w-10
+        pointer-events-none
+        bg-primary opacity-80
+    `
+);
 
-export const treeDropHintIconThemeVariants = createThemeStrategy({
-    anna: annaTreeDropHintIconVariants,
-    mona: monaTreeDropHintIconVariants
-});
+export const treeDropHintIconThemeVariants = cva(
+    `
+        absolute flex items-center justify-center
+        -top-3.25 -left-3.5 text-xl
+    `
+);
 
-export const treeNodeBaseThemeVariants = createThemeStrategy({
-    anna: annaTreeNodeBaseVariants,
-    mona: monaTreeNodeBaseVariants
-});
+export const treeNodeBaseThemeVariants = cva(
+    `
+        cursor-default px-2 py-1 text-foreground
+    `,
+    {
+        variants: {
+            disabled: {
+                true: "pointer-events-none cursor-default text-disabled-foreground",
+                false: ""
+            },
+            highlighted: {
+                true: "inset-ring-1 inset-ring-focus-indicator/35",
+                false: ""
+            },
+            selected: {
+                true: "bg-active text-foreground",
+                false: ""
+            }
+        },
+        compoundVariants: [
+            {
+                disabled: false,
+                selected: false,
+                class: "hover:bg-hover active:bg-active"
+            },
+            {
+                disabled: false,
+                selected: true,
+                class: "hover:bg-active"
+            }
+        ]
+    }
+);
 
-export const treeNodeContainerThemeVariants = createThemeStrategy({
-    anna: annaTreeNodeContainerVariants,
-    mona: monaTreeNodeContainerVariants
-});
+export const treeNodeContainerThemeVariants = cva(
+    `
+        flex items-center
+    `
+);
 
-export const treeNodeDraggingThemeVariants = createThemeStrategy({
-    anna: annaTreeNodeDraggingVariants,
-    mona: monaTreeNodeDraggingVariants
-});
+export const treeNodeDraggingThemeVariants = cva(
+    `
+        flex items-center justify-center
+        top-3! px-2! py-1!
+        bg-surface-overlay! text-foreground!
+        border! border-border!
+        shadow-(--shadow-overlay)
+    `
+);
 
-export const treeNodeExpanderThemeVariants = createThemeStrategy({
-    anna: annaTreeNodeExpanderVariants,
-    mona: monaTreeNodeExpanderVariants
-});
+export const treeNodeExpanderThemeVariants = cva(
+    `
+        -ms-6 flex h-full min-w-6 items-center justify-center
+        cursor-pointer text-sm text-foreground
+    `
+);

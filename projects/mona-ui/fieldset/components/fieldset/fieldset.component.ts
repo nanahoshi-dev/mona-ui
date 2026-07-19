@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, inject, input, TemplateRef } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { FieldsetLegendTemplateDirective } from "../../directives/fieldset-legend-template.directive";
 import {
@@ -20,23 +19,19 @@ import {
     }
 })
 export class FieldsetComponent implements FieldsetVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return fieldsetBaseThemeVariants(theme)();
+        return fieldsetBaseThemeVariants();
     });
     protected readonly fieldsetClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const disabled = this.disabled();
         const userClass = this.userClass();
-        return twMerge(fieldsetThemeVariants(theme)({ rounded, disabled }), userClass);
+        return twMerge(fieldsetThemeVariants({ rounded, disabled }), userClass);
     });
     protected readonly legendClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const hasTemplate = !!this.legendTemplate();
-        return fieldsetLegendThemeVariants(theme)({ hasTemplate, rounded });
+        return fieldsetLegendThemeVariants({ hasTemplate, rounded });
     });
     protected readonly legendTemplate = contentChild(FieldsetLegendTemplateDirective, { read: TemplateRef });
     protected readonly legendVisible = computed(() => {

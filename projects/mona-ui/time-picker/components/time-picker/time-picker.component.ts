@@ -33,7 +33,6 @@ import { type AttributeConfig, createElementControlId } from "@nanahoshi/mona-ui
 import { ListSizeInputType } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxComponent, TextBoxSuffixTemplateDirective } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { TimeSelectorComponent } from "@nanahoshi/mona-ui/time-selector";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
@@ -73,14 +72,12 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
-    readonly #themeService = inject(ThemeService);
 
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = timePickerBaseThemeVariants(theme)({ focused, rounded, size });
+        const variantClass = timePickerBaseThemeVariants({ focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -113,11 +110,10 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
     );
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly popupId = createElementControlId();

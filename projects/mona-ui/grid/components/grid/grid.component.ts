@@ -39,7 +39,6 @@ import {
     PopupMenuTextTemplateDirective
 } from "@nanahoshi/mona-ui/popup-menu";
 import { SortDirection } from "@nanahoshi/mona-ui/query";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { v4 } from "uuid";
 import { GridColumnResizeHandlerDirective } from "../../directives/grid-column-resize-handler.directive";
@@ -137,32 +136,26 @@ export class GridComponent<T> implements GridVariantInput {
     readonly #platformId = inject(PLATFORM_ID);
     readonly #registeredFooterScrollElement = signal<HTMLDivElement | null>(null);
     readonly #toolbarActiveIndex = signal(0);
-    readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     private readonly footerScrollElement = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const variantClass = gridBaseThemeVariants(theme)({ rounded });
+        const variantClass = gridBaseThemeVariants({ rounded });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly columnActionsClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridColumnActionsThemeVariants(theme)();
+        return gridColumnActionsThemeVariants();
     });
     protected readonly columnDragPreviewClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridColumnDragPreviewThemeVariants(theme)();
+        return gridColumnDragPreviewThemeVariants();
     });
     protected readonly columnDragging = signal(false);
     protected readonly columnDropHintClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridColumnDropHintThemeVariants(theme)();
+        return gridColumnDropHintThemeVariants();
     });
     protected readonly columnResizerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridColumnResizerThemeVariants(theme)();
+        return gridColumnResizerThemeVariants();
     });
     protected readonly dragColumn = signal<Column | null>(null);
     protected readonly dropColumn = signal<Column | null>(null);
@@ -175,16 +168,13 @@ export class GridComponent<T> implements GridVariantInput {
         return opts.enabled && (opts.type === "row" || opts.type === "menu, row");
     });
     protected readonly footerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterThemeVariants(theme)();
+        return gridFooterThemeVariants();
     });
     protected readonly footerTableClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterTableThemeVariants(theme)();
+        return gridFooterTableThemeVariants();
     });
     protected readonly footerTableRowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterTableRowThemeVariants(theme)();
+        return gridFooterTableRowThemeVariants();
     });
     protected readonly footerVisible = computed(
         () => !this.gridService.virtualScrollOptions().enabled && this.gridService.hasFooter()
@@ -196,44 +186,35 @@ export class GridComponent<T> implements GridVariantInput {
     protected readonly gridWidthSet = signal(false);
     protected readonly groupColumnList = viewChild<CdkDropList>("groupColumnList");
     protected readonly groupPanelPlaceholderClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridGroupPanelPlaceholderThemeVariants(theme)();
+        return gridGroupPanelPlaceholderThemeVariants();
     });
     protected readonly groupPanelClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridGroupPanelThemeVariants(theme)();
+        return gridGroupPanelThemeVariants();
     });
     protected readonly groupPanelPlaceholderVisible = signal(true);
     protected readonly groupable = computed(() => this.gridService.groupableOptions().enabled);
     protected readonly groupingInProgress = signal(false);
     protected readonly headerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridHeaderThemeVariants(theme)();
+        return gridHeaderThemeVariants();
     });
     protected readonly headerMarginRight = computed(() => this.gridService.scrollbarGutterWidth());
     protected readonly headerTableClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridHeaderTableThemeVariants(theme)();
+        return gridHeaderTableThemeVariants();
     });
     protected readonly headerTableCellClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridHeaderTableCellThemeVariants(theme)();
+        return gridHeaderTableCellThemeVariants();
     });
     protected readonly headerTableColumnTitleClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridHeaderTableColumnTitleThemeVariants(theme)();
+        return gridHeaderTableColumnTitleThemeVariants();
     });
     protected readonly headerTableColumnWrapClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridHeaderTableColumnWrapThemeVariants(theme)();
+        return gridHeaderTableColumnWrapThemeVariants();
     });
     protected readonly headerTableRowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridHeaderTableRowThemeVariants(theme)();
+        return gridHeaderTableRowThemeVariants();
     });
     protected readonly noDataClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridNoDataThemeVariants(theme)();
+        return gridNoDataThemeVariants();
     });
     protected readonly noDataTemplate = contentChild(GridNoDataTemplateDirective, { read: TemplateRef });
     protected readonly resizing = signal(false);

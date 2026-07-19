@@ -26,9 +26,9 @@ describe("WindowComponent", () => {
     });
 
     it("uses an overlay surface and a neutral default title bar", () => {
-        const windowClasses = windowBaseThemeVariants("mona")({ rounded: "medium" }).split(/\s+/);
-        const contentClasses = windowContentContainerThemeVariants("mona")({ rounded: "medium" }).split(/\s+/);
-        const titleClasses = windowTitleBarThemeVariants("mona")({ look: "default", rounded: "medium" }).split(/\s+/);
+        const windowClasses = windowBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const contentClasses = windowContentContainerThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const titleClasses = windowTitleBarThemeVariants({ look: "default", rounded: "medium" }).split(/\s+/);
 
         expect(windowClasses).toContain("bg-surface-overlay");
         expect(contentClasses).toContain("border-border");

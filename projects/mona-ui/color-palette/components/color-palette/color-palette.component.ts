@@ -2,7 +2,6 @@ import { Component, computed, ElementRef, inject, input, model, output, signal, 
 import type { FormValueControl } from "@angular/forms/signals";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
 import type { ColorScheme } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { count } from "@mirei/ts-collections";
 import {
     colorPaletteBaseThemeVariants,
@@ -33,10 +32,8 @@ import { flatColorScheme, materialColorScheme, websafeColorScheme } from "../../
 })
 export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValueControl<string | null> {
     readonly #elementRef = inject(ElementRef<HTMLElement>);
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return colorPaletteBaseThemeVariants(theme)();
+        return colorPaletteBaseThemeVariants();
     });
     protected readonly colorScheme: Signal<ColorScheme> = computed(() => {
         const palette = this.palette();
@@ -57,9 +54,8 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         };
     });
     protected readonly paletteItemClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return colorPaletteItemThemeVariants(theme)({ rounded });
+        return colorPaletteItemThemeVariants({ rounded });
     });
     protected readonly colorRows = computed(() => {
         const { colors, columns } = this.colorScheme();

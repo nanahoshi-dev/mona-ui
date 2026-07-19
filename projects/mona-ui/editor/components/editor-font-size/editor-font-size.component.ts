@@ -1,7 +1,6 @@
 import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorService } from "../../services/editor.service";
 import { editorFontSizeDropdownListThemeVariants } from "../../styles/editor.styles";
 
@@ -12,10 +11,8 @@ import { editorFontSizeDropdownListThemeVariants } from "../../styles/editor.sty
 })
 export class EditorFontSizeComponent {
     protected readonly editorService: EditorService = inject(EditorService);
-    readonly #themeService = inject(ThemeService);
     protected readonly dropdownListClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return editorFontSizeDropdownListThemeVariants(theme)();
+        return editorFontSizeDropdownListThemeVariants();
     });
     protected readonly selectedFontSize = computed(() => {
         this.editorService.state();

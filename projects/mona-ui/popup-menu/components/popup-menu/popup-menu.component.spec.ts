@@ -1,7 +1,7 @@
 import { DOCUMENT } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { popupMenuContainerVariants } from "../../styles/popup-menu.mona.styles";
+import { popupMenuContainerThemeVariants } from "../../styles/popup-menu.styles";
 import { PopupMenuComponent } from "./popup-menu.component";
 
 describe("PopupMenuComponent", () => {
@@ -27,7 +27,7 @@ describe("PopupMenuComponent", () => {
     });
 
     it("uses the overlay surface, quiet border, and floating shadow", () => {
-        const classes = popupMenuContainerVariants({ rounded: "medium" }).split(/\s+/);
+        const classes = popupMenuContainerThemeVariants({ rounded: "medium" }).split(/\s+/);
 
         expect(classes).toContain("bg-surface-overlay");
         expect(classes).toContain("border-border");

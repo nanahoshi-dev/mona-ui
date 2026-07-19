@@ -1,44 +1,88 @@
+import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
-import {
-    dropdownListAffixContainerVariants as annaDropdownListAffixContainerVariants,
-    dropdownListInputVariants as annaDropdownListInputVariants,
-    dropdownListValueContainerVariants as annaDropdownListValueContainerVariants
-} from "./dropdown-list.anna.styles";
-import {
-    dropdownListAffixContainerVariants as monaDropdownListAffixContainerVariants,
-    dropdownListInputVariants as monaDropdownListInputVariants,
-    dropdownListValueContainerVariants as monaDropdownListValueContainerVariants
-} from "./dropdown-list.mona.styles";
 
-export const dropdownListAffixContainerThemeVariants = createThemeStrategy({
-    anna: annaDropdownListAffixContainerVariants,
-    mona: monaDropdownListAffixContainerVariants
+export const dropdownListInputThemeVariants = cva(
+    `
+        inline-flex items-center
+        cursor-pointer select-none
+        bg-input-background text-foreground
+        border border-input-border shadow-(--shadow-control) outline-none
+        transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
+        data-[readonly='true']:cursor-default
+        hover:bg-hover active:bg-active
+        focus-within:border-focus-indicator focus-within:ring-2 focus-within:ring-focus-indicator/35
+    `,
+    {
+        variants: {
+            disabled: {
+                true: `
+                    pointer-events-none cursor-not-allowed
+                    bg-disabled-background text-disabled-foreground
+                    border-disabled-border shadow-none
+                `,
+                false: ""
+            },
+            expanded: {
+                true: "border-focus-indicator ring-2 ring-focus-indicator/35",
+                false: ""
+            },
+            hasPrefix: {
+                false: "ps-2"
+            },
+            invalid: {
+                true: "border-error ring-2 ring-error/35 focus-within:border-error focus-within:ring-error/35",
+                false: ""
+            },
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full px-3"
+            },
+            size: {
+                large: "h-10 text-md",
+                medium: "h-9 text-sm",
+                small: "h-8 text-xs"
+            }
+        },
+        compoundVariants: [
+            {
+                expanded: true,
+                invalid: true,
+                class: "border-error ring-error/35"
+            }
+        ]
+    }
+);
+
+export const dropdownListValueContainerThemeVariants = cva(`flex h-full w-full items-center overflow-hidden`, {
+    variants: {
+        hasTemplate: {
+            false: "[&>span]:truncate [&>span]:items-center [&>span]:inline-block"
+        }
+    }
 });
 
-export const dropdownListInputThemeVariants = createThemeStrategy({
-    anna: annaDropdownListInputVariants,
-    mona: monaDropdownListInputVariants
-});
+export const dropdownListAffixContainerThemeVariants = cva(`flex h-full flex-none items-center justify-center`);
 
-export const dropdownListValueContainerThemeVariants = createThemeStrategy({
-    anna: annaDropdownListValueContainerVariants,
-    mona: monaDropdownListValueContainerVariants
-});
+type DropdownListInputVariantProps = VariantProps<typeof dropdownListInputThemeVariants>;
 
-type DropdownListInputVariantProps = VariantProps<ReturnType<typeof dropdownListInputThemeVariants>>;
 type DropdownListInputVariantInput = VariantInputs<DropdownListInputVariantProps>;
 
-type DropdownListAffixContainerVariantProps = VariantProps<ReturnType<typeof dropdownListAffixContainerThemeVariants>>;
+type DropdownListAffixContainerVariantProps = VariantProps<typeof dropdownListAffixContainerThemeVariants>;
+
 type DropdownListAffixContainerVariantInput = VariantInputs<DropdownListAffixContainerVariantProps>;
 
-type DropdownListValueContainerVariantProps = VariantProps<ReturnType<typeof dropdownListValueContainerThemeVariants>>;
+type DropdownListValueContainerVariantProps = VariantProps<typeof dropdownListValueContainerThemeVariants>;
+
 type DropdownListValueContainerVariantInput = VariantInputs<DropdownListValueContainerVariantProps>;
 
 export type DropDownListVariantProps = DropdownListInputVariantProps &
     DropdownListAffixContainerVariantProps &
     DropdownListValueContainerVariantProps;
+
 export type DropDownListVariantInput = Omit<DropdownListInputVariantInput, "expanded" | "hasPrefix" | "invalid"> &
     DropdownListAffixContainerVariantInput &
     Omit<DropdownListValueContainerVariantInput, "hasTemplate">;

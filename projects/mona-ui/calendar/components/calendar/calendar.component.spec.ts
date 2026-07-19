@@ -294,12 +294,12 @@ function expectRangePreview(fixture: ComponentFixture<unknown>, day: number, pre
 
 describe("Calendar visual contract", () => {
     it("uses a raised neutral surface and primary only for committed dates", () => {
-        const baseClasses = calendarBaseThemeVariants("mona")({
+        const baseClasses = calendarBaseThemeVariants({
             disabled: false,
             readonly: false,
             rounded: "medium"
         }).split(/\s+/);
-        const focusedClasses = calendarMonthViewDayThemeVariants("mona")({
+        const focusedClasses = calendarMonthViewDayThemeVariants({
             disabled: false,
             focused: true,
             outside: false,
@@ -308,7 +308,7 @@ describe("Calendar visual contract", () => {
             selected: false,
             today: false
         }).split(/\s+/);
-        const selectedClasses = calendarMonthViewDayThemeVariants("mona")({
+        const selectedClasses = calendarMonthViewDayThemeVariants({
             disabled: false,
             focused: false,
             outside: false,
@@ -318,8 +318,9 @@ describe("Calendar visual contract", () => {
             today: false
         }).split(/\s+/);
 
-        expect(baseClasses).toContain("bg-surface-raised");
+        expect(baseClasses).toContain("bg-input-background");
         expect(baseClasses).toContain("border-border");
+        expect(baseClasses).toContain("shadow-(--mona-calendar-shadow)");
         expect(focusedClasses).toContain("bg-hover");
         expect(focusedClasses).toContain("ring-focus-indicator/35");
         expect(focusedClasses).not.toContain("bg-accent");

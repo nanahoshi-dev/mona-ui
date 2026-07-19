@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { converter, parse } from "culori";
 import { annaThemeColors } from "../../mona-ui/theme/definitions/anna-theme-colors";
@@ -86,8 +86,34 @@ for (const [name, value] of Object.entries(runtimeShadows)) {
     }
 }
 
+const librarySources = globSync("projects/mona-ui/**/*.ts").filter(path => !path.endsWith(".spec.ts"));
+const forbiddenThemeStyleFiles = librarySources.filter(path => /\.(?:anna|mona)\.styles\.ts$/.test(path));
+if (forbiddenThemeStyleFiles.length > 0) {
+    throw new Error(`Theme-specific style files remain: ${forbiddenThemeStyleFiles.join(", ")}.`);
+}
+
+const forbiddenRecipeStrategies = librarySources.filter(path =>
+    readFileSync(path, "utf8").includes("createThemeStrategy")
+);
+if (forbiddenRecipeStrategies.length > 0) {
+    throw new Error(`Component recipe strategies remain: ${forbiddenRecipeStrategies.join(", ")}.`);
+}
+
+const styleOnlyThemeServiceInjections = librarySources.filter(path => {
+    if (path.endsWith("theme.service.ts")) {
+        return false;
+    }
+    return /(?:inject\(ThemeService\)|ThemeService)/.test(readFileSync(path, "utf8"));
+});
+if (styleOnlyThemeServiceInjections.length > 0) {
+    throw new Error(
+        `Production ThemeService recipe dependencies remain: ${styleOnlyThemeServiceInjections.join(", ")}.`
+    );
+}
+
 console.log(
-    `Theme parity verified across ${runtimeKeys.length} color variables and ${runtimeShadowKeys.length} shadow variables.`
+    `Theme parity verified across ${runtimeKeys.length} color variables and ${runtimeShadowKeys.length} shadow variables; ` +
+        `canonical recipe source contract verified across ${librarySources.length} files.`
 );
 
 function normalizeCssValue(value: string | undefined): string {

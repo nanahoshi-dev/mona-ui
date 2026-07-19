@@ -100,15 +100,15 @@ let mockClosedSubject: Subject<void>;
 let mockOpenedSubject: Subject<void>;
 
 describe("Tooltip visual contract", () => {
-    it("uses an inverse primary surface for both body and arrow", () => {
-        const tooltipClasses = tooltipBaseThemeVariants("mona")({ rounded: "medium" }).split(/\s+/);
-        const arrowClasses = tooltipArrowThemeVariants("mona")().split(/\s+/);
+    it("uses the semantic overlay surface for both body and arrow", () => {
+        const tooltipClasses = tooltipBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const arrowClasses = tooltipArrowThemeVariants().split(/\s+/);
 
-        expect(tooltipClasses).toContain("bg-primary");
-        expect(tooltipClasses).toContain("text-primary-foreground");
-        expect(tooltipClasses).toContain("border-primary");
-        expect(arrowClasses).toContain("bg-primary");
-        expect(arrowClasses).toContain("border-primary");
+        expect(tooltipClasses).toContain("bg-surface-overlay");
+        expect(tooltipClasses).toContain("text-foreground");
+        expect(tooltipClasses).toContain("border-border");
+        expect(arrowClasses).toContain("bg-surface-overlay");
+        expect(arrowClasses).toContain("border-border");
     });
 });
 let mockPositionSubject: Subject<ConnectionPositionPair>;

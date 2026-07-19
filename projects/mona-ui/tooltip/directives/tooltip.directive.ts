@@ -22,7 +22,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Position } from "@nanahoshi/mona-ui/common";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import {
@@ -332,16 +331,13 @@ export class TooltipDirective implements TooltipVariantInputs {
     `
 })
 class TooltipTemplateComponent {
-    readonly #themeService = inject(ThemeService);
     protected readonly arrowClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return tooltipArrowThemeVariants(theme)();
+        return tooltipArrowThemeVariants();
     });
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const userClasses = `p-2`;
-        const variants = tooltipBaseThemeVariants(theme)({ rounded });
+        const variants = tooltipBaseThemeVariants({ rounded });
         return twMerge(variants, userClasses);
     });
     public readonly currentArrowPosition = linkedSignal(() => this.position());

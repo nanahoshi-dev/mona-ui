@@ -1,30 +1,51 @@
+import { cva } from "class-variance-authority";
 import { VariantProps } from "class-variance-authority";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import {
-    indicatorIconHostVariants as annaIndicatorIconHostVariants,
-    indicatorIconSvgVariants as annaIndicatorIconSvgVariants
-} from "./indicator-icon.anna.styles";
-import {
-    indicatorIconHostVariants as monaIndicatorIconHostVariants,
-    indicatorIconSvgVariants as monaIndicatorIconSvgVariants
-} from "./indicator-icon.mona.styles";
 
-export const indicatorIconHostThemeVariants = createThemeStrategy({
-    anna: annaIndicatorIconHostVariants,
-    mona: monaIndicatorIconHostVariants
+export const indicatorIconHostThemeVariants = cva(
+    `h-full aspect-square flex-none inline-flex items-center justify-center self-stretch`,
+    {
+        variants: {
+            interactive: {
+                true: `
+                    opacity-50
+                    hover:opacity-90
+                    focus-visible:ring-2 focus-visible:ring-focus-indicator/35 focus-visible:outline-none
+                `,
+                false: ""
+            },
+            preset: {
+                clear: "",
+                dropdown: "opacity-50",
+                loading: ""
+            }
+        },
+        defaultVariants: {
+            interactive: false
+        }
+    }
+);
+
+export const indicatorIconSvgThemeVariants = cva(``, {
+    variants: {
+        loading: {
+            true: "animate-[spin_2s_linear_infinite]",
+            false: ""
+        }
+    },
+    defaultVariants: {
+        loading: false
+    }
 });
 
-export const indicatorIconSvgThemeVariants = createThemeStrategy({
-    anna: annaIndicatorIconSvgVariants,
-    mona: monaIndicatorIconSvgVariants
-});
+type IndicatorIconHostVariantProps = VariantProps<typeof indicatorIconHostThemeVariants>;
 
-type IndicatorIconHostVariantProps = VariantProps<ReturnType<typeof indicatorIconHostThemeVariants>>;
 type IndicatorIconHostVariantInput = VariantInputs<IndicatorIconHostVariantProps>;
 
-type IndicatorIconSvgVariantProps = VariantProps<ReturnType<typeof indicatorIconSvgThemeVariants>>;
+type IndicatorIconSvgVariantProps = VariantProps<typeof indicatorIconSvgThemeVariants>;
+
 type IndicatorIconSvgVariantInput = VariantInputs<IndicatorIconSvgVariantProps>;
 
 export type IndicatorIconVariantProps = IndicatorIconHostVariantProps & IndicatorIconSvgVariantProps;
+
 export type IndicatorIconVariantInput = IndicatorIconHostVariantInput & IndicatorIconSvgVariantInput;

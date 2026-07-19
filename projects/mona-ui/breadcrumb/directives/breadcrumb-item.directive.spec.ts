@@ -1,23 +1,20 @@
 import { TestBed } from "@angular/core/testing";
-import { describe, beforeEach, it } from "vitest";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
+import { describe, it } from "vitest";
 import { breadcrumbCurrentItemThemeVariants, breadcrumbListItemThemeVariants } from "../styles/breadcrumb.styles";
 import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
 
 describe("BreadcrumbItemDirective", () => {
-    beforeEach(() => TestBed.configureTestingModule({ providers: [ThemeService] }));
-
     it("should create an instance", () => {
         const directive = TestBed.runInInjectionContext(() => new BreadcrumbItemDirective());
         expect(directive).toBeTruthy();
     });
 
     it("uses neutral navigation states and foreground for the current page", () => {
-        const itemClasses = breadcrumbListItemThemeVariants("mona")({
+        const itemClasses = breadcrumbListItemThemeVariants({
             disabled: false,
             listDisabled: false
         }).split(/\s+/);
-        const currentClasses = breadcrumbCurrentItemThemeVariants("mona")().split(/\s+/);
+        const currentClasses = breadcrumbCurrentItemThemeVariants().split(/\s+/);
 
         expect(itemClasses).toContain("text-muted-foreground");
         expect(itemClasses).toContain("hover:bg-hover");

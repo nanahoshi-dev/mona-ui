@@ -1,74 +1,135 @@
+import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
-import {
-    tabContentVariants as annaTabContentVariants,
-    tabListBaseVariants as annaTabListBaseVariants,
-    tabListListItemVariants as annaTabListListItemVariants,
-    tabListListVariants as annaTabListListVariants,
-    tabListListWrapperVariants as annaTabListListWrapperVariants,
-    tabListScrollButtonVariants as annaTabListScrollButtonVariants,
-    tabsBaseVariants as annaTabsBaseVariants
-} from "./tabs.anna.styles";
-import {
-    tabContentVariants as monaTabContentVariants,
-    tabListBaseVariants as monaTabListBaseVariants,
-    tabListListItemVariants as monaTabListListItemVariants,
-    tabListListVariants as monaTabListListVariants,
-    tabListListWrapperVariants as monaTabListListWrapperVariants,
-    tabListScrollButtonVariants as monaTabListScrollButtonVariants,
-    tabsBaseVariants as monaTabsBaseVariants
-} from "./tabs.mona.styles";
 
-export const tabListBaseThemeVariants = createThemeStrategy({
-    anna: annaTabListBaseVariants,
-    mona: monaTabListBaseVariants
-});
+export const tabListBaseThemeVariants = cva(
+    `
+        flex w-fit max-w-full overflow-hidden
+        text-sm font-medium
+        bg-surface-muted
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full",
+                none: "rounded-none"
+            },
+            size: {
+                small: "h-8",
+                medium: "h-9",
+                large: "h-10"
+            }
+        }
+    }
+);
 
-export const tabListListWrapperThemeVariants = createThemeStrategy({
-    anna: annaTabListListWrapperVariants,
-    mona: monaTabListListWrapperVariants
-});
+export const tabListListWrapperThemeVariants = cva(`h-full w-full overflow-hidden`);
 
-export const tabListListThemeVariants = createThemeStrategy({
-    anna: annaTabListListVariants,
-    mona: monaTabListListVariants
-});
+export const tabListListThemeVariants = cva(
+    `
+        flex h-full w-full list-none overflow-hidden p-[3px]
+        cursor-default select-none whitespace-nowrap
+        transition-colors duration-(--mona-motion-standard) ease-out
+    `
+);
 
-export const tabListListItemThemeVariants = createThemeStrategy({
-    anna: annaTabListListItemVariants,
-    mona: monaTabListListItemVariants
-});
+export const tabListListItemThemeVariants = cva(
+    `
+        flex items-center justify-center px-2
+        cursor-pointer outline-none
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+    `,
+    {
+        variants: {
+            active: {
+                true: "bg-surface-raised font-semibold text-foreground shadow-(--shadow-control) inset-ring-1 inset-ring-border-subtle",
+                false: ""
+            },
+            disabled: {
+                true: "pointer-events-none cursor-not-allowed select-none text-disabled-foreground",
+                false: ""
+            },
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full",
+                none: "rounded-none"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium"
+        }
+    }
+);
 
-export const tabListScrollButtonThemeVariants = createThemeStrategy({
-    anna: annaTabListScrollButtonVariants,
-    mona: monaTabListScrollButtonVariants
-});
+export const tabListScrollButtonThemeVariants = cva(
+    `
+        flex h-full items-center justify-center px-2
+        text-muted-foreground
+        hover:bg-hover hover:text-foreground
+        active:bg-active
+    `
+);
 
-export const tabContentThemeVariants = createThemeStrategy({
-    anna: annaTabContentVariants,
-    mona: monaTabContentVariants
-});
+export const tabContentThemeVariants = cva(
+    `
+        flex-1 w-full overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+        bg-(--mona-tab-content-background) text-foreground
+        border border-border shadow-(--shadow-raised)
+    `,
+    {
+        variants: {
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full",
+                none: "rounded-none"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium"
+        }
+    }
+);
 
-export const tabsBaseThemeVariants = createThemeStrategy({
-    anna: annaTabsBaseVariants,
-    mona: monaTabsBaseVariants
-});
+export const tabsBaseThemeVariants = cva(
+    `
+        flex max-w-full flex-col gap-2
+    `
+);
 
-type TabListBaseVariantProps = VariantProps<ReturnType<typeof tabListBaseThemeVariants>>;
+type TabListBaseVariantProps = VariantProps<typeof tabListBaseThemeVariants>;
+
 type TabListBaseVariantInput = VariantInputs<TabListBaseVariantProps>;
-type TabListListWrapperVariantProps = VariantProps<ReturnType<typeof tabListListWrapperThemeVariants>>;
+
+type TabListListWrapperVariantProps = VariantProps<typeof tabListListWrapperThemeVariants>;
+
 type TabListListWrapperVariantInput = VariantInputs<TabListListWrapperVariantProps>;
-type TabListListVariantProps = VariantProps<ReturnType<typeof tabListListThemeVariants>>;
+
+type TabListListVariantProps = VariantProps<typeof tabListListThemeVariants>;
+
 type TabListListVariantInput = VariantInputs<TabListListVariantProps>;
-export type TabListListItemVariantProps = VariantProps<ReturnType<typeof tabListListItemThemeVariants>>;
+
+export type TabListListItemVariantProps = VariantProps<typeof tabListListItemThemeVariants>;
+
 export type TabListListItemVariantInput = VariantInputs<TabListListItemVariantProps>;
-export type TabListScrollButtonVariantProps = VariantProps<ReturnType<typeof tabListScrollButtonThemeVariants>>;
+
+export type TabListScrollButtonVariantProps = VariantProps<typeof tabListScrollButtonThemeVariants>;
+
 export type TabListScrollButtonVariantInput = VariantInputs<TabListScrollButtonVariantProps>;
 
-type TabContentVariantProps = VariantProps<ReturnType<typeof tabContentThemeVariants>>;
+type TabContentVariantProps = VariantProps<typeof tabContentThemeVariants>;
+
 type TabContentVariantInput = VariantInputs<TabContentVariantProps>;
-type TabsBaseVariantProps = VariantProps<ReturnType<typeof tabsBaseThemeVariants>>;
+
+type TabsBaseVariantProps = VariantProps<typeof tabsBaseThemeVariants>;
+
 type TabsBaseVariantInput = VariantInputs<TabsBaseVariantProps>;
 
 export type TabListVariantProps = TabListBaseVariantProps &
@@ -76,6 +137,7 @@ export type TabListVariantProps = TabListBaseVariantProps &
     TabListListVariantProps &
     TabListListItemVariantProps &
     TabListScrollButtonVariantProps;
+
 export type TabListVariantInput = TabListBaseVariantInput &
     TabListListWrapperVariantInput &
     TabListListVariantInput &
@@ -83,4 +145,5 @@ export type TabListVariantInput = TabListBaseVariantInput &
     TabListScrollButtonVariantInput;
 
 export type TabsVariantProps = TabsBaseVariantProps & TabListVariantProps & TabContentVariantProps;
+
 export type TabsVariantInput = TabsBaseVariantInput & TabListVariantInput & TabContentVariantInput;

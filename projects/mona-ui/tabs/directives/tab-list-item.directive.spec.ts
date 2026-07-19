@@ -1,4 +1,6 @@
 import { TestBed } from "@angular/core/testing";
+import { annaTheme } from "../../theme/definitions/anna-theme";
+import { monaTheme } from "../../theme/definitions/mona-theme";
 import { tabContentThemeVariants, tabListBaseThemeVariants, tabListListItemThemeVariants } from "../styles/tabs.styles";
 import { TabListItemDirective } from "./tab-list-item.directive";
 
@@ -15,7 +17,7 @@ describe("TabListItemDirective", () => {
     });
 
     it("uses a distinct surface and boundary for the selected tab", () => {
-        const classes = tabListListItemThemeVariants("mona")({
+        const classes = tabListListItemThemeVariants({
             active: true,
             disabled: false,
             rounded: "medium"
@@ -30,24 +32,19 @@ describe("TabListItemDirective", () => {
         expect(tokens).not.toContain("bg-accent");
     });
 
-    it("uses a muted rail and a bordered elevated panel for Mona", () => {
-        const railClasses = tabListBaseThemeVariants("mona")({ rounded: "medium", size: "medium" }).split(/\s+/);
-        const panelClasses = tabContentThemeVariants("mona")({ rounded: "medium" }).split(/\s+/);
+    it("uses a muted rail and a token-driven bordered panel", () => {
+        const railClasses = tabListBaseThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
+        const panelClasses = tabContentThemeVariants({ rounded: "medium" }).split(/\s+/);
 
         expect(railClasses).toContain("bg-surface-muted");
-        expect(panelClasses).toContain("bg-surface");
+        expect(panelClasses).toContain("bg-(--mona-tab-content-background)");
         expect(panelClasses).toContain("border");
         expect(panelClasses).toContain("border-border");
         expect(panelClasses).toContain("shadow-(--shadow-raised)");
     });
 
-    it("uses a darker bordered and elevated content panel for Anna", () => {
-        const panelClasses = tabContentThemeVariants("anna")({ rounded: "medium" }).split(/\s+/);
-
-        expect(panelClasses).toContain("bg-surface-muted");
-        expect(panelClasses).toContain("border");
-        expect(panelClasses).toContain("border-border");
-        expect(panelClasses).toContain("shadow-(--shadow-raised)");
-        expect(panelClasses).not.toContain("bg-surface");
+    it("keeps Mona and Anna tab backgrounds in their independent profiles", () => {
+        expect(monaTheme.variants.dark.components["--mona-tab-content-background"]).toBe("var(--color-surface)");
+        expect(annaTheme.variants.dark.components["--mona-tab-content-background"]).toBe("transparent");
     });
 });

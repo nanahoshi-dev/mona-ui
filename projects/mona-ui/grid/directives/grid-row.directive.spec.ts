@@ -1,6 +1,6 @@
 import { TestBed } from "@angular/core/testing";
 import { GridService } from "../services/grid.service";
-import { gridListTableRowVariants } from "../styles/grid.mona.styles";
+import { gridListTableRowThemeVariants } from "../styles/grid.styles";
 import { GridRowDirective } from "./grid-row.directive";
 
 describe("GridRowDirective", () => {
@@ -13,13 +13,13 @@ describe("GridRowDirective", () => {
     });
 
     it("uses neutral hover and persistent selection instead of primary fills", () => {
-        const restingClasses = gridListTableRowVariants({ selected: false });
-        const selectedClasses = gridListTableRowVariants({ selected: true });
+        const restingClasses = gridListTableRowThemeVariants({ selected: false });
+        const selectedClasses = gridListTableRowThemeVariants({ selected: true });
 
         expect(restingClasses).toContain("bg-surface");
         expect(restingClasses).toContain("hover:bg-hover");
-        expect(selectedClasses).toContain("bg-active");
-        expect(selectedClasses).toContain("text-foreground");
+        expect(selectedClasses).toContain("bg-(--color-selected)");
+        expect(selectedClasses).toContain("text-(--color-selected-foreground)");
         expect(selectedClasses).not.toContain("bg-primary");
     });
 });

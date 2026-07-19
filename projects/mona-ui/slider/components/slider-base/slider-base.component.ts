@@ -14,7 +14,6 @@ import {
     viewChildren
 } from "@angular/core";
 import { Orientation } from "@nanahoshi/mona-ui/common";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { SliderHandleTemplateDirective } from "../../directives/slider-handle-template.directive";
 import { SliderTickValueTemplateDirective } from "../../directives/slider-tick-value-template.directive";
@@ -39,13 +38,12 @@ import { valueToPosition } from "../../utils/valueToPosition";
 
 @Directive()
 export abstract class SliderBaseComponent implements SliderVariantInputs {
-    readonly #themeService = inject(ThemeService);
     protected readonly destroyRef = inject(DestroyRef);
     protected readonly dragging = signal(false);
     protected readonly hostElementRef: ElementRef<HTMLDivElement> = inject(ElementRef);
     protected readonly tickElements = viewChildren(SliderTickDirective);
     protected readonly zone: NgZone = inject(NgZone);
-    protected readonly baseClasses = computed(() => sliderBaseThemeVariants(this.#themeService.theme())());
+    protected readonly baseClasses = computed(() => sliderBaseThemeVariants());
     protected readonly effectiveDisabled = computed(() => this.disabled());
     protected readonly handleTemplate = contentChild(SliderHandleTemplateDirective, { read: TemplateRef });
     protected readonly handleTemplateStyles = computed<Partial<CSSStyleDeclaration>>(() => {
@@ -100,11 +98,11 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return typeof bg === "string" ? { background: bg } : bg;
     });
-    protected readonly selectionClasses = computed(() => sliderSelectionThemeVariants(this.#themeService.theme())());
+    protected readonly selectionClasses = computed(() => sliderSelectionThemeVariants());
     protected readonly sliderHandleClasses = computed(() => {
         const rounded = this.rounded();
         const handleClasses = this.handleClasses();
-        const variants = sliderHandleThemeVariants(this.#themeService.theme())({ rounded });
+        const variants = sliderHandleThemeVariants({ rounded });
         return twMerge(variants ?? "", Array.isArray(handleClasses) ? handleClasses.join(" ") : handleClasses);
     });
     protected readonly sliderTrackSize = computed(() => {
@@ -121,12 +119,10 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
         }
         return `${number}px`;
     });
-    protected readonly tickClasses = computed(() => sliderTickThemeVariants(this.#themeService.theme())());
-    protected readonly tickLabelClasses = computed(() => sliderTickLabelThemeVariants(this.#themeService.theme())());
-    protected readonly tickLabelListClasses = computed(() =>
-        sliderTickLabelListThemeVariants(this.#themeService.theme())()
-    );
-    protected readonly tickListClasses = computed(() => sliderTickListThemeVariants(this.#themeService.theme())());
+    protected readonly tickClasses = computed(() => sliderTickThemeVariants());
+    protected readonly tickLabelClasses = computed(() => sliderTickLabelThemeVariants());
+    protected readonly tickLabelListClasses = computed(() => sliderTickLabelListThemeVariants());
+    protected readonly tickListClasses = computed(() => sliderTickListThemeVariants());
     protected readonly tickStyleArgs = computed<TickStyleArgs>(() => {
         const largeTickStep = this.largeTickStep();
         const max = this.maxValue();
@@ -160,7 +156,7 @@ export abstract class SliderBaseComponent implements SliderVariantInputs {
     });
     protected readonly trackClasses = computed(() => {
         const rounded = this.rounded();
-        return sliderTrackThemeVariants(this.#themeService.theme())({ rounded });
+        return sliderTrackThemeVariants({ rounded });
     });
 
     /**

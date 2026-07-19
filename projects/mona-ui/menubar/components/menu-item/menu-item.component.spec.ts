@@ -23,7 +23,7 @@ describe("MenuItemComponent", () => {
     });
 
     it("uses neutral hover, focus, active, and disabled states", () => {
-        const classes = menuItemThemeVariants("mona")({ size: "medium" }).split(/\s+/);
+        const classes = menuItemThemeVariants({ size: "medium" }).split(/\s+/);
 
         expect(classes).toContain("hover:bg-hover");
         expect(classes).toContain("focus-within:bg-hover");

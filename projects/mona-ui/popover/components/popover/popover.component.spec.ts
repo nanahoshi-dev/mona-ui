@@ -98,8 +98,8 @@ let mockPopupService: { create: ReturnType<typeof vi.fn> };
 
 describe("Popover visual contract", () => {
     it("keeps the overlay and its arrow on the same surface tier", () => {
-        const popoverClasses = popoverBaseThemeVariants("mona")({ rounded: "medium" }).split(/\s+/);
-        const arrowClasses = popoverArrowThemeVariants("mona")().split(/\s+/);
+        const popoverClasses = popoverBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const arrowClasses = popoverArrowThemeVariants().split(/\s+/);
 
         expect(popoverClasses).toContain("bg-surface-overlay");
         expect(popoverClasses).toContain("border-border");

@@ -1,6 +1,5 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { TextAreaDirective } from "./text-area.directive";
 
 @Component({
@@ -16,8 +15,7 @@ describe("TextAreaDirective", () => {
     let fixture: ComponentFixture<TestHostComponent>;
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [TestHostComponent],
-            providers: [ThemeService]
+            imports: [TestHostComponent]
         });
         directive = TestBed.runInInjectionContext(() => new TextAreaDirective());
         fixture = TestBed.createComponent(TestHostComponent);

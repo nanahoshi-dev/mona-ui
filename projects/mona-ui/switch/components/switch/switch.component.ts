@@ -14,7 +14,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import type { FormCheckboxControl } from "@angular/forms/signals";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { filter, fromEvent, merge, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { SwitchHandleContentTemplateDirective } from "../../directives/switch-handle-content-template.directive";
@@ -88,30 +87,26 @@ import {
 export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl {
     readonly #destroyRef = inject(DestroyRef);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = switchThemeVariants(theme)({ rounded, size });
+        const classes = switchThemeVariants({ rounded, size });
         return twMerge(classes, this.userClass());
     });
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && !this.checked())
     );
     protected readonly handleClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = switchHandleThemeVariants(theme)({ rounded, size });
+        const classes = switchHandleThemeVariants({ rounded, size });
         return twMerge(classes);
     });
     protected readonly handleContentTemplate = contentChild(SwitchHandleContentTemplateDirective, {
         read: TemplateRef
     });
     protected readonly labelClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        const classes = switchLabelThemeVariants(theme)();
+        const classes = switchLabelThemeVariants();
         return twMerge(classes);
     });
     protected readonly offLabelTemplate = contentChild(SwitchOffLabelTemplateDirective, { read: TemplateRef });

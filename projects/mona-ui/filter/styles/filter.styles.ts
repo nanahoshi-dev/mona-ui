@@ -1,34 +1,50 @@
+import { cva } from "class-variance-authority";
 import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { createThemeStrategy, type ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import type { VariantProps } from "class-variance-authority";
-import {
-    filterMenuActionVariants as annaFilterMenuActionVariants,
-    filterMenuBaseVariants as annaFilterMenuBaseVariants,
-    filterMenuItemVariants as annaFilterMenuItemVariants
-} from "./filter.anna.styles";
-import {
-    filterMenuActionVariants as monaFilterMenuActionVariants,
-    filterMenuBaseVariants as monaFilterMenuBaseVariants,
-    filterMenuItemVariants as monaFilterMenuItemVariants
-} from "./filter.mona.styles";
 
-export const filterMenuBaseThemeVariants = createThemeStrategy({
-    anna: annaFilterMenuBaseVariants,
-    mona: monaFilterMenuBaseVariants
-});
+export const filterMenuBaseThemeVariants = cva(
+    `
+        flex w-full flex-col
+        gap-2 p-1
+        bg-surface-overlay text-foreground
+        border border-border shadow-(--shadow-overlay)
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg"
+            },
+            size: {
+                small: "",
+                medium: "",
+                large: ""
+            }
+        }
+    }
+);
 
-export const filterMenuActionsThemeVariants = createThemeStrategy({
-    anna: annaFilterMenuActionVariants,
-    mona: monaFilterMenuActionVariants
-});
+export const filterMenuItemThemeVariants = cva(
+    `
+        flex flex-col gap-1
+        [&>mona-button-group>button]:flex-1
+    `
+);
 
-export const filterMenuItemThemeVariants = createThemeStrategy({
-    anna: annaFilterMenuItemVariants,
-    mona: monaFilterMenuItemVariants
-});
+export const filterMenuActionsThemeVariants = cva(
+    `
+        flex flex-row
+        items-center justify-center
+        gap-1 [&>button]:flex-1
+    `
+);
 
-type FilterMenuBaseVariantProps = VariantProps<ReturnType<typeof filterMenuBaseThemeVariants>>;
+type FilterMenuBaseVariantProps = VariantProps<typeof filterMenuBaseThemeVariants>;
+
 type FilterMenuBaseVariantInput = VariantInputs<FilterMenuBaseVariantProps>;
 
 export type FilterMenuVariantProps = FilterMenuBaseVariantProps;
+
 export type FilterMenuVariantInput = FilterMenuBaseVariantInput;

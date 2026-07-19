@@ -1,6 +1,5 @@
 import { computed, Directive, inject, input } from "@angular/core";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { textAreaThemeVariants, TextAreaVariantInput, TextAreaVariantProps } from "../styles/textarea.styles";
 
 @Directive({
@@ -12,11 +11,9 @@ import { textAreaThemeVariants, TextAreaVariantInput, TextAreaVariantProps } fro
     }
 })
 export class TextAreaDirective implements TextAreaVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const classes = textAreaThemeVariants(theme)({ rounded });
+        const classes = textAreaThemeVariants({ rounded });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });

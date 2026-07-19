@@ -78,7 +78,10 @@ export class DemoContainerComponent<TComponent> {
     protected readonly customColor = signal<string | null>(null);
     protected readonly direction = signal<"ltr" | "rtl">("ltr");
     protected readonly selectedTheme = computed(() => {
-        return this.themeDropdownData.find(theme => theme.id === this.#themeService.themeId());
+        return this.themeDropdownData.find(
+            theme =>
+                theme.name === this.#themeService.themeName() && theme.variant === this.#themeService.themeVariant()
+        );
     });
     protected readonly themeDropdownData = THEME_OPTIONS;
     public readonly config = input.required<ComponentConfig<TComponent>>();
@@ -96,6 +99,6 @@ export class DemoContainerComponent<TComponent> {
     }
 
     protected onThemeChange(item: ThemeOption): void {
-        this.#themeService.setThemeId(item.id);
+        this.#themeService.setTheme(item);
     }
 }
