@@ -104,10 +104,14 @@ describe("Tooltip visual contract", () => {
         const tooltipClasses = tooltipBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
         const arrowClasses = tooltipArrowThemeVariants().split(/\s+/);
 
-        expect(tooltipClasses).toContain("bg-surface-overlay");
+        expect(tooltipClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(tooltipClasses).toContain("text-foreground");
         expect(tooltipClasses).toContain("border-border");
-        expect(arrowClasses).toContain("bg-surface-overlay");
+        expect(arrowClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(arrowClasses).toContain("border-border");
     });
 });

@@ -94,7 +94,11 @@ describe("ButtonDirective", () => {
             expect(buttonElement.classList.length).toBeGreaterThan(0);
             expect(buttonElement.getAttribute("data-look")).toBe("default");
             expect(buttonElement.getAttribute("data-size")).toBe("medium");
-            expect(buttonElement.classList.contains("bg-input-background")).toBe(true);
+            expect(
+                buttonElement.classList.contains(
+                    "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+                )
+            ).toBe(true);
             expect(buttonElement.classList.contains("border-input-border")).toBe(true);
             expect(buttonElement.classList.contains("hover:bg-hover")).toBe(true);
             expect(buttonElement.classList.contains("active:bg-active")).toBe(true);

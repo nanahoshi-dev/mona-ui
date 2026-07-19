@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const tooltipBaseThemeVariants = cva(
     `
         relative z-1 flex items-center justify-center
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay)
     `,
     {
@@ -25,7 +25,7 @@ export const tooltipArrowThemeVariants = cva(
     `
         absolute z-0 h-3 w-3 rotate-45 transform-center box-border
         pointer-events-none
-        bg-surface-overlay
+        ${themeOverlaySurfaceClasses}
         border border-border shadow-(--shadow-overlay)
 
         data-[position="top"]:-bottom-1.5

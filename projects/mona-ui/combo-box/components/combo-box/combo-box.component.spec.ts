@@ -64,7 +64,11 @@ describe("ComboBoxComponent", () => {
         const fixture = await createSignalFormFixture();
         const host = getHost(fixture);
 
-        expect(host.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            host.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(host.classList.contains("border-input-border")).toBe(true);
         expect(host.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);

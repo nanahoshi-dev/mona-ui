@@ -686,7 +686,7 @@ describe("Pager visual contract", () => {
         const baseClasses = pagerBaseThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
         const infoClasses = pagerInfoThemeVariants().split(/\s+/);
 
-        expect(baseClasses).toContain("bg-surface-muted");
+        expect(baseClasses).toContain("bg-(--mona-pager-background)");
         expect(baseClasses).toContain("border-border-subtle");
         expect(baseClasses).not.toContain("bg-primary");
         expect(infoClasses).toContain("text-muted-foreground");

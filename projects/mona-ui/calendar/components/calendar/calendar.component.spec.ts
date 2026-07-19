@@ -135,7 +135,7 @@ describe("CalendarComponent signal forms", () => {
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-16"]);
         expectRangePreview(fixture, 16, false);
         expectRangePreview(fixture, 17, true);
-        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
+        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("false");
     });
 
     it("previews a backward range from the pending start date to the hovered day", async () => {
@@ -150,7 +150,7 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expectRangePreview(fixture, 17, true);
-        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
+        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("false");
     });
 
     it("commits the final range selection and clears the hover preview", async () => {
@@ -166,7 +166,7 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-18"]);
-        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBe("true");
+        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("true");
         expectRangePreview(fixture, 17, false);
     });
 
@@ -318,7 +318,8 @@ describe("Calendar visual contract", () => {
             today: false
         }).split(/\s+/);
 
-        expect(baseClasses).toContain("bg-input-background");
+        expect(baseClasses).toContain("bg-(--mona-calendar-background)");
+        expect(baseClasses).toContain("[backdrop-filter:var(--mona-effect-raised-backdrop-filter,none)]");
         expect(baseClasses).toContain("border-border");
         expect(baseClasses).toContain("shadow-(--mona-calendar-shadow)");
         expect(focusedClasses).toContain("bg-hover");

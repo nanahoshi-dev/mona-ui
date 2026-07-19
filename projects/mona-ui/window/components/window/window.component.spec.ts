@@ -30,7 +30,9 @@ describe("WindowComponent", () => {
         const contentClasses = windowContentContainerThemeVariants({ rounded: "medium" }).split(/\s+/);
         const titleClasses = windowTitleBarThemeVariants({ look: "default", rounded: "medium" }).split(/\s+/);
 
-        expect(windowClasses).toContain("bg-surface-overlay");
+        expect(windowClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(contentClasses).toContain("border-border");
         expect(contentClasses).toContain("shadow-(--shadow-overlay)");
         expect(titleClasses).toContain("bg-surface-muted");

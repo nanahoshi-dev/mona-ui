@@ -149,14 +149,30 @@
     --mona-border-radius: 0;
     --mona-motion-fast: 200ms;
     --mona-motion-standard: 300ms;
+    --mona-effect-control-background-color: var(--color-input-background);
+    --mona-effect-control-fallback-background-color: var(--color-input-background);
+    --mona-effect-control-background-image: none;
+    --mona-effect-control-backdrop-filter: none;
+    --mona-effect-raised-background-color: var(--color-surface-raised);
+    --mona-effect-raised-fallback-background-color: var(--color-surface-raised);
+    --mona-effect-raised-background-image: none;
+    --mona-effect-raised-backdrop-filter: none;
+    --mona-effect-overlay-background-color: var(--color-surface-overlay);
+    --mona-effect-overlay-fallback-background-color: var(--color-surface-overlay);
+    --mona-effect-overlay-background-image: none;
+    --mona-effect-overlay-backdrop-filter: none;
+    --mona-calendar-background: var(--color-input-background);
     --mona-calendar-shadow: var(--shadow-raised);
     --mona-list-background: transparent;
     --mona-list-disabled-background: transparent;
     --mona-list-group-background: transparent;
     --mona-list-group-border-width: 0px;
     --mona-list-group-font-weight: 700;
+    --mona-menubar-background: var(--color-surface-muted);
     --mona-menubar-shadow: var(--shadow-raised);
+    --mona-pager-background: var(--color-surface-muted);
     --mona-slider-handle-border-color: color-mix(in srgb, var(--color-focus-indicator) 50%, transparent);
+    --mona-tab-list-background: var(--color-surface-muted);
     --mona-tab-content-background: var(--color-surface);
 }
 

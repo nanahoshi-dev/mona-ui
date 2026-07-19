@@ -28,9 +28,11 @@ describe("MenubarComponent", () => {
             size: "medium"
         }).split(/\s+/);
 
-        expect(barClasses).toContain("bg-surface-muted");
+        expect(barClasses).toContain("bg-(--mona-menubar-background)");
         expect(barClasses).toContain("border-border-subtle");
-        expect(menuClasses).toContain("bg-surface-overlay");
+        expect(menuClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(menuClasses).toContain("border-border");
         expect(menuClasses).toContain("shadow-(--shadow-overlay)");
     });

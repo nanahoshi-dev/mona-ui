@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeRaisedBackdropClasses, themeRaisedSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const tabListBaseThemeVariants = cva(
     `
         flex w-fit max-w-full overflow-hidden
         text-sm font-medium
-        bg-surface-muted
+        bg-(--mona-tab-list-background) ${themeRaisedBackdropClasses}
     `,
     {
         variants: {
@@ -45,7 +45,7 @@ export const tabListListItemThemeVariants = cva(
     {
         variants: {
             active: {
-                true: "bg-surface-raised font-semibold text-foreground shadow-(--shadow-control) inset-ring-1 inset-ring-border-subtle",
+                true: `${themeRaisedSurfaceClasses} font-semibold text-foreground shadow-(--shadow-control) inset-ring-1 inset-ring-border-subtle`,
                 false: ""
             },
             disabled: {
@@ -79,7 +79,7 @@ export const tabContentThemeVariants = cva(
     `
         flex-1 w-full overflow-auto
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
-        bg-(--mona-tab-content-background) text-foreground
+        bg-(--mona-tab-content-background) ${themeRaisedBackdropClasses} text-foreground
         border border-border shadow-(--shadow-raised)
     `,
     {

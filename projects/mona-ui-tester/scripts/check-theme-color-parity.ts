@@ -3,8 +3,13 @@ import { resolve } from "node:path";
 import { converter, parse } from "culori";
 import { annaThemeColors } from "../../mona-ui/theme/definitions/anna-theme-colors";
 import { annaThemeShadows } from "../../mona-ui/theme/definitions/anna-theme-shadows";
+import { annaTheme } from "../../mona-ui/theme/definitions/anna-theme";
+import { lunaThemeColors } from "../../mona-ui/theme/definitions/luna-theme-colors";
+import { lunaThemeShadows } from "../../mona-ui/theme/definitions/luna-theme-shadows";
+import { lunaTheme } from "../../mona-ui/theme/definitions/luna-theme";
 import { monaThemeColors } from "../../mona-ui/theme/definitions/mona-theme-colors";
 import { monaThemeShadows } from "../../mona-ui/theme/definitions/mona-theme-shadows";
+import { monaTheme } from "../../mona-ui/theme/definitions/mona-theme";
 
 const stylesPath = resolve("projects/mona-ui-tester/src/styles.css");
 const styles = readFileSync(stylesPath, "utf8");
@@ -39,7 +44,9 @@ if (JSON.stringify(tailwindKeys) !== JSON.stringify(runtimeKeys)) {
 for (const [name, colors] of Object.entries({
     "Mona Light": monaThemeColors.light,
     "Mona Dark": monaThemeColors.dark,
-    "Anna Dark": annaThemeColors.dark
+    "Anna Dark": annaThemeColors.dark,
+    "Luna Light": lunaThemeColors.light,
+    "Luna Dark": lunaThemeColors.dark
 })) {
     const keys = Object.keys(colors).sort();
     if (JSON.stringify(keys) !== JSON.stringify(runtimeKeys)) {
@@ -66,7 +73,9 @@ const tailwindShadowKeys = Object.keys(tailwindShadows).sort();
 
 for (const [name, shadows] of Object.entries({
     "Mona Dark": monaThemeShadows.dark,
-    "Anna Dark": annaThemeShadows.dark
+    "Anna Dark": annaThemeShadows.dark,
+    "Luna Light": lunaThemeShadows.light,
+    "Luna Dark": lunaThemeShadows.dark
 })) {
     const keys = Object.keys(shadows).sort();
     if (JSON.stringify(keys) !== JSON.stringify(runtimeShadowKeys)) {
@@ -87,7 +96,22 @@ for (const [name, value] of Object.entries(runtimeShadows)) {
 }
 
 const librarySources = globSync("projects/mona-ui/**/*.ts").filter(path => !path.endsWith(".spec.ts"));
-const forbiddenThemeStyleFiles = librarySources.filter(path => /\.(?:anna|mona)\.styles\.ts$/.test(path));
+for (const [name, profile] of Object.entries({
+    "Anna Dark": annaTheme.variants.dark,
+    "Luna Light": lunaTheme.variants.light,
+    "Luna Dark": lunaTheme.variants.dark
+})) {
+    for (const section of ["effects", "shape", "components"] as const) {
+        if (
+            JSON.stringify(Object.keys(profile[section]).sort()) !==
+            JSON.stringify(Object.keys(monaTheme.variants.light[section]).sort())
+        ) {
+            throw new Error(`${name} does not match the built-in runtime ${section} contract.`);
+        }
+    }
+}
+
+const forbiddenThemeStyleFiles = librarySources.filter(path => /\.(?:anna|luna|mona)\.styles\.ts$/.test(path));
 if (forbiddenThemeStyleFiles.length > 0) {
     throw new Error(`Theme-specific style files remain: ${forbiddenThemeStyleFiles.join(", ")}.`);
 }

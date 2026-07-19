@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const radioButtonThemeVariants = cva(
@@ -15,7 +15,7 @@ export const radioButtonCircleThemeVariants = cva(
     `
         relative flex h-4.5 w-4.5 items-center justify-center
         cursor-pointer overflow-hidden
-        bg-input-background
+        ${themeControlSurfaceClasses}
         border border-input-border
         transition-colors duration-(--mona-motion-fast)
 
@@ -88,7 +88,7 @@ export const radioButtonDirectiveThemeVariants = cva(
     `
         relative flex h-4.5 w-4.5 items-center justify-center place-content-center
         cursor-pointer appearance-none
-        bg-input-background
+        ${themeControlSurfaceClasses}
         border border-input-border
         outline-none
 

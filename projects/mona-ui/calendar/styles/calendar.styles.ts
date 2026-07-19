@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeRaisedBackdropClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const calendarBaseThemeVariants = cva(
     `
         flex min-w-64 flex-col gap-2 p-2
         select-none
-        bg-input-background text-foreground
+        bg-(--mona-calendar-background) ${themeRaisedBackdropClasses} text-foreground
         border border-border shadow-(--mona-calendar-shadow)
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35

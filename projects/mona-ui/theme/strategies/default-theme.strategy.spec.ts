@@ -48,6 +48,18 @@ describe("DefaultThemeStrategy", () => {
         );
     });
 
+    it("requires the effect and shape sections for third-party profiles", () => {
+        const { effects: _effects, shape: _shape, ...incomplete } = cloneProfile(monaTheme.variants.light);
+
+        expect(
+            () =>
+                new DefaultThemeStrategy(
+                    [{ name: "custom", variants: { light: incomplete as unknown as ThemeProfile } }],
+                    []
+                )
+        ).toThrowError(/missing effects tokens/);
+    });
+
     it("rejects a family with no declared variants", () => {
         const registration = { name: "custom", variants: {} } as ThemeFamilyRegistration;
 
@@ -72,6 +84,35 @@ describe("DefaultThemeStrategy", () => {
 
         expect(strategy.resolve({ name: "mona", variant: "light" }).colors["--color-primary"]).toBe("common-2");
         expect(strategy.resolve({ name: "mona", variant: "dark" }).colors["--color-primary"]).toBe("dark-3");
+    });
+
+    it("applies effect and shape overrides through the same ordered pipeline", () => {
+        const strategy = new DefaultThemeStrategy(
+            [],
+            [
+                {
+                    theme: "luna",
+                    common: {
+                        effects: { "--mona-effect-control-backdrop-filter": "blur(20px)" },
+                        shape: { "--radius-md": "0.875rem" }
+                    }
+                },
+                {
+                    theme: "luna",
+                    dark: {
+                        effects: { "--mona-effect-control-backdrop-filter": "blur(22px)" }
+                    }
+                }
+            ]
+        );
+
+        expect(
+            strategy.resolve({ name: "luna", variant: "light" }).effects["--mona-effect-control-backdrop-filter"]
+        ).toBe("blur(20px)");
+        expect(
+            strategy.resolve({ name: "luna", variant: "dark" }).effects["--mona-effect-control-backdrop-filter"]
+        ).toBe("blur(22px)");
+        expect(strategy.resolve({ name: "luna", variant: "dark" }).shape["--radius-md"]).toBe("0.875rem");
     });
 
     it("rejects overrides for unknown targets", () => {
@@ -145,7 +186,9 @@ function cloneProfile(profile: ThemeProfile): ThemeProfile {
         colors: { ...profile.colors },
         components: { ...profile.components },
         custom: profile.custom ? { ...profile.custom } : undefined,
+        effects: { ...profile.effects },
         motion: { ...profile.motion },
+        shape: { ...profile.shape },
         shadows: { ...profile.shadows }
     };
 }

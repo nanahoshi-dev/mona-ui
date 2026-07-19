@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const checkboxInputThemeVariants = cva(`sr-only appearance-none outline-none peer`);
@@ -9,7 +9,7 @@ export const checkmarkThemeVariants = cva(
         flex items-center justify-center
         h-4.5 w-4.5 pl-0.25
         cursor-pointer overflow-hidden
-        bg-input-background
+        ${themeControlSurfaceClasses}
         border border-input-border
         outline-none
 
@@ -72,7 +72,7 @@ export const checkboxDirectiveThemeVariants = cva(
     `
         relative h-4.5 w-4.5
         cursor-pointer appearance-none
-        bg-input-background
+        ${themeControlSurfaceClasses}
         border border-input-border
         outline-none
 

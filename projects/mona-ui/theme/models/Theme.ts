@@ -1,4 +1,4 @@
-export type BuiltInThemeName = "anna" | "mona";
+export type BuiltInThemeName = "anna" | "luna" | "mona";
 export type ThemeName = string;
 export type ThemeVariant = "light" | "dark";
 

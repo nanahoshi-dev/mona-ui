@@ -27,7 +27,11 @@ describe("SwitchComponent", () => {
         expect(hostElement.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
         expect(hostElement.classList.contains("data-[invalid='true']:focus-visible:ring-error/35")).toBe(true);
         expect(hostElement.classList.contains("data-[disabled='true']:bg-disabled-background")).toBe(true);
-        expect(handleElement.classList.contains("bg-surface-raised")).toBe(true);
+        expect(
+            handleElement.classList.contains(
+                "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+            )
+        ).toBe(true);
         expect(handleElement.classList.contains("border-border-subtle")).toBe(true);
     });
 });

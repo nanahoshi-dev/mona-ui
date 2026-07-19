@@ -21,7 +21,11 @@ describe("DateTimePickerComponent", () => {
     it("uses one shared input shell without a nested focus ring", () => {
         const picker = fixture.nativeElement.querySelector("mona-datetime-picker") as HTMLElement;
 
-        expect(picker.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            picker.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(picker.classList.contains("border-input-border")).toBe(true);
         expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);

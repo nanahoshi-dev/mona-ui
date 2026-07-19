@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const popoverBaseThemeVariants = cva(
     `
         relative z-1 flex flex-col items-center justify-center
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay)
     `,
     {
@@ -47,7 +47,7 @@ export const popoverArrowThemeVariants = cva(
     `
         absolute z-0 h-3 w-3 rotate-45 transform-center box-border
         pointer-events-none
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border
         data-[position="top"]:-bottom-1.5 data-[position="top"]:border-t-0 data-[position="top"]:border-l-0
         data-[position="top"]:[clip-path:inset(1px_0_0_1px)]

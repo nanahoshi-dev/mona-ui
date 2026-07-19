@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, themeRaisedSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const switchThemeVariants = cva(
     `
         group relative flex items-center
         cursor-pointer select-none
-        bg-input-background
+        ${themeControlSurfaceClasses}
         border border-input-border
         outline-none
         transition-[background,border-color]
@@ -51,7 +51,7 @@ export const switchThemeVariants = cva(
 export const switchHandleThemeVariants = cva(
     `
         absolute inline-flex items-center justify-center
-        bg-surface-raised text-foreground
+        ${themeRaisedSurfaceClasses} text-foreground
         border border-border-subtle shadow-(--shadow-control)
         outline-none
         transition-[left,background] duration-(--mona-motion-standard) ease-in-out

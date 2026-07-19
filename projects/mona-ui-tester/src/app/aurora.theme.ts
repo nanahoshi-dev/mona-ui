@@ -89,15 +89,38 @@ export const auroraTheme = Object.freeze({
                 "--mona-motion-fast": "170ms",
                 "--mona-motion-standard": "240ms"
             }),
+            effects: Object.freeze({
+                "--mona-effect-control-background-color": "var(--color-input-background)",
+                "--mona-effect-control-fallback-background-color": "var(--color-input-background)",
+                "--mona-effect-control-background-image": "none",
+                "--mona-effect-control-backdrop-filter": "none",
+                "--mona-effect-raised-background-color": "var(--color-surface-raised)",
+                "--mona-effect-raised-fallback-background-color": "var(--color-surface-raised)",
+                "--mona-effect-raised-background-image": "none",
+                "--mona-effect-raised-backdrop-filter": "none",
+                "--mona-effect-overlay-background-color": "var(--color-surface-overlay)",
+                "--mona-effect-overlay-fallback-background-color": "var(--color-surface-overlay)",
+                "--mona-effect-overlay-background-image": "none",
+                "--mona-effect-overlay-backdrop-filter": "none"
+            }),
+            shape: Object.freeze({
+                "--radius-sm": "0.25rem",
+                "--radius-md": "0.375rem",
+                "--radius-lg": "0.5rem"
+            }),
             components: Object.freeze({
+                "--mona-calendar-background": "var(--color-input-background)",
                 "--mona-calendar-shadow": "var(--shadow-raised)",
                 "--mona-list-background": "var(--color-surface)",
                 "--mona-list-disabled-background": "var(--color-disabled-background)",
                 "--mona-list-group-background": "var(--color-surface-muted)",
                 "--mona-list-group-border-width": "1px",
                 "--mona-list-group-font-weight": "600",
+                "--mona-menubar-background": "var(--color-surface-muted)",
                 "--mona-menubar-shadow": "var(--shadow-raised)",
+                "--mona-pager-background": "var(--color-surface-muted)",
                 "--mona-slider-handle-border-color": "var(--color-focus-indicator)",
+                "--mona-tab-list-background": "var(--color-surface-muted)",
                 "--mona-tab-content-background": "var(--color-surface)"
             })
         })

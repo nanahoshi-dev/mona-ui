@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const textAreaThemeVariants = cva(
     `
         px-2 py-1
         text-sm text-foreground
-        bg-input-background
+        ${themeControlSurfaceClasses}
         border border-input-border shadow-(--shadow-control)
         outline-none
         selection:bg-primary selection:text-primary-foreground

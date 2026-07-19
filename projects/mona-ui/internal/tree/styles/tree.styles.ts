@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 
 export const subTreeListThemeVariants = cva(
     `
@@ -79,7 +80,7 @@ export const treeNodeDraggingThemeVariants = cva(
     `
         flex items-center justify-center
         top-3! px-2! py-1!
-        bg-surface-overlay! text-foreground!
+        ${themeOverlaySurfaceClasses} text-foreground!
         border! border-border!
         shadow-(--shadow-overlay)
     `

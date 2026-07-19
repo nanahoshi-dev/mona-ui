@@ -23,7 +23,11 @@ describe("TextBoxDirective", () => {
         fixture.detectChanges();
         const element = fixture.nativeElement.querySelector("input") as HTMLInputElement;
 
-        expect(element.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            element.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(element.classList.contains("border-input-border")).toBe(true);
         expect(element.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(element.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);

@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
 import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const autoCompleteBaseThemeVariants = cva(
     `
         flex
-        bg-input-background text-foreground
+        ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control) outline-none
         transition-[color,box-shadow,border] duration-(--mona-motion-standard) ease-in-out
         data-[readonly='true']:cursor-default

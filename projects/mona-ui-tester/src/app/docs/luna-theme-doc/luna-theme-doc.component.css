@@ -1,0 +1,245 @@
+:host {
+    --luna-ink: var(--color-foreground);
+}
+
+.luna-page {
+    display: grid;
+    max-width: 76rem;
+    gap: 2rem;
+    margin-inline: auto;
+    padding: 2rem clamp(1rem, 4vw, 3rem) 5rem;
+    color: var(--luna-ink);
+}
+
+.luna-hero,
+.luna-stage,
+.luna-overlay-field {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
+    border-radius: var(--radius-lg);
+}
+
+.luna-hero {
+    min-height: 21rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 2rem;
+    padding: clamp(2rem, 7vw, 5rem);
+    background:
+        radial-gradient(circle at 74% 18%, color-mix(in srgb, var(--color-primary) 38%, transparent), transparent 28%),
+        radial-gradient(
+            circle at 18% 82%,
+            color-mix(in srgb, var(--color-secondary) 28%, transparent),
+            transparent 32%
+        ),
+        var(--color-surface);
+}
+
+.luna-orbit {
+    position: absolute;
+    width: 19rem;
+    aspect-ratio: 1;
+    top: -7rem;
+    right: 9%;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 44%, transparent);
+    border-radius: 999px;
+    box-shadow:
+        0 0 0 3rem color-mix(in srgb, var(--color-primary) 4%, transparent),
+        0 0 0 7rem color-mix(in srgb, var(--color-primary) 3%, transparent);
+}
+
+.luna-hero-copy {
+    position: relative;
+    max-width: 42rem;
+}
+
+.luna-hero h1 {
+    margin: 0;
+    font-size: clamp(4.5rem, 14vw, 10rem);
+    font-weight: 260;
+    line-height: 0.78;
+    letter-spacing: -0.075em;
+}
+
+.luna-hero-copy > p:last-child {
+    max-width: 36rem;
+    margin-top: 2rem;
+    color: var(--color-muted-foreground);
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+.luna-kicker,
+.luna-label,
+.luna-section-heading p,
+.luna-status span,
+.luna-status small {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.luna-status,
+.luna-overlay-specimen {
+    position: relative;
+    background-color: var(--mona-effect-overlay-background-color);
+    background-image: var(--mona-effect-overlay-background-image);
+    backdrop-filter: var(--mona-effect-overlay-backdrop-filter);
+    -webkit-backdrop-filter: var(--mona-effect-overlay-backdrop-filter);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-overlay);
+}
+
+.luna-status {
+    display: grid;
+    min-width: 10rem;
+    gap: 0.15rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+}
+
+.luna-status strong {
+    font-size: 1rem;
+}
+
+.luna-status small,
+.luna-section-heading p,
+.luna-label {
+    color: var(--color-muted-foreground);
+}
+
+.luna-stage {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    background: var(--color-surface);
+}
+
+.luna-section-heading h2 {
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    font-weight: 480;
+    letter-spacing: -0.035em;
+}
+
+.luna-control-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.luna-cluster {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+    padding: 1.25rem;
+    background: color-mix(in srgb, var(--color-surface-muted) 76%, transparent);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-md);
+}
+
+.luna-navigation-stage {
+    background:
+        radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--color-secondary) 14%, transparent), transparent 30%),
+        var(--color-surface);
+}
+
+.luna-feature-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.luna-tab-panel {
+    display: grid;
+    gap: 0.75rem;
+    min-height: 12rem;
+    padding: 1.5rem;
+}
+
+.luna-tab-panel strong {
+    font-size: 1.35rem;
+    font-weight: 520;
+}
+
+.luna-tab-panel p {
+    max-width: 32rem;
+    color: var(--color-muted-foreground);
+    line-height: 1.6;
+}
+
+.luna-overlay-field {
+    min-height: 25rem;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background:
+        linear-gradient(125deg, color-mix(in srgb, var(--color-primary) 38%, transparent), transparent 45%),
+        radial-gradient(circle at 76% 28%, color-mix(in srgb, var(--color-info) 52%, transparent), transparent 24%),
+        var(--color-canvas);
+}
+
+.luna-moon {
+    position: absolute;
+    width: min(17rem, 58vw);
+    aspect-ratio: 1;
+    right: 8%;
+    top: 8%;
+    border-radius: 999px;
+    background:
+        radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.8), transparent 12%),
+        radial-gradient(circle at 65% 66%, rgb(76 84 150 / 0.22), transparent 16%),
+        linear-gradient(145deg, #dce2ff, #7f8dde);
+    box-shadow: 0 0 5rem color-mix(in srgb, var(--color-primary) 42%, transparent);
+}
+
+.luna-overlay-specimen {
+    width: min(34rem, 100%);
+    margin-right: 24%;
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    border-radius: var(--radius-lg);
+}
+
+.luna-overlay-specimen h2 {
+    margin: 0.65rem 0;
+    font-size: clamp(1.65rem, 4vw, 2.4rem);
+    font-weight: 480;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+}
+
+.luna-overlay-specimen p {
+    margin-bottom: 1.5rem;
+    color: var(--color-muted-foreground);
+    line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+    .luna-hero,
+    .luna-control-grid,
+    .luna-feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .luna-status {
+        width: fit-content;
+    }
+
+    .luna-overlay-specimen {
+        margin-right: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .luna-page *,
+    .luna-page *::before,
+    .luna-page *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

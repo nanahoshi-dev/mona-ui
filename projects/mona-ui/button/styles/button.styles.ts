@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const buttonThemeVariants = cva(
@@ -31,7 +31,7 @@ export const buttonThemeVariants = cva(
             },
             look: {
                 default: `
-                    bg-input-background text-foreground
+                    ${themeControlSurfaceClasses} text-foreground
                     border border-input-border
                     hover:bg-hover active:bg-active
                     focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35
@@ -66,7 +66,7 @@ export const buttonThemeVariants = cva(
                     focus-visible:ring-2 focus-visible:ring-info/35
                 `,
                 outline: `
-                    bg-input-background text-foreground
+                    ${themeControlSurfaceClasses} text-foreground
                     border border-input-border
                     hover:bg-hover active:bg-active
                     focus-visible:border-focus-indicator focus-visible:ring-2 focus-visible:ring-focus-indicator/35

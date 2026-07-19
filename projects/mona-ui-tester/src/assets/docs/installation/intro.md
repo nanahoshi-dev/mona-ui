@@ -120,7 +120,7 @@ At runtime, call `themeService.setTheme({ name, variant })`. Unknown families an
 
 ## Register a Theme Family
 
-Custom families provide one or both variants. Every declared variant is a complete, independent `ThemeProfile` with `colors`, `shadows`, `motion`, and `components` sections:
+Custom families provide one or both variants. Every declared variant is a complete, independent `ThemeProfile` with `colors`, `shadows`, `motion`, `effects`, `shape`, and `components` sections:
 
 ```ts
 import { provideThemeFamily, type ThemeFamilyRegistration } from "@nanahoshi/mona-ui/theme";
@@ -134,7 +134,7 @@ const auroraTheme = {
 providers: [provideThemeFamily(auroraTheme)];
 ```
 
-The profile must declare the full canonical token contract. Optional custom variables may not collide with required profile variables.
+The profile must declare the full canonical token contract. The required `effects` section defines control, raised, and overlay materials, including opaque fallbacks; `shape` defines the shared small, medium, and large radius scale. Optional custom variables may not collide with required profile variables. Mona UI automatically substitutes effect fallbacks when backdrop filtering is unavailable or reduced transparency is requested.
 
 ### Using New Color Names with Tailwind
 

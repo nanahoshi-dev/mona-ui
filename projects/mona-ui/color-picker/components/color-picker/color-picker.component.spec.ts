@@ -111,7 +111,11 @@ describe("ColorPickerComponent", () => {
         const fixture = await createValueBindingFixture();
         const picker = getPicker(fixture);
 
-        expect(picker.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            picker.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(picker.classList.contains("border-input-border")).toBe(true);
         expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("hover:bg-hover")).toBe(true);
@@ -127,7 +131,11 @@ describe("ColorPickerComponent", () => {
         await openPicker(fixture);
         const popup = document.body.querySelector("[role='dialog']") as HTMLElement;
 
-        expect(popup.classList.contains("bg-surface-overlay")).toBe(true);
+        expect(
+            popup.classList.contains(
+                "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+            )
+        ).toBe(true);
         expect(popup.classList.contains("border-border")).toBe(true);
         expect(popup.classList.contains("shadow-(--shadow-overlay)")).toBe(true);
         expect(popup.classList.contains("border-input-border")).toBe(false);

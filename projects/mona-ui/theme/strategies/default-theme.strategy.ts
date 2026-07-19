@@ -108,7 +108,9 @@ function applyOverrides(profile: ThemeProfile, overrides: ThemeProfileOverrides 
         colors: Object.freeze({ ...profile.colors, ...overrides.colors }),
         components: Object.freeze({ ...profile.components, ...overrides.components }),
         custom,
+        effects: Object.freeze({ ...profile.effects, ...overrides.effects }),
         motion: Object.freeze({ ...profile.motion, ...overrides.motion }),
+        shape: Object.freeze({ ...profile.shape, ...overrides.shape }),
         shadows: Object.freeze({ ...profile.shadows, ...overrides.shadows })
     };
 }
@@ -119,7 +121,7 @@ function cloneProfile(profile: ThemeProfile): ThemeProfile {
 
 function validateProfile(name: string, variant: ThemeVariant, profile: ThemeProfile): void {
     const reference = builtInThemes.mona.variants.light;
-    for (const section of ["colors", "shadows", "motion", "components"] as const) {
+    for (const section of ["colors", "shadows", "motion", "effects", "shape", "components"] as const) {
         const values = profile[section];
         const missing = values
             ? Object.keys(reference[section]).filter(key => !(key in values))

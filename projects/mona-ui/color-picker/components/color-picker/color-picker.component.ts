@@ -22,7 +22,7 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorGradientComponent } from "@nanahoshi/mona-ui/color-gradient";
 import { ColorPaletteComponent } from "@nanahoshi/mona-ui/color-palette";
 import { PaletteType } from "@nanahoshi/mona-ui/common";
-import { createElementControlId } from "@nanahoshi/mona-ui/internal";
+import { createElementControlId, themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
 import { dropdownPopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
 import { fromEvent, take, takeUntil } from "rxjs";
@@ -86,6 +86,8 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && !this.value())
     );
+    protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay)`;
+    protected readonly palettePopupClasses = `flex flex-col p-0.5 ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;
     protected readonly popupId = createElementControlId();
     protected readonly popupTemplate: Signal<TemplateRef<any>> = viewChild.required("popupTemplate");
     protected readonly valueTemplate = contentChild(ColorPickerValueTemplateDirective, { read: TemplateRef });

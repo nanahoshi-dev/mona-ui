@@ -51,7 +51,9 @@ describe("NotificationComponent", () => {
         const notificationClasses = notificationBaseThemeVariants().split(/\s+/);
         const errorIconClasses = notificationIconThemeVariants({ type: "error" }).split(/\s+/);
 
-        expect(notificationClasses).toContain("bg-surface-overlay");
+        expect(notificationClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(notificationClasses).toContain("border-border");
         expect(notificationClasses).toContain("shadow-(--shadow-overlay)");
         expect(notificationClasses).not.toContain("bg-error");

@@ -24,7 +24,9 @@ describe("TabListItemDirective", () => {
         });
         const tokens = classes.split(/\s+/);
 
-        expect(tokens).toContain("bg-surface-raised");
+        expect(tokens).toContain(
+            "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+        );
         expect(tokens).toContain("font-semibold");
         expect(tokens).toContain("shadow-(--shadow-control)");
         expect(tokens).toContain("inset-ring-border-subtle");
@@ -36,7 +38,7 @@ describe("TabListItemDirective", () => {
         const railClasses = tabListBaseThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
         const panelClasses = tabContentThemeVariants({ rounded: "medium" }).split(/\s+/);
 
-        expect(railClasses).toContain("bg-surface-muted");
+        expect(railClasses).toContain("bg-(--mona-tab-list-background)");
         expect(panelClasses).toContain("bg-(--mona-tab-content-background)");
         expect(panelClasses).toContain("border");
         expect(panelClasses).toContain("border-border");

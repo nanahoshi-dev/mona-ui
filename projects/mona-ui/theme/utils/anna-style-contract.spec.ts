@@ -1,5 +1,7 @@
 import { buttonThemeVariants } from "../../button/styles/button.styles";
 import { calendarBaseThemeVariants } from "../../calendar/styles/calendar.styles";
+import { datePopupThemeVariants } from "../../date-input/styles/date-popup.styles";
+import { gridBaseThemeVariants } from "../../grid/styles/grid.styles";
 import { listItemContentThemeVariants, listThemeVariants } from "../../internal/list/styles/list.styles";
 import { menubarBaseThemeVariants } from "../../menubar/styles/menu.styles";
 import { sliderHandleThemeVariants, sliderSelectionThemeVariants } from "../../slider/styles/slider.styles";
@@ -21,13 +23,21 @@ describe("canonical recipe and built-in profile contract", () => {
     });
 
     it("routes every former structural recipe difference through profile variables", () => {
+        expect(buttonThemeVariants({ look: "default" })).toContain(
+            "[backdrop-filter:var(--mona-effect-control-backdrop-filter,none)]"
+        );
         expect(calendarBaseThemeVariants()).toContain("shadow-(--mona-calendar-shadow)");
+        expect(calendarBaseThemeVariants()).toContain(
+            "[backdrop-filter:var(--mona-effect-raised-backdrop-filter,none)]"
+        );
         expect(menubarBaseThemeVariants()).toContain("shadow-(--mona-menubar-shadow)");
+        expect(datePopupThemeVariants()).toContain("[backdrop-filter:var(--mona-effect-overlay-backdrop-filter,none)]");
         expect(listThemeVariants()).toContain("bg-(--mona-list-background)");
         expect(sliderSelectionThemeVariants()).toContain("duration-(--mona-motion-fast)");
         expect(sliderHandleThemeVariants()).toContain("border-(--mona-slider-handle-border-color)");
         expect(tabContentThemeVariants()).toContain("bg-(--mona-tab-content-background)");
         expect(timeSelectorListThemeVariants()).toContain("focus-visible:bg-(--color-focus-surface)");
+        expect(gridBaseThemeVariants()).not.toContain("backdrop-filter");
     });
 
     it("preserves Mona's raised surfaces and Anna's flat controls", () => {

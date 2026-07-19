@@ -24,7 +24,9 @@ describe("DialogComponent", () => {
         const dialogClasses = dialogBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
         const footerClasses = dialogFooterThemeVariants({ layout: "end", rounded: "medium" }).split(/\s+/);
 
-        expect(dialogClasses).toContain("bg-surface-overlay");
+        expect(dialogClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(dialogClasses).toContain("border-border");
         expect(dialogClasses).toContain("shadow-(--shadow-overlay)");
         expect(footerClasses).toContain("bg-surface-muted");

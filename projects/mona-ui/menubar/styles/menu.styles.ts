@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, themeRaisedBackdropClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const contextMenuContentThemeVariants = cva(
     `
         w-full gap-4 overflow-hidden
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay)
     `,
     {
@@ -72,7 +72,7 @@ export const menuItemThemeVariants = cva(
 export const menubarBaseThemeVariants = cva(
     `
         flex items-center justify-center gap-1 overflow-hidden
-        bg-surface-muted text-foreground
+        bg-(--mona-menubar-background) ${themeRaisedBackdropClasses} text-foreground
         border border-border-subtle shadow-(--mona-menubar-shadow)
         data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground

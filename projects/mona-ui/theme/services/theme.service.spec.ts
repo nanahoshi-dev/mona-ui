@@ -31,6 +31,8 @@ describe("ThemeService", () => {
         expect(root.style.getPropertyValue("--mona-motion-fast")).toBe("200ms");
         expect(root.getAttribute("data-mona-theme")).toBe("mona");
         expect(root.getAttribute("data-mona-variant")).toBe("light");
+        expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
+        expect(root.style.getPropertyValue("--mona-effect-control-background-color")).toBe("control-fallback");
     });
 
     it("uses a configured initial selection", () => {
@@ -84,6 +86,55 @@ describe("ThemeService", () => {
         expect("set" in service.themeVariant).toBe(false);
     });
 
+    it("uses full transparency when the standard backdrop filter is supported", () => {
+        const environment = createTransparencyEnvironment(root, "backdrop-filter", false);
+        const configured = configureService(root, environment.document);
+
+        expect(configured.selection()).toEqual({ name: "mona", variant: "light" });
+        expect(root.getAttribute("data-mona-transparency")).toBe("full");
+        expect(root.style.getPropertyValue("--mona-effect-control-background-color")).toBe("control");
+        expect(root.style.getPropertyValue("--mona-effect-control-background-image")).toBe("control-image");
+        expect(root.style.getPropertyValue("--mona-effect-control-backdrop-filter")).toBe("blur(1px)");
+    });
+
+    it("recognizes WebKit backdrop filter support", () => {
+        const environment = createTransparencyEnvironment(root, "-webkit-backdrop-filter", false);
+        configureService(root, environment.document);
+
+        expect(root.getAttribute("data-mona-transparency")).toBe("full");
+    });
+
+    it("starts in reduced mode when filtering is unsupported or transparency is reduced", () => {
+        const unsupported = createTransparencyEnvironment(root, "unsupported", false);
+        configureService(root, unsupported.document);
+
+        expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
+        expect(root.style.getPropertyValue("--mona-effect-raised-background-color")).toBe("raised-fallback");
+
+        const reduced = createTransparencyEnvironment(root, "backdrop-filter", true);
+        configureService(root, reduced.document);
+
+        expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
+        expect(root.style.getPropertyValue("--mona-effect-overlay-background-color")).toBe("overlay-fallback");
+    });
+
+    it("reacts to reduced-transparency changes without changing theme selection and cleans up", () => {
+        const environment = createTransparencyEnvironment(root, "backdrop-filter", false);
+        const configured = configureService(root, environment.document);
+        const beforeSelection = configured.selection();
+
+        environment.media.setMatches(true);
+
+        expect(configured.selection()).toEqual(beforeSelection);
+        expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
+        expect(root.style.getPropertyValue("--mona-effect-overlay-background-color")).toBe("overlay-fallback");
+        expect(root.style.getPropertyValue("--mona-effect-overlay-background-image")).toBe("none");
+        expect(root.style.getPropertyValue("--mona-effect-overlay-backdrop-filter")).toBe("none");
+
+        TestBed.resetTestingModule();
+        expect(environment.media.removeCount).toBe(1);
+    });
+
     it("safely skips DOM writes when no document element exists", () => {
         TestBed.resetTestingModule();
         TestBed.configureTestingModule({
@@ -96,6 +147,62 @@ describe("ThemeService", () => {
         expect(() => TestBed.inject(ThemeService)).not.toThrow();
     });
 });
+
+function configureService(root: HTMLElement, configuredDocument: Document): ThemeService {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+        providers: [
+            { provide: DOCUMENT, useValue: configuredDocument },
+            { provide: THEME_STRATEGY, useValue: createStrategy() }
+        ]
+    });
+    return TestBed.inject(ThemeService);
+}
+
+function createTransparencyEnvironment(
+    root: HTMLElement,
+    supportedProperty: string,
+    reduced: boolean
+): {
+    readonly document: Document;
+    readonly media: TestMediaQueryList;
+} {
+    const media = new TestMediaQueryList(reduced);
+    const view = {
+        CSS: { supports: (property: string): boolean => property === supportedProperty },
+        matchMedia: (): MediaQueryList => media as unknown as MediaQueryList
+    };
+    return {
+        document: { documentElement: root, defaultView: view } as unknown as Document,
+        media
+    };
+}
+
+class TestMediaQueryList {
+    readonly #listeners = new Set<() => void>();
+    public matches: boolean;
+    public removeCount = 0;
+
+    public constructor(matches: boolean) {
+        this.matches = matches;
+    }
+
+    public addEventListener(_type: string, listener: () => void): void {
+        this.#listeners.add(listener);
+    }
+
+    public removeEventListener(_type: string, listener: () => void): void {
+        this.removeCount++;
+        this.#listeners.delete(listener);
+    }
+
+    public setMatches(matches: boolean): void {
+        this.matches = matches;
+        for (const listener of this.#listeners) {
+            listener();
+        }
+    }
+}
 
 function createStrategy(): ThemeStrategy {
     return {
@@ -114,15 +221,34 @@ function createProfile(primary: string, includeLightOnly = false): ThemeProfile 
         colors: { "--color-primary": primary },
         shadows: { "--shadow-control": "none" },
         motion: { "--mona-motion-fast": "200ms", "--mona-motion-standard": "300ms" },
+        effects: {
+            "--mona-effect-control-background-color": "control",
+            "--mona-effect-control-fallback-background-color": "control-fallback",
+            "--mona-effect-control-background-image": "control-image",
+            "--mona-effect-control-backdrop-filter": "blur(1px)",
+            "--mona-effect-raised-background-color": "raised",
+            "--mona-effect-raised-fallback-background-color": "raised-fallback",
+            "--mona-effect-raised-background-image": "raised-image",
+            "--mona-effect-raised-backdrop-filter": "blur(2px)",
+            "--mona-effect-overlay-background-color": "overlay",
+            "--mona-effect-overlay-fallback-background-color": "overlay-fallback",
+            "--mona-effect-overlay-background-image": "overlay-image",
+            "--mona-effect-overlay-backdrop-filter": "blur(3px)"
+        },
+        shape: { "--radius-sm": "4px", "--radius-md": "6px", "--radius-lg": "8px" },
         components: {
+            "--mona-calendar-background": "control",
             "--mona-calendar-shadow": "none",
             "--mona-list-background": "transparent",
             "--mona-list-disabled-background": "transparent",
             "--mona-list-group-background": "transparent",
             "--mona-list-group-border-width": "0px",
             "--mona-list-group-font-weight": "700",
+            "--mona-menubar-background": "raised",
             "--mona-menubar-shadow": "none",
+            "--mona-pager-background": "raised",
             "--mona-slider-handle-border-color": "transparent",
+            "--mona-tab-list-background": "raised",
             "--mona-tab-content-background": "transparent"
         },
         custom: includeLightOnly ? { "--example-light-only": "present" } : undefined

@@ -101,10 +101,14 @@ describe("Popover visual contract", () => {
         const popoverClasses = popoverBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
         const arrowClasses = popoverArrowThemeVariants().split(/\s+/);
 
-        expect(popoverClasses).toContain("bg-surface-overlay");
+        expect(popoverClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(popoverClasses).toContain("border-border");
         expect(popoverClasses).toContain("shadow-(--shadow-overlay)");
-        expect(arrowClasses).toContain("bg-surface-overlay");
+        expect(arrowClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(arrowClasses).toContain("border-border");
         expect(arrowClasses).not.toContain("bg-primary");
     });

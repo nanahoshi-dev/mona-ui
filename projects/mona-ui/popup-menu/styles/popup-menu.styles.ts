@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 import { VariantProps } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const popupMenuBaseThemeVariants = cva(`h-full w-full overflow-hidden`, {
     variants: {
@@ -16,7 +16,7 @@ export const popupMenuBaseThemeVariants = cva(`h-full w-full overflow-hidden`, {
 export const popupMenuContainerThemeVariants = cva(
     `
         flex flex-col p-1
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay) outline-none
     `,
     {

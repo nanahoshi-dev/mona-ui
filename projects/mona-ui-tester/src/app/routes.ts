@@ -32,6 +32,11 @@ export const routes: Routes = [
                     import("./docs/theme-colors-doc/theme-colors-doc.component").then(m => m.ThemeColorsDocComponent)
             },
             {
+                path: "theme-luna",
+                loadComponent: () =>
+                    import("./docs/luna-theme-doc/luna-theme-doc.component").then(m => m.LunaThemeDocComponent)
+            },
+            {
                 path: "auto-complete",
                 loadComponent: () =>
                     import("./docs/components/auto-complete-doc/auto-complete-doc.component").then(

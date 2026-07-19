@@ -64,7 +64,11 @@ describe("DropdownListComponent", () => {
         const fixture = await createSignalFormFixture();
         const host = getHost(fixture);
 
-        expect(host.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            host.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(host.classList.contains("border-input-border")).toBe(true);
         expect(host.classList.contains("hover:bg-hover")).toBe(true);
         expect(host.classList.contains("active:bg-active")).toBe(true);
@@ -76,13 +80,22 @@ describe("DropdownListComponent", () => {
         const fixture = await createSignalFormFixture();
         await openPopup(fixture);
 
-        const popup = document.body.querySelector(".bg-surface-overlay") as HTMLElement;
         const selectedOption = getOption("Banana");
+        const popup = selectedOption.closest("mona-list")?.parentElement as HTMLElement;
 
         expect(popup).not.toBeNull();
         expect(popup.classList.contains("border-border")).toBe(true);
         expect(popup.classList.contains("shadow-(--shadow-overlay)")).toBe(true);
-        expect(popup.classList.contains("bg-surface-raised")).toBe(false);
+        expect(
+            popup.classList.contains(
+                "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+            )
+        ).toBe(true);
+        expect(
+            popup.classList.contains(
+                "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+            )
+        ).toBe(false);
         expect(selectedOption.classList.contains("bg-(--color-selected)")).toBe(true);
         expect(selectedOption.classList.contains("text-(--color-selected-foreground)")).toBe(true);
         expect(selectedOption.classList.contains("bg-primary")).toBe(false);

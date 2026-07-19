@@ -22,7 +22,11 @@ describe("DatePickerComponent", () => {
     it("uses one shared input shell without a nested focus ring", () => {
         const picker = fixture.nativeElement.querySelector("mona-date-picker") as HTMLElement;
 
-        expect(picker.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            picker.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(picker.classList.contains("border-input-border")).toBe(true);
         expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
@@ -34,7 +38,9 @@ describe("DatePickerComponent", () => {
     it("uses an overlay-tier popup instead of an input-tier surface", () => {
         const classes = datePopupThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
 
-        expect(classes).toContain("bg-surface-overlay");
+        expect(classes).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(classes).toContain("border-border");
         expect(classes).toContain("shadow-(--shadow-overlay)");
         expect(classes).not.toContain("border-input-border");

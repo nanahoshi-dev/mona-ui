@@ -15,7 +15,7 @@
     @if (view() === "palette") {
         <div
             [id]="popupId"
-            class="flex flex-col p-0.5 bg-surface-overlay border border-border shadow-(--shadow-overlay) outline-none"
+            [class]="palettePopupClasses"
             tabindex="0"
             role="dialog"
             aria-label="Color palette picker"
@@ -39,7 +39,7 @@
     } @else if (view() === "gradient") {
         <div
             [id]="popupId"
-            class="bg-surface-overlay border border-border shadow-(--shadow-overlay)"
+            [class]="gradientPopupClasses"
             tabindex="0"
             role="dialog"
             aria-label="Color gradient picker">

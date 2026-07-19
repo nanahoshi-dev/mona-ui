@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeRaisedSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const chipThemeVariants = cva(
@@ -17,7 +17,7 @@ export const chipThemeVariants = cva(
             },
             look: {
                 default: `
-                    bg-surface-raised text-foreground
+                    ${themeRaisedSurfaceClasses} text-foreground
                     border border-border
                     hover:bg-hover hover:text-foreground
                     active:bg-(--color-selected-active) active:text-(--color-selected-active-foreground)

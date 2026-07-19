@@ -39,7 +39,11 @@ describe("TextAreaDirective", () => {
         fixture.detectChanges();
         const textArea = fixture.nativeElement.querySelector("textarea") as HTMLTextAreaElement;
 
-        expect(textArea.classList.contains("bg-input-background")).toBe(true);
+        expect(
+            textArea.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
         expect(textArea.classList.contains("border-input-border")).toBe(true);
         expect(textArea.classList.contains("shadow-(--shadow-control)")).toBe(true);
         expect(textArea.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);

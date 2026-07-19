@@ -403,7 +403,11 @@ describe("ChipComponent", () => {
         it("should apply default look with a raised neutral surface", () => {
             component.look.set("default");
             fixture.detectChanges();
-            expect(chipElement.classList.contains("bg-surface-raised")).toBe(true);
+            expect(
+                chipElement.classList.contains(
+                    "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+                )
+            ).toBe(true);
             expect(chipElement.classList.contains("text-foreground")).toBe(true);
             expect(chipElement.classList.contains("hover:bg-hover")).toBe(true);
         });

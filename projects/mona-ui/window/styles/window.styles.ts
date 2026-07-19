@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const windowBaseThemeVariants = cva(
     `
         flex h-full w-full flex-col
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
     `,
     {
         variants: {

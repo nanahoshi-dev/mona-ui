@@ -1,12 +1,12 @@
 import { cva } from "class-variance-authority";
-import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeOverlaySurfaceClasses, type VariantInputs } from "@nanahoshi/mona-ui/internal";
 import type { VariantProps } from "class-variance-authority";
 
 export const filterMenuBaseThemeVariants = cva(
     `
         flex w-full flex-col
         gap-2 p-1
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay)
     `,
     {

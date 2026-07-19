@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { LucideBookOpen, LucidePalette, LucideSearch, LucideSparkles } from "@lucide/angular";
+import { LucideBookOpen, LucideMoon, LucidePalette, LucideSearch, LucideSparkles } from "@lucide/angular";
 import { NavigationGroup } from "../../models/NavigationGroup";
 import { SidebarGroupComponent } from "../sidebar-group/sidebar-group.component";
 
@@ -19,7 +19,8 @@ export class SidebarComponent {
             items: [
                 { text: "Introduction", path: "/introduction", icon: LucideSparkles },
                 { text: "Installation", path: "/installation", icon: LucideBookOpen },
-                { text: "Theme Colors", path: "/theme-colors", icon: LucidePalette }
+                { text: "Theme Colors", path: "/theme-colors", icon: LucidePalette },
+                { text: "Luna Theme", path: "/theme-luna", icon: LucideMoon }
             ]
         },
         {

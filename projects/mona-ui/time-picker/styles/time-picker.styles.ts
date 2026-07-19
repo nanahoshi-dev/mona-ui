@@ -1,11 +1,11 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const timePickerBaseThemeVariants = cva(
     `
         flex w-full items-center
-        bg-input-background text-foreground
+        ${themeControlSurfaceClasses} text-foreground
         border border-input-border shadow-(--shadow-control)
         outline-none
 

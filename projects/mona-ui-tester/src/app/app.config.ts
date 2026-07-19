@@ -57,6 +57,21 @@ export const appConfig: ApplicationConfig = {
                 }
             }
         }),
+        provideThemeOverrides({
+            theme: "luna",
+            light: {
+                colors: {
+                    "--color-page-background": "oklch(94% 0.05 275)",
+                    "--color-demo-background": "oklch(97% 0.025 275)"
+                }
+            },
+            dark: {
+                colors: {
+                    "--color-page-background": "oklch(11% 0.035 275)",
+                    "--color-demo-background": "oklch(15% 0.035 275)"
+                }
+            }
+        }),
         provideMarkdown({
             markedExtensions: [
                 {

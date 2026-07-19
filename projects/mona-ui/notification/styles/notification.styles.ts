@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 
 //---------------------------------
 // Notification Container Component
@@ -39,7 +40,7 @@ export const notificationActionThemeVariants = cva(
 export const notificationBaseThemeVariants = cva(
     `
         relative mb-2 flex h-fit w-fit flex-col overflow-hidden
-        bg-surface-overlay text-foreground
+        ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay)
     `
 );

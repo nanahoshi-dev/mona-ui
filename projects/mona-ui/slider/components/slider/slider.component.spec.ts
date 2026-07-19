@@ -173,7 +173,11 @@ describe("SliderComponent", () => {
             expect(track.classList.contains("border-input-border")).toBe(false);
             expect(track.classList.contains("rounded-full")).toBe(true);
             expect(selection).toBeTruthy();
-            expect(handle.classList.contains("bg-surface-raised")).toBe(true);
+            expect(
+                handle.classList.contains(
+                    "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+                )
+            ).toBe(true);
             expect(handle.classList.contains('data-[focused="true"]:ring-focus-indicator/35')).toBe(true);
             expect(handle.classList.contains('data-[invalid="true"]:data-[focused="true"]:ring-error/35')).toBe(true);
         });

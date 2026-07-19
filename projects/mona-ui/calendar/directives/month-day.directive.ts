@@ -8,13 +8,14 @@ import { compareDates } from "../utils/compareDates";
     selector: "[monaMonthDay]",
     host: {
         "[attr.tabindex]": "focused() ? 0 : -1",
-        "[attr.aria-selected]": "selected() ? 'true' : null",
+        "[attr.aria-pressed]": "selected() ? 'true' : 'false'",
         "[attr.aria-current]": "isToday() ? 'date' : null",
         "[attr.aria-disabled]": "dayDisabled() ? 'true' : null",
         "[attr.data-range-preview]": "rangePreviewed() ? 'true' : null",
         "[class]": "baseClass()",
         "(click)": "onClick($event)",
-        "(pointerenter)": "onPointerEnter()"
+        "(pointerenter)": "onPointerEnter()",
+        role: "button"
     }
 })
 export class MonthDayDirective {

@@ -29,9 +29,13 @@ describe("PopupMenuComponent", () => {
     it("uses the overlay surface, quiet border, and floating shadow", () => {
         const classes = popupMenuContainerThemeVariants({ rounded: "medium" }).split(/\s+/);
 
-        expect(classes).toContain("bg-surface-overlay");
+        expect(classes).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
         expect(classes).toContain("border-border");
         expect(classes).toContain("shadow-(--shadow-overlay)");
-        expect(classes).not.toContain("bg-surface-raised");
+        expect(classes).not.toContain(
+            "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+        );
     });
 });

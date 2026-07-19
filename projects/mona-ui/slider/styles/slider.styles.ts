@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority";
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { themeRaisedSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
 
 export const sliderBaseThemeVariants = cva(
@@ -111,7 +111,7 @@ export const sliderHandleThemeVariants = cva(
         absolute z-2 flex items-center justify-center
         h-4.25 w-4.25
         cursor-pointer
-        bg-surface-raised
+        ${themeRaisedSurfaceClasses}
         border border-(--mona-slider-handle-border-color) shadow-(--shadow-control)
         outline-none
         transition duration-(--mona-motion-fast) ease-out
