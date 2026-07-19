@@ -1,71 +1,35 @@
-:host {
-    --luna-ink: var(--color-foreground);
-}
-
 .luna-page {
     display: grid;
     max-width: 76rem;
-    gap: 2rem;
+    gap: 1.5rem;
     margin-inline: auto;
     padding: 2rem clamp(1rem, 4vw, 3rem) 5rem;
-    color: var(--luna-ink);
-}
-
-.luna-hero,
-.luna-stage,
-.luna-overlay-field {
-    position: relative;
-    overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
-    border-radius: var(--radius-lg);
+    color: var(--color-foreground);
 }
 
 .luna-hero {
-    min-height: 21rem;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
     align-items: end;
+    justify-content: space-between;
     gap: 2rem;
-    padding: clamp(2rem, 7vw, 5rem);
-    background:
-        radial-gradient(circle at 74% 18%, color-mix(in srgb, var(--color-primary) 38%, transparent), transparent 28%),
-        radial-gradient(
-            circle at 18% 82%,
-            color-mix(in srgb, var(--color-secondary) 28%, transparent),
-            transparent 32%
-        ),
-        var(--color-surface);
-}
-
-.luna-orbit {
-    position: absolute;
-    width: 19rem;
-    aspect-ratio: 1;
-    top: -7rem;
-    right: 9%;
-    border: 1px solid color-mix(in srgb, var(--color-primary) 44%, transparent);
-    border-radius: 999px;
-    box-shadow:
-        0 0 0 3rem color-mix(in srgb, var(--color-primary) 4%, transparent),
-        0 0 0 7rem color-mix(in srgb, var(--color-primary) 3%, transparent);
+    padding-top: clamp(1rem, 3vw, 2rem);
 }
 
 .luna-hero-copy {
-    position: relative;
     max-width: 42rem;
 }
 
 .luna-hero h1 {
-    margin: 0;
-    font-size: clamp(4.5rem, 14vw, 10rem);
-    font-weight: 260;
-    line-height: 0.78;
+    margin: 0.2rem 0 0;
+    font-size: clamp(3.75rem, 10vw, 7rem);
+    font-weight: 360;
+    line-height: 0.9;
     letter-spacing: -0.075em;
 }
 
 .luna-hero-copy > p:last-child {
-    max-width: 36rem;
-    margin-top: 2rem;
+    max-width: 38rem;
+    margin: 1.5rem 0 0;
     color: var(--color-muted-foreground);
     font-size: 1.05rem;
     line-height: 1.65;
@@ -76,15 +40,16 @@
 .luna-section-heading p,
 .luna-status span,
 .luna-status small {
+    color: var(--color-muted-foreground);
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.13em;
     font-size: 0.7rem;
     font-weight: 700;
 }
 
 .luna-status,
+.luna-command-palette,
 .luna-overlay-specimen {
-    position: relative;
     background-color: var(--mona-effect-overlay-background-color);
     background-image: var(--mona-effect-overlay-background-image);
     backdrop-filter: var(--mona-effect-overlay-backdrop-filter);
@@ -95,20 +60,122 @@
 
 .luna-status {
     display: grid;
-    min-width: 10rem;
+    min-width: 10.5rem;
     gap: 0.15rem;
-    padding: 1rem 1.25rem;
+    padding: 0.9rem 1.1rem;
     border-radius: var(--radius-md);
 }
 
-.luna-status strong {
-    font-size: 1rem;
+.luna-workspace,
+.luna-stage,
+.luna-overlay-field {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
 }
 
-.luna-status small,
-.luna-section-heading p,
-.luna-label {
+.luna-workspace {
+    min-height: 30rem;
+    padding: clamp(1rem, 5vw, 3rem);
+    background: var(--color-canvas);
+}
+
+.luna-document-ribbon,
+.luna-overlay-ribbon {
+    position: absolute;
+    background: linear-gradient(100deg, #d23a57, #e86a80 58%, #efb8c3);
+}
+
+.luna-document-ribbon {
+    inset: auto -4rem 3rem 24%;
+    height: 8.5rem;
+}
+
+.luna-document-sheet {
+    position: relative;
+    z-index: 1;
+    width: min(46rem, 78%);
+    min-height: 24rem;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-raised);
+}
+
+.luna-document-toolbar {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 1rem;
     color: var(--color-muted-foreground);
+    border-bottom: 1px solid var(--color-border-subtle);
+    font-size: 0.75rem;
+}
+
+.luna-document-copy {
+    max-width: 32rem;
+    padding-block: clamp(2rem, 6vw, 4rem) 2rem;
+}
+
+.luna-document-copy h2 {
+    margin: 0.5rem 0 1rem;
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    font-weight: 470;
+    line-height: 1.02;
+    letter-spacing: -0.055em;
+}
+
+.luna-document-copy p,
+.luna-tab-panel p,
+.luna-overlay-specimen p {
+    color: var(--color-muted-foreground);
+    line-height: 1.65;
+}
+
+.luna-command-palette {
+    position: absolute;
+    z-index: 3;
+    top: clamp(3rem, 12vw, 6.5rem);
+    right: clamp(1rem, 7vw, 5rem);
+    display: grid;
+    width: min(17rem, calc(100% - 2rem));
+    gap: 0.15rem;
+    padding: 0.55rem;
+    border-radius: var(--radius-lg);
+}
+
+.luna-command-title {
+    padding: 0.45rem 0.65rem 0.3rem;
+    color: var(--color-muted-foreground);
+}
+
+.luna-command-palette button {
+    min-height: 2.25rem;
+    padding-inline: 0.65rem;
+    color: var(--color-foreground);
+    text-align: start;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+}
+
+.luna-command-palette button:hover,
+.luna-command-palette button:focus-visible,
+.luna-command-palette button.is-active {
+    background: var(--color-hover);
+    outline: none;
+}
+
+.luna-command-palette button:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--color-focus-indicator);
+}
+
+.luna-command-divider {
+    height: 1px;
+    margin: 0.3rem 0.4rem;
+    background: var(--color-border-subtle);
 }
 
 .luna-stage {
@@ -137,15 +204,9 @@
     gap: 1rem;
     min-width: 0;
     padding: 1.25rem;
-    background: color-mix(in srgb, var(--color-surface-muted) 76%, transparent);
+    background: var(--color-surface);
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-md);
-}
-
-.luna-navigation-stage {
-    background:
-        radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--color-secondary) 14%, transparent), transparent 30%),
-        var(--color-surface);
 }
 
 .luna-feature-grid {
@@ -158,47 +219,36 @@
 .luna-tab-panel {
     display: grid;
     gap: 0.75rem;
-    min-height: 12rem;
     padding: 1.5rem;
-}
-
-.luna-tab-panel strong {
-    font-size: 1.35rem;
-    font-weight: 520;
-}
-
-.luna-tab-panel p {
-    max-width: 32rem;
-    color: var(--color-muted-foreground);
-    line-height: 1.6;
+    background: var(--color-surface);
 }
 
 .luna-overlay-field {
-    min-height: 25rem;
+    min-height: 28rem;
     display: grid;
     place-items: center;
     padding: 2rem;
-    background:
-        linear-gradient(125deg, color-mix(in srgb, var(--color-primary) 38%, transparent), transparent 45%),
-        radial-gradient(circle at 76% 28%, color-mix(in srgb, var(--color-info) 52%, transparent), transparent 24%),
-        var(--color-canvas);
+    background: var(--color-canvas);
 }
 
-.luna-moon {
+.luna-overlay-document {
     position: absolute;
-    width: min(17rem, 58vw);
-    aspect-ratio: 1;
-    right: 8%;
-    top: 8%;
-    border-radius: 999px;
-    background:
-        radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.8), transparent 12%),
-        radial-gradient(circle at 65% 66%, rgb(76 84 150 / 0.22), transparent 16%),
-        linear-gradient(145deg, #dce2ff, #7f8dde);
-    box-shadow: 0 0 5rem color-mix(in srgb, var(--color-primary) 42%, transparent);
+    inset: 3rem 8% 3rem auto;
+    align-content: start;
+    width: min(31rem, 74%);
+    padding: 3rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-raised);
+}
+
+.luna-overlay-ribbon {
+    inset: 11rem -4rem 4rem 18%;
 }
 
 .luna-overlay-specimen {
+    position: relative;
     width: min(34rem, 100%);
     margin-right: 24%;
     padding: clamp(1.5rem, 5vw, 2.5rem);
@@ -215,14 +265,13 @@
 
 .luna-overlay-specimen p {
     margin-bottom: 1.5rem;
-    color: var(--color-muted-foreground);
-    line-height: 1.6;
 }
 
 @media (max-width: 760px) {
     .luna-hero,
     .luna-control-grid,
     .luna-feature-grid {
+        display: grid;
         grid-template-columns: 1fr;
     }
 
@@ -230,16 +279,20 @@
         width: fit-content;
     }
 
+    .luna-workspace {
+        min-height: 34rem;
+    }
+
+    .luna-document-sheet {
+        width: 100%;
+    }
+
+    .luna-command-palette {
+        top: auto;
+        bottom: 1.5rem;
+    }
+
     .luna-overlay-specimen {
         margin-right: 0;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .luna-page *,
-    .luna-page *::before,
-    .luna-page *::after {
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
     }
 }

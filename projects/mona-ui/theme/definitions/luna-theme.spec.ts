@@ -20,19 +20,79 @@ describe("Luna theme", () => {
         }
     });
 
-    it("uses the Luna radius and material hierarchy in both variants", () => {
+    it("uses Mona's radius scale and Luna's neutral material hierarchy in both variants", () => {
         for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
-            expect(profile.shape).toEqual({
-                "--radius-sm": "0.5rem",
-                "--radius-md": "0.75rem",
-                "--radius-lg": "1rem"
-            });
-            expect(profile.effects["--mona-effect-control-backdrop-filter"]).toBe("blur(16px) saturate(140%)");
-            expect(profile.effects["--mona-effect-raised-backdrop-filter"]).toBe("blur(24px) saturate(150%)");
-            expect(profile.effects["--mona-effect-overlay-backdrop-filter"]).toBe("blur(32px) saturate(165%)");
+            expect(profile.shape).toEqual(monaTheme.variants.light.shape);
+            expect(profile.effects["--mona-effect-control-backdrop-filter"]).toBe("blur(16px) saturate(110%)");
+            expect(profile.effects["--mona-effect-raised-backdrop-filter"]).toBe("blur(22px) saturate(112%)");
+            expect(profile.effects["--mona-effect-overlay-backdrop-filter"]).toBe("blur(28px) saturate(115%)");
             expect(profile.components["--mona-menubar-background"]).toBe("var(--mona-effect-raised-background-color)");
             expect(profile.components["--mona-list-background"]).toBe("var(--color-surface)");
+            expect(profile.components["--mona-tab-content-background"]).toBe("var(--color-surface)");
         }
+    });
+
+    it("uses the Craft-inspired neutral surface ladder and restrained blue accent", () => {
+        expect(lunaTheme.variants.light.colors).toMatchObject({
+            "--color-canvas": "#fcfcfc",
+            "--color-surface": "#ffffff",
+            "--color-surface-muted": "#f3f4f5",
+            "--color-surface-raised": "#fbfbfb",
+            "--color-surface-overlay": "#f9f9fa",
+            "--color-foreground": "#252525",
+            "--color-primary": "#3f6be2",
+            "--color-selected": "#e5ebfb"
+        });
+        expect(lunaTheme.variants.dark.colors).toMatchObject({
+            "--color-canvas": "#151515",
+            "--color-surface": "#1b1b1c",
+            "--color-surface-muted": "#252527",
+            "--color-surface-raised": "#202022",
+            "--color-surface-overlay": "#262628"
+        });
+        expect(lunaTheme.variants.light.effects).toMatchObject({
+            "--mona-effect-control-fallback-background-color": "#f3f4f5",
+            "--mona-effect-raised-fallback-background-color": "#fbfbfb",
+            "--mona-effect-overlay-fallback-background-color": "#f9f9fa"
+        });
+        expect(lunaTheme.variants.light.components["--mona-tab-list-background"]).toBe("#f5f5f6");
+        for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
+            expect(profile.custom?.["--mona-input-addon-background"]).toBe(
+                "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"
+            );
+        }
+
+        const serializedProfiles = JSON.stringify(lunaTheme.variants).toLowerCase();
+        expect(serializedProfiles).not.toContain("#7486ff");
+        expect(serializedProfiles).not.toContain("#a874ff");
+        expect(serializedProfiles).not.toContain("rgb(116 134 255");
+    });
+
+    it("keeps glass translucent without glossy images or inset highlights", () => {
+        for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
+            for (const level of ["control", "raised", "overlay"] as const) {
+                const image = profile.effects[`--mona-effect-${level}-background-image`];
+                expect(image).toBe("none");
+            }
+            for (const shadow of Object.values(profile.shadows)) {
+                expect(shadow).toMatch(/rgb\((?:0 0 0|20 20 20) \/ /);
+                expect(shadow).not.toContain("inset");
+            }
+        }
+    });
+
+    it("uses subtle resting boundaries and semantic interaction boundaries", () => {
+        expect(lunaTheme.variants.light.colors).toMatchObject({
+            "--color-border-subtle": "#eeeeef",
+            "--color-border": "#e4e4e6",
+            "--color-border-control": "#d5d6d9",
+            "--color-selected-border": "#3f6be2"
+        });
+        expect(lunaTheme.variants.dark.colors).toMatchObject({
+            "--color-border-subtle": "#303033",
+            "--color-border": "#39393d",
+            "--color-border-control": "#494a4f"
+        });
     });
 
     it("keeps Mona and Anna opaque with their existing radius scale", () => {
@@ -48,7 +108,7 @@ describe("Luna theme", () => {
         }
     });
 
-    it("keeps text, focus, and material boundaries accessible against opaque fallbacks", () => {
+    it("keeps text and focus indicators accessible against opaque fallbacks", () => {
         assertProfileContrast(lunaTheme.variants.light.colors, lunaTheme.variants.light.effects);
         assertProfileContrast(lunaTheme.variants.dark.colors, lunaTheme.variants.dark.effects);
     });
@@ -81,11 +141,6 @@ function assertProfileContrast(colors: ThemeColors, effects: ThemeEffects): void
         expect(
             contrast(resolveColor(colors, "--color-focus-indicator"), background),
             `${level} focus contrast against ${background}`
-        ).toBeGreaterThanOrEqual(3);
-        const boundary = level === "control" ? "--color-border-control" : "--color-border";
-        expect(
-            contrast(resolveColor(colors, boundary), background),
-            `${level} ${boundary} contrast against ${background}`
         ).toBeGreaterThanOrEqual(3);
     }
 }

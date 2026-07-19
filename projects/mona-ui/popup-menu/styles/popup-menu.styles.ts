@@ -54,7 +54,7 @@ export const popupMenuItemThemeVariants = cva(
         focus-within:bg-hover focus-within:text-foreground focus-within:outline-none
         data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground
-        data-[active='true']:bg-(--color-selected) data-[active='true']:text-(--color-selected-foreground)
+        data-[active='true']:bg-hover data-[active='true']:text-foreground
     `,
     {
         variants: {

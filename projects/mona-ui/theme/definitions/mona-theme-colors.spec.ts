@@ -91,6 +91,13 @@ describe("monaThemeColors", () => {
         }
     });
 
+    it("keeps the Mona Dark menu hover visible against overlay surfaces", () => {
+        expect(resolveColor(monaThemeColors.dark, "--color-hover")).not.toBe(
+            resolveColor(monaThemeColors.dark, "--color-surface-overlay")
+        );
+        expect(colorContrast(monaThemeColors.dark, "--color-hover", "--color-surface-overlay")).toBeGreaterThan(1.1);
+    });
+
     it("keeps the built-in identity and interaction palette zinc-neutral", () => {
         const neutralTokens = [
             "--color-canvas",

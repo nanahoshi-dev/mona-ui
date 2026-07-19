@@ -2,6 +2,7 @@ import { DOCUMENT } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import type { ThemeSelection } from "../models/Theme";
 import type { ThemeProfile } from "../models/ThemeDefinition";
+import { DefaultThemeStrategy } from "../strategies/default-theme.strategy";
 import type { ThemeStrategy } from "../strategies/theme.strategy";
 import { THEME_OPTIONS, THEME_STRATEGY } from "../tokens/theme.tokens";
 import { ThemeService } from "./theme.service";
@@ -116,6 +117,26 @@ describe("ThemeService", () => {
 
         expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
         expect(root.style.getPropertyValue("--mona-effect-overlay-background-color")).toBe("overlay-fallback");
+    });
+
+    it("applies Luna's exact neutral fallbacks without changing its selection", () => {
+        TestBed.resetTestingModule();
+        const environment = createTransparencyEnvironment(root, "unsupported", false);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DOCUMENT, useValue: environment.document },
+                { provide: THEME_OPTIONS, useValue: { initialTheme: { name: "luna", variant: "light" } } },
+                { provide: THEME_STRATEGY, useValue: new DefaultThemeStrategy([], []) }
+            ]
+        });
+
+        const configured = TestBed.inject(ThemeService);
+
+        expect(configured.selection()).toEqual({ name: "luna", variant: "light" });
+        expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
+        expect(root.style.getPropertyValue("--mona-effect-control-background-color")).toBe("#f3f4f5");
+        expect(root.style.getPropertyValue("--mona-effect-raised-background-color")).toBe("#fbfbfb");
+        expect(root.style.getPropertyValue("--mona-effect-overlay-background-color")).toBe("#f9f9fa");
     });
 
     it("reacts to reduced-transparency changes without changing theme selection and cleans up", () => {

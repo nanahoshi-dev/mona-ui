@@ -154,7 +154,7 @@ const dark: ThemeColors = Object.freeze({
     "--color-border-control": "oklch(32% 0.008 285.938)",
     "--color-border-control-hover": "oklch(37.1% 0.008 285.805)",
 
-    "--color-hover": "oklch(27.4% 0.006 286.033)",
+    "--color-hover": "oklch(32% 0.007 286.033)",
     "--color-active": "oklch(37.1% 0.008 285.805)",
 
     "--color-disabled-foreground": "oklch(70.5% 0.010 286.067)",

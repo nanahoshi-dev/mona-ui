@@ -95,6 +95,22 @@ describe("ColorGradientComponent", () => {
         expect(handle.classList.contains("focus-visible:ring-primary/40")).toBe(false);
     });
 
+    it("uses a neutral input-relative background for channel prefixes", () => {
+        const prefixLabels = new Set(["R", "G", "B", "A", "HEX"]);
+        const prefixes = Array.from(fixture.nativeElement.querySelectorAll("span") as NodeListOf<HTMLSpanElement>).filter(
+            element => element.classList.contains("w-7.5") && prefixLabels.has(element.textContent?.trim() ?? "")
+        );
+
+        expect(prefixes).toHaveLength(5);
+        for (const prefix of prefixes) {
+            expect(prefix.classList).toContain(
+                "[background-color:var(--mona-input-addon-background,var(--color-secondary))]"
+            );
+            expect(prefix.classList).toContain("text-foreground");
+            expect(prefix.classList).not.toContain("bg-secondary");
+        }
+    });
+
     it("does not throw when the hsv rectangle click updates after render", async () => {
         await waitForStable(fixture);
 

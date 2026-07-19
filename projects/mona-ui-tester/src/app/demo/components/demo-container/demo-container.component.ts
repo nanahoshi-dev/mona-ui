@@ -5,6 +5,7 @@ import { LucideCode } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ColorPickerComponent } from "@nanahoshi/mona-ui/color-picker";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
+import { DropdownGroupableDirective } from "@nanahoshi/mona-ui/dropdowns";
 import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { THEME_OPTIONS, type ThemeOption } from "../../../theme-options";
 import { ComponentMetadata } from "../../models/ComponentMetadata";
@@ -21,7 +22,8 @@ import { ConfigComponent } from "../config/config.component";
         CodeViewerComponent,
         ButtonDirective,
         ColorPickerComponent,
-        LucideCode
+        LucideCode,
+        DropdownGroupableDirective
     ],
     templateUrl: "./demo-container.component.html",
     styles: [
@@ -98,7 +100,10 @@ export class DemoContainerComponent<TComponent> {
         this.#directionality.change.emit(direction);
     }
 
-    protected onThemeChange(item: ThemeOption): void {
+    protected onThemeChange(item: ThemeOption | null | undefined): void {
+        if (!item) {
+            return;
+        }
         this.#themeService.setTheme(item);
     }
 }

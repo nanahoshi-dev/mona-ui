@@ -24,10 +24,12 @@
                 [data]="themeDropdownData"
                 textField="text"
                 valueField="value"
-                [ngModel]="selectedTheme()"
+                monaDropDownGroupable
+                [groupBy]="'group'"
+                [value]="selectedTheme()"
                 size="small"
                 [style.width.px]="100"
-                (ngModelChange)="onThemeChange($event)">
+                (valueChange)="onThemeChange($event)">
             </mona-dropdown-list>
         </div>
         <div

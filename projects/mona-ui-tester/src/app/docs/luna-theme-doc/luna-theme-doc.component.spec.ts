@@ -6,7 +6,7 @@ import { LunaThemeDocComponent } from "./luna-theme-doc.component";
 describe("LunaThemeDocComponent", () => {
     afterEach(() => TestBed.resetTestingModule());
 
-    it("renders the dedicated Luna material showcase", () => {
+    it("renders the dedicated neutral glass workspace", () => {
         const themeService = TestBed.inject(ThemeService);
         themeService.setTheme({ name: "luna", variant: "light" });
         const fixture = TestBed.createComponent(LunaThemeDocComponent);
@@ -18,12 +18,14 @@ describe("LunaThemeDocComponent", () => {
         expect(element.querySelector("mona-calendar")).not.toBeNull();
         expect(element.querySelector("mona-tabs")).not.toBeNull();
         expect(element.querySelector("mona-menubar")).not.toBeNull();
+        expect(element.querySelector("nav[aria-label='Document commands']")).not.toBeNull();
+        expect(element.textContent).toContain("A clear surface for the work itself");
         expect(element.textContent).toContain("luna light");
     });
 
-    it("has no AXE accessibility violations", async () => {
+    it.each(["light", "dark"] as const)("has no AXE accessibility violations in Luna %s", async variant => {
         const themeService = TestBed.inject(ThemeService);
-        themeService.setTheme({ name: "luna", variant: "dark" });
+        themeService.setTheme({ name: "luna", variant });
         const fixture = TestBed.createComponent(LunaThemeDocComponent);
         fixture.detectChanges();
 
