@@ -8,6 +8,10 @@ export const datePopupThemeVariants = cva(
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
         ${themeOverlaySurfaceClasses} text-foreground
         border border-border shadow-(--shadow-overlay)
+        [&_mona-calendar]:[background-color:var(--mona-date-popup-calendar-background,var(--mona-calendar-background))]!
+        [&_mona-calendar]:[background-image:var(--mona-date-popup-calendar-background-image,var(--mona-effect-raised-background-image))]!
+        [&_mona-calendar]:[backdrop-filter:var(--mona-date-popup-calendar-backdrop-filter,var(--mona-effect-raised-backdrop-filter))]!
+        [&_mona-calendar]:[-webkit-backdrop-filter:var(--mona-date-popup-calendar-backdrop-filter,var(--mona-effect-raised-backdrop-filter))]!
         [&_mona-calendar]:border-none
         [&_mona-calendar]:shadow-none
     `,

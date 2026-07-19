@@ -8,6 +8,7 @@ export const dropdownPopupThemeVariants = cva(
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
         text-foreground
         ${themeOverlaySurfaceClasses}
+        [&_mona-list]:[background-color:var(--mona-dropdown-popup-list-background,var(--mona-list-background))]!
         border border-border shadow-(--shadow-overlay)
     `,
     {

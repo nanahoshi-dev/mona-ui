@@ -60,6 +60,12 @@ describe("Luna theme", () => {
             expect(profile.custom?.["--mona-input-addon-background"]).toBe(
                 "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"
             );
+            expect(profile.custom).toMatchObject({
+                "--mona-date-popup-calendar-backdrop-filter": "none",
+                "--mona-date-popup-calendar-background": "transparent",
+                "--mona-date-popup-calendar-background-image": "none",
+                "--mona-dropdown-popup-list-background": "transparent"
+            });
         }
 
         const serializedProfiles = JSON.stringify(lunaTheme.variants).toLowerCase();
@@ -69,6 +75,10 @@ describe("Luna theme", () => {
     });
 
     it("keeps glass translucent without glossy images or inset highlights", () => {
+        expect(lunaTheme.variants.light.effects["--mona-effect-overlay-background-color"]).toBe(
+            "rgb(249 249 250 / 0.72)"
+        );
+        expect(lunaTheme.variants.dark.effects["--mona-effect-overlay-background-color"]).toBe("rgb(38 38 40 / 0.74)");
         for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
             for (const level of ["control", "raised", "overlay"] as const) {
                 const image = profile.effects[`--mona-effect-${level}-background-image`];

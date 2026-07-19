@@ -43,6 +43,12 @@ describe("DatePickerComponent", () => {
         );
         expect(classes).toContain("border-border");
         expect(classes).toContain("shadow-(--shadow-overlay)");
+        expect(classes).toContain(
+            "[&_mona-calendar]:[background-color:var(--mona-date-popup-calendar-background,var(--mona-calendar-background))]!"
+        );
+        expect(classes).toContain(
+            "[&_mona-calendar]:[backdrop-filter:var(--mona-date-popup-calendar-backdrop-filter,var(--mona-effect-raised-backdrop-filter))]!"
+        );
         expect(classes).not.toContain("border-input-border");
     });
 

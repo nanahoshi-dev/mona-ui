@@ -22,13 +22,17 @@ export const lunaTheme = Object.freeze({
                 "--mona-effect-raised-fallback-background-color": "#fbfbfb",
                 "--mona-effect-raised-background-image": "none",
                 "--mona-effect-raised-backdrop-filter": "blur(22px) saturate(112%)",
-                "--mona-effect-overlay-background-color": "rgb(249 249 250 / 0.82)",
+                "--mona-effect-overlay-background-color": "rgb(249 249 250 / 0.72)",
                 "--mona-effect-overlay-fallback-background-color": "#f9f9fa",
                 "--mona-effect-overlay-background-image": "none",
                 "--mona-effect-overlay-backdrop-filter": "blur(28px) saturate(115%)"
             }),
             shape: createDefaultThemeShape(),
             custom: Object.freeze({
+                "--mona-date-popup-calendar-backdrop-filter": "none",
+                "--mona-date-popup-calendar-background": "transparent",
+                "--mona-date-popup-calendar-background-image": "none",
+                "--mona-dropdown-popup-list-background": "transparent",
                 "--mona-input-addon-background":
                     "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"
             }),
@@ -64,13 +68,17 @@ export const lunaTheme = Object.freeze({
                 "--mona-effect-raised-fallback-background-color": "#202022",
                 "--mona-effect-raised-background-image": "none",
                 "--mona-effect-raised-backdrop-filter": "blur(22px) saturate(112%)",
-                "--mona-effect-overlay-background-color": "rgb(38 38 40 / 0.82)",
+                "--mona-effect-overlay-background-color": "rgb(38 38 40 / 0.74)",
                 "--mona-effect-overlay-fallback-background-color": "#262628",
                 "--mona-effect-overlay-background-image": "none",
                 "--mona-effect-overlay-backdrop-filter": "blur(28px) saturate(115%)"
             }),
             shape: createDefaultThemeShape(),
             custom: Object.freeze({
+                "--mona-date-popup-calendar-backdrop-filter": "none",
+                "--mona-date-popup-calendar-background": "transparent",
+                "--mona-date-popup-calendar-background-image": "none",
+                "--mona-dropdown-popup-list-background": "transparent",
                 "--mona-input-addon-background":
                     "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"
             }),

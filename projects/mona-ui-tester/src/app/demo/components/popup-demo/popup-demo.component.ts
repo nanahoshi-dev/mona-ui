@@ -1,6 +1,7 @@
 import { NgComponentOutlet } from "@angular/common";
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, input, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 import { PopupComponent } from "@nanahoshi/mona-ui/popup";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -208,16 +209,20 @@ export class PopupDemoComponent extends AbstractDemoComponent<PopupComponent> {
             [width]="width()"
             [withPush]="withPush()"
             [withScrollTracking]="withScrollTracking()">
-            <div
-                class="flex flex-col items-center justify-center w-full h-full bg-background border border-border shadow-md">
+            <div [class]="popupContentClasses">
                 <h3 class="text-lg font-semibold">Popup Content</h3>
-                <p class="mt-2 text-sm text-gray-600">This is a popup example.</p>
+                <p class="mt-2 text-sm text-muted-foreground">This is a popup example.</p>
             </div>
         </mona-popup>
     `
 })
 export class PopupWrapperComponent implements ComponentInputsAsSignal<PopupComponent> {
     readonly #document = inject(DOCUMENT);
+    protected readonly popupContentClasses = `
+        flex h-full w-full flex-col items-center justify-center
+        ${themeOverlaySurfaceClasses} text-foreground
+        border border-border shadow-(--shadow-overlay)
+    `;
     public readonly anchor = input<ReturnType<PopupComponent["anchor"]>>(this.#document.body);
     public readonly anchorConnectionPoint = input<ReturnType<PopupComponent["anchorConnectionPoint"]>>("bottomcenter");
     public readonly animation = input<ReturnType<PopupComponent["animation"]>>(true);

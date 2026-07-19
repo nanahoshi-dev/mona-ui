@@ -96,6 +96,11 @@ describe("DropdownListComponent", () => {
                 "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
             )
         ).toBe(false);
+        expect(
+            popup.classList.contains(
+                "[&_mona-list]:[background-color:var(--mona-dropdown-popup-list-background,var(--mona-list-background))]!"
+            )
+        ).toBe(true);
         expect(selectedOption.classList.contains("bg-(--color-selected)")).toBe(true);
         expect(selectedOption.classList.contains("text-(--color-selected-foreground)")).toBe(true);
         expect(selectedOption.classList.contains("bg-primary")).toBe(false);
