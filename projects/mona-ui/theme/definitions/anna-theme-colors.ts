@@ -11,28 +11,28 @@ const generatedRoles = generateThemeColorPalette({
 });
 
 const light: ThemeColors = Object.freeze({
-    "--color-canvas": "#E7E7EA",
-    "--color-surface": "#F0F0F2",
-    "--color-surface-muted": "#D9D9DE",
-    "--color-surface-raised": "#FAFAFB",
-    "--color-surface-overlay": "#D9D9DE",
+    "--color-canvas": "#F7F7F9",
+    "--color-surface": "#FFFFFF",
+    "--color-surface-muted": "#E4E4E8",
+    "--color-surface-raised": "#FFFFFF",
+    "--color-surface-overlay": "#FFFFFF",
 
     "--color-foreground": "#26262B",
     "--color-muted-foreground": "#5B5B64",
 
-    "--color-input-background": "#F3F3F5",
+    "--color-input-background": "#ECECEF",
     "--color-input-foreground": "var(--color-foreground)",
-    "--color-border-subtle": "#C4C4CB",
-    "--color-border": "#B4B4BD",
-    "--color-border-control": "#898993",
-    "--color-border-control-hover": "#797984",
+    "--color-border-subtle": "#0000001A",
+    "--color-border": "#00000026",
+    "--color-border-control": "#00000033",
+    "--color-border-control-hover": "#00000047",
 
-    "--color-hover": "#E6E6EA",
-    "--color-active": "#DCDCE1",
+    "--color-hover": "#E2E2E6",
+    "--color-active": "#D8D8DE",
 
-    "--color-disabled-foreground": "#62626A",
-    "--color-disabled-background": "#E1E1E5",
-    "--color-disabled-border": "#BDBDC5",
+    "--color-disabled-foreground": "#73737B",
+    "--color-disabled-background": "#FAFAFB",
+    "--color-disabled-border": "#0000001F",
 
     ...generatedRoles.light,
 
@@ -45,14 +45,14 @@ const light: ThemeColors = Object.freeze({
     "--color-primary-subtle-foreground": "#4A275E",
     "--color-primary-border": "#7D548E",
 
-    "--color-secondary": "#D3D3D9",
+    "--color-secondary": "#E6E6EA",
     "--color-secondary-foreground": "#2F2F35",
-    "--color-secondary-hover": "#C7C7CE",
-    "--color-secondary-active": "#BBBBC4",
-    "--color-secondary-selected": "#BBBBC4",
-    "--color-secondary-subtle": "#E3E3E7",
+    "--color-secondary-hover": "#DCDCE2",
+    "--color-secondary-active": "#D2D2D8",
+    "--color-secondary-selected": "#D2D2D8",
+    "--color-secondary-subtle": "#F1F1F3",
     "--color-secondary-subtle-foreground": "#38383E",
-    "--color-secondary-border": "#81818B",
+    "--color-secondary-border": "#00000033",
 
     "--color-accent": "#583573",
     "--color-accent-foreground": "#FAF7FC",
@@ -68,7 +68,7 @@ const light: ThemeColors = Object.freeze({
     "--color-header-foreground": "var(--color-foreground)",
     "--color-input-border": "var(--color-border-control)",
     "--color-input-hover": "var(--color-hover)",
-    "--color-input-active": "var(--color-surface-raised)",
+    "--color-input-active": "var(--color-active)",
     "--color-popover": "var(--color-surface-overlay)",
     "--color-popover-foreground": "var(--color-foreground)",
     "--color-muted": "var(--color-surface-muted)",
@@ -87,11 +87,11 @@ const light: ThemeColors = Object.freeze({
     "--color-scrollbar-thumb-hover": "#85858F",
     "--color-scrollbar-thumb-active": "#6E6E79",
     "--color-scrollbar-thumb-focus": "var(--color-focus-indicator)",
-    "--color-scrollbar-track": "#D9D9DE",
-    "--color-scrollbar-track-hover": "#D1D1D6",
-    "--color-scrollbar-track-active": "#C7C7CE",
+    "--color-scrollbar-track": "#E4E4E8",
+    "--color-scrollbar-track-hover": "#DCDCE1",
+    "--color-scrollbar-track-active": "#D2D2D8",
     "--color-scrollbar-track-focus": "#E9DEEF",
-    "--color-scrollbar-corner": "#D9D9DE"
+    "--color-scrollbar-corner": "#E4E4E8"
 });
 
 const dark: ThemeColors = Object.freeze({

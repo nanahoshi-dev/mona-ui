@@ -3,7 +3,7 @@ import { provideHttpClient, withXhr } from "@angular/common/http";
 import { ApplicationConfig, importProvidersFrom } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { provideRouter } from "@angular/router";
-import { provideThemeColors } from "@nanahoshi/mona-ui/theme";
+import { provideThemeColorPalette, provideThemeColors } from "@nanahoshi/mona-ui/theme";
 import HighlightJS from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import json from "highlight.js/lib/languages/json";
@@ -42,8 +42,8 @@ export const appConfig: ApplicationConfig = {
             theme: "anna",
             colors: {
                 light: {
-                    "--color-page-background": "#E7E7EA",
-                    "--color-demo-background": "#F0F0F2"
+                    "--color-page-background": "#F7F7F9",
+                    "--color-demo-background": "#FFFFFF"
                 },
                 dark: {
                     "--color-page-background": "#202123",
@@ -64,6 +64,18 @@ export const appConfig: ApplicationConfig = {
                     })
                 }
             ]
+        }),
+        provideThemeColorPalette({
+            theme: "anna",
+            seeds: {
+                primary: "#83e06c"
+            }
+        }),
+        provideThemeColorPalette({
+            theme: "mona",
+            seeds: {
+                primary: "#00ff96"
+            }
         })
     ]
 };

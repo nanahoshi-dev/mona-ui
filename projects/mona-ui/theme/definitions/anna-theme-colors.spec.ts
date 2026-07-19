@@ -32,12 +32,17 @@ describe("annaThemeColors", () => {
     it("owns the light graphite inverse and solid violet selection independently", () => {
         expect(annaThemeColors.light).toEqual(
             expect.objectContaining({
-                "--color-canvas": "#E7E7EA",
-                "--color-surface": "#F0F0F2",
-                "--color-surface-muted": "#D9D9DE",
-                "--color-surface-overlay": "#D9D9DE",
-                "--color-input-background": "#F3F3F5",
-                "--color-border-control": "#898993",
+                "--color-canvas": "#F7F7F9",
+                "--color-surface": "#FFFFFF",
+                "--color-surface-muted": "#E4E4E8",
+                "--color-surface-overlay": "#FFFFFF",
+                "--color-input-background": "#ECECEF",
+                "--color-border-subtle": "#0000001A",
+                "--color-border": "#00000026",
+                "--color-border-control": "#00000033",
+                "--color-border-control-hover": "#00000047",
+                "--color-disabled-background": "#FAFAFB",
+                "--color-disabled-border": "#0000001F",
                 "--color-primary": "#583573",
                 "--color-accent": "#583573",
                 "--color-selected": "var(--color-accent)",
@@ -53,7 +58,7 @@ describe("annaThemeColors", () => {
                 "--color-background": "var(--color-surface)",
                 "--color-popover": "var(--color-surface-overlay)",
                 "--color-chart-5": "#B34B62",
-                "--color-scrollbar-track": "#D9D9DE"
+                "--color-scrollbar-track": "#E4E4E8"
             })
         );
         expect(annaThemeColors.dark).toEqual(
@@ -87,16 +92,31 @@ describe("annaThemeColors", () => {
             expectDarker(colors, "--color-border-control-hover", "--color-input-background");
             expectDarker(colors, "--color-disabled-border", "--color-disabled-background");
         }
-        expectDarker(annaThemeColors.light, "--color-border-control-hover", "--color-border-control");
+        expect(alpha(resolveColor(annaThemeColors.light, "--color-border-control-hover"))).toBeGreaterThan(
+            alpha(resolveColor(annaThemeColors.light, "--color-border-control"))
+        );
         expectDarker(annaThemeColors.dark, "--color-border-control", "--color-border-control-hover");
-        expectContrast(annaThemeColors.light, "--color-border-control", "--color-input-background", 3);
+        expect(resolveColor(annaThemeColors.light, "--color-border-control")).toBe("#00000033");
     });
 
-    it("keeps overlay surfaces darker than the controls they contain", () => {
-        for (const colors of variants) {
-            expectDarker(colors, "--color-surface-overlay", "--color-input-background");
-            expectDarker(colors, "--color-surface-overlay", "--color-surface-raised");
-        }
+    it("makes disabled light controls visibly quieter than enabled controls", () => {
+        expectLighter(annaThemeColors.light, "--color-disabled-background", "--color-input-background");
+        expect(alpha(resolveColor(annaThemeColors.light, "--color-disabled-border"))).toBeLessThan(
+            alpha(resolveColor(annaThemeColors.light, "--color-border-control"))
+        );
+        expectContrast(annaThemeColors.light, "--color-disabled-foreground", "--color-disabled-background", 4.5);
+    });
+
+    it("uses gray inset controls and bright overlays in light mode", () => {
+        expectDarker(annaThemeColors.light, "--color-input-background", "--color-canvas");
+        expectDarker(annaThemeColors.light, "--color-input-background", "--color-surface");
+        expectLighter(annaThemeColors.light, "--color-surface", "--color-canvas");
+        expectLighter(annaThemeColors.light, "--color-surface-overlay", "--color-input-background");
+    });
+
+    it("retains the dark theme's sunken overlay hierarchy", () => {
+        expectDarker(annaThemeColors.dark, "--color-surface-overlay", "--color-input-background");
+        expectDarker(annaThemeColors.dark, "--color-surface-overlay", "--color-surface-raised");
     });
 });
 
@@ -111,6 +131,10 @@ function expectContrast(
     );
 }
 
+function alpha(color: string): number {
+    return parse(color)?.alpha ?? 1;
+}
+
 function resolveColor(colors: ThemeColors, name: `--color-${string}`): string {
     const value = colors[name];
     const alias = /^var\((--color-[^)]+)\)$/.exec(value);
@@ -118,13 +142,30 @@ function resolveColor(colors: ThemeColors, name: `--color-${string}`): string {
 }
 
 function expectDarker(colors: ThemeColors, darker: `--color-${string}`, lighter: `--color-${string}`): void {
-    const toOklch = converter("oklch");
-    const darkerColor = toOklch(parse(resolveColor(colors, darker)));
-    const lighterColor = toOklch(parse(resolveColor(colors, lighter)));
+    expectRelativeLightness(colors, darker, lighter, "less than");
+}
 
-    if (!darkerColor || !lighterColor) {
-        throw new Error(`Expected parsable colors for ${darker} and ${lighter}.`);
+function expectLighter(colors: ThemeColors, lighter: `--color-${string}`, darker: `--color-${string}`): void {
+    expectRelativeLightness(colors, lighter, darker, "greater than");
+}
+
+function expectRelativeLightness(
+    colors: ThemeColors,
+    first: `--color-${string}`,
+    second: `--color-${string}`,
+    relation: "less than" | "greater than"
+): void {
+    const toOklch = converter("oklch");
+    const firstColor = toOklch(parse(resolveColor(colors, first)));
+    const secondColor = toOklch(parse(resolveColor(colors, second)));
+
+    if (!firstColor || !secondColor) {
+        throw new Error(`Expected parsable colors for ${first} and ${second}.`);
     }
 
-    expect(darkerColor.l).toBeLessThan(lighterColor.l);
+    if (relation === "less than") {
+        expect(firstColor.l).toBeLessThan(secondColor.l);
+    } else {
+        expect(firstColor.l).toBeGreaterThan(secondColor.l);
+    }
 }

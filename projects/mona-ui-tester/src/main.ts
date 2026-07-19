@@ -20,18 +20,6 @@ bootstrapApplication(AppComponent, {
         {
             provide: Directionality,
             useClass: CustomDirectionalityService
-        },
-        provideThemeColorPalette({
-            theme: "anna",
-            seeds: {
-                primary: "#00ff96"
-            }
-        }),
-        provideThemeColorPalette({
-            theme: "mona",
-            seeds: {
-                primary: "#00ff96"
-            }
-        })
+        }
     ]
 }).catch(err => console.error(err));
