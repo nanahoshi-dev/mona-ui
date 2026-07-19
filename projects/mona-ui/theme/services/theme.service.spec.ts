@@ -57,17 +57,6 @@ describe("ThemeService", () => {
         expect(root.style.getPropertyValue("--shadow-overlay")).toBe(monaThemeShadows.dark["--shadow-overlay"]);
     });
 
-    it("supports Anna Light as a distinct style and variant", () => {
-        service.setThemeId("anna-light");
-
-        expect({ id: service.themeId(), style: service.theme(), variant: service.themeVariant() }).toEqual({
-            id: "anna-light",
-            style: "anna",
-            variant: "light"
-        });
-        expect(root.style.getPropertyValue("--shadow-raised")).toBe(annaThemeShadows.light["--shadow-raised"]);
-    });
-
     it("supports Anna Dark as a distinct style and variant", () => {
         service.setThemeId("anna-dark");
 
@@ -92,6 +81,18 @@ describe("ThemeService", () => {
             'Unknown Mona UI theme identifier: "future-theme".'
         );
         expect(service.themeId()).toBe("mona-light");
+    });
+
+    it("rejects the removed Anna Light identifier without changing active state", () => {
+        // @ts-expect-error Anna Light is no longer a supported built-in theme identifier.
+        const removedThemeId: ThemeId = "anna-light";
+
+        expect(() => service.setThemeId(removedThemeId)).toThrowError(
+            'Unknown Mona UI theme identifier: "anna-light".'
+        );
+        expect(service.themeId()).toBe("mona-light");
+        expect(root.style.getPropertyValue("--color-primary")).toBe("light-primary");
+        expect(root.style.getPropertyValue("--shadow-raised")).toBe(monaThemeShadows.light["--shadow-raised"]);
     });
 
     it("exposes read-only signals", () => {

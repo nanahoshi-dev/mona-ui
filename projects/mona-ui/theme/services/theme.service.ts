@@ -18,8 +18,6 @@ interface ActiveTheme {
 
 function parseThemeId(themeId: string): ActiveTheme {
     switch (themeId) {
-        case "anna-light":
-            return { id: themeId, style: "anna", variant: "light" };
         case "anna-dark":
             return { id: themeId, style: "anna", variant: "dark" };
         case "mona-light":

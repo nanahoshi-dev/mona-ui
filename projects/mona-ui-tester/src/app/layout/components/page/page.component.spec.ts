@@ -25,26 +25,21 @@ describe("PageComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("offers all built-in themes and switches to Anna Light", () => {
+    it("offers all built-in themes and switches to Anna Dark", () => {
         const themeService = TestBed.inject(ThemeService);
-        expect(component["themeOptions"].map(theme => theme.id)).toEqual([
-            "mona-light",
-            "mona-dark",
-            "anna-dark",
-            "anna-light"
-        ]);
+        expect(component["themeOptions"].map(theme => theme.id)).toEqual(["mona-light", "mona-dark", "anna-dark"]);
 
-        component["onThemeChange"](THEME_OPTIONS.find(theme => theme.id === "anna-light")!);
+        component["onThemeChange"](THEME_OPTIONS.find(theme => theme.id === "anna-dark")!);
         fixture.detectChanges();
 
-        expect(themeService.themeId()).toBe("anna-light");
+        expect(themeService.themeId()).toBe("anna-dark");
         expect(themeService.theme()).toBe("anna");
-        expect(themeService.themeVariant()).toBe("light");
+        expect(themeService.themeVariant()).toBe("dark");
     });
 
-    it("has no AXE violations with Anna Light active", async () => {
+    it("has no AXE violations with Anna Dark active", async () => {
         const themeService = TestBed.inject(ThemeService);
-        themeService.setThemeId("anna-light");
+        themeService.setThemeId("anna-dark");
         fixture.detectChanges();
 
         // jsdom has no canvas implementation; theme specs verify Anna contrast pairs numerically.

@@ -39,7 +39,6 @@ if (JSON.stringify(tailwindKeys) !== JSON.stringify(runtimeKeys)) {
 for (const [name, colors] of Object.entries({
     "Mona Light": monaThemeColors.light,
     "Mona Dark": monaThemeColors.dark,
-    "Anna Light": annaThemeColors.light,
     "Anna Dark": annaThemeColors.dark
 })) {
     const keys = Object.keys(colors).sort();
@@ -67,7 +66,6 @@ const tailwindShadowKeys = Object.keys(tailwindShadows).sort();
 
 for (const [name, shadows] of Object.entries({
     "Mona Dark": monaThemeShadows.dark,
-    "Anna Light": annaThemeShadows.light,
     "Anna Dark": annaThemeShadows.dark
 })) {
     const keys = Object.keys(shadows).sort();

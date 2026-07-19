@@ -42,7 +42,22 @@ describe("provideThemeColors", () => {
         expect(strategy.resolve("mona", "dark")["--color-primary"]).toBe("second");
     });
 
-    it("applies Anna Light overrides without affecting Anna Dark or Mona", () => {
+    it("applies Anna Dark overrides without affecting Mona", () => {
+        TestBed.configureTestingModule({
+            providers: [
+                provideThemeColors({
+                    theme: "anna",
+                    colors: { dark: { "--color-primary": "anna-dark-override" } }
+                })
+            ]
+        });
+
+        const strategy = TestBed.inject(THEME_COLOR_STRATEGY);
+        expect(strategy.resolve("anna", "dark")["--color-primary"]).toBe("anna-dark-override");
+        expect(strategy.resolve("mona", "dark")["--color-primary"]).not.toBe("anna-dark-override");
+    });
+
+    it("does not let an Anna Light override create an unsupported built-in variant", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideThemeColors({
@@ -52,10 +67,9 @@ describe("provideThemeColors", () => {
             ]
         });
 
-        const strategy = TestBed.inject(THEME_COLOR_STRATEGY);
-        expect(strategy.resolve("anna", "light")["--color-primary"]).toBe("anna-light-override");
-        expect(strategy.resolve("anna", "dark")["--color-primary"]).not.toBe("anna-light-override");
-        expect(strategy.resolve("mona", "light")["--color-primary"]).not.toBe("anna-light-override");
+        expect(() => TestBed.inject(THEME_COLOR_STRATEGY).resolve("anna", "light")).toThrowError(
+            'Mona UI theme "anna" does not support the "light" variant.'
+        );
     });
 
     it("does not mutate the supplied registration", () => {

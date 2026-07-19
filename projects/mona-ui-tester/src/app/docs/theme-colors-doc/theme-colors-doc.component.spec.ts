@@ -23,17 +23,17 @@ describe("ThemeColorsDocComponent", () => {
         const themeService = TestBed.inject(ThemeService);
         fixture.detectChanges();
 
-        themeService.setThemeId("anna-light");
+        themeService.setThemeId("anna-dark");
         fixture.detectChanges();
 
-        expect((fixture.nativeElement as HTMLElement).textContent).toContain("anna-light");
+        expect((fixture.nativeElement as HTMLElement).textContent).toContain("anna-dark");
         expect((fixture.nativeElement as HTMLElement).textContent).toMatch(/Focus \/ input\d+\.\d{2}:1/);
     });
 
     it("has no AXE accessibility violations", async () => {
         const fixture = TestBed.createComponent(ThemeColorsDocComponent);
         const themeService = TestBed.inject(ThemeService);
-        themeService.setThemeId("anna-light");
+        themeService.setThemeId("anna-dark");
         fixture.detectChanges();
 
         // jsdom has no canvas implementation; theme specs verify all contrast pairs numerically.

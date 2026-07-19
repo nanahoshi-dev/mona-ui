@@ -63,7 +63,8 @@ export const timeSelectorListVariants = cva(
         scrollbar-width:none
         select-none outline-none
         [&::-webkit-scrollbar]:hidden
-        focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/35
+        focus-visible:bg-surface-muted
+        focus-within:bg-surface-muted
     `,
     {
         variants: {

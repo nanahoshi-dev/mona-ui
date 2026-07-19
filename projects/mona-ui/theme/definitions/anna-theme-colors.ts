@@ -10,90 +10,6 @@ const generatedRoles = generateThemeColorPalette({
     info: "#4DA3FF"
 });
 
-const light: ThemeColors = Object.freeze({
-    "--color-canvas": "#F7F7F9",
-    "--color-surface": "#FFFFFF",
-    "--color-surface-muted": "#E4E4E8",
-    "--color-surface-raised": "#FFFFFF",
-    "--color-surface-overlay": "#FFFFFF",
-
-    "--color-foreground": "#26262B",
-    "--color-muted-foreground": "#5B5B64",
-
-    "--color-input-background": "#ECECEF",
-    "--color-input-foreground": "var(--color-foreground)",
-    "--color-border-subtle": "#0000001A",
-    "--color-border": "#00000026",
-    "--color-border-control": "#00000033",
-    "--color-border-control-hover": "#00000047",
-
-    "--color-hover": "#E2E2E6",
-    "--color-active": "#D8D8DE",
-
-    "--color-disabled-foreground": "#73737B",
-    "--color-disabled-background": "#FAFAFB",
-    "--color-disabled-border": "#0000001F",
-
-    ...generatedRoles.light,
-
-    "--color-primary": "#583573",
-    "--color-primary-foreground": "#FAF7FC",
-    "--color-primary-hover": "#684484",
-    "--color-primary-active": "#472A5E",
-    "--color-primary-selected": "#583573",
-    "--color-primary-subtle": "#E9DEEF",
-    "--color-primary-subtle-foreground": "#4A275E",
-    "--color-primary-border": "#7D548E",
-
-    "--color-secondary": "#E6E6EA",
-    "--color-secondary-foreground": "#2F2F35",
-    "--color-secondary-hover": "#DCDCE2",
-    "--color-secondary-active": "#D2D2D8",
-    "--color-secondary-selected": "#D2D2D8",
-    "--color-secondary-subtle": "#F1F1F3",
-    "--color-secondary-subtle-foreground": "#38383E",
-    "--color-secondary-border": "#00000033",
-
-    "--color-accent": "#583573",
-    "--color-accent-foreground": "#FAF7FC",
-    "--color-accent-hover": "#684484",
-    "--color-accent-active": "#472A5E",
-    "--color-accent-dark": "var(--color-accent-active)",
-    "--color-selected": "var(--color-accent)",
-    "--color-focus-indicator": "#8159A0",
-
-    "--color-background": "var(--color-surface)",
-    "--color-background-dark": "var(--color-surface-muted)",
-    "--color-header-background": "var(--color-surface-muted)",
-    "--color-header-foreground": "var(--color-foreground)",
-    "--color-input-border": "var(--color-border-control)",
-    "--color-input-hover": "var(--color-hover)",
-    "--color-input-active": "var(--color-active)",
-    "--color-popover": "var(--color-surface-overlay)",
-    "--color-popover-foreground": "var(--color-foreground)",
-    "--color-muted": "var(--color-surface-muted)",
-    "--color-destructive": "var(--color-error)",
-    "--color-destructive-foreground": "var(--color-error-foreground)",
-    "--color-input": "var(--color-border-control)",
-    "--color-disabled": "var(--color-disabled-foreground)",
-
-    "--color-chart-1": "#583573",
-    "--color-chart-2": "#3F6F9E",
-    "--color-chart-3": "#2F7F70",
-    "--color-chart-4": "#9C7B16",
-    "--color-chart-5": "#B34B62",
-
-    "--color-scrollbar-thumb": "#9C9CA6",
-    "--color-scrollbar-thumb-hover": "#85858F",
-    "--color-scrollbar-thumb-active": "#6E6E79",
-    "--color-scrollbar-thumb-focus": "var(--color-focus-indicator)",
-    "--color-scrollbar-track": "#E4E4E8",
-    "--color-scrollbar-track-hover": "#DCDCE1",
-    "--color-scrollbar-track-active": "#D2D2D8",
-    "--color-scrollbar-track-focus": "#E9DEEF",
-    "--color-scrollbar-corner": "#E4E4E8"
-});
-
 const dark: ThemeColors = Object.freeze({
     "--color-canvas": "#202123",
     "--color-surface": "#1D1E20",
@@ -178,4 +94,4 @@ const dark: ThemeColors = Object.freeze({
     "--color-scrollbar-corner": "#161718"
 });
 
-export const annaThemeColors = Object.freeze({ light, dark } satisfies ThemeDefinition);
+export const annaThemeColors = Object.freeze({ dark } satisfies ThemeDefinition);
