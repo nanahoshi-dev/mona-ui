@@ -18,7 +18,7 @@
         "build:tester": "ng build mona-ui-tester --configuration production",
         "serve:tester": "ng serve mona-ui-tester",
         "watch": "ng build mona-ui --watch --configuration development",
-        "test:lib": "ng test mona-ui",
+        "test:lib": "ng test mona-ui --watch=false --coverage",
         "test:lib:watch": "ng test mona-ui --coverage --watch",
         "test:app": "ng test mona-ui-tester",
         "test:theme-colors": "tsx projects/mona-ui-tester/scripts/check-theme-color-parity.ts"

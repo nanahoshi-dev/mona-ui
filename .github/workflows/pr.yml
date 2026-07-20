@@ -33,4 +33,4 @@ jobs:
         run: npm run build:prod
 
       - name: Test
-        run: npm run test:lib -- --browsers=ChromeHeadless --watch=false --code-coverage
+        run: npm run test:lib
