@@ -63,7 +63,6 @@ export const stepperStepListItemThemeVariants = cva(
 export const stepperStepIndicatorThemeVariants = cva(
     `
         flex h-8 w-8 items-center justify-center
-        bg-surface-raised text-foreground
         border border-border outline-none
         transition-colors duration-400 ease-in-out
     `,
@@ -71,7 +70,7 @@ export const stepperStepIndicatorThemeVariants = cva(
         variants: {
             active: {
                 true: "bg-primary text-primary-foreground",
-                false: ""
+                false: "bg-surface-raised text-foreground"
             },
             focused: {
                 true: "border-focus-indicator ring-2 ring-focus-indicator/35",

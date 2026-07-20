@@ -49,8 +49,13 @@ describe("StepperIndicatorDirective", () => {
         const progress = stepperTrackLineThemeVariants({ orientation: "horizontal" }).split(/\s+/);
 
         expect(inactive).toContain("bg-surface-raised");
+        expect(inactive).toContain("text-foreground");
         expect(inactive).not.toContain("bg-primary");
+        expect(inactive).not.toContain("text-primary-foreground");
         expect(active).toContain("bg-primary");
+        expect(active).toContain("text-primary-foreground");
+        expect(active).not.toContain("bg-surface-raised");
+        expect(active).not.toContain("text-foreground");
         expect(active).toContain("ring-focus-indicator/35");
         expect(track).toContain("bg-surface-muted");
         expect(track).toContain("border-border-subtle");
