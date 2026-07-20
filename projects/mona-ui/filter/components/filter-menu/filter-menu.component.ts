@@ -15,7 +15,6 @@ import {
     StringFilterOperators
 } from "@nanahoshi/mona-ui/query";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { FilterMenuConnectorItem } from "../../models/FilterMenuConnectorItem";
 import { FilterMenuDataItem } from "../../models/FilterMenuDataItem";
 import type { FilterMenuDateOptions, FilterMenuDateType } from "../../models/FilterMenuDateOptions";
@@ -52,7 +51,6 @@ import {
 export class FilterMenuComponent implements FilterMenuVariantInput {
     #booleanFilterValues: [boolean | null, boolean | null] = [null, null];
     readonly #filterService = inject(FilterService);
-    readonly #themeService = inject(ThemeService);
     protected readonly applyDisabled = computed(() => {
         if (!this.firstFilterValid()) {
             return true;
@@ -60,8 +58,7 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
         return !!(this.selectedConnectorItem() && !this.secondFilterValid());
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return filterMenuBaseThemeVariants(theme)();
+        return filterMenuBaseThemeVariants();
     });
     protected readonly booleanFilterMenuDataItems = this.#filterService.booleanFilterMenuItems;
     protected readonly connectorDataItems: FilterMenuConnectorItem[] = [
@@ -85,12 +82,10 @@ export class FilterMenuComponent implements FilterMenuVariantInput {
         };
     });
     protected readonly filterMenuActionsClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return filterMenuActionsThemeVariants(theme)();
+        return filterMenuActionsThemeVariants();
     });
     protected readonly filterMenuItemClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return filterMenuItemThemeVariants(theme)();
+        return filterMenuItemThemeVariants();
     });
     protected readonly firstFilterValid = computed(() => {
         const operator = this.selectedFilterMenuDataItemList()[0]?.value;

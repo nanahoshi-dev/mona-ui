@@ -32,7 +32,7 @@ protected currentStep = 0;
 Each step renders an **indicator** (the numbered circle) and a **label** (the text below or beside it). Three `ng-template` directives let you replace either part, or replace the entire step unit:
 
 | Directive                           | Selector                                    | Replaces                                      |
-|-------------------------------------|---------------------------------------------|-----------------------------------------------|
+| ----------------------------------- | ------------------------------------------- | --------------------------------------------- |
 | `StepperIndicatorTemplateDirective` | `ng-template[monaStepperIndicatorTemplate]` | Content inside the indicator circle           |
 | `StepperLabelTemplateDirective`     | `ng-template[monaStepperLabelTemplate]`     | The step label text                           |
 | `StepperStepTemplateDirective`      | `ng-template[monaStepperStepTemplate]`      | The entire step unit (indicator + label area) |
@@ -40,7 +40,7 @@ Each step renders an **indicator** (the numbered circle) and a **label** (the te
 All three directives expose the same typed context (`StepperTemplateContext<T>`):
 
 | Variable                 | Type             | Description                                                 |
-|--------------------------|------------------|-------------------------------------------------------------|
+| ------------------------ | ---------------- | ----------------------------------------------------------- |
 | `$implicit` (`let-step`) | `StepOptions<T>` | The step's options object                                   |
 | `active`                 | `boolean`        | True when this step's index ≤ the current active step index |
 | `currentIndex`           | `number`         | Zero-based index of the currently active step               |
@@ -66,10 +66,8 @@ Replaces only the icon or number inside the indicator circle. The circle element
 <mona-stepper [steps]="steps" [(step)]="currentStep">
     <ng-template monaStepperIndicatorTemplate let-step let-index="index" let-currentIndex="currentIndex">
         @if (index < currentIndex) {
-            <svg lucideCheck [size]="16"></svg>
-        } @else {
-            {{ index + 1 }}
-        }
+        <svg lucideCheck [size]="16"></svg>
+        } @else { {{ index + 1 }} }
     </ng-template>
 </mona-stepper>
 ```
@@ -93,9 +91,7 @@ Replaces the entire visual step unit. The component wraps the projected content 
 ```html
 <mona-stepper [steps]="steps" [(step)]="currentStep">
     <ng-template monaStepperStepTemplate let-step let-active="active">
-        <span class="text-3xl" [class.text-primary]="active">
-            {{ active ? "●" : "○" }}
-        </span>
+        <span class="text-3xl" [class.text-primary]="active"> {{ active ? "●" : "○" }} </span>
     </ng-template>
 </mona-stepper>
 ```
@@ -131,7 +127,7 @@ In vertical mode, `ArrowUp` and `ArrowDown` replace `ArrowLeft` and `ArrowRight`
 ### Rounded presets
 
 | `rounded` | Shape              |
-|-----------|--------------------|
+| --------- | ------------------ |
 | `none`    | Square corners     |
 | `small`   | Slightly rounded   |
 | `medium`  | Moderately rounded |
@@ -154,7 +150,7 @@ protected readonly steps: StepOptions<{ icon: string }>[] = [
 ### Keyboard map
 
 | Key                                                | Action                          |
-|----------------------------------------------------|---------------------------------|
+| -------------------------------------------------- | ------------------------------- |
 | `ArrowLeft` (horizontal) / `ArrowUp` (vertical)    | Move highlight to previous step |
 | `ArrowRight` (horizontal) / `ArrowDown` (vertical) | Move highlight to next step     |
 | `Home`                                             | Move highlight to first step    |
@@ -166,7 +162,7 @@ Arrow key movement respects linear mode (limits range) and disabled steps (skips
 ### ARIA attributes
 
 | Attribute                         | Element                    | When                             | Value                                                 |
-|-----------------------------------|----------------------------|----------------------------------|-------------------------------------------------------|
+| --------------------------------- | -------------------------- | -------------------------------- | ----------------------------------------------------- |
 | `role="group"`                    | Host                       | Always                           | —                                                     |
 | `aria-label`                      | Host                       | Always                           | `aria-label` input (default `"Progress"`)             |
 | `role="button"`                   | Each step indicator        | Always                           | —                                                     |
@@ -196,7 +192,7 @@ Arrow key movement respects linear mode (limits range) and disabled steps (skips
 #### Inputs
 
 | Name                | Type                                                 | Default           | Description                                                                                                     |
-|---------------------|------------------------------------------------------|-------------------|-----------------------------------------------------------------------------------------------------------------|
+| ------------------- | ---------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------- |
 | `aria-label`        | `string`                                             | `"Progress"`      | Accessible label for the stepper group (`role="group"`).                                                        |
 | `linear`            | `boolean`                                            | `true`            | When true, only the immediately adjacent step can be reached by click or keyboard.                              |
 | `orientation`       | `"horizontal" \| "vertical"`                         | `"horizontal"`    | Layout direction of the step list and track.                                                                    |
@@ -208,7 +204,7 @@ Arrow key movement respects linear mode (limits range) and disabled steps (skips
 #### Outputs
 
 | Name         | Type     | Description                                                                  |
-|--------------|----------|------------------------------------------------------------------------------|
+| ------------ | -------- | ---------------------------------------------------------------------------- |
 | `stepChange` | `number` | Emitted when the active step changes. Carries the new zero-based step index. |
 
 ---
@@ -238,7 +234,7 @@ Replaces the entire visual step unit. The component wraps projected content in a
 #### `StepOptions<T = unknown>`
 
 | Field      | Type      | Required | Description                                                                             |
-|------------|-----------|----------|-----------------------------------------------------------------------------------------|
+| ---------- | --------- | -------- | --------------------------------------------------------------------------------------- |
 | `label`    | `string`  | Yes      | Display label and accessible name for the indicator.                                    |
 | `data`     | `T`       | No       | Arbitrary data attached to this step. Available in template contexts as `step.data`.    |
 | `disabled` | `boolean` | No       | When true, the step cannot be activated by click or keyboard regardless of linear mode. |
@@ -246,14 +242,14 @@ Replaces the entire visual step unit. The component wraps projected content in a
 #### `StepItem<T = unknown>`
 
 | Field     | Type             | Description                                  |
-|-----------|------------------|----------------------------------------------|
+| --------- | ---------------- | -------------------------------------------- |
 | `index`   | `number`         | Zero-based position of the step in the list. |
 | `options` | `StepOptions<T>` | The original options object for this step.   |
 
 #### `StepperTemplateContext<T = unknown>`
 
 | Field          | Type             | Description                                                  |
-|----------------|------------------|--------------------------------------------------------------|
+| -------------- | ---------------- | ------------------------------------------------------------ |
 | `$implicit`    | `StepOptions<T>` | The step's options object (bind with `let-myVar`).           |
 | `active`       | `boolean`        | True when this step's index ≤ the current active step index. |
 | `currentIndex` | `number`         | Zero-based index of the currently active step.               |
@@ -270,8 +266,8 @@ Replaces the entire visual step unit. The component wraps projected content in a
 - [x] StepOptions fields verified against models/Step.ts
 - [x] aria-label alias verified (input("Progress", { alias: "aria-label" }))
 - [x] No private or unexported APIs exposed
-- [x] rounded variant values verified against stepper.mona.styles.ts CVA config
-- [x] orientation values verified against stepper.mona.styles.ts CVA config
+- [x] rounded variant values verified against stepper.styles.ts CVA config
+- [x] orientation values verified against stepper.styles.ts CVA config
 - [x] Keyboard map verified against setKeyboardEvents() in stepper.component.ts
 - [x] ARIA attributes verified against stepper.component.html and host bindings
 -->

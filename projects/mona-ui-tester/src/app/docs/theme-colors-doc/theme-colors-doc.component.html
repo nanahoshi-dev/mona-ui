@@ -1,0 +1,139 @@
+<main class="grid max-w-6xl gap-14 px-5 py-12 pb-20 mx-auto md:px-12">
+    <header class="max-w-3xl">
+        <p class="eyebrow">Color foundation · {{ themeLabel() }}</p>
+        <h1>Theme Colors</h1>
+        <p>
+            Mona separates elevation, neutral interaction, and persistent emphasis so controls remain legible wherever they
+            are placed. Contrast labels show the current theme's computed WCAG ratio.
+        </p>
+    </header>
+
+    <section aria-labelledby="surface-heading">
+        <div class="section-heading flex items-end justify-between gap-8 mb-5 max-md:grid">
+            <div>
+                <p class="section-number">01</p>
+                <h2 id="surface-heading">Surface hierarchy</h2>
+            </div>
+            <p class="max-w-md text-right max-md:text-left">
+                Canvas recedes, controls rise, and temporary content sits on the overlay tier.
+            </p>
+        </div>
+
+        <div class="canvas-preview">
+            <span class="tier-label">Canvas</span>
+            <div class="surface-preview shadow-raised">
+                <span class="tier-label">Surface</span>
+                <div class="raised-preview shadow-control">
+                    <label for="theme-filter">Filter records</label>
+                    <input id="theme-filter" type="search" placeholder="Search by name…" />
+                    <span class="contrast-note">
+                        Text {{ contrast("--color-input-foreground", "--color-input-background") }}:1 · boundary
+                        {{ contrast("--color-border-control", "--color-input-background") }}:1
+                    </span>
+                </div>
+
+                <aside class="overlay-preview shadow-overlay" aria-label="Filter popup preview">
+                    <div class="overlay-title">
+                        <span>Recent filters</span>
+                        <span class="contrast-note">
+                            {{ contrast("--color-popover-foreground", "--color-popover") }}:1
+                        </span>
+                    </div>
+                    <button type="button">Assigned to me</button>
+                    <button class="is-hovered" type="button">Updated this week</button>
+                    <button class="is-selected" type="button" aria-pressed="true">High priority</button>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="interaction-heading">
+        <div class="section-heading flex items-end justify-between gap-8 mb-5 max-md:grid">
+            <div>
+                <p class="section-number">02</p>
+                <h2 id="interaction-heading">Interaction language</h2>
+            </div>
+            <p class="max-w-md text-right max-md:text-left">
+                Hover and active are quiet zinc tones. Accent marks persistent selection without introducing a competing hue.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <article class="interaction-card">
+                <span>Rest</span>
+                <strong>Neutral surface</strong>
+            </article>
+            <article class="interaction-card is-hovered">
+                <span>Hover</span>
+                <strong>Temporary intent</strong>
+            </article>
+            <article class="interaction-card is-active">
+                <span>Active</span>
+                <strong>Pressed state</strong>
+            </article>
+            <article class="interaction-card is-selected">
+                <span>Accent</span>
+                <strong>Persistent choice</strong>
+            </article>
+        </div>
+    </section>
+
+    <section aria-labelledby="roles-heading">
+        <div class="section-heading flex items-end justify-between gap-8 mb-5 max-md:grid">
+            <div>
+                <p class="section-number">03</p>
+                <h2 id="roles-heading">Semantic roles</h2>
+            </div>
+            <p class="max-w-md text-right max-md:text-left">
+                Primary and secondary stay neutral; status roles retain color only where meaning depends on it.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            @for (role of roles; track role.token) {
+                <article class="role-card border border-border-subtle bg-surface">
+                    <div
+                        class="role-solid"
+                        [style.background]="'var(' + roleVariable(role) + ')'"
+                        [style.color]="'var(' + roleVariable(role, '-foreground') + ')'">
+                        <strong>{{ role.label }}</strong>
+                        <span>{{ contrast(roleVariable(role, "-foreground"), roleVariable(role)) }}:1</span>
+                    </div>
+                    <div
+                        class="role-subtle"
+                        [style.background]="'var(' + roleVariable(role, '-subtle') + ')'"
+                        [style.border-color]="'var(' + roleVariable(role, '-border') + ')'"
+                        [style.color]="'var(' + roleVariable(role, '-subtle-foreground') + ')'">
+                        <span>Subtle message</span>
+                        <span>
+                            {{ contrast(roleVariable(role, "-subtle-foreground"), roleVariable(role, "-subtle")) }}:1
+                        </span>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section
+        class="contrast-summary grid grid-cols-[minmax(12rem,1fr)_2fr] gap-8 p-6 border border-border-subtle bg-surface-muted max-md:grid-cols-1"
+        aria-labelledby="contrast-heading">
+        <div>
+            <p class="section-number">04</p>
+            <h2 id="contrast-heading">Contrast checkpoints</h2>
+        </div>
+        <dl>
+            <div>
+                <dt>Primary text / surface</dt>
+                <dd>{{ contrast("--color-foreground", "--color-surface") }}:1</dd>
+            </div>
+            <div>
+                <dt>Muted text / canvas</dt>
+                <dd>{{ contrast("--color-muted-foreground", "--color-canvas") }}:1</dd>
+            </div>
+            <div>
+                <dt>Focus / input</dt>
+                <dd>{{ contrast("--color-focus-indicator", "--color-input-background") }}:1</dd>
+            </div>
+        </dl>
+    </section>
+</main>

@@ -19,7 +19,6 @@ import { ImmutableList, ImmutableSet } from "@mirei/ts-collections";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent } from "rxjs";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
@@ -83,13 +82,11 @@ export class GridVirtualListComponent {
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #injector = inject(Injector);
     readonly #rowFlattener = inject(GridRowFlattenerService);
-    readonly #themeService = inject(ThemeService);
     private readonly addRowScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("addRowScrollElement");
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     private readonly footerScrollElementRef = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridListBaseThemeVariants(theme)({ virtual: true });
+        return gridListBaseThemeVariants({ virtual: true });
     });
     protected readonly flattenedGroupedRows = computed(() => {
         const groupColumns = this.gridService.groupColumns();
@@ -105,25 +102,20 @@ export class GridVirtualListComponent {
         return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys, showFooter, groupAggregateDict);
     });
     protected readonly footerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterThemeVariants(theme)();
+        return gridFooterThemeVariants();
     });
     protected readonly footerTableClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterTableThemeVariants(theme)();
+        return gridFooterTableThemeVariants();
     });
     protected readonly footerTableRowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterTableRowThemeVariants(theme)();
+        return gridFooterTableRowThemeVariants();
     });
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridGroupRowThemeVariants(theme)();
+        return gridGroupRowThemeVariants();
     });
     protected readonly tableClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridListTableThemeVariants(theme)();
+        return gridListTableThemeVariants();
     });
     protected readonly viewport = viewChild.required(CdkVirtualScrollViewport);
     public readonly columns = input<ImmutableList<Column>>(ImmutableList.create());

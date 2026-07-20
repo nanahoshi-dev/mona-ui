@@ -26,7 +26,6 @@ import {
     PopupMenuTextTemplateDirective,
     PopupMenuToken
 } from "@nanahoshi/mona-ui/popup-menu";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -61,16 +60,14 @@ import {
 })
 export class SplitButtonComponent implements SplitButtonVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #themeService = inject(ThemeService);
     private readonly menuItemComponents = contentChildren(PopupMenuToken, { descendants: false });
     protected readonly menuButtonRef = viewChild<ElementRef<HTMLButtonElement>>("menuButton");
     protected readonly popupMenuRef = viewChild<PopupMenuComponent>("popupMenu");
     protected readonly classes = computed(() => {
-        const theme = this.#themeService.theme();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = splitButtonThemeVariants(theme)({
+        const classes = splitButtonThemeVariants({
             look,
             rounded,
             size

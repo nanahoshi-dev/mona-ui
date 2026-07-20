@@ -10,6 +10,7 @@ import {
 import { DateTime } from "luxon";
 import { describe, expect, it } from "vitest";
 import { CalendarSelection } from "../../models/CalendarSelection";
+import { calendarBaseThemeVariants, calendarMonthViewDayThemeVariants } from "../../styles/calendar.styles";
 import { CalendarComponent } from "./calendar.component";
 
 @Component({
@@ -134,7 +135,7 @@ describe("CalendarComponent signal forms", () => {
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-16"]);
         expectRangePreview(fixture, 16, false);
         expectRangePreview(fixture, 17, true);
-        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
+        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("false");
     });
 
     it("previews a backward range from the pending start date to the hovered day", async () => {
@@ -149,7 +150,7 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expectRangePreview(fixture, 17, true);
-        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBeNull();
+        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("false");
     });
 
     it("commits the final range selection and clears the hover preview", async () => {
@@ -165,7 +166,7 @@ describe("CalendarComponent signal forms", () => {
         await waitForStable(fixture);
 
         expect(valueDates(component)).toEqualCalendarDates(["2023-09-16", "2023-09-18"]);
-        expect(getDay(fixture, 17).getAttribute("aria-selected")).toBe("true");
+        expect(getDay(fixture, 17).getAttribute("aria-pressed")).toBe("true");
         expectRangePreview(fixture, 17, false);
     });
 
@@ -282,13 +283,52 @@ function dispatchDayPointerEnter(fixture: ComponentFixture<unknown>, day: number
 
 function expectRangePreview(fixture: ComponentFixture<unknown>, day: number, previewed: boolean): void {
     const dayElement = getDay(fixture, day);
+    const classTokens = dayElement.className.split(/\s+/);
     expect(dayElement.getAttribute("data-range-preview")).toBe(previewed ? "true" : null);
     if (previewed) {
-        expect(dayElement.className).toContain("bg-primary/20");
+        expect(classTokens).toContain("bg-active");
     } else {
-        expect(dayElement.className).not.toContain("bg-primary/20");
+        expect(classTokens).not.toContain("bg-active");
     }
 }
+
+describe("Calendar visual contract", () => {
+    it("uses a raised neutral surface and primary only for committed dates", () => {
+        const baseClasses = calendarBaseThemeVariants({
+            disabled: false,
+            readonly: false,
+            rounded: "medium"
+        }).split(/\s+/);
+        const focusedClasses = calendarMonthViewDayThemeVariants({
+            disabled: false,
+            focused: true,
+            outside: false,
+            rangePreview: false,
+            rounded: "medium",
+            selected: false,
+            today: false
+        }).split(/\s+/);
+        const selectedClasses = calendarMonthViewDayThemeVariants({
+            disabled: false,
+            focused: false,
+            outside: false,
+            rangePreview: false,
+            rounded: "medium",
+            selected: true,
+            today: false
+        }).split(/\s+/);
+
+        expect(baseClasses).toContain("bg-(--mona-calendar-background)");
+        expect(baseClasses).toContain("[backdrop-filter:var(--mona-effect-raised-backdrop-filter,none)]");
+        expect(baseClasses).toContain("border-border");
+        expect(baseClasses).toContain("shadow-(--mona-calendar-shadow)");
+        expect(focusedClasses).toContain("bg-hover");
+        expect(focusedClasses).toContain("ring-focus-indicator/35");
+        expect(focusedClasses).not.toContain("bg-accent");
+        expect(selectedClasses).toContain("bg-primary");
+        expect(selectedClasses).toContain("text-primary-foreground");
+    });
+});
 
 function getCalendar(fixture: ComponentFixture<unknown>): HTMLElement {
     return fixture.nativeElement.querySelector("mona-calendar") as HTMLElement;

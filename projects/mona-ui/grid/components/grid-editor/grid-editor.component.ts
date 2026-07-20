@@ -18,7 +18,6 @@ import { CheckBoxComponent } from "@nanahoshi/mona-ui/check-box";
 import { DatePickerComponent } from "@nanahoshi/mona-ui/date-picker";
 import { NumericTextBoxComponent } from "@nanahoshi/mona-ui/numeric-text-box";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { TooltipComponent } from "@nanahoshi/mona-ui/tooltip";
 import { Column } from "../../models/Column";
 import type { GridEditSession } from "../../models/GridEditSession";
@@ -45,13 +44,11 @@ import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } fro
 export class GridEditorComponent {
     readonly #datePopupOpen = signal(false);
     readonly #elementRef = inject(ElementRef<HTMLElement>);
-    readonly #themeService = inject(ThemeService);
     #ignoreNextBooleanFocusOut = false;
     private readonly numericTextBoxRef = viewChild(NumericTextBoxComponent);
     private readonly textBoxRef = viewChild(TextBoxComponent);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridCellEditorBaseThemeVariants(theme)();
+        return gridCellEditorBaseThemeVariants();
     });
     protected readonly editTemplateContext = computed<GridEditTemplateContext>(() => ({
         cancel: (): void => this.cancel.emit(),
@@ -70,8 +67,7 @@ export class GridEditorComponent {
         value: this.formField()().value()
     }));
     protected readonly editorInputClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridCellEditorInputThemeVariants(theme)();
+        return gridCellEditorInputThemeVariants();
     });
     protected readonly fieldErrorMessage = computed(() => {
         const [firstError] = this.formField()().errors();

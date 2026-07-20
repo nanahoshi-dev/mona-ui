@@ -1,5 +1,4 @@
 import { computed, Directive, inject } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { gridDetailRowThemeVariants } from "../styles/grid.styles";
 
 @Directive({
@@ -9,9 +8,7 @@ import { gridDetailRowThemeVariants } from "../styles/grid.styles";
     }
 })
 export class GridDetailRowDirective {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridDetailRowThemeVariants(theme)();
+        return gridDetailRowThemeVariants();
     });
 }

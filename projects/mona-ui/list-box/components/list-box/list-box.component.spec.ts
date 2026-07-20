@@ -31,6 +31,13 @@ describe("ListBoxComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
+
+    it("should render its list on the neutral content surface", () => {
+        const listView = fixture.nativeElement.querySelector("mona-list-view") as HTMLElement;
+
+        expect(listView.classList.contains("bg-surface")).toBe(true);
+        expect(listView.classList.contains("border-border")).toBe(true);
+    });
 });
 
 /**

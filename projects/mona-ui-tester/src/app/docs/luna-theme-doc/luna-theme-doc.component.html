@@ -1,0 +1,210 @@
+<main class="luna-page">
+    <header class="luna-hero">
+        <div class="luna-hero-copy">
+            <p class="luna-kicker">Neutral glass · {{ themeLabel() }}</p>
+            <h1>Luna</h1>
+            <p>
+                Quiet white surfaces keep the document in focus. Translucent controls and overlays reveal just enough of
+                the workspace beneath them to preserve depth.
+            </p>
+        </div>
+        <aside class="luna-status" aria-label="Transparency status">
+            <span>Transparency</span>
+            <strong>{{ transparencyMode() === "full" ? "Glass enabled" : "Opaque fallback" }}</strong>
+            <small>{{ transparencyMode() }}</small>
+        </aside>
+    </header>
+
+    <section class="luna-workspace" aria-labelledby="workspace-title">
+        <div class="luna-document-ribbon" aria-hidden="true"></div>
+        <article class="luna-document-sheet">
+            <div class="luna-document-toolbar">
+                <span>Workspace</span>
+                <span>Updated just now</span>
+            </div>
+            <div class="luna-document-copy">
+                <span class="luna-label">Project note</span>
+                <h2 id="workspace-title">A clear surface for the work itself.</h2>
+                <p>
+                    Content remains opaque and calm. The glass layer belongs to navigation, tools, and temporary
+                    decisions—not to the document.
+                </p>
+            </div>
+        </article>
+
+        <nav class="luna-command-palette" aria-label="Document commands">
+            <span class="luna-command-title">Open in</span>
+            <button type="button" class="is-active">New workspace</button>
+            <button type="button">Copy link</button>
+            <button type="button">Add to favorites</button>
+            <span class="luna-command-divider" aria-hidden="true"></span>
+            <button type="button">Move document</button>
+        </nav>
+    </section>
+
+    <section class="luna-stage" aria-labelledby="controls-title">
+        <div class="luna-section-heading">
+            <p>Everyday controls</p>
+            <h2 id="controls-title">Soft structure, clear state</h2>
+        </div>
+
+        <div class="luna-control-grid">
+            <article class="luna-cluster">
+                <span class="luna-label">Actions</span>
+                <div class="flex flex-wrap gap-2">
+                    <button monaButton rounded="large">New note</button>
+                    <button monaButton look="primary" rounded="large">Share</button>
+                    <button monaButton [selected]="true" rounded="large">Pinned</button>
+                    <button monaButton [disabled]="true" rounded="large">Unavailable</button>
+                </div>
+            </article>
+
+            <article class="luna-cluster">
+                <span class="luna-label">Fields</span>
+                <div class="grid gap-2 sm:grid-cols-2">
+                    <label>
+                        <span class="sr-only">Search workspace</span>
+                        <mona-text-box placeholder="Search workspace" rounded="large"></mona-text-box>
+                    </label>
+                    <label>
+                        <span class="sr-only">Invalid document title</span>
+                        <mona-text-box value="Untitled note" [invalid]="true" rounded="large"></mona-text-box>
+                    </label>
+                    <label>
+                        <span class="sr-only">Read-only author</span>
+                        <mona-text-box value="Team workspace" [readonly]="true" rounded="large"></mona-text-box>
+                    </label>
+                    <label>
+                        <span class="sr-only">Offline workspace</span>
+                        <mona-text-box value="Offline" [disabled]="true" rounded="large"></mona-text-box>
+                    </label>
+                </div>
+            </article>
+
+            <article class="luna-cluster">
+                <span class="luna-label">Preferences</span>
+                <div class="flex flex-wrap items-center gap-5">
+                    <mona-check-box label="Show backlinks" [checked]="true" rounded="large"></mona-check-box>
+                    <mona-check-box label="Compact toolbar" rounded="large"></mona-check-box>
+                    <mona-check-box label="Managed setting" [disabled]="true" rounded="large"></mona-check-box>
+                </div>
+            </article>
+
+            <article class="luna-cluster">
+                <label class="luna-label" for="luna-intensity">Panel transparency · {{ sliderValue() }}</label>
+                <mona-slider
+                    id="luna-intensity"
+                    aria-label="Panel transparency"
+                    class="w-full"
+                    rounded="full"
+                    [(value)]="sliderValue"></mona-slider>
+            </article>
+        </div>
+    </section>
+
+    <section class="luna-stage" aria-labelledby="navigation-title">
+        <div class="luna-section-heading">
+            <p>Navigation and planning</p>
+            <h2 id="navigation-title">Raised only when useful</h2>
+        </div>
+
+        <mona-menubar rounded="large">
+            <mona-menu text="File">
+                <mona-menu-item label="New document"></mona-menu-item>
+                <mona-menu-item label="Open workspace"></mona-menu-item>
+                <mona-menu-separator></mona-menu-separator>
+                <mona-menu-item label="Move to archive"></mona-menu-item>
+            </mona-menu>
+            <mona-menu text="Edit">
+                <mona-menu-item label="Copy link"></mona-menu-item>
+                <mona-menu-item label="Find in document"></mona-menu-item>
+            </mona-menu>
+            <mona-menu text="View">
+                <mona-menu-item label="Show details"></mona-menu-item>
+            </mona-menu>
+        </mona-menubar>
+
+        <div class="luna-feature-grid">
+            <mona-tabs rounded="large" class="min-w-0">
+                <mona-tab title="Document" [selected]="true">
+                    <ng-template monaTabContentTemplate>
+                        <div class="luna-tab-panel">
+                            <span class="luna-label">Current document</span>
+                            <strong>Launch notes</strong>
+                            <p>The tab content stays opaque while the navigation rail retains its glass material.</p>
+                        </div>
+                    </ng-template>
+                </mona-tab>
+                <mona-tab title="Details">
+                    <ng-template monaTabContentTemplate>
+                        <div class="luna-tab-panel">Updated today · Shared with the product team</div>
+                    </ng-template>
+                </mona-tab>
+            </mona-tabs>
+
+            <mona-calendar rounded="large" [(value)]="calendarValue"></mona-calendar>
+        </div>
+    </section>
+
+    <section class="luna-overlay-field" aria-labelledby="overlay-title">
+        <div class="luna-overlay-document" aria-hidden="true"></div>
+        <div class="luna-overlay-ribbon" aria-hidden="true"></div>
+        <article class="luna-overlay-specimen">
+            <span class="luna-label">Temporary surface</span>
+            <h2 id="overlay-title">Glass should reveal context, not compete with it.</h2>
+            <p>
+                Menus, popups, notifications, dialogs, and windows use this same neutral overlay material over any
+                content color.
+            </p>
+            <div class="flex flex-wrap gap-2">
+                <button monaButton look="primary" rounded="large" (click)="dialogVisible.set(true)">Open dialog</button>
+                <button monaButton rounded="large" (click)="windowVisible.set(true)">Open window</button>
+            </div>
+        </article>
+    </section>
+
+    @if (dialogVisible()) {
+        <mona-dialog
+            title="Move document?"
+            description="Choose whether this note should move to the shared workspace."
+            text="The document stays available from its current links after it is moved."
+            type="confirm"
+            rounded="large"
+            [draggable]="true"
+            [actions]="[
+                { text: 'Cancel', look: 'default' },
+                { text: 'Move', look: 'primary' }
+            ]"
+            (action)="dialogVisible.set(false)"
+            (close)="dialogVisible.set(false)"></mona-dialog>
+    }
+
+    @if (windowVisible()) {
+        <mona-window
+            title="Document details"
+            rounded="large"
+            [width]="430"
+            [height]="250"
+            [modal]="true"
+            [draggable]="true"
+            [minimizable]="false"
+            [maximizable]="false"
+            [resizable]="false"
+            (close)="windowVisible.set(false)">
+            <ng-template monaWindowContentTemplate>
+                <div class="grid h-full gap-4 bg-surface p-5">
+                    <span class="luna-label">Opaque content inside glass chrome</span>
+                    <p class="m-0 leading-6 text-muted-foreground">
+                        Dense information remains readable while the surrounding window keeps the neutral overlay
+                        treatment.
+                    </p>
+                    <div class="flex justify-end">
+                        <button monaButton look="primary" rounded="large" (click)="windowVisible.set(false)">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </ng-template>
+        </mona-window>
+    }
+</main>

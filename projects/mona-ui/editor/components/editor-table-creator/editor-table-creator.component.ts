@@ -1,5 +1,4 @@
 import { Component, computed, inject, output } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { EditorTableInsertEvent } from "../../models/EditorTableInsertEvent";
 import { editorTableCreatorCellThemeVariants, editorTableCreatorThemeVariants } from "../../styles/editor.styles";
 
@@ -8,15 +7,12 @@ import { editorTableCreatorCellThemeVariants, editorTableCreatorThemeVariants } 
     templateUrl: "./editor-table-creator.component.html"
 })
 export class EditorTableCreatorComponent {
-    readonly #themeService = inject(ThemeService);
     protected highlightedCell: { row: number; col: number } = { row: 0, col: 0 };
     protected readonly tableCreatorCellClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return editorTableCreatorCellThemeVariants(theme)();
+        return editorTableCreatorCellThemeVariants();
     });
     protected readonly tableCreatorClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return editorTableCreatorThemeVariants(theme)();
+        return editorTableCreatorThemeVariants();
     });
     public readonly insert = output<EditorTableInsertEvent>();
 

@@ -17,7 +17,6 @@ import {
 import { takeUntilDestroyed, toObservable, toSignal } from "@angular/core/rxjs-interop";
 import { ScrollDirection } from "@nanahoshi/mona-ui/common";
 import { toCssValue } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { select } from "@mirei/ts-collections";
 import {
     asyncScheduler,
@@ -153,7 +152,6 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         }
     );
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #themeService = inject(ThemeService);
     #resizeObserver: ResizeObserver | null = null;
     #scroll$ = new Subject<void>();
     #scrollMouseUpHandler = () => this.onPagerScrollEnd();
@@ -163,15 +161,13 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return typeof animate === "boolean" ? (animate ? 500 : 0) : animate;
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        const variantClass = scrollViewBaseThemeVariants(theme)({ rounded });
+        const variantClass = scrollViewBaseThemeVariants({ rounded });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly contentClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return scrollViewContentThemeVariants(theme)();
+        return scrollViewContentThemeVariants();
     });
     protected readonly contentTemplate = contentChild(TemplateRef);
     protected readonly enterAnimation = computed(() => {
@@ -182,37 +178,30 @@ export class ScrollViewComponent implements ScrollViewVariantInput {
         return this.#directionFromIndex() === "right" ? "slide-out-to-left" : "slide-out-to-right";
     });
     protected readonly leftArrowClass = computed(() => {
-        const theme = this.#themeService.theme();
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== 0);
-        return scrollViewArrowThemeVariants(theme)({ left: true, hidden });
+        return scrollViewArrowThemeVariants({ left: true, hidden });
     });
     protected readonly listClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return scrollViewListThemeVariants(theme)();
+        return scrollViewListThemeVariants();
     });
     protected readonly pagerArrowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return scrollViewPagerArrowThemeVariants(theme)();
+        return scrollViewPagerArrowThemeVariants();
     });
     protected readonly pagerArrowVisible = signal(true);
     protected readonly pagerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const pagerOverlay = this.pagerOverlay();
-        return scrollViewPagerThemeVariants(theme)({ pagerOverlay });
+        return scrollViewPagerThemeVariants({ pagerOverlay });
     });
     protected readonly pagerListClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return scrollViewPagerListThemeVariants(theme)();
+        return scrollViewPagerListThemeVariants();
     });
     protected readonly pagerListContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return scrollViewPagerListContainerThemeVariants(theme)();
+        return scrollViewPagerListContainerThemeVariants();
     });
     protected readonly pagerListElementRef = viewChild<ElementRef<HTMLUListElement>>("pagerListElement");
     protected readonly rightArrowClass = computed(() => {
-        const theme = this.#themeService.theme();
         const hidden = !this.arrows() || !(this.infinite() || this.index() !== this.itemCount() - 1);
-        return scrollViewArrowThemeVariants(theme)({ right: true, hidden });
+        return scrollViewArrowThemeVariants({ right: true, hidden });
     });
     protected readonly scrollViewHeight = computed(() => {
         const height = this.height();

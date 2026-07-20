@@ -2,7 +2,6 @@ import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { DropdownListComponent } from "@nanahoshi/mona-ui/dropdown-list";
 import { DropdownItemTemplateDirective } from "@nanahoshi/mona-ui/dropdowns";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { HeadingsDropdownListDataItem, HeadingType } from "../../models/HeadingsDropdownListDataItem";
 import { EditorService } from "../../services/editor.service";
 import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.styles";
@@ -14,11 +13,9 @@ import { editorHeadingsDropdownListThemeVariants } from "../../styles/editor.sty
 })
 export class EditorHeadingsComponent {
     readonly #editorService: EditorService = inject(EditorService);
-    readonly #themeService = inject(ThemeService);
     protected readonly HeadingType = HeadingType;
     protected readonly dropdownListClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return editorHeadingsDropdownListThemeVariants(theme)();
+        return editorHeadingsDropdownListThemeVariants();
     });
     protected readonly headingsDropdownListData = [
         { text: "Paragraph", value: HeadingType.Paragraph },

@@ -1,110 +1,149 @@
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { cva } from "class-variance-authority";
+import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
-import {
-    windowBaseVariants as monaWindowBaseVariants,
-    windowContentContainerVariants as monaWindowContentContainerVariants,
-    windowContentVariants as monaWindowContentVariants,
-    windowResizerVariants as monaWindowResizerVariants,
-    windowTitleBarActionVariants as monaWindowTitleBarActionVariants,
-    windowTitleBarVariants as monaWindowTitleBarVariants,
-    windowTitleContainerVariants as monaWindowTitleContainerVariants,
-    windowTitleVariants as monaWindowTitleVariants
-} from "./window.mona.styles";
 
-export const windowBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowBaseVariants;
-        default:
-            return monaWindowBaseVariants;
+export const windowBaseThemeVariants = cva(
+    `
+        flex h-full w-full flex-col
+        ${themeOverlaySurfaceClasses} text-foreground
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium"
+        }
     }
-};
+);
 
-export const windowContentContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowContentContainerVariants;
-        default:
-            return monaWindowContentContainerVariants;
+export const windowContentContainerThemeVariants = cva(
+    `
+        relative flex h-full w-full flex-col
+        border border-border
+        shadow-(--shadow-overlay)
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg"
+            }
+        }
     }
-};
+);
 
-export const windowContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowContentVariants;
-        default:
-            return monaWindowContentVariants;
+export const windowContentThemeVariants = cva(
+    `
+        flex-1 overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+    `
+);
+
+export const windowResizerThemeVariants = cva(
+    `
+        absolute flex
+    `,
+    {
+        variants: {
+            position: {
+                east: "top-0 bottom-0 -right-0.5 w-2 cursor-ew-resize",
+                north: "left-0 right-0 -top-0.5 h-2 cursor-ns-resize",
+                south: "left-0 right-0 -bottom-0.5 h-2 cursor-ns-resize",
+                west: "top-0 bottom-0 -left-0.5 w-2 cursor-ew-resize",
+                northeast: "-top-0.5 -right-0.5 w-2 h-2 cursor-nesw-resize",
+                northwest: "-top-0.5 -left-0.5 w-2 h-2 cursor-nwse-resize",
+                southeast: "-bottom-0.5 -right-0.5 w-2 h-2 cursor-nwse-resize",
+                southwest: "-bottom-0.5 -left-0.5 w-2 h-2 cursor-nesw-resize"
+            }
+        }
     }
-};
+);
 
-export const windowResizerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowResizerVariants;
-        default:
-            return monaWindowResizerVariants;
+export const windowTitleBarActionThemeVariants = cva(
+    `
+        flex items-center justify-evenly
+    `
+);
+
+export const windowTitleBarThemeVariants = cva(
+    `
+        flex items-center justify-start
+        overflow-hidden px-2 py-1 text-sm
+        border-b border-border-subtle
+    `,
+    {
+        variants: {
+            look: {
+                default: "bg-surface-muted text-foreground",
+                primary: "bg-primary text-primary-foreground"
+            },
+            rounded: {
+                none: "rounded-ss-none rounded-se-none",
+                small: "rounded-ss-sm rounded-se-sm",
+                medium: "rounded-ss-md rounded-se-md",
+                large: "rounded-ss-lg rounded-se-lg"
+            }
+        }
     }
-};
+);
 
-export const windowTitleBarActionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleBarActionVariants;
-        default:
-            return monaWindowTitleBarActionVariants;
+export const windowTitleContainerThemeVariants = cva(
+    `
+        flex h-full flex-1 items-center overflow-hidden
+        cursor-default select-none text-ellipsis
+    `
+);
+
+export const windowTitleThemeVariants = cva(
+    `
+        overflow-hidden text-ellipsis whitespace-nowrap font-semibold
+    `,
+    {
+        variants: {
+            look: {
+                default: "text-foreground",
+                primary: "text-primary-foreground"
+            }
+        }
     }
-};
+);
 
-export const windowTitleBarThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleBarVariants;
-        default:
-            return monaWindowTitleBarVariants;
-    }
-};
+type WindowBaseVariantProps = VariantProps<typeof windowBaseThemeVariants>;
 
-export const windowTitleContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleContainerVariants;
-        default:
-            return monaWindowTitleContainerVariants;
-    }
-};
-
-export const windowTitleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaWindowTitleVariants;
-        default:
-            return monaWindowTitleVariants;
-    }
-};
-
-type WindowBaseVariantProps = VariantProps<ReturnType<typeof windowBaseThemeVariants>>;
 type WindowBaseVariantInput = VariantInputs<WindowBaseVariantProps>;
 
-type WindowContentContainerVariantProps = VariantProps<ReturnType<typeof windowContentContainerThemeVariants>>;
+type WindowContentContainerVariantProps = VariantProps<typeof windowContentContainerThemeVariants>;
+
 type WindowContentContainerVariantInput = VariantInputs<WindowContentContainerVariantProps>;
 
-type WindowContentVariantProps = VariantProps<ReturnType<typeof windowContentThemeVariants>>;
+type WindowContentVariantProps = VariantProps<typeof windowContentThemeVariants>;
 
-export type WindowResizerVariantProps = VariantProps<ReturnType<typeof windowResizerThemeVariants>>;
+export type WindowResizerVariantProps = VariantProps<typeof windowResizerThemeVariants>;
+
 type WindowResizerVariantInput = VariantInputs<WindowResizerVariantProps>;
 
-type WindowTitleBarActionVariantProps = VariantProps<ReturnType<typeof windowTitleBarActionThemeVariants>>;
+type WindowTitleBarActionVariantProps = VariantProps<typeof windowTitleBarActionThemeVariants>;
+
 type WindowTitleBarActionVariantInput = VariantInputs<WindowTitleBarActionVariantProps>;
 
-type WindowTitleBarVariantProps = VariantProps<ReturnType<typeof windowTitleBarThemeVariants>>;
+type WindowTitleBarVariantProps = VariantProps<typeof windowTitleBarThemeVariants>;
+
 type WindowTitleBarVariantInput = VariantInputs<WindowTitleBarVariantProps>;
 
-type WindowTitleContainerVariantProps = VariantProps<ReturnType<typeof windowTitleContainerThemeVariants>>;
+type WindowTitleContainerVariantProps = VariantProps<typeof windowTitleContainerThemeVariants>;
+
 type WindowTitleContainerVariantInput = VariantInputs<WindowTitleContainerVariantProps>;
 
-type WindowTitleVariantProps = VariantProps<ReturnType<typeof windowTitleThemeVariants>>;
+type WindowTitleVariantProps = VariantProps<typeof windowTitleThemeVariants>;
+
 type WindowTitleVariantInput = VariantInputs<WindowTitleVariantProps>;
 
 export type WindowVariantProps = WindowBaseVariantProps &
@@ -115,6 +154,7 @@ export type WindowVariantProps = WindowBaseVariantProps &
     WindowTitleBarVariantProps &
     WindowTitleContainerVariantProps &
     WindowTitleVariantProps;
+
 export type WindowVariantInput = WindowBaseVariantInput &
     WindowContentContainerVariantInput &
     Omit<WindowResizerVariantInput, "position"> &

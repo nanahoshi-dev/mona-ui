@@ -15,7 +15,7 @@ import { twMerge } from "tailwind-merge";
 import { ListItem } from "../../models/ListItem";
 import { ListItemTemplateContext } from "../../models/ListItemTemplateContext";
 import { ListService } from "../../services/list.service";
-import { listGroupHeaderTextVariants, listItemBaseVariants } from "../../styles/list.styles";
+import { listGroupHeaderTextThemeVariants, listItemBaseThemeVariants } from "../../styles/list.styles";
 
 @Component({
     selector: "mona-list-item",
@@ -32,7 +32,7 @@ export class ListItemComponent<TData> {
         if (isHeader) {
             return ``;
         }
-        return listItemBaseVariants();
+        return listItemBaseThemeVariants();
     });
     protected readonly checkboxes = computed(() => {
         return this.listService.selectableOptions().checkboxes && !this.isHeader();
@@ -55,7 +55,7 @@ export class ListItemComponent<TData> {
         const isHeader = this.isHeader();
         if (isHeader) {
             const hasTemplate = this.template() != null;
-            const classes = listGroupHeaderTextVariants({ hasTemplate });
+            const classes = listGroupHeaderTextThemeVariants({ hasTemplate });
             return twMerge(classes);
         }
         return ``; // TODO

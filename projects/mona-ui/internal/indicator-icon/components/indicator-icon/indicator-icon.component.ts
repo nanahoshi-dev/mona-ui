@@ -11,7 +11,6 @@ import {
     viewChild
 } from "@angular/core";
 import { LucideChevronDown, LucideDynamicIcon, type LucideIconInput, LucideLoader, LucideX } from "@lucide/angular";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { indicatorIconHostThemeVariants, indicatorIconSvgThemeVariants } from "../../styles/indicator-icon.styles";
 
@@ -34,19 +33,15 @@ export type IndicatorIconPreset = "clear" | "dropdown" | "loading";
     }
 })
 export class IndicatorIconComponent {
-    readonly #themeService = inject(ThemeService);
-
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const interactive = this.interactive();
         const preset = this.preset();
-        return twMerge(indicatorIconHostThemeVariants(theme)({ interactive, preset }), this.userClass());
+        return twMerge(indicatorIconHostThemeVariants({ interactive, preset }), this.userClass());
     });
     protected readonly hasProjectedContent = signal(false);
     protected readonly iconClass = computed(() => {
-        const theme = this.#themeService.theme();
         const loading = this.preset() === "loading";
-        return indicatorIconSvgThemeVariants(theme)({ loading });
+        return indicatorIconSvgThemeVariants({ loading });
     });
     protected readonly iconToRender = computed<LucideIconInput | null>(() => {
         switch (this.preset()) {

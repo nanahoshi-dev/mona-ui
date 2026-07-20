@@ -1,34 +1,72 @@
+import { cva } from "class-variance-authority";
 import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
 import { VariantProps } from "class-variance-authority";
-import {
-    listBoxBaseVariants as monaListBoxBaseVariants,
-    listBoxToolbarVariants as monaListBoxToolbarVariants
-} from "./list-box.mona.styles";
 
-export const listBoxBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaListBoxBaseVariants;
-        default:
-            return monaListBoxBaseVariants;
+export const listBoxBaseThemeVariants = cva(
+    `
+        flex gap-1
+        [&_mona-list-view]:w-full
+    `,
+    {
+        variants: {
+            direction: {
+                horizontal: "flex-row",
+                vertical: "flex-col"
+            },
+            reversed: {
+                true: "",
+                false: ""
+            },
+            rounded: {
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                none: "rounded-none"
+            },
+            size: {
+                small: "text-sm",
+                medium: "text-base",
+                large: "text-lg"
+            }
+        },
+        compoundVariants: [
+            {
+                direction: "horizontal",
+                reversed: true,
+                class: "flex-row-reverse"
+            },
+            {
+                direction: "vertical",
+                reversed: true,
+                class: "flex-col-reverse"
+            }
+        ]
     }
-};
+);
 
-export const listBoxToolbarThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaListBoxToolbarVariants;
-        default:
-            return monaListBoxToolbarVariants;
+export const listBoxToolbarThemeVariants = cva(
+    `
+        flex gap-1
+        items-center justify-center
+    `,
+    {
+        variants: {
+            direction: {
+                horizontal: "flex-row",
+                vertical: "flex-col"
+            }
+        }
     }
-};
+);
 
-type ListBoxBaseVariantProps = VariantProps<ReturnType<typeof listBoxBaseThemeVariants>>;
+type ListBoxBaseVariantProps = VariantProps<typeof listBoxBaseThemeVariants>;
+
 type ListBoxBaseVariantInputs = Omit<VariantInputs<ListBoxBaseVariantProps>, "direction" | "reversed">;
 
-type ListBoxToolbarVariantProps = VariantProps<ReturnType<typeof listBoxToolbarThemeVariants>>;
+type ListBoxToolbarVariantProps = VariantProps<typeof listBoxToolbarThemeVariants>;
+
 type ListBoxToolbarVariantInputs = Omit<VariantInputs<ListBoxToolbarVariantProps>, "direction">;
 
 export type ListBoxVariantProps = ListBoxBaseVariantProps & ListBoxToolbarVariantProps;
+
 export type ListBoxVariantInputs = ListBoxBaseVariantInputs & ListBoxToolbarVariantInputs;

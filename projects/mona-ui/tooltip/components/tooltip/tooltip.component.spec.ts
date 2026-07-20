@@ -6,7 +6,7 @@ import { PopupService } from "@nanahoshi/mona-ui/popup";
 import { Observable, Subject } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Position } from "../../../common/models/Position";
-import { TooltipVariantProps } from "../../styles/tooltip.styles";
+import { TooltipVariantProps, tooltipArrowThemeVariants, tooltipBaseThemeVariants } from "../../styles/tooltip.styles";
 import { TooltipComponent } from "./tooltip.component";
 
 // =============================================================================
@@ -98,6 +98,23 @@ function dispatchFocusOut(element: HTMLElement): void {
 
 let mockClosedSubject: Subject<void>;
 let mockOpenedSubject: Subject<void>;
+
+describe("Tooltip visual contract", () => {
+    it("uses the semantic overlay surface for both body and arrow", () => {
+        const tooltipClasses = tooltipBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const arrowClasses = tooltipArrowThemeVariants().split(/\s+/);
+
+        expect(tooltipClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
+        expect(tooltipClasses).toContain("text-foreground");
+        expect(tooltipClasses).toContain("border-border");
+        expect(arrowClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
+        expect(arrowClasses).toContain("border-border");
+    });
+});
 let mockPositionSubject: Subject<ConnectionPositionPair>;
 let mockPopupRef: {
     close: ReturnType<typeof vi.fn>;

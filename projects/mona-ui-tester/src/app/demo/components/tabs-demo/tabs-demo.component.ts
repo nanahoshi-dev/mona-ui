@@ -1,5 +1,6 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
+import { Component, computed, inject, input, signal } from "@angular/core";
+import { range } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     TabCloseEvent,
@@ -9,7 +10,6 @@ import {
     TabSelectEvent
 } from "@nanahoshi/mona-ui/tabs";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { range } from "@mirei/ts-collections";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -73,10 +73,10 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
-            class="w-full max-w-90">
+            class="w-92 items-center">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
-                    <div class="p-4 flex flex-col gap-3">
+                    <div class="p-4 flex flex-col gap-3 bg-surface-muted">
                         <div class="p-4 flex flex-col gap-1 items-center justify-center">
                             <h1 class="text-lg font-extrabold">Create an account</h1>
                             <span class="text-sm">Enter your email below to create your account.</span>
@@ -98,7 +98,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             </mona-tab>
             <mona-tab title="Login">
                 <ng-template monaTabContentTemplate>
-                    <div class="p-4 pt-8 flex flex-col gap-3">
+                    <div class="p-4 pt-8 flex flex-col gap-3 bg-surface-muted">
                         <div class="flex flex-col gap-1 items-center justify-center">
                             <h1 class="text-lg font-extrabold">Login</h1>
                         </div>
@@ -122,11 +122,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                 </mona-tab>
             }
         </mona-tabs>
-    `,
-    changeDetection: ChangeDetectionStrategy.Eager,
-    host: {
-        class: "w-full flex items-center justify-center"
-    }
+    `
 })
 export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;

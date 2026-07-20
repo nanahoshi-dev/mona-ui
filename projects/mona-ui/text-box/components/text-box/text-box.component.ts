@@ -17,7 +17,6 @@ import { type FormValueControl } from "@angular/forms/signals";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { rxTimeout } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { AttributeBinderDirective, AttributeConfig } from "@nanahoshi/mona-ui/internal";
 import { TextBoxPrefixTemplateDirective } from "../../directives/text-box-prefix-template.directive";
@@ -39,12 +38,10 @@ import { textBoxThemeVariants, TextBoxVariantInput, TextBoxVariantProps } from "
 })
 export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<string> {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const classes = textBoxThemeVariants(theme)({ rounded, size });
+        const classes = textBoxThemeVariants({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });

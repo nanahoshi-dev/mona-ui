@@ -1,68 +1,161 @@
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { cva } from "class-variance-authority";
+import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
-import {
-    radioButtonCircleVariants as monaRadioButtonCircleVariants,
-    radioButtonContainerLabelVariants as monaRadioButtonContainerLabelVariants,
-    radioButtonDirectiveVariants,
-    radioButtonIndicatorVariants as monaRadioButtonIndicatorVariants,
-    radioButtonVariants as monaRadioButtonVariants
-} from "./radio.mona.styles";
 
-export const radioButtonThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonVariants;
-        default:
-            return monaRadioButtonVariants; // Default to Mona styles
+export const radioButtonThemeVariants = cva(
+    `
+        peer absolute inset-0 z-10 h-full w-full
+        cursor-pointer appearance-none opacity-0
+        outline-none
+        disabled:cursor-not-allowed
+    `
+);
+
+export const radioButtonCircleThemeVariants = cva(
+    `
+        relative flex h-4.5 w-4.5 items-center justify-center
+        cursor-pointer overflow-hidden
+        ${themeControlSurfaceClasses}
+        border border-input-border
+        transition-colors duration-(--mona-motion-fast)
+
+        peer-disabled:cursor-not-allowed
+        peer-disabled:border-disabled-border peer-disabled:bg-disabled-background peer-disabled:text-disabled-foreground
+
+        peer-focus-visible:border-focus-indicator
+        peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
+
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:peer-focus-visible:border-error
+        data-[invalid='true']:peer-focus-visible:ring-error/35
+    `,
+    {
+        variants: {
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-lg",
+                medium: "rounded-md",
+                none: "rounded-none",
+                small: "rounded-sm"
+            }
+        }
     }
-};
+);
 
-export const radioButtonCircleThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonCircleVariants;
-        default:
-            return monaRadioButtonCircleVariants; // Default to Mona styles
+export const radioButtonIndicatorThemeVariants = cva(
+    `
+        flex h-3 w-3
+        bg-primary
+        transition-all duration-(--mona-motion-fast)
+    `,
+    {
+        variants: {
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-lg",
+                medium: "rounded-md",
+                none: "rounded-none",
+                small: "rounded-sm"
+            }
+        }
     }
-};
+);
 
-export const radioButtonIndicatorThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonIndicatorVariants;
-        default:
-            return monaRadioButtonIndicatorVariants; // Default to Mona styles
+export const radioButtonContainerLabelThemeVariants = cva(
+    `
+        relative flex h-full w-full items-center justify-center gap-1
+        cursor-pointer
+        data-[disabled='true']:pointer-events-none
+        data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:text-disabled-foreground
+    `,
+    {
+        variants: {
+            labelSize: {
+                small: "text-sm",
+                medium: "text-base",
+                large: "text-lg"
+            }
+        },
+        defaultVariants: {
+            labelSize: "medium"
+        }
     }
-};
+);
 
-export const radioButtonContainerLabelThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaRadioButtonContainerLabelVariants;
-        default:
-            return monaRadioButtonContainerLabelVariants; // Default to Mona styles
+export const radioButtonDirectiveThemeVariants = cva(
+    `
+        relative flex h-4.5 w-4.5 items-center justify-center place-content-center
+        cursor-pointer appearance-none
+        ${themeControlSurfaceClasses}
+        border border-input-border
+        outline-none
+
+        disabled:pointer-events-none disabled:cursor-not-allowed
+        disabled:border-disabled-border disabled:bg-disabled-background disabled:text-disabled-foreground
+
+        after:inline-grid
+        after:h-3 after:w-3
+        after:place-content-center
+        after:content-['']
+
+        checked:after:bg-primary
+        checked:after:rounded-full
+
+        focus-visible:border-focus-indicator
+        focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+
+        [&.ng-touched.ng-invalid]:border-error
+        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
+        [&.ng-touched.ng-invalid]:focus-visible:border-error
+        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
+    `,
+    {
+        variants: {
+            rounded: {
+                full: "rounded-full",
+                large: "rounded-lg",
+                medium: "rounded-md",
+                none: "rounded-none",
+                small: "rounded-sm"
+            }
+        },
+        compoundVariants: [
+            {
+                rounded: "full",
+                class: "checked:after:rounded-full"
+            },
+            {
+                rounded: "large",
+                class: "checked:after:rounded-lg"
+            },
+            {
+                rounded: "medium",
+                class: "checked:after:rounded-md"
+            },
+            {
+                rounded: "none",
+                class: "checked:after:rounded-none"
+            },
+            {
+                rounded: "small",
+                class: "checked:after:rounded-sm"
+            }
+        ]
     }
-};
+);
 
-export const radioButtonDirectiveThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return radioButtonDirectiveVariants;
-        default:
-            return radioButtonDirectiveVariants; // Default to Mona styles
-    }
-};
+export type RadioButtonContainerLabelVariantProps = VariantProps<typeof radioButtonContainerLabelThemeVariants>;
 
-export type RadioButtonContainerLabelVariantProps = VariantProps<
-    ReturnType<typeof radioButtonContainerLabelThemeVariants>
->;
 export type RadioButtonContainerLabelVariantInput = VariantInputs<RadioButtonContainerLabelVariantProps>;
 
-export type RadioButtonCircleVariantProps = VariantProps<ReturnType<typeof radioButtonCircleThemeVariants>>;
+export type RadioButtonCircleVariantProps = VariantProps<typeof radioButtonCircleThemeVariants>;
+
 export type RadioButtonCircleVariantInput = VariantInputs<RadioButtonCircleVariantProps>;
 
-export type RadioButtonIndicatorVariantProps = VariantProps<ReturnType<typeof radioButtonIndicatorThemeVariants>>;
+export type RadioButtonIndicatorVariantProps = VariantProps<typeof radioButtonIndicatorThemeVariants>;
+
 export type RadioButtonIndicatorVariantInput = VariantInputs<RadioButtonIndicatorVariantProps>;
 
 export type RadioButtonVariantProps = RadioButtonContainerLabelVariantProps &
@@ -73,5 +166,6 @@ export type RadioButtonVariantInput = RadioButtonContainerLabelVariantInput &
     RadioButtonCircleVariantInput &
     RadioButtonIndicatorVariantInput;
 
-export type RadioButtonDirectiveProps = VariantProps<ReturnType<typeof radioButtonDirectiveThemeVariants>>;
+export type RadioButtonDirectiveProps = VariantProps<typeof radioButtonDirectiveThemeVariants>;
+
 export type RadioButtonDirectiveInput = VariantInputs<RadioButtonDirectiveProps>;

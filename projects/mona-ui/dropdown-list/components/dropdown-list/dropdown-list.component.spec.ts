@@ -60,6 +60,53 @@ describe("DropdownListComponent", () => {
         expect(fixture.componentInstance).toBeTruthy();
     });
 
+    it("uses a neutral input shell and keeps invalid focus precedence", async () => {
+        const fixture = await createSignalFormFixture();
+        const host = getHost(fixture);
+
+        expect(
+            host.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
+        expect(host.classList.contains("border-input-border")).toBe(true);
+        expect(host.classList.contains("hover:bg-hover")).toBe(true);
+        expect(host.classList.contains("active:bg-active")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("hover:bg-accent")).toBe(false);
+    });
+
+    it("uses an overlay popup and neutral persistent option selection", async () => {
+        const fixture = await createSignalFormFixture();
+        await openPopup(fixture);
+
+        const selectedOption = getOption("Banana");
+        const popup = selectedOption.closest("mona-list")?.parentElement as HTMLElement;
+
+        expect(popup).not.toBeNull();
+        expect(popup.classList.contains("border-border")).toBe(true);
+        expect(popup.classList.contains("shadow-(--shadow-overlay)")).toBe(true);
+        expect(
+            popup.classList.contains(
+                "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+            )
+        ).toBe(true);
+        expect(
+            popup.classList.contains(
+                "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+            )
+        ).toBe(false);
+        expect(
+            popup.classList.contains(
+                "[&_mona-list]:[background-color:var(--mona-dropdown-popup-list-background,var(--mona-list-background))]!"
+            )
+        ).toBe(true);
+        expect(selectedOption.classList.contains("bg-(--color-selected)")).toBe(true);
+        expect(selectedOption.classList.contains("text-(--color-selected-foreground)")).toBe(true);
+        expect(selectedOption.classList.contains("bg-primary")).toBe(false);
+        expect(selectedOption.classList.contains("bg-accent-hover")).toBe(false);
+    });
+
     it("hydrates the rendered selection from a signal form primitive valueField value", async () => {
         const fixture = await createSignalFormFixture();
 
@@ -97,6 +144,10 @@ describe("DropdownListComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-disabled")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
+        expect(getHost(fixture).classList.contains("bg-disabled-background")).toBe(true);
+        expect(getHost(fixture).classList.contains("border-disabled-border")).toBe(true);
+        expect(getHost(fixture).classList.contains("text-disabled-foreground")).toBe(true);
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe(2);
     });
@@ -110,6 +161,7 @@ describe("DropdownListComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-readonly")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-readonly")).toBe("true");
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe(2);
     });
@@ -154,6 +206,7 @@ describe("DropdownListComponent", () => {
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).getAttribute("aria-required")).toBe("true");
         expect(getHost(fixture).className).toContain("border-error");
+        expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
 
     it("does not report a required field as invalid when a falsy primitive value is selected", async () => {

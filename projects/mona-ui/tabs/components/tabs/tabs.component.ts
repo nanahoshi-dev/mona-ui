@@ -11,7 +11,6 @@ import {
     viewChild
 } from "@angular/core";
 import { ImmutableSet, select } from "@mirei/ts-collections";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
@@ -35,19 +34,16 @@ import { TabComponent } from "../tab/tab.component";
     }
 })
 export class TabsComponent implements TabsVariantInput {
-    readonly #themeService = inject(ThemeService);
     private readonly tabListComponent = viewChild.required(TabListComponent);
     private readonly tabs = contentChildren(TabComponent);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        const variantClass = tabsBaseThemeVariants(theme)();
+        const variantClass = tabsBaseThemeVariants();
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly contentClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        return tabContentThemeVariants(theme)({ rounded });
+        return tabContentThemeVariants({ rounded });
     });
     protected readonly selectedTabId = linkedSignal<ImmutableSet<TabItem>, string | null>({
         source: () => this.tabList(),

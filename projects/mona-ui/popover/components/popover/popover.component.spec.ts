@@ -9,6 +9,7 @@ import { PopoverTitleTemplateDirective } from "../../directives/popover-title-te
 import { PopoverHideEvent } from "../../models/PopoverHideEvent";
 import { PopoverShowEvent } from "../../models/PopoverShowEvent";
 import { PopoverTrigger } from "../../models/PopoverTrigger";
+import { popoverArrowThemeVariants, popoverBaseThemeVariants } from "../../styles/popover.styles";
 
 import { PopoverComponent } from "./popover.component";
 
@@ -94,6 +95,24 @@ let mockPopupRef: {
     beforeClose: Observable<PopupCloseEvent>;
 };
 let mockPopupService: { create: ReturnType<typeof vi.fn> };
+
+describe("Popover visual contract", () => {
+    it("keeps the overlay and its arrow on the same surface tier", () => {
+        const popoverClasses = popoverBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const arrowClasses = popoverArrowThemeVariants().split(/\s+/);
+
+        expect(popoverClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
+        expect(popoverClasses).toContain("border-border");
+        expect(popoverClasses).toContain("shadow-(--shadow-overlay)");
+        expect(arrowClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
+        expect(arrowClasses).toContain("border-border");
+        expect(arrowClasses).not.toContain("bg-primary");
+    });
+});
 
 /**
  * Mirrors PopupReference.close(): emits on beforeClose first, and only

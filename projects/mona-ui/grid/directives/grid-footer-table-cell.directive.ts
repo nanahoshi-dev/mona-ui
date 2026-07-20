@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { Column } from "../models/Column";
 import { gridFooterTableCellThemeVariants } from "../styles/grid.styles";
 
@@ -12,10 +11,8 @@ import { gridFooterTableCellThemeVariants } from "../styles/grid.styles";
     }
 })
 export class GridFooterTableCellDirective {
-    readonly #themeService = inject(ThemeService);
     protected readonly className = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterTableCellThemeVariants(theme)();
+        return gridFooterTableCellThemeVariants();
     });
     protected readonly minWidth = computed(() => this.footerColumn()?.minWidth ?? this.footerCellMinWidth());
     protected readonly width = computed(() => this.footerColumn()?.calculatedWidth ?? this.footerCellWidth());

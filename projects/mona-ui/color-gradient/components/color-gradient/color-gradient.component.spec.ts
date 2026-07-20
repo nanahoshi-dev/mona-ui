@@ -84,6 +84,33 @@ describe("ColorGradientComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("uses a dual-contrast handle and semantic keyboard focus over arbitrary hues", () => {
+        const handle = getHsvHandle(fixture);
+        const rectangle = handle.parentElement as HTMLElement;
+
+        expect(rectangle.classList.contains("border-border-subtle")).toBe(true);
+        expect(handle.classList.contains("border-black/90")).toBe(true);
+        expect(handle.classList.contains("outline-white/90")).toBe(true);
+        expect(handle.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(handle.classList.contains("focus-visible:ring-primary/40")).toBe(false);
+    });
+
+    it("uses a neutral input-relative background for channel prefixes", () => {
+        const prefixLabels = new Set(["R", "G", "B", "A", "HEX"]);
+        const prefixes = Array.from(fixture.nativeElement.querySelectorAll("span") as NodeListOf<HTMLSpanElement>).filter(
+            element => element.classList.contains("w-7.5") && prefixLabels.has(element.textContent?.trim() ?? "")
+        );
+
+        expect(prefixes).toHaveLength(5);
+        for (const prefix of prefixes) {
+            expect(prefix.classList).toContain(
+                "[background-color:var(--mona-input-addon-background,var(--color-secondary))]"
+            );
+            expect(prefix.classList).toContain("text-foreground");
+            expect(prefix.classList).not.toContain("bg-secondary");
+        }
+    });
+
     it("does not throw when the hsv rectangle click updates after render", async () => {
         await waitForStable(fixture);
 

@@ -16,7 +16,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideBadgeInfo, LucideCircleCheckBig, LucideOctagonAlert, LucideOctagonX, LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ProgressBarComponent } from "@nanahoshi/mona-ui/progress-bar";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asyncScheduler, interval, takeWhile } from "rxjs";
 import { NotificationData } from "../../models/NotificationData";
 import {
@@ -55,23 +54,18 @@ export class NotificationComponent {
     readonly #document = inject(DOCUMENT);
     readonly #isUrgent = computed(() => this.type() === "error" || this.type() === "warning");
     readonly #paused = signal(false);
-    readonly #themeService = inject(ThemeService);
     protected readonly actionClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return notificationActionThemeVariants(theme)();
+        return notificationActionThemeVariants();
     });
     protected readonly ariaLive = computed(() => (this.#isUrgent() ? "assertive" : "polite"));
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return notificationBaseThemeVariants(theme)();
+        return notificationBaseThemeVariants();
     });
     protected readonly bodyClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return notificationBodyThemeVariants(theme)();
+        return notificationBodyThemeVariants();
     });
     protected readonly contentClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return notificationContentThemeVariants(theme)();
+        return notificationContentThemeVariants();
     });
     protected readonly contentComponent = computed(() => {
         const content = this.data().options.content;
@@ -83,13 +77,11 @@ export class NotificationComponent {
     });
     protected readonly contentHost = viewChild<unknown, ViewContainerRef>("contentHost", { read: ViewContainerRef });
     protected readonly headerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return notificationHeaderThemeVariants(theme)();
+        return notificationHeaderThemeVariants();
     });
     protected readonly iconClass = computed(() => {
-        const theme = this.#themeService.theme();
         const type = this.type();
-        return notificationIconThemeVariants(theme)({ type });
+        return notificationIconThemeVariants({ type });
     });
     protected readonly isStringContent = computed(() => typeof this.data().options.content === "string");
     protected readonly progressColor = computed(() => {
@@ -100,8 +92,7 @@ export class NotificationComponent {
     protected readonly progressValue = signal(100);
     protected readonly role = computed(() => (this.#isUrgent() ? "alert" : "status"));
     protected readonly textClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return notificationTextThemeVariants(theme)();
+        return notificationTextThemeVariants();
     });
     protected readonly type = computed(() => this.data().options.type ?? "info");
     /**

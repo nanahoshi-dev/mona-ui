@@ -59,7 +59,6 @@ import {
 } from "@nanahoshi/mona-ui/dropdowns";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { debounceTime, filter, identity, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 
@@ -108,8 +107,9 @@ import {
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
         "[class]": "baseClass()"
     }
@@ -127,27 +127,24 @@ export class AutoCompleteComponent<TData = unknown>
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
     readonly #listService = inject(ListService);
     readonly #popupRef = this.#dropdownService.popupRef;
-    readonly #themeService = inject(ThemeService);
 
     protected readonly activeDescendant = computed(() => {
         const highlightedItem = this.#listService.highlightedItem();
         return highlightedItem ? highlightedItem.uid : null;
     });
     protected readonly affixClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return autoCompleteAffixContainerThemeVariants(theme)();
+        return autoCompleteAffixContainerThemeVariants();
     });
     protected readonly autoCompleteValue = linkedSignal(() => this.value() ?? "");
     protected readonly autoCompleteValue$ = new Subject<string | null>();
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const expanded = this.expanded();
         const focused = this.#popupRef() !== null;
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = autoCompleteBaseThemeVariants(theme)({
+        const variantClass = autoCompleteBaseThemeVariants({
             disabled,
             expanded,
             focused,
@@ -169,9 +166,8 @@ export class AutoCompleteComponent<TData = unknown>
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly id = createElementControlId();
     protected readonly inputClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return autoCompleteTextInputThemeVariants(theme)({ rounded });
+        return autoCompleteTextInputThemeVariants({ rounded });
     });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
@@ -180,11 +176,10 @@ export class AutoCompleteComponent<TData = unknown>
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });

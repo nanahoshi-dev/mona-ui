@@ -120,7 +120,6 @@ describe("GridLockedCellDirective", () => {
         expect(cell.classList.contains("border-b-border")).toBe(true);
         expect(cell.classList.contains("border-l")).toBe(false);
         expect(cell.classList.contains("border-l-border")).toBe(false);
-        expect(cell.style.boxShadow).toBe("2px 0 4px 0 rgba(0, 0, 0, 0.15)");
     });
 
     it("does not remove gridline borders from the right locked boundary", () => {
@@ -130,7 +129,6 @@ describe("GridLockedCellDirective", () => {
         expect(cell.classList.contains("border-r-border")).toBe(true);
         expect(cell.classList.contains("border-b")).toBe(true);
         expect(cell.classList.contains("border-b-border")).toBe(true);
-        expect(cell.style.boxShadow).toBe("-2px 0 4px 0 rgba(0, 0, 0, 0.15)");
     });
 
     it("does not remove gridline borders from non-edge locked cells", () => {

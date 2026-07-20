@@ -31,6 +31,18 @@ describe("ExpansionPanelComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("uses quiet disclosure surfaces and neutral interaction states", () => {
+        const host = fixture.nativeElement as HTMLElement;
+        const header = getHeader();
+
+        expect(host.classList.contains("bg-surface")).toBe(true);
+        expect(header.classList.contains("bg-surface-muted")).toBe(true);
+        expect(header.classList.contains("hover:bg-hover")).toBe(true);
+        expect(header.classList.contains("active:bg-active")).toBe(true);
+        expect(header.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(header.classList.contains("ring-primary/40")).toBe(false);
+    });
+
     it("should toggle expanded on header click", () => {
         expect(component.expanded()).toBe(false);
         getHeader().click();
@@ -93,6 +105,9 @@ describe("ExpansionPanelComponent", () => {
         const header = getHeader();
         expect(header.getAttribute("aria-disabled")).toBe("true");
         expect(header.getAttribute("tabindex")).toBe("-1");
+        expect(header.classList.contains("bg-disabled-background")).toBe(true);
+        expect(header.classList.contains("text-disabled-foreground")).toBe(true);
+        expect(header.classList.contains("opacity-50")).toBe(false);
     });
 
     it("should leave aria-disabled unset and tabindex 0 when not disabled", () => {

@@ -5,6 +5,7 @@
         "^@lucide/angular$",
         "^@mirei/ts-collections$",
         "^class-variance-authority$",
+        "^culori$",
         "^luxon$",
         "^remixicon$",
         "^tailwind-merge$",

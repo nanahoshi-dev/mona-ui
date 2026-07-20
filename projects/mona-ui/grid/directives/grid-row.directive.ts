@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { Row } from "../models/Row";
 import { GridService } from "../services/grid.service";
 import { gridListTableRowThemeVariants } from "../styles/grid.styles";
@@ -18,12 +17,10 @@ import { gridListTableRowThemeVariants } from "../styles/grid.styles";
 })
 export class GridRowDirective {
     readonly #gridService = inject(GridService);
-    readonly #themeService = inject(ThemeService);
     protected readonly ariaRowIndex = computed(() => this.index() + this.#gridService.paginationState().skip + 2);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const selected = this.selected();
-        return gridListTableRowThemeVariants(theme)({ selected });
+        return gridListTableRowThemeVariants({ selected });
     });
     protected readonly selectable = computed(() => this.#gridService.selectableOptions().enabled);
     public readonly expanded = computed(() => this.#gridService.isRowExpanded(this.row()));

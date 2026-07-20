@@ -1,3 +1,8 @@
-export type ThemeStyle = "mona";
+export type BuiltInThemeName = "anna" | "luna" | "mona";
+export type ThemeName = string;
 export type ThemeVariant = "light" | "dark";
-export type ThemeId = `${ThemeStyle}-${ThemeVariant}`;
+
+export interface ThemeSelection {
+    readonly name: ThemeName;
+    readonly variant: ThemeVariant;
+}

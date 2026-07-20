@@ -19,4 +19,13 @@ describe("CircularProgressBarComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
+
+    it("uses a muted trail while retaining primary as the default progress color", () => {
+        const host = fixture.nativeElement as HTMLElement;
+        const progressCircle = host.querySelector("circle:not([data-stroke-trail])") as SVGCircleElement;
+
+        expect(host.classList.contains("[&_svg_circle]:data-[stroke-trail='true']:stroke-surface-muted")).toBe(true);
+        expect(progressCircle.getAttribute("stroke")).toBe("var(--color-primary)");
+        expect(host.classList.contains("text-foreground")).toBe(true);
+    });
 });

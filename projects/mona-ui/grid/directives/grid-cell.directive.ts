@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { type GridRowNeighborType } from "../models/GridRowNeighbourType";
 import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } from "../styles/grid.styles";
 
@@ -10,9 +9,7 @@ import { gridListTableCellThemeVariants, type GridListTableCellVariantInput } fr
     }
 })
 export class GridCellDirective implements GridListTableCellVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const dataCell = this.dataCell();
         const groupHeader = this.groupHeader();
         const groupToggle = this.groupToggle();
@@ -21,7 +18,7 @@ export class GridCellDirective implements GridListTableCellVariantInput {
         const masterDetailContent = this.masterDetailContent();
         const masterDetailToggle = this.masterDetailToggle();
         const lastInRow = this.lastInRow() || groupHeader || masterDetailContent;
-        return gridListTableCellThemeVariants(theme)({
+        return gridListTableCellThemeVariants({
             dataCell,
             groupHeader,
             groupToggle,

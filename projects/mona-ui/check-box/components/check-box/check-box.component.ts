@@ -2,7 +2,6 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input, model, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { type FormCheckboxControl } from "@angular/forms/signals";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { twMerge } from "tailwind-merge";
 import {
     checkboxContainerLabelThemeVariants,
@@ -26,21 +25,17 @@ import {
     }
 })
 export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariantInput, FormCheckboxControl {
-    readonly #themeService = inject(ThemeService);
     protected readonly checkBoxClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return checkboxInputThemeVariants(theme)();
+        return checkboxInputThemeVariants();
     });
     protected readonly checkMarkClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return checkmarkThemeVariants(theme)({ rounded });
+        return checkmarkThemeVariants({ rounded });
     });
     protected readonly containerLabelClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const labelSize = this.labelSize();
         const classes = this.userClass();
-        const variantClasses = checkboxContainerLabelThemeVariants(theme)({ labelSize });
+        const variantClasses = checkboxContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, classes);
     });
     protected readonly invalidState = computed(

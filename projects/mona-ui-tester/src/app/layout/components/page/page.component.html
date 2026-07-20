@@ -1,4 +1,4 @@
-<div class="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans">
+<div class="flex h-screen w-full overflow-hidden font-sans">
     <!-- Mobile Drawer Sidebar Backdrop -->
     @if (sidebarService.isOpen()) {
         <div
@@ -30,7 +30,7 @@
     <app-sidebar class="hidden md:flex w-64 h-full border-r border-border flex-shrink-0 overflow-hidden"></app-sidebar>
 
     <!-- Main Content Area Wrapper -->
-    <div class="flex flex-col flex-1 h-full min-w-0 bg-background">
+    <div class="flex flex-col flex-1 h-full min-w-0">
         <!-- Breadcrumbs & Actions Header Bar (Desktop/Tablet) -->
         <div
             class="hidden md:flex items-center justify-between px-8 py-4 border-b border-border sticky top-0 bg-header-background/90 backdrop-blur-md z-20 h-16 flex-shrink-0 select-none">
@@ -51,12 +51,14 @@
 
             <!-- Header Action Items -->
             <div class="flex items-center gap-2 text-muted-foreground">
-                <button
-                    class="p-2 rounded-lg hover:bg-hover hover:text-foreground transition-colors cursor-pointer"
-                    aria-label="Toggle Dark Mode"
-                    type="button">
-                    <svg lucideMoon [size]="18"></svg>
-                </button>
+                <mona-dropdown-list
+                    aria-label="Theme"
+                    class="w-28"
+                    [data]="themeOptions"
+                    textField="text"
+                    [ngModel]="selectedTheme()"
+                    size="small"
+                    (ngModelChange)="onThemeChange($event)"></mona-dropdown-list>
                 <a
                     href="https://github.com/phrolovia/mona-ui"
                     target="_blank"

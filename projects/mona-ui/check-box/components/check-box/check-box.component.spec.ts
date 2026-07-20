@@ -28,5 +28,9 @@ describe("CheckBoxComponent", () => {
         expect(inputElement.classList.contains("hidden")).toBe(false);
         expect(inputElement.classList.contains("sr-only")).toBe(true);
         expect(checkmarkElement.classList.contains("peer-focus-visible:ring-2")).toBe(true);
+        expect(checkmarkElement.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(checkmarkElement.classList.contains("data-[invalid='true']:peer-focus-visible:ring-error/35")).toBe(true);
+        expect(checkmarkElement.classList.contains("peer-disabled:bg-disabled-background")).toBe(true);
+        expect(checkmarkElement.classList.contains("opacity-50")).toBe(false);
     });
 });

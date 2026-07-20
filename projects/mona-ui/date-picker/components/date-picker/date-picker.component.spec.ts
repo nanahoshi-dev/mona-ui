@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled, form, FormField, required } from "@angular/forms/signals";
+import { datePopupThemeVariants } from "../../../date-input/styles/date-popup.styles";
 import { DatePickerComponent } from "./date-picker.component";
 
 describe("DatePickerComponent", () => {
@@ -16,6 +17,39 @@ describe("DatePickerComponent", () => {
 
     it("writes the signal-form value to the text box", () => {
         expect(getInput().value).toBe("02/01/2026");
+    });
+
+    it("uses one shared input shell without a nested focus ring", () => {
+        const picker = fixture.nativeElement.querySelector("mona-date-picker") as HTMLElement;
+
+        expect(
+            picker.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
+        expect(picker.classList.contains("border-input-border")).toBe(true);
+        expect(picker.classList.contains("shadow-(--shadow-control)")).toBe(true);
+        expect(picker.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(picker.classList.contains("data-[invalid='true']:focus-within:ring-error/35")).toBe(true);
+        expect(picker.classList.contains("[&_mona-text-box]:focus-within:ring-0")).toBe(true);
+        expect(picker.classList.contains("[&_mona-text-box[data-invalid='true']]:ring-0")).toBe(true);
+    });
+
+    it("uses an overlay-tier popup instead of an input-tier surface", () => {
+        const classes = datePopupThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
+
+        expect(classes).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
+        expect(classes).toContain("border-border");
+        expect(classes).toContain("shadow-(--shadow-overlay)");
+        expect(classes).toContain(
+            "[&_mona-calendar]:[background-color:var(--mona-date-popup-calendar-background,var(--mona-calendar-background))]!"
+        );
+        expect(classes).toContain(
+            "[&_mona-calendar]:[backdrop-filter:var(--mona-date-popup-calendar-backdrop-filter,var(--mona-effect-raised-backdrop-filter))]!"
+        );
+        expect(classes).not.toContain("border-input-border");
     });
 
     it("updates the signal-form value from typed date text on blur", async () => {
@@ -37,6 +71,9 @@ describe("DatePickerComponent", () => {
         fixture.detectChanges();
 
         expect(getInput().disabled).toBe(true);
+        expect(
+            (fixture.nativeElement.querySelector("mona-date-picker") as HTMLElement).getAttribute("data-disabled")
+        ).toBe("true");
     });
 
     it("reflects required invalid state after the field is touched", async () => {

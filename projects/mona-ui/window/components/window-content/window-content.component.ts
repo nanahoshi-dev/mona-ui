@@ -20,7 +20,6 @@ import { LucideDynamicIcon, LucideMaximize, LucideMinimize, LucideMinus, LucideX
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { createElementControlId, focusElement } from "@nanahoshi/mona-ui/internal";
 import { PopupCloseEvent, PopupCloseSource, PopupDataInjectionToken } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { WindowDragHandlerDirective } from "../../directives/window-drag-handler.directive";
 import { WindowResizeHandlerDirective } from "../../directives/window-resize-handler.directive";
 import { WindowInjectorData } from "../../models/WindowInjectorData";
@@ -65,26 +64,22 @@ export class WindowContentComponent implements WindowContentVariantInput {
 
     readonly #sizeBeforeMaximize = signal({ width: 0, height: 0, top: 0, left: 0 });
     readonly #sizeBeforeMinimize = signal(0);
-    readonly #themeService = inject(ThemeService);
     readonly #trapFocus = inject(CdkTrapFocus);
     readonly #viewContainerRef = inject(ViewContainerRef);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.windowData.rounded;
-        return windowBaseThemeVariants(theme)({ rounded });
+        return windowBaseThemeVariants({ rounded });
     });
     protected readonly componentAnchor = viewChild.required("componentAnchor", {
         read: ViewContainerRef
     });
     protected readonly componentRef?: ComponentRef<unknown>;
     protected readonly contentClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return windowContentThemeVariants(theme)();
+        return windowContentThemeVariants();
     });
     protected readonly contentContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.windowData.rounded;
-        return windowContentContainerThemeVariants(theme)({ rounded });
+        return windowContentContainerThemeVariants({ rounded });
     });
     protected readonly contentTemplate = computed(() => {
         const content = this.windowData.content;
@@ -98,23 +93,19 @@ export class WindowContentComponent implements WindowContentVariantInput {
     protected readonly maximized = signal(false);
     protected readonly minimized = signal(false);
     protected readonly titleBarActionClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return windowTitleBarActionThemeVariants(theme)();
+        return windowTitleBarActionThemeVariants();
     });
     protected readonly titleBarClass = computed(() => {
-        const theme = this.#themeService.theme();
         const look = this.windowData.look;
         const rounded = this.windowData.rounded;
-        return windowTitleBarThemeVariants(theme)({ look, rounded });
+        return windowTitleBarThemeVariants({ look, rounded });
     });
     protected readonly titleClass = computed(() => {
-        const theme = this.#themeService.theme();
         const look = this.windowData.look;
-        return windowTitleThemeVariants(theme)({ look });
+        return windowTitleThemeVariants({ look });
     });
     protected readonly titleContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return windowTitleContainerThemeVariants(theme)();
+        return windowTitleContainerThemeVariants();
     });
     protected readonly windowData = inject<WindowInjectorData>(PopupDataInjectionToken);
 

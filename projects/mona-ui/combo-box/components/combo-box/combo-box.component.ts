@@ -60,7 +60,6 @@ import {
 } from "@nanahoshi/mona-ui/internal/list";
 import { PopupCloseEvent } from "@nanahoshi/mona-ui/popup";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { debounceTime, filter, fromEvent, Subject, take, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
 
@@ -109,8 +108,9 @@ import {
         "[attr.aria-invalid]": "invalidState() ? true : undefined",
         "[attr.aria-readonly]": "readonly() ? true : undefined",
         "[attr.aria-required]": "required() ? true : undefined",
-        "[attr.data-disabled]": "disabled()",
+        "[attr.data-disabled]": "disabled() || null",
         "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly() || null",
         "[attr.tabindex]": "-1",
         "[class]": "baseClass()"
     }
@@ -130,7 +130,6 @@ export class ComboBoxComponent<TData = unknown>
     readonly #listService = inject(ListService);
     readonly #navigatedValue = linkedSignal(() => this.value());
     readonly #popupRef = this.#dropdownService.popupRef;
-    readonly #themeService = inject(ThemeService);
     readonly #userNavigatedViaArrows = signal(false);
 
     protected readonly activeDescendant = computed(() => {
@@ -138,17 +137,15 @@ export class ComboBoxComponent<TData = unknown>
         return highlightedItem ? highlightedItem.uid : null;
     });
     protected readonly affixClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return comboBoxAffixContainerThemeVariants(theme)();
+        return comboBoxAffixContainerThemeVariants();
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const focused = this.#popupRef() != null;
         const invalid = this.invalidState();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = comboBoxBaseThemeVariants(theme)({ disabled, focused, invalid, rounded, size });
+        const variantClass = comboBoxBaseThemeVariants({ disabled, focused, invalid, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -163,9 +160,8 @@ export class ComboBoxComponent<TData = unknown>
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly id = createElementControlId();
     protected readonly inputClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return comboBoxTextInputThemeVariants(theme)({ rounded });
+        return comboBoxTextInputThemeVariants({ rounded });
     });
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && this.value() == null)
@@ -173,11 +169,10 @@ export class ComboBoxComponent<TData = unknown>
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();
     protected readonly listPopupClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = dropdownPopupThemeVariants(theme)({ rounded, size });
+        const variantClass = dropdownPopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly noDataTemplate = contentChild(DropdownNoDataTemplateDirective, { read: TemplateRef });

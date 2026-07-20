@@ -65,4 +65,12 @@ describe("SplitButtonComponent", () => {
     it("should create", () => {
         expect(component).toBeTruthy();
     });
+
+    it("should use the input border for an outline split divider", () => {
+        fixture.componentRef.setInput("look", "outline");
+        fixture.detectChanges();
+
+        const element = fixture.nativeElement as HTMLElement;
+        expect(element.classList.contains("[&>button:not(:last-child)]:border-input-border")).toBe(true);
+    });
 });

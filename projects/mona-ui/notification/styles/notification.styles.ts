@@ -1,89 +1,88 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import {
-    notificationActionVariants as monaNotificationActionVariants,
-    notificationBaseVariants as monaNotificationBaseVariants,
-    notificationBodyVariants as monaNotificationBodyVariants,
-    notificationContainerBaseVariants as monaNotificationContainerBaseVariants,
-    notificationContentVariants as monaNotificationContentVariants,
-    notificationHeaderVariants as monaNotificationHeaderVariants,
-    notificationIconVariants as monaNotificationIconVariants,
-    notificationTextVariants as monaNotificationTextVariants
-} from "./notification.mona.styles";
+import { cva } from "class-variance-authority";
+import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 
-export const notificationContainerBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationContainerBaseVariants;
-        default:
-            return monaNotificationContainerBaseVariants;
+//---------------------------------
+// Notification Container Component
+//---------------------------------
+
+export const notificationContainerBaseThemeVariants = cva(`p-2 z-40000`, {
+    variants: {
+        position: {
+            bottom: "bottom-0 left-1/2 -translate-x-1/2",
+            bottomleft: "bottom-0 left-0",
+            bottomright: "bottom-0 right-0",
+            top: "top-0 left-1/2 -translate-x-1/2",
+            topleft: "top-0 left-0",
+            topright: "top-0 right-0"
+        },
+        positionType: {
+            fixed: "fixed",
+            absolute: "absolute"
+        }
+    },
+    defaultVariants: {
+        positionType: "fixed"
     }
-};
+});
 
-export const notificationActionThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationActionVariants;
-        default:
-            return monaNotificationActionVariants;
+//-----------------------
+// Notification Component
+//-----------------------
+
+export const notificationActionThemeVariants = cva(
+    `
+        absolute top-0 right-0 flex h-auto items-start
+        [&>svg.lucide]:cursor-pointer
+        [&>svg.lucide]:-mt-1
+    `
+);
+
+export const notificationBaseThemeVariants = cva(
+    `
+        relative mb-2 flex h-fit w-fit flex-col overflow-hidden
+        ${themeOverlaySurfaceClasses} text-foreground
+        border border-border shadow-(--shadow-overlay)
+    `
+);
+
+export const notificationBodyThemeVariants = cva(
+    `
+        flex flex-1 p-2 ps-0 pe-8
+    `
+);
+
+export const notificationContentThemeVariants = cva(
+    `
+        flex w-full flex-1 items-center
+    `
+);
+
+export const notificationHeaderThemeVariants = cva(
+    `
+        flex w-full flex-1 flex-row items-center
+        text-sm font-medium
+        select-none
+    `
+);
+
+export const notificationIconThemeVariants = cva(
+    `
+        flex items-center justify-center px-4
+    `,
+    {
+        variants: {
+            type: {
+                info: "text-info",
+                success: "text-success",
+                warning: "text-warning",
+                error: "text-error"
+            }
+        }
     }
-};
+);
 
-export const notificationBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationBaseVariants;
-        default:
-            return monaNotificationBaseVariants;
-    }
-};
-
-export const notificationBodyThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationBodyVariants;
-        default:
-            return monaNotificationBodyVariants;
-    }
-};
-
-export const notificationContentThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationContentVariants;
-        default:
-            return monaNotificationContentVariants;
-    }
-};
-
-export const notificationHeaderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationHeaderVariants;
-        default:
-            return monaNotificationHeaderVariants;
-    }
-};
-
-export const notificationIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationIconVariants;
-        default:
-            return monaNotificationIconVariants;
-    }
-};
-
-export const notificationTextThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaNotificationTextVariants;
-        default:
-            return monaNotificationTextVariants;
-    }
-};
-
-// type NotificationBaseVariantProps = VariantProps<ReturnType<typeof notificationBaseThemeVariants>>;
-// type NotificationBaseVariantInput = VariantInputs<NotificationBaseVariantProps>;
-//
-// export type NotificationVariantProps = NotificationBaseVariantProps;
-// export type NotificationVariantInput = NotificationBaseVariantInput;
+export const notificationTextThemeVariants = cva(
+    `
+        text-sm text-foreground
+    `
+);

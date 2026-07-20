@@ -27,7 +27,6 @@ import {
     ListService
 } from "@nanahoshi/mona-ui/internal/list";
 import { PageChangeEvent, PagerComponent, PageSizeChangeEvent } from "@nanahoshi/mona-ui/pager";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { ImmutableSet } from "@mirei/ts-collections";
 import { filter, fromEvent, Subscription } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -72,13 +71,11 @@ export class ListViewComponent<T = unknown> implements ListViewVariantInputs {
         const pageableOptions = this.listService.pageableOptions();
         return !pageableOptions.enabled;
     });
-    readonly #themeService = inject(ThemeService);
     #scrollSubscription: Subscription | null = null;
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClasses = listViewBaseThemeVariants(theme)({ rounded, size });
+        const variantClasses = listViewBaseThemeVariants({ rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });

@@ -11,7 +11,6 @@ import {
     signal
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { compact } from "@mirei/ts-collections";
 import { filter, fromEvent, map, merge, skipUntil, takeUntil, tap } from "rxjs";
 import { splitterResizerThemeVariants, SplitterVariantProps } from "../../styles/splitter.styles";
@@ -47,15 +46,13 @@ export class SplitterResizerComponent {
     readonly #hostElementRef = inject(ElementRef);
     readonly #paneSizeMemory = new WeakMap<SplitterPaneComponent, number>();
     readonly #splitter = inject(SplitterComponent);
-    readonly #themeService = inject(ThemeService);
     protected readonly ariaValueMax = signal(0);
     protected readonly ariaValueMin = signal(0);
     protected readonly ariaValueNow = signal(0);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const orientation = this.orientation();
         const resizing = this.resizing();
-        return splitterResizerThemeVariants(theme)({ orientation, resizing });
+        return splitterResizerThemeVariants({ orientation, resizing });
     });
     protected readonly hovered = signal(false);
     protected readonly isInert = computed(() => {

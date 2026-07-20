@@ -13,7 +13,6 @@ import {
 import { outputFromObservable, takeUntilDestroyed, toObservable } from "@angular/core/rxjs-interop";
 import { ButtonDirective, ButtonService } from "@nanahoshi/mona-ui/button";
 import { SelectionMode } from "@nanahoshi/mona-ui/common";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 
 import { map, pairwise } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -36,13 +35,11 @@ import {
 export class ButtonGroupComponent implements ButtonGroupVariantsInput {
     readonly #buttonService = inject(ButtonService, { self: true });
     readonly #destroyRef = inject(DestroyRef);
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const look = this.look();
         const rounded = this.rounded();
         const size = this.size();
-        const variantClasses = buttonGroupThemeVariants(theme)({ look, rounded, size });
+        const variantClasses = buttonGroupThemeVariants({ look, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });

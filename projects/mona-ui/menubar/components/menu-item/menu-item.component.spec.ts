@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { menuItemThemeVariants } from "../../styles/menu.styles";
 
 import { MenuItemComponent } from "./menu-item.component";
 
@@ -19,5 +20,16 @@ describe("MenuItemComponent", () => {
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("uses neutral hover, focus, active, and disabled states", () => {
+        const classes = menuItemThemeVariants({ size: "medium" }).split(/\s+/);
+
+        expect(classes).toContain("hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain("focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain("data-[focused]:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain("data-[disabled='true']:text-disabled-foreground");
+        expect(classes).not.toContain("focus-within:bg-accent");
+        expect(classes).not.toContain("text-accent-foreground");
     });
 });

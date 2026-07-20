@@ -59,6 +59,21 @@ describe("AutoCompleteComponent", () => {
         expect(fixture.componentInstance).toBeTruthy();
     });
 
+    it("uses the shared input shell and semantic state precedence", async () => {
+        const fixture = await createSignalFormFixture();
+        const host = getHost(fixture);
+
+        expect(
+            host.classList.contains(
+                "[background-color:var(--mona-effect-control-background-color,var(--color-input-background))]"
+            )
+        ).toBe(true);
+        expect(host.classList.contains("border-input-border")).toBe(true);
+        expect(host.classList.contains("shadow-(--shadow-control)")).toBe(true);
+        expect(host.classList.contains("focus-within:ring-focus-indicator/35")).toBe(true);
+        expect(host.classList.contains("opacity-50")).toBe(false);
+    });
+
     it("hydrates the input from the signal form value", async () => {
         const fixture = await createSignalFormFixture();
 
@@ -96,6 +111,10 @@ describe("AutoCompleteComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-disabled")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-disabled")).toBe("true");
+        expect(getHost(fixture).classList.contains("bg-disabled-background")).toBe(true);
+        expect(getHost(fixture).classList.contains("border-disabled-border")).toBe(true);
+        expect(getHost(fixture).classList.contains("text-disabled-foreground")).toBe(true);
         expect(getInput(fixture).disabled).toBe(true);
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe("Banana");
@@ -110,6 +129,7 @@ describe("AutoCompleteComponent", () => {
         await waitForStable(fixture);
 
         expect(getHost(fixture).getAttribute("aria-readonly")).toBe("true");
+        expect(getHost(fixture).getAttribute("data-readonly")).toBe("true");
         expect(getInput(fixture).readOnly).toBe(true);
         expect(getOptions().length).toBe(0);
         expect(fixture.componentInstance.form.value().value()).toBe("Banana");
@@ -156,6 +176,7 @@ describe("AutoCompleteComponent", () => {
         expect(getHost(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getInput(fixture).getAttribute("aria-invalid")).toBe("true");
         expect(getHost(fixture).className).toContain("border-error");
+        expect(getHost(fixture).className).toContain("focus-within:ring-error/35");
     });
 
     it("falls back the input's accessible name to the placeholder when no aria-label is provided", async () => {

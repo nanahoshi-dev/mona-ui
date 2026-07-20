@@ -20,7 +20,6 @@ import { LucideChevronLeft, LucideChevronRight, LucideX } from "@lucide/angular"
 import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { ScrollDirection } from "@nanahoshi/mona-ui/common";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
 import { ScrollIntent } from "../../models/ScrollIntent";
@@ -46,23 +45,19 @@ import {
 })
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
-    readonly #themeService = inject(ThemeService);
     readonly #keydown$ = new Subject<KeyboardEvent>();
     #resizeObserver: ResizeObserver | null = null;
     readonly #scrollIntent$ = new Subject<ScrollIntent | null>();
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
-        return tabListBaseThemeVariants(theme)({ rounded, size });
+        return tabListBaseThemeVariants({ rounded, size });
     });
     protected readonly listClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return tabListListThemeVariants(theme)();
+        return tabListListThemeVariants();
     });
     protected readonly scrollButtonClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return tabListScrollButtonThemeVariants(theme)();
+        return tabListScrollButtonThemeVariants();
     });
     protected readonly scrollsVisible = signal(false);
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");

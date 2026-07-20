@@ -30,7 +30,6 @@ import type {
     StringFilterOperators
 } from "@nanahoshi/mona-ui/query";
 import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { debounceTime, Subject } from "rxjs";
 import { Column } from "../../models/Column";
 import type { ColumnFilterState } from "../../models/ColumnFilterState";
@@ -67,10 +66,8 @@ export class GridFilterRowCellComponent {
     readonly #gridService = inject(GridService);
     readonly #numberInput$ = new Subject<number | null>();
     readonly #stringInput$ = new Subject<string>();
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFilterRowCellThemeVariants(theme)();
+        return gridFilterRowCellThemeVariants();
     });
     protected readonly isFilterActive = computed(() => {
         const op = this.selectedOperator();

@@ -16,7 +16,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Position } from "@nanahoshi/mona-ui/common";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { fadePopupAnimation, PopupAnchor, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, take, takeUntil } from "rxjs";
 import {
     tooltipArrowThemeVariants,
@@ -46,7 +45,6 @@ export class TooltipComponent implements TooltipVariantInputs {
     readonly #document = inject(DOCUMENT);
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
-    readonly #themeService = inject(ThemeService);
     #currentAnchor: HTMLElement | null = null;
     #eventSubscription: Subscription | null = null;
     #hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -54,13 +52,11 @@ export class TooltipComponent implements TooltipVariantInputs {
     #popupRef: PopupRef | null = null;
     #showTimeoutId: ReturnType<typeof setTimeout> | null = null;
     protected readonly arrowClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return tooltipArrowThemeVariants(theme)();
+        return tooltipArrowThemeVariants();
     });
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return tooltipBaseThemeVariants(theme)({ rounded });
+        return tooltipBaseThemeVariants({ rounded });
     });
     protected readonly currentArrowPosition = linkedSignal(() => this.position());
     protected readonly templateRef = viewChild.required(TemplateRef);

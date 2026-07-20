@@ -36,7 +36,7 @@ import { ListKeySelector } from "../../models/ListSelectors";
 import { ListSizeInputType, ListSizeType } from "../../models/ListSizeType";
 import { SelectionChangeEvent, SelectionSource } from "../../models/SelectionChangeEvent";
 import { ListService } from "../../services/list.service";
-import { listGroupHeaderVariants, listInnerListVariants, listVariants } from "../../styles/list.styles";
+import { listGroupHeaderThemeVariants, listInnerListThemeVariants, listThemeVariants } from "../../styles/list.styles";
 import { cycleThroughMatchedItems } from "../../utils/cycleThroughMatchedItems";
 import { getListNavigationDirection } from "../../utils/getListNavigationDirection";
 import { ListItemComponent } from "../list-item/list-item.component";
@@ -69,14 +69,14 @@ export class ListComponent<TData> implements OnInit {
     readonly #typeaheadKey$ = new Subject<string>();
     private readonly filterInput = viewChild(FilterInputComponent);
     protected readonly classes = computed(() => {
-        const classes = listVariants();
+        const classes = listThemeVariants();
         return twMerge(classes);
     });
     protected readonly footerTemplate = contentChild(ListFooterTemplateDirective, { read: TemplateRef });
     protected readonly groupHeaderClasses = computed(() => {
         const listItemClass = this.listItemClass();
         const hasTemplate = this.groupHeaderTemplate() != null;
-        const classes = listGroupHeaderVariants({ hasTemplate });
+        const classes = listGroupHeaderThemeVariants({ hasTemplate });
         return twMerge(classes, listItemClass);
     });
     protected readonly groupHeaderTemplate = contentChild(ListGroupHeaderTemplateDirective, { read: TemplateRef });
@@ -84,7 +84,7 @@ export class ListComponent<TData> implements OnInit {
     protected readonly hostTabIndex = computed(() => (this.listService.focusableItem() ? -1 : 0));
     protected readonly itemTemplate = contentChild(ListItemTemplateDirective, { read: TemplateRef });
     protected readonly innerListClasses = computed(() => {
-        const classes = listInnerListVariants();
+        const classes = listInnerListThemeVariants();
         const listClass = this.listClass();
         return twMerge(classes, listClass);
     });

@@ -1,16 +1,42 @@
-import { VariantInputs } from "@nanahoshi/mona-ui/internal";
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
+import { cva } from "class-variance-authority";
+import { themeOverlaySurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
-import { datePopupVariants as monaDatePopupVariants } from "./date-popup.mona.styles";
 
-export const datePopupThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaDatePopupVariants;
-        default:
-            return monaDatePopupVariants;
+export const datePopupThemeVariants = cva(
+    `
+        h-full overflow-auto
+        [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
+        ${themeOverlaySurfaceClasses} text-foreground
+        border border-border shadow-(--shadow-overlay)
+        [&_mona-calendar]:[background-color:var(--mona-date-popup-calendar-background,var(--mona-calendar-background))]!
+        [&_mona-calendar]:[background-image:var(--mona-date-popup-calendar-background-image,var(--mona-effect-raised-background-image))]!
+        [&_mona-calendar]:[backdrop-filter:var(--mona-date-popup-calendar-backdrop-filter,var(--mona-effect-raised-backdrop-filter))]!
+        [&_mona-calendar]:[-webkit-backdrop-filter:var(--mona-date-popup-calendar-backdrop-filter,var(--mona-effect-raised-backdrop-filter))]!
+        [&_mona-calendar]:border-none
+        [&_mona-calendar]:shadow-none
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-lg"
+            },
+            size: {
+                large: "text-lg",
+                medium: "text-md",
+                small: "text-sm"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium",
+            size: "medium"
+        }
     }
-};
+);
 
-export type DatePopupVariantProps = VariantProps<ReturnType<typeof datePopupThemeVariants>>;
+export type DatePopupVariantProps = VariantProps<typeof datePopupThemeVariants>;
+
 export type DatePopupVariantInput = VariantInputs<DatePopupVariantProps>;

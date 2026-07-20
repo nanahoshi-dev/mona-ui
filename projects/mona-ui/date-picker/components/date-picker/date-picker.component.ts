@@ -51,7 +51,6 @@ import {
     TextBoxPrefixTemplateDirective,
     TextBoxSuffixTemplateDirective
 } from "@nanahoshi/mona-ui/text-box";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime } from "luxon";
 import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -89,8 +88,10 @@ import {
     host: {
         "[attr.tabindex]": "disabled() ? null : -1",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
+        "[attr.data-disabled]": "disabled() || null",
         "[attr.data-expanded]": "expanded()",
         "[attr.data-invalid]": "invalidState() || null",
+        "[attr.data-readonly]": "readonly() || null",
         "[class]": "baseClass()"
     }
 })
@@ -102,13 +103,11 @@ export class DatePickerComponent
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
     readonly #id = createElementControlId();
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const focused = this.#dropdownService.popupRef() != null;
         const rounded = this.rounded();
         const size = this.size();
-        const variantClass = datePickerBaseThemeVariants(theme)({ focused, rounded, size });
+        const variantClass = datePickerBaseThemeVariants({ focused, rounded, size });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -143,11 +142,10 @@ export class DatePickerComponent
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());
     protected readonly pickerPopupClass = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const size = this.size();
         const userClass = this.popupClass();
-        const variantClass = datePopupThemeVariants(theme)({ rounded, size });
+        const variantClass = datePopupThemeVariants({ rounded, size });
         return twMerge(variantClass, userClass);
     });
     protected readonly popupId = createElementControlId();

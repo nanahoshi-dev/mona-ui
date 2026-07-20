@@ -160,6 +160,26 @@ describe("SliderComponent", () => {
             await waitForStable(fixture);
 
             expect(getHandle(fixture).classList.contains("rounded-sm")).toBe(true);
+            expect(fixture.debugElement.query(By.css(".bg-surface-muted")).classes["rounded-sm"]).toBe(true);
+        });
+
+        it("should use a muted track, primary progress, and a neutral semantic-focus handle", async () => {
+            await waitForStable(fixture);
+
+            const track = fixture.debugElement.query(By.css(".bg-surface-muted")).nativeElement as HTMLElement;
+            const selection = fixture.debugElement.query(By.css(".bg-primary")).nativeElement as HTMLElement;
+            const handle = getHandle(fixture);
+
+            expect(track.classList.contains("border-input-border")).toBe(false);
+            expect(track.classList.contains("rounded-full")).toBe(true);
+            expect(selection).toBeTruthy();
+            expect(
+                handle.classList.contains(
+                    "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+                )
+            ).toBe(true);
+            expect(handle.classList.contains('data-[focused="true"]:ring-focus-indicator/35')).toBe(true);
+            expect(handle.classList.contains('data-[invalid="true"]:data-[focused="true"]:ring-error/35')).toBe(true);
         });
 
         it("should disable focus and keyboard updates when the form field is disabled", async () => {

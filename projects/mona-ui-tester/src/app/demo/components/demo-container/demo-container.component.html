@@ -1,5 +1,5 @@
 <div class="flex flex-col border border-border">
-    <div class="flex flex-col border-b border-border bg-demo-background" [style.background]="background()">
+    <div class="flex flex-col border-b border-border" [style.background]="background()">
         <div class="flex items-center justify-end p-2 gap-1">
             <button monaButton look="ghost" (click)="onCodeToggle()">
                 <svg lucideCode [size]="20"></svg>
@@ -21,13 +21,15 @@
                 (valueChange)="customColor.set($event)"
                 size="small"></mona-color-picker>
             <mona-dropdown-list
-                [data]="themeDropdownData()"
+                [data]="themeDropdownData"
                 textField="text"
                 valueField="value"
-                [ngModel]="selectedTheme()"
+                monaDropDownGroupable
+                [groupBy]="'group'"
+                [value]="selectedTheme()"
                 size="small"
                 [style.width.px]="100"
-                (ngModelChange)="onThemeChange($event)">
+                (valueChange)="onThemeChange($event)">
             </mona-dropdown-list>
         </div>
         <div

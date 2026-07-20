@@ -1,93 +1,94 @@
-import { ThemeStyle } from "@nanahoshi/mona-ui/theme";
-import {
-    subTreeListItemVariants as monaSubTreeListItemVariants,
-    subTreeListVariants as monaSubTreeListVariants,
-    treeBaseVariants as monaTreeBaseVariants,
-    treeDropHintBaseVariants as monaTreeDropHintBaseVariants,
-    treeDropHintIconVariants as monaTreeDropHintIconVariants,
-    treeNodeBaseVariants as monaTreeNodeBaseVariants,
-    treeNodeContainerVariants as monaTreeNodeContainerVariants,
-    treeNodeDraggingVariants as monaTreeNodeDraggingVariants,
-    treeNodeExpanderVariants as monaTreeNodeExpanderVariants
-} from "./tree.mona.styles";
+import { cva } from "class-variance-authority";
+import { themeOverlaySurfaceClasses } from "@nanahoshi/mona-ui/internal";
 
-export const subTreeListThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSubTreeListVariants;
-        default:
-            return monaSubTreeListVariants;
-    }
-};
+export const subTreeListThemeVariants = cva(
+    `
+        flex list-none flex-col
+    `
+);
 
-export const subTreeListItemThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaSubTreeListItemVariants;
-        default:
-            return monaSubTreeListItemVariants;
-    }
-};
+export const subTreeListItemThemeVariants = cva(
+    `
+        relative overflow-hidden outline-none
+        ps-6
+    `
+);
 
-export const treeBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeBaseVariants;
-        default:
-            return monaTreeBaseVariants;
-    }
-};
+export const treeBaseThemeVariants = cva(
+    `
+        relative outline-none select-none
+        text-md
+    `
+);
 
-export const treeDropHintBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeDropHintBaseVariants;
-        default:
-            return monaTreeDropHintBaseVariants;
-    }
-};
+export const treeDropHintBaseThemeVariants = cva(
+    `
+        fixed z-1 h-0.5 w-10
+        pointer-events-none
+        bg-primary opacity-80
+    `
+);
 
-export const treeDropHintIconThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeDropHintIconVariants;
-        default:
-            return monaTreeDropHintIconVariants;
-    }
-};
+export const treeDropHintIconThemeVariants = cva(
+    `
+        absolute flex items-center justify-center
+        -top-3.25 -left-3.5 text-xl
+    `
+);
 
-export const treeNodeBaseThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeBaseVariants;
-        default:
-            return monaTreeNodeBaseVariants;
+export const treeNodeBaseThemeVariants = cva(
+    `
+        cursor-default px-2 py-1 text-foreground
+    `,
+    {
+        variants: {
+            disabled: {
+                true: "pointer-events-none cursor-default text-disabled-foreground",
+                false: ""
+            },
+            highlighted: {
+                true: "inset-ring-1 inset-ring-focus-indicator/35",
+                false: ""
+            },
+            selected: {
+                true: "bg-active text-foreground",
+                false: ""
+            }
+        },
+        compoundVariants: [
+            {
+                disabled: false,
+                selected: false,
+                class: "hover:bg-hover active:bg-active"
+            },
+            {
+                disabled: false,
+                selected: true,
+                class: "hover:bg-active"
+            }
+        ]
     }
-};
+);
 
-export const treeNodeContainerThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeContainerVariants;
-        default:
-            return monaTreeNodeContainerVariants;
-    }
-};
+export const treeNodeContainerThemeVariants = cva(
+    `
+        flex items-center
+    `
+);
 
-export const treeNodeDraggingThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeDraggingVariants;
-        default:
-            return monaTreeNodeDraggingVariants;
-    }
-};
+export const treeNodeDraggingThemeVariants = cva(
+    `
+        flex items-center justify-center
+        top-3! px-2! py-1!
+        ${themeOverlaySurfaceClasses} text-foreground!
+        border! border-border!
+        shadow-(--shadow-overlay)
+    `
+);
 
-export const treeNodeExpanderThemeVariants = (theme: ThemeStyle) => {
-    switch (theme) {
-        case "mona":
-            return monaTreeNodeExpanderVariants;
-        default:
-            return monaTreeNodeExpanderVariants;
-    }
-};
+export const treeNodeExpanderThemeVariants = cva(
+    `
+        -ms-6 flex h-full min-w-6 items-center justify-center
+        cursor-pointer text-sm text-foreground
+    `
+);

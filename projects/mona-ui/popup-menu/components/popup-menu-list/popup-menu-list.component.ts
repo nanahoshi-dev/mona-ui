@@ -4,7 +4,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideCheck, LucideChevronRight } from "@lucide/angular";
 import { createElementControlId, isNavigationKey, isTypeaheadKey, setupTypeahead } from "@nanahoshi/mona-ui/internal";
 import { PopupCloseEvent, PopupDataInjectionToken, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { groupBy, selectMany } from "@mirei/ts-collections";
 import { filter, fromEvent, Observable, Subject, switchMap, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -70,25 +69,21 @@ export class PopupMenuListComponent implements OnInit {
     });
     readonly #parentConfig = inject<PopupMenuListConfig>(PopupDataInjectionToken);
     readonly #popupService = inject(PopupService);
-    readonly #themeService = inject(ThemeService);
     readonly #typeaheadKey$ = new Subject<string>();
     readonly #viaKeyboardNavigation = signal(false);
     protected readonly activeMenuItem = signal<PopupMenuItem | null>(null);
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
-        return popupMenuBaseThemeVariants(theme)({ rounded });
+        return popupMenuBaseThemeVariants({ rounded });
     });
     protected readonly containerClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
-        return popupMenuContainerThemeVariants(theme)({ rounded });
+        return popupMenuContainerThemeVariants({ rounded });
     });
     protected readonly groupHeaderClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const size = this.#parentConfig.size();
         const hasIcon = this.iconAreaVisible();
-        const variantClasses = popupMenuGroupHeaderThemeVariants(theme)({ size });
+        const variantClasses = popupMenuGroupHeaderThemeVariants({ size });
         const iconClasses = hasIcon ? "pl-8" : "pl-2";
         return twMerge(variantClasses, iconClasses);
     });
@@ -100,20 +95,17 @@ export class PopupMenuListComponent implements OnInit {
         return hasIconsOrSelectable || !!this.#parentConfig.popupIconTemplate?.();
     });
     protected readonly iconContainerClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return popupMenuIconContainerThemeVariants(theme)();
+        return popupMenuIconContainerThemeVariants();
     });
     protected readonly linkContainerClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return popupMenuLinkThemeVariants(theme)();
+        return popupMenuLinkThemeVariants();
     });
     protected readonly menuId = computed(() => this.#parentConfig.menuId);
     protected readonly menuItemClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.#parentConfig.rounded();
         const size = this.#parentConfig.size();
         const hasIcon = this.iconAreaVisible();
-        const variantClasses = popupMenuItemThemeVariants(theme)({ rounded, size });
+        const variantClasses = popupMenuItemThemeVariants({ rounded, size });
         const iconClasses = hasIcon ? "pl-8" : "pl-2";
         return twMerge(variantClasses, iconClasses);
     });
@@ -149,6 +141,14 @@ export class PopupMenuListComponent implements OnInit {
             return;
         }
         this.#parentConfig.menuItemClick$.next(popupMenuItemClickEvent);
+    }
+
+    private closePopup(): void {
+        if (this.popupRef) {
+            this.popupRef.close();
+            this.popupRef = null;
+        }
+        this.#close$.next();
     }
 
     private createSubmenu(target: HTMLElement, viaKeyboard: boolean): Observable<PopupCloseEvent> {
@@ -294,10 +294,7 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     private handleEscapeKey(): void {
-        if (this.popupRef) {
-            this.popupRef.close();
-            this.popupRef = null;
-        }
+        this.closePopup();
     }
 
     private handleHomeKey(): void {
@@ -372,12 +369,7 @@ export class PopupMenuListComponent implements OnInit {
         this.#parentConfig.parentClose$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                tap(() => {
-                    if (this.popupRef) {
-                        this.popupRef.close();
-                        this.popupRef = null;
-                    }
-                })
+                tap(() => this.closePopup())
             )
             .subscribe();
         this.#childCloseRequest$
@@ -386,10 +378,7 @@ export class PopupMenuListComponent implements OnInit {
                 tap(() => {
                     const activeItem = this.activeMenuItem();
                     this.notifyNavigation(activeItem, "left");
-                    if (this.popupRef) {
-                        this.popupRef.close();
-                        this.popupRef = null;
-                    }
+                    this.closePopup();
                 })
             )
             .subscribe();
@@ -402,7 +391,7 @@ export class PopupMenuListComponent implements OnInit {
                 takeUntil(this.#parentConfig.parentClose$),
                 filter(e => e.item !== this.activeMenuItem()),
                 tap(e => {
-                    this.popupRef?.close();
+                    this.closePopup();
                     if (e.item.items.length === 0) {
                         this.activeMenuItem.set(null);
                     }

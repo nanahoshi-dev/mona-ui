@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime } from "luxon";
 import { calendarDecadeViewCellThemeVariants, CalendarVariantProps } from "../styles/calendar.styles";
 
@@ -15,13 +14,11 @@ import { calendarDecadeViewCellThemeVariants, CalendarVariantProps } from "../st
     }
 })
 export class DecadeYearDirective {
-    readonly #themeService = inject(ThemeService);
     protected readonly ariaLabel = computed(() => `Year ${this.year()}`);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const focused = this.focused();
         const rounded = this.rounded();
-        return calendarDecadeViewCellThemeVariants(theme)({ focused, rounded });
+        return calendarDecadeViewCellThemeVariants({ focused, rounded });
     });
     protected readonly focused = computed(() => {
         const navigatedYear = DateTime.fromJSDate(this.navigatedDate()).year;

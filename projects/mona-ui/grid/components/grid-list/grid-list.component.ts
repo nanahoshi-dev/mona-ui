@@ -4,7 +4,6 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent } from "rxjs";
 import { GridCellDirective } from "../../directives/grid-cell.directive";
 import { GridDetailContentCellDirective } from "../../directives/grid-detail-content-cell.directive";
@@ -61,11 +60,9 @@ export class GridListComponent implements GridListVariantInput {
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #hostElementRef = inject(ElementRef<HTMLDivElement>);
     readonly #rowFlattener = inject(GridRowFlattenerService);
-    readonly #themeService = inject(ThemeService);
     private readonly bodyTableElementRef = viewChild.required<ElementRef<HTMLTableElement>>("bodyTable");
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridListBaseThemeVariants(theme)({ virtual: false });
+        return gridListBaseThemeVariants({ virtual: false });
     });
     protected readonly flattenedGroupedRows = computed<GridViewRow[]>(() => {
         const groupColumns = this.gridService.groupColumns();
@@ -81,17 +78,14 @@ export class GridListComponent implements GridListVariantInput {
         return this.#rowFlattener.flatten(this.data(), groupColumns, collapsedKeys, showFooter, groupAggregateDict);
     });
     protected readonly footerTableRowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridFooterTableRowThemeVariants(theme)();
+        return gridFooterTableRowThemeVariants();
     });
     protected readonly gridService = inject(GridService);
     protected readonly groupRowClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridGroupRowThemeVariants(theme)();
+        return gridGroupRowThemeVariants();
     });
     protected readonly tableClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridListTableThemeVariants(theme)();
+        return gridListTableThemeVariants();
     });
 
     public readonly columns = input<ImmutableList<Column>>(ImmutableList.create());

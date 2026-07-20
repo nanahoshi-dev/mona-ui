@@ -2,7 +2,6 @@ import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, contentChild, contentChildren, inject, input, TemplateRef } from "@angular/core";
 import { LucideChevronRight } from "@lucide/angular";
 import { twMerge } from "tailwind-merge";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { BreadcrumbItemDirective } from "../../directives/breadcrumb-item.directive";
 import { BreadcrumbSeparatorTemplateDirective } from "../../directives/breadcrumb-separator-template.directive";
 import {
@@ -22,17 +21,14 @@ import { BreadcrumbItemComponent } from "../breadcrumb-item/breadcrumb-item.comp
     }
 })
 export class BreadcrumbComponent implements BreadcrumbVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly itemComponents = contentChildren(BreadcrumbItemComponent);
     protected readonly currentItemClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return breadcrumbCurrentItemThemeVariants(theme)();
+        return breadcrumbCurrentItemThemeVariants();
     });
     protected readonly listClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const userClass = this.userClass();
-        const variantClass = breadcrumbListThemeVariants(theme)({ disabled });
+        const variantClass = breadcrumbListThemeVariants({ disabled });
         return twMerge(variantClass, userClass);
     });
     protected readonly separatorTemplate = contentChild(BreadcrumbSeparatorTemplateDirective, {

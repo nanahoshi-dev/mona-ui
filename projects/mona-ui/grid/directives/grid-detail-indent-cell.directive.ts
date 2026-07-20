@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import type { GridRowNeighborType } from "../models/GridRowNeighbourType";
 import { gridDetailIndentCellThemeVariants } from "../styles/grid.styles";
 
@@ -10,10 +9,8 @@ import { gridDetailIndentCellThemeVariants } from "../styles/grid.styles";
     }
 })
 export class GridDetailIndentCellDirective {
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridDetailIndentCellThemeVariants(theme)({
+        return gridDetailIndentCellThemeVariants({
             nextIsGroup: this.nextRowType() === "group"
         });
     });

@@ -1,0 +1,228 @@
+:host {
+    color: var(--color-foreground);
+}
+
+.eyebrow,
+.section-number,
+.tier-label {
+    color: var(--color-primary);
+    font-size: 0.6875rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0.35rem 0 0.75rem;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 720;
+    letter-spacing: -0.055em;
+    line-height: 0.95;
+}
+
+h2 {
+    margin: 0.2rem 0 0;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 680;
+    letter-spacing: -0.035em;
+}
+
+p {
+    margin: 0;
+}
+
+.page-intro > p:last-child,
+.section-heading > p {
+    color: var(--color-muted-foreground);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.canvas-preview {
+    position: relative;
+    min-height: 31rem;
+    padding: clamp(1.25rem, 4vw, 3rem);
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-canvas);
+}
+
+.tier-label {
+    position: relative;
+    z-index: 1;
+}
+
+.surface-preview {
+    position: relative;
+    z-index: 1;
+    min-height: 23rem;
+    margin-top: 1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface);
+}
+
+.raised-preview {
+    display: grid;
+    gap: 0.5rem;
+    width: min(100%, 25rem);
+    margin-top: 2.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-raised);
+}
+
+.raised-preview label,
+.overlay-title,
+.interaction-card strong {
+    font-size: 0.8125rem;
+    font-weight: 650;
+}
+
+.raised-preview input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--color-border-control);
+    outline: none;
+    background: var(--color-input-background);
+    color: var(--color-input-foreground);
+}
+
+.raised-preview input:hover {
+    border-color: var(--color-border-control-hover);
+}
+
+.raised-preview input:focus-visible {
+    outline: 2px solid var(--color-focus-indicator);
+    outline-offset: 2px;
+}
+
+.raised-preview input::placeholder {
+    color: var(--color-muted-foreground);
+}
+
+.contrast-note {
+    color: var(--color-muted-foreground);
+    font-size: 0.6875rem;
+}
+
+.overlay-preview {
+    position: absolute;
+    right: clamp(1rem, 4vw, 3rem);
+    bottom: clamp(1rem, 4vw, 3rem);
+    display: grid;
+    width: min(19rem, calc(100% - 2rem));
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-overlay);
+}
+
+.overlay-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.625rem 0.75rem;
+}
+
+.overlay-preview button {
+    padding: 0.6rem 0.625rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-foreground);
+    font: inherit;
+    font-size: 0.8125rem;
+    text-align: left;
+}
+
+.overlay-preview button:focus-visible {
+    outline: 2px solid var(--color-focus-indicator);
+    outline-offset: -2px;
+}
+
+.is-hovered {
+    background: var(--color-hover) !important;
+}
+
+.is-active {
+    background: var(--color-active) !important;
+}
+
+.is-selected {
+    background: var(--color-accent) !important;
+    color: var(--color-accent-foreground) !important;
+}
+
+.interaction-card {
+    display: grid;
+    gap: 1.5rem;
+    min-height: 8rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-raised);
+}
+
+.interaction-card > span {
+    color: var(--color-muted-foreground);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.role-solid,
+.role-subtle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 5rem;
+    padding: 1rem;
+}
+
+.role-solid span,
+.role-subtle span:last-child {
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.role-subtle {
+    min-height: 4rem;
+    border-top: 1px solid;
+    font-size: 0.75rem;
+}
+
+.contrast-summary dl {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.contrast-summary dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.contrast-summary dt {
+    color: var(--color-muted-foreground);
+    font-size: 0.8125rem;
+}
+
+.contrast-summary dd {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 36rem) {
+    .canvas-preview {
+        min-height: 40rem;
+    }
+
+    .raised-preview {
+        margin-top: 1.5rem;
+    }
+}

@@ -25,6 +25,20 @@ describe("TreeNodeComponent", () => {
         expect(component).toBeTruthy();
     });
 
+    it("uses neutral selection with a focus indicator for the navigated node", () => {
+        const node = new TreeNode({ id: "1" });
+        fixture.componentRef.setInput("node", node);
+        treeService.setSelectableOptions({ enabled: true, mode: "single", childrenOnly: false });
+        treeService.setNodeSelect(node, true);
+        fixture.detectChanges();
+
+        const row = fixture.nativeElement.querySelector("div") as HTMLElement;
+        expect(row.classList.contains("bg-active")).toBe(true);
+        expect(row.classList.contains("text-foreground")).toBe(true);
+        expect(row.classList.contains("inset-ring-focus-indicator/35")).toBe(true);
+        expect(row.classList.contains("bg-primary")).toBe(false);
+    });
+
     describe("onNodeClick", () => {
         it("sets the navigated node even when selection is disabled", () => {
             const node = new TreeNode({ id: "1" });

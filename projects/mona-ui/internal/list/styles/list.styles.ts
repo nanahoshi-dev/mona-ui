@@ -1,65 +1,40 @@
 import { cva } from "class-variance-authority";
 
-export const listVariants = cva(
-    `
-        h-full flex flex-col overflow-hidden outline-none
-    `
+export const listThemeVariants = cva(`flex h-full flex-col overflow-hidden bg-(--mona-list-background) outline-none`);
+
+export const listInnerListThemeVariants = cva(
+    `m-0 h-full list-none overflow-x-hidden overflow-y-auto p-0 outline-none [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]`
 );
 
-export const listInnerListVariants = cva(
-    `
-        list-none p-0 m-0 overflow-x-hidden overflow-y-auto
-        h-full outline-none
-    `
-);
-
-export const listGroupHeaderVariants = cva(``, {
+export const listGroupHeaderThemeVariants = cva(``, {
     variants: {
         hasTemplate: {
             true: "",
-            false: "py-1 font-bold"
+            false: "border-y-[length:var(--mona-list-group-border-width)] border-border-subtle bg-(--mona-list-group-background) py-1 font-[var(--mona-list-group-font-weight)]"
         }
     }
 });
 
-export const listGroupHeaderTextVariants = cva(`select-none`, {
+export const listGroupHeaderTextThemeVariants = cva(`select-none text-muted-foreground`, {
     variants: {
-        hasTemplate: {
-            true: "",
-            false: "font-bold w-full px-3 py-1"
-        }
+        hasTemplate: { true: "", false: "w-full px-3 py-1 font-[var(--mona-list-group-font-weight)]" }
     }
 });
 
-export const listItemBaseVariants = cva(
-    `
-        w-full h-full flex gap-2 items-center
-    `
-);
+export const listItemBaseThemeVariants = cva(`flex h-full w-full items-center gap-2`);
 
-export const listItemContentVariants = cva(
-    `
-        relative flex cursor-default select-none items-center
-        outline-none px-3 py-1
-        hover:bg-accent hover:text-accent-foreground
-        focus:bg-accent focus:text-accent-foreground
-    `,
+export const listItemContentThemeVariants = cva(
+    `relative flex cursor-default select-none items-center px-3 py-1 text-foreground outline-none hover:bg-hover focus:bg-hover`,
     {
         variants: {
-            checkboxes: {
-                true: "gap-2",
-                false: ""
-            },
+            checkboxes: { true: "gap-2", false: "" },
             highlighted: {
-                true: "bg-accent text-accent-foreground rounded-none inset-ring-1 inset-ring-gray-400/70",
+                true: "bg-hover text-foreground inset-ring-1 inset-ring-focus-indicator/35",
                 false: ""
             },
-            selected: {
-                true: "bg-primary text-primary-foreground inset-ring-1 inset-ring-primary-foreground/40",
-                false: ""
-            },
+            selected: { true: "bg-(--color-selected) text-(--color-selected-foreground)", false: "" },
             disabled: {
-                true: "pointer-events-none opacity-50 cursor-default",
+                true: "pointer-events-none cursor-default bg-(--mona-list-disabled-background) text-disabled-foreground",
                 false: "cursor-pointer"
             }
         },
@@ -67,29 +42,15 @@ export const listItemContentVariants = cva(
             {
                 selected: true,
                 checkboxes: false,
-                class: `
-                    bg-primary text-primary-foreground rounded-none
-                    inset-ring-1 inset-ring-primary-foreground/40
-                    hover:bg-primary hover:text-primary-foreground
-                    focus:bg-primary focus:text-primary-foreground
-                `
+                class: "bg-(--color-selected) text-(--color-selected-foreground) hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground) focus:bg-(--color-selected-focus) focus:text-(--color-selected-focus-foreground)"
             },
             {
                 highlighted: true,
                 selected: true,
                 checkboxes: false,
-                class: `
-                    bg-primary text-primary-foreground rounded-none
-                    inset-ring-1 inset-ring-primary-foreground/40
-                    hover:bg-primary hover:text-primary-foreground
-                    focus:bg-primary focus:text-primary-foreground
-                `
+                class: "bg-(--color-selected) text-(--color-selected-foreground) inset-ring-1 inset-ring-focus-indicator/35 hover:bg-(--color-selected-hover) hover:text-(--color-selected-hover-foreground) focus:bg-(--color-selected-focus) focus:text-(--color-selected-focus-foreground)"
             },
-            {
-                selected: true,
-                checkboxes: true,
-                class: `bg-transparent text-foreground`
-            }
+            { selected: true, checkboxes: true, class: "bg-transparent text-foreground" }
         ]
     }
 );

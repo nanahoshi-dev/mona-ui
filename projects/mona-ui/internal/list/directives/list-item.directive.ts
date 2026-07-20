@@ -4,7 +4,7 @@ import { fromEvent } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ListItem } from "../models/ListItem";
 import { ListService } from "../services/list.service";
-import { listItemContentVariants } from "../styles/list.styles";
+import { listItemContentThemeVariants } from "../styles/list.styles";
 
 @Directive({
     selector: "li[monaListItem]",
@@ -42,7 +42,12 @@ export class ListItemDirective<TData> {
         const highlighted = this.highlighted();
         const selected = this.selected();
         const checkboxes = this.#listService.selectableOptions().checkboxes;
-        const classes = listItemContentVariants({ disabled, highlighted, selected, checkboxes });
+        const classes = listItemContentThemeVariants({
+            disabled,
+            highlighted,
+            selected,
+            checkboxes
+        });
         return twMerge(classes);
     });
     public readonly item = input.required<ListItem<TData>>();

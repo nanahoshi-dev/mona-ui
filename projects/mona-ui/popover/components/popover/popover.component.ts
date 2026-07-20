@@ -16,7 +16,6 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Position } from "@nanahoshi/mona-ui/common";
 import { fadePopupAnimation, PopupRef, PopupService } from "@nanahoshi/mona-ui/popup";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { getOffsetForPosition, getPositionConnectionPoints } from "@nanahoshi/mona-ui/tooltip";
 import { filter, fromEvent, Subscription, take, takeUntil, tap } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -46,29 +45,24 @@ export class PopoverComponent implements PopoverVariantInputs {
     readonly #destroyRef = inject(DestroyRef);
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
-    readonly #themeService = inject(ThemeService);
     #subscription: Subscription | null = null;
     protected readonly arrowClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return popoverArrowThemeVariants(theme)();
+        return popoverArrowThemeVariants();
     });
     protected readonly baseClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
-        return popoverBaseThemeVariants(theme)({ rounded });
+        return popoverBaseThemeVariants({ rounded });
     });
     protected readonly contentClasses = computed(() => {
-        const theme = this.#themeService.theme();
-        return popoverContentThemeVariants(theme)();
+        return popoverContentThemeVariants();
     });
     protected readonly currentArrowPosition = computed(() => this.position());
     protected readonly footerTemplateRef = contentChild(PopoverFooterTemplateDirective, { read: TemplateRef });
     protected readonly headerClasses = computed(() => {
-        const theme = this.#themeService.theme();
         const rounded = this.rounded();
         const hasTemplate = !!this.titleTemplateRef();
         const padding = hasTemplate ? "p-0" : "p-2";
-        const variants = popoverHeaderThemeVariants(theme)({ rounded });
+        const variants = popoverHeaderThemeVariants({ rounded });
         return twMerge(variants, padding);
     });
     protected readonly headerId = computed(() =>

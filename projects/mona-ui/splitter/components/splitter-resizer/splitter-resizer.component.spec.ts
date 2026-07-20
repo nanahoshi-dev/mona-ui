@@ -32,4 +32,15 @@ describe("SplitterResizerComponent", () => {
     it("should create", () => {
         expect(hostComponent).toBeTruthy();
     });
+
+    it("uses a quiet neutral separator with a semantic keyboard focus indicator", () => {
+        const resizer = hostFixture.nativeElement.querySelector("mona-splitter-resizer") as HTMLElement;
+
+        expect(resizer.classList.contains("bg-border-subtle")).toBe(true);
+        expect(resizer.classList.contains("hover:bg-border-control")).toBe(true);
+        expect(resizer.classList.contains("active:bg-border-control-hover")).toBe(true);
+        expect(resizer.classList.contains("focus-visible:ring-focus-indicator/35")).toBe(true);
+        expect(resizer.classList.contains("bg-accent")).toBe(false);
+        expect(resizer.classList.contains("focus-visible:bg-primary")).toBe(false);
+    });
 });

@@ -17,7 +17,6 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { IndicatorIconComponent } from "@nanahoshi/mona-ui/internal/indicator-icon";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { fromEvent, Subscription, takeWhile } from "rxjs";
 import { twMerge } from "tailwind-merge";
 import { ButtonService } from "../services/button.service";
@@ -45,7 +44,6 @@ export class ButtonDirective implements ButtonVariantsInput {
     readonly #hostElementRef: ElementRef<HTMLButtonElement> = inject(ElementRef);
     readonly #injector = inject(Injector);
     readonly #renderer = inject(Renderer2);
-    readonly #themeService = inject(ThemeService);
     #loaderComponentRef: ComponentRef<IndicatorIconComponent> | null = null;
     #toggleSubscription: Subscription | null = null;
 
@@ -66,8 +64,7 @@ export class ButtonDirective implements ButtonVariantsInput {
         const size = this.effectiveSize();
         const selected = this.selected();
         const userClass = this.userClass();
-        const theme = this.#themeService.theme();
-        const variants = buttonThemeVariants(theme);
+        const variants = buttonThemeVariants;
         const variantClasses = variants({ disabled, iconOnly, loading, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });

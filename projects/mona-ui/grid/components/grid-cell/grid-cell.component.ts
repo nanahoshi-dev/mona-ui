@@ -1,7 +1,6 @@
 import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
 import { Component, computed, ElementRef, inject, input, LOCALE_ID } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
 import { GridService } from "../../services/grid.service";
@@ -27,23 +26,18 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 export class GridCellComponent {
     readonly #elementRef = inject(ElementRef<HTMLElement>);
     readonly #locale = inject(LOCALE_ID);
-    readonly #themeService = inject(ThemeService);
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridCellBaseThemeVariants(theme)();
+        return gridCellBaseThemeVariants();
     });
     protected readonly cellContainerClass = computed(() => {
-        const theme = this.#themeService.theme();
         const editing = this.isEditing();
-        return gridCellContainerThemeVariants(theme)({ editing });
+        return gridCellContainerThemeVariants({ editing });
     });
     protected readonly cellDirtyIndicatorClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridCellDirtyIndicatorThemeVariants(theme)();
+        return gridCellDirtyIndicatorThemeVariants();
     });
     protected readonly cellTextClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return gridCellTextThemeVariants(theme)();
+        return gridCellTextThemeVariants();
     });
     protected readonly cellUid = computed(() => `${this.row().uid}_${this.column().field}`);
     protected readonly displayValue = computed(() => {

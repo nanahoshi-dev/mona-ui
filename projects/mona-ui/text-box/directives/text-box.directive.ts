@@ -1,5 +1,4 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { inputThemeVariants, InputVariantInput, InputVariantProps } from "../styles/textbox.styles";
 import { twMerge } from "tailwind-merge";
 
@@ -10,12 +9,10 @@ import { twMerge } from "tailwind-merge";
     }
 })
 export class TextBoxDirective implements InputVariantInput {
-    readonly #themeService = inject(ThemeService);
     protected readonly classes = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
-        const theme = this.#themeService.theme();
-        const classes = inputThemeVariants(theme)({ rounded, size });
+        const classes = inputThemeVariants({ rounded, size });
         const userClass = this.userClass();
         return twMerge(classes, userClass);
     });

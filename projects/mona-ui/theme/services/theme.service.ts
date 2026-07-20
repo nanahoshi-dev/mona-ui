@@ -1,220 +1,157 @@
-import { DOCUMENT, inject, Injectable, signal } from "@angular/core";
-import { type ThemeId, ThemeStyle, type ThemeVariant } from "../models/Theme";
-import { generatePrimaryColorPalette } from "../utils/generateThemeColors";
-import { themeColorMap } from "../utils/themeColorMap";
+import { computed, DestroyRef, DOCUMENT, inject, Injectable, signal } from "@angular/core";
+import type { ThemeSelection } from "../models/Theme";
+import {
+    flattenThemeProfile,
+    type GeneratedThemeColorPalette,
+    type ThemeColorPaletteSeeds,
+    type ThemeColors,
+    type ThemeEffectLevel,
+    type ThemeProfile,
+    type ThemeVariable,
+    type ThemeVariables
+} from "../models/ThemeDefinition";
+import { THEME_OPTIONS, THEME_STRATEGY } from "../tokens/theme.tokens";
+import { generateThemeColorPalette } from "../utils/generate-theme-color-palette";
 
-@Injectable({
-    providedIn: "root"
-})
+@Injectable({ providedIn: "root" })
 export class ThemeService {
+    readonly #appliedVariables = new Set<ThemeVariable>();
     readonly #document = inject(DOCUMENT);
-    readonly #theme = signal<ThemeStyle>("mona");
-    readonly #themeVariant = signal<ThemeVariant>("light");
-    public readonly themeId = signal<ThemeId>("mona-light");
-    public readonly theme = this.#theme.asReadonly();
-    public readonly themeVariant = this.#themeVariant.asReadonly();
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #initialSelection = normalizeSelection(inject(THEME_OPTIONS).initialTheme);
+    readonly #strategy = inject(THEME_STRATEGY);
+
+    readonly #activeSelection = signal<ThemeSelection>(this.#initialSelection);
+    readonly #activeProfile = signal<ThemeProfile>(this.#strategy.resolve(this.#initialSelection));
+    readonly #activeColorPaletteSeeds = signal<ThemeColorPaletteSeeds | null>(null);
+    readonly #transparencyQuery = this.#document.defaultView?.matchMedia?.("(prefers-reduced-transparency: reduce)");
+    #runtimeColorPalette: GeneratedThemeColorPalette | null = null;
+
+    /** The consumer-provided seeds for the active runtime color palette, or `null` when provider defaults are active. */
+    public readonly colorPaletteSeeds = this.#activeColorPaletteSeeds.asReadonly();
+    public readonly profile = this.#activeProfile.asReadonly();
+    public readonly selection = this.#activeSelection.asReadonly();
+    public readonly themeName = computed(() => this.#activeSelection().name);
+    public readonly themeVariant = computed(() => this.#activeSelection().variant);
 
     public constructor() {
-        this.updateThemeVariables();
-    }
-
-    public setThemeId(themeId: ThemeId): void {
-        const [theme, variant] = themeId.split("-") as [ThemeStyle, ThemeVariant];
-        this.#theme.set(theme);
-        this.#themeVariant.set(variant);
-        this.themeId.set(themeId);
-        this.updateThemeVariables();
-    }
-
-    private getActiveThemeVariables(): Record<string, string> {
-        const theme = this.theme();
-        const variant = this.themeVariant();
-        if (theme === "mona") {
-            return variant === "light" ? this.getMonaLightThemeVariables() : this.getMonaDarkThemeVariables();
+        this.#applyTheme(this.#initialSelection, this.#activeProfile());
+        const query = this.#transparencyQuery;
+        if (query) {
+            const onPreferenceChange = (): void => this.#applyTheme(this.#activeSelection(), this.#activeProfile());
+            query.addEventListener("change", onPreferenceChange);
+            this.#destroyRef.onDestroy(() => query.removeEventListener("change", onPreferenceChange));
         }
-        return {};
     }
 
-    private getMonaDarkThemeVariables(): Record<string, string> {
-        return {
-            "--color-background": "oklch(0.21 0 0)",
-            "--color-background-dark": "oklch(0.19 0 0)",
-            "--color-foreground": "oklch(100% 0.001 106.424)",
-            "--color-hover": "oklch(22.5% 0 0)",
-            "--color-active": "oklch(19.5% 0 0)",
-            "--color-selected": "oklch(24% 0 0)",
+    /** Removes the runtime color palette and restores the registered profile and provider overrides. */
+    public clearColorPalette(): void {
+        const selection = this.#activeSelection();
+        const profile = this.#strategy.resolve(selection);
 
-            "--color-header-background": "oklch(0.18 0 0)",
-            "--color-header-foreground": "oklch(0.20 0 0)",
-
-            "--color-accent": "oklch(24.5% 0 0)",
-            "--color-accent-dark": "oklch(21.5% 0 0)",
-            "--color-accent-foreground": "oklch(97% 0 0)",
-            "--color-accent-hover": "oklch(26.5% 0 0)",
-            "--color-accent-active": "oklch(31.5% 0 0)",
-
-            "--color-input-background": "oklch(0.20 0 0)",
-            "--color-input-border": "oklch(0.12 0 0)",
-            "--color-input-hover": "oklch(0.22 0 0)",
-            "--color-input-active": "oklch(0.21 0 0)",
-
-            "--color-popover": "#fff",
-            "--color-popover-foreground": "#09090b",
-
-            ...generatePrimaryColorPalette(themeColorMap.flora),
-
-            "--color-secondary": "oklch(0.27 0 0)",
-            "--color-secondary-foreground": "oklch(97.7% 0.001 106.424)",
-            "--color-secondary-hover": "oklch(0.29 0 0)",
-            "--color-secondary-active": "oklch(0.31 0 0)",
-            // "--color-secondary-selected": "oklch(43.8% 0.195 277.366 / 0.5)",
-
-            "--color-success": "oklch(62.7% 0.194 149.214)",
-            "--color-success-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-success-hover": "oklch(66.7% 0.194 149.214)",
-            "--color-success-active": "oklch(54.7% 0.194 149.214)",
-            "--color-success-selected": "oklch(76.7% 0.194 149.214)",
-
-            "--color-error": "oklch(57.7% 0.245 27.325)",
-            "--color-error-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-error-hover": "oklch(61.7% 0.245 27.325)",
-            "--color-error-active": "oklch(53.7% 0.245 27.325)",
-            "--color-error-selected": "oklch(71.7% 0.245 27.325)",
-
-            "--color-warning": "oklch(66.6% 0.179 58.318)",
-            "--color-warning-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-warning-hover": "oklch(70.6% 0.179 58.318)",
-            "--color-warning-active": "oklch(58.6% 0.179 58.318)",
-            "--color-warning-selected": "oklch(80.6% 0.179 58.318)",
-
-            "--color-info": "oklch(54.6% 0.245 262.881)",
-            "--color-info-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-info-hover": "oklch(58.6% 0.245 262.881)",
-            "--color-info-active": "oklch(46.6% 0.245 262.881)",
-            "--color-info-selected": "oklch(68.6% 0.245 262.881)",
-
-            "--color-muted": "#f4f4f5",
-            "--color-muted-foreground": "#71717a",
-
-            "--color-border": "oklch(0.1689 0.0021 286.18)",
-            "--color-input": "#e4e4e7",
-
-            "--color-chart-1": "#e76e50",
-            "--color-chart-2": "#2a9d90",
-            "--color-chart-3": "#274754",
-            "--color-chart-4": "#e8c468",
-            "--color-chart-5": "#f4a462",
-
-            "--color-scrollbar-thumb": "#d1d5db",
-            "--color-scrollbar-thumb-hover": "#9ca3af",
-            "--color-scrollbar-thumb-active": "#6b7280",
-            "--color-scrollbar-thumb-focus": "#9ca3af",
-            "--color-scrollbar-track": "#f9fafb",
-            "--color-scrollbar-track-hover": "#f4f5f7",
-            "--color-scrollbar-track-active": "#e5e7eb",
-            "--color-scrollbar-track-focus": "#f4f5f7",
-            "--color-scrollbar-corner": "#f9fafb",
-
-            // Temporary variables for testing purposes
-            "--page-background": "#1a1b1c",
-            "--color-demo-background": "#202122"
-            // "--color-demo-background": "oklch(0.24 0 0)"
-        };
+        this.#applyTheme(selection, profile);
+        this.#runtimeColorPalette = null;
+        this.#activeProfile.set(profile);
+        this.#activeColorPaletteSeeds.set(null);
     }
 
-    private getMonaLightThemeVariables(): Record<string, string> {
-        return {
-            "--color-background": "oklch(1 0 0)",
-            "--color-background-dark": "oklch(0.99 0 0)",
-            "--color-foreground": "oklch(0.1407 0.0044 285.82)",
-            "--color-hover": "oklch(0.96 0 0)",
-            "--color-active": "oklch(0.94 0 0)",
-            "--color-selected": "#f4f5f7",
+    /**
+     * Applies a runtime-generated semantic color palette after all registered profile overrides.
+     * The palette remains active across theme and light/dark switches until cleared.
+     */
+    public setColorPalette(seeds: ThemeColorPaletteSeeds): void {
+        const normalizedSeeds = Object.freeze({ ...seeds });
+        const palette = generateThemeColorPalette(normalizedSeeds);
+        const selection = this.#activeSelection();
+        const baseProfile = this.#strategy.resolve(selection);
+        const profile = applyColorPalette(baseProfile, palette[selection.variant]);
 
-            "--color-header-background": "oklch(0.97 0 0)",
-            "--color-header-foreground": "oklch(0.99 0 0)",
-
-            "--color-accent": "oklch(0.96 0 0)",
-            "--color-accent-dark": "oklch(0.93 0 0)",
-            "--color-accent-foreground": "oklch(0.21 0 0)",
-            "--color-accent-hover": "oklch(0.95 0 0)",
-            "--color-accent-active": "oklch(0.90 0 0)",
-
-            "--color-input-background": "oklch(1 0 0)",
-            "--color-input-border": "oklch(0.92 0 0)",
-            "--color-input-hover": "oklch(0.95 0 0)",
-            "--color-input-active": "oklch(0.98 0 0)",
-
-            "--color-popover": "#fff",
-            "--color-popover-foreground": "#09090b",
-
-            ...generatePrimaryColorPalette("oklch(0.21 0.01 0)"),
-            // ...generatePrimaryColorPalette("oklch(0.59 0.25 17.59)"),
-
-            "--color-secondary": "oklch(.97 0 0)",
-            "--color-secondary-foreground": "oklch(0.21 0 0)",
-            "--color-secondary-hover": "oklch(0.95 0 0)",
-            "--color-secondary-active": "oklch(0.90 0 0)",
-
-            "--color-success": "oklch(62.7% 0.194 149.214)",
-            "--color-success-foreground": "oklch(97.7% 0.001 106.424)",
-            "--color-success-hover": "oklch(66.7% 0.194 149.214)",
-            "--color-success-active": "oklch(54.7% 0.194 149.214)",
-            "--color-success-selected": "oklch(76.7% 0.194 149.214)",
-
-            "--color-error": "oklch(57.7% 0.245 27.325)",
-            "--color-error-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-error-hover": "oklch(61.7% 0.245 27.325)",
-            "--color-error-active": "oklch(53.7% 0.245 27.325)",
-            "--color-error-selected": "oklch(71.7% 0.245 27.325)",
-
-            "--color-warning": "oklch(66.6% 0.179 58.318)",
-            "--color-warning-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-warning-hover": "oklch(70.6% 0.179 58.318)",
-            "--color-warning-active": "oklch(58.6% 0.179 58.318)",
-            "--color-warning-selected": "oklch(80.6% 0.179 58.318)",
-
-            "--color-info": "oklch(54.6% 0.245 262.881)",
-            "--color-info-foreground": "oklch(94.3% 0.029 294.588)",
-            "--color-info-hover": "oklch(58.6% 0.245 262.881)",
-            "--color-info-active": "oklch(46.6% 0.245 262.881)",
-            "--color-info-selected": "oklch(68.6% 0.245 262.881)",
-
-            "--color-muted": "#f4f4f5",
-            "--color-muted-foreground": "#71717a",
-
-            "--color-destructive": "#ef4444",
-            "--color-destructive-foreground": "#fafafa",
-
-            "--color-border": "oklch(0.9197 0.004 286.32)",
-            "--color-input": "#e4e4e7",
-
-            "--color-chart-1": "#e76e50",
-            "--color-chart-2": "#2a9d90",
-            "--color-chart-3": "#274754",
-            "--color-chart-4": "#e8c468",
-            "--color-chart-5": "#f4a462",
-
-            "--color-scrollbar-thumb": "#d1d5db",
-            "--color-scrollbar-thumb-hover": "#9ca3af",
-            "--color-scrollbar-thumb-active": "#6b7280",
-            "--color-scrollbar-thumb-focus": "#9ca3af",
-            "--color-scrollbar-track": "#f9fafb",
-            "--color-scrollbar-track-hover": "#f4f5f7",
-            "--color-scrollbar-track-active": "#e5e7eb",
-            "--color-scrollbar-track-focus": "#f4f5f7",
-            "--color-scrollbar-corner": "#f9fafb",
-
-            "--page-background": "#fff",
-            "--color-demo-background": "#f9fafb"
-        };
+        this.#applyTheme(selection, profile);
+        this.#runtimeColorPalette = palette;
+        this.#activeProfile.set(profile);
+        this.#activeColorPaletteSeeds.set(normalizedSeeds);
     }
 
-    private updateThemeVariables(): void {
-        const themeVariables = this.getActiveThemeVariables();
-        const root = this.#document.querySelector(":root") as HTMLElement;
-        Object.entries(themeVariables).forEach(([key, value]) => {
-            root.style.setProperty(key, value);
-        });
+    /** Updates only the runtime primary seed while retaining any other active runtime seeds. */
+    public setPrimaryColor(primary: string): void {
+        this.setColorPalette({ ...(this.#activeColorPaletteSeeds() ?? {}), primary });
     }
+
+    public setTheme(selection: ThemeSelection): void {
+        const normalized = normalizeSelection(selection);
+        const profile = this.#resolveProfile(normalized);
+        this.#applyTheme(normalized, profile);
+        this.#activeProfile.set(profile);
+        this.#activeSelection.set(normalized);
+    }
+
+    #applyTheme(selection: ThemeSelection, profile: ThemeProfile): void {
+        const root = this.#document.documentElement;
+        if (!root) {
+            return;
+        }
+
+        const transparency = this.#getTransparencyMode();
+        const variables = getEffectiveVariables(profile, transparency);
+        for (const previousName of this.#appliedVariables) {
+            if (!(previousName in variables)) {
+                root.style.removeProperty(previousName);
+            }
+        }
+        for (const [name, value] of Object.entries(variables)) {
+            root.style.setProperty(name, value);
+        }
+
+        root.setAttribute("data-mona-theme", selection.name);
+        root.setAttribute("data-mona-variant", selection.variant);
+        root.setAttribute("data-mona-transparency", transparency);
+        this.#appliedVariables.clear();
+        for (const name of Object.keys(variables)) {
+            this.#appliedVariables.add(name as ThemeVariable);
+        }
+    }
+
+    #getTransparencyMode(): TransparencyMode {
+        const css = this.#document.defaultView?.CSS;
+        const supportsBackdropFilter =
+            css?.supports("backdrop-filter", "blur(1px)") === true ||
+            css?.supports("-webkit-backdrop-filter", "blur(1px)") === true;
+        return supportsBackdropFilter && this.#transparencyQuery?.matches !== true ? "full" : "reduced";
+    }
+
+    #resolveProfile(selection: ThemeSelection): ThemeProfile {
+        const profile = this.#strategy.resolve(selection);
+        const palette = this.#runtimeColorPalette;
+        return palette ? applyColorPalette(profile, palette[selection.variant]) : profile;
+    }
+}
+
+type TransparencyMode = "full" | "reduced";
+
+const effectLevels: readonly ThemeEffectLevel[] = ["control", "raised", "overlay"];
+
+function applyColorPalette(profile: ThemeProfile, colors: ThemeColors): ThemeProfile {
+    return Object.freeze({
+        ...profile,
+        colors: Object.freeze({ ...profile.colors, ...colors })
+    });
+}
+
+function getEffectiveVariables(profile: ThemeProfile, transparency: TransparencyMode): ThemeVariables {
+    const variables: Record<ThemeVariable, string> = { ...flattenThemeProfile(profile) };
+    if (transparency === "full") {
+        return variables;
+    }
+
+    for (const level of effectLevels) {
+        variables[`--mona-effect-${level}-background-color`] =
+            profile.effects[`--mona-effect-${level}-fallback-background-color`];
+        variables[`--mona-effect-${level}-background-image`] = "none";
+        variables[`--mona-effect-${level}-backdrop-filter`] = "none";
+    }
+    return variables;
+}
+
+function normalizeSelection(selection: ThemeSelection): ThemeSelection {
+    return Object.freeze({ name: selection.name, variant: selection.variant });
 }

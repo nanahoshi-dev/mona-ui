@@ -1,5 +1,10 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { WindowService } from "../../services/window.service";
+import {
+    windowBaseThemeVariants,
+    windowContentContainerThemeVariants,
+    windowTitleBarThemeVariants
+} from "../../styles/window.styles";
 import { WindowComponent } from "./window.component";
 
 describe("WindowComponent", () => {
@@ -18,5 +23,20 @@ describe("WindowComponent", () => {
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("uses an overlay surface and a neutral default title bar", () => {
+        const windowClasses = windowBaseThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const contentClasses = windowContentContainerThemeVariants({ rounded: "medium" }).split(/\s+/);
+        const titleClasses = windowTitleBarThemeVariants({ look: "default", rounded: "medium" }).split(/\s+/);
+
+        expect(windowClasses).toContain(
+            "[background-color:var(--mona-effect-overlay-background-color,var(--color-surface-overlay))]"
+        );
+        expect(contentClasses).toContain("border-border");
+        expect(contentClasses).toContain("shadow-(--shadow-overlay)");
+        expect(titleClasses).toContain("bg-surface-muted");
+        expect(titleClasses).toContain("border-border-subtle");
+        expect(titleClasses).not.toContain("bg-secondary");
     });
 });

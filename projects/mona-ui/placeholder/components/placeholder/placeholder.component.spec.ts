@@ -58,6 +58,13 @@ describe("PlaceholderComponent", () => {
         expect(host).toBeTruthy();
     });
 
+    it("uses a muted theme surface without a hardcoded light background", () => {
+        const host = getHostElement(fixture);
+
+        expect(host.classList.contains("bg-surface-muted/50")).toBe(true);
+        expect(host.classList.contains("bg-white")).toBe(false);
+    });
+
     // =========================================================================
     // Projected Content Mode
     // =========================================================================

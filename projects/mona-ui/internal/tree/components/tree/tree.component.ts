@@ -15,7 +15,6 @@ import {
     untracked
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { asapScheduler, filter, fromEvent, switchMap, takeWhile } from "rxjs";
 import { TreeNodeTemplateDirective } from "../../directives/tree-node-template.directive";
 import { NodeCheckEvent } from "../../models/NodeCheckEvent";
@@ -44,7 +43,6 @@ export class TreeComponent<T> {
     readonly #destroyRef = inject(DestroyRef);
     readonly #focusMonitor = inject(FocusMonitor);
     readonly #hostElementRef: ElementRef<HTMLElement> = inject(ElementRef);
-    readonly #themeService = inject(ThemeService);
     readonly #zone: NgZone = inject(NgZone);
     #lastNavigatedNode: TreeNode<T> | null = null;
     protected readonly activeDescendantId = computed<string | null>(() => {
@@ -52,8 +50,7 @@ export class TreeComponent<T> {
         return node === null ? null : this.treeService.getNodeElementId(node.uid);
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return treeBaseThemeVariants(theme)();
+        return treeBaseThemeVariants();
     });
     public readonly ariaLabel = input<string>("");
     public readonly treeService: TreeService<T> = inject(TreeService);

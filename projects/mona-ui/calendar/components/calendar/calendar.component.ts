@@ -23,7 +23,6 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { PreventableEvent, TakeFirstPipe } from "@nanahoshi/mona-ui/common";
 import { CalendarService, CalendarView, DateDisabledType } from "@nanahoshi/mona-ui/date-input";
 import { createElementControlId, rxTimeout } from "@nanahoshi/mona-ui/internal";
-import { ThemeService } from "@nanahoshi/mona-ui/theme";
 import { DateTime, DurationObjectUnits } from "luxon";
 import { fromEvent, skip } from "rxjs";
 import { twMerge } from "tailwind-merge";
@@ -137,7 +136,6 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
         return [];
     });
-    readonly #themeService = inject(ThemeService);
     protected readonly ariaLabel = computed(() => {
         const view = this.calendarView();
         const navigatedDate = this.navigatedDate();
@@ -152,11 +150,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         }
     });
     protected readonly baseClass = computed(() => {
-        const theme = this.#themeService.theme();
         const disabled = this.disabled();
         const readonly = this.readonly();
         const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        const variantClass = calendarBaseThemeVariants(theme)({ disabled, readonly, rounded });
+        const variantClass = calendarBaseThemeVariants({ disabled, readonly, rounded });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
@@ -166,8 +163,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return this.decadeStart() + 9;
     });
     protected readonly decadeGridClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return calendarDecadeViewGridThemeVariants(theme)();
+        return calendarDecadeViewGridThemeVariants();
     });
     protected readonly decadeStart = computed(() => {
         const navigatedDate = this.navigatedDate();
@@ -184,8 +180,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     });
     protected readonly gridId = createElementControlId();
     protected readonly headerClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return calendarHeaderThemeVariants(theme)({});
+        return calendarHeaderThemeVariants({});
     });
     protected readonly invalidState = computed(
         () => this.invalid() || (this.required() && this.touched() && this.isEmptyValue())
@@ -210,12 +205,10 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
             .toImmutableSet();
     });
     protected readonly monthGridClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return calendarMonthViewGridThemeVariants(theme)();
+        return calendarMonthViewGridThemeVariants();
     });
     protected readonly monthGridHeaderClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return calendarMonthViewGridHeaderThemeVariants(theme)();
+        return calendarMonthViewGridHeaderThemeVariants();
     });
     protected readonly months = computed(() => {
         const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -309,8 +302,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
     });
     protected readonly yearCellTemplate = contentChild(CalendarYearCellTemplateDirective);
     protected readonly yearGridClass = computed(() => {
-        const theme = this.#themeService.theme();
-        return calendarYearViewGridThemeVariants(theme)();
+        return calendarYearViewGridThemeVariants();
     });
 
     /**
