@@ -106,6 +106,41 @@ providers: [
 
 Theme registrations are static root-level configuration. They customize the global theme written by `ThemeService`; component-level providers do not create independently scoped themes.
 
+## Change Brand Colors at Runtime
+
+Inject `ThemeService` when the application user can choose a brand color after bootstrap. A single primary seed regenerates all related semantic roles and updates the root variables immediately:
+
+```ts
+import { inject } from "@angular/core";
+import { ThemeService } from "@nanahoshi/mona-ui/theme";
+
+export class AppearanceSettings {
+    readonly #theme = inject(ThemeService);
+
+    protected usePrimaryColor(color: string): void {
+        this.#theme.setPrimaryColor(color);
+    }
+
+    protected restoreConfiguredPalette(): void {
+        this.#theme.clearColorPalette();
+    }
+}
+```
+
+Use `setColorPalette()` when users can customize more roles:
+
+```ts
+themeService.setColorPalette({
+    primary: "#3f6be2",
+    secondary: "#526070",
+    success: "#287a4b"
+});
+```
+
+The runtime palette is applied after registered profiles and provider overrides. It remains active when `setTheme()` switches families or variants, using its generated light or dark tones as appropriate. `clearColorPalette()` restores the provider-resolved palette. `colorPaletteSeeds` is a readonly signal for displaying the current runtime choice.
+
+Runtime updates are atomic: invalid or translucent colors throw before the active profile, signals, or root styles change. Persistence is application-owned; save the selected seed in your preferred settings store and reapply it during startup when needed.
+
 ## Select the Initial Theme
 
 Mona Light is the default. Configure a different registered selection at bootstrap:

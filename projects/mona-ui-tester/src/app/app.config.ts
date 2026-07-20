@@ -3,12 +3,7 @@ import { provideHttpClient, withXhr } from "@angular/common/http";
 import { ApplicationConfig, importProvidersFrom } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { provideRouter } from "@angular/router";
-import {
-    generateThemeColorPalette,
-    provideThemeColorPalette,
-    provideThemeFamily,
-    provideThemeOverrides
-} from "@nanahoshi/mona-ui/theme";
+import { generateThemeColorPalette, provideThemeFamily, provideThemeOverrides } from "@nanahoshi/mona-ui/theme";
 import HighlightJS from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import json from "highlight.js/lib/languages/json";
@@ -85,12 +80,6 @@ export const appConfig: ApplicationConfig = {
                     })
                 }
             ]
-        }),
-        provideThemeColorPalette({
-            theme: "mona",
-            seeds: {
-                primary: "#00ff96"
-            }
         })
     ]
 };

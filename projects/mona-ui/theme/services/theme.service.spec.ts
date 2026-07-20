@@ -6,6 +6,7 @@ import { DefaultThemeStrategy } from "../strategies/default-theme.strategy";
 import type { ThemeStrategy } from "../strategies/theme.strategy";
 import { THEME_OPTIONS, THEME_STRATEGY } from "../tokens/theme.tokens";
 import { ThemeService } from "./theme.service";
+import { generateThemeColorPalette } from "../utils/generate-theme-color-palette";
 
 describe("ThemeService", () => {
     let root: HTMLElement;
@@ -62,6 +63,65 @@ describe("ThemeService", () => {
         expect(root.getAttribute("data-mona-variant")).toBe("dark");
     });
 
+    it("applies a runtime primary palette and exposes its immutable seed", () => {
+        const expected = generateThemeColorPalette({ primary: "#0057b8" }).light;
+
+        service.setPrimaryColor("#0057b8");
+
+        expect(service.colorPaletteSeeds()).toEqual({ primary: "#0057b8" });
+        expect(Object.isFrozen(service.colorPaletteSeeds())).toBe(true);
+        expect(service.profile().colors["--color-primary"]).toBe(expected["--color-primary"]);
+        expect(service.profile().colors["--color-primary-hover"]).toBe(expected["--color-primary-hover"]);
+        expect(root.style.getPropertyValue("--color-primary")).toBe(expected["--color-primary"]);
+        expect(root.style.getPropertyValue("--color-focus-indicator")).toBe("var(--color-primary)");
+    });
+
+    it("retains runtime palette seeds and uses the matching generated variant when switching themes", () => {
+        const expected = generateThemeColorPalette({ primary: "#0057b8" });
+        service.setPrimaryColor("#0057b8");
+
+        service.setTheme({ name: "mona", variant: "dark" });
+
+        expect(service.colorPaletteSeeds()).toEqual({ primary: "#0057b8" });
+        expect(service.profile().colors["--color-primary"]).toBe(expected.dark["--color-primary"]);
+        expect(root.style.getPropertyValue("--color-primary")).toBe(expected.dark["--color-primary"]);
+    });
+
+    it("retains non-primary runtime seeds when updating only the primary color", () => {
+        service.setColorPalette({ primary: "#0057b8", success: "#137333" });
+
+        service.setPrimaryColor("#7444c3");
+
+        expect(service.colorPaletteSeeds()).toEqual({ primary: "#7444c3", success: "#137333" });
+        const expected = generateThemeColorPalette({ primary: "#7444c3", success: "#137333" }).light;
+        expect(root.style.getPropertyValue("--color-primary")).toBe(expected["--color-primary"]);
+        expect(root.style.getPropertyValue("--color-success")).toBe(expected["--color-success"]);
+    });
+
+    it("clears the runtime palette and restores provider-resolved colors", () => {
+        service.setPrimaryColor("#0057b8");
+        expect(root.style.getPropertyValue("--color-accent")).not.toBe("");
+
+        service.clearColorPalette();
+
+        expect(service.colorPaletteSeeds()).toBeNull();
+        expect(service.profile().colors["--color-primary"]).toBe("mona-light");
+        expect(root.style.getPropertyValue("--color-primary")).toBe("mona-light");
+        expect(root.style.getPropertyValue("--color-accent")).toBe("");
+    });
+
+    it("rejects invalid runtime colors without partially changing state or the DOM", () => {
+        service.setPrimaryColor("#0057b8");
+        const beforeStyle = root.getAttribute("style");
+        const beforeProfile = service.profile();
+        const beforeSeeds = service.colorPaletteSeeds();
+
+        expect(() => service.setPrimaryColor("not-a-color")).toThrowError("Invalid primary theme color seed");
+        expect(service.profile()).toBe(beforeProfile);
+        expect(service.colorPaletteSeeds()).toBe(beforeSeeds);
+        expect(root.getAttribute("style")).toBe(beforeStyle);
+    });
+
     it("removes variables absent from the next profile", () => {
         expect(root.style.getPropertyValue("--example-light-only")).toBe("present");
 
@@ -81,6 +141,7 @@ describe("ThemeService", () => {
     });
 
     it("exposes read-only signals", () => {
+        expect("set" in service.colorPaletteSeeds).toBe(false);
         expect("set" in service.selection).toBe(false);
         expect("set" in service.profile).toBe(false);
         expect("set" in service.themeName).toBe(false);
