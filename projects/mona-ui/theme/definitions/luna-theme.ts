@@ -34,7 +34,11 @@ export const lunaTheme = Object.freeze({
                 "--mona-date-popup-calendar-background-image": "none",
                 "--mona-dropdown-popup-list-background": "transparent",
                 "--mona-input-addon-background":
-                    "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"
+                    "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)",
+                "--mona-menu-item-hover-background": "rgb(37 37 37 / 0.06)",
+                "--mona-menu-item-hover-foreground": "var(--color-foreground)",
+                "--mona-menubar-backdrop-filter": "var(--mona-effect-control-backdrop-filter)",
+                "--mona-menubar-background-image": "var(--mona-effect-control-background-image)"
             }),
             components: Object.freeze({
                 "--mona-calendar-background": "var(--mona-effect-raised-background-color)",
@@ -44,8 +48,8 @@ export const lunaTheme = Object.freeze({
                 "--mona-list-group-background": "var(--color-surface-muted)",
                 "--mona-list-group-border-width": "1px",
                 "--mona-list-group-font-weight": "650",
-                "--mona-menubar-background": "var(--mona-effect-raised-background-color)",
-                "--mona-menubar-shadow": "var(--shadow-raised)",
+                "--mona-menubar-background": "var(--mona-effect-control-background-color)",
+                "--mona-menubar-shadow": "var(--shadow-control)",
                 "--mona-pager-background": "var(--mona-effect-raised-background-color)",
                 "--mona-slider-handle-border-color": "var(--color-border-control)",
                 "--mona-tab-list-background": "#f5f5f6",
@@ -80,7 +84,9 @@ export const lunaTheme = Object.freeze({
                 "--mona-date-popup-calendar-background-image": "none",
                 "--mona-dropdown-popup-list-background": "transparent",
                 "--mona-input-addon-background":
-                    "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"
+                    "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)",
+                "--mona-menubar-backdrop-filter": "var(--mona-effect-control-backdrop-filter)",
+                "--mona-menubar-background-image": "var(--mona-effect-control-background-image)"
             }),
             components: Object.freeze({
                 "--mona-calendar-background": "var(--mona-effect-raised-background-color)",
@@ -90,8 +96,8 @@ export const lunaTheme = Object.freeze({
                 "--mona-list-group-background": "var(--color-surface-muted)",
                 "--mona-list-group-border-width": "1px",
                 "--mona-list-group-font-weight": "650",
-                "--mona-menubar-background": "var(--mona-effect-raised-background-color)",
-                "--mona-menubar-shadow": "var(--shadow-raised)",
+                "--mona-menubar-background": "var(--mona-effect-control-background-color)",
+                "--mona-menubar-shadow": "var(--shadow-control)",
                 "--mona-pager-background": "var(--mona-effect-raised-background-color)",
                 "--mona-slider-handle-border-color": "var(--color-border-control)",
                 "--mona-tab-list-background": "var(--mona-effect-raised-background-color)",

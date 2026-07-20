@@ -24,9 +24,11 @@ describe("PopupMenuItemComponent", () => {
     it("uses the same neutral highlight for leaf and submenu rows", () => {
         const classes = popupMenuItemThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
 
-        expect(classes).toContain("hover:bg-hover");
-        expect(classes).toContain("focus-within:bg-hover");
-        expect(classes).toContain("data-[active='true']:bg-hover");
+        expect(classes).toContain("hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain("focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain(
+            "data-[active='true']:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]"
+        );
         expect(classes).toContain("data-[active='true']:text-foreground");
         expect(classes).toContain("data-[disabled='true']:text-disabled-foreground");
         expect(classes).not.toContain("data-[active='true']:bg-(--color-selected)");

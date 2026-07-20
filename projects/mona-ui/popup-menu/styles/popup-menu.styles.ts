@@ -50,11 +50,13 @@ export const popupMenuItemThemeVariants = cva(
     `
         relative flex cursor-pointer select-none items-center gap-2 py-1 pr-2 pl-8
         text-foreground outline-none
-        hover:bg-hover hover:text-foreground
-        focus-within:bg-hover focus-within:text-foreground focus-within:outline-none
+        hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))] hover:text-foreground
+        focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
+        focus-within:text-foreground focus-within:outline-none
         data-[disabled='true']:pointer-events-none data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground
-        data-[active='true']:bg-hover data-[active='true']:text-foreground
+        data-[active='true']:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]
+        data-[active='true']:text-foreground
     `,
     {
         variants: {

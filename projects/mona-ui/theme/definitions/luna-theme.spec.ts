@@ -26,9 +26,16 @@ describe("Luna theme", () => {
             expect(profile.effects["--mona-effect-control-backdrop-filter"]).toBe("blur(16px) saturate(110%)");
             expect(profile.effects["--mona-effect-raised-backdrop-filter"]).toBe("blur(22px) saturate(112%)");
             expect(profile.effects["--mona-effect-overlay-backdrop-filter"]).toBe("blur(28px) saturate(115%)");
-            expect(profile.components["--mona-menubar-background"]).toBe("var(--mona-effect-raised-background-color)");
+            expect(profile.components["--mona-menubar-background"]).toBe("var(--mona-effect-control-background-color)");
+            expect(profile.components["--mona-menubar-shadow"]).toBe("var(--shadow-control)");
             expect(profile.components["--mona-list-background"]).toBe("var(--color-surface)");
             expect(profile.components["--mona-tab-content-background"]).toBe("var(--color-surface)");
+            expect(profile.custom?.["--mona-menubar-background-image"]).toBe(
+                "var(--mona-effect-control-background-image)"
+            );
+            expect(profile.custom?.["--mona-menubar-backdrop-filter"]).toBe(
+                "var(--mona-effect-control-backdrop-filter)"
+            );
         }
     });
 
@@ -56,6 +63,10 @@ describe("Luna theme", () => {
             "--mona-effect-overlay-fallback-background-color": "#f9f9fa"
         });
         expect(lunaTheme.variants.light.components["--mona-tab-list-background"]).toBe("#f5f5f6");
+        expect(lunaTheme.variants.light.custom?.["--mona-menu-item-hover-background"]).toBe("rgb(37 37 37 / 0.06)");
+        expect(lunaTheme.variants.light.custom?.["--mona-menu-item-hover-foreground"]).toBe("var(--color-foreground)");
+        expect(lunaTheme.variants.dark.custom).not.toHaveProperty("--mona-menu-item-hover-background");
+        expect(lunaTheme.variants.dark.custom).not.toHaveProperty("--mona-menu-item-hover-foreground");
         for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
             expect(profile.custom?.["--mona-input-addon-background"]).toBe(
                 "color-mix(in srgb, var(--color-input-background), var(--color-foreground) 8%)"

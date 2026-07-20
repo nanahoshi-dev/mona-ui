@@ -10,17 +10,17 @@
         @let menuId = item.uid + "-menu";
         <li
             [class]="listItemClasses()"
-            [attr.data-disabled]="item.disabled()"
+            [attr.data-disabled]="disabled() || item.disabled()"
             [attr.data-active]="currentPopupMenu() != null && currentPopupMenu() === item.popupMenu"
             [attr.data-mid]="item.uid"
-            [attr.tabindex]="item.disabled() ? -1 : i === activeIndex() ? 0 : -1"
+            [attr.tabindex]="disabled() || item.disabled() ? -1 : i === activeIndex() ? 0 : -1"
             [attr.role]="'menuitem'"
             [attr.aria-haspopup]="'menu'"
             [attr.aria-expanded]="
                 currentPopupMenu() != null && currentPopupMenu() === item.popupMenu ? 'true' : 'false'
             "
             [attr.aria-controls]="currentPopupMenu() != null && currentPopupMenu() === item.popupMenu ? menuId : null"
-            [attr.aria-disabled]="item.disabled()"
+            [attr.aria-disabled]="disabled() || item.disabled()"
             (pointerenter)="onMenuPointerEnter(item, listItemElement, popupMenu)"
             (keydown)="onMenuKeyDown($event, item, popupMenu)"
             (click)="onMenuClick($event, item)"

@@ -143,6 +143,14 @@ export class PopupMenuListComponent implements OnInit {
         this.#parentConfig.menuItemClick$.next(popupMenuItemClickEvent);
     }
 
+    private closePopup(): void {
+        if (this.popupRef) {
+            this.popupRef.close();
+            this.popupRef = null;
+        }
+        this.#close$.next();
+    }
+
     private createSubmenu(target: HTMLElement, viaKeyboard: boolean): Observable<PopupCloseEvent> {
         this.#viaKeyboardNavigation.set(viaKeyboard);
         const minWidth = this.#parentConfig.minWidth?.() ?? undefined;
@@ -286,10 +294,7 @@ export class PopupMenuListComponent implements OnInit {
     }
 
     private handleEscapeKey(): void {
-        if (this.popupRef) {
-            this.popupRef.close();
-            this.popupRef = null;
-        }
+        this.closePopup();
     }
 
     private handleHomeKey(): void {
@@ -364,12 +369,7 @@ export class PopupMenuListComponent implements OnInit {
         this.#parentConfig.parentClose$
             .pipe(
                 takeUntilDestroyed(this.#destroyRef),
-                tap(() => {
-                    if (this.popupRef) {
-                        this.popupRef.close();
-                        this.popupRef = null;
-                    }
-                })
+                tap(() => this.closePopup())
             )
             .subscribe();
         this.#childCloseRequest$
@@ -378,10 +378,7 @@ export class PopupMenuListComponent implements OnInit {
                 tap(() => {
                     const activeItem = this.activeMenuItem();
                     this.notifyNavigation(activeItem, "left");
-                    if (this.popupRef) {
-                        this.popupRef.close();
-                        this.popupRef = null;
-                    }
+                    this.closePopup();
                 })
             )
             .subscribe();
@@ -394,7 +391,7 @@ export class PopupMenuListComponent implements OnInit {
                 takeUntil(this.#parentConfig.parentClose$),
                 filter(e => e.item !== this.activeMenuItem()),
                 tap(e => {
-                    this.popupRef?.close();
+                    this.closePopup();
                     if (e.item.items.length === 0) {
                         this.activeMenuItem.set(null);
                     }

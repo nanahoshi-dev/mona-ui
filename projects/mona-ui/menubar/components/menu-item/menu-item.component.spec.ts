@@ -25,9 +25,9 @@ describe("MenuItemComponent", () => {
     it("uses neutral hover, focus, active, and disabled states", () => {
         const classes = menuItemThemeVariants({ size: "medium" }).split(/\s+/);
 
-        expect(classes).toContain("hover:bg-hover");
-        expect(classes).toContain("focus-within:bg-hover");
-        expect(classes).toContain("data-[focused]:bg-hover");
+        expect(classes).toContain("hover:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain("focus-within:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
+        expect(classes).toContain("data-[focused]:bg-[var(--mona-menu-item-hover-background,var(--color-hover))]");
         expect(classes).toContain("data-[disabled='true']:text-disabled-foreground");
         expect(classes).not.toContain("focus-within:bg-accent");
         expect(classes).not.toContain("text-accent-foreground");
