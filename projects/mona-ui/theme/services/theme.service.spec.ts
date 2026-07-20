@@ -74,6 +74,34 @@ describe("ThemeService", () => {
         expect(service.profile().colors["--color-primary-hover"]).toBe(expected["--color-primary-hover"]);
         expect(root.style.getPropertyValue("--color-primary")).toBe(expected["--color-primary"]);
         expect(root.style.getPropertyValue("--color-focus-indicator")).toBe("var(--color-primary)");
+        expect(root.style.getPropertyValue("--color-selected")).toBe("var(--color-accent)");
+        expect(root.style.getPropertyValue("--color-selected-hover")).toBe("var(--color-accent-hover)");
+        expect(root.style.getPropertyValue("--color-selected-active")).toBe("var(--color-accent-active)");
+        expect(root.style.getPropertyValue("--color-selected-focus")).toBe("var(--color-accent-hover)");
+        expect(root.style.getPropertyValue("--color-selected-border")).toBe("var(--color-primary)");
+    });
+
+    it("replaces Luna's built-in selected colors with the runtime primary accent", () => {
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DOCUMENT, useValue: { documentElement: root } },
+                { provide: THEME_OPTIONS, useValue: { initialTheme: { name: "luna", variant: "light" } } },
+                { provide: THEME_STRATEGY, useValue: new DefaultThemeStrategy([], []) }
+            ]
+        });
+        const configured = TestBed.inject(ThemeService);
+        const expected = generateThemeColorPalette({ primary: "#e8aaf0" }).light;
+
+        expect(root.style.getPropertyValue("--color-selected")).toBe("#e5ebfb");
+
+        configured.setPrimaryColor("#e8aaf0");
+
+        expect(root.style.getPropertyValue("--color-accent")).toBe(expected["--color-accent"]);
+        expect(root.style.getPropertyValue("--color-selected")).toBe("var(--color-accent)");
+        expect(root.style.getPropertyValue("--color-selected-foreground")).toBe("var(--color-accent-foreground)");
+        expect(root.style.getPropertyValue("--color-selected-hover")).toBe("var(--color-accent-hover)");
+        expect(root.style.getPropertyValue("--color-selected-active")).toBe("var(--color-accent-active)");
     });
 
     it("retains runtime palette seeds and uses the matching generated variant when switching themes", () => {

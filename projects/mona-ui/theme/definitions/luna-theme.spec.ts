@@ -63,6 +63,8 @@ describe("Luna theme", () => {
             "--mona-effect-overlay-fallback-background-color": "#f9f9fa"
         });
         expect(lunaTheme.variants.light.components["--mona-tab-list-background"]).toBe("#f5f5f6");
+        expect(lunaTheme.variants.light.components["--mona-list-group-background"]).toBe("rgb(37 37 37 / 0.05)");
+        expect(lunaTheme.variants.dark.components["--mona-list-group-background"]).toBe("rgb(255 255 255 / 0.04)");
         expect(lunaTheme.variants.light.custom?.["--mona-menu-item-hover-background"]).toBe("rgb(37 37 37 / 0.06)");
         expect(lunaTheme.variants.light.custom?.["--mona-menu-item-hover-foreground"]).toBe("var(--color-foreground)");
         expect(lunaTheme.variants.dark.custom).not.toHaveProperty("--mona-menu-item-hover-background");

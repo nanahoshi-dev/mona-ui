@@ -26,7 +26,13 @@ describe("generateThemeColorPalette", () => {
                 expect.objectContaining({
                     "--color-primary": expect.stringMatching(/^oklch\(/),
                     "--color-accent": expect.stringMatching(/^oklch\(/),
-                    "--color-focus-indicator": "var(--color-primary)"
+                    "--color-focus-indicator": "var(--color-primary)",
+                    "--color-selected": "var(--color-accent)",
+                    "--color-selected-foreground": "var(--color-accent-foreground)",
+                    "--color-selected-hover": "var(--color-accent-hover)",
+                    "--color-selected-active": "var(--color-accent-active)",
+                    "--color-selected-focus": "var(--color-accent-hover)",
+                    "--color-selected-border": "var(--color-primary)"
                 })
             );
             expect(palette[variant]).not.toHaveProperty("--color-secondary");
@@ -141,6 +147,24 @@ describe("generateThemeColorPalette", () => {
                 expect(palette[variant][`--color-${role}-selected`]).toBe(palette[variant][`--color-${role}-active`]);
                 expect(palette[variant][`--color-${role}-selected`]).not.toBe(palette[variant][`--color-${role}`]);
             }
+        }
+    });
+
+    it("maps semantic selected states to the generated primary accent", () => {
+        const palette = generateThemeColorPalette({ primary: "#7444c3" });
+
+        for (const variant of variants) {
+            expect(palette[variant]).toMatchObject({
+                "--color-selected": "var(--color-accent)",
+                "--color-selected-foreground": "var(--color-accent-foreground)",
+                "--color-selected-hover": "var(--color-accent-hover)",
+                "--color-selected-hover-foreground": "var(--color-accent-foreground)",
+                "--color-selected-active": "var(--color-accent-active)",
+                "--color-selected-active-foreground": "var(--color-accent-foreground)",
+                "--color-selected-focus": "var(--color-accent-hover)",
+                "--color-selected-focus-foreground": "var(--color-accent-foreground)",
+                "--color-selected-border": "var(--color-primary)"
+            });
         }
     });
 });

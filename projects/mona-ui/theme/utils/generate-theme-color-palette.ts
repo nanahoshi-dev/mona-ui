@@ -193,7 +193,16 @@ function createPrimaryEmphasisPalette(
         "--color-accent-hover": formatOklch(hover),
         "--color-accent-active": formatOklch(active),
         "--color-accent-dark": "var(--color-accent-active)",
-        "--color-focus-indicator": "var(--color-primary)"
+        "--color-focus-indicator": "var(--color-primary)",
+        "--color-selected": "var(--color-accent)",
+        "--color-selected-foreground": "var(--color-accent-foreground)",
+        "--color-selected-hover": "var(--color-accent-hover)",
+        "--color-selected-hover-foreground": "var(--color-accent-foreground)",
+        "--color-selected-active": "var(--color-accent-active)",
+        "--color-selected-active-foreground": "var(--color-accent-foreground)",
+        "--color-selected-focus": "var(--color-accent-hover)",
+        "--color-selected-focus-foreground": "var(--color-accent-foreground)",
+        "--color-selected-border": "var(--color-primary)"
     };
 }
 
