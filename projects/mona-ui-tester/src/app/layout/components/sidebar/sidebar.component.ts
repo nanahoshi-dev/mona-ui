@@ -51,6 +51,7 @@ export class SidebarComponent {
                 { text: "Fieldset", path: "/fieldset" },
                 { text: "Grid", path: "/grid" },
                 { text: "Input", path: "/input" },
+                { text: "Label", path: "/label" },
                 { text: "List Box", path: "/list-box" },
                 { text: "List View", path: "/list-view" },
                 { text: "Menubar", path: "/menubar" },

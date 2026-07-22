@@ -6,13 +6,13 @@
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "ID of an element that provides an extended description for the input.\r\nUse this to associate error messages or help text with the input.",
+        "description": "ID of an element that provides an extended description for the input.\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the input. Describe what the autocomplete represents.\r\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
+        "description": "Accessible name for the input. Describe what the autocomplete represents.\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
         "kind": "input"
       },
       {
@@ -54,7 +54,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -138,19 +138,19 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf null, the item itself is used as the display text.",
+        "description": "Property name or accessor used to derive the display text from a data item.\nIf null, the item itself is used as the display text.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -162,13 +162,13 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the value from a data item.\r\nIf null, the item itself is used as the value.",
+        "description": "Property name or accessor used to derive the value from a data item.\nIf null, the item itself is used as the value.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "string | null",
-        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\r\nenabling signal forms `[formField]` binding.",
+        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\nenabling signal forms `[formField]` binding.",
         "kind": "model"
       }
     ]
@@ -204,25 +204,25 @@
       {
         "name": "ariaHasPopup",
         "type": "string",
-        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\r\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
+        "description": "Value forwarded to the `aria-haspopup` attribute. Set when this button triggers a popup, menu,\nlistbox, tree, grid, or dialog. Omit or leave as `\"false\"` for plain action buttons.",
         "kind": "input"
       },
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\r\nWhen inside a `ButtonGroup`, the group's disabled state takes precedence.",
+        "description": "Renders the component with reduced visual emphasis and removes pointer interaction.\nWhen inside a `ButtonGroup`, the group's disabled state takes precedence.",
         "kind": "model"
       },
       {
         "name": "iconOnly",
         "type": "boolean",
-        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\r\nProvide `aria-label` on the host when using icon-only buttons.",
+        "description": "Removes horizontal padding and fixes a square aspect ratio sized to match `size`.\nProvide `aria-label` on the host when using icon-only buttons.",
         "kind": "input"
       },
       {
         "name": "loading",
         "type": "boolean",
-        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\r\nSets `aria-busy=\"true\"` on the host.",
+        "description": "Displays a loading indicator and prevents interaction while an operation is in progress.\nSets `aria-busy=\"true\"` on the host.",
         "kind": "model"
       },
       {
@@ -234,31 +234,31 @@
       {
         "name": "rounded",
         "type": "ButtonVariantProps[\"rounded\"]",
-        "description": "Border-radius preset applied to the component.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
+        "description": "Border-radius preset applied to the component.\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input"
       },
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\r\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
+        "description": "Whether the button is in the selected/pressed state. Drives `aria-pressed` when the button is toggleable.\nManaged by `toggleable` click handling or by `ButtonGroup` selection policy.",
         "kind": "model"
       },
       {
         "name": "size",
         "type": "ButtonVariantProps[\"size\"]",
-        "description": "Size preset controlling the button's height and horizontal padding.\r\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
+        "description": "Size preset controlling the button's height and horizontal padding.\nWhen inside a `ButtonGroup`, the group's value takes precedence.",
         "kind": "input"
       },
       {
         "name": "tabindex",
         "type": "number",
-        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.\r\nAccepts a numeric string and converts it to a number.",
+        "description": "Tab index of the host element. Automatically overridden to `-1` when the button is disabled or loading.\nAccepts a numeric string and converts it to a number.",
         "kind": "input"
       },
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\r\nMust use `[toggleable]=\"true\"` binding syntax, not bare attribute form.",
+        "description": "Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.\nMust use `[toggleable]=\"true\"` binding syntax, not bare attribute form.",
         "kind": "input"
       },
       {
@@ -418,9 +418,21 @@
     "selector": "\"input[type='checkbox'][monaCheckbox]\"",
     "inputs": [
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the checkbox as invalid, triggering error border and ring styling.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "CheckboxDirectiveVariantProps[\"rounded\"]",
         "description": "Border-radius preset applied to the checkbox.",
+        "kind": "input"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the checkbox as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
         "kind": "input"
       },
       {
@@ -438,13 +450,13 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Describe what the chip represents.\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the chip represents.\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input"
       },
       {
         "name": "contentClick",
         "type": "void",
-        "description": "Emitted when the chip body is clicked or activated via Enter or Space.\r\nNot emitted when the remove button is activated.",
+        "description": "Emitted when the chip body is clicked or activated via Enter or Space.\nNot emitted when the remove button is activated.",
         "kind": "output"
       },
       {
@@ -474,19 +486,19 @@
       {
         "name": "remove",
         "type": "Event",
-        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\r\nEmits the originating `Event`.",
+        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\nEmits the originating `Event`.",
         "kind": "output"
       },
       {
         "name": "removeLabel",
         "type": "string",
-        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\r\nUse when the chip shows only projected content and the default label is not descriptive enough.",
+        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\nUse when the chip shows only projected content and the default label is not descriptive enough.",
         "kind": "input"
       },
       {
         "name": "removeTabIndex",
         "type": "number | string",
-        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\r\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
+        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
         "kind": "input"
       },
       {
@@ -498,7 +510,7 @@
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\r\nSupports two-way binding via `[(selected)]`.",
+        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\nSupports two-way binding via `[(selected)]`.",
         "kind": "model"
       },
       {
@@ -510,13 +522,13 @@
       {
         "name": "tabindex",
         "type": "number | string",
-        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
+        "description": "Tab index override for the chip host element. When not set, computed automatically:\n`0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
         "kind": "input"
       },
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\r\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
+        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
         "kind": "input"
       },
       {
@@ -528,7 +540,7 @@
       {
         "name": "value",
         "type": "unknown",
-        "description": "Arbitrary value associated with this chip.\r\nUseful for identifying which chip was selected or removed in a collection.",
+        "description": "Arbitrary value associated with this chip.\nUseful for identifying which chip was selected or removed in a collection.",
         "kind": "input"
       }
     ]
@@ -1127,6 +1139,24 @@
       }
     ]
   },
+  "LabelDirective": {
+    "name": "LabelDirective",
+    "selector": "\"label[monaLabel]\"",
+    "inputs": [
+      {
+        "name": "for",
+        "type": "LabelTarget",
+        "description": "Associates the label with a native control ID or a target that exposes a public `focus()` method.\nString values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the native label element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
   "ListViewGroupableDirective": {
     "name": "ListViewGroupableDirective",
     "selector": "\"mona-list-view[monaListViewGroupable]\"",
@@ -1240,9 +1270,21 @@
     "selector": "\"input[type='radio'][monaRadioButton]\"",
     "inputs": [
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the radio button as invalid, triggering error border and ring styling.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "RadioButtonDirectiveProps[\"rounded\"]",
         "description": "Sets the border radius of the radio button.",
+        "kind": "input"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the radio button as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
         "kind": "input"
       }
     ]
@@ -1366,6 +1408,12 @@
     "selector": "\"input[monaTextBox]\"",
     "inputs": [
       {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the input as invalid, triggering error border and ring styling.",
+        "kind": "input"
+      },
+      {
         "name": "rounded",
         "type": "InputVariantProps[\"rounded\"]",
         "description": "Border-radius preset applied to the component.",
@@ -1375,6 +1423,12 @@
         "name": "size",
         "type": "InputVariantProps[\"size\"]",
         "description": "Size preset controlling the component's dimensions.",
+        "kind": "input"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the input as touched. Error styling is only shown when both `invalid` and `touched` are `true`.",
         "kind": "input"
       },
       {
@@ -1446,7 +1500,7 @@
       {
         "name": "filter",
         "type": "string",
-        "description": "The filter to select elements that will have tooltips.\r\nIt can be a CSS selector that matches elements within the host element.\r\nOnly applies when `mode` is set to `content`.",
+        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element.\nOnly applies when `mode` is set to `content`.",
         "kind": "input"
       },
       {
@@ -1458,7 +1512,7 @@
       {
         "name": "mode",
         "type": "\"host\" | \"content\"",
-        "description": "The mode of the tooltip.\r\n\"host\" mode receives the tooltip from the host element's title attribute.\r\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "description": "The mode of the tooltip.\n\"host\" mode receives the tooltip from the host element's title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
         "kind": "input"
       },
       {
@@ -1902,7 +1956,7 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the breadcrumb navigation landmark.\r\nOverride when multiple breadcrumb components appear on the same page.",
+        "description": "Accessible name for the breadcrumb navigation landmark.\nOverride when multiple breadcrumb components appear on the same page.",
         "kind": "input"
       },
       {
@@ -1944,13 +1998,13 @@
       {
         "name": "allowEmpty",
         "type": "boolean",
-        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\r\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
+        "description": "When `false` and `selection` is `\"single\"`, at least one button must remain selected;\nthe active button cannot be deselected. Has no effect in `\"multiple\"` mode.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\r\nso screen reader users can distinguish them.",
+        "description": "Accessible name for the host element. Override when multiple button groups appear on the same page\nso screen reader users can distinguish them.",
         "kind": "input"
       },
       {
@@ -1962,7 +2016,7 @@
       {
         "name": "look",
         "type": "ButtonGroupVariantProps[\"look\"]",
-        "description": "Visual style variant propagated to all child buttons.\r\nAlso controls container-level divider and border behavior.",
+        "description": "Visual style variant propagated to all child buttons.\nAlso controls container-level divider and border behavior.",
         "kind": "input"
       },
       {
@@ -1974,7 +2028,7 @@
       {
         "name": "selection",
         "type": "SelectionMode",
-        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\r\nor toggle independently (`\"multiple\"`).",
+        "description": "Two-way bindable. Controls whether child buttons behave as a radio group (`\"single\"`)\nor toggle independently (`\"multiple\"`).",
         "kind": "model"
       },
       {
@@ -2004,7 +2058,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the calendar.\r\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the calendar.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -2016,7 +2070,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the calendar as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2052,19 +2106,19 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the calendar value is changed by user interaction.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the calendar value is changed by user interaction.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets whether the calendar is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the calendar. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2130,7 +2184,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the checkbox as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -2178,7 +2232,7 @@
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Marks the checkbox as touched. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the checkbox as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -2196,25 +2250,25 @@
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Enables CSS transitions on stroke and color changes.\r\nSet to `false` when updating `value` at a high frequency.",
+        "description": "Enables CSS transitions on stroke and color changes.\nSet to `false` when updating `value` at a high frequency.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input"
       },
       {
         "name": "ariaValueText",
         "type": "string",
-        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Human-readable override for the `aria-valuenow` announcement.\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input"
       },
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
+        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\nreturning a string. When empty, falls back to the primary theme color.",
         "kind": "input"
       },
       {
@@ -2226,7 +2280,7 @@
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "Activates indeterminate mode when the completion value is unknown.\r\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Activates indeterminate mode when the completion value is unknown.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
         "kind": "input"
       },
       {
@@ -2274,13 +2328,13 @@
       {
         "name": "apply",
         "type": "void",
-        "description": "Emits when the Apply button is clicked.\r\nThe `Apply` button is only displayed when `showButtons` is set to true.",
+        "description": "Emits when the Apply button is clicked.\nThe `Apply` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
         "name": "cancel",
         "type": "void",
-        "description": "Emits when the Cancel button is clicked.\r\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
+        "description": "Emits when the Cancel button is clicked.\nThe `Cancel` button is only displayed when `showButtons` is set to true.",
         "kind": "output"
       },
       {
@@ -2298,7 +2352,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the color gradient as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -2322,7 +2376,7 @@
       {
         "name": "showButtons",
         "type": "boolean",
-        "description": "Specifies whether the color picker should display the buttons.\r\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\r\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
+        "description": "Specifies whether the color picker should display the buttons.\nWhen set to true, the color picker will display the \"Apply\" and \"Cancel\" buttons.\nWhen set to false, the color picker will not display the buttons and will emit the color value on change.",
         "kind": "input"
       },
       {
@@ -2340,19 +2394,19 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the color gradient is interacted with on blur or value adjustment.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the color gradient is interacted with on blur or value adjustment.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Marks the color gradient as touched. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the color gradient as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "string | null | undefined",
-        "description": "Two-way bindable current color value.\r\nWhen undefined, the component keeps its default internal color state (white, #ffffffff).",
+        "description": "Two-way bindable current color value.\nWhen undefined, the component keeps its default internal color state (white, #ffffffff).",
         "kind": "model"
       }
     ]
@@ -2364,7 +2418,7 @@
       {
         "name": "columns",
         "type": "number",
-        "description": "The number of columns in the color palette grid.\r\nOnly applicable when using a custom palette.",
+        "description": "The number of columns in the color palette grid.\nOnly applicable when using a custom palette.",
         "kind": "input"
       },
       {
@@ -2376,19 +2430,19 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the color palette as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the color palette as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
         "name": "palette",
         "type": "PaletteType | Iterable<string>",
-        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\r\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
+        "description": "The palette to display — one of the built-in `\"flat\"`, `\"material\"`, or `\"websafe\"` schemes, or a\ncustom iterable of color strings. An empty custom palette falls back to the flat scheme.",
         "kind": "input"
       },
       {
         "name": "readonly",
         "type": "boolean",
-        "description": "Prevents value changes while preserving the component's visual state. When bound to a signal\r\nform field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Prevents value changes while preserving the component's visual state. When bound to a signal\nform field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2400,7 +2454,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets whether the color palette is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets whether the color palette is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2412,13 +2466,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the color palette is interacted with on blur or color selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the color palette is interacted with on blur or color selection.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the color palette. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the color palette. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2544,7 +2598,7 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the input. Describe what the combo box represents.\r\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
+        "description": "Accessible name for the input. Describe what the combo box represents.\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
         "kind": "input"
       },
       {
@@ -2586,7 +2640,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the combo box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the combo box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2664,19 +2718,19 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf not set, the item itself is used as the text representation.",
+        "description": "Property name or accessor used to derive the display text from a data item.\nIf not set, the item itself is used as the text representation.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the combo box is interacted with on blur, selection, clear, or committed input.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the combo box is interacted with on blur, selection, clear, or committed input.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the combo box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the combo box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2688,19 +2742,19 @@
       {
         "name": "valueAdd",
         "type": "string",
-        "description": "Emitted with the entered text when the user presses Enter on unmatched input.\r\nOnly emitted when {@link allowCustomValue} is true.",
+        "description": "Emitted with the entered text when the user presses Enter on unmatched input.\nOnly emitted when {@link allowCustomValue} is true.",
         "kind": "output"
       },
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the value from a data item.\r\nIf not set, the item itself is used as the value representation.",
+        "description": "Property name or accessor used to derive the value from a data item.\nIf not set, the item itself is used as the value representation.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "TData | null",
-        "description": "Two-way bindable current selected value. Implements `FormValueControl<TData | null>`,\r\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\r\nwritten into this model to restore a matching selected item.",
+        "description": "Two-way bindable current selected value. Implements `FormValueControl<TData | null>`,\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\nwritten into this model to restore a matching selected item.",
         "kind": "model"
       }
     ]
@@ -2904,7 +2958,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the date picker.\r\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date picker.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -2922,7 +2976,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the date picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2988,7 +3042,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the date picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the date picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -3012,13 +3066,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the date picker is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the date picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the date picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the date picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -3066,7 +3120,7 @@
       {
         "name": "disabledDates",
         "type": "DateDisabledType",
-        "description": "Sets the disabled dates of the date time picker.\r\nAccepts either an iterable of Date objects or a predicate function.",
+        "description": "Sets the disabled dates of the date time picker.\nAccepts either an iterable of Date objects or a predicate function.",
         "kind": "input"
       },
       {
@@ -3096,7 +3150,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the date time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -3168,7 +3222,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the date time picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the date time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -3204,13 +3258,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the date time picker is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the date time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the date time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -3570,7 +3624,7 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Describe what the component represents.\r\nWhen empty, falls back to the placeholder text.",
+        "description": "Accessible name for the host element. Describe what the component represents.\nWhen empty, falls back to the placeholder text.",
         "kind": "input"
       },
       {
@@ -3690,13 +3744,13 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf omitted, the item itself is used as the display text.",
+        "description": "Property name or accessor used to derive the display text from a data item.\nIf omitted, the item itself is used as the display text.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the control is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the control is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
@@ -3714,13 +3768,13 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the value from a data item.\r\nIf omitted, the item itself is used as the value.",
+        "description": "Property name or accessor used to derive the value from a data item.\nIf omitted, the item itself is used as the value.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "TData | null",
-        "description": "Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.\r\nWhen `valueField` is set, this may hold the primitive field value instead of the full data item.",
+        "description": "Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.\nWhen `valueField` is set, this may hold the primitive field value instead of the full data item.",
         "kind": "model"
       }
     ]
@@ -3852,13 +3906,13 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Whether the fieldset and its projected form controls are disabled.\r\nReflected as the native `disabled` attribute on the rendered `<fieldset>`.",
+        "description": "Whether the fieldset and its projected form controls are disabled.\nReflected as the native `disabled` attribute on the rendered `<fieldset>`.",
         "kind": "input"
       },
       {
         "name": "legend",
         "type": "string",
-        "description": "The legend text of the fieldset. Shown in the top border as a labelled notch.\r\nIgnored when `monaFieldsetLegendTemplate` is provided.",
+        "description": "The legend text of the fieldset. Shown in the top border as a labelled notch.\nIgnored when `monaFieldsetLegendTemplate` is provided.",
         "kind": "input"
       },
       {
@@ -3954,19 +4008,19 @@
       {
         "name": "pageSizeValues",
         "type": "number[]",
-        "description": "The page sizes that the user can select from.\r\nThese values will be displayed in the page size dropdown.",
+        "description": "The page sizes that the user can select from.\nThese values will be displayed in the page size dropdown.",
         "kind": "input"
       },
       {
         "name": "resizeMethod",
         "type": "ResizeMethod",
-        "description": "The method to be used to set initial column widths.\r\nIt can be the following values:\r\n- `fitView`: The columns will be resized to fit the available width.\r\n- `auto`: The columns will be resized based on the content.\r\n- A number representing the width of the columns. All columns except the columns with a specified width\r\nwill have the same width.",
+        "description": "The method to be used to set initial column widths.\nIt can be the following values:\n- `fitView`: The columns will be resized to fit the available width.\n- `auto`: The columns will be resized based on the content.\n- A number representing the width of the columns. All columns except the columns with a specified width\nwill have the same width.",
         "kind": "input"
       },
       {
         "name": "responsivePager",
         "type": "boolean",
-        "description": "Whether the pager is responsive.\r\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
+        "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
         "kind": "input"
       },
       {
@@ -4379,6 +4433,42 @@
       }
     ]
   },
+  "LabelComponent": {
+    "name": "LabelComponent",
+    "selector": "\"mona-label\"",
+    "inputs": [
+      {
+        "name": "for",
+        "type": "LabelTarget",
+        "description": "Associates the label with a native control ID or a target that exposes a public `focus()` method.\nString values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked.",
+        "kind": "input"
+      },
+      {
+        "name": "optional",
+        "type": "boolean",
+        "description": "Whether to display optional-field text next to the caption.",
+        "kind": "input"
+      },
+      {
+        "name": "optionalText",
+        "type": "string",
+        "description": "Text displayed when `optional` is enabled.",
+        "kind": "input"
+      },
+      {
+        "name": "text",
+        "type": "string",
+        "description": "Visible label caption text.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the rendered `<label>` element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
   "ListBoxComponent": {
     "name": "ListBoxComponent",
     "selector": "\"mona-list-box\"",
@@ -4392,7 +4482,7 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\r\nwhich matters in particular when connecting two list boxes.",
+        "description": "Accessible name for the list box's `listbox` element. Describe what the list represents,\nwhich matters in particular when connecting two list boxes.",
         "kind": "input"
       },
       {
@@ -4452,7 +4542,7 @@
       {
         "name": "singleSelectionToggleable",
         "type": "boolean",
-        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\r\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`.",
+        "description": "Allows an already-selected item to be deselected by clicking it again while `selectionMode`\nis `\"single\"`. Has no effect when `selectionMode` is `\"multiple\"`.",
         "kind": "input"
       },
       {
@@ -4470,7 +4560,7 @@
       {
         "name": "toolbar",
         "type": "boolean | Partial<ToolbarOptions>",
-        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\r\nwhich actions are shown and where the toolbar is positioned.",
+        "description": "Shows the action toolbar. Pass `false` to hide it entirely, or an options object to customize\nwhich actions are shown and where the toolbar is positioned.",
         "kind": "input"
       },
       {
@@ -4830,7 +4920,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the multi select as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the multi select as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4902,19 +4992,19 @@
       {
         "name": "textField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the multi select component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
+        "description": "Sets the text field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the multi select is interacted with on blur, selection, remove, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the multi select is interacted with on blur, selection, remove, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the multi select. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the multi select. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -4926,13 +5016,13 @@
       {
         "name": "valueField",
         "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the multi select component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the value representation.",
+        "description": "Sets the value field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "Iterable<TData>",
-        "description": "Two-way bindable current selected values. Implements `FormValueControl<Iterable<TData>>`,\r\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\r\nwritten into this model to restore matching selected items.",
+        "description": "Two-way bindable current selected values. Implements `FormValueControl<Iterable<TData>>`,\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\nwritten into this model to restore matching selected items.",
         "kind": "model"
       }
     ]
@@ -5028,7 +5118,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the numeric text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5064,13 +5154,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the numeric text box is interacted with on blur, value change, or spinner update.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the numeric text box is interacted with on blur, value change, or spinner update.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the numeric text box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the numeric text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5202,13 +5292,13 @@
       {
         "name": "text",
         "type": "string",
-        "description": "The text to display inside the placeholder.\r\nTakes precedence over projected content if both are provided.",
+        "description": "The text to display inside the placeholder.\nTakes precedence over projected content if both are provided.",
         "kind": "input"
       },
       {
         "name": "userClass",
         "type": "string",
-        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.\r\nBind this input with the public `class` alias.",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.\nBind this input with the public `class` alias.",
         "kind": "input"
       }
     ]
@@ -5226,7 +5316,7 @@
       {
         "name": "hide",
         "type": "PopoverHideEvent",
-        "description": "Emits when the popover is about to be closed.\r\nThis event is preventable.",
+        "description": "Emits when the popover is about to be closed.\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -5250,7 +5340,7 @@
       {
         "name": "show",
         "type": "PopoverShowEvent",
-        "description": "Emits when the popover is about to be shown.\r\nThis event is preventable.",
+        "description": "Emits when the popover is about to be shown.\nThis event is preventable.",
         "kind": "output"
       },
       {
@@ -5274,7 +5364,7 @@
       {
         "name": "trigger",
         "type": "PopoverTrigger",
-        "description": "The trigger that opens/closes the popover.\r\n\"click\" toggles on click, \"hover\" opens on pointer enter and closes on\r\npointer leave, \"none\" disables automatic triggering (use `open()`/`close()`\r\ninstead). Any other DOM event name is also accepted and used as-is.",
+        "description": "The trigger that opens/closes the popover.\n\"click\" toggles on click, \"hover\" opens on pointer enter and closes on\npointer leave, \"none\" disables automatic triggering (use `open()`/`close()`\ninstead). Any other DOM event name is also accepted and used as-is.",
         "kind": "input"
       }
     ]
@@ -5706,25 +5796,25 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible label for the progress bar host element.\r\nUse to describe what is being measured (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role and numeric values only.",
+        "description": "Accessible label for the progress bar host element.\nUse to describe what is being measured (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role and numeric values only.",
         "kind": "input"
       },
       {
         "name": "ariaValueText",
         "type": "string",
-        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\r\nParticularly useful in indeterminate mode — set to a localized string such as \"Loading\"\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Overrides the numeric aria-valuenow announcement for assistive technology.\nParticularly useful in indeterminate mode — set to a localized string such as \"Loading\"\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input"
       },
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Enables CSS transitions on fill and color changes.\r\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
+        "description": "Enables CSS transitions on fill and color changes.\nSet to `false` when updating `value` at high frequency (e.g., a real-time byte counter).",
         "kind": "input"
       },
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "Fill color of the progress track.\r\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\r\nWhen empty, falls back to the primary theme color.",
+        "description": "Fill color of the progress track.\nPass a CSS color string, or a function that receives the current percentage (0–100) and returns a color string.\nWhen empty, falls back to the primary theme color.",
         "kind": "input"
       },
       {
@@ -5736,7 +5826,7 @@
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\r\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Switches to indeterminate mode: plays a looping animation and hides the label.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
         "kind": "input"
       },
       {
@@ -5748,13 +5838,13 @@
       {
         "name": "labelStyles",
         "type": "Partial<CSSStyleDeclaration>",
-        "description": "Inline styles applied to the default label span.\r\nHas no effect when a custom `monaProgressBarLabelTemplate` is provided.",
+        "description": "Inline styles applied to the default label span.\nHas no effect when a custom `monaProgressBarLabelTemplate` is provided.",
         "kind": "input"
       },
       {
         "name": "labelVisible",
         "type": "boolean",
-        "description": "Controls label visibility in determinate mode.\r\nHas no effect in indeterminate mode — the label is always hidden there.",
+        "description": "Controls label visibility in determinate mode.\nHas no effect in indeterminate mode — the label is always hidden there.",
         "kind": "input"
       },
       {
@@ -5784,7 +5874,7 @@
       {
         "name": "value",
         "type": "number",
-        "description": "Current progress value within `[min, max]`.\r\nValues outside the range are clamped before rendering; non-finite values are treated as `0`.",
+        "description": "Current progress value within `[min, max]`.\nValues outside the range are clamped before rendering; non-finite values are treated as `0`.",
         "kind": "input"
       }
     ]
@@ -5820,13 +5910,13 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the radio button as invalid. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the radio button as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
         "name": "label",
         "type": "string",
-        "description": "Text label displayed alongside the radio button.\r\nWhen provided, takes precedence over projected content.\r\nWhen empty, projected content inside `<mona-radio-button>` is used.\r\nWhen both are absent, the radio button has no accessible name — always provide one.",
+        "description": "Text label displayed alongside the radio button.\nWhen provided, takes precedence over projected content.\nWhen empty, projected content inside `<mona-radio-button>` is used.\nWhen both are absent, the radio button has no accessible name — always provide one.",
         "kind": "input"
       },
       {
@@ -5844,13 +5934,13 @@
       {
         "name": "name",
         "type": "string",
-        "description": "HTML `name` attribute forwarded to the native input.\r\nRadio buttons that share the same `name` form a mutually exclusive group in the browser.",
+        "description": "HTML `name` attribute forwarded to the native input.\nRadio buttons that share the same `name` form a mutually exclusive group in the browser.",
         "kind": "input"
       },
       {
         "name": "radioValue",
         "type": "any",
-        "description": "The identity value of this radio button within a group.\r\nCompared against `value()` to determine whether this button is selected.\r\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.",
+        "description": "The identity value of this radio button within a group.\nCompared against `value()` to determine whether this button is selected.\nWhen this button is chosen, its `radioValue` is written to the form as the new group value.",
         "kind": "input"
       },
       {
@@ -5866,6 +5956,12 @@
         "kind": "output"
       },
       {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
         "name": "userClass",
         "type": "string",
         "description": "Additional CSS classes merged onto the label container element via `tailwind-merge`.",
@@ -5874,7 +5970,7 @@
       {
         "name": "value",
         "type": "any",
-        "description": "The currently selected value in the radio group.\r\nWhen bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.\r\nWhen bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.",
+        "description": "The currently selected value in the radio group.\nWhen bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.\nWhen bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.",
         "kind": "model"
       }
     ]
@@ -5886,7 +5982,7 @@
       {
         "name": "animate",
         "type": "boolean | number",
-        "description": "Sets whether page transitions are animated.\r\nPass a boolean for default duration (500ms) or a number for custom duration in milliseconds.",
+        "description": "Sets whether page transitions are animated.\nPass a boolean for default duration (500ms) or a number for custom duration in milliseconds.",
         "kind": "input"
       },
       {
@@ -5904,7 +6000,7 @@
       {
         "name": "height",
         "type": "string | number",
-        "description": "Sets the height of the scroll view.\r\nThis property is required.",
+        "description": "Sets the height of the scroll view.\nThis property is required.",
         "kind": "input"
       },
       {
@@ -6402,13 +6498,13 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the main action button.\r\nFalls back to `\"{text} splitbutton\"` when empty.",
+        "description": "Accessible name for the main action button.\nFalls back to `\"{text} splitbutton\"` when empty.",
         "kind": "input"
       },
       {
         "name": "ariaLabelledby",
         "type": "string",
-        "description": "ID of an external element that provides the accessible name for the main action button.\r\nTakes precedence over `ariaLabel` when both are set.",
+        "description": "ID of an external element that provides the accessible name for the main action button.\nTakes precedence over `ariaLabel` when both are set.",
         "kind": "input"
       },
       {
@@ -6420,7 +6516,7 @@
       {
         "name": "disabled",
         "type": "boolean",
-        "description": "Renders the component with reduced visual emphasis\r\nand removes pointer interaction from both the main button and the menu toggle button.",
+        "description": "Renders the component with reduced visual emphasis\nand removes pointer interaction from both the main button and the menu toggle button.",
         "kind": "input"
       },
       {
@@ -6432,7 +6528,7 @@
       {
         "name": "menuButtonAriaLabel",
         "type": "string",
-        "description": "Accessible name for the menu toggle button.\r\nOverride to provide a localized label for non-English applications.",
+        "description": "Accessible name for the menu toggle button.\nOverride to provide a localized label for non-English applications.",
         "kind": "input"
       },
       {
@@ -6444,7 +6540,7 @@
       {
         "name": "popupWidth",
         "type": "number",
-        "description": "Minimum width of the popup menu in pixels.\r\nA value of `0` means no minimum width is applied.",
+        "description": "Minimum width of the popup menu in pixels.\nA value of `0` means no minimum width is applied.",
         "kind": "input"
       },
       {
@@ -6462,7 +6558,7 @@
       {
         "name": "text",
         "type": "string",
-        "description": "Primary text content displayed in the main action button.\r\nIgnored when a `monaSplitButtonTextTemplate` is provided.",
+        "description": "Primary text content displayed in the main action button.\nIgnored when a `monaSplitButtonTextTemplate` is provided.",
         "kind": "input"
       },
       {
@@ -6726,7 +6822,7 @@
       {
         "name": "linear",
         "type": "boolean",
-        "description": "Sets the flow of the stepper.\r\nIf set to true, the user will only be able to navigate to the previous or the next step.",
+        "description": "Sets the flow of the stepper.\nIf set to true, the user will only be able to navigate to the previous or the next step.",
         "kind": "input"
       },
       {
@@ -6768,7 +6864,7 @@
       {
         "name": "ariaLabel",
         "type": "string | null",
-        "description": "Accessible name for the host element. Describe what the component represents.\r\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the component represents.\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input"
       },
       {
@@ -6792,7 +6888,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the switch as invalid. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the switch as invalid. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -6834,7 +6930,7 @@
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Marks the switch as touched. When bound to a signal form field via `[field]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the switch as touched. When bound to a signal form field via `[field]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -7026,13 +7122,13 @@
       {
         "name": "inputStyle",
         "type": "string | Partial<CSSStyleDeclaration> | null",
-        "description": "Inline styles applied to the inner `<input>` element.\r\nAccepts a style string or a `CSSStyleDeclaration` partial.",
+        "description": "Inline styles applied to the inner `<input>` element.\nAccepts a style string or a `CSSStyleDeclaration` partial.",
         "kind": "input"
       },
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the text box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7050,7 +7146,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Marks the text box as required.\r\nTriggers the invalid state when the value is empty and the field has been touched.",
+        "description": "Marks the text box as required.\nTriggers the invalid state when the value is empty and the field has been touched.",
         "kind": "input"
       },
       {
@@ -7068,13 +7164,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the text box is interacted with — on blur, value change, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the text box is interacted with — on blur, value change, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the text box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7140,7 +7236,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the time picker as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7212,7 +7308,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets the required state of the time picker.\r\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
+        "description": "Sets the required state of the time picker.\nWhen bound to a signal form field via `[formField]`, this is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7248,13 +7344,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the time picker is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the time picker. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7314,7 +7410,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the time selector as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Marks the time selector as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7344,7 +7440,7 @@
       {
         "name": "required",
         "type": "boolean",
-        "description": "Sets whether the time selector is required. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets whether the time selector is required. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7374,13 +7470,13 @@
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the time selector is interacted with via blur or value selection.\r\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the time selector is interacted with via blur or value selection.\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the time selector. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the time selector. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -7440,7 +7536,7 @@
       {
         "name": "target",
         "type": "PopupAnchor",
-        "description": "The target element(s) to which the tooltip is attached.\r\nCan be an Element, ElementRef, or CSS selector string.",
+        "description": "The target element(s) to which the tooltip is attached.\nCan be an Element, ElementRef, or CSS selector string.",
         "kind": "input"
       }
     ]

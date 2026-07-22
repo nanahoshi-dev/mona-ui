@@ -1,0 +1,3 @@
+<app-demo-container [config]="config()" [metadata]="metadata()" (valueChange)="onInputValueChange($event)">
+    <ng-container [ngComponentOutlet]="LabelWrapperComponent" [ngComponentOutletInputs]="inputs()"></ng-container>
+</app-demo-container>
