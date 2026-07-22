@@ -183,7 +183,7 @@ export class CalendarComponent implements CalendarVariantInput, FormValueControl
         return calendarHeaderThemeVariants({});
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && this.isEmptyValue())
+        () => this.touched() && (this.invalid() || (this.required() && this.isEmptyValue()))
     );
     protected readonly monthBounds = computed(() => {
         const navigatedDate = this.navigatedDate();

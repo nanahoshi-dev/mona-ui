@@ -44,14 +44,6 @@ protected readonly myForm = form({ notes: "" });
 </textarea>
 ```
 
-**Angular Reactive Forms:**
-
-When used with Angular Reactive Forms (`formControl`, `formControlName`, or `ngModel`), the invalid border and ring activate automatically based on the native Angular form validation state, without setting `invalid` or `touched` manually.
-
-```html
-<textarea monaTextArea [formControl]="notesControl" rows="4"></textarea>
-```
-
 ## Appearance & Styling
 
 ### `rounded` presets
@@ -72,7 +64,7 @@ When used with Angular Reactive Forms (`formControl`, `formControlName`, or `ngM
 | Disabled | Reduced visual emphasis; pointer interaction removed       |
 | Invalid  | Error-colored border and ring                              |
 
-The invalid state activates when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes these automatically. When using Angular Reactive Forms without signal forms, the invalid styling is applied automatically based on Angular's validation class state.
+The invalid state activates when both `invalid` and `touched` are `true`. When using `[formField]`, `FormField` writes these automatically. Without signal forms, set `invalid` and `touched` manually (e.g. from a `FormControl`'s status).
 
 ### Custom classes
 
@@ -131,7 +123,7 @@ The directive does not manage an accessible name. Associate a label using one of
 - [x] API definitions and defaults verified against source and component-metadata.json
 - [x] `class` alias used in API table (not internal name `userClass`)
 - [x] Signal forms ([formField]) documented with demo evidence
-- [x] Angular Reactive Forms validation state documented (ng-touched ng-invalid)
+- [x] invalid/touched inputs documented as the sole mechanism for invalid styling (no automatic Reactive Forms class detection)
 - [x] aria-invalid documented — set when invalid && touched
 - [x] No unexported types exposed in API table
 - [x] No internal Tailwind class names in styling section

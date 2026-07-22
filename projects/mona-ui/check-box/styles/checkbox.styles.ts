@@ -22,7 +22,6 @@ export const checkmarkThemeVariants = cva(
         peer-focus-visible:border-focus-indicator
         peer-focus-visible:ring-2 peer-focus-visible:ring-focus-indicator/35
 
-        [&.ng-touched.ng-invalid]:border-error
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:peer-focus-visible:border-error
@@ -101,10 +100,10 @@ export const checkboxDirectiveThemeVariants = cva(
         indeterminate:after:[mask-repeat:no-repeat]
         indeterminate:after:[mask-size:contain]
 
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
-        [&.ng-touched.ng-invalid]:focus-visible:border-error
-        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-visible:border-error
+        data-[invalid='true']:focus-visible:ring-error/35
     `,
     {
         variants: {

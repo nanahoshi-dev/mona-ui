@@ -52,10 +52,10 @@ import {
         role: "group",
         "[attr.aria-label]": "ariaLabel()",
         "[attr.aria-disabled]": "disabled()",
-        "[attr.aria-invalid]": "invalid() ? 'true' : null",
+        "[attr.aria-invalid]": "invalidState() ? 'true' : null",
         "[attr.aria-readonly]": "readonly()",
         "[attr.aria-required]": "required()",
-        "[attr.data-invalid]": "invalid() || null",
+        "[attr.data-invalid]": "invalidState() || null",
         "[attr.data-readonly]": "readonly() || null",
         "[attr.data-required]": "required() || null",
         "[class]": "baseClass()",
@@ -97,6 +97,7 @@ export class TimeSelectorComponent implements FormValueControl<Date | null>, Tim
     protected readonly infoContainerClass = computed(() => {
         return timeSelectorInfoContainerThemeVariants();
     });
+    protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly listContainerClass = computed(() => {
         return timeSelectorListContainerThemeVariants();
     });

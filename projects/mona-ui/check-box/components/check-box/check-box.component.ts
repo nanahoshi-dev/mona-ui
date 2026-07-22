@@ -39,7 +39,7 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
         return twMerge(variantClasses, classes);
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.checked())
+        () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
     );
 
     /**

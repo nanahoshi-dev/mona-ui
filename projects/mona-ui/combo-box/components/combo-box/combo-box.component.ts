@@ -164,7 +164,7 @@ export class ComboBoxComponent<TData = unknown>
         return comboBoxTextInputThemeVariants({ rounded });
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && this.value() == null)
+        () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly listId = createElementControlId();

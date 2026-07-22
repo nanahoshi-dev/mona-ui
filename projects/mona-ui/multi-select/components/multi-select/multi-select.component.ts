@@ -159,7 +159,7 @@ export class MultiSelectComponent<TData = unknown>
     });
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && none(this.value()))
+        () => this.touched() && (this.invalid() || (this.required() && none(this.value())))
     );
     protected readonly indicatorClass = computed(() => {
         const size = this.size();

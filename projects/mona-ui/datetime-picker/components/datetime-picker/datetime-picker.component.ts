@@ -142,7 +142,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         const controls = this.popupId;
         const expanded = this.#dropdownService.popupRef() != null;
         const hasPopup = "dialog";
-        const invalid = this.invalid();
+        const invalid = this.invalidState();
         return {
             "aria-autocomplete": "none",
             "aria-controls": controls,
@@ -154,7 +154,7 @@ export class DateTimePickerComponent implements FormValueControl<Date | null>, D
         };
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());

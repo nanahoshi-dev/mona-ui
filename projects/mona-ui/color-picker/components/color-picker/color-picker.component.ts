@@ -84,7 +84,7 @@ export class ColorPickerComponent implements OnInit, ColorPickerVariantInput, Fo
     });
     protected readonly expanded = computed(() => this.#popupRef() !== null);
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly gradientPopupClasses = `${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay)`;
     protected readonly palettePopupClasses = `flex flex-col p-0.5 ${themeOverlaySurfaceClasses} border border-border shadow-(--shadow-overlay) outline-none`;

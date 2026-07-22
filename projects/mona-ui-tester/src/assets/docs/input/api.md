@@ -72,7 +72,7 @@ Always pair `monaTextBox` with an accessible label — either a `<label for>`, o
 | Default         | Mona UI themed border and background                                                       |
 | Focused         | Focus ring visible for keyboard-initiated focus                                            |
 | Disabled        | Reduced visual emphasis; pointer interaction removed. Use the native `disabled` attribute. |
-| Invalid (forms) | Error-colored border when the input is touched and invalid                                 |
+| Invalid         | Error-colored border when both `invalid` and `touched` are `true`                          |
 
 ### Custom classes
 
@@ -105,8 +105,10 @@ The focus ring appears only for keyboard-initiated focus, matching browser `focu
 | Name      | Type                                                 | Default    | Description                                                               |
 |-----------|------------------------------------------------------|------------|---------------------------------------------------------------------------|
 | `class`   | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
+| `invalid` | `boolean`                                            | `false`    | Marks the input as invalid, triggering error border and ring styling.     |
 | `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset applied to the component.                            |
 | `size`    | `'small' \| 'medium' \| 'large'`                     | `'medium'` | Size preset controlling the component's dimensions.                       |
+| `touched` | `boolean`                                            | `false`    | Marks the input as touched. Error styling requires both `invalid` and `touched` to be `true`. |
 
 `TextBoxDirective` has no outputs. Listen to native events (`(focus)`, `(blur)`, `(change)`, `(input)`) directly on the host element.
 

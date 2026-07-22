@@ -88,7 +88,7 @@ export class NumericTextBoxComponent implements NumericTextboxVariantInputs, For
         return this.formatValueForDisplay(this.value());
     });
     protected readonly invalidInput = computed(
-        () => this.invalid() || (this.required() && this.value() == null && this.touched())
+        () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly keydown$ = new Subject<KeyboardEvent>();
     protected readonly rawInputValue = signal("");

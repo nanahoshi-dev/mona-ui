@@ -106,10 +106,10 @@ export const radioButtonDirectiveThemeVariants = cva(
         focus-visible:border-focus-indicator
         focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
-        [&.ng-touched.ng-invalid]:focus-visible:border-error
-        [&.ng-touched.ng-invalid]:focus-visible:ring-error/35
+        data-[invalid='true']:border-error
+        data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
+        data-[invalid='true']:focus-visible:border-error
+        data-[invalid='true']:focus-visible:ring-error/35
     `,
     {
         variants: {

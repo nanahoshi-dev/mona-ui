@@ -119,12 +119,14 @@ protected readonly selectedSize = signal<string>("M");
 |------|------|------|---------|----------|-------------|
 | `class` | input | `string` | `''` | Optional | Additional CSS classes merged onto the label container via `tailwind-merge`. |
 | `disabled` | input | `boolean` | `false` | Optional | Sets the disabled state. |
+| `invalid` | input | `boolean` | `false` | Optional | Marks the radio button as invalid. When bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive. Error styling requires both `invalid` and `touched` to be `true`. |
 | `label` | input | `string` | `''` | Optional | Text label alongside the circle. Takes precedence over projected content. Always provide `label` or projected content for an accessible name. |
 | `labelPosition` | input | `'after' \| 'before'` | `'after'` | Optional | Position of the label relative to the radio circle. |
 | `labelSize` | input | `'default' \| 'large' \| 'small'` | `'default'` | Optional | Font size applied to the label text. |
 | `name` | input | `string` | `''` | Optional | HTML `name` attribute forwarded to the native input. Radio buttons with the same `name` form a mutually exclusive group. |
 | `radioValue` | input | `any` | `undefined` | Optional | The identity value of this radio button. Compared against `value` to determine whether this button is selected. When selected, `radioValue` is written to the form as the new group value. |
 | `rounded` | input | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'full'` | Optional | Border radius of the radio circle and selected indicator. |
+| `touched` | input | `boolean` | `false` | Optional | Marks the radio button as touched. When bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive. Error styling requires both `invalid` and `touched` to be `true`. |
 | `value` | model | `any` | `undefined` | Optional | The currently selected value in the radio group. Kept in sync by the `Field` directive (signal forms) or by the CVA layer (`ngModel` / `formControl`). |
 | `inputBlur` | output | `FocusEvent` | — | — | Emits when the native input loses focus. |
 | `inputClick` | output | `MouseEvent` | — | — | Emits when the native input is clicked. |
@@ -192,15 +194,17 @@ Pair each input with a `<label>` for accessibility. The `<label>` must either wr
 
 The directive applies styles directly to the `<input>` element's `class` attribute. Additional classes can be added directly to the `<input>` element.
 
-**Form validation state:** When used with Angular Forms, the directive applies `border-error` automatically when the input is in the `ng-touched ng-invalid` state.
+**Form validation state:** Set `invalid` and `touched` on the directive (e.g. from a `FormControl`'s status) to apply `border-error` styling.
 
 ### API — `RadioButtonDirective`
 
 **Selector:** `input[type='radio'][monaRadioButton]`
 
-| Name      | Kind  | Type                                                 | Default  | Required | Description                                 |
-|-----------|-------|------------------------------------------------------|----------|----------|---------------------------------------------|
-| `rounded` | input | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'none'` | Optional | Sets the border radius of the radio button. |
+| Name      | Kind  | Type                                                 | Default  | Required | Description                                                                                    |
+|-----------|-------|------------------------------------------------------|----------|----------|--------------------------------------------------------------------------------------------------|
+| `invalid` | input | `boolean`                                            | `false`  | Optional | Marks the radio button as invalid, triggering error border and ring styling.                     |
+| `rounded` | input | `'full' \| 'large' \| 'medium' \| 'none' \| 'small'` | `'none'` | Optional | Sets the border radius of the radio button.                                                      |
+| `touched` | input | `boolean`                                            | `false`  | Optional | Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`. |
 
 The directive has no outputs. All native input events (`change`, `blur`, `focus`, etc.) are available directly on the host element.
 
@@ -227,7 +231,7 @@ The directive has no outputs. All native input events (`change`, `blur`, `focus`
 - [x] RadioButtonDirective @default added to rounded
 - [x] label/projected-content accessible-name requirement documented
 - [x] ControlValueAccessor behavior documented
-- [x] Directive validation state (ng-touched ng-invalid) documented from CVA source
+- [x] Directive validation state documented via invalid/touched inputs
 - [x] No internal or unexported APIs exposed
 -->
 

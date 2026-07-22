@@ -171,7 +171,7 @@ export class AutoCompleteComponent<TData = unknown>
     });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();

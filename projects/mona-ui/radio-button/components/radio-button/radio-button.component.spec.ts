@@ -30,4 +30,17 @@ describe("RadioButtonComponent", () => {
         expect(circleElement.classList.contains("data-[invalid='true']:peer-focus-visible:ring-error/35")).toBe(true);
         expect(circleElement.classList.contains("peer-disabled:bg-disabled-background")).toBe(true);
     });
+
+    it("should not show invalid styling until touched", () => {
+        fixture.componentRef.setInput("invalid", true);
+        fixture.detectChanges();
+
+        const circleElement = fixture.nativeElement.querySelector("span") as HTMLSpanElement;
+        expect(circleElement.getAttribute("data-invalid")).toBeNull();
+
+        fixture.componentRef.setInput("touched", true);
+        fixture.detectChanges();
+
+        expect(circleElement.getAttribute("data-invalid")).toBe("true");
+    });
 });
