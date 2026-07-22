@@ -50,6 +50,7 @@
             "@nanahoshi/mona-ui/internal/tree": ["./projects/mona-ui/internal/tree/public-api.ts"],
             "@nanahoshi/mona-ui/filter": ["./projects/mona-ui/filter/public-api.ts"],
             "@nanahoshi/mona-ui/grid": ["./projects/mona-ui/grid/public-api.ts"],
+            "@nanahoshi/mona-ui/label": ["./projects/mona-ui/label/public-api.ts"],
             "@nanahoshi/mona-ui/list": ["./projects/mona-ui/list/public-api.ts"],
             "@nanahoshi/mona-ui/list-box": ["./projects/mona-ui/list-box/public-api.ts"],
             "@nanahoshi/mona-ui/list-view": ["./projects/mona-ui/list-view/public-api.ts"],

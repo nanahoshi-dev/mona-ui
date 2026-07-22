@@ -184,6 +184,11 @@ export const routes: Routes = [
                     import("./docs/components/input-doc/input-doc.component").then(m => m.InputDocComponent)
             },
             {
+                path: "label",
+                loadComponent: () =>
+                    import("./docs/components/label-doc/label-doc.component").then(m => m.LabelDocComponent)
+            },
+            {
                 path: "list-box",
                 loadComponent: () =>
                     import("./docs/components/list-box-doc/list-box-doc.component").then(m => m.ListBoxDocComponent)
