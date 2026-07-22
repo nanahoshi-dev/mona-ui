@@ -172,7 +172,7 @@ export class ColorGradientComponent implements ColorGradientVariantInputs, FormV
     });
     protected readonly hueValue$ = new Subject<number>();
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly lastSelectedColor = signal("");
     protected readonly rgb = signal<RGB>({ r: 255, g: 255, b: 255 });

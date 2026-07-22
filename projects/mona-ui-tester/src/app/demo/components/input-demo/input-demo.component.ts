@@ -34,7 +34,6 @@ export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> 
 
 @Component({
     imports: [TextBoxDirective, FormField],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <div class="flex flex-col gap-2">
             <span>Value: {{ form.text().value() }}</span>

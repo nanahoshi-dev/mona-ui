@@ -94,7 +94,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         const controls = this.popupId;
         const expanded = this.#dropdownService.popupRef() != null;
         const hasPopup = "dialog";
-        const invalid = this.invalid();
+        const invalid = this.invalidState();
         return {
             "aria-autocomplete": "none",
             "aria-controls": controls,
@@ -106,7 +106,7 @@ export class TimePickerComponent implements FormValueControl<Date | null>, TimeP
         };
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly navigatedDate = signal(new Date());
     protected readonly pickerPopupClass = computed(() => {

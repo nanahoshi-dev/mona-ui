@@ -189,10 +189,12 @@ Applies Mona UI styling to a native `<input type="checkbox">`. All native checkb
 
 #### Inputs
 
-| Name      | Type                                                 | Default    | Description                                                               |
-|-----------|------------------------------------------------------|------------|---------------------------------------------------------------------------|
-| `class`   | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`. |
-| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset for the checkbox.                                    |
+| Name      | Type                                                 | Default    | Description                                                                                    |
+|-----------|------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------|
+| `class`   | `string`                                             | `''`       | Additional CSS classes merged onto the host element via `tailwind-merge`.                       |
+| `invalid` | `boolean`                                            | `false`    | Marks the checkbox as invalid, triggering error border and ring styling.                        |
+| `rounded` | `'none' \| 'small' \| 'medium' \| 'large' \| 'full'` | `'medium'` | Border-radius preset for the checkbox.                                                           |
+| `touched` | `boolean`                                            | `false`    | Marks the checkbox as touched. Error styling requires both `invalid` and `touched` to be `true`. |
 
 `CheckboxDirective` has no outputs. Listen to native events (`(change)`, `(focus)`, `(blur)`) on the host element directly.
 

@@ -94,7 +94,7 @@ export class SwitchComponent implements SwitchVariantInputs, FormCheckboxControl
         return twMerge(classes, this.userClass());
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.checked())
+        () => this.touched() && (this.invalid() || (this.required() && !this.checked()))
     );
     protected readonly handleClasses = computed(() => {
         const rounded = this.rounded();

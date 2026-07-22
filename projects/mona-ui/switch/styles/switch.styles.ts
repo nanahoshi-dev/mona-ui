@@ -24,7 +24,6 @@ export const switchThemeVariants = cva(
         focus-visible:border-focus-indicator
         focus-visible:ring-2 focus-visible:ring-focus-indicator/35
 
-        [&.ng-touched.ng-invalid]:border-error
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:focus-visible:border-error

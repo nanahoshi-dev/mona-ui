@@ -164,7 +164,7 @@ export class DropdownListComponent<TData = unknown>
     protected readonly headerTemplate = contentChild(DropdownHeaderTemplateDirective, { read: TemplateRef });
     protected readonly itemTemplate = contentChild(DropdownItemTemplateDirective, { read: TemplateRef });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && this.value() == null)
+        () => this.touched() && (this.invalid() || (this.required() && this.value() == null))
     );
     protected readonly isEmpty = computed(() => !this.#listService.viewItems().any());
     protected readonly listId = createElementControlId();

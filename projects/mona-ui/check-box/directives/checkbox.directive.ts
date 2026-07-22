@@ -9,6 +9,8 @@ import {
 @Directive({
     selector: "input[type='checkbox'][monaCheckbox]",
     host: {
+        "[attr.aria-invalid]": "inputInvalid() || null",
+        "[attr.data-invalid]": "inputInvalid() || null",
         "[class]": "classes()"
     }
 })
@@ -19,12 +21,25 @@ export class CheckboxDirective implements CheckboxDirectiveVariantInput {
         const userClass = this.userClass();
         return twMerge(variantClasses, userClass);
     });
+    protected readonly inputInvalid = computed(() => this.touched() && this.invalid());
+
+    /**
+     * @description Marks the checkbox as invalid, triggering error border and ring styling.
+     * @default false
+     */
+    public readonly invalid = input(false);
 
     /**
      * @description Border-radius preset applied to the checkbox.
      * @default "medium"
      */
     public readonly rounded = input<CheckboxDirectiveVariantProps["rounded"]>("medium");
+
+    /**
+     * @description Marks the checkbox as touched. Error styling is only shown when both `invalid` and `touched` are `true`.
+     * @default false
+     */
+    public readonly touched = input(false);
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

@@ -70,7 +70,7 @@ export class ColorPaletteComponent implements ColorPaletteVariantInput, FormValu
         this.focusedColorIndex() === -1 ? 0 : this.focusedColorIndex()
     );
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
 
     /**

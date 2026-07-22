@@ -125,7 +125,7 @@ export class DatePickerComponent
         const controls = this.popupId;
         const expanded = this.#dropdownService.popupRef() != null;
         const hasPopup = "grid";
-        const invalid = this.invalid();
+        const invalid = this.invalidState();
         return {
             "aria-autocomplete": "none",
             "aria-controls": controls,
@@ -137,7 +137,7 @@ export class DatePickerComponent
         };
     });
     protected readonly invalidState = computed(
-        () => this.invalid() || (this.required() && this.touched() && !this.value())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly monthCellTemplate = contentChild(CalendarMonthCellTemplateDirective);
     protected readonly navigatedDate = linkedSignal(() => this.value() ?? new Date());

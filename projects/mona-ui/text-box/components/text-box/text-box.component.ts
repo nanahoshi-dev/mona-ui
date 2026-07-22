@@ -47,7 +47,7 @@ export class TextBoxComponent implements TextBoxVariantInput, FormValueControl<s
     });
     protected readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>("input");
     protected readonly invalidInput = computed(
-        () => this.invalid() || (this.required() && !this.value() && this.touched())
+        () => this.touched() && (this.invalid() || (this.required() && !this.value()))
     );
     protected readonly prefixTemplateList = contentChildren(TextBoxPrefixTemplateDirective, { read: TemplateRef });
     protected readonly suffixTemplateList = contentChildren(TextBoxSuffixTemplateDirective, { read: TemplateRef });

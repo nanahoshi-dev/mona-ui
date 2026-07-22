@@ -28,6 +28,7 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
         const variantClasses = radioButtonContainerLabelThemeVariants({ labelSize });
         return twMerge(variantClasses, userClasses);
     });
+    protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly radioButtonCircleClasses = computed(() => {
         const rounded = this.rounded();
         return radioButtonCircleThemeVariants({ rounded });
@@ -109,6 +110,13 @@ export class RadioButtonComponent implements RadioButtonVariantInput, FormValueC
     public readonly rounded = input<RadioButtonVariantProps["rounded"]>("full");
 
     public readonly touch = output<void>();
+
+    /**
+     * @description Marks the radio button as touched. Error styling requires both `invalid` and `touched` to be `true`.
+     * When bound to a signal form field via `[field]`, this is written by the signal forms `Field` directive.
+     * @default false
+     */
+    public readonly touched = input(false);
 
     /**
      * @description Additional CSS classes merged onto the label container element via `tailwind-merge`.

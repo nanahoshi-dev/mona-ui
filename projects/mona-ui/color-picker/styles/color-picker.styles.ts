@@ -28,10 +28,6 @@ export const colorPickerBaseThemeVariants = cva(
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         data-[invalid='true']:focus-within:border-error
         data-[invalid='true']:focus-within:ring-error/35
-        [&.ng-touched.ng-invalid]:border-error
-        [&.ng-touched.ng-invalid]:ring-2 [&.ng-touched.ng-invalid]:ring-error/35
-        [&.ng-touched.ng-invalid]:focus-within:border-error
-        [&.ng-touched.ng-invalid]:focus-within:ring-error/35
     `,
     {
         variants: {
