@@ -17,6 +17,6 @@ export class AppComponent {
     public readonly sidebarService = inject(SidebarService);
 
     public constructor() {
-        this.#themeService.setPrimaryColor("#e8aaf0");
+        // this.#themeService.setPrimaryColor("#e8aaf0");
     }
 }

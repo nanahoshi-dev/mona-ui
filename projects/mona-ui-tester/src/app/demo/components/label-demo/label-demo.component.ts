@@ -1,16 +1,15 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal, viewChild } from "@angular/core";
+import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
 import { LabelComponent } from "@nanahoshi/mona-ui/label";
-import { TextBoxComponent, TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
 import { DemoContainerComponent } from "../demo-container/demo-container.component";
 
 @Component({
     selector: "app-label-demo",
-    imports: [DemoContainerComponent, NgComponentOutlet, LabelComponent, TextBoxComponent, TextBoxDirective],
-    templateUrl: "./label-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    imports: [DemoContainerComponent, NgComponentOutlet],
+    templateUrl: "./label-demo.component.html"
 })
 export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
     protected readonly config = signal<ComponentConfig<LabelComponent>>({
@@ -30,7 +29,6 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
             }
         }
     });
-    protected readonly focusTarget = viewChild<TextBoxComponent>("focusTargetRef");
     protected readonly LabelWrapperComponent = LabelWrapperComponent;
     protected readonly metadata = this.getMetadata("LabelComponent");
 }
@@ -42,7 +40,6 @@ export class LabelDemoComponent extends AbstractDemoComponent<LabelComponent> {
             <mona-text-box placeholder="Enter an email address"></mona-text-box>
         </mona-label>
     `,
-    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
         class: "w-full flex items-center justify-center"
     }

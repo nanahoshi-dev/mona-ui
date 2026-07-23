@@ -1,8 +1,8 @@
 export type { SelectionMode } from "./models/SelectionMode";
 export type { ScrollDirection } from "./models/ScrollDirection";
 
+export * from "./models/ClassInputType";
 export * from "./models/ColorMode";
-
 export * from "./models/DataType";
 export * from "./models/FilterChangeEvent";
 export * from "./models/FilterableOptions";
@@ -19,5 +19,6 @@ export { TakeFirstPipe } from "./pipes/take-first.pipe";
 export * from "./utils/PatchStore";
 export * from "./utils/PreventableEvent";
 export * from "./utils/deepMerge";
+export { classInputToClass } from "./utils/classInputToClass";
 export { getPercentage } from "./utils/getPercentage";
 export { moveIndices } from "./utils/moveIndices";

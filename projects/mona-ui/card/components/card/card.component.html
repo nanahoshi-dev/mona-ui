@@ -1,0 +1,11 @@
+@if (headerTemplate()) {
+    <div [class]="headerClass()">
+        <ng-container [ngTemplateOutlet]="headerTemplate()"></ng-container>
+    </div>
+}
+<div>CONTENT</div>
+@if (footerTemplate()) {
+    <div [class]="footerClass()">
+        <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
+    </div>
+}
