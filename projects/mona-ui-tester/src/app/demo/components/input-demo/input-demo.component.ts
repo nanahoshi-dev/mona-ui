@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, signal } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { form, FormField } from "@angular/forms/signals";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
@@ -9,8 +9,7 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 @Component({
     selector: "app-input-demo",
     imports: [DemoContainerComponent, NgComponentOutlet],
-    templateUrl: "./input-demo.component.html",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    templateUrl: "./input-demo.component.html"
 })
 export class InputDemoComponent extends AbstractDemoComponent<TextBoxDirective> {
     protected readonly InputWrapperComponent = InputWrapperComponent;

@@ -12,31 +12,6 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 })
 export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxComponent> {
     protected readonly config = signal<ComponentConfig<CheckBoxComponent>>({
-        code: `
-            <mona-check-box
-                [disabled]="disabled()"
-                [indeterminate]="indeterminate()"
-                [label]="label()"
-                [labelPosition]="labelPosition()"
-                [labelSize]="labelSize()"
-                [rounded]="rounded()"
-                (inputBlur)="onInputBlur($event)"
-                (inputChange)="onInputChange($event)"
-                (inputFocus)="onInputFocus($event)">
-                <span class="text-emerald-700">Checkbox Component</span>
-            </mona-check-box>
-
-            <label class="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    (change)="onInputChange($event)"
-                    [indeterminate]="indeterminate()"
-                    [disabled]="disabled()"
-                    [rounded]="rounded()"
-                    monaCheckbox />
-                Checkbox Directive
-            </label>
-        `,
         inputs: {
             checked: {
                 type: "boolean",
@@ -77,7 +52,6 @@ export class CheckboxDemoComponent extends AbstractDemoComponent<CheckBoxCompone
 
 @Component({
     imports: [CheckBoxComponent, CheckboxDirective],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <mona-check-box
             [checked]="checked()"

@@ -1,0 +1,30 @@
+@if (headerTemplate()) {
+    <div [class]="headerClass()">
+        @if (titleTemplate()) {
+            <div [class]="titleCellClass">
+                <ng-container [ngTemplateOutlet]="titleTemplate()" [ngTemplateOutletContext]="{ $implicit: titleId() }" />
+            </div>
+        }
+        @if (descriptionTemplate()) {
+            <div [class]="descriptionCellClass">
+                <ng-container
+                    [ngTemplateOutlet]="descriptionTemplate()"
+                    [ngTemplateOutletContext]="{ $implicit: descriptionId() }"
+                />
+            </div>
+        }
+        @if (actionTemplate().length > 0) {
+            <div [class]="actionsCellClass" role="group" aria-label="Card actions">
+                @for (template of actionTemplate(); track template) {
+                    <ng-container [ngTemplateOutlet]="template" />
+                }
+            </div>
+        }
+    </div>
+}
+<ng-container [ngTemplateOutlet]="contentDirective()?.templateRef ?? null" />
+@if (footerTemplate()) {
+    <div [class]="footerClass()">
+        <ng-container [ngTemplateOutlet]="footerTemplate()" />
+    </div>
+}

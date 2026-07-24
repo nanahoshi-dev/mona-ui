@@ -16,6 +16,8 @@ const dark: ThemeColors = Object.freeze({
     "--color-surface-muted": "#161718",
     "--color-surface-raised": "#242528",
     "--color-surface-overlay": "#161718",
+    "--color-card": "var(--color-surface-raised)",
+    "--color-card-foreground": "var(--color-foreground)",
 
     "--color-foreground": "#D6D6D8",
     "--color-muted-foreground": "#A8A8AD",

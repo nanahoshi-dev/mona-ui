@@ -16,6 +16,8 @@
     --color-surface-muted: oklch(96.7% 0.001 286.375);
     --color-surface-raised: oklch(100% 0 0);
     --color-surface-overlay: oklch(100% 0 0);
+    --color-card: var(--color-surface-raised);
+    --color-card-foreground: var(--color-foreground);
 
     --color-background: var(--color-surface);
     --color-background-dark: var(--color-surface-muted);

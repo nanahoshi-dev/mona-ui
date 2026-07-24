@@ -1,0 +1,6 @@
+<app-demo-container [config]="config()" [metadata]="metadata()" (valueChange)="onInputValueChange($event)">
+    <ng-container
+        [ngComponentOutlet]="CardWrapperComponent"
+        [ngComponentOutletInputs]="inputs()"
+        [ngComponentOutletInjector]="featureInjector"></ng-container>
+</app-demo-container>

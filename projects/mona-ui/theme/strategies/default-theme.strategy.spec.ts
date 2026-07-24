@@ -48,6 +48,19 @@ describe("DefaultThemeStrategy", () => {
         );
     });
 
+    it("requires the semantic card color pair in third-party profiles", () => {
+        const {
+            "--color-card": _card,
+            "--color-card-foreground": _cardForeground,
+            ...colors
+        } = cloneProfile(monaTheme.variants.light).colors;
+        const profile = { ...cloneProfile(monaTheme.variants.light), colors };
+
+        expect(() => new DefaultThemeStrategy([{ name: "custom", variants: { light: profile } }], [])).toThrowError(
+            /missing colors tokens.*--color-card.*--color-card-foreground/
+        );
+    });
+
     it("requires the effect and shape sections for third-party profiles", () => {
         const { effects: _effects, shape: _shape, ...incomplete } = cloneProfile(monaTheme.variants.light);
 

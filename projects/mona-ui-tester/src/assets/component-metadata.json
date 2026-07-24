@@ -1146,7 +1146,7 @@
       {
         "name": "for",
         "type": "LabelTarget",
-        "description": "Associates the label with a native control ID or a target that exposes a public `focus()` method.\nString values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked.",
+        "description": "Associates the label with a native control ID or a target that exposes a public `focus()` method.\r\nString values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked.",
         "kind": "input"
       },
       {
@@ -2137,6 +2137,48 @@
         "name": "weekNumber",
         "type": "boolean",
         "description": "Enables the display of week numbers in the calendar.",
+        "kind": "input"
+      }
+    ]
+  },
+  "CardComponent": {
+    "name": "CardComponent",
+    "selector": "\"mona-card\"",
+    "inputs": [
+      {
+        "name": "rounded",
+        "type": "CardVariantProps[\"rounded\"]",
+        "description": "Controls the border radius applied to the card and its header/footer regions.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "CardFooterComponent": {
+    "name": "CardFooterComponent",
+    "selector": "\"mona-card-footer\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "ClassInputType",
+        "description": "Additional CSS classes merged onto the rendered footer element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "CardHeaderComponent": {
+    "name": "CardHeaderComponent",
+    "selector": "\"mona-card-header\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "ClassInputType",
+        "description": "Additional CSS classes merged onto the rendered header element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -4440,7 +4482,7 @@
       {
         "name": "for",
         "type": "LabelTarget",
-        "description": "Associates the label with a native control ID or a target that exposes a public `focus()` method.\nString values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked.",
+        "description": "Associates the label with a native control ID or a target that exposes a public `focus()` method.\r\nString values are reflected as the native `for` attribute. Object targets receive focus when the label is clicked.",
         "kind": "input"
       },
       {

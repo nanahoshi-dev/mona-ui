@@ -1,12 +1,12 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChild, inject, input } from "@angular/core";
+import { Component, computed, contentChild, input } from "@angular/core";
 import { getPercentage } from "@nanahoshi/mona-ui/common";
 import type { Action } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { CircularProgressBarLabelTemplateDirective } from "../../directives/circular-progress-bar-label-template.directive";
 import {
     circularProgressBarBaseThemeVariants,
-    type CircularProgressBarBaseVariantInput
+    type CircularProgressBarVariantInput
 } from "../../styles/circular-progress-bar.styles";
 
 @Component({
@@ -45,7 +45,7 @@ import {
         "[style.height]": "pixelSize()"
     }
 })
-export class CircularProgressBarComponent implements CircularProgressBarBaseVariantInput {
+export class CircularProgressBarComponent implements CircularProgressBarVariantInput {
     protected readonly baseClasses = computed(() => {
         const disabled = this.disabled();
         const classes = circularProgressBarBaseThemeVariants({ disabled });

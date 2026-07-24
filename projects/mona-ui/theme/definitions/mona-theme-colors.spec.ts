@@ -20,6 +20,8 @@ describe("monaThemeColors", () => {
             "--color-surface-muted",
             "--color-surface-raised",
             "--color-surface-overlay",
+            "--color-card",
+            "--color-card-foreground",
             "--color-foreground",
             "--color-muted-foreground",
             "--color-input-background",
@@ -98,6 +100,14 @@ describe("monaThemeColors", () => {
         expect(colorContrast(monaThemeColors.dark, "--color-hover", "--color-surface-overlay")).toBeGreaterThan(1.1);
     });
 
+    it("maps cards to the raised surface and the canonical foreground", () => {
+        for (const colors of Object.values(monaThemeColors)) {
+            expect(colors["--color-card"]).toBe("var(--color-surface-raised)");
+            expect(colors["--color-card-foreground"]).toBe("var(--color-foreground)");
+            expectContrast(colors, "--color-card-foreground", "--color-card", 4.5);
+        }
+    });
+
     it("keeps the built-in identity and interaction palette zinc-neutral", () => {
         const neutralTokens = [
             "--color-canvas",
@@ -105,6 +115,7 @@ describe("monaThemeColors", () => {
             "--color-surface-muted",
             "--color-surface-raised",
             "--color-surface-overlay",
+            "--color-card",
             "--color-foreground",
             "--color-muted-foreground",
             "--color-input-background",

@@ -63,6 +63,14 @@ describe("annaThemeColors", () => {
         expectDarker(annaThemeColors.dark, "--color-surface-overlay", "--color-input-background");
         expectDarker(annaThemeColors.dark, "--color-surface-overlay", "--color-surface-raised");
     });
+
+    it("maps cards to the raised surface with accessible foreground text", () => {
+        const colors = annaThemeColors.dark;
+
+        expect(colors["--color-card"]).toBe("var(--color-surface-raised)");
+        expect(colors["--color-card-foreground"]).toBe("var(--color-foreground)");
+        expectContrast(colors, "--color-card-foreground", "--color-card", 4.5);
+    });
 });
 
 function expectContrast(
