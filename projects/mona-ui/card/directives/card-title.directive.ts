@@ -1,13 +1,10 @@
-import { Directive, inject, input, TemplateRef } from "@angular/core";
-import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { Directive, inject, TemplateRef } from "@angular/core";
+import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 
 @Directive({
     selector: "[monaCardTitle]"
 })
 export class CardTitleDirective {
+    public readonly id = createElementControlId();
     public readonly templateRef = inject(TemplateRef);
-    public readonly userClass = input<ClassInputType, string>("", {
-        alias: "class",
-        transform: value => classInputToClass(value)
-    });
 }

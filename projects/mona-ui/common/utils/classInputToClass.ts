@@ -1,4 +1,4 @@
-import type { ClassInputType } from "@nanahoshi/mona-ui/common";
+import type { ClassInputType } from "../models/ClassInputType";
 
 export const classInputToClass = (input: ClassInputType): string => {
     if (input == null) {

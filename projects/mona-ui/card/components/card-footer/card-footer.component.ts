@@ -10,12 +10,16 @@ import { CardService } from "../../services/card.service";
 export class CardFooterComponent {
     readonly #cardService = inject(CardService);
     private readonly footerTemplate = viewChild.required(TemplateRef);
+
+    /**
+     * @description Additional CSS classes merged onto the rendered footer element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<ClassInputType>("", { alias: "class" });
 
     public constructor() {
         afterRenderEffect({
             read: () => {
-                console.log(this.footerTemplate());
                 this.#cardService.footerTemplate.set(this.footerTemplate());
                 this.#cardService.footerClass.set(this.userClass());
             }

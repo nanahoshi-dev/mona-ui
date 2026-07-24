@@ -4,6 +4,7 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import {
     CardActionDirective,
     CardComponent,
+    CardContentDirective,
     CardDescriptionDirective,
     CardFooterComponent,
     CardHeaderComponent,
@@ -24,13 +25,13 @@ import { DemoContainerComponent } from "../demo-container/demo-container.compone
 export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
     readonly #injector = createFeatureInjector({
         footer: {
-            active: false,
+            active: true,
             code: ``,
             description: "Render card footer.",
             name: "Footer"
         },
         header: {
-            active: false,
+            active: true,
             code: ``,
             description: "Render card header.",
             name: "Header"
@@ -40,7 +41,7 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
         inputs: {
             rounded: {
                 type: "dropdown",
-                value: ["small", "medium", "large", "none"],
+                value: ["small", "medium", "large", "xlarge", "xxlarge", "none"],
                 defaultValue: "medium"
             }
         },
@@ -61,35 +62,39 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
         TextBoxComponent,
         CardTitleDirective,
         CardDescriptionDirective,
-        CardActionDirective
+        CardActionDirective,
+        CardContentDirective
     ],
     template: `
         @let featureData = features();
-        <mona-card [rounded]="rounded()" class="w-72">
+        <mona-card [rounded]="rounded()" class="w-96">
             @if (featureData["header"].active) {
                 <mona-card-header>
-                    <h3 class="font-semibold text-sm" *monaCardTitle>Card Title</h3>
-                    <p class="text-sm text-foreground/70" *monaCardDescription>This is the card description.</p>
-                    <button monaButton look="ghost" *monaCardAction>Sign up</button>
+                    <h3 class="font-semibold text-sm" *monaCardTitle="let id" [id]="id">Login to your account</h3>
+                    <p class="text-sm text-foreground/70" *monaCardDescription="let id" [id]="id">
+                        Enter your username below to login to your account
+                    </p>
+                    <button monaButton look="link" size="small" *monaCardAction>Sign up</button>
                 </mona-card-header>
             }
-            @if (featureData["footer"].active) {
-                <mona-card-footer class="bg-gray-100 flex items-center justify-end">
-                    <button monaButton>Accept</button>
-                </mona-card-footer>
-            }
-            <div *monaCardDescription>
-                <div class="p-2 flex flex-col gap-4">
-                    <div class="flex flex-col gap-2">
-                        <mona-label [for]="username">Username</mona-label>
-                        <mona-text-box #username></mona-text-box>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <mona-label [for]="password">Password</mona-label>
-                        <mona-text-box #password></mona-text-box>
-                    </div>
+
+            <div class="px-4 flex flex-col gap-4" *monaCardContent>
+                <div class="flex flex-col gap-2">
+                    <mona-label [for]="username">Username</mona-label>
+                    <mona-text-box placeholder="Enter your username..." #username></mona-text-box>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <mona-label [for]="password">Password</mona-label>
+                    <mona-text-box placeholder="Enter your password..." #password></mona-text-box>
                 </div>
             </div>
+
+            @if (featureData["footer"].active) {
+                <mona-card-footer class="flex flex-col gap-2">
+                    <button monaButton look="primary" size="small" class="w-full">Log in</button>
+                    <button monaButton size="small" class="w-full">Log in with Google</button>
+                </mona-card-footer>
+            }
         </mona-card>
     `
 })

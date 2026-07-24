@@ -5,3 +5,4 @@ export * from "./directives/card-action.directive";
 export * from "./directives/card-content.directive";
 export * from "./directives/card-description.directive";
 export * from "./directives/card-title.directive";
+export type { CardVariantProps } from "./styles/card.styles";

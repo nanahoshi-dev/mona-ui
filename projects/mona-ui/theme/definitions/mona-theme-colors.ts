@@ -74,6 +74,8 @@ const light: ThemeColors = Object.freeze({
     "--color-surface-muted": "oklch(96.7% 0.001 286.375)",
     "--color-surface-raised": "oklch(100% 0 0)",
     "--color-surface-overlay": "oklch(100% 0 0)",
+    "--color-card": "var(--color-surface-raised)",
+    "--color-card-foreground": "var(--color-foreground)",
 
     "--color-foreground": "oklch(14.1% 0.005 285.823)",
     "--color-muted-foreground": "oklch(55.2% 0.016 285.938)",
@@ -143,6 +145,8 @@ const dark: ThemeColors = Object.freeze({
     "--color-surface-muted": "oklch(20.5% 0.006 285.885)",
     "--color-surface-raised": "oklch(24% 0.006 286.033)",
     "--color-surface-overlay": "oklch(27.4% 0.006 286.033)",
+    "--color-card": "var(--color-surface-raised)",
+    "--color-card-foreground": "var(--color-foreground)",
 
     "--color-foreground": "oklch(98.5% 0 0)",
     "--color-muted-foreground": "oklch(70.5% 0.015 286.067)",

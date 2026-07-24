@@ -223,6 +223,7 @@ describe("ThemeService", () => {
 
         expect(configured.selection()).toEqual({ name: "luna", variant: "light" });
         expect(root.getAttribute("data-mona-transparency")).toBe("reduced");
+        expect(root.style.getPropertyValue("--color-card")).toBe("var(--mona-effect-raised-background-color)");
         expect(root.style.getPropertyValue("--mona-effect-control-background-color")).toBe("#f3f4f5");
         expect(root.style.getPropertyValue("--mona-effect-raised-background-color")).toBe("#fbfbfb");
         expect(root.style.getPropertyValue("--mona-effect-overlay-background-color")).toBe("#f9f9fa");

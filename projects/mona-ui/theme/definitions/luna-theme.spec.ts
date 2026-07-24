@@ -87,6 +87,18 @@ describe("Luna theme", () => {
         expect(serializedProfiles).not.toContain("rgb(116 134 255");
     });
 
+    it("uses the raised glass material for cards in both variants", () => {
+        for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
+            expect(profile.colors["--color-card"]).toBe("var(--mona-effect-raised-background-color)");
+            expect(profile.colors["--color-card-foreground"]).toBe("var(--color-foreground)");
+
+            const fallback = profile.effects["--mona-effect-raised-fallback-background-color"];
+            expect(contrast(resolveColor(profile.colors, "--color-card-foreground"), fallback)).toBeGreaterThanOrEqual(
+                4.5
+            );
+        }
+    });
+
     it("keeps glass translucent without glossy images or inset highlights", () => {
         expect(lunaTheme.variants.light.effects["--mona-effect-overlay-background-color"]).toBe(
             "rgb(249 249 250 / 0.72)"
