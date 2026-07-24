@@ -1,7 +1,16 @@
 import { NgComponentOutlet } from "@angular/common";
 import { Component, inject, input, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { CardComponent, CardFooterComponent, CardHeaderComponent } from "@nanahoshi/mona-ui/card";
+import {
+    CardActionDirective,
+    CardComponent,
+    CardDescriptionDirective,
+    CardFooterComponent,
+    CardHeaderComponent,
+    CardTitleDirective
+} from "@nanahoshi/mona-ui/card";
+import { LabelComponent } from "@nanahoshi/mona-ui/label";
+import { TextBoxComponent } from "@nanahoshi/mona-ui/text-box";
 import type { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -43,20 +52,44 @@ export class CardDemoComponent extends AbstractDemoComponent<CardComponent> {
 }
 
 @Component({
-    imports: [CardComponent, ButtonDirective, CardFooterComponent, CardHeaderComponent],
+    imports: [
+        CardComponent,
+        ButtonDirective,
+        CardFooterComponent,
+        CardHeaderComponent,
+        LabelComponent,
+        TextBoxComponent,
+        CardTitleDirective,
+        CardDescriptionDirective,
+        CardActionDirective
+    ],
     template: `
         @let featureData = features();
         <mona-card [rounded]="rounded()" class="w-72">
+            @if (featureData["header"].active) {
+                <mona-card-header>
+                    <h3 class="font-semibold text-sm" *monaCardTitle>Card Title</h3>
+                    <p class="text-sm text-foreground/70" *monaCardDescription>This is the card description.</p>
+                    <button monaButton look="ghost" *monaCardAction>Sign up</button>
+                </mona-card-header>
+            }
             @if (featureData["footer"].active) {
-                <mona-card-footer class="bg-red-300">
+                <mona-card-footer class="bg-gray-100 flex items-center justify-end">
                     <button monaButton>Accept</button>
                 </mona-card-footer>
             }
-            @if (featureData["header"].active) {
-                <mona-card-header class="bg-red-300">
-                    <button monaButton>Accept</button>
-                </mona-card-header>
-            }
+            <div *monaCardDescription>
+                <div class="p-2 flex flex-col gap-4">
+                    <div class="flex flex-col gap-2">
+                        <mona-label [for]="username">Username</mona-label>
+                        <mona-text-box #username></mona-text-box>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <mona-label [for]="password">Password</mona-label>
+                        <mona-text-box #password></mona-text-box>
+                    </div>
+                </div>
+            </div>
         </mona-card>
     `
 })

@@ -44,9 +44,7 @@ export const cardFooterThemeVariants = cva(
 
 export const cardHeaderThemeVariants = cva(
     `
-        flex flex-row
-        justify-between
-        items-center
+        grid grid-cols-[1fr_auto] grid-rows-2
         p-2
         border-b
         border-border

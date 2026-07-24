@@ -1,7 +1,8 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, inject, input } from "@angular/core";
+import { Component, computed, contentChild, inject, input } from "@angular/core";
 import { classInputToClass } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
+import { CardContentDirective } from "../../directives/card-content.directive";
 import { CardService } from "../../services/card.service";
 import {
     cardBaseThemeVariants,
@@ -21,12 +22,15 @@ import {
 })
 export class CardComponent {
     readonly #cardService = inject(CardService);
+    protected readonly actionTemplate = this.#cardService.actionTemplate.asReadonly();
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
         const variantClass = cardBaseThemeVariants({ rounded });
         const userClass = classInputToClass(this.userClass());
         return twMerge(variantClass, userClass);
     });
+    protected readonly contentDirective = contentChild(CardContentDirective);
+    protected readonly descriptionTemplate = this.#cardService.descriptionTemplate.asReadonly();
     protected readonly footerClass = computed(() => {
         const rounded = this.rounded();
         const variantClass = cardFooterThemeVariants({ rounded });
@@ -41,6 +45,7 @@ export class CardComponent {
         return twMerge(variantClass, userClass);
     });
     protected readonly headerTemplate = this.#cardService.headerTemplate.asReadonly();
+    protected readonly titleTemplate = this.#cardService.titleTemplate.asReadonly();
 
     public readonly rounded = input<CardVariantProps["rounded"]>("medium");
 

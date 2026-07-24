@@ -1,9 +1,24 @@
 @if (headerTemplate()) {
     <div [class]="headerClass()">
-        <ng-container [ngTemplateOutlet]="headerTemplate()"></ng-container>
+        @if (titleTemplate()) {
+            <div *ngTemplateOutlet="titleTemplate()"></div>
+        } @else {
+            <div></div>
+        }
+        @if (actionTemplate()) {
+            <div *ngTemplateOutlet="actionTemplate()"></div>
+        } @else {
+            <div></div>
+        }
+        @if (descriptionTemplate()) {
+            <div *ngTemplateOutlet="descriptionTemplate()"></div>
+        } @else {
+            <div></div>
+        }
+        <div></div>
     </div>
 }
-<div>CONTENT</div>
+<ng-container *ngTemplateOutlet="contentDirective()?.templateRef"></ng-container>
 @if (footerTemplate()) {
     <div [class]="footerClass()">
         <ng-container [ngTemplateOutlet]="footerTemplate()"></ng-container>
