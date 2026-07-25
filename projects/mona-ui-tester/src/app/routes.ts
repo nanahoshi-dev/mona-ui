@@ -287,6 +287,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "sidebar",
+                loadComponent: () =>
+                    import("./docs/components/sidebar-doc/sidebar-doc.component").then(m => m.SidebarDocComponent)
+            },
+            {
                 path: "slider",
                 loadComponent: () =>
                     import("./docs/components/slider-doc/slider-doc.component").then(m => m.SliderDocComponent)

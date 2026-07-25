@@ -84,7 +84,7 @@ export class PopupMenuListComponent implements OnInit {
         const size = this.#parentConfig.size();
         const hasIcon = this.iconAreaVisible();
         const variantClasses = popupMenuGroupHeaderThemeVariants({ size });
-        const iconClasses = hasIcon ? "pl-8" : "pl-2";
+        const iconClasses = ""; //hasIcon ? "pl-8" : "pl-2";
         return twMerge(variantClasses, iconClasses);
     });
     protected readonly iconAreaVisible = computed(() => {

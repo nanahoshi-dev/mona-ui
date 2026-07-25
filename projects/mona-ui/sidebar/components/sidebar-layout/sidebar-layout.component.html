@@ -1,0 +1,11 @@
+<aside
+    [class]="sidebarClass"
+    [style.width]="sidebarWidthString()"
+    style="transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1)">
+    <ng-content select="[monaSidebarHeader]"></ng-content>
+    <ng-content select="[monaSidebarContent]"></ng-content>
+    <ng-content select="[monaSidebarFooter]"></ng-content>
+</aside>
+<main [class]="sidebarContentClass">
+    <button monaButton (click)="onSidebarToggle()">TOGGLE</button>
+</main>

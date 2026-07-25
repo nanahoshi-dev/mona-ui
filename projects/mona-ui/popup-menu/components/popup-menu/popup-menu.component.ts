@@ -2,7 +2,6 @@ import { Point } from "@angular/cdk/drag-drop";
 import {
     afterNextRender,
     afterRenderEffect,
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -14,6 +13,7 @@ import {
     output
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { rxTimeout, toCssValue } from "@nanahoshi/mona-ui/internal";
 import {
     ConnectionPoint,
@@ -43,8 +43,7 @@ import { PopupMenuListComponent } from "../popup-menu-list/popup-menu-list.compo
 
 @Component({
     selector: "mona-popup-menu",
-    template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush
+    template: ""
 })
 export class PopupMenuComponent implements PopupMenuVariantInput {
     readonly #close$ = new Subject<void>();
@@ -197,6 +196,11 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
      */
     public readonly width = input<string | number>();
 
+    public readonly userClass = input<string, ClassInputType>(undefined, {
+        alias: "class",
+        transform: value => classInputToClass(value)
+    });
+
     public constructor() {
         afterNextRender({
             read: () => this.setSubscriptions()
@@ -297,6 +301,7 @@ export class PopupMenuComponent implements PopupMenuVariantInput {
             data,
             minWidth,
             offset,
+            popupClass: this.userClass(),
             popupConnectionPoint,
             restoreFocus: false,
             width

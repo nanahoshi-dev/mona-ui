@@ -68,6 +68,7 @@ export class SidebarComponent {
                 { text: "Radio Button", path: "/radio-button" },
                 { text: "Range Slider", path: "/range-slider" },
                 { text: "Scroll View", path: "/scroll-view" },
+                { text: "Sidebar", path: "/sidebar" },
                 { text: "Slider", path: "/slider" },
                 { text: "Split Button", path: "/split-button" },
                 { text: "Splitter", path: "/splitter" },
