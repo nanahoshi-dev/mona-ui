@@ -8,7 +8,10 @@ import { SidebarService } from "../services/sidebar.service";
     host: {
         "[style.display]": "hidden() ? 'none' : null",
         "[style.padding]": "'0.25rem'",
-        class: "w-auto h-auto hover:bg-sidebar-accent!"
+        class:
+            "w-auto h-auto " +
+            "hover:bg-(--color-sidebar-accent)! hover:text-(--color-sidebar-accent-foreground)! " +
+            "group-data-[active=true]/menu-item:text-(--color-sidebar-primary-foreground)!"
     }
 })
 export class SidebarMenuActionDirective {

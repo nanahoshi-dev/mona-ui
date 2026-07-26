@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { themeRaisedBackdropClasses } from "@nanahoshi/mona-ui/internal";
 import type { SidebarVariant } from "../models/SidebarVariant";
 
 /**
@@ -48,7 +49,10 @@ export const sidebarInsetThemeVariants = cva(
                 sidebar: "h-full",
                 floating: "h-full",
                 // The `inset` variant moves the raised surface from the sidebar onto this region.
-                inset: "m-2 h-[calc(100%-1rem)] rounded-lg border border-border bg-surface shadow-sm"
+                inset: `
+                    m-2 h-[calc(100%-1rem)] rounded-lg
+                    border border-(--color-border) bg-(--color-surface) shadow-(--shadow-raised)
+                `
             }
         }
     }
@@ -76,7 +80,7 @@ export const sidebarGroupHeaderThemeVariants = cva(
 export const sidebarGroupLabelThemeVariants = cva(
     `
         flex grow-1 items-center shrink-0
-        text-xs font-medium whitespace-nowrap text-sidebar-foreground/70
+        text-xs font-medium whitespace-nowrap text-(--color-sidebar-foreground)/70
         transition-[opacity,visibility] duration-(--mona-motion-standard) ease-out
         motion-reduce:transition-none
     `
@@ -86,12 +90,16 @@ export const sidebarMenuItemThemeVariants = cva(
     `
         flex text-base gap-1
         group/menu-item
+        data-[active=true]:bg-(--color-sidebar-primary)
+        data-[active=true]:text-(--color-sidebar-primary-foreground)
+        data-[active=true]:hover:bg-(--color-sidebar-primary)!
+        data-[active=true]:hover:text-(--color-sidebar-primary-foreground)!
     `,
     {
         variants: {
             collapsible: {
                 true: "flex-col items-stretch",
-                false: "flex-row items-center rounded-md hover:bg-sidebar-accent"
+                false: "flex-row items-center rounded-md hover:bg-(--color-sidebar-accent)"
             },
             // The item takes its width from the menu, which takes it from the sidebar, so it narrows
             // with the animation instead of snapping to a rail-sized box of its own.
@@ -102,7 +110,11 @@ export const sidebarMenuItemThemeVariants = cva(
         },
         compoundVariants: [
             // On the rail a collapsible item has nothing left to stack, so it behaves like any other row.
-            { collapsible: true, iconOnly: true, class: "flex-row items-center rounded-md hover:bg-sidebar-accent" }
+            {
+                collapsible: true,
+                iconOnly: true,
+                class: "flex-row items-center rounded-md hover:bg-(--color-sidebar-accent)"
+            }
         ]
     }
 );
@@ -111,7 +123,7 @@ export const sidebarMenuSubThemeVariants = cva(
     `
         flex flex-col w-full space-y-1
         ms-3.5 ps-2.5
-        border-l border-sidebar-border
+        border-l border-(--color-sidebar-border)
     `
 );
 
@@ -134,7 +146,7 @@ export const sidebarMenuThemeVariants = cva(
 export const sidebarThemeVariants = cva(
     `
         relative flex flex-col shrink-0
-        bg-sidebar text-sidebar-foreground overflow-hidden
+        bg-(--color-sidebar) text-(--color-sidebar-foreground) overflow-hidden
         transition-[width] duration-(--mona-motion-standard) ease-out
         motion-reduce:transition-none
     `,
@@ -147,9 +159,13 @@ export const sidebarThemeVariants = cva(
                 right: "order-last"
             },
             variant: {
-                sidebar: "h-full",
+                sidebar: `h-full ${themeRaisedBackdropClasses}`,
                 // Any change to the borders below must be matched in `sidebarBorderAllowance` above.
-                floating: "m-2 h-[calc(100%-1rem)] rounded-lg border border-sidebar-border shadow-sm",
+                floating: `
+                    m-2 h-[calc(100%-1rem)] rounded-lg
+                    border border-(--color-sidebar-border) shadow-(--shadow-raised)
+                    ${themeRaisedBackdropClasses}
+                `,
                 inset: "m-2 h-[calc(100%-1rem)] bg-transparent"
             },
             // Once an offcanvas sidebar is fully collapsed any margin would leave a visible gutter.
@@ -159,8 +175,8 @@ export const sidebarThemeVariants = cva(
             }
         },
         compoundVariants: [
-            { variant: "sidebar", side: "left", class: "border-r border-sidebar-border" },
-            { variant: "sidebar", side: "right", class: "border-l border-sidebar-border" },
+            { variant: "sidebar", side: "left", class: "border-r border-(--color-sidebar-border)" },
+            { variant: "sidebar", side: "right", class: "border-l border-(--color-sidebar-border)" },
             { variant: "floating", flush: true, class: "h-full" },
             { variant: "inset", flush: true, class: "h-full" }
         ]
@@ -172,7 +188,7 @@ export const sidebarMenuBadgeThemeVariants = cva(
         ms-auto flex items-center justify-center shrink-0
         min-w-5 h-5 px-1.5
         rounded-md text-xs font-medium tabular-nums
-        bg-sidebar-accent text-sidebar-accent-foreground
+        bg-(--color-sidebar-accent) text-(--color-sidebar-accent-foreground)
         pointer-events-none select-none
     `
 );
@@ -181,8 +197,8 @@ export const sidebarRailThemeVariants = cva(
     `
         absolute inset-y-0 z-20 hidden w-1
         cursor-pointer
-        transition-colors hover:bg-sidebar-border
-        focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-sidebar-ring
+        transition-colors hover:bg-(--color-sidebar-border)
+        focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-(--color-sidebar-ring)
         sm:flex
     `,
     {
@@ -197,7 +213,7 @@ export const sidebarRailThemeVariants = cva(
 
 export const sidebarSeparatorThemeVariants = cva(
     `
-        shrink-0 h-px bg-sidebar-border
+        shrink-0 h-px bg-(--color-sidebar-border)
         transition-[margin] duration-(--mona-motion-standard) ease-out
         motion-reduce:transition-none
     `,

@@ -8,6 +8,7 @@ import { sidebarMenuItemThemeVariants } from "../styles/sidebar.styles";
 @Directive({
     selector: "li[monaSidebarMenuItem]",
     host: {
+        "[attr.data-active]": "active() ? 'true' : null",
         "[class]": "baseClass()"
     }
 })
@@ -23,6 +24,13 @@ export class SidebarMenuItemDirective {
         });
         return twMerge(variantClass, this.userClass());
     });
+
+    /**
+     * @description Marks this row as the current sidebar destination. The row owns the selected
+     * surface so trailing badges and actions remain inside one continuous highlight.
+     * @default false
+     */
+    public readonly active = input(false);
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

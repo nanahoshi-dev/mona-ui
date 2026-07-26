@@ -188,19 +188,24 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                     <div monaSidebarGroup>
                         <div monaSidebarGroupHeader>
                             <div monaSidebarGroupLabel>Getting Started</div>
-                            <button monaButton [iconOnly]="true" look="ghost" monaSidebarGroupAction>
+                            <button
+                                monaButton
+                                [iconOnly]="true"
+                                look="ghost"
+                                monaSidebarGroupAction
+                                aria-label="Add getting started item">
                                 <svg lucidePlusCircle [size]="14"></svg>
                             </button>
                         </div>
                         <div monaSidebarGroupContent>
                             <ul monaSidebarMenu>
-                                <li monaSidebarMenuItem>
+                                <li monaSidebarMenuItem [active]="true">
                                     <button monaSidebarMenuButton tooltip="Introduction">
                                         <svg lucideHome [size]="14"></svg>
                                         <span>Introduction</span>
                                         <span monaSidebarMenuBadge>12</span>
                                     </button>
-                                    <button monaSidebarMenuAction #introItem>
+                                    <button monaSidebarMenuAction #introItem aria-label="Introduction actions">
                                         <svg lucideEllipsis [size]="14"></svg>
                                     </button>
                                     <mona-popup-menu [target]="introItem">

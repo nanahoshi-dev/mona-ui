@@ -319,7 +319,7 @@ describe("Sidebar parts", () => {
 
             const sidebar = query("mona-sidebar");
             expect(sidebar.classList.contains("rounded-lg")).toBe(true);
-            expect(sidebar.classList.contains("shadow-sm")).toBe(true);
+            expect(sidebar.classList.contains("shadow-(--shadow-raised)")).toBe(true);
             expect(sidebar.classList.contains("border-r")).toBe(false);
         });
 
@@ -329,7 +329,7 @@ describe("Sidebar parts", () => {
 
             expect(query("mona-sidebar").classList.contains("bg-transparent")).toBe(true);
             expect(query(".inset").classList.contains("rounded-lg")).toBe(true);
-            expect(query(".inset").classList.contains("bg-surface")).toBe(true);
+            expect(query(".inset").classList.contains("bg-(--color-surface)")).toBe(true);
         });
 
         it("should drop the margin once an offcanvas sidebar is fully collapsed", () => {

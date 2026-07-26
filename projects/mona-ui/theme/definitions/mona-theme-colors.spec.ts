@@ -192,6 +192,23 @@ describe("monaThemeColors", () => {
         }
     });
 
+    it("keeps sidebar hover neutral and reserves selected colors for the current destination", () => {
+        for (const colors of Object.values(monaThemeColors)) {
+            expect(colors).toMatchObject({
+                "--color-sidebar-foreground": "var(--color-foreground)",
+                "--color-sidebar-primary": "var(--color-selected)",
+                "--color-sidebar-primary-foreground": "var(--color-selected-foreground)",
+                "--color-sidebar-accent": "var(--color-hover)",
+                "--color-sidebar-accent-foreground": "var(--color-foreground)",
+                "--color-sidebar-border": "var(--color-border)",
+                "--color-sidebar-ring": "var(--color-focus-indicator)"
+            });
+            expect(resolveColor(colors, "--color-sidebar-accent")).not.toBe(
+                resolveColor(colors, "--color-sidebar-primary")
+            );
+        }
+    });
+
     it("does not include tester-owned colors", () => {
         for (const colors of Object.values(monaThemeColors)) {
             expect(colors).not.toHaveProperty("--color-page-background");

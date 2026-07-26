@@ -102,6 +102,11 @@ describe("ThemeService", () => {
         expect(root.style.getPropertyValue("--color-selected-foreground")).toBe("var(--color-accent-foreground)");
         expect(root.style.getPropertyValue("--color-selected-hover")).toBe("var(--color-accent-hover)");
         expect(root.style.getPropertyValue("--color-selected-active")).toBe("var(--color-accent-active)");
+        expect(root.style.getPropertyValue("--color-sidebar-primary")).toBe("var(--color-selected)");
+        expect(root.style.getPropertyValue("--color-sidebar-primary-foreground")).toBe(
+            "var(--color-selected-foreground)"
+        );
+        expect(root.style.getPropertyValue("--color-sidebar-accent")).toBe("var(--color-hover)");
     });
 
     it("retains runtime palette seeds and uses the matching generated variant when switching themes", () => {

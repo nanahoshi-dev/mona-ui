@@ -1386,13 +1386,13 @@
       {
         "name": "size",
         "type": "SidebarMenuButtonSize",
-        "description": "How much room this button's leading visual needs. Use `\"large\"` when it opens with\r\nsomething avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it.",
+        "description": "How much room this button's leading visual needs. Use `\"large\"` when it opens with\nsomething avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it.",
         "kind": "input"
       },
       {
         "name": "tooltip",
         "type": "string",
-        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\r\nlabel is clipped away. Applied as the host's `title`, so the browser surfaces it on hover, and an\r\nancestor carrying `monaTooltip` with `mode=\"content\"` renders it as a styled tooltip instead.",
+        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Applied as the host's `title`, so the browser surfaces it on hover, and an\nancestor carrying `monaTooltip` with `mode=\"content\"` renders it as a styled tooltip instead.",
         "kind": "input"
       }
     ]
@@ -1401,6 +1401,12 @@
     "name": "SidebarMenuItemDirective",
     "selector": "\"li[monaSidebarMenuItem]\"",
     "inputs": [
+      {
+        "name": "active",
+        "type": "boolean",
+        "description": "Marks this row as the current sidebar destination. The row owns the selected\nsurface so trailing badges and actions remain inside one continuous highlight.",
+        "kind": "input"
+      },
       {
         "name": "userClass",
         "type": "string",

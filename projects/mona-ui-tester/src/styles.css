@@ -118,14 +118,14 @@
     --color-info-subtle-foreground: oklch(34% 0.1119 255);
     --color-info-border: oklch(62.75% 0.0825 255);
 
-    /* Sidebar chrome. Declared here so `bg-sidebar`, `text-sidebar-foreground` and friends exist as
-       utilities; the running theme overwrites the values at :root. */
+    /* Keep the Tailwind theme contract in parity with the complete runtime profile. Sidebar recipes use
+       arbitrary-variable utilities so consumers are not dependent on these named utility declarations. */
     --color-sidebar: var(--color-canvas);
     --color-sidebar-foreground: var(--color-foreground);
-    --color-sidebar-primary: var(--color-primary);
-    --color-sidebar-primary-foreground: var(--color-primary-foreground);
-    --color-sidebar-accent: var(--color-accent);
-    --color-sidebar-accent-foreground: var(--color-accent-foreground);
+    --color-sidebar-primary: var(--color-selected);
+    --color-sidebar-primary-foreground: var(--color-selected-foreground);
+    --color-sidebar-accent: var(--color-hover);
+    --color-sidebar-accent-foreground: var(--color-foreground);
     --color-sidebar-border: var(--color-border);
     --color-sidebar-ring: var(--color-focus-indicator);
 

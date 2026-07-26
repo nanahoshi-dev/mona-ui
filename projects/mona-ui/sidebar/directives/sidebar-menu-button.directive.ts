@@ -2,11 +2,13 @@ import { computed, DestroyRef, Directive, effect, inject, input, signal } from "
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import type { SidebarMenuButtonSize } from "../models/SidebarMenuButtonSize";
 import { SidebarService } from "../services/sidebar.service";
+import { SidebarMenuItemDirective } from "./sidebar-menu-item.directive";
 
 @Directive({
     selector: "button[monaSidebarMenuButton]",
     hostDirectives: [ButtonDirective],
     host: {
+        "[attr.aria-current]": "current() ? 'page' : null",
         "[attr.title]": "railTitle()",
         // `ButtonDirective` owns the `[class]` binding on this element, so the rail box is driven through
         // style bindings, which also beat the button's own padding without needing `!important`.
@@ -30,15 +32,21 @@ import { SidebarService } from "../services/sidebar.service";
         // first child whatever it is — an icon, an avatar — and to any icon elsewhere in the row.
         class:
             "flex w-full font-normal whitespace-nowrap rounded-md " +
-            "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground " +
+            "hover:bg-(--color-sidebar-accent)! hover:text-(--color-sidebar-accent-foreground)! " +
+            "group-data-[active=true]/menu-item:bg-transparent! " +
+            "group-data-[active=true]/menu-item:text-(--color-sidebar-primary-foreground)! " +
+            "group-data-[active=true]/menu-item:hover:bg-transparent! " +
+            "group-data-[active=true]/menu-item:hover:text-(--color-sidebar-primary-foreground)! " +
             "[&>*:first-child]:shrink-0 [&>svg]:shrink-0"
     }
 })
 export class SidebarMenuButtonDirective {
     readonly #button = inject(ButtonDirective);
+    readonly #menuItem = inject(SidebarMenuItemDirective, { optional: true });
     readonly #reducedMotion = signal(false);
     readonly #sidebarService = inject(SidebarService, { optional: true });
 
+    protected readonly current = computed(() => this.#menuItem?.active() ?? false);
     protected readonly gap = computed(() => (this.railBox() ? "2rem" : "0.5rem"));
 
     /**

@@ -1,13 +1,21 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 
 import { SidebarMenuButtonDirective } from "./sidebar-menu-button.directive";
+import { SidebarMenuItemDirective } from "./sidebar-menu-item.directive";
 
 @Component({
-    template: `<button monaSidebarMenuButton>Item</button>`,
-    imports: [SidebarMenuButtonDirective]
+    template: `
+        <li monaSidebarMenuItem [active]="active()">
+            <button monaSidebarMenuButton>Item</button>
+            <button>Action</button>
+        </li>
+    `,
+    imports: [SidebarMenuButtonDirective, SidebarMenuItemDirective]
 })
-class SidebarMenuButtonHostComponent {}
+class SidebarMenuButtonHostComponent {
+    public readonly active = signal(false);
+}
 
 describe("SidebarMenuButtonDirective", () => {
     it("should render a full width, left aligned row that highlights on hover", () => {
@@ -18,7 +26,22 @@ describe("SidebarMenuButtonDirective", () => {
         const button: HTMLElement = fixture.nativeElement.querySelector("button");
         expect(button.classList.contains("w-full")).toBe(true);
         expect(button.style.justifyContent).toBe("flex-start");
-        expect(button.classList.contains("hover:bg-sidebar-accent")).toBe(true);
+        expect(button.classList.contains("hover:bg-(--color-sidebar-accent)!")).toBe(true);
         expect(button.classList.contains("rounded-md")).toBe(true);
+    });
+
+    it("should expose the current destination on the navigation control", () => {
+        TestBed.configureTestingModule({ imports: [SidebarMenuButtonHostComponent] });
+        const fixture = TestBed.createComponent(SidebarMenuButtonHostComponent);
+        fixture.componentInstance.active.set(true);
+        fixture.detectChanges();
+
+        const button: HTMLElement = fixture.nativeElement.querySelector("button");
+        expect(button.getAttribute("aria-current")).toBe("page");
+        expect(button.hasAttribute("data-active")).toBe(false);
+
+        fixture.componentInstance.active.set(false);
+        fixture.detectChanges();
+        expect(button.hasAttribute("aria-current")).toBe(false);
     });
 });

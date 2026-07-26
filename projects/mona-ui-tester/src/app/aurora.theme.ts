@@ -1,4 +1,8 @@
-import { generateThemeColorPalette, type ThemeFamilyRegistration } from "@nanahoshi/mona-ui/theme";
+import {
+    createSidebarColorRoles,
+    generateThemeColorPalette,
+    type ThemeFamilyRegistration
+} from "@nanahoshi/mona-ui/theme";
 
 const generated = generateThemeColorPalette({
     primary: "#22d3ee",
@@ -19,6 +23,8 @@ export const auroraTheme = Object.freeze({
                 "--color-surface-muted": "#102631",
                 "--color-surface-raised": "#15313d",
                 "--color-surface-overlay": "#102631",
+                "--color-card": "var(--color-surface-raised)",
+                "--color-card-foreground": "var(--color-foreground)",
                 "--color-foreground": "#e6f8fb",
                 "--color-muted-foreground": "#9abcc4",
                 "--color-input-background": "#0b1b25",
@@ -63,6 +69,7 @@ export const auroraTheme = Object.freeze({
                 "--color-destructive-foreground": "var(--color-error-foreground)",
                 "--color-input": "var(--color-border-control)",
                 "--color-disabled": "var(--color-disabled-foreground)",
+                ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
                 "--color-chart-1": "#22d3ee",
                 "--color-chart-2": "#8b5cf6",
                 "--color-chart-3": "#34d399",
