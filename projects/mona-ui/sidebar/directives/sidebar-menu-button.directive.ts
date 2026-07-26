@@ -5,7 +5,7 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
     selector: "button[monaSidebarMenuButton]",
     hostDirectives: [ButtonDirective],
     host: {
-        class: "flex w-full h-full justify-start px-1! py-1 font-normal"
+        class: "flex w-full h-full justify-start px-1! py-1 font-normal rounded-md hover:bg-accent"
     }
 })
 export class SidebarMenuButtonDirective {

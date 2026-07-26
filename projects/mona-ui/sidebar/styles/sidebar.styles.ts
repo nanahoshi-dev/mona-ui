@@ -1,17 +1,5 @@
 import { cva } from "class-variance-authority";
 
-export const sidebarCollapsibleThemeVariants = cva(
-    `
-        bg-transparent border-none ps-4 pe-2
-        [&>div]:first:border-none
-        [&>div]:first:bg-transparent
-        [&>div]:first:hover:bg-accent
-        [&>div]:first:py-0
-        [&>div]:first:px-0
-        [&>div]:first:rounded-md
-    `
-);
-
 export const sidebarLayoutBaseThemeVariants = cva(
     `
         flex flex-row w-full h-screen h-dvh
@@ -23,6 +11,29 @@ export const sidebarLayoutContentThemeVariants = cva(
     `
         flex flex-col grow flex-1 items-center justify-center
         h-full
+    `
+);
+
+export const sidebarMenuItemThemeVariants = cva(
+    `
+        flex text-base gap-1
+        group/menu-item
+    `,
+    {
+        variants: {
+            collapsible: {
+                true: "flex-col items-stretch",
+                false: "flex-row items-center rounded-md hover:bg-accent"
+            }
+        }
+    }
+);
+
+export const sidebarMenuSubThemeVariants = cva(
+    `
+        flex flex-col w-full space-y-1
+        ms-3.5 ps-2.5
+        border-l border-border
     `
 );
 

@@ -28,6 +28,7 @@
             "@nanahoshi/mona-ui/check-box": ["./projects/mona-ui/check-box/public-api.ts"],
             "@nanahoshi/mona-ui/chip": ["./projects/mona-ui/chip/public-api.ts"],
             "@nanahoshi/mona-ui/circular-progress-bar": ["./projects/mona-ui/circular-progress-bar/public-api.ts"],
+            "@nanahoshi/mona-ui/collapsible": ["./projects/mona-ui/collapsible/public-api.ts"],
             "@nanahoshi/mona-ui/color-gradient": ["./projects/mona-ui/color-gradient/public-api.ts"],
             "@nanahoshi/mona-ui/color-palette": ["./projects/mona-ui/color-palette/public-api.ts"],
             "@nanahoshi/mona-ui/color-picker": ["./projects/mona-ui/color-picker/public-api.ts"],

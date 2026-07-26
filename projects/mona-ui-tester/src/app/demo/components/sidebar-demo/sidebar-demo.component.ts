@@ -5,6 +5,7 @@ import {
     LucideBell,
     LucideCalendar,
     LucideChevronDown,
+    LucideChevronRight,
     LucideCirclePlus,
     LucideCircleUser,
     LucideCommand,
@@ -24,7 +25,11 @@ import {
 } from "@lucide/angular";
 import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { ExpansionPanelComponent, ExpansionPanelTitleTemplateDirective } from "@nanahoshi/mona-ui/expansion-panel";
+import {
+    CollapsibleContentDirective,
+    CollapsibleDirective,
+    CollapsibleTriggerDirective
+} from "@nanahoshi/mona-ui/collapsible";
 import { PopupComponent } from "@nanahoshi/mona-ui/popup";
 import {
     PopupMenuComponent,
@@ -44,9 +49,9 @@ import {
     SidebarLayoutComponent,
     SidebarMenuActionDirective,
     SidebarMenuButtonDirective,
-    SidebarMenuCollapsibleDirective,
     SidebarMenuDirective,
-    SidebarMenuItemDirective
+    SidebarMenuItemDirective,
+    SidebarMenuSubDirective
 } from "@nanahoshi/mona-ui/sidebar";
 import type { ComponentConfig } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
@@ -105,11 +110,13 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
         LucideCreditCard,
         LucideBell,
         LucideLogOut,
-        ExpansionPanelComponent,
-        SidebarMenuCollapsibleDirective,
+        CollapsibleDirective,
+        CollapsibleTriggerDirective,
+        CollapsibleContentDirective,
+        SidebarMenuSubDirective,
         LucideGalleryHorizontalEnd,
-        ExpansionPanelTitleTemplateDirective,
         LucideChevronDown,
+        LucideChevronRight,
         LucideList
     ],
     template: `
@@ -212,28 +219,33 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                                 </button>
                             </li>
                         </ul>
-                        <mona-expansion-panel monaSidebarMenuCollapsible>
-                            <ng-template monaExpansionPanelTitleTemplate>
-                                <button monaSidebarMenuButton>
+                        <ul monaSidebarMenu>
+                            <li monaSidebarMenuItem monaCollapsible #lists="monaCollapsible">
+                                <button monaSidebarMenuButton monaCollapsibleTrigger>
                                     <svg lucideList [size]="14"></svg>
                                     <span>Lists</span>
+                                    <svg
+                                        lucideChevronRight
+                                        [size]="14"
+                                        class="ms-auto transition-transform"
+                                        [style.rotate]="lists.expanded() ? '90deg' : '0deg'"></svg>
                                 </button>
-                            </ng-template>
-                            <ul monaSidebarMenu>
-                                <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
-                                        <svg lucideGalleryHorizontalEnd [size]="14"></svg>
-                                        <span>List Box</span>
-                                    </button>
-                                </li>
-                                <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
-                                        <svg lucideGalleryHorizontalEnd [size]="14"></svg>
-                                        <span>List View</span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </mona-expansion-panel>
+                                <ul monaSidebarMenuSub monaCollapsibleContent>
+                                    <li monaSidebarMenuItem>
+                                        <button monaSidebarMenuButton>
+                                            <svg lucideGalleryHorizontalEnd [size]="14"></svg>
+                                            <span>List Box</span>
+                                        </button>
+                                    </li>
+                                    <li monaSidebarMenuItem>
+                                        <button monaSidebarMenuButton>
+                                            <svg lucideGalleryHorizontalEnd [size]="14"></svg>
+                                            <span>List View</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
