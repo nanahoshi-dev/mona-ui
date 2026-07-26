@@ -4,6 +4,7 @@
 
 export * from "./components/sidebar/sidebar.component";
 export * from "./components/sidebar-layout/sidebar-layout.component";
+export * from "./components/sidebar-menu-skeleton/sidebar-menu-skeleton.component";
 
 export * from "./directives/sidebar-content.directive";
 export * from "./directives/sidebar-footer.directive";
@@ -26,6 +27,7 @@ export * from "./directives/sidebar-separator.directive";
 export * from "./directives/sidebar-trigger.directive";
 
 export type { SidebarCollapsibleMode } from "./models/SidebarCollapsibleMode";
+export type { SidebarMenuButtonSize } from "./models/SidebarMenuButtonSize";
 export type { SidebarSide } from "./models/SidebarSide";
 export type { SidebarVariant } from "./models/SidebarVariant";
 

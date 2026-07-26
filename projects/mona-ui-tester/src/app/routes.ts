@@ -96,6 +96,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "collapsible",
+                loadComponent: () =>
+                    import("./docs/components/collapsible-doc/collapsible-doc.component").then(
+                        m => m.CollapsibleDocComponent
+                    )
+            },
+            {
                 path: "color-gradient",
                 loadComponent: () =>
                     import("./docs/components/color-gradient-doc/color-gradient-doc.component").then(
@@ -290,6 +297,13 @@ export const routes: Routes = [
                 path: "sidebar",
                 loadComponent: () =>
                     import("./docs/components/sidebar-doc/sidebar-doc.component").then(m => m.SidebarDocComponent)
+            },
+            {
+                path: "skeleton",
+                loadComponent: () =>
+                    import("./docs/components/skeleton-doc/skeleton-doc.component").then(
+                        m => m.SkeletonDocComponent
+                    )
             },
             {
                 path: "slider",

@@ -6,10 +6,9 @@ import { SidebarService } from "../services/sidebar.service";
     selector: "button[monaSidebarMenuAction]",
     hostDirectives: [ButtonDirective],
     host: {
-        // `ButtonDirective` owns the `[class]` binding on this element, so visibility is driven
-        // through a style binding rather than a competing class binding.
         "[style.display]": "hidden() ? 'none' : null",
-        class: "w-auto h-auto p-1! hover:bg-accent!"
+        "[style.padding]": "'0.25rem'",
+        class: "w-auto h-auto hover:bg-sidebar-accent!"
     }
 })
 export class SidebarMenuActionDirective {

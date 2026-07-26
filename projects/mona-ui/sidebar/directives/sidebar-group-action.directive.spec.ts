@@ -19,6 +19,6 @@ describe("SidebarGroupActionDirective", () => {
         expect(button.classList.contains("w-auto")).toBe(true);
         expect(button.classList.contains("h-auto")).toBe(true);
         // No SidebarService is available here, so the directive must not assume one.
-        expect(button.style.display).toBe("");
+        expect(button.style.opacity).toBe("1");
     });
 });

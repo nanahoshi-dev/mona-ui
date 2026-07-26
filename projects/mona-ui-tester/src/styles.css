@@ -118,6 +118,17 @@
     --color-info-subtle-foreground: oklch(34% 0.1119 255);
     --color-info-border: oklch(62.75% 0.0825 255);
 
+    /* Sidebar chrome. Declared here so `bg-sidebar`, `text-sidebar-foreground` and friends exist as
+       utilities; the running theme overwrites the values at :root. */
+    --color-sidebar: var(--color-canvas);
+    --color-sidebar-foreground: var(--color-foreground);
+    --color-sidebar-primary: var(--color-primary);
+    --color-sidebar-primary-foreground: var(--color-primary-foreground);
+    --color-sidebar-accent: var(--color-accent);
+    --color-sidebar-accent-foreground: var(--color-accent-foreground);
+    --color-sidebar-border: var(--color-border);
+    --color-sidebar-ring: var(--color-focus-indicator);
+
     --color-muted: var(--color-surface-muted);
     --color-destructive: var(--color-error);
     --color-destructive-foreground: var(--color-error-foreground);

@@ -38,9 +38,6 @@ export class SidebarLayoutComponent {
     });
 
     public constructor() {
-        // The service is the single source of truth so that descendants can drive the state directly.
-        // These two effects keep the two-way binding in step with it; signal equality stops them from
-        // ping-ponging, because setting a signal to the value it already holds notifies nobody.
         effect(() => {
             const expanded = this.expanded();
             untracked(() => this.#sidebarService.setExpanded(expanded));

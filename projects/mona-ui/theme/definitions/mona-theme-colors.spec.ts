@@ -39,7 +39,15 @@ describe("monaThemeColors", () => {
             "--color-accent",
             "--color-accent-foreground",
             "--color-accent-hover",
-            "--color-accent-active"
+            "--color-accent-active",
+            "--color-sidebar",
+            "--color-sidebar-foreground",
+            "--color-sidebar-primary",
+            "--color-sidebar-primary-foreground",
+            "--color-sidebar-accent",
+            "--color-sidebar-accent-foreground",
+            "--color-sidebar-border",
+            "--color-sidebar-ring"
         ];
 
         for (const role of ["primary", "secondary", "success", "error", "warning", "info"]) {
@@ -169,6 +177,18 @@ describe("monaThemeColors", () => {
                 expectContrast(colors, `--color-${role}-subtle-foreground`, `--color-${role}-subtle`, 4.5);
                 expectContrast(colors, `--color-${role}-border`, `--color-${role}-subtle`, 3);
             }
+        }
+    });
+
+    it("gives the sidebar a surface of its own that still carries legible content", () => {
+        for (const colors of Object.values(monaThemeColors)) {
+            // The point of the role is that the sidebar reads as chrome rather than as more page. If it
+            // resolved to the content surface there would be nothing to separate the two regions.
+            expect(resolveColor(colors, "--color-sidebar")).not.toBe(resolveColor(colors, "--color-surface"));
+            expectContrast(colors, "--color-sidebar-foreground", "--color-sidebar", 4.5);
+            expectContrast(colors, "--color-sidebar-accent-foreground", "--color-sidebar-accent", 4.5);
+            expectContrast(colors, "--color-sidebar-primary-foreground", "--color-sidebar-primary", 4.5);
+            expectContrast(colors, "--color-sidebar-ring", "--color-sidebar", 3);
         }
     });
 

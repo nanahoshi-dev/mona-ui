@@ -32,6 +32,15 @@ describe("SidebarLayoutComponent", () => {
     let component: SidebarLayoutHostComponent;
 
     const getSidebar = (): HTMLElement => fixture.nativeElement.querySelector("mona-sidebar");
+
+    // `calc()` is reordered and folded differently by each engine, so both sides go through the same
+    // serialiser rather than being compared as literal text.
+    const asCssWidth = (value: string): string => {
+        const probe = document.createElement("div");
+        probe.style.width = value;
+        return probe.style.width;
+    };
+
     const getTrigger = (): HTMLElement => fixture.nativeElement.querySelector(".trigger");
 
     beforeEach(() => {
@@ -58,7 +67,7 @@ describe("SidebarLayoutComponent", () => {
     });
 
     it("should collapse the sidebar to zero width from the trigger", () => {
-        expect(getSidebar().style.width).toBe("16rem");
+        expect(getSidebar().style.width).toBe(asCssWidth("calc(16rem + 1px)"));
         expect(getSidebar().getAttribute("data-state")).toBe("expanded");
 
         getTrigger().click();
@@ -90,7 +99,7 @@ describe("SidebarLayoutComponent", () => {
     it("should treat a numeric width as pixels", () => {
         component.width.set(240);
         fixture.detectChanges();
-        expect(getSidebar().style.width).toBe("240px");
+        expect(getSidebar().style.width).toBe(asCssWidth("calc(240px + 1px)"));
     });
 
     it("should order and border the sidebar according to side", () => {

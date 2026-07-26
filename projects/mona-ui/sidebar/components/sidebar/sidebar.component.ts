@@ -5,7 +5,7 @@ import type { SidebarCollapsibleMode } from "../../models/SidebarCollapsibleMode
 import type { SidebarSide } from "../../models/SidebarSide";
 import type { SidebarVariant } from "../../models/SidebarVariant";
 import { SidebarService } from "../../services/sidebar.service";
-import { sidebarThemeVariants } from "../../styles/sidebar.styles";
+import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sidebar.styles";
 
 /**
  * @description
@@ -37,12 +37,19 @@ export class SidebarComponent {
     });
     protected readonly sidebarId = this.#sidebarService.sidebarId;
     protected readonly state = this.#sidebarService.state;
+    /**
+     * `width` and `iconWidth` are the width the sidebar's *contents* get, because that is what the
+     * parts inside are measured against — an icon rail less a region's padding is meant to leave
+     * exactly one icon square. The variant's border is painted inside the box under the global
+     * `border-box`, so it is added back on here rather than being taken out of that measurement.
+     * A fully collapsed sidebar is the exception: it has no contents to make room for.
+     */
     protected readonly widthString = computed(() => {
         const toCss = (value: string | number): string => (typeof value === "number" ? `${value}px` : value);
         if (this.#sidebarService.expanded()) {
-            return toCss(this.width());
+            return this.#withBorderAllowance(toCss(this.width()));
         }
-        return this.collapsible() === "icon" ? toCss(this.iconWidth()) : "0px";
+        return this.collapsible() === "icon" ? this.#withBorderAllowance(toCss(this.iconWidth())) : "0px";
     });
 
     /**
@@ -99,5 +106,11 @@ export class SidebarComponent {
                 this.#sidebarService.setVariant(variant);
             });
         });
+    }
+
+    #withBorderAllowance(width: string): string {
+        const allowance = sidebarBorderAllowance[this.variant()];
+        // The `inset` variant draws no border, so it is left as an ordinary length.
+        return allowance === "0px" ? width : `calc(${width} + ${allowance})`;
     }
 }

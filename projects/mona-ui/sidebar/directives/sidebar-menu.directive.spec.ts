@@ -10,7 +10,7 @@ import { SidebarMenuDirective } from "./sidebar-menu.directive";
 class SidebarMenuHostComponent {}
 
 describe("SidebarMenuDirective", () => {
-    it("should fall back to its full width layout outside a sidebar layout", () => {
+    it("should stretch to its container and leave the inset to it", () => {
         TestBed.configureTestingModule({ imports: [SidebarMenuHostComponent] });
         const fixture = TestBed.createComponent(SidebarMenuHostComponent);
         fixture.detectChanges();
@@ -18,8 +18,11 @@ describe("SidebarMenuDirective", () => {
         const menu: HTMLElement = fixture.nativeElement.querySelector("ul");
         expect(menu.classList.contains("flex-col")).toBe(true);
         expect(menu.classList.contains("w-full")).toBe(true);
-        // No SidebarService is available here, so the directive must not assume the icon rail.
-        expect(menu.classList.contains("ps-4")).toBe(true);
-        expect(menu.classList.contains("items-center")).toBe(false);
+        // An inset here would have to change with the rail state, and a consumer overriding it would be
+        // fighting `ps-*`/`pe-*` with `px-*`, which `tailwind-merge` keeps side by side. The enclosing
+        // group, header or footer owns it instead, and holds it steady.
+        for (const inset of ["ps-4", "pe-2", "px-2", "p-2"]) {
+            expect(menu.classList.contains(inset)).toBe(false);
+        }
     });
 });

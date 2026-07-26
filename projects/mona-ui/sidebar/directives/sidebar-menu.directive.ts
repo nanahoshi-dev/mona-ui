@@ -1,5 +1,6 @@
-import { computed, Directive, inject } from "@angular/core";
-import { SidebarService } from "../services/sidebar.service";
+import { computed, Directive, input } from "@angular/core";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { twMerge } from "tailwind-merge";
 import { sidebarMenuThemeVariants } from "../styles/sidebar.styles";
 
 @Directive({
@@ -9,8 +10,14 @@ import { sidebarMenuThemeVariants } from "../styles/sidebar.styles";
     }
 })
 export class SidebarMenuDirective {
-    readonly #sidebarService = inject(SidebarService, { optional: true });
-    protected readonly baseClass = computed(() =>
-        sidebarMenuThemeVariants({ iconOnly: this.#sidebarService?.iconOnly() ?? false })
-    );
+    protected readonly baseClass = computed(() => twMerge(sidebarMenuThemeVariants(), this.userClass()));
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
+    public readonly userClass = input<string, ClassInputType>("", {
+        alias: "class",
+        transform: value => classInputToClass(value)
+    });
 }

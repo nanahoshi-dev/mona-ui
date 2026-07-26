@@ -4,7 +4,9 @@
 
 export * from "./services/theme.service";
 export * from "./models/Theme";
+export { createSidebarColorRoles } from "./definitions/theme-primitives";
 export type {
+    SidebarColorRoleSeeds,
     ThemeColorPaletteRegistration,
     ThemeColorPaletteSeeds,
     ThemeColors,

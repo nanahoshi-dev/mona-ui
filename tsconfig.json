@@ -70,6 +70,7 @@
             "@nanahoshi/mona-ui/radio-button": ["./projects/mona-ui/radio-button/public-api.ts"],
             "@nanahoshi/mona-ui/scroll-view": ["./projects/mona-ui/scroll-view/public-api.ts"],
             "@nanahoshi/mona-ui/sidebar": ["./projects/mona-ui/sidebar/public-api.ts"],
+            "@nanahoshi/mona-ui/skeleton": ["./projects/mona-ui/skeleton/public-api.ts"],
             "@nanahoshi/mona-ui/slider": ["./projects/mona-ui/slider/public-api.ts"],
             "@nanahoshi/mona-ui/split-button": ["./projects/mona-ui/split-button/public-api.ts"],
             "@nanahoshi/mona-ui/splitter": ["./projects/mona-ui/splitter/public-api.ts"],

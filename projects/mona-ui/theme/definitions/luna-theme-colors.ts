@@ -1,5 +1,6 @@
 import type { ThemeColors, ThemeDefinition } from "../models/ThemeDefinition";
 import { generateThemeColorPalette } from "../utils/generate-theme-color-palette";
+import { createSidebarColorRoles } from "./theme-primitives";
 
 const generatedRoles = generateThemeColorPalette({
     primary: "#3f6be2",
@@ -70,6 +71,9 @@ const light: ThemeColors = Object.freeze({
     "--color-destructive-foreground": "var(--color-error-foreground)",
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
+    // Luna's content surface is pure white, so the sidebar takes the muted tone it already uses for
+    // chrome such as headers and tab lists.
+    ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
     "--color-chart-1": "#3f6be2",
     "--color-chart-2": "#667085",
     "--color-chart-3": "#4f8a70",
@@ -146,6 +150,9 @@ const dark: ThemeColors = Object.freeze({
     "--color-destructive-foreground": "var(--color-error-foreground)",
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
+    // The raised tone sits between the canvas and the muted chrome, lifting the sidebar off the page
+    // without matching the popovers layered above it.
+    ...createSidebarColorRoles({ background: "var(--color-surface-raised)" }),
     "--color-chart-1": "#7f9bf0",
     "--color-chart-2": "#9ba3b2",
     "--color-chart-3": "#70aa8e",

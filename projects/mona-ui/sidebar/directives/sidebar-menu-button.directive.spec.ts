@@ -17,8 +17,8 @@ describe("SidebarMenuButtonDirective", () => {
 
         const button: HTMLElement = fixture.nativeElement.querySelector("button");
         expect(button.classList.contains("w-full")).toBe(true);
-        expect(button.classList.contains("justify-start")).toBe(true);
-        expect(button.classList.contains("hover:bg-accent")).toBe(true);
+        expect(button.style.justifyContent).toBe("flex-start");
+        expect(button.classList.contains("hover:bg-sidebar-accent")).toBe(true);
         expect(button.classList.contains("rounded-md")).toBe(true);
     });
 });

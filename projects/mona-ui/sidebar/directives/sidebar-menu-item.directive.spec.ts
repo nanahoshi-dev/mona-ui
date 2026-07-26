@@ -44,7 +44,7 @@ describe("SidebarMenuItemDirective", () => {
         const item = query(".plain-item");
         expect(item.classList.contains("flex-row")).toBe(true);
         expect(item.classList.contains("items-center")).toBe(true);
-        expect(item.classList.contains("hover:bg-accent")).toBe(true);
+        expect(item.classList.contains("hover:bg-sidebar-accent")).toBe(true);
     });
 
     it("should stack an item that is also a collapsible root", () => {
@@ -53,7 +53,7 @@ describe("SidebarMenuItemDirective", () => {
         expect(item.classList.contains("items-stretch")).toBe(true);
         expect(item.classList.contains("flex-row")).toBe(false);
         // The row hover would otherwise bleed onto the whole expanded submenu.
-        expect(item.classList.contains("hover:bg-accent")).toBe(false);
+        expect(item.classList.contains("hover:bg-sidebar-accent")).toBe(false);
     });
 
     it("should let the submenu carry both the sidebar and the collapsible content directives", () => {

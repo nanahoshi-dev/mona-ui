@@ -55,11 +55,13 @@ import {
     SidebarMenuDirective,
     SidebarMenuBadgeDirective,
     SidebarMenuItemDirective,
+    SidebarMenuSkeletonComponent,
     SidebarMenuSubDirective,
     SidebarRailDirective,
     SidebarSeparatorDirective,
     SidebarTriggerDirective
 } from "@nanahoshi/mona-ui/sidebar";
+import { TooltipDirective } from "@nanahoshi/mona-ui/tooltip";
 import type { ComponentConfig } from "../../utils/componentConfig";
 import { createFeatureInjector, FeatureConfigHandler } from "../../utils/featureInjection";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -131,15 +133,25 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
         LucideGalleryHorizontalEnd,
         LucideChevronDown,
         LucideChevronRight,
-        LucideList
+        LucideCommand,
+        LucideList,
+        TooltipDirective,
+        SidebarMenuSkeletonComponent
     ],
     template: `
         <mona-sidebar-layout class="h-150 border border-border">
-            <mona-sidebar collapsible="icon" variant="floating">
+            <mona-sidebar
+                collapsible="icon"
+                variant="floating"
+                [side]="'left'"
+                monaTooltip
+                mode="content"
+                position="right">
                 <header monaSidebarHeader>
-                    <ul monaSidebarMenu class="px-0!">
+                    <ul monaSidebarMenu>
                         <li monaSidebarMenuItem #headerMenu>
-                            <button monaSidebarMenuButton class="flex items-center gap-1">
+                            <button monaSidebarMenuButton tooltip="Nanahoshi">
+                                <svg lucideCommand [size]="14"></svg>
                                 <span class="text-md font-semibold">Nanahoshi</span>
                                 <svg lucideChevronDown [size]="14"></svg>
                             </button>
@@ -265,24 +277,36 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                             </ul>
                         </div>
                     </div>
+                    <div monaSidebarGroup>
+                        <div monaSidebarGroupHeader>
+                            <div monaSidebarGroupLabel>Loading</div>
+                        </div>
+                        <div monaSidebarGroupContent aria-busy="true">
+                            <ul monaSidebarMenu>
+                                @for (width of skeletonWidths; track $index) {
+                                    <li monaSidebarMenuItem>
+                                        <mona-sidebar-menu-skeleton [labelWidth]="width" />
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <footer class="flex" monaSidebarFooter>
-                    <ul class="px-0!" monaSidebarMenu>
+                    <ul monaSidebarMenu>
                         <li monaSidebarMenuItem>
-                            <button monaSidebarMenuButton #profile>
-                                <div class="flex items-center gap-2">
-                                    <mona-avatar
-                                        [width]="32"
-                                        [height]="32"
-                                        label="NH"
-                                        labelFontSize="0.8em"
-                                        backgroundColor="black"
-                                        borderRadius="100%"
-                                        labelColor="white"></mona-avatar>
-                                    <div class="flex flex-col justify-start flex-1">
-                                        <p class="text-left font-semibold">Nanahoshi</p>
-                                        <p class="font-light">nanahoshi&#64;nanahoshi.dev</p>
-                                    </div>
+                            <button monaSidebarMenuButton size="large" #profile>
+                                <mona-avatar
+                                    [width]="32"
+                                    [height]="32"
+                                    label="NH"
+                                    labelFontSize="0.8em"
+                                    backgroundColor="black"
+                                    borderRadius="100%"
+                                    labelColor="white"></mona-avatar>
+                                <div class="flex flex-col justify-start flex-1">
+                                    <p class="text-left font-semibold">Nanahoshi</p>
+                                    <p class="text-left font-light">nanahoshi&#64;nanahoshi.dev</p>
                                 </div>
                             </button>
                             <mona-popup-menu
@@ -331,6 +355,7 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
     `
 })
 export class SidebarLayoutWrapperComponent {
+    protected readonly skeletonWidths = ["70%", "50%", "60%"];
     protected readonly headerMenuItems = [
         { label: "Nanahoshi Inc.", icon: LucideGalleryVerticalEnd },
         { label: "Nanahoshi Corp.", icon: LucideAudioWaveform },

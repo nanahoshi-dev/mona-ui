@@ -6,7 +6,11 @@ import { sidebarGroupLabelThemeVariants } from "../styles/sidebar.styles";
     selector: "[monaSidebarGroupLabel]",
     host: {
         "[class]": "baseClass",
-        "[style.display]": "hidden() ? 'none' : null"
+        // Faded rather than removed from the layout: the header around it closes by height over the
+        // same interval, so dropping the label outright would empty the row before it had finished
+        // shrinking. `visibility` follows the fade so it leaves the accessibility tree with it.
+        "[style.opacity]": "hidden() ? '0' : '1'",
+        "[style.visibility]": "hidden() ? 'hidden' : null"
     }
 })
 export class SidebarGroupLabelDirective {
