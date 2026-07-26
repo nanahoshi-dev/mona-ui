@@ -2,18 +2,36 @@ import { NgComponentOutlet } from "@angular/common";
 import { Component, signal } from "@angular/core";
 import {
     LucideAudioWaveform,
+    LucideBell,
+    LucideCalendar,
+    LucideChevronDown,
     LucideCirclePlus,
+    LucideCircleUser,
     LucideCommand,
+    LucideCreditCard,
+    LucideDatabase,
     LucideDynamicIcon,
+    LucideEllipsis,
+    LucideGalleryHorizontalEnd,
     LucideGalleryVerticalEnd,
     LucideHouse,
-    LucideLayers,
+    LucideList,
+    LucideLogOut,
     LucidePalette,
-    LucidePlus
+    LucidePlus,
+    LucideSparkles,
+    LucideSquarePen
 } from "@lucide/angular";
+import { AvatarComponent } from "@nanahoshi/mona-ui/avatar";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { ExpansionPanelComponent } from "@nanahoshi/mona-ui/expansion-panel";
+import { ExpansionPanelComponent, ExpansionPanelTitleTemplateDirective } from "@nanahoshi/mona-ui/expansion-panel";
 import { PopupComponent } from "@nanahoshi/mona-ui/popup";
+import {
+    PopupMenuComponent,
+    PopupMenuIconTemplateDirective,
+    PopupMenuItemComponent,
+    PopupMenuSeparatorComponent
+} from "@nanahoshi/mona-ui/popup-menu";
 import {
     SidebarContentDirective,
     SidebarFooterDirective,
@@ -24,7 +42,9 @@ import {
     SidebarGroupLabelDirective,
     SidebarHeaderDirective,
     SidebarLayoutComponent,
+    SidebarMenuActionDirective,
     SidebarMenuButtonDirective,
+    SidebarMenuCollapsibleDirective,
     SidebarMenuDirective,
     SidebarMenuItemDirective
 } from "@nanahoshi/mona-ui/sidebar";
@@ -54,14 +74,12 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
         SidebarLayoutComponent,
         SidebarHeaderDirective,
         ButtonDirective,
-        LucideLayers,
         PopupComponent,
         SidebarFooterDirective,
         LucideDynamicIcon,
         SidebarContentDirective,
         SidebarMenuDirective,
         SidebarMenuItemDirective,
-        ExpansionPanelComponent,
         SidebarGroupDirective,
         SidebarGroupLabelDirective,
         SidebarGroupContentDirective,
@@ -71,22 +89,40 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
         SidebarMenuButtonDirective,
         LucideHouse,
         LucideGalleryVerticalEnd,
-        LucidePalette
+        LucidePalette,
+        SidebarMenuActionDirective,
+        LucideEllipsis,
+        PopupMenuComponent,
+        PopupMenuItemComponent,
+        LucideCalendar,
+        LucideSquarePen,
+        LucideDatabase,
+        AvatarComponent,
+        PopupMenuSeparatorComponent,
+        PopupMenuIconTemplateDirective,
+        LucideSparkles,
+        LucideCircleUser,
+        LucideCreditCard,
+        LucideBell,
+        LucideLogOut,
+        ExpansionPanelComponent,
+        SidebarMenuCollapsibleDirective,
+        LucideGalleryHorizontalEnd,
+        ExpansionPanelTitleTemplateDirective,
+        LucideChevronDown,
+        LucideList
     ],
     template: `
         <mona-sidebar-layout class="h-150 border border-border">
             <header monaSidebarHeader>
-                <button monaButton look="ghost" class="w-full h-auto p-0 py-1 cursor-default" #headerMenu>
-                    <div class="flex w-full h-full">
-                        <div class="flex w-10 aspect-square items-center justify-center">
-                            <svg lucideLayers [size]="16"></svg>
-                        </div>
-                        <div class="flex flex-col items-start flex-1">
-                            <span class="text-sm">Nanahoshi</span>
-                            <span class="text-xs font-normal">Mona UI</span>
-                        </div>
-                    </div>
-                </button>
+                <ul monaSidebarMenu class="px-0!">
+                    <li monaSidebarMenuItem #headerMenu>
+                        <button monaSidebarMenuButton class="flex items-center gap-1">
+                            <span class="text-md font-semibold">Nanahoshi</span>
+                            <svg lucideChevronDown [size]="14"></svg>
+                        </button>
+                    </li>
+                </ul>
                 <mona-popup
                     [anchor]="headerMenu"
                     [anchorConnectionPoint]="'topright'"
@@ -124,19 +160,26 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                     <div monaSidebarGroupContent>
                         <ul monaSidebarMenu>
                             <li monaSidebarMenuItem>
-                                <button monaButton monaSidebarMenuButton>
+                                <button monaSidebarMenuButton>
                                     <svg lucideHome [size]="14"></svg>
                                     <span>Introduction</span>
                                 </button>
+                                <button monaSidebarMenuAction #introItem>
+                                    <svg lucideEllipsis [size]="14"></svg>
+                                </button>
+                                <mona-popup-menu [target]="introItem">
+                                    <mona-popup-menu-item label="Edit"></mona-popup-menu-item>
+                                    <mona-popup-menu-item label="Delete"></mona-popup-menu-item>
+                                </mona-popup-menu>
                             </li>
                             <li monaSidebarMenuItem>
-                                <button monaButton monaSidebarMenuButton>
+                                <button monaSidebarMenuButton>
                                     <svg lucideGalleryVerticalEnd [size]="14"></svg>
                                     <span>Installation</span>
                                 </button>
                             </li>
                             <li monaSidebarMenuItem>
-                                <button monaButton monaSidebarMenuButton>
+                                <button monaSidebarMenuButton>
                                     <svg lucidePalette [size]="14"></svg>
                                     <span>Theming</span>
                                 </button>
@@ -144,9 +187,109 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                         </ul>
                     </div>
                 </div>
+                <div monaSidebarGroup>
+                    <div monaSidebarGroupHeader>
+                        <div monaSidebarGroupLabel>Components</div>
+                    </div>
+                    <div monaSidebarGroupContent>
+                        <ul monaSidebarMenu>
+                            <li monaSidebarMenuItem>
+                                <button monaSidebarMenuButton>
+                                    <svg lucideCalendar [size]="14"></svg>
+                                    <span>Calendar</span>
+                                </button>
+                            </li>
+                            <li monaSidebarMenuItem>
+                                <button monaSidebarMenuButton>
+                                    <svg lucideEdit [size]="14"></svg>
+                                    <span>Editor</span>
+                                </button>
+                            </li>
+                            <li monaSidebarMenuItem>
+                                <button monaSidebarMenuButton>
+                                    <svg lucideDatabase [size]="14"></svg>
+                                    <span>Grid</span>
+                                </button>
+                            </li>
+                        </ul>
+                        <mona-expansion-panel monaSidebarMenuCollapsible>
+                            <ng-template monaExpansionPanelTitleTemplate>
+                                <button monaSidebarMenuButton>
+                                    <svg lucideList [size]="14"></svg>
+                                    <span>Lists</span>
+                                </button>
+                            </ng-template>
+                            <ul monaSidebarMenu>
+                                <li monaSidebarMenuItem>
+                                    <button monaSidebarMenuButton>
+                                        <svg lucideGalleryHorizontalEnd [size]="14"></svg>
+                                        <span>List Box</span>
+                                    </button>
+                                </li>
+                                <li monaSidebarMenuItem>
+                                    <button monaSidebarMenuButton>
+                                        <svg lucideGalleryHorizontalEnd [size]="14"></svg>
+                                        <span>List View</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </mona-expansion-panel>
+                    </div>
+                </div>
             </div>
-            <footer monaSidebarFooter>
-                <p>FOOTER</p>
+            <footer class="flex" monaSidebarFooter>
+                <ul class="px-0!" monaSidebarMenu>
+                    <li monaSidebarMenuItem>
+                        <button monaSidebarMenuButton #profile>
+                            <div class="flex items-center gap-2">
+                                <mona-avatar
+                                    [width]="32"
+                                    [height]="32"
+                                    label="NH"
+                                    labelFontSize="0.8em"
+                                    backgroundColor="black"
+                                    borderRadius="100%"
+                                    labelColor="white"></mona-avatar>
+                                <div class="flex flex-col justify-start flex-1">
+                                    <p class="text-left font-semibold">Nanahoshi</p>
+                                    <p class="font-light">nanahoshi&#64;nanahoshi.dev</p>
+                                </div>
+                            </div>
+                        </button>
+                        <mona-popup-menu
+                            [target]="profile"
+                            [anchorConnectionPoint]="'bottomright'"
+                            [popupConnectionPoint]="'bottomleft'">
+                            <mona-popup-menu-item label="Upgrade to Pro">
+                                <ng-template monaPopupMenuIconTemplate>
+                                    <svg lucideSparkles [size]="14"></svg>
+                                </ng-template>
+                            </mona-popup-menu-item>
+                            <mona-popup-menu-separator></mona-popup-menu-separator>
+                            <mona-popup-menu-item label="Account">
+                                <ng-template monaPopupMenuIconTemplate>
+                                    <svg lucideCircleUser [size]="14"></svg>
+                                </ng-template>
+                            </mona-popup-menu-item>
+                            <mona-popup-menu-item label="Billing">
+                                <ng-template monaPopupMenuIconTemplate>
+                                    <svg lucideCreditCard [size]="14"></svg>
+                                </ng-template>
+                            </mona-popup-menu-item>
+                            <mona-popup-menu-item label="Notifications">
+                                <ng-template monaPopupMenuIconTemplate>
+                                    <svg lucideBell [size]="14"></svg>
+                                </ng-template>
+                            </mona-popup-menu-item>
+                            <mona-popup-menu-separator></mona-popup-menu-separator>
+                            <mona-popup-menu-item label="Log out">
+                                <ng-template monaPopupMenuIconTemplate>
+                                    <svg lucideLogOut [size]="14"></svg>
+                                </ng-template>
+                            </mona-popup-menu-item>
+                        </mona-popup-menu>
+                    </li>
+                </ul>
             </footer>
         </mona-sidebar-layout>
     `

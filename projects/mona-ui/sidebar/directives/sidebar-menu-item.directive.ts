@@ -1,4 +1,4 @@
-import { Directive } from "@angular/core";
+import { Directive, input } from "@angular/core";
 
 @Directive({
     selector: "li[monaSidebarMenuItem]",
@@ -6,4 +6,7 @@ import { Directive } from "@angular/core";
         class: "flex flex-row items-center text-base gap-1 group/menu-item rounded-md hover:bg-accent"
     }
 })
-export class SidebarMenuItemDirective {}
+export class SidebarMenuItemDirective {
+    public readonly collapsed = input<boolean>();
+    public readonly collapsible = input<boolean>();
+}

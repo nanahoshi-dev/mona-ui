@@ -12,6 +12,8 @@ export * from "./directives/sidebar-group-content.directive";
 export * from "./directives/sidebar-group-header.directive";
 export * from "./directives/sidebar-group-label.directive";
 export * from "./directives/sidebar-header.directive";
+export * from "./directives/sidebar-menu-action.directive";
+export * from "./directives/sidebar-menu-collapsible.directive";
 export * from "./directives/sidebar-menu.directive";
 export * from "./directives/sidebar-menu-button.directive";
 export * from "./directives/sidebar-menu-item.directive";

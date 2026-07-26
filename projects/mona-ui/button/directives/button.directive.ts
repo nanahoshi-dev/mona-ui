@@ -64,8 +64,7 @@ export class ButtonDirective implements ButtonVariantsInput {
         const size = this.effectiveSize();
         const selected = this.selected();
         const userClass = this.userClass();
-        const variants = buttonThemeVariants;
-        const variantClasses = variants({ disabled, iconOnly, loading, look, rounded, selected, size });
+        const variantClasses = buttonThemeVariants({ disabled, iconOnly, loading, look, rounded, selected, size });
         return twMerge(variantClasses, userClass);
     });
     protected readonly loadingSize = computed(() => {

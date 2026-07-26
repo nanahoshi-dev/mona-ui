@@ -2,8 +2,6 @@ import { Component, computed, input, signal } from "@angular/core";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
-import { SidebarMenuItemDirective } from "../../directives/sidebar-menu-item.directive";
-import { SidebarMenuDirective } from "../../directives/sidebar-menu.directive";
 import {
     sidebarLayoutBaseThemeVariants,
     sidebarLayoutContentThemeVariants,
@@ -13,7 +11,7 @@ import {
 @Component({
     selector: "mona-sidebar-layout",
     templateUrl: "./sidebar-layout.component.html",
-    imports: [ButtonDirective, SidebarMenuDirective, SidebarMenuItemDirective],
+    imports: [ButtonDirective],
     host: {
         "[class]": "baseClass()"
     }
