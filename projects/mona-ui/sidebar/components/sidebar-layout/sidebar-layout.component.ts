@@ -1,51 +1,53 @@
-import { Component, computed, input, signal } from "@angular/core";
-import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, model, untracked } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
-import {
-    sidebarLayoutBaseThemeVariants,
-    sidebarLayoutContentThemeVariants,
-    sidebarThemeVariants
-} from "../../styles/sidebar.styles";
+import { SidebarService } from "../../services/sidebar.service";
+import { sidebarLayoutBaseThemeVariants } from "../../styles/sidebar.styles";
 
+/**
+ * @description
+ * Provides the shared sidebar state and lays its children out in a row. Project a `mona-sidebar`
+ * and an element marked with `monaSidebarInset` into it.
+ */
 @Component({
     selector: "mona-sidebar-layout",
-    templateUrl: "./sidebar-layout.component.html",
-    imports: [ButtonDirective],
+    template: `<ng-content></ng-content>`,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
         "[class]": "baseClass()"
-    }
+    },
+    providers: [SidebarService]
 })
 export class SidebarLayoutComponent {
-    protected readonly baseClass = computed(() => {
-        const variantClass = sidebarLayoutBaseThemeVariants();
-        const userClass = this.userClass();
-        return twMerge(variantClass, userClass);
-    });
-    protected readonly sidebarClass = sidebarThemeVariants();
-    protected readonly sidebarContentClass = sidebarLayoutContentThemeVariants();
-    protected readonly sidebarExpanded = signal(true);
-    protected readonly sidebarWidthString = computed(() => {
-        const expanded = this.sidebarExpanded();
-        const width = this.sidebarWidth();
-        const widthStr = typeof width === "number" ? `${width}px` : width;
-        return expanded ? widthStr : "0";
-    });
-    public readonly sidebarWidth = input<string | number>();
+    readonly #sidebarService = inject(SidebarService);
+    protected readonly baseClass = computed(() => twMerge(sidebarLayoutBaseThemeVariants(), this.userClass()));
+
+    /**
+     * @description Sets whether the sidebar is expanded. Supports two-way binding.
+     * @default true
+     */
+    public readonly expanded = model(true);
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string, ClassInputType>("", {
         alias: "class",
         transform: value => classInputToClass(value)
     });
 
-    protected collapse(): void {
-        this.sidebarExpanded.set(false);
-    }
-
-    protected expand(): void {
-        this.sidebarExpanded.set(true);
-    }
-
-    protected onSidebarToggle(): void {
-        this.sidebarExpanded.set(!this.sidebarExpanded());
+    public constructor() {
+        // The service is the single source of truth so that descendants can drive the state directly.
+        // These two effects keep the two-way binding in step with it; signal equality stops them from
+        // ping-ponging, because setting a signal to the value it already holds notifies nobody.
+        effect(() => {
+            const expanded = this.expanded();
+            untracked(() => this.#sidebarService.setExpanded(expanded));
+        });
+        effect(() => {
+            const expanded = this.#sidebarService.expanded();
+            untracked(() => this.expanded.set(expanded));
+        });
     }
 }

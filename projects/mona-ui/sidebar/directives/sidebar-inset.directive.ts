@@ -1,26 +1,24 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { CollapsibleToken } from "@nanahoshi/mona-ui/collapsible";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../services/sidebar.service";
-import { sidebarMenuItemThemeVariants } from "../styles/sidebar.styles";
+import { sidebarInsetThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * Marks the main region beside the sidebar. Fills the remaining width and scrolls independently.
+ * Takes on the raised surface when the sidebar uses the `inset` variant.
+ */
 @Directive({
-    selector: "li[monaSidebarMenuItem]",
+    selector: "[monaSidebarInset]",
     host: {
         "[class]": "baseClass()"
     }
 })
-export class SidebarMenuItemDirective {
-    // Applying `monaCollapsible` to the same element turns the item into a disclosure row, so it has to
-    // stack its trigger and submenu instead of laying them out side by side.
-    readonly #collapsible = inject(CollapsibleToken, { optional: true, self: true });
+export class SidebarInsetDirective {
     readonly #sidebarService = inject(SidebarService, { optional: true });
     protected readonly baseClass = computed(() => {
-        const variantClass = sidebarMenuItemThemeVariants({
-            collapsible: this.#collapsible !== null,
-            iconOnly: this.#sidebarService?.iconOnly() ?? false
-        });
+        const variantClass = sidebarInsetThemeVariants({ variant: this.#sidebarService?.variant() ?? "sidebar" });
         return twMerge(variantClass, this.userClass());
     });
 

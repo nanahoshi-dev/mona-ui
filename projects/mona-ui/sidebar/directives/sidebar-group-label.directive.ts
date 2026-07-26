@@ -1,9 +1,18 @@
-import { Directive } from "@angular/core";
+import { computed, Directive, inject } from "@angular/core";
+import { SidebarService } from "../services/sidebar.service";
+import { sidebarGroupLabelThemeVariants } from "../styles/sidebar.styles";
 
 @Directive({
     selector: "[monaSidebarGroupLabel]",
     host: {
-        class: "flex grow-1 items-center shrink-0 text-xs font-medium text-foreground/80" // TODO: Introduce --color-sidebar-foreground
+        "[class]": "baseClass",
+        "[style.display]": "hidden() ? 'none' : null"
     }
 })
-export class SidebarGroupLabelDirective {}
+export class SidebarGroupLabelDirective {
+    readonly #sidebarService = inject(SidebarService, { optional: true });
+    protected readonly baseClass = sidebarGroupLabelThemeVariants();
+
+    // A group label has no abbreviated form, so the rail simply drops it.
+    protected readonly hidden = computed(() => this.#sidebarService?.iconOnly() ?? false);
+}

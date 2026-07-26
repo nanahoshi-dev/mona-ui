@@ -2,20 +2,23 @@ import { computed, Directive, inject, input } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../services/sidebar.service";
-import { sidebarMenuSubThemeVariants } from "../styles/sidebar.styles";
+import { sidebarMenuBadgeThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * A trailing count or status badge on a menu item. Stands down on the icon rail, where it would
+ * crowd out the icon it belongs to.
+ */
 @Directive({
-    selector: "ul[monaSidebarMenuSub]",
+    selector: "[monaSidebarMenuBadge]",
     host: {
         "[class]": "baseClass()",
         "[style.display]": "hidden() ? 'none' : null"
     }
 })
-export class SidebarMenuSubDirective {
+export class SidebarMenuBadgeDirective {
     readonly #sidebarService = inject(SidebarService, { optional: true });
-    protected readonly baseClass = computed(() => twMerge(sidebarMenuSubThemeVariants(), this.userClass()));
-
-    // An indented submenu cannot render meaningfully in a rail the width of a single icon.
+    protected readonly baseClass = computed(() => twMerge(sidebarMenuBadgeThemeVariants(), this.userClass()));
     protected readonly hidden = computed(() => this.#sidebarService?.iconOnly() ?? false);
 
     /**

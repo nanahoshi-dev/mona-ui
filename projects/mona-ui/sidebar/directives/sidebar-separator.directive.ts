@@ -1,24 +1,23 @@
 import { computed, Directive, inject, input } from "@angular/core";
-import { CollapsibleToken } from "@nanahoshi/mona-ui/collapsible";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import { SidebarService } from "../services/sidebar.service";
-import { sidebarMenuItemThemeVariants } from "../styles/sidebar.styles";
+import { sidebarSeparatorThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * A horizontal rule between sidebar regions. Tightens its inset on the icon rail.
+ */
 @Directive({
-    selector: "li[monaSidebarMenuItem]",
+    selector: "[monaSidebarSeparator]",
     host: {
         "[class]": "baseClass()"
     }
 })
-export class SidebarMenuItemDirective {
-    // Applying `monaCollapsible` to the same element turns the item into a disclosure row, so it has to
-    // stack its trigger and submenu instead of laying them out side by side.
-    readonly #collapsible = inject(CollapsibleToken, { optional: true, self: true });
+export class SidebarSeparatorDirective {
     readonly #sidebarService = inject(SidebarService, { optional: true });
     protected readonly baseClass = computed(() => {
-        const variantClass = sidebarMenuItemThemeVariants({
-            collapsible: this.#collapsible !== null,
+        const variantClass = sidebarSeparatorThemeVariants({
             iconOnly: this.#sidebarService?.iconOnly() ?? false
         });
         return twMerge(variantClass, this.userClass());

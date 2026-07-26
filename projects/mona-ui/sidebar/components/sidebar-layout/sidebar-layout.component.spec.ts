@@ -1,22 +1,115 @@
+import { Component, signal, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
+import { SidebarComponent } from "../sidebar/sidebar.component";
+import { SidebarInsetDirective } from "../../directives/sidebar-inset.directive";
+import { SidebarTriggerDirective } from "../../directives/sidebar-trigger.directive";
+import { SidebarService } from "../../services/sidebar.service";
 import { SidebarLayoutComponent } from "./sidebar-layout.component";
 
+@Component({
+    template: `
+        <mona-sidebar-layout [(expanded)]="expanded">
+            <mona-sidebar [side]="side()" [width]="width()">
+                <div class="sidebar-body">Navigation</div>
+            </mona-sidebar>
+            <main monaSidebarInset class="inset">
+                <button monaSidebarTrigger class="trigger">Toggle</button>
+            </main>
+        </mona-sidebar-layout>
+    `,
+    imports: [SidebarLayoutComponent, SidebarComponent, SidebarInsetDirective, SidebarTriggerDirective]
+})
+class SidebarLayoutHostComponent {
+    public readonly expanded = signal(true);
+    public readonly layout = viewChild.required(SidebarLayoutComponent);
+    public readonly side = signal<"left" | "right">("left");
+    public readonly width = signal<string | number>("16rem");
+}
+
 describe("SidebarLayoutComponent", () => {
-    let component: SidebarLayoutComponent;
-    let fixture: ComponentFixture<SidebarLayoutComponent>;
+    let fixture: ComponentFixture<SidebarLayoutHostComponent>;
+    let component: SidebarLayoutHostComponent;
 
-    beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [SidebarLayoutComponent]
-        }).compileComponents();
+    const getSidebar = (): HTMLElement => fixture.nativeElement.querySelector("mona-sidebar");
+    const getTrigger = (): HTMLElement => fixture.nativeElement.querySelector(".trigger");
 
-        fixture = TestBed.createComponent(SidebarLayoutComponent);
+    beforeEach(() => {
+        TestBed.configureTestingModule({ imports: [SidebarLayoutHostComponent] });
+        fixture = TestBed.createComponent(SidebarLayoutHostComponent);
         component = fixture.componentInstance;
-        await fixture.whenStable();
+        fixture.detectChanges();
     });
 
     it("should create", () => {
-        expect(component).toBeTruthy();
+        expect(component.layout()).toBeTruthy();
+    });
+
+    it("should project the sidebar and the inset", () => {
+        expect(fixture.nativeElement.querySelector(".sidebar-body").textContent).toContain("Navigation");
+        expect(fixture.nativeElement.querySelector(".inset")).toBeTruthy();
+    });
+
+    it("should point the trigger at the sidebar through aria-controls", () => {
+        const sidebarId = getSidebar().getAttribute("id");
+        expect(sidebarId).toBeTruthy();
+        expect(getTrigger().getAttribute("aria-controls")).toBe(sidebarId);
+        expect(getTrigger().getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("should collapse the sidebar to zero width from the trigger", () => {
+        expect(getSidebar().style.width).toBe("16rem");
+        expect(getSidebar().getAttribute("data-state")).toBe("expanded");
+
+        getTrigger().click();
+        fixture.detectChanges();
+
+        expect(getSidebar().style.width).toBe("0px");
+        expect(getSidebar().getAttribute("data-state")).toBe("collapsed");
+        expect(getTrigger().getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("should push trigger driven changes back out through the two-way binding", () => {
+        getTrigger().click();
+        fixture.detectChanges();
+        expect(component.expanded()).toBe(false);
+
+        getTrigger().click();
+        fixture.detectChanges();
+        expect(component.expanded()).toBe(true);
+    });
+
+    it("should apply an expanded value bound from the outside", () => {
+        component.expanded.set(false);
+        fixture.detectChanges();
+
+        expect(getSidebar().style.width).toBe("0px");
+        expect(getSidebar().getAttribute("data-state")).toBe("collapsed");
+    });
+
+    it("should treat a numeric width as pixels", () => {
+        component.width.set(240);
+        fixture.detectChanges();
+        expect(getSidebar().style.width).toBe("240px");
+    });
+
+    it("should order and border the sidebar according to side", () => {
+        expect(getSidebar().classList.contains("order-first")).toBe(true);
+        expect(getSidebar().classList.contains("border-r")).toBe(true);
+
+        component.side.set("right");
+        fixture.detectChanges();
+
+        expect(getSidebar().classList.contains("order-last")).toBe(true);
+        expect(getSidebar().classList.contains("border-l")).toBe(true);
+    });
+
+    it("should expose the same service instance to every descendant", () => {
+        const service = fixture.debugElement.query(node => node.name === "mona-sidebar").injector.get(SidebarService);
+        service.collapse();
+        fixture.detectChanges();
+
+        expect(component.expanded()).toBe(false);
+        expect(getSidebar().getAttribute("data-state")).toBe("collapsed");
     });
 });

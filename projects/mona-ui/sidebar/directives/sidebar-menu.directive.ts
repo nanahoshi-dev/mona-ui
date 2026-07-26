@@ -1,9 +1,16 @@
-import { Directive } from "@angular/core";
+import { computed, Directive, inject } from "@angular/core";
+import { SidebarService } from "../services/sidebar.service";
+import { sidebarMenuThemeVariants } from "../styles/sidebar.styles";
 
 @Directive({
     selector: "ul[monaSidebarMenu]",
     host: {
-        class: "flex flex-col w-full space-y-1 ps-4 pe-2"
+        "[class]": "baseClass()"
     }
 })
-export class SidebarMenuDirective {}
+export class SidebarMenuDirective {
+    readonly #sidebarService = inject(SidebarService, { optional: true });
+    protected readonly baseClass = computed(() =>
+        sidebarMenuThemeVariants({ iconOnly: this.#sidebarService?.iconOnly() ?? false })
+    );
+}

@@ -1,9 +1,16 @@
-import { Directive } from "@angular/core";
+import { computed, Directive, inject } from "@angular/core";
+import { SidebarService } from "../services/sidebar.service";
+import { sidebarGroupHeaderThemeVariants } from "../styles/sidebar.styles";
 
 @Directive({
     selector: "[monaSidebarGroupHeader]",
     host: {
-        class: "h-8 flex items-center px-3"
+        "[class]": "baseClass()"
     }
 })
-export class SidebarGroupHeaderDirective {}
+export class SidebarGroupHeaderDirective {
+    readonly #sidebarService = inject(SidebarService, { optional: true });
+    protected readonly baseClass = computed(() =>
+        sidebarGroupHeaderThemeVariants({ iconOnly: this.#sidebarService?.iconOnly() ?? false })
+    );
+}
