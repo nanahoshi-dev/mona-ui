@@ -19,6 +19,6 @@ describe("SidebarGroupLabelDirective", () => {
         expect(label.classList.contains("text-xs")).toBe(true);
         expect(label.classList.contains("font-medium")).toBe(true);
         // No SidebarService is available here, so the directive must not assume one.
-        expect(label.style.opacity).toBe("1");
+        expect(label.classList.contains("opacity-100")).toBe(true);
     });
 });

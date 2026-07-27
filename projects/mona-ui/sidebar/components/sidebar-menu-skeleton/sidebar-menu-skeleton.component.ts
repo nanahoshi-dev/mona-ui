@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from "@angular/core";
 import { SkeletonComponent } from "@nanahoshi/mona-ui/skeleton";
 import { SidebarService } from "../../services/sidebar.service";
+import { sidebarMenuSkeletonThemeVariants } from "../../styles/sidebar.styles";
 
 /**
  * @description
@@ -25,12 +26,7 @@ export class SidebarMenuSkeletonComponent {
     readonly #sidebarService = inject(SidebarService, { optional: true });
     // Laid out exactly like a real menu button so the two animate as one: the same inset centres the
     // icon square on the rail, and the same widened gap carries the label bar out of the clipped box.
-    protected readonly baseClass = computed(() => {
-        const shared =
-            "flex h-8 w-full items-center overflow-hidden " +
-            "transition-[gap,padding] duration-(--mona-motion-standard) ease-out motion-reduce:transition-none";
-        return this.iconOnly() ? `${shared} gap-8 px-2` : `${shared} gap-2 px-1`;
-    });
+    protected readonly baseClass = computed(() => sidebarMenuSkeletonThemeVariants({ iconOnly: this.iconOnly() }));
     protected readonly iconOnly = computed(() => this.#sidebarService?.iconOnly() ?? false);
 
     /**

@@ -1,5 +1,6 @@
 import { computed, Directive, inject } from "@angular/core";
 import { SidebarService } from "../services/sidebar.service";
+import { sidebarContentThemeVariants } from "../styles/sidebar.styles";
 
 @Directive({
     selector: "[monaSidebarContent]",
@@ -16,8 +17,6 @@ export class SidebarContentDirective {
      * to read on the rail anyway — the labels are gone — so the overflow is simply clipped there.
      */
     protected readonly baseClass = computed(() =>
-        this.#sidebarService?.iconOnly()
-            ? "flex-1 overflow-hidden"
-            : "flex-1 overflow-x-hidden overflow-y-auto"
+        sidebarContentThemeVariants({ iconOnly: this.#sidebarService?.iconOnly() ?? false })
     );
 }

@@ -1,6 +1,7 @@
 import { computed, Directive, inject } from "@angular/core";
 import { TextBoxDirective } from "@nanahoshi/mona-ui/text-box";
 import { SidebarService } from "../services/sidebar.service";
+import { sidebarInputClasses } from "../styles/sidebar.styles";
 
 /**
  * @description
@@ -11,13 +12,13 @@ import { SidebarService } from "../services/sidebar.service";
     selector: "input[monaSidebarInput]",
     hostDirectives: [TextBoxDirective],
     host: {
-        // `TextBoxDirective` owns the `[class]` binding on this element, so visibility is driven
-        // through a style binding rather than a competing class binding.
-        "[style.display]": "hidden() ? 'none' : null",
-        class: "w-full h-8"
+        // `TextBoxDirective` owns `[class]`, so a data attribute drives the static sidebar recipe.
+        "[attr.data-hidden]": "hidden() ? 'true' : null",
+        "[class]": "baseClass"
     }
 })
 export class SidebarInputDirective {
     readonly #sidebarService = inject(SidebarService, { optional: true });
+    protected readonly baseClass = sidebarInputClasses();
     protected readonly hidden = computed(() => this.#sidebarService?.iconOnly() ?? false);
 }

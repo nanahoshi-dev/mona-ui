@@ -43,6 +43,38 @@ export const sidebarLayoutBaseThemeVariants = cva(
     `
 );
 
+export const sidebarContentThemeVariants = cva("flex-1", {
+    variants: {
+        iconOnly: {
+            true: "overflow-hidden",
+            false: "overflow-x-hidden overflow-y-auto"
+        }
+    }
+});
+
+export const sidebarFooterThemeVariants = cva("p-2 shrink-0");
+
+export const sidebarGroupThemeVariants = cva(
+    `
+        relative flex flex-col w-full p-2
+    `
+);
+
+export const sidebarGroupContentThemeVariants = cva("w-full");
+
+/**
+ * This stays a static host class because consumers commonly compose `monaButton` on the same
+ * element. The button owns `[class]`, so the sidebar publishes its state through `data-hidden`
+ * instead of adding a competing class binding.
+ */
+export const sidebarGroupActionClasses = `
+    p-1 w-auto h-auto
+    visible opacity-100
+    transition-[opacity,visibility] duration-(--mona-motion-standard) ease-out
+    motion-reduce:transition-none
+    data-[hidden=true]:invisible data-[hidden=true]:opacity-0
+`;
+
 export const sidebarInsetThemeVariants = cva(
     `
         flex flex-col grow flex-1 min-w-0
@@ -58,6 +90,10 @@ export const sidebarInsetThemeVariants = cva(
                     m-2 h-[calc(100%-1rem)] rounded-lg
                     border border-(--color-border) bg-(--color-surface) shadow-(--shadow-raised)
                 `
+            },
+            behindDrawer: {
+                true: "overflow-hidden!",
+                false: ""
             }
         }
     }
@@ -88,7 +124,49 @@ export const sidebarGroupLabelThemeVariants = cva(
         text-xs font-medium whitespace-nowrap text-(--color-sidebar-foreground)/70
         transition-[opacity,visibility] duration-(--mona-motion-standard) ease-out
         motion-reduce:transition-none
+    `,
+    {
+        variants: {
+            hidden: {
+                true: "invisible opacity-0",
+                false: "visible opacity-100"
+            }
+        }
+    }
+);
+
+export const sidebarHeaderThemeVariants = cva("p-2 shrink-0");
+
+/**
+ * `monaTextBox` owns `[class]`, so the rail state is exposed through `data-hidden` and consumed by
+ * this static class rather than by a second class binding.
+ */
+export const sidebarInputClasses = cva(`
+    w-full h-8
+    data-[hidden=true]:hidden
+`);
+
+export const sidebarMenuActionClasses = cva(`
+    w-auto h-auto p-1!
+    hover:bg-(--color-sidebar-accent)! hover:text-(--color-sidebar-accent-foreground)!
+    group-data-[active=true]/menu-item:text-(--color-sidebar-primary-foreground)!
+    data-[hidden=true]:hidden
+`);
+
+export const sidebarMenuSkeletonThemeVariants = cva(
     `
+        flex h-8 w-full items-center overflow-hidden
+        transition-[gap,padding] duration-(--mona-motion-standard) ease-out
+        motion-reduce:transition-none
+    `,
+    {
+        variants: {
+            iconOnly: {
+                true: "gap-8 px-2",
+                false: "gap-2 px-1"
+            }
+        }
+    }
 );
 
 export const sidebarMenuItemThemeVariants = cva(
@@ -142,6 +220,8 @@ export const sidebarMenuButtonThemeVariants = cva(
         outline-none
         focus-visible:ring-2 focus-visible:ring-(--color-sidebar-ring)/60
         [&>*:first-child]:shrink-0 [&>svg]:shrink-0
+        [transition:gap_var(--mona-motion-standard)_ease-out,height_var(--mona-motion-standard)_ease-out,padding_var(--mona-motion-standard)_ease-out,background-color_100ms_ease-in-out,color_100ms_ease-in-out]
+        motion-reduce:[transition:none]
     `,
     {
         variants: {
@@ -155,8 +235,22 @@ export const sidebarMenuButtonThemeVariants = cva(
             disabled: {
                 true: "opacity-50 pointer-events-none cursor-default",
                 false: "cursor-pointer"
+            },
+            iconOnly: {
+                true: "shrink-0 gap-8 h-8",
+                false: "gap-2 p-1"
+            },
+            size: {
+                medium: "",
+                large: ""
             }
-        }
+        },
+        compoundVariants: [
+            { iconOnly: false, size: "medium", class: "h-8" },
+            { iconOnly: false, size: "large", class: "h-12" },
+            { iconOnly: true, size: "medium", class: "p-2" },
+            { iconOnly: true, size: "large", class: "p-0" }
+        ]
     }
 );
 
@@ -231,6 +325,10 @@ export const sidebarThemeVariants = cva(
                     motion-reduce:transition-none
                 `,
                 false: ""
+            },
+            open: {
+                true: "",
+                false: ""
             }
         },
         compoundVariants: [
@@ -242,6 +340,8 @@ export const sidebarThemeVariants = cva(
             // variant's margins, rounding and transparency are all dropped for it.
             { drawer: true, side: "start", class: "start-0" },
             { drawer: true, side: "end", class: "end-0" },
+            { drawer: true, open: false, side: "start", class: "-translate-x-full" },
+            { drawer: true, open: false, side: "end", class: "translate-x-full" },
             { drawer: true, variant: "floating", class: "rounded-none" },
             { drawer: true, variant: "inset", class: "bg-(--color-sidebar)" }
         ]
@@ -276,7 +376,15 @@ export const sidebarMenuBadgeThemeVariants = cva(
         rounded-md text-xs font-medium tabular-nums
         bg-(--color-sidebar-accent) text-(--color-sidebar-accent-foreground)
         pointer-events-none select-none
-    `
+    `,
+    {
+        variants: {
+            hidden: {
+                true: "hidden!",
+                false: ""
+            }
+        }
+    }
 );
 
 export const sidebarRailThemeVariants = cva(

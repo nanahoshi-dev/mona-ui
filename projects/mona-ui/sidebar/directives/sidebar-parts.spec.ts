@@ -112,8 +112,8 @@ describe("Sidebar parts", () => {
             // shrinks continuously instead of snapping to a rail sized box on the first frame.
             expect(button.style.width).toBe("");
             expect(button.classList.contains("w-full")).toBe(true);
-            expect(button.style.padding).toBe("0.25rem");
-            expect(button.style.gap).toBe("0.5rem");
+            expect(button.classList.contains("p-1")).toBe(true);
+            expect(button.classList.contains("gap-2")).toBe(true);
         });
 
         it("should clip its own label in either state, so the label leaves with the width", () => {
@@ -128,25 +128,26 @@ describe("Sidebar parts", () => {
             collapse();
 
             const button = query(".menu-button");
-            expect(button.style.height).toBe("2rem");
-            expect(button.style.padding).toBe("0.5rem");
+            expect(button.classList.contains("h-8")).toBe(true);
+            expect(button.classList.contains("p-2")).toBe(true);
             expect(button.classList.contains("overflow-hidden")).toBe(true);
         });
 
         it("should animate the properties that change with the rail state", () => {
-            const transition = query(".menu-button").style.transition;
+            const transition = [...query(".menu-button").classList].find(className =>
+                className.startsWith("[transition:")
+            );
+            expect(transition).toBeDefined();
             for (const property of ["gap", "height", "padding"]) {
-                expect(transition).toContain(`${property} var(--mona-motion-standard)`);
+                expect(transition).toContain(`${property}_var(--mona-motion-standard)`);
             }
-            // Restated because the button's own class binding would otherwise be the only rule setting
-            // `transition-property`, and declaring it inline drops the colour transition it provides.
             expect(transition).toContain("background-color");
         });
 
         it("should hold its size against siblings in the row", () => {
             collapse();
             // A trailing action or popup host would otherwise shrink the square below the icon size.
-            expect(query(".menu-button").style.flexShrink).toBe("0");
+            expect(query(".menu-button").classList.contains("shrink-0")).toBe(true);
         });
 
         it("should keep the leading icon anchored rather than centring overflowing content", () => {
@@ -159,7 +160,7 @@ describe("Sidebar parts", () => {
         it("should push everything after the icon clear of the square", () => {
             collapse();
             // A gap narrower than the square leaves a sliver of the label showing at the edge.
-            expect(query(".menu-button").style.gap).toBe("2rem");
+            expect(query(".menu-button").classList.contains("gap-8")).toBe(true);
         });
 
         it("should stop its leading visual being crushed by a long label", () => {
@@ -172,27 +173,27 @@ describe("Sidebar parts", () => {
 
         it("should inset a medium button so its icon sits centred in the square", () => {
             collapse();
-            expect(query(".menu-button").style.padding).toBe("0.5rem");
+            expect(query(".menu-button").classList.contains("p-2")).toBe(true);
         });
 
         it("should let a large button's visual fill the square edge to edge", () => {
             collapse();
 
             const profile = query(".profile-button");
-            expect(profile.style.height).toBe("2rem");
+            expect(profile.classList.contains("h-8")).toBe(true);
             // An avatar is already the size of the square; insetting it would push it out of view.
-            expect(profile.style.padding).toBe("0px");
+            expect(profile.classList.contains("p-0")).toBe(true);
         });
 
         it("should give a large button a taller row while expanded", () => {
-            expect(query(".profile-button").style.height).toBe(asCssWidth("3rem"));
-            expect(query(".menu-button").style.height).toBe("2rem");
+            expect(query(".profile-button").classList.contains("h-12")).toBe(true);
+            expect(query(".menu-button").classList.contains("h-8")).toBe(true);
         });
 
         it("should state both heights so the taller row animates down to the square", () => {
             collapse();
             // Left unset on the rail, the row would fall back to its class-driven height and jump.
-            expect(query(".profile-button").style.height).toBe("2rem");
+            expect(query(".profile-button").classList.contains("h-8")).toBe(true);
         });
 
         it("should stay interactive on the rail", () => {
@@ -200,7 +201,7 @@ describe("Sidebar parts", () => {
             const button = query(".menu-button") as HTMLButtonElement;
             expect(button.tagName).toBe("BUTTON");
             expect(button.disabled).toBe(false);
-            expect(button.style.display).not.toBe("none");
+            expect(button.classList.contains("hidden")).toBe(false);
         });
     });
 
@@ -232,16 +233,16 @@ describe("Sidebar parts", () => {
 
     describe("badge, input and separator", () => {
         it("should show all of them at full width", () => {
-            expect(query(".badge").style.display).toBe("");
-            expect(query(".search").style.display).toBe("");
+            expect(query(".badge").classList.contains("hidden!")).toBe(false);
+            expect(query(".search").hasAttribute("data-hidden")).toBe(false);
             expect(query(".separator").classList.contains("mx-2")).toBe(true);
         });
 
         it("should stand the badge and input down on the rail and tighten the separator", () => {
             collapse();
 
-            expect(query(".badge").style.display).toBe("none");
-            expect(query(".search").style.display).toBe("none");
+            expect(query(".badge").classList.contains("hidden!")).toBe(true);
+            expect(query(".search").getAttribute("data-hidden")).toBe("true");
             expect(query(".separator").classList.contains("mx-1")).toBe(true);
             expect(query(".separator").classList.contains("mx-2")).toBe(false);
         });
@@ -286,7 +287,9 @@ describe("Sidebar parts", () => {
             // Counts the borders on the inline axis straight off each variant's classes, so changing a
             // border without changing the allowance fails here rather than silently clipping an avatar.
             const inlineBorders = (variant: SidebarVariant): number => {
-                const classes = sidebarThemeVariants({ variant, side: "start", flush: false, drawer: false }).split(/\s+/);
+                const classes = sidebarThemeVariants({ variant, side: "start", flush: false, drawer: false }).split(
+                    /\s+/
+                );
                 return classes.includes("border") ? 2 : classes.filter(name => name === "border-e").length;
             };
 

@@ -42,7 +42,7 @@ export class SidebarTriggerDirective {
     }
 
     protected onEnterKeydown(event: Event): void {
-        // Buttons and anchors already synthesise a click for Enter.
+        // Buttons and anchors already synthesize a click for Enter.
         if (this.#nativeButton || this.#nativeAnchor) {
             return;
         }
@@ -51,7 +51,7 @@ export class SidebarTriggerDirective {
     }
 
     protected onSpaceKeydown(event: Event): void {
-        // Buttons already synthesise a click for Space; anchors scroll the page instead.
+        // Buttons already synthesize a click for Space; anchors scroll the page instead.
         if (this.#nativeButton) {
             return;
         }

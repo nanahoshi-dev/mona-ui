@@ -14,7 +14,7 @@ import { sidebarMenuItemThemeVariants } from "../styles/sidebar.styles";
 })
 export class SidebarMenuItemDirective {
     // Applying `monaCollapsible` to the same element turns the item into a disclosure row, so it has to
-    // stack its trigger and submenu instead of laying them out side by side.
+    // stack its trigger and submenu instead of laying them out side-by-side.
     readonly #collapsible = inject(CollapsibleToken, { optional: true, self: true });
     readonly #sidebarService = inject(SidebarService, { optional: true });
     #expandedBeforeRail = false;

@@ -75,18 +75,18 @@ describe("Sidebar drawer on a compact viewport", () => {
 
         it("should slide out of view rather than shrink, so its contents do not reflow every frame", () => {
             goCompact();
-            expect(sidebar().style.translate).toBe("-100% 0");
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(true);
 
             query(".trigger").click();
             fixture.detectChanges();
-            expect(sidebar().style.translate).toBe("");
+            expect(sidebar().classList.contains("-translate-x-full")).toBe(false);
         });
 
         it("should slide towards whichever edge it is docked against", () => {
             fixture.componentInstance.side.set("end");
             goCompact();
 
-            expect(sidebar().style.translate).toBe("100% 0");
+            expect(sidebar().classList.contains("translate-x-full")).toBe(true);
         });
 
         it("should never present an icon rail, having the room to show everything", () => {
@@ -117,7 +117,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             openDrawer();
 
             expect(query(".inset").hasAttribute("inert")).toBe(true);
-            expect(query(".inset").style.overflow).toBe("hidden");
+            expect(query(".inset").classList.contains("overflow-hidden!")).toBe(true);
         });
 
         it("should give the layout back once the drawer closes", () => {
@@ -126,7 +126,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             fixture.detectChanges();
 
             expect(query(".inset").hasAttribute("inert")).toBe(false);
-            expect(query(".inset").style.overflow).toBe("");
+            expect(query(".inset").classList.contains("overflow-hidden!")).toBe(false);
         });
 
         it("should close on Escape", () => {

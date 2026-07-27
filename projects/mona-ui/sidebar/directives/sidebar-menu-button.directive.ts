@@ -1,4 +1,4 @@
-import { computed, DestroyRef, Directive, ElementRef, inject, input, signal } from "@angular/core";
+import { computed, Directive, ElementRef, inject, input } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
 import type { SidebarMenuButtonSize } from "../models/SidebarMenuButtonSize";
@@ -28,13 +28,6 @@ import { SidebarMenuItemDirective } from "./sidebar-menu-item.directive";
         "[attr.title]": "railTitle()",
         "[attr.type]": "type",
         "[class]": "baseClass()",
-        // Sibling elements in the row — a trailing action, a popup host — would otherwise shrink the
-        // square below the size of the icon it exists to show.
-        "[style.flex-shrink]": "railBox() ? '0' : null",
-        "[style.gap]": "gap()",
-        "[style.height]": "height()",
-        "[style.padding]": "padding()",
-        "[style.transition]": "transition()",
         "(click)": "onClick($event)"
     }
 })
@@ -42,10 +35,19 @@ export class SidebarMenuButtonDirective {
     readonly #element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     readonly #menuItem = inject(SidebarMenuItemDirective, { optional: true });
     readonly #nativeButton = this.#element.tagName === "BUTTON";
-    readonly #reducedMotion = signal(false);
     readonly #sidebarService = inject(SidebarService, { optional: true });
 
     protected readonly ariaDisabled = computed(() => (this.disabled() ? "true" : null));
+
+    protected readonly baseClass = computed(() => {
+        const variantClass = sidebarMenuButtonThemeVariants({
+            active: this.#menuItem?.active() ?? false,
+            disabled: this.disabled(),
+            iconOnly: this.railBox(),
+            size: this.size()
+        });
+        return twMerge(variantClass, this.userClass());
+    });
 
     /**
      * Marks the row the user is currently on. `page` regardless of host element: `active` describes a
@@ -54,27 +56,7 @@ export class SidebarMenuButtonDirective {
      */
     protected readonly current = computed(() => ((this.#menuItem?.active() ?? false) ? "page" : null));
 
-    protected readonly gap = computed(() => (this.railBox() ? "2rem" : "0.5rem"));
-
-    /**
-     * A large button carries stacked content beside its visual, so it needs a taller row than the icon
-     * square. Both ends are stated so the row animates down to the square instead of snapping to it.
-     */
-    protected readonly height = computed(() => (!this.railBox() && this.size() === "large" ? "3rem" : "2rem"));
-
     protected readonly nativeDisabled = computed(() => (this.#nativeButton && this.disabled() ? "" : null));
-
-    /**
-     * The inset that centres the leading visual in the rail square. A `medium` row holds an icon
-     * smaller than the square, so it is padded inwards; a `large` one holds something that already
-     * fills the square, so padding it would push it out of view.
-     */
-    protected readonly padding = computed(() => {
-        if (!this.railBox()) {
-            return "0.25rem";
-        }
-        return this.size() === "large" ? "0" : "0.5rem";
-    });
 
     /**
      * On the rail the row becomes a square exactly the size of its leading visual and clips its own
@@ -91,30 +73,8 @@ export class SidebarMenuButtonDirective {
 
     protected readonly tabIndex = computed(() => (this.disabled() && !this.#nativeButton ? 0 : null));
 
-    /**
-     * Declared inline rather than as utility classes because the same three properties are also set
-     * inline above, and a class would be decided against them by source order rather than specificity.
-     */
-    protected readonly transition = computed(() => {
-        if (this.#reducedMotion()) {
-            return "none";
-        }
-        const shape = ["gap", "height", "padding"]
-            .map(property => `${property} var(--mona-motion-standard) ease-out`)
-            .join(", ");
-        return `${shape}, background-color 100ms ease-in-out, color 100ms ease-in-out`;
-    });
-
     // Guards against a sidebar row inside a form submitting it.
     protected readonly type = this.#nativeButton ? "button" : null;
-
-    protected readonly baseClass = computed(() => {
-        const variantClass = sidebarMenuButtonThemeVariants({
-            active: this.#menuItem?.active() ?? false,
-            disabled: this.disabled()
-        });
-        return twMerge(variantClass, this.userClass());
-    });
 
     /**
      * @description Closes the overlay drawer after this row is activated. Only applies on compact
@@ -153,17 +113,6 @@ export class SidebarMenuButtonDirective {
         alias: "class",
         transform: value => classInputToClass(value)
     });
-
-    public constructor() {
-        const destroyRef = inject(DestroyRef);
-        if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
-            const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-            const onPreferenceChange = (event: MediaQueryListEvent): void => this.#reducedMotion.set(event.matches);
-            this.#reducedMotion.set(query.matches);
-            query.addEventListener("change", onPreferenceChange);
-            destroyRef.onDestroy(() => query.removeEventListener("change", onPreferenceChange));
-        }
-    }
 
     protected onClick(event: Event): void {
         if (this.disabled()) {

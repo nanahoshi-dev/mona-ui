@@ -49,7 +49,6 @@ import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sideb
         "[attr.inert]": "hidden() ? '' : null",
         "[attr.role]": "resolvedRole()",
         "[class]": "baseClass()",
-        "[style.translate]": "translate()",
         "[style.width]": "widthString()"
     }
 })
@@ -63,6 +62,7 @@ export class SidebarComponent {
     protected readonly baseClass = computed(() => {
         const variantClass = sidebarThemeVariants({
             drawer: this.drawer(),
+            open: this.#sidebarService.mobileOpen(),
             side: this.#sidebarService.side(),
             variant: this.variant(),
             flush: this.offcanvasClosed()
@@ -96,14 +96,6 @@ export class SidebarComponent {
 
     protected readonly sidebarId = this.#sidebarService.sidebarId;
     protected readonly state = this.#sidebarService.state;
-
-    /** Drawers slide rather than resize: animating width would reflow their contents every frame. */
-    protected readonly translate = computed(() => {
-        if (!this.drawer() || this.#sidebarService.mobileOpen()) {
-            return null;
-        }
-        return this.#sidebarService.side() === "end" ? "100% 0" : "-100% 0";
-    });
 
     /**
      * `width` and `iconWidth` are the width the sidebar's *contents* get, because that is what the

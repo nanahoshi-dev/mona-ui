@@ -1,6 +1,10 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { CollapsibleContentDirective, CollapsibleDirective, CollapsibleTriggerDirective } from "@nanahoshi/mona-ui/collapsible";
+import {
+    CollapsibleContentDirective,
+    CollapsibleDirective,
+    CollapsibleTriggerDirective
+} from "@nanahoshi/mona-ui/collapsible";
 
 import { SidebarGroupActionDirective } from "../../directives/sidebar-group-action.directive";
 import { SidebarGroupHeaderDirective } from "../../directives/sidebar-group-header.directive";
@@ -69,7 +73,6 @@ describe("SidebarComponent collapsible modes", () => {
         return probe.style.width;
     };
 
-
     const collapse = (): void => {
         query(".trigger").click();
         fixture.detectChanges();
@@ -137,8 +140,8 @@ describe("SidebarComponent collapsible modes", () => {
         component.collapsible.set("icon");
         fixture.detectChanges();
 
-        expect(query(".group-label").style.opacity).toBe("1");
-        expect(query(".group-action").style.opacity).toBe("1");
+        expect(query(".group-label").classList.contains("opacity-100")).toBe(true);
+        expect(query(".group-action").hasAttribute("data-hidden")).toBe(false);
         expect(query(".menu-sub").style.display).toBe("");
     });
 
@@ -149,10 +152,9 @@ describe("SidebarComponent collapsible modes", () => {
 
         // Faded rather than dropped, so they leave over the same interval the sidebar takes to narrow.
         // `visibility` is what takes them out of the accessibility tree and tab order once it lands.
-        expect(query(".group-label").style.opacity).toBe("0");
-        expect(query(".group-label").style.visibility).toBe("hidden");
-        expect(query(".group-action").style.opacity).toBe("0");
-        expect(query(".group-action").style.visibility).toBe("hidden");
+        expect(query(".group-label").classList.contains("opacity-0")).toBe(true);
+        expect(query(".group-label").classList.contains("invisible")).toBe(true);
+        expect(query(".group-action").getAttribute("data-hidden")).toBe("true");
         // The submenu is no longer hidden behind the disclosure's back. The item closes the
         // collapsible on the rail instead, so the trigger stops claiming it is expanded and the
         // collapsible content directive applies its own `inert`.
@@ -175,7 +177,7 @@ describe("SidebarComponent collapsible modes", () => {
     it("should not stand parts down in offcanvas mode, where the whole sidebar is gone", () => {
         collapse();
 
-        expect(query(".group-label").style.opacity).toBe("1");
+        expect(query(".group-label").classList.contains("opacity-100")).toBe(true);
         expect(query(".menu-sub").style.display).toBe("");
     });
 

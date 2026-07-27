@@ -12,14 +12,14 @@ import { sidebarMenuBadgeThemeVariants } from "../styles/sidebar.styles";
 @Directive({
     selector: "[monaSidebarMenuBadge]",
     host: {
-        "[class]": "baseClass()",
-        "[style.display]": "hidden() ? 'none' : null"
+        "[class]": "baseClass()"
     }
 })
 export class SidebarMenuBadgeDirective {
     readonly #sidebarService = inject(SidebarService, { optional: true });
-    protected readonly baseClass = computed(() => twMerge(sidebarMenuBadgeThemeVariants(), this.userClass()));
-    protected readonly hidden = computed(() => this.#sidebarService?.iconOnly() ?? false);
+    protected readonly baseClass = computed(() =>
+        twMerge(sidebarMenuBadgeThemeVariants({ hidden: this.#sidebarService?.iconOnly() ?? false }), this.userClass())
+    );
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
