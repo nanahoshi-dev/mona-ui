@@ -1,9 +1,10 @@
-import { computed, inject, linkedSignal, Service, signal } from "@angular/core";
+import { computed, effect, inject, linkedSignal, Service, signal, untracked } from "@angular/core";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import type { SidebarCollapsibleMode } from "../models/SidebarCollapsibleMode";
 import type { SidebarController } from "../models/SidebarController";
 import { type SidebarLogicalSide, type SidebarSide, toLogicalSide } from "../models/SidebarSide";
 import type { SidebarVariant } from "../models/SidebarVariant";
+import { SIDEBAR_STORAGE } from "../tokens/sidebar.tokens";
 import { SidebarLayoutService } from "./sidebar-layout.service";
 
 /**
@@ -32,8 +33,10 @@ export class SidebarService {
     readonly #expanded = signal(true);
     readonly #generatedId = createElementControlId();
     readonly #layoutService = inject(SidebarLayoutService, { optional: true });
+    readonly #persistKey = signal("");
     readonly #providedId = signal<string | null>(null);
     readonly #side = signal<SidebarSide>("start");
+    readonly #storage = inject(SIDEBAR_STORAGE);
 
     readonly #variant = signal<SidebarVariant>("sidebar");
 
@@ -105,6 +108,38 @@ export class SidebarService {
         variant: this.variant
     };
 
+    public constructor() {
+        // Restore before persist, so the first pass cannot write the default back over what was
+        // stored. Both sit idle until `mona-sidebar` publishes a key, which it only does when the
+        // consumer asked for one.
+        effect(() => {
+            const key = this.#persistKey();
+            if (!key) {
+                return;
+            }
+            untracked(() => {
+                const stored = this.#storage.read(key);
+                if (stored !== null) {
+                    this.#expanded.set(stored);
+                }
+            });
+        });
+
+        /*
+         * The docked signal, not `expanded`. That one reports the drawer while compact, and a drawer
+         * is not what is being remembered here: opening one on a phone would otherwise overwrite the
+         * state the desktop is meant to come back to.
+         */
+        effect(() => {
+            const key = this.#persistKey();
+            const expanded = this.#expanded();
+            if (!key) {
+                return;
+            }
+            untracked(() => this.#storage.write(key, expanded));
+        });
+    }
+
     public collapse(): void {
         this.setExpanded(false);
     }
@@ -141,6 +176,11 @@ export class SidebarService {
     /** @internal Published by `mona-sidebar` from its own input. */
     public setId(id: string | null): void {
         this.#providedId.set(id || null);
+    }
+
+    /** @internal Published by `mona-sidebar` from its own input. */
+    public setPersistKey(persistKey: string): void {
+        this.#persistKey.set(persistKey);
     }
 
     /** @internal Published by `mona-sidebar` from its own input. */

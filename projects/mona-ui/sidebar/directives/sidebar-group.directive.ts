@@ -1,6 +1,11 @@
 import { Directive } from "@angular/core";
 import { sidebarGroupThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * A titled section of the sidebar, grouping a label and its menu. Stack as many as the sidebar
+ * needs; each is an ordinary block, so a `monaSidebarSeparator` between them is optional.
+ */
 @Directive({
     selector: "[monaSidebarGroup]",
     host: {

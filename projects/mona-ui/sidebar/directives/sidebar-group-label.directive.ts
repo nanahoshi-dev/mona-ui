@@ -2,6 +2,10 @@ import { computed, Directive, inject } from "@angular/core";
 import { SidebarService } from "../services/sidebar.service";
 import { sidebarGroupLabelThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * The name of a group. Fades out on the icon rail, where there is no width to read it in.
+ */
 @Directive({
     selector: "[monaSidebarGroupLabel]",
     host: {

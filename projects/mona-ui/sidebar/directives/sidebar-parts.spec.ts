@@ -1,5 +1,5 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { SidebarComponent } from "../components/sidebar/sidebar.component";
 import { SidebarLayoutComponent } from "../components/sidebar-layout/sidebar-layout.component";

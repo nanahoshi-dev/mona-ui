@@ -1,5 +1,5 @@
 import { Component, signal, viewChild } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { type ComponentFixture, TestBed } from "@angular/core/testing";
 
 import { SidebarComponent } from "../sidebar/sidebar.component";
 import { SidebarInsetDirective } from "../../directives/sidebar-inset.directive";

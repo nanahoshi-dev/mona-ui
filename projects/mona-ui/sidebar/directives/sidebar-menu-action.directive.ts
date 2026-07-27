@@ -3,6 +3,11 @@ import { ButtonDirective } from "@nanahoshi/mona-ui/button";
 import { SidebarService } from "../services/sidebar.service";
 import { sidebarMenuActionClasses } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * A trailing control on a menu item — an overflow menu, a pin. Sits inside the row's highlight and
+ * stands down on the icon rail. Give it an `aria-label`: it is icon-only.
+ */
 @Directive({
     selector: "button[monaSidebarMenuAction]",
     hostDirectives: [ButtonDirective],

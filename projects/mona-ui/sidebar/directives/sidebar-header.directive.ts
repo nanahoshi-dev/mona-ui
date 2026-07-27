@@ -3,16 +3,24 @@ import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/commo
 import { twMerge } from "tailwind-merge";
 import { sidebarHeaderThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * The region at the top of the sidebar, above its content. Holds what stays put while the content
+ * scrolls — a workspace switcher, a search box.
+ */
 @Directive({
     selector: "[monaSidebarHeader]",
     host: {
-        "[class]": "classes()"
+        "[class]": "baseClass()"
     }
 })
 export class SidebarHeaderDirective {
-    public readonly classes = computed(() => {
-        return twMerge(sidebarHeaderThemeVariants(), this.userClass());
-    });
+    protected readonly baseClass = computed(() => twMerge(sidebarHeaderThemeVariants(), this.userClass()));
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string, ClassInputType>("", {
         alias: "class",
         transform: value => classInputToClass(value)

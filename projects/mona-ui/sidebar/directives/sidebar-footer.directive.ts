@@ -3,16 +3,24 @@ import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/commo
 import { twMerge } from "tailwind-merge";
 import { sidebarFooterThemeVariants } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * The region at the bottom of the sidebar, below its content. Holds what stays put while the content
+ * scrolls — a profile menu, a sign-out.
+ */
 @Directive({
     selector: "[monaSidebarFooter]",
     host: {
-        "[class]": "classes()"
+        "[class]": "baseClass()"
     }
 })
 export class SidebarFooterDirective {
-    public readonly classes = computed(() => {
-        return twMerge(sidebarFooterThemeVariants(), this.userClass());
-    });
+    protected readonly baseClass = computed(() => twMerge(sidebarFooterThemeVariants(), this.userClass()));
+
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
     public readonly userClass = input<string, ClassInputType>("", {
         alias: "class",
         transform: value => classInputToClass(value)

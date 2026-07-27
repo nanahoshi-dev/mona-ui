@@ -164,6 +164,21 @@ export class SidebarComponent {
     public readonly mobileWidth = input<string | number>("18rem");
 
     /**
+     * @description Remembers whether this sidebar was left open, under this key. Unset means nothing is
+     * stored — no key, no storage written.
+     *
+     * Only the docked state is kept. A drawer is never restored open: on the viewport that makes one,
+     * it would cover the page on load. A stored value wins over `expanded`, and is pushed back out
+     * through that binding, so do not set a key on a sidebar whose state is already restored elsewhere.
+     *
+     * Where it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered
+     * application cannot read that until hydration and so flashes the default first; supply storage the
+     * server can read through `provideSidebarStorage()`.
+     * @default ""
+     */
+    public readonly persistKey = input("");
+
+    /**
      * @description ARIA role for the sidebar region. Leave unset and wrap the menus in a labelled `nav`
      * when the sidebar holds more than navigation; set `"navigation"` with an `aria-label` when it does
      * not. Ignored on compact viewports, where the drawer is a `dialog`.
@@ -205,11 +220,13 @@ export class SidebarComponent {
         effect(() => {
             const collapsible = this.collapsible();
             const id = this.id();
+            const persistKey = this.persistKey();
             const side = this.side();
             const variant = this.variant();
             untracked(() => {
                 this.#sidebarService.setCollapsible(collapsible);
                 this.#sidebarService.setId(id);
+                this.#sidebarService.setPersistKey(persistKey);
                 this.#sidebarService.setSide(side);
                 this.#sidebarService.setVariant(variant);
             });

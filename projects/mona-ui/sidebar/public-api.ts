@@ -30,7 +30,12 @@ export type { SidebarCollapsibleMode } from "./models/SidebarCollapsibleMode";
 export type { SidebarController } from "./models/SidebarController";
 export type { SidebarMenuButtonSize } from "./models/SidebarMenuButtonSize";
 export type { SidebarLogicalSide, SidebarSide } from "./models/SidebarSide";
+export type { SidebarStorage } from "./models/SidebarStorage";
 export type { SidebarVariant } from "./models/SidebarVariant";
+
+export { provideSidebarStorage } from "./providers/sidebar.providers";
+export { LocalStorageSidebarStorage } from "./strategies/local-storage-sidebar.strategy";
+export { SIDEBAR_STORAGE } from "./tokens/sidebar.tokens";
 
 /*
  * `SidebarService` is deliberately not exported. Its structural setters exist so `mona-sidebar` can

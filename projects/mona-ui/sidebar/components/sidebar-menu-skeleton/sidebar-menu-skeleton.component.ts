@@ -24,7 +24,7 @@ import { sidebarMenuSkeletonThemeVariants } from "../../styles/sidebar.styles";
 })
 export class SidebarMenuSkeletonComponent {
     readonly #sidebarService = inject(SidebarService, { optional: true });
-    // Laid out exactly like a real menu button so the two animate as one: the same inset centres the
+    // Laid out exactly like a real menu button, so the two animate as one: the same inset centres the
     // icon square on the rail, and the same widened gap carries the label bar out of the clipped box.
     protected readonly baseClass = computed(() => sidebarMenuSkeletonThemeVariants({ iconOnly: this.iconOnly() }));
     protected readonly iconOnly = computed(() => this.#sidebarService?.iconOnly() ?? false);

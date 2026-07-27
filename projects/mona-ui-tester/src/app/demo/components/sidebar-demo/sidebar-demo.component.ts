@@ -142,7 +142,7 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
         <mona-sidebar-layout class="h-150 border border-border">
             <mona-sidebar
                 collapsible="icon"
-                variant="floating"
+                variant="sidebar"
                 [side]="'left'"
                 monaTooltip
                 mode="content"
@@ -351,6 +351,7 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                 </footer>
                 <button monaSidebarRail aria-label="Toggle sidebar"></button>
             </mona-sidebar>
+
             <main monaSidebarInset class="items-center justify-center">
                 <button monaButton monaSidebarTrigger look="ghost" [iconOnly]="true" aria-label="Toggle sidebar">
                     <svg lucidePanelLeft [size]="16"></svg>

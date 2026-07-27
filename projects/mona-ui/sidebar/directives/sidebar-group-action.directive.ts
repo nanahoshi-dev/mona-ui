@@ -2,6 +2,11 @@ import { computed, Directive, inject } from "@angular/core";
 import { SidebarService } from "../services/sidebar.service";
 import { sidebarGroupActionClasses } from "../styles/sidebar.styles";
 
+/**
+ * @description
+ * A control in the corner of a group header — an add or overflow button. Stands down on the icon
+ * rail, where there is no header row left to sit in. Give it an `aria-label`: it is icon-only.
+ */
 @Directive({
     selector: "button[monaSidebarGroupAction]",
     host: {
