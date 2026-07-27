@@ -1,13 +1,4 @@
-<div
-    [class]="headerClass()"
-    role="button"
-    [attr.tabindex]="disabled() ? -1 : 0"
-    [attr.aria-expanded]="expanded()"
-    [attr.aria-controls]="contentId"
-    [attr.aria-disabled]="disabled() ? 'true' : undefined"
-    (click)="toggle()"
-    (keydown.enter)="$event.preventDefault(); toggle()"
-    (keydown.space)="$event.preventDefault(); toggle()">
+<div monaCollapsibleTrigger [class]="headerClass()">
     <div [class]="headerTitleClass()">
         @if (titleTemplate()) {
             <ng-container [ngTemplateOutlet]="titleTemplate()"></ng-container>
