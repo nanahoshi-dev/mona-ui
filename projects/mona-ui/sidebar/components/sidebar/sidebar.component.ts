@@ -9,6 +9,7 @@ import {
     inject,
     Injector,
     input,
+    model,
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
@@ -16,6 +17,7 @@ import { twMerge } from "tailwind-merge";
 import type { SidebarCollapsibleMode } from "../../models/SidebarCollapsibleMode";
 import type { SidebarSide } from "../../models/SidebarSide";
 import type { SidebarVariant } from "../../models/SidebarVariant";
+import { SidebarLayoutService } from "../../services/sidebar-layout.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sidebar.styles";
 
@@ -50,12 +52,16 @@ import { sidebarBorderAllowance, sidebarThemeVariants } from "../../styles/sideb
         "[attr.role]": "resolvedRole()",
         "[class]": "baseClass()",
         "[style.width]": "widthString()"
-    }
+    },
+    // One service per sidebar, not per layout, so a layout can hold more than one of these and each
+    // keeps its own side, width and open state. Descendants resolve the nearest one, which is theirs.
+    providers: [SidebarService]
 })
 export class SidebarComponent {
     readonly #focusTrap = inject(CdkTrapFocus);
     readonly #host = inject<ElementRef<HTMLElement>>(ElementRef);
     readonly #injector = inject(Injector);
+    readonly #layoutService = inject(SidebarLayoutService, { optional: true });
     readonly #sidebarService = inject(SidebarService);
     #restoreFocusTo: HTMLElement | null = null;
 
@@ -65,7 +71,7 @@ export class SidebarComponent {
             open: this.#sidebarService.mobileOpen(),
             side: this.#sidebarService.side(),
             variant: this.variant(),
-            flush: this.offcanvasClosed()
+            flush: this.offCanvasClosed()
         });
         return twMerge(variantClass, this.userClass());
     });
@@ -84,10 +90,10 @@ export class SidebarComponent {
         if (this.drawer()) {
             return !this.#sidebarService.mobileOpen();
         }
-        return this.offcanvasClosed();
+        return this.offCanvasClosed();
     });
 
-    protected readonly offcanvasClosed = computed(
+    protected readonly offCanvasClosed = computed(
         () => !this.drawer() && !this.#sidebarService.expanded() && this.collapsible() === "offcanvas"
     );
 
@@ -128,6 +134,13 @@ export class SidebarComponent {
      * @default "offcanvas"
      */
     public readonly collapsible = input<SidebarCollapsibleMode>("offcanvas");
+
+    /**
+     * @description Sets whether this sidebar is open. Supports two-way binding. While the viewport is
+     * compact this reflects the drawer, so one binding drives both presentations.
+     * @default true
+     */
+    public readonly expanded = model(true);
 
     /**
      * @description Width of the icon rail while collapsed. Only applies when `collapsible` is `"icon"`.
@@ -200,6 +213,27 @@ export class SidebarComponent {
                 this.#sidebarService.setSide(side);
                 this.#sidebarService.setVariant(variant);
             });
+        });
+
+        effect(() => {
+            const expanded = this.expanded();
+            untracked(() => this.#sidebarService.setExpanded(expanded));
+        });
+        effect(() => {
+            const expanded = this.#sidebarService.expanded();
+            untracked(() => this.expanded.set(expanded));
+        });
+
+        // Keyed on the resolved id rather than the input, so a sidebar left to generate its own id is
+        // still reachable by a trigger. The effect's cleanup covers both halves of a changed id — the
+        // old key is dropped before the new one is added — as well as teardown.
+        effect(onCleanup => {
+            const layoutService = this.#layoutService;
+            if (!layoutService) {
+                return;
+            }
+            const id = this.#sidebarService.sidebarId();
+            onCleanup(layoutService.register(id, this.#sidebarService.controller));
         });
 
         effect(() => {

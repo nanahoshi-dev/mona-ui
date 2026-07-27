@@ -5,6 +5,7 @@ import { SidebarInsetDirective } from "../../directives/sidebar-inset.directive"
 import { SidebarMenuButtonDirective } from "../../directives/sidebar-menu-button.directive";
 import { SidebarTriggerDirective } from "../../directives/sidebar-trigger.directive";
 import type { SidebarSide } from "../../models/SidebarSide";
+import { SidebarLayoutService } from "../../services/sidebar-layout.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { SidebarLayoutComponent } from "../sidebar-layout/sidebar-layout.component";
 import { SidebarComponent } from "./sidebar.component";
@@ -37,17 +38,18 @@ class SidebarDrawerHostComponent {
 
 describe("Sidebar drawer on a compact viewport", () => {
     let fixture: ComponentFixture<SidebarDrawerHostComponent>;
+    let layoutService: SidebarLayoutService;
     let service: SidebarService;
 
     const query = (selector: string): HTMLElement => fixture.nativeElement.querySelector(selector);
     const sidebar = (): HTMLElement => query("mona-sidebar");
 
     /**
-     * jsdom's `matchMedia` never matches, so the breakpoint is driven through the service directly.
+     * jsdom's `matchMedia` never matches, so the breakpoint is driven through the layout directly.
      * That is the same signal the media query feeds, so everything downstream of it is exercised.
      */
     const goCompact = (): void => {
-        service.setCompact(true);
+        layoutService.setCompact(true);
         fixture.detectChanges();
     };
     const openDrawer = (): void => {
@@ -59,6 +61,9 @@ describe("Sidebar drawer on a compact viewport", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({ imports: [SidebarDrawerHostComponent] });
         fixture = TestBed.createComponent(SidebarDrawerHostComponent);
+        layoutService = fixture.debugElement
+            .query(node => node.name === "mona-sidebar-layout")
+            .injector.get(SidebarLayoutService);
         service = fixture.debugElement.query(node => node.name === "mona-sidebar").injector.get(SidebarService);
         fixture.detectChanges();
     });
@@ -220,7 +225,7 @@ describe("Sidebar drawer on a compact viewport", () => {
             openDrawer();
             expect(service.mobileOpen()).toBe(true);
 
-            service.setCompact(false);
+            layoutService.setCompact(false);
             fixture.detectChanges();
 
             expect(service.mobileOpen()).toBe(false);

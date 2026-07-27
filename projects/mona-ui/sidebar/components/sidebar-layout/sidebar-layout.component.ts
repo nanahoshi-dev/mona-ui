@@ -6,23 +6,25 @@ import {
     effect,
     inject,
     input,
-    model,
     signal,
     untracked
 } from "@angular/core";
 import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { twMerge } from "tailwind-merge";
-import { SidebarService } from "../../services/sidebar.service";
+import { SidebarLayoutService } from "../../services/sidebar-layout.service";
 import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "../../styles/sidebar.styles";
 
 /**
  * @description
- * Provides the shared sidebar state and lays its children out in a row. Project a `mona-sidebar`
- * and an element marked with `monaSidebarInset` into it.
+ * Lays its children out in a row and owns what they share. Project one or more `mona-sidebar`
+ * elements and an element marked with `monaSidebarInset` into it. Each sidebar keeps its own open
+ * state, on its own `[(expanded)]` binding, so a layout can hold a navigation column on one edge and
+ * an inspector on the other.
  *
- * Below `mobileBreakpoint` the sidebar presents as an overlay drawer instead of a column. The drawer
- * has its own open state, so a sidebar collapsed on a desktop does not come back open on a phone,
- * and it is reset whenever the viewport crosses the breakpoint.
+ * Below `mobileBreakpoint` sidebars present as overlay drawers instead of columns. A drawer has its
+ * own open state, so a sidebar collapsed on a desktop does not come back open on a phone, and it is
+ * reset whenever the viewport crosses the breakpoint. Only one drawer is open at a time: opening one
+ * closes any other, and they share the single backdrop this layout paints behind them.
  */
 @Component({
     selector: "mona-sidebar-layout",
@@ -44,22 +46,17 @@ import { sidebarBackdropThemeVariants, sidebarLayoutBaseThemeVariants } from "..
         // trapped focus inside the drawer itself.
         "(keydown.escape)": "onEscape($event)"
     },
-    providers: [SidebarService]
+    providers: [SidebarLayoutService]
 })
 export class SidebarLayoutComponent {
+    readonly #layoutService = inject(SidebarLayoutService);
     readonly #matches = signal(false);
-    readonly #sidebarService = inject(SidebarService);
     protected readonly backdropClass = computed(() => sidebarBackdropThemeVariants({ open: this.mobileOpen() }));
     protected readonly baseClass = computed(() => twMerge(sidebarLayoutBaseThemeVariants(), this.userClass()));
-    protected readonly compact = this.#sidebarService.compact;
-    protected readonly mobileOpen = this.#sidebarService.mobileOpen;
+    protected readonly compact = this.#layoutService.compact;
 
-    /**
-     * @description Sets whether the sidebar is open. Supports two-way binding. While the viewport is
-     * compact this reflects the drawer, so one binding drives both presentations.
-     * @default true
-     */
-    public readonly expanded = model(true);
+    /** One backdrop serves every sidebar, because only one of their drawers is ever open. */
+    protected readonly mobileOpen = this.#layoutService.anyMobileOpen;
 
     /**
      * @description Viewport width, in pixels, below which the sidebar presents as an overlay drawer.
@@ -79,29 +76,20 @@ export class SidebarLayoutComponent {
 
     public constructor() {
         this.#watchBreakpoint();
-
-        effect(() => {
-            const expanded = this.expanded();
-            untracked(() => this.#sidebarService.setExpanded(expanded));
-        });
-        effect(() => {
-            const expanded = this.#sidebarService.expanded();
-            untracked(() => this.expanded.set(expanded));
-        });
     }
 
     protected onBackdropClick(): void {
-        this.#sidebarService.collapse();
+        this.#layoutService.closeAll();
     }
 
     protected onEscape(event: Event): void {
-        // Only the drawer is dismissible. A docked sidebar is part of the page, and closing it on
+        // Only a drawer is dismissible. A docked sidebar is part of the page, and closing it on
         // Escape would take the key from anything inside it that wanted to handle it.
-        if (!this.#sidebarService.mobileOpen()) {
+        if (!this.#layoutService.anyMobileOpen()) {
             return;
         }
         event.preventDefault();
-        this.#sidebarService.collapse();
+        this.#layoutService.closeAll();
     }
 
     /**
@@ -113,7 +101,7 @@ export class SidebarLayoutComponent {
 
         effect(() => {
             const compact = this.#matches();
-            untracked(() => this.#sidebarService.setCompact(compact));
+            untracked(() => this.#layoutService.setCompact(compact));
         });
 
         // Server-rendered and jsdom hosts have no media queries; both keep the docked presentation,

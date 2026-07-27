@@ -9,8 +9,8 @@ import { SidebarLayoutComponent } from "./sidebar-layout.component";
 
 @Component({
     template: `
-        <mona-sidebar-layout [(expanded)]="expanded">
-            <mona-sidebar [side]="side()" [width]="width()">
+        <mona-sidebar-layout>
+            <mona-sidebar [(expanded)]="expanded" [side]="side()" [width]="width()">
                 <div class="sidebar-body">Navigation</div>
             </mona-sidebar>
             <main monaSidebarInset class="inset">
@@ -115,7 +115,7 @@ describe("SidebarLayoutComponent", () => {
         expect(getSidebar().classList.contains("border-s")).toBe(true);
     });
 
-    it("should expose the same service instance to every descendant", () => {
+    it("should expose the sidebar's own service instance to its descendants", () => {
         const service = fixture.debugElement.query(node => node.name === "mona-sidebar").injector.get(SidebarService);
         service.collapse();
         fixture.detectChanges();

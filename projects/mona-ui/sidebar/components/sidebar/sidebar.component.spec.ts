@@ -19,8 +19,8 @@ import { SidebarComponent } from "./sidebar.component";
 
 @Component({
     template: `
-        <mona-sidebar-layout [(expanded)]="expanded">
-            <mona-sidebar [collapsible]="collapsible()" [iconWidth]="iconWidth()">
+        <mona-sidebar-layout>
+            <mona-sidebar [(expanded)]="expanded" [collapsible]="collapsible()" [iconWidth]="iconWidth()">
                 <div monaSidebarGroupHeader class="group-header">
                     <div monaSidebarGroupLabel class="group-label">Components</div>
                     <button monaSidebarGroupAction class="group-action">Add</button>

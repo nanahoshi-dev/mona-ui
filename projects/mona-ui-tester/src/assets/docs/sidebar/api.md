@@ -5,7 +5,7 @@ The sidebar is split into a small number of structural pieces and a set of conte
 - `SidebarLayoutComponent` (`mona-sidebar-layout`) provides the shared state and the row layout. It is the only piece that must wrap the others.
 - `SidebarComponent` (`mona-sidebar`) is the panel. It owns `width`, `collapsible`, `variant` and `side`, and switches itself to a modal drawer on compact viewports.
 - `SidebarInsetDirective` (`[monaSidebarInset]`) marks the main region beside the panel. It fills the remaining width, scrolls independently, and goes inert behind an open drawer.
-- `SidebarTriggerDirective` (`[monaSidebarTrigger]`) toggles the sidebar from anywhere inside the layout.
+- `SidebarTriggerDirective` (`[monaSidebarTrigger]`) toggles a sidebar from anywhere inside the layout, naming one with `for` where there is more than one.
 
 Content is projected in author order, so a header, content region and footer appear exactly where you write them. None of the directives add wrapper elements.
 
@@ -105,11 +105,32 @@ While collapsed to icons the labels are clipped away. Set `tooltip` on every row
 
 ### Controlled state
 
-`expanded` is a two-way model on the layout. On a compact viewport it reflects the drawer, so one binding drives both presentations:
+`expanded` is a two-way model on `mona-sidebar`. On a compact viewport it reflects the drawer, so one binding drives both presentations:
 
 ```html
-<mona-sidebar-layout [(expanded)]="sidebarOpen">…</mona-sidebar-layout>
+<mona-sidebar-layout>
+    <mona-sidebar [(expanded)]="sidebarOpen">…</mona-sidebar>
+</mona-sidebar-layout>
 ```
+
+### More than one sidebar
+
+A layout can hold more than one sidebar — a navigation column on one edge and an inspector on the other. Each keeps its own state on its own binding, and each needs an `id` so a trigger can name it:
+
+```html
+<mona-sidebar-layout>
+    <mona-sidebar id="nav" side="start" [(expanded)]="navOpen">…</mona-sidebar>
+    <main monaSidebarInset>
+        <button monaSidebarTrigger for="nav" aria-label="Toggle navigation">Menu</button>
+        <button monaSidebarTrigger for="inspector" aria-label="Toggle inspector">Details</button>
+    </main>
+    <mona-sidebar id="inspector" side="end" [(expanded)]="inspectorOpen">…</mona-sidebar>
+</mona-sidebar-layout>
+```
+
+A trigger with no `for` drives the sidebar it is written inside, falling back to the first sidebar in the layout — which is all a layout with a single sidebar ever needs. A `for` naming no sidebar leaves the trigger inert rather than throwing.
+
+On a compact viewport only one drawer is open at a time: opening one closes the other, and they share the single backdrop the layout paints behind them. The inset steps out of the way for whichever drawer is open, and takes its surface from the first sidebar in author order.
 
 ### Reading the sidebar from a descendant
 
