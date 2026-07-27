@@ -99,6 +99,30 @@ describe("Luna theme", () => {
         }
     });
 
+    it("uses raised glass for sidebar chrome with neutral hover and selected-color emphasis", () => {
+        for (const profile of [lunaTheme.variants.light, lunaTheme.variants.dark]) {
+            expect(profile.colors).toMatchObject({
+                "--color-sidebar": "var(--mona-effect-raised-background-color)",
+                "--color-sidebar-primary": "var(--color-selected)",
+                "--color-sidebar-primary-foreground": "var(--color-selected-foreground)",
+                "--color-sidebar-accent": "var(--color-hover)",
+                "--color-sidebar-accent-foreground": "var(--color-foreground)"
+            });
+            expect(
+                contrast(
+                    resolveColor(profile.colors, "--color-sidebar-foreground"),
+                    profile.effects["--mona-effect-raised-fallback-background-color"]
+                )
+            ).toBeGreaterThanOrEqual(4.5);
+            expect(
+                contrast(
+                    resolveColor(profile.colors, "--color-sidebar-primary-foreground"),
+                    resolveColor(profile.colors, "--color-sidebar-primary")
+                )
+            ).toBeGreaterThanOrEqual(4.5);
+        }
+    });
+
     it("keeps glass translucent without glossy images or inset highlights", () => {
         expect(lunaTheme.variants.light.effects["--mona-effect-overlay-background-color"]).toBe(
             "rgb(249 249 250 / 0.72)"

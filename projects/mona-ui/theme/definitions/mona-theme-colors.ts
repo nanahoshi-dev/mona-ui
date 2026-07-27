@@ -1,5 +1,6 @@
 import type { ThemeColors, ThemeDefinition } from "../models/ThemeDefinition";
 import { generateThemeColorPalette } from "../utils/generate-theme-color-palette";
+import { createSidebarColorRoles } from "./theme-primitives";
 
 // The public seed API requires a primary color. Mona replaces the generated identity roles with
 // the neutral definitions below and keeps the generated output only for chromatic status roles.
@@ -122,6 +123,10 @@ const light: ThemeColors = Object.freeze({
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
 
+    // Mona's content sits on pure white, so the sidebar takes the canvas tone to read as chrome
+    // rather than as another card.
+    ...createSidebarColorRoles({ background: "var(--color-canvas)" }),
+
     "--color-chart-1": "oklch(20.5% 0.006 285.885)",
     "--color-chart-2": "oklch(37.1% 0.008 285.805)",
     "--color-chart-3": "oklch(55.2% 0.010 285.938)",
@@ -192,6 +197,10 @@ const dark: ThemeColors = Object.freeze({
     "--color-destructive-foreground": "var(--color-error-foreground)",
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
+
+    // Dark mode inverts the relationship: the canvas is the darkest tone, so the sidebar lifts off it
+    // instead of sinking into it.
+    ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
 
     "--color-chart-1": "oklch(92.2% 0.004 286.320)",
     "--color-chart-2": "oklch(80.5% 0.008 286.067)",

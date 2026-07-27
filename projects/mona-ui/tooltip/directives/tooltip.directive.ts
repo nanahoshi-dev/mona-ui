@@ -48,6 +48,7 @@ export class TooltipDirective implements TooltipVariantInputs {
     readonly #injector = inject(EnvironmentInjector);
     readonly #popupService = inject(PopupService);
     readonly #renderer = inject(Renderer2);
+    readonly #selfTitleWrites = new Map<Element, number>();
     #currentAnchor: HTMLElement | null = null;
     #hideTimeoutId: ReturnType<typeof setTimeout> | null = null;
     #mutationObserver: MutationObserver | null = null;
@@ -126,8 +127,13 @@ export class TooltipDirective implements TooltipVariantInputs {
                 this.#mutationObserver?.disconnect();
                 this.#mutationObserver = null;
                 if (this.mode() === "content") {
-                    this.#mutationObserver = new MutationObserver(() => this.#refreshSubscription());
-                    this.#mutationObserver.observe(this.#host.nativeElement, { childList: true, subtree: true });
+                    this.#mutationObserver = new MutationObserver(records => this.#onMutations(records));
+                    this.#mutationObserver.observe(this.#host.nativeElement, {
+                        attributeFilter: ["title"],
+                        attributes: true,
+                        childList: true,
+                        subtree: true
+                    });
                 }
             }
         });
@@ -188,6 +194,7 @@ export class TooltipDirective implements TooltipVariantInputs {
                 this.#currentAnchor = null;
             }
             this.#renderer.removeAttribute(anchor, "aria-describedby");
+            this.#markSelfTitleWrite(anchor);
             this.#renderer.setAttribute(anchor, "title", text);
             component.destroy();
             this.hidden.emit();
@@ -235,6 +242,9 @@ export class TooltipDirective implements TooltipVariantInputs {
         }
         this.#popupRef?.close();
         const title = targetElement.getAttribute("title") || "";
+        if (title) {
+            this.#markSelfTitleWrite(targetElement);
+        }
         this.#renderer.removeAttribute(targetElement, "title");
         if (this.mode() === "host") {
             this.originalTitle.set(title);
@@ -251,6 +261,44 @@ export class TooltipDirective implements TooltipVariantInputs {
             } else {
                 this.#createTooltip(title, targetElement);
             }
+        }
+    }
+
+    /**
+     * The directive strips a `title` while its tooltip is open and restores it on close. Those writes
+     * reach the observer too, so each one is booked ahead of time and cancelled out here — otherwise
+     * showing a tooltip would tear down and rebuild the very subscriptions driving it.
+     */
+    #isSelfTitleWrite(element: Element): boolean {
+        const pending = this.#selfTitleWrites.get(element) ?? 0;
+        if (pending <= 0) {
+            return false;
+        }
+        if (pending === 1) {
+            this.#selfTitleWrites.delete(element);
+        } else {
+            this.#selfTitleWrites.set(element, pending - 1);
+        }
+        return true;
+    }
+
+    #markSelfTitleWrite(element: Element): void {
+        this.#selfTitleWrites.set(element, (this.#selfTitleWrites.get(element) ?? 0) + 1);
+    }
+
+    #onMutations(records: MutationRecord[]): void {
+        // Mapped rather than short circuited, so every self inflicted record is still cancelled out.
+        const externalChanges = records.map(record => {
+            if (record.type !== "attributes") {
+                return true;
+            }
+            if (record.attributeName !== "title") {
+                return false;
+            }
+            return !this.#isSelfTitleWrite(record.target as Element);
+        });
+        if (externalChanges.some(Boolean)) {
+            this.#refreshSubscription();
         }
     }
 

@@ -545,6 +545,30 @@
       }
     ]
   },
+  "CollapsibleDirective": {
+    "name": "CollapsibleDirective",
+    "selector": "\"[monaCollapsible]\"",
+    "inputs": [
+      {
+        "name": "animate",
+        "type": "boolean",
+        "description": "Enables the height transition applied to the collapsible content.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Suppresses toggling through the trigger. `expand()` and `collapse()` still apply.",
+        "kind": "input"
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "description": "Sets whether the content is expanded. Supports two-way binding.",
+        "kind": "model"
+      }
+    ]
+  },
   "DropdownFilterableDirective": {
     "name": "DropdownFilterableDirective",
     "selector": "",
@@ -1307,6 +1331,126 @@
       }
     ]
   },
+  "SidebarFooterDirective": {
+    "name": "SidebarFooterDirective",
+    "selector": "\"[monaSidebarFooter]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarHeaderDirective": {
+    "name": "SidebarHeaderDirective",
+    "selector": "\"[monaSidebarHeader]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarInsetDirective": {
+    "name": "SidebarInsetDirective",
+    "selector": "\"[monaSidebarInset]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarMenuBadgeDirective": {
+    "name": "SidebarMenuBadgeDirective",
+    "selector": "\"[monaSidebarMenuBadge]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarMenuButtonDirective": {
+    "name": "SidebarMenuButtonDirective",
+    "selector": "\"button[monaSidebarMenuButton]\"",
+    "inputs": [
+      {
+        "name": "size",
+        "type": "SidebarMenuButtonSize",
+        "description": "How much room this button's leading visual needs. Use `\"large\"` when it opens with\nsomething avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it.",
+        "kind": "input"
+      },
+      {
+        "name": "tooltip",
+        "type": "string",
+        "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Applied as the host's `title`, so the browser surfaces it on hover, and an\nancestor carrying `monaTooltip` with `mode=\"content\"` renders it as a styled tooltip instead.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarMenuItemDirective": {
+    "name": "SidebarMenuItemDirective",
+    "selector": "\"li[monaSidebarMenuItem]\"",
+    "inputs": [
+      {
+        "name": "active",
+        "type": "boolean",
+        "description": "Marks this row as the current sidebar destination. The row owns the selected\nsurface so trailing badges and actions remain inside one continuous highlight.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarMenuSubDirective": {
+    "name": "SidebarMenuSubDirective",
+    "selector": "\"ul[monaSidebarMenuSub]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarMenuDirective": {
+    "name": "SidebarMenuDirective",
+    "selector": "\"ul[monaSidebarMenu]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarSeparatorDirective": {
+    "name": "SidebarSeparatorDirective",
+    "selector": "\"[monaSidebarSeparator]\"",
+    "inputs": [
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
   "SplitterPaneStyleDirective": {
     "name": "SplitterPaneStyleDirective",
     "selector": "\"div[monaSplitterPaneStyle]\"",
@@ -1500,7 +1644,7 @@
       {
         "name": "filter",
         "type": "string",
-        "description": "The filter to select elements that will have tooltips.\nIt can be a CSS selector that matches elements within the host element.\nOnly applies when `mode` is set to `content`.",
+        "description": "The filter to select elements that will have tooltips.\r\nIt can be a CSS selector that matches elements within the host element.\r\nOnly applies when `mode` is set to `content`.",
         "kind": "input"
       },
       {
@@ -1512,7 +1656,7 @@
       {
         "name": "mode",
         "type": "\"host\" | \"content\"",
-        "description": "The mode of the tooltip.\n\"host\" mode receives the tooltip from the host element's title attribute.\n\"content\" mode uses the title attribute of elements matching the filter.",
+        "description": "The mode of the tooltip.\r\n\"host\" mode receives the tooltip from the host element's title attribute.\r\n\"content\" mode uses the title attribute of elements matching the filter.",
         "kind": "input"
       },
       {
@@ -2292,25 +2436,25 @@
       {
         "name": "animate",
         "type": "boolean",
-        "description": "Enables CSS transitions on stroke and color changes.\nSet to `false` when updating `value` at a high frequency.",
+        "description": "Enables CSS transitions on stroke and color changes.\r\nSet to `false` when updating `value` at a high frequency.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the component represents (e.g., \"Upload progress\").\r\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input"
       },
       {
         "name": "ariaValueText",
         "type": "string",
-        "description": "Human-readable override for the `aria-valuenow` announcement.\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\nso screen readers announce state rather than silence.\nWhen empty, assistive technology falls back to the numeric value.",
+        "description": "Human-readable override for the `aria-valuenow` announcement.\r\nUseful in indeterminate mode — set to a localized string such as `\"Loading\"`\r\nso screen readers announce state rather than silence.\r\nWhen empty, assistive technology falls back to the numeric value.",
         "kind": "input"
       },
       {
         "name": "color",
         "type": "string | Action<number, string>",
-        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\nreturning a string. When empty, falls back to the primary theme color.",
+        "description": "Accent color. Pass a CSS color string, or a function receiving the current percentage (0–100) and\r\nreturning a string. When empty, falls back to the primary theme color.",
         "kind": "input"
       },
       {
@@ -2322,7 +2466,7 @@
       {
         "name": "indeterminate",
         "type": "boolean",
-        "description": "Activates indeterminate mode when the completion value is unknown.\nARIA value attributes are removed and `aria-busy` is set on the host element.",
+        "description": "Activates indeterminate mode when the completion value is unknown.\r\nARIA value attributes are removed and `aria-busy` is set on the host element.",
         "kind": "input"
       },
       {
@@ -5610,13 +5754,13 @@
       {
         "name": "anchor",
         "type": "ElementRef<HTMLElement> | Element",
-        "description": "The anchor element that the context menu will be anchored to.\r\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor element that the context menu will be anchored to.\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "anchorConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The anchor connection point of the popup menu.\r\nOnly applicable when `precise` is set to `false`.",
+        "description": "The anchor connection point of the popup menu.\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
@@ -5628,7 +5772,7 @@
       {
         "name": "items",
         "type": "Iterable<PopupMenuItem | MenuItem>",
-        "description": "The items to render in the popup menu.\r\nIf provided, it will override the menu items defined by projected menu item components.",
+        "description": "The items to render in the popup menu.\nIf provided, it will override the menu items defined by projected menu item components.",
         "kind": "input"
       },
       {
@@ -5646,13 +5790,13 @@
       {
         "name": "minWidth",
         "type": "string | number",
-        "description": "Sets the minimum width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the minimum width of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "navigate",
         "type": "PopupMenuNavigationEvent",
-        "description": "The event that is emitted when the popup menu is navigated.\r\nThis is used to handle keyboard navigation within the popup menu.",
+        "description": "The event that is emitted when the popup menu is navigated.\nThis is used to handle keyboard navigation within the popup menu.",
         "kind": "output"
       },
       {
@@ -5670,25 +5814,25 @@
       {
         "name": "popupConnectionPoint",
         "type": "ConnectionPoint | null",
-        "description": "The connection point of the popup element to which the anchor will be connected.\r\nOnly applicable when `precise` is set to `false`.",
+        "description": "The connection point of the popup element to which the anchor will be connected.\nOnly applicable when `precise` is set to `false`.",
         "kind": "input"
       },
       {
         "name": "precise",
         "type": "boolean",
-        "description": "Whether the context menu should be opened with precise positioning.\r\nIf true, the context menu will be positioned at the mouse cursor position.\r\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
+        "description": "Whether the context menu should be opened with precise positioning.\nIf true, the context menu will be positioned at the mouse cursor position.\nIf false, it will be positioned at the target element. If an anchor is provided, it will be anchored to that element.",
         "kind": "input"
       },
       {
         "name": "rounded",
         "type": "PopupMenuVariantProps[\"rounded\"]",
-        "description": "Sets the border radius of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the border radius of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
         "name": "size",
         "type": "PopupMenuVariantProps[\"size\"]",
-        "description": "Sets the size of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the size of the popup menu.\nThis will be applied to the root menu and all submenus.",
         "kind": "input"
       },
       {
@@ -5706,7 +5850,13 @@
       {
         "name": "width",
         "type": "string | number",
-        "description": "Sets the width of the popup menu.\r\nThis will be applied to the root menu and all submenus.",
+        "description": "Sets the width of the popup menu.\nThis will be applied to the root menu and all submenus.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "",
         "kind": "input"
       }
     ]
@@ -6097,6 +6247,114 @@
         "name": "width",
         "type": "string | number",
         "description": "Sets the width of the scroll view.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarComponent": {
+    "name": "SidebarComponent",
+    "selector": "\"mona-sidebar\"",
+    "inputs": [
+      {
+        "name": "collapsible",
+        "type": "SidebarCollapsibleMode",
+        "description": "How the sidebar behaves when collapsed. `\"icon\"` keeps a narrow rail of icons visible,\n`\"offcanvas\"` removes it from the layout entirely, and `\"none\"` disables collapsing altogether.",
+        "kind": "input"
+      },
+      {
+        "name": "iconWidth",
+        "type": "string | number",
+        "description": "Width of the icon rail while collapsed. Only applies when `collapsible` is `\"icon\"`.\nNumbers are treated as pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "side",
+        "type": "SidebarSide",
+        "description": "Which edge the sidebar sits on. Also controls its order within the layout.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      },
+      {
+        "name": "variant",
+        "type": "SidebarVariant",
+        "description": "The visual treatment of the sidebar. `\"floating\"` detaches it from the edge on its own\nsurface, and `\"inset\"` moves that raised surface onto the region beside it instead.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number",
+        "description": "Width of the sidebar while expanded. Numbers are treated as pixels.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarLayoutComponent": {
+    "name": "SidebarLayoutComponent",
+    "selector": "\"mona-sidebar-layout\"",
+    "inputs": [
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "description": "Sets whether the sidebar is expanded. Supports two-way binding.",
+        "kind": "model"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarMenuSkeletonComponent": {
+    "name": "SidebarMenuSkeletonComponent",
+    "selector": "\"mona-sidebar-menu-skeleton\"",
+    "inputs": [
+      {
+        "name": "labelWidth",
+        "type": "string | number",
+        "description": "Width of the label bar. Varying it across a list keeps the placeholder from looking\r\nlike a rigid grid. Numbers are treated as pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "showIcon",
+        "type": "boolean",
+        "description": "Renders a square standing in for the item's icon.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SkeletonComponent": {
+    "name": "SkeletonComponent",
+    "selector": "\"mona-skeleton\"",
+    "inputs": [
+      {
+        "name": "height",
+        "type": "string | number",
+        "description": "Height of the placeholder. Numbers are treated as pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "rounded",
+        "type": "SkeletonVariantProps[\"rounded\"]",
+        "description": "Border-radius preset applied to the placeholder.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "string | number",
+        "description": "Width of the placeholder. Numbers are treated as pixels.",
         "kind": "input"
       }
     ]

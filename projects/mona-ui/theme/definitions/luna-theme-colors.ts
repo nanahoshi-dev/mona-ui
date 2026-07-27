@@ -1,5 +1,6 @@
 import type { ThemeColors, ThemeDefinition } from "../models/ThemeDefinition";
 import { generateThemeColorPalette } from "../utils/generate-theme-color-palette";
+import { createSidebarColorRoles } from "./theme-primitives";
 
 const generatedRoles = generateThemeColorPalette({
     primary: "#3f6be2",
@@ -70,6 +71,9 @@ const light: ThemeColors = Object.freeze({
     "--color-destructive-foreground": "var(--color-error-foreground)",
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
+    // Navigation is part of Luna's raised glass layer. Reduced-transparency mode replaces this with
+    // the exact opaque raised fallback during runtime profile resolution.
+    ...createSidebarColorRoles({ background: "var(--mona-effect-raised-background-color)" }),
     "--color-chart-1": "#3f6be2",
     "--color-chart-2": "#667085",
     "--color-chart-3": "#4f8a70",
@@ -146,6 +150,8 @@ const dark: ThemeColors = Object.freeze({
     "--color-destructive-foreground": "var(--color-error-foreground)",
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
+    // Keep navigation on the same independent raised-glass material as the light profile.
+    ...createSidebarColorRoles({ background: "var(--mona-effect-raised-background-color)" }),
     "--color-chart-1": "#7f9bf0",
     "--color-chart-2": "#9ba3b2",
     "--color-chart-3": "#70aa8e",

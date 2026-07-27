@@ -1,5 +1,4 @@
 import {
-    ChangeDetectionStrategy,
     Component,
     computed,
     contentChild,
@@ -30,7 +29,6 @@ import { PopupMenuItemClickEvent } from "../../models/PopupMenuItemClickEvent";
 @Component({
     selector: "mona-popup-menu-item",
     template: "",
-    changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [
         {
             provide: PopupMenuToken,

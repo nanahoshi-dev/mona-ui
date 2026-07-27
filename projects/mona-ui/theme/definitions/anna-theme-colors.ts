@@ -1,5 +1,6 @@
 import type { ThemeColors, ThemeDefinition } from "../models/ThemeDefinition";
 import { generateThemeColorPalette } from "../utils/generate-theme-color-palette";
+import { createSidebarColorRoles } from "./theme-primitives";
 
 const generatedRoles = generateThemeColorPalette({
     primary: "#583573",
@@ -87,6 +88,10 @@ const dark: ThemeColors = Object.freeze({
     "--color-destructive-foreground": "var(--color-error-foreground)",
     "--color-input": "var(--color-border-control)",
     "--color-disabled": "var(--color-disabled-foreground)",
+
+    // Anna's canvas is already dark, so the sidebar recedes below it rather than lifting off it —
+    // the same relationship its scrollbar track and popovers use.
+    ...createSidebarColorRoles({ background: "var(--color-surface-muted)" }),
 
     "--color-chart-1": "#A174C2",
     "--color-chart-2": "#6F4A8A",

@@ -1,6 +1,7 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChild, contentChildren, inject, input, model, TemplateRef } from "@angular/core";
+import { Component, computed, contentChild, contentChildren, forwardRef, input, model, TemplateRef } from "@angular/core";
 import { LucideMinus, LucidePlus } from "@lucide/angular";
+import { type CollapsibleConfig, CollapsibleToken, CollapsibleTriggerDirective } from "@nanahoshi/mona-ui/collapsible";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { ExpansionPanelActionsTemplateDirective } from "../../directives/expansion-panel-actions-template.directive";
@@ -20,12 +21,13 @@ import {
     selector: "mona-expansion-panel",
     templateUrl: "./expansion-panel.component.html",
     styles: ``,
-    imports: [NgTemplateOutlet, LucideMinus, LucidePlus],
+    imports: [NgTemplateOutlet, LucideMinus, LucidePlus, CollapsibleTriggerDirective],
     host: {
         "[class]": "baseClass()"
-    }
+    },
+    providers: [{ provide: CollapsibleToken, useExisting: forwardRef(() => ExpansionPanelComponent) }]
 })
-export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
+export class ExpansionPanelComponent implements ExpansionPanelVariantInput, CollapsibleConfig {
     protected readonly actionsTemplateList = contentChildren(ExpansionPanelActionsTemplateDirective, {
         read: TemplateRef
     });
@@ -38,7 +40,6 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
         const expanded = this.expanded();
         return expansionPanelContentThemeVariants({ expanded });
     });
-    protected readonly contentId = createElementControlId();
     protected readonly headerClass = computed(() => {
         const collapsed = !this.expanded();
         const disabled = this.disabled();
@@ -53,6 +54,14 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
     });
     protected readonly iconTemplate = contentChild(ExpansionPanelIconTemplateDirective, { read: TemplateRef });
     protected readonly titleTemplate = contentChild(ExpansionPanelTitleTemplateDirective, { read: TemplateRef });
+
+    /**
+     * @description Always enabled. Satisfies the `CollapsibleConfig` contract for `monaCollapsibleTrigger`;
+     * this component doesn't use `monaCollapsibleContent`, so no animation ever consults it.
+     */
+    public readonly animate = computed(() => true);
+
+    public readonly contentId = createElementControlId();
 
     /**
      * @description Disables header interaction, suppressing click and keyboard toggling.
@@ -84,7 +93,15 @@ export class ExpansionPanelComponent implements ExpansionPanelVariantInput {
      */
     public readonly userClass = input("");
 
-    protected toggle(): void {
+    public collapse(): void {
+        this.expanded.set(false);
+    }
+
+    public expand(): void {
+        this.expanded.set(true);
+    }
+
+    public toggle(): void {
         if (this.disabled()) {
             return;
         }

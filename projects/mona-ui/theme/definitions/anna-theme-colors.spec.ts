@@ -71,6 +71,22 @@ describe("annaThemeColors", () => {
         expect(colors["--color-card-foreground"]).toBe("var(--color-foreground)");
         expectContrast(colors, "--color-card-foreground", "--color-card", 4.5);
     });
+
+    it("uses neutral sidebar hover and the selected violet pair for the current destination", () => {
+        const colors = annaThemeColors.dark;
+
+        expect(colors).toMatchObject({
+            "--color-sidebar": "var(--color-surface-muted)",
+            "--color-sidebar-primary": "var(--color-selected)",
+            "--color-sidebar-primary-foreground": "var(--color-selected-foreground)",
+            "--color-sidebar-accent": "var(--color-hover)",
+            "--color-sidebar-accent-foreground": "var(--color-foreground)"
+        });
+        expectContrast(colors, "--color-sidebar-foreground", "--color-sidebar", 4.5);
+        expectContrast(colors, "--color-sidebar-accent-foreground", "--color-sidebar-accent", 4.5);
+        expectContrast(colors, "--color-sidebar-primary-foreground", "--color-sidebar-primary", 4.5);
+        expectContrast(colors, "--color-sidebar-ring", "--color-sidebar", 3);
+    });
 });
 
 function expectContrast(

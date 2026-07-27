@@ -23,7 +23,7 @@ export const expansionPanelBaseThemeVariants = cva(
 export const expansionPanelHeaderThemeVariants = cva(
     `
         relative flex w-full items-center justify-between
-        px-2 py-1
+        px-2 py-2
         cursor-pointer
         select-none
         font-medium text-foreground
@@ -47,11 +47,7 @@ export const expansionPanelHeaderThemeVariants = cva(
     }
 );
 
-export const expansionPanelHeaderTitleThemeVariants = cva(
-    `
-        p-1 flex-1
-    `
-);
+export const expansionPanelHeaderTitleThemeVariants = cva(`flex-1`);
 
 export const expansionPanelIconContainerThemeVariants = cva(``, {
     variants: {

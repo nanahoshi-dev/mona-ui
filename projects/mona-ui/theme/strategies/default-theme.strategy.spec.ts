@@ -61,6 +61,25 @@ describe("DefaultThemeStrategy", () => {
         );
     });
 
+    it("requires the complete semantic sidebar color family in third-party profiles", () => {
+        const {
+            "--color-sidebar": _sidebar,
+            "--color-sidebar-foreground": _sidebarForeground,
+            "--color-sidebar-primary": _sidebarPrimary,
+            "--color-sidebar-primary-foreground": _sidebarPrimaryForeground,
+            "--color-sidebar-accent": _sidebarAccent,
+            "--color-sidebar-accent-foreground": _sidebarAccentForeground,
+            "--color-sidebar-border": _sidebarBorder,
+            "--color-sidebar-ring": _sidebarRing,
+            ...colors
+        } = cloneProfile(monaTheme.variants.light).colors;
+        const profile = { ...cloneProfile(monaTheme.variants.light), colors };
+
+        expect(() => new DefaultThemeStrategy([{ name: "custom", variants: { light: profile } }], [])).toThrowError(
+            /missing colors tokens.*--color-sidebar.*--color-sidebar-ring/
+        );
+    });
+
     it("requires the effect and shape sections for third-party profiles", () => {
         const { effects: _effects, shape: _shape, ...incomplete } = cloneProfile(monaTheme.variants.light);
 

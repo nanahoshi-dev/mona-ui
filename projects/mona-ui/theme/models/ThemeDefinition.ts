@@ -93,6 +93,21 @@ export interface ThemeColorPaletteSeeds {
 
 export type GeneratedThemeColorPalette = Readonly<Record<ThemeVariant, ThemeColors>>;
 
+/**
+ * Inputs to the sidebar colour roles. Everything but the background falls back to the theme's
+ * corresponding page role, so a theme only states what it wants the sidebar to do differently.
+ */
+export interface SidebarColorRoleSeeds {
+    readonly accent?: string;
+    readonly accentForeground?: string;
+    readonly background: string;
+    readonly border?: string;
+    readonly foreground?: string;
+    readonly primary?: string;
+    readonly primaryForeground?: string;
+    readonly ring?: string;
+}
+
 export interface ThemeColorPaletteRegistration {
     readonly seeds: ThemeColorPaletteSeeds;
     readonly theme: ThemeName;
