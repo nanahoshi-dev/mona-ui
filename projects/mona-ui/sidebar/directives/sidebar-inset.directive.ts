@@ -12,7 +12,14 @@ import { sidebarInsetThemeVariants } from "../styles/sidebar.styles";
 @Directive({
     selector: "[monaSidebarInset]",
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        // The drawer is modal, so everything behind it leaves the tab order and the accessibility
+        // tree. `inert` covers both, and unlike `aria-hidden` it also stops pointer interaction.
+        "[attr.inert]": "behindDrawer() ? '' : null",
+        // The scoped equivalent of locking body scroll. The layout already clips its own overflow, so
+        // this region is the only thing behind the drawer that scrolls; suppressing it here avoids
+        // reaching out to mutate `document.body`, which a library has no business owning.
+        "[style.overflow]": "behindDrawer() ? 'hidden' : null"
     }
 })
 export class SidebarInsetDirective {
@@ -21,6 +28,7 @@ export class SidebarInsetDirective {
         const variantClass = sidebarInsetThemeVariants({ variant: this.#sidebarService?.variant() ?? "sidebar" });
         return twMerge(variantClass, this.userClass());
     });
+    protected readonly behindDrawer = computed(() => this.#sidebarService?.mobileOpen() ?? false);
 
     /**
      * @description Additional CSS classes merged onto the host element via `tailwind-merge`.

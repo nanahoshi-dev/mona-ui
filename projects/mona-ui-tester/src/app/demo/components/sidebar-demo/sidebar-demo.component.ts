@@ -184,7 +184,7 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                     </mona-popup>
                 </header>
                 <div monaSidebarSeparator></div>
-                <div monaSidebarContent>
+                <nav monaSidebarContent aria-label="Documentation">
                     <div monaSidebarGroup>
                         <div monaSidebarGroupHeader>
                             <div monaSidebarGroupLabel>Getting Started</div>
@@ -200,11 +200,11 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                         <div monaSidebarGroupContent>
                             <ul monaSidebarMenu>
                                 <li monaSidebarMenuItem [active]="true">
-                                    <button monaSidebarMenuButton tooltip="Introduction">
+                                    <a monaSidebarMenuButton href="#introduction" tooltip="Introduction">
                                         <svg lucideHome [size]="14"></svg>
                                         <span>Introduction</span>
                                         <span monaSidebarMenuBadge>12</span>
-                                    </button>
+                                    </a>
                                     <button monaSidebarMenuAction #introItem aria-label="Introduction actions">
                                         <svg lucideEllipsis [size]="14"></svg>
                                     </button>
@@ -214,16 +214,16 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                                     </mona-popup-menu>
                                 </li>
                                 <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
+                                    <a monaSidebarMenuButton href="#installation" tooltip="Installation">
                                         <svg lucideGalleryVerticalEnd [size]="14"></svg>
                                         <span>Installation</span>
-                                    </button>
+                                    </a>
                                 </li>
                                 <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
+                                    <a monaSidebarMenuButton href="#theming" tooltip="Theming">
                                         <svg lucidePalette [size]="14"></svg>
                                         <span>Theming</span>
-                                    </button>
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -235,22 +235,22 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                         <div monaSidebarGroupContent>
                             <ul monaSidebarMenu>
                                 <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
+                                    <a monaSidebarMenuButton href="#calendar" tooltip="Calendar">
                                         <svg lucideCalendar [size]="14"></svg>
                                         <span>Calendar</span>
-                                    </button>
+                                    </a>
                                 </li>
                                 <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
+                                    <a monaSidebarMenuButton href="#editor" tooltip="Editor">
                                         <svg lucideEdit [size]="14"></svg>
                                         <span>Editor</span>
-                                    </button>
+                                    </a>
                                 </li>
                                 <li monaSidebarMenuItem>
-                                    <button monaSidebarMenuButton>
+                                    <a monaSidebarMenuButton href="#grid" tooltip="Grid">
                                         <svg lucideDatabase [size]="14"></svg>
                                         <span>Grid</span>
-                                    </button>
+                                    </a>
                                 </li>
                             </ul>
                             <ul monaSidebarMenu>
@@ -266,16 +266,16 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                                     </button>
                                     <ul monaSidebarMenuSub monaCollapsibleContent>
                                         <li monaSidebarMenuItem>
-                                            <button monaSidebarMenuButton>
+                                            <a monaSidebarMenuButton href="#list-box" tooltip="List Box">
                                                 <svg lucideGalleryHorizontalEnd [size]="14"></svg>
                                                 <span>List Box</span>
-                                            </button>
+                                            </a>
                                         </li>
                                         <li monaSidebarMenuItem>
-                                            <button monaSidebarMenuButton>
+                                            <a monaSidebarMenuButton href="#list-view" tooltip="List View">
                                                 <svg lucideGalleryHorizontalEnd [size]="14"></svg>
                                                 <span>List View</span>
-                                            </button>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
@@ -296,7 +296,7 @@ export class SidebarDemoComponent extends AbstractDemoComponent<SidebarLayoutCom
                             </ul>
                         </div>
                     </div>
-                </div>
+                </nav>
                 <footer class="flex" monaSidebarFooter>
                     <ul monaSidebarMenu>
                         <li monaSidebarMenuItem>

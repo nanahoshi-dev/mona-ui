@@ -79,7 +79,7 @@ describe("SidebarMenuItemDirective", () => {
 
     it("should let the submenu carry both the sidebar and the collapsible content directives", () => {
         const subMenu = query(".sub-menu");
-        expect(subMenu.classList.contains("border-l")).toBe(true);
+        expect(subMenu.classList.contains("border-s")).toBe(true);
         expect(subMenu.getAttribute("data-state")).toBe("closed");
         expect(subMenu.hasAttribute("id")).toBe(true);
         expect(subMenu.hasAttribute("inert")).toBe(true);

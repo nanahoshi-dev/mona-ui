@@ -153,7 +153,12 @@ describe("SidebarComponent collapsible modes", () => {
         expect(query(".group-label").style.visibility).toBe("hidden");
         expect(query(".group-action").style.opacity).toBe("0");
         expect(query(".group-action").style.visibility).toBe("hidden");
-        expect(query(".menu-sub").style.display).toBe("none");
+        // The submenu is no longer hidden behind the disclosure's back. The item closes the
+        // collapsible on the rail instead, so the trigger stops claiming it is expanded and the
+        // collapsible content directive applies its own `inert`.
+        expect(query(".menu-sub").style.display).toBe("");
+        expect(query(".menu-sub").hasAttribute("inert")).toBe(true);
+        expect(query("[monaCollapsibleTrigger]").getAttribute("aria-expanded")).toBe("false");
     });
 
     it("should collapse the group header row away rather than leave an empty gap on the rail", () => {

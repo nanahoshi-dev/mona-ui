@@ -31,9 +31,14 @@ export const sidebarBorderAllowance: Readonly<Record<SidebarVariant, string>> = 
  * constant, because Tailwind extracts class names from source text and cannot follow an identifier.
  */
 
+/**
+ * `relative` is what scopes the drawer and its backdrop to this layout. They are positioned against
+ * it rather than the viewport, so a sidebar embedded in a bounded region — a documentation example, a
+ * split pane — overlays only that region, and a layout that fills the page behaves identically.
+ */
 export const sidebarLayoutBaseThemeVariants = cva(
     `
-        flex flex-row w-full h-screen h-dvh
+        relative flex flex-row w-full h-screen h-dvh
         overflow-hidden
     `
 );
@@ -92,8 +97,8 @@ export const sidebarMenuItemThemeVariants = cva(
         group/menu-item
         data-[active=true]:bg-(--color-sidebar-primary)
         data-[active=true]:text-(--color-sidebar-primary-foreground)
-        data-[active=true]:hover:bg-(--color-sidebar-primary)!
-        data-[active=true]:hover:text-(--color-sidebar-primary-foreground)!
+        data-[active=true]:hover:bg-(--color-sidebar-primary)
+        data-[active=true]:hover:text-(--color-sidebar-primary-foreground)
     `,
     {
         variants: {
@@ -119,11 +124,47 @@ export const sidebarMenuItemThemeVariants = cva(
     }
 );
 
+/**
+ * The menu row's own appearance.
+ *
+ * It used to compose `ButtonDirective`, which owns a `[class]` binding of its own; every sidebar rule
+ * that had to beat it needed `!important`, and the composition ruled anchors out entirely. Owning the
+ * class here costs a handful of declarations and removes both problems.
+ *
+ * `shrink-0` on the leading visual is what stops a long label crushing it. It applies to the first
+ * child whatever it is — an icon, an avatar — and to any icon elsewhere in the row.
+ */
+export const sidebarMenuButtonThemeVariants = cva(
+    `
+        flex w-full items-center justify-start overflow-hidden
+        rounded-md border-0 bg-transparent
+        text-start text-sm font-normal whitespace-nowrap no-underline
+        outline-none
+        focus-visible:ring-2 focus-visible:ring-(--color-sidebar-ring)/60
+        [&>*:first-child]:shrink-0 [&>svg]:shrink-0
+    `,
+    {
+        variants: {
+            active: {
+                true: "text-(--color-sidebar-primary-foreground)",
+                false: `
+                    text-(--color-sidebar-foreground)
+                    hover:bg-(--color-sidebar-accent) hover:text-(--color-sidebar-accent-foreground)
+                `
+            },
+            disabled: {
+                true: "opacity-50 pointer-events-none cursor-default",
+                false: "cursor-pointer"
+            }
+        }
+    }
+);
+
 export const sidebarMenuSubThemeVariants = cva(
     `
         flex flex-col w-full space-y-1
         ms-3.5 ps-2.5
-        border-l border-(--color-sidebar-border)
+        border-s border-(--color-sidebar-border)
     `
 );
 
@@ -154,9 +195,11 @@ export const sidebarThemeVariants = cva(
         variants: {
             // `side` only decides placement; the border it implies is applied per variant below,
             // so the `floating` and `inset` treatments are not left fighting a single edge border.
+            // Flex order is already direction-relative, which is why the borders below have to be
+            // logical too — a physical `border-r` would land on the wrong edge under RTL.
             side: {
-                left: "order-first",
-                right: "order-last"
+                start: "order-first",
+                end: "order-last"
             },
             variant: {
                 sidebar: `h-full ${themeRaisedBackdropClasses}`,
@@ -168,18 +211,61 @@ export const sidebarThemeVariants = cva(
                 `,
                 inset: "m-2 h-[calc(100%-1rem)] bg-transparent"
             },
-            // Once an offcanvas sidebar is fully collapsed any margin would leave a visible gutter.
+            // Once an offcanvas sidebar is fully collapsed any margin would leave a visible gutter, and
+            // the border would leave a 1px sliver of surface down the edge of a panel that is supposed
+            // to be gone entirely.
             flush: {
-                true: "m-0",
+                true: "m-0 border-0",
+                false: ""
+            },
+            /**
+             * The compact presentation. The panel leaves the flex flow and becomes an overlay pinned to
+             * one edge, sliding in on `translate` rather than `width` — a drawer that animated its width
+             * would reflow its own contents for the whole transition.
+             */
+            drawer: {
+                true: `
+                    absolute inset-y-0 z-50 h-full m-0
+                    shadow-(--shadow-overlay)
+                    transition-[translate] duration-(--mona-motion-standard) ease-out
+                    motion-reduce:transition-none
+                `,
                 false: ""
             }
         },
         compoundVariants: [
-            { variant: "sidebar", side: "left", class: "border-r border-(--color-sidebar-border)" },
-            { variant: "sidebar", side: "right", class: "border-l border-(--color-sidebar-border)" },
-            { variant: "floating", flush: true, class: "h-full" },
-            { variant: "inset", flush: true, class: "h-full" }
+            { drawer: false, variant: "sidebar", side: "start", class: "border-e border-(--color-sidebar-border)" },
+            { drawer: false, variant: "sidebar", side: "end", class: "border-s border-(--color-sidebar-border)" },
+            { drawer: false, variant: "floating", flush: true, class: "h-full" },
+            { drawer: false, variant: "inset", flush: true, class: "h-full" },
+            // A drawer is a surface in its own right whatever the docked variant looks like, so the
+            // variant's margins, rounding and transparency are all dropped for it.
+            { drawer: true, side: "start", class: "start-0" },
+            { drawer: true, side: "end", class: "end-0" },
+            { drawer: true, variant: "floating", class: "rounded-none" },
+            { drawer: true, variant: "inset", class: "bg-(--color-sidebar)" }
         ]
+    }
+);
+
+/**
+ * The scrim behind an open drawer. Fades rather than sliding, so it is not competing with the panel's
+ * own movement, and stays below it in the stacking order.
+ */
+export const sidebarBackdropThemeVariants = cva(
+    `
+        absolute inset-0 z-40
+        bg-black/50
+        transition-opacity duration-(--mona-motion-standard) ease-out
+        motion-reduce:transition-none
+    `,
+    {
+        variants: {
+            open: {
+                true: "opacity-100",
+                false: "opacity-0 pointer-events-none"
+            }
+        }
     }
 );
 
@@ -203,9 +289,11 @@ export const sidebarRailThemeVariants = cva(
     `,
     {
         variants: {
+            // The rail sits on the sidebar's inner edge, which is the opposite one to the side it is
+            // docked against. Logical, so it stays on the inner edge under RTL.
             side: {
-                left: "right-0",
-                right: "left-0"
+                start: "end-0",
+                end: "start-0"
             }
         }
     }

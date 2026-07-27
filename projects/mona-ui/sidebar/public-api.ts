@@ -27,8 +27,15 @@ export * from "./directives/sidebar-separator.directive";
 export * from "./directives/sidebar-trigger.directive";
 
 export type { SidebarCollapsibleMode } from "./models/SidebarCollapsibleMode";
+export type { SidebarController } from "./models/SidebarController";
 export type { SidebarMenuButtonSize } from "./models/SidebarMenuButtonSize";
-export type { SidebarSide } from "./models/SidebarSide";
+export type { SidebarLogicalSide, SidebarSide } from "./models/SidebarSide";
 export type { SidebarVariant } from "./models/SidebarVariant";
 
-export * from "./services/sidebar.service";
+/*
+ * `SidebarService` is deliberately not exported. Its structural setters exist so `mona-sidebar` can
+ * publish its own inputs, and calling them from a consumer leaves the service and the component
+ * disagreeing about the same sidebar until the next change detection pass. `injectSidebar()` returns
+ * the reads and the commands that are safe from anywhere.
+ */
+export { injectSidebar } from "./utils/inject-sidebar";

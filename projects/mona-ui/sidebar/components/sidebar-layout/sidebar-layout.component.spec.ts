@@ -103,14 +103,16 @@ describe("SidebarLayoutComponent", () => {
     });
 
     it("should order and border the sidebar according to side", () => {
+        // Logical, not physical. Flex order is already direction-relative, so a physical border
+        // would land on the outer edge instead of the inner one under RTL.
         expect(getSidebar().classList.contains("order-first")).toBe(true);
-        expect(getSidebar().classList.contains("border-r")).toBe(true);
+        expect(getSidebar().classList.contains("border-e")).toBe(true);
 
         component.side.set("right");
         fixture.detectChanges();
 
         expect(getSidebar().classList.contains("order-last")).toBe(true);
-        expect(getSidebar().classList.contains("border-l")).toBe(true);
+        expect(getSidebar().classList.contains("border-s")).toBe(true);
     });
 
     it("should expose the same service instance to every descendant", () => {

@@ -25,9 +25,12 @@ describe("SidebarMenuButtonDirective", () => {
 
         const button: HTMLElement = fixture.nativeElement.querySelector("button");
         expect(button.classList.contains("w-full")).toBe(true);
-        expect(button.style.justifyContent).toBe("flex-start");
-        expect(button.classList.contains("hover:bg-(--color-sidebar-accent)!")).toBe(true);
+        expect(button.classList.contains("justify-start")).toBe(true);
+        // No `!important` any more: the row owns its own class binding instead of composing
+        // `ButtonDirective`, so nothing of its own is competing to be overridden.
+        expect(button.classList.contains("hover:bg-(--color-sidebar-accent)")).toBe(true);
         expect(button.classList.contains("rounded-md")).toBe(true);
+        expect(button.getAttribute("type")).toBe("button");
     });
 
     it("should expose the current destination on the navigation control", () => {

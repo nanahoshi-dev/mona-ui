@@ -1,52 +1,59 @@
-import { computed, DestroyRef, Directive, effect, inject, input, signal } from "@angular/core";
-import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { computed, DestroyRef, Directive, ElementRef, inject, input, signal } from "@angular/core";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
+import { twMerge } from "tailwind-merge";
 import type { SidebarMenuButtonSize } from "../models/SidebarMenuButtonSize";
 import { SidebarService } from "../services/sidebar.service";
+import { sidebarMenuButtonThemeVariants } from "../styles/sidebar.styles";
 import { SidebarMenuItemDirective } from "./sidebar-menu-item.directive";
 
+/**
+ * @description
+ * A row in a sidebar menu. Applies to a `button` for an action and to an `a` for a destination —
+ * an anchor keeps `href`, `routerLink`, middle-click, open-in-new-tab and the browser's own status
+ * bar preview, none of which a button can offer.
+ *
+ * On a compact viewport, following a link closes the drawer, since the destination it navigates to is
+ * underneath it.
+ */
 @Directive({
-    selector: "button[monaSidebarMenuButton]",
-    hostDirectives: [ButtonDirective],
+    selector: "a[monaSidebarMenuButton], button[monaSidebarMenuButton]",
+    exportAs: "monaSidebarMenuButton",
     host: {
-        "[attr.aria-current]": "current() ? 'page' : null",
+        "[attr.aria-current]": "current()",
+        "[attr.aria-disabled]": "ariaDisabled()",
+        "[attr.disabled]": "nativeDisabled()",
+        // An anchor without an `href` is not focusable or clickable, so a disabled link has to be
+        // given back a tab stop to stay announceable, and its activation suppressed instead.
+        "[attr.tabindex]": "tabIndex()",
         "[attr.title]": "railTitle()",
-        // `ButtonDirective` owns the `[class]` binding on this element, so the rail box is driven through
-        // style bindings, which also beat the button's own padding without needing `!important`.
-        // Sibling elements in the row (a trailing action, a popup host) would otherwise shrink the square.
+        "[attr.type]": "type",
+        "[class]": "baseClass()",
+        // Sibling elements in the row — a trailing action, a popup host — would otherwise shrink the
+        // square below the size of the icon it exists to show.
         "[style.flex-shrink]": "railBox() ? '0' : null",
-        // A gap at least as wide as the square guarantees whatever follows the leading visual ends up
-        // outside it, rather than leaving a sliver of the label showing. Costs nothing: it is clipped.
-        // Both ends are stated inline so the growth animates instead of jumping off the button's own class.
         "[style.gap]": "gap()",
         "[style.height]": "height()",
-        // Start aligned rather than centred: a button may hold a trailing chevron or badge after its icon,
-        // and centring overflowing content would clip the leading visual as well as the trailing one.
-        // Unconditional, so nothing shifts sideways at the moment the rail state flips.
-        "[style.justify-content]": "'flex-start'",
-        // Also unconditional. The label is clipped by the button's own edge on the way in, which is what
-        // makes it slide out of view with the sidebar rather than disappear the instant it collapses.
-        "[style.overflow]": "'hidden'",
         "[style.padding]": "padding()",
         "[style.transition]": "transition()",
-        // `shrink-0` on the leading visual is what stops a long label from crushing it. It applies to the
-        // first child whatever it is — an icon, an avatar — and to any icon elsewhere in the row.
-        class:
-            "flex w-full font-normal whitespace-nowrap rounded-md " +
-            "hover:bg-(--color-sidebar-accent)! hover:text-(--color-sidebar-accent-foreground)! " +
-            "group-data-[active=true]/menu-item:bg-transparent! " +
-            "group-data-[active=true]/menu-item:text-(--color-sidebar-primary-foreground)! " +
-            "group-data-[active=true]/menu-item:hover:bg-transparent! " +
-            "group-data-[active=true]/menu-item:hover:text-(--color-sidebar-primary-foreground)! " +
-            "[&>*:first-child]:shrink-0 [&>svg]:shrink-0"
+        "(click)": "onClick($event)"
     }
 })
 export class SidebarMenuButtonDirective {
-    readonly #button = inject(ButtonDirective);
+    readonly #element = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     readonly #menuItem = inject(SidebarMenuItemDirective, { optional: true });
+    readonly #nativeButton = this.#element.tagName === "BUTTON";
     readonly #reducedMotion = signal(false);
     readonly #sidebarService = inject(SidebarService, { optional: true });
 
-    protected readonly current = computed(() => this.#menuItem?.active() ?? false);
+    protected readonly ariaDisabled = computed(() => (this.disabled() ? "true" : null));
+
+    /**
+     * Marks the row the user is currently on. `page` regardless of host element: `active` describes a
+     * destination, and a sidebar built from buttons rather than anchors is still a set of destinations
+     * as far as a screen reader is concerned.
+     */
+    protected readonly current = computed(() => ((this.#menuItem?.active() ?? false) ? "page" : null));
+
     protected readonly gap = computed(() => (this.railBox() ? "2rem" : "0.5rem"));
 
     /**
@@ -55,8 +62,10 @@ export class SidebarMenuButtonDirective {
      */
     protected readonly height = computed(() => (!this.railBox() && this.size() === "large" ? "3rem" : "2rem"));
 
+    protected readonly nativeDisabled = computed(() => (this.#nativeButton && this.disabled() ? "" : null));
+
     /**
-     * The inset that centres the leading visual in the rail square. A `medium` button holds an icon
+     * The inset that centres the leading visual in the rail square. A `medium` row holds an icon
      * smaller than the square, so it is padded inwards; a `large` one holds something that already
      * fills the square, so padding it would push it out of view.
      */
@@ -68,7 +77,7 @@ export class SidebarMenuButtonDirective {
     });
 
     /**
-     * On the rail the button becomes a square exactly the size of its leading visual and clips its own
+     * On the rail the row becomes a square exactly the size of its leading visual and clips its own
      * overflow, so any label is pushed out of view instead of competing for space.
      */
     protected readonly railBox = computed(() => this.#sidebarService?.iconOnly() ?? false);
@@ -80,10 +89,11 @@ export class SidebarMenuButtonDirective {
         return tooltip && this.railBox() ? tooltip : null;
     });
 
+    protected readonly tabIndex = computed(() => (this.disabled() && !this.#nativeButton ? 0 : null));
+
     /**
-     * Declared inline rather than as a utility class because `ButtonDirective` already sets
-     * `transition-colors duration-100` through the class binding it owns, and the two would be decided
-     * by stylesheet order. The colour transition is restated here so it survives.
+     * Declared inline rather than as utility classes because the same three properties are also set
+     * inline above, and a class would be decided against them by source order rather than specificity.
      */
     protected readonly transition = computed(() => {
         if (this.#reducedMotion()) {
@@ -95,8 +105,33 @@ export class SidebarMenuButtonDirective {
         return `${shape}, background-color 100ms ease-in-out, color 100ms ease-in-out`;
     });
 
+    // Guards against a sidebar row inside a form submitting it.
+    protected readonly type = this.#nativeButton ? "button" : null;
+
+    protected readonly baseClass = computed(() => {
+        const variantClass = sidebarMenuButtonThemeVariants({
+            active: this.#menuItem?.active() ?? false,
+            disabled: this.disabled()
+        });
+        return twMerge(variantClass, this.userClass());
+    });
+
     /**
-     * @description How much room this button's leading visual needs. Use `"large"` when it opens with
+     * @description Closes the overlay drawer after this row is activated. Only applies on compact
+     * viewports, where the drawer covers the destination being navigated to. Set to `false` for rows
+     * that do not navigate, such as a disclosure trigger.
+     * @default true
+     */
+    public readonly closeOnSelect = input(true);
+
+    /**
+     * @description Renders the row as unavailable and suppresses activation.
+     * @default false
+     */
+    public readonly disabled = input(false);
+
+    /**
+     * @description How much room this row's leading visual needs. Use `"large"` when it opens with
      * something avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it.
      * @default "medium"
      */
@@ -110,6 +145,15 @@ export class SidebarMenuButtonDirective {
      */
     public readonly tooltip = input("");
 
+    /**
+     * @description Additional CSS classes merged onto the host element via `tailwind-merge`.
+     * @default ""
+     */
+    public readonly userClass = input<string, ClassInputType>("", {
+        alias: "class",
+        transform: value => classInputToClass(value)
+    });
+
     public constructor() {
         const destroyRef = inject(DestroyRef);
         if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
@@ -119,9 +163,17 @@ export class SidebarMenuButtonDirective {
             query.addEventListener("change", onPreferenceChange);
             destroyRef.onDestroy(() => query.removeEventListener("change", onPreferenceChange));
         }
+    }
 
-        effect(() => {
-            this.#button.look.set("clear");
-        });
+    protected onClick(event: Event): void {
+        if (this.disabled()) {
+            // `aria-disabled` is advisory: an anchor with an `href` still navigates without this.
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+        if (this.closeOnSelect() && this.#sidebarService?.mobileOpen()) {
+            this.#sidebarService.collapse();
+        }
     }
 }
