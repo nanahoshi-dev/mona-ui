@@ -1,0 +1,40 @@
+<ng-template #sheetTemplate>
+    <section
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        [class]="baseClass()"
+        role="dialog"
+        aria-modal="true"
+        tabindex="-1"
+        [attr.aria-labelledby]="title() ? titleId : null"
+        [attr.aria-describedby]="description() ? descriptionId : null"
+        [attr.aria-label]="!title() ? ariaLabel() : null">
+        @if (title() || description() || closable()) {
+            <header [class]="headerClass()">
+                <div class="min-w-0 flex-1">
+                    @if (title()) {
+                        <h2 [id]="titleId" [class]="titleClass()">{{ title() }}</h2>
+                    }
+                    @if (description()) {
+                        <p [id]="descriptionId" [class]="descriptionClass()">{{ description() }}</p>
+                    }
+                </div>
+                @if (closable()) {
+                    <button
+                        monaButton
+                        type="button"
+                        look="ghost"
+                        [iconOnly]="true"
+                        aria-label="Close sheet"
+                        [class]="closeButtonClass()"
+                        (click)="closeSheet()">
+                        <svg lucideX [size]="20"></svg>
+                    </button>
+                }
+            </header>
+        }
+        <div [class]="contentClass()">
+            <ng-content></ng-content>
+        </div>
+    </section>
+</ng-template>

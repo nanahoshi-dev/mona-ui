@@ -1,7 +1,6 @@
 import { ComponentType } from "@angular/cdk/overlay";
 import { NgTemplateOutlet } from "@angular/common";
 import {
-    afterNextRender,
     Component,
     ComponentRef,
     computed,
@@ -34,6 +33,25 @@ import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSetting
                 display: block;
             }
 
+            /*
+             * "clip" rather than "hidden" on purpose. "hidden" makes these elements scroll containers, so
+             * when content inside the popup takes focus while the enter animation still has it translated
+             * off-screen, the browser scrolls them to reveal it. That scroll cancels the transform before
+             * the first paint and the popup appears instantly instead of sliding in. "clip" cannot scroll.
+             */
+            :host(.mona-popup-constrain-height) {
+                min-height: 0;
+                max-height: inherit;
+                overflow: clip;
+            }
+
+            :host(.mona-popup-constrain-height) > div {
+                display: flex;
+                min-height: 0;
+                max-height: inherit;
+                overflow: clip;
+            }
+
             .mona-popup-enter {
                 animation: mona-popup-scale-in 150ms cubic-bezier(0.4, 0, 0.2, 1);
             }
@@ -58,6 +76,73 @@ import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSetting
 
             .mona-popup-fade-leave {
                 animation: mona-popup-fade-out 150ms ease-out;
+            }
+
+            .mona-popup-slide-from-right-enter,
+            .mona-popup-slide-from-left-enter,
+            .mona-popup-slide-from-top-enter,
+            .mona-popup-slide-from-bottom-enter,
+            .mona-popup-slide-to-right-leave,
+            .mona-popup-slide-to-left-leave,
+            .mona-popup-slide-to-top-leave,
+            .mona-popup-slide-to-bottom-leave {
+                animation-fill-mode: both;
+                backface-visibility: hidden;
+                will-change: transform;
+            }
+
+            /*
+             * The curve is deliberately gentle rather than front-loaded. A sharply decelerating curve
+             * covers most of the travel in the first few frames, which reads as a snap on the sides whose
+             * leading edge carries the content (right and bottom), while looking calm on the sides that
+             * lead with blank margin (left and top).
+             */
+            .mona-popup-slide-from-right-enter,
+            .mona-popup-slide-from-left-enter,
+            .mona-popup-slide-from-top-enter,
+            .mona-popup-slide-from-bottom-enter {
+                animation-duration: 320ms;
+                animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            }
+
+            .mona-popup-slide-to-right-leave,
+            .mona-popup-slide-to-left-leave,
+            .mona-popup-slide-to-top-leave,
+            .mona-popup-slide-to-bottom-leave {
+                animation-duration: 240ms;
+                animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+            }
+
+            .mona-popup-slide-from-right-enter {
+                animation-name: mona-popup-slide-from-right;
+            }
+
+            .mona-popup-slide-to-right-leave {
+                animation-name: mona-popup-slide-to-right;
+            }
+
+            .mona-popup-slide-from-left-enter {
+                animation-name: mona-popup-slide-from-left;
+            }
+
+            .mona-popup-slide-to-left-leave {
+                animation-name: mona-popup-slide-to-left;
+            }
+
+            .mona-popup-slide-from-top-enter {
+                animation-name: mona-popup-slide-from-top;
+            }
+
+            .mona-popup-slide-to-top-leave {
+                animation-name: mona-popup-slide-to-top;
+            }
+
+            .mona-popup-slide-from-bottom-enter {
+                animation-name: mona-popup-slide-from-bottom;
+            }
+
+            .mona-popup-slide-to-bottom-leave {
+                animation-name: mona-popup-slide-to-bottom;
             }
 
             @keyframes mona-popup-scale-in {
@@ -128,13 +213,93 @@ import { PopupAnimationSettings, PopupSettings } from "../../models/PopupSetting
                 }
             }
 
+            @keyframes mona-popup-slide-from-right {
+                from {
+                    transform: translateX(100%);
+                }
+                to {
+                    transform: translateX(0);
+                }
+            }
+
+            @keyframes mona-popup-slide-to-right {
+                from {
+                    transform: translateX(0);
+                }
+                to {
+                    transform: translateX(100%);
+                }
+            }
+
+            @keyframes mona-popup-slide-from-left {
+                from {
+                    transform: translateX(-100%);
+                }
+                to {
+                    transform: translateX(0);
+                }
+            }
+
+            @keyframes mona-popup-slide-to-left {
+                from {
+                    transform: translateX(0);
+                }
+                to {
+                    transform: translateX(-100%);
+                }
+            }
+
+            @keyframes mona-popup-slide-from-top {
+                from {
+                    transform: translateY(-100%);
+                }
+                to {
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes mona-popup-slide-to-top {
+                from {
+                    transform: translateY(0);
+                }
+                to {
+                    transform: translateY(-100%);
+                }
+            }
+
+            @keyframes mona-popup-slide-from-bottom {
+                from {
+                    transform: translateY(100%);
+                }
+                to {
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes mona-popup-slide-to-bottom {
+                from {
+                    transform: translateY(0);
+                }
+                to {
+                    transform: translateY(100%);
+                }
+            }
+
             @media (prefers-reduced-motion: reduce) {
                 .mona-popup-enter,
                 .mona-popup-leave,
                 .mona-dropdown-popup-enter,
                 .mona-dropdown-popup-leave,
                 .mona-popup-fade-enter,
-                .mona-popup-fade-leave {
+                .mona-popup-fade-leave,
+                .mona-popup-slide-from-right-enter,
+                .mona-popup-slide-to-right-leave,
+                .mona-popup-slide-from-left-enter,
+                .mona-popup-slide-to-left-leave,
+                .mona-popup-slide-from-top-enter,
+                .mona-popup-slide-to-top-leave,
+                .mona-popup-slide-from-bottom-enter,
+                .mona-popup-slide-to-bottom-leave {
                     animation-duration: 1ms;
                 }
             }
@@ -162,31 +327,22 @@ export class PopupWrapperComponent implements OnInit {
     protected readonly leaveAnimationClasses = computed(() => this.#getAnimationConfig()?.leave ?? "");
     public readonly templateRef = signal<TemplateRef<any> | null>(null);
     public readonly visible = signal(true);
-    public readonly wrapperClass = signal("");
+    public readonly wrapperClass = signal(
+        this.#popupSettings.popupWrapperClass instanceof Array
+            ? this.#popupSettings.popupWrapperClass.join(" ")
+            : (this.#popupSettings.popupWrapperClass ?? "")
+    );
 
     public constructor() {
-        afterNextRender({
-            read: () => {
-                if (this.#popupSettings.popupWrapperClass != null) {
-                    if (this.#popupSettings.popupWrapperClass instanceof Array) {
-                        this.wrapperClass.set(this.#popupSettings.popupWrapperClass.join(" "));
-                    } else {
-                        this.wrapperClass.set(this.#popupSettings.popupWrapperClass);
-                    }
-                }
-                this.#popupReference.closeStart$
-                    .pipe(take(1), takeUntilDestroyed(this.#destroyRef))
-                    .subscribe(event => {
-                        this.#closeEvent = event;
-                        const animationElement = this.animationElement().nativeElement;
-                        this.visible.set(false);
-                        if (!this.leaveAnimationClasses()) {
-                            this.#completeClose();
-                            return;
-                        }
-                        this.#document.defaultView?.setTimeout(() => this.#startFallbackTimer(animationElement));
-                    });
+        this.#popupReference.closeStart$.pipe(take(1), takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            this.#closeEvent = event;
+            const animationElement = this.animationElement().nativeElement;
+            this.visible.set(false);
+            if (!this.leaveAnimationClasses()) {
+                this.#completeClose();
+                return;
             }
+            this.#document.defaultView?.setTimeout(() => this.#startFallbackTimer(animationElement));
         });
         this.#destroyRef.onDestroy(() => this.#clearFallbackTimer());
     }
@@ -204,6 +360,11 @@ export class PopupWrapperComponent implements OnInit {
         return this.componentOutlet().createComponent(content, { injector });
     }
 
+    /**
+     * Only completion events are observed. A cancellation is also raised when the enter animation is
+     * replaced by the leave animation, so treating it as completion would dispose the overlay before
+     * the leave animation had a chance to play. {@link #startFallbackTimer} covers genuine cancellations.
+     */
     protected onNativeLeaveComplete(event: AnimationEvent | TransitionEvent): void {
         if (event.target !== event.currentTarget) {
             return;

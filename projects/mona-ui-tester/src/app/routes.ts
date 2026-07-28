@@ -299,6 +299,11 @@ export const routes: Routes = [
                     import("./docs/components/sidebar-doc/sidebar-doc.component").then(m => m.SidebarDocComponent)
             },
             {
+                path: "sheet",
+                loadComponent: () =>
+                    import("./docs/components/sheet-doc/sheet-doc.component").then(m => m.SheetDocComponent)
+            },
+            {
                 path: "skeleton",
                 loadComponent: () =>
                     import("./docs/components/skeleton-doc/skeleton-doc.component").then(

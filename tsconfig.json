@@ -69,6 +69,7 @@
             "@nanahoshi/mona-ui/query": ["./projects/mona-ui/query/public-api.ts"],
             "@nanahoshi/mona-ui/radio-button": ["./projects/mona-ui/radio-button/public-api.ts"],
             "@nanahoshi/mona-ui/scroll-view": ["./projects/mona-ui/scroll-view/public-api.ts"],
+            "@nanahoshi/mona-ui/sheet": ["./projects/mona-ui/sheet/public-api.ts"],
             "@nanahoshi/mona-ui/sidebar": ["./projects/mona-ui/sidebar/public-api.ts"],
             "@nanahoshi/mona-ui/skeleton": ["./projects/mona-ui/skeleton/public-api.ts"],
             "@nanahoshi/mona-ui/slider": ["./projects/mona-ui/slider/public-api.ts"],

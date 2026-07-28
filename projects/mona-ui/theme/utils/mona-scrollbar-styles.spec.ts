@@ -4,6 +4,7 @@ import { dropdownPopupThemeVariants } from "../../dropdowns/styles/dropdown-popu
 import { editorContainerThemeVariants } from "../../editor/styles/editor.styles";
 import { gridListBaseThemeVariants } from "../../grid/styles/grid.styles";
 import { listInnerListThemeVariants } from "../../internal/list/styles/list.styles";
+import { sheetContentVariants } from "../../sheet/styles/sheet.styles";
 import { tabContentThemeVariants } from "../../tabs/styles/tabs.styles";
 import { timeSelectorListThemeVariants } from "../../time-selector/styles/time-selector.styles";
 import { windowContentThemeVariants } from "../../window/styles/window.styles";
@@ -20,6 +21,7 @@ describe("Mona scrollbar styles", () => {
             editorContainerThemeVariants(),
             gridListBaseThemeVariants(),
             listInnerListThemeVariants(),
+            sheetContentVariants(),
             tabContentThemeVariants(),
             timeSelectorListThemeVariants(),
             windowContentThemeVariants()

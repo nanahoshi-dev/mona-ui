@@ -38,6 +38,13 @@ export interface PopupSettings<T = unknown, C = void> {
     backdropClass?: string | string[];
 
     /**
+     * Whether scrolling behind the popup should be blocked while it is open.
+     * Default: false.
+     * @type {boolean}
+     */
+    blockScroll?: boolean;
+
+    /**
      * The content to display in the popup.
      * @type {TemplateRef | ComponentType}
      */
