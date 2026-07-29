@@ -1,15 +1,42 @@
 import type { CdkDragStart } from "@angular/cdk/drag-drop";
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ImmutableList } from "@mirei/ts-collections";
 import { PagerComponent } from "@nanahoshi/mona-ui/pager";
+import type { SortDescriptor } from "@nanahoshi/mona-ui/query";
+import { GridSortableDirective } from "../../directives/grid-sortable.directive";
 import type { Column } from "../../models/Column";
 import type { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GridService } from "../../services/grid.service";
 import { gridBaseThemeVariants, gridHeaderTableCellThemeVariants } from "../../styles/grid.styles";
+import { GridColumnComponent } from "../grid-column/grid-column.component";
 
 import { GridComponent } from "./grid.component";
+
+@Component({
+    template: `
+        <mona-grid>
+            <mona-grid-column field="name" title="Name"></mona-grid-column>
+            <mona-grid-column field="age" title="Age"></mona-grid-column>
+        </mona-grid>
+    `,
+    imports: [GridComponent, GridColumnComponent]
+})
+class GridWithColumnsTestComponent {}
+
+@Component({
+    template: `
+        <mona-grid monaGridSortable [sort]="sort">
+            <mona-grid-column field="name" title="Name"></mona-grid-column>
+        </mona-grid>
+    `,
+    imports: [GridComponent, GridColumnComponent, GridSortableDirective]
+})
+class SortableGridWithColumnsTestComponent {
+    protected readonly sort: SortDescriptor[] = [{ field: "name", dir: "asc" }];
+}
 
 function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Column {
     return {
@@ -68,6 +95,33 @@ describe("GridComponent", () => {
 
     it("should create", () => {
         expect(component).toBeTruthy();
+    });
+
+    it("registers projected columns without requiring a feature directive", async () => {
+        const hostFixture = TestBed.createComponent(GridWithColumnsTestComponent);
+
+        hostFixture.detectChanges();
+        await hostFixture.whenStable();
+        hostFixture.detectChanges();
+
+        const gridElement = hostFixture.nativeElement as HTMLElement;
+        const headers = Array.from(gridElement.querySelectorAll<HTMLElement>('[role="columnheader"]'), header =>
+            header.textContent?.trim()
+        );
+        expect(headers).toEqual(["Name", "Age"]);
+    });
+
+    it("applies initial sorts after the grid registers its projected columns", async () => {
+        const hostFixture = TestBed.createComponent(SortableGridWithColumnsTestComponent);
+
+        hostFixture.detectChanges();
+        await hostFixture.whenStable();
+        hostFixture.detectChanges();
+
+        const gridElement = hostFixture.nativeElement as HTMLElement;
+        expect(gridElement.querySelector<HTMLElement>('[role="columnheader"]')?.getAttribute("aria-sort")).toBe(
+            "ascending"
+        );
     });
 
     it("uses a neutral surface, quiet boundary, and semantic header focus", () => {

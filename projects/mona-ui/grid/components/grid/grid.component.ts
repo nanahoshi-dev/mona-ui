@@ -15,6 +15,7 @@ import {
     Component,
     computed,
     contentChild,
+    contentChildren,
     DestroyRef,
     effect,
     ElementRef,
@@ -53,6 +54,7 @@ import { ColumnFilterState } from "../../models/ColumnFilterState";
 import { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
+import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -137,6 +139,7 @@ export class GridComponent<T> implements GridVariantInput {
     readonly #registeredFooterScrollElement = signal<HTMLDivElement | null>(null);
     readonly #toolbarActiveIndex = signal(0);
     #resizeObserver: ResizeObserver | null = null;
+    private readonly columnDefinitions = contentChildren<GridColumnDefinition>(GRID_COLUMN_DEFINITION);
     private readonly footerScrollElement = viewChild<ElementRef<HTMLDivElement>>("footerScrollElement");
     protected readonly baseClass = computed(() => {
         const rounded = this.rounded();
@@ -279,6 +282,10 @@ export class GridComponent<T> implements GridVariantInput {
     public readonly userClass = input<string>("", { alias: "class" });
 
     public constructor() {
+        effect(() => {
+            const columns = this.columnDefinitions().map(definition => definition.getColumn());
+            untracked(() => this.gridService.setColumnDefinitions(columns));
+        });
         this.setPageSizeEffect();
         this.setGridDetailEffect();
         this.setDataEffect();
