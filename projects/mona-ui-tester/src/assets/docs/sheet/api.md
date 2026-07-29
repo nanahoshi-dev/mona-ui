@@ -94,9 +94,11 @@ protected onSheetClose(event: PopupCloseEvent): void {
 
 ## Technical & Behavior Notes
 
-### All inputs are one-shot
+### `side` is fixed once the sheet opens
 
-Every input is read once when the sheet opens, on the first render. Changing an input afterward has no effect on the already-open sheet — there is no equivalent of Window's or Dialog's live-input set.
+`side` is read once, on the first render, and fixes both the viewport edge the sheet is attached to and the direction it slides in and out. Changing it on an open sheet has no effect — close the sheet and reopen it with the new value.
+
+Every other input is live: `title`, `description`, `ariaLabel`, and `closable` re-render as usual, `width` and `height` resize the open sheet, and `closeOnEscape` and `closeOnBackdropClick` apply from the moment they change.
 
 ### `close` fires for every close path
 
@@ -162,8 +164,10 @@ Form integration is not applicable — Sheet is a container, not a form control.
 <!-- verification-checklist
 - [x] SheetComponent inputs and defaults verified against sheet.component.ts source, including the horizontal-vs-vertical width/height defaults resolved in #open()
 - [x] SheetComponent outputs verified (close: PopupCloseEvent, closed: void) against sheet.component.ts source
-- [x] All-inputs-one-shot behavior verified: every input is read only inside #open(), which runs once via afterNextRender
-- [x] close firing for close button, Escape, and backdrop click verified against sheet.component.ts's #popupRef.beforeClose subscription and the closeOnEscape/closeOnBackdropClick settings passed to PopupService.create
+- [x] side-is-fixed behavior verified: side is read only inside #open(), which runs once via afterNextRender, and drives both #positionOverlay() and #resolveAnimation()
+- [x] Live width/height verified against the #trackSize() effect calling overlayRef.updateSize()
+- [x] Live closeOnEscape/closeOnBackdropClick verified against #isSuppressedCloseSource(), which vetoes those sources in the beforeClose subscription
+- [x] close firing for close button, Escape, and backdrop click verified against sheet.component.ts's #popupRef.beforeClose subscription
 - [x] blockScroll: true verified against the PopupSettings passed in #open()
 - [x] role="dialog"/aria-modal/aria-labelledby/aria-describedby/aria-label verified against sheet.component.html template bindings
 - [x] Focus trap (cdkTrapFocus, cdkTrapFocusAutoCapture) and restoreFocus: true verified against sheet.component.html and the PopupSettings passed in #open()

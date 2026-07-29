@@ -162,6 +162,44 @@ describe("SheetComponent", () => {
         expect(settings?.maxHeight).toBe("90dvh");
     });
 
+    it("applies width and height changes to an open sheet", async () => {
+        // Explicit dimensions rather than the dvw/dvh defaults, which JSDOM drops as unparsable values.
+        await createSheet({ ariaLabel: "Resizable sheet", width: "20rem", height: 300 });
+
+        expect(getPanel().style.width).toBe("20rem");
+        expect(getPanel().style.height).toBe("300px");
+
+        fixture?.componentRef.setInput("width", "32rem");
+        fixture?.componentRef.setInput("height", 480);
+        fixture?.detectChanges();
+        TestBed.inject(ApplicationRef).tick();
+
+        expect(getPanel().style.width).toBe("32rem");
+        expect(getPanel().style.height).toBe("480px");
+    });
+
+    it.each([
+        ["closeOnEscape", () => document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))],
+        ["closeOnBackdropClick", () => overlayContainer.querySelector<HTMLElement>(".cdk-overlay-backdrop")?.click()]
+    ] as const)("honours %s changes made while the sheet is open", async (input, closeSheet) => {
+        const component = await createSheet({ ariaLabel: "Toggling sheet" });
+        const sources: Array<PopupCloseSource | undefined> = [];
+        component.close.subscribe(event => sources.push(event.via));
+
+        fixture?.componentRef.setInput(input, false);
+        TestBed.inject(ApplicationRef).tick();
+        closeSheet();
+
+        expect(sources).toEqual([]);
+        expect(getDialog()).toBeTruthy();
+
+        fixture?.componentRef.setInput(input, true);
+        TestBed.inject(ApplicationRef).tick();
+        closeSheet();
+
+        expect(sources).toHaveLength(1);
+    });
+
     it("blocks background scrolling while open", async () => {
         const popupService = TestBed.inject(PopupService);
         const createPopup = popupService.create.bind(popupService);

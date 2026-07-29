@@ -6,6 +6,7 @@ import {
     computed,
     DestroyRef,
     DOCUMENT,
+    effect,
     inject,
     Injector,
     input,
@@ -16,6 +17,7 @@ import {
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { LucideX } from "@lucide/angular";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
+import { classInputToClass, type ClassInputType } from "@nanahoshi/mona-ui/common";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import {
     PopupCloseEvent,
@@ -29,6 +31,7 @@ import {
     type PopupAnimationSettings
 } from "@nanahoshi/mona-ui/popup";
 import { take } from "rxjs";
+import { twMerge } from "tailwind-merge";
 import { SheetSide } from "../../models/SheetSide";
 import {
     sheetBaseVariants,
@@ -54,10 +57,14 @@ export class SheetComponent implements SheetVariantInput {
     readonly #injector = inject(Injector);
     readonly #popupService = inject(PopupService);
     #destroyed = false;
+    #horizontal = false;
     #popupRef?: PopupRef;
     private readonly sheetTemplate = viewChild.required<TemplateRef<void>>("sheetTemplate");
-
-    protected readonly baseClass = computed(() => sheetBaseVariants({ side: this.side() }));
+    protected readonly baseClass = computed(() => {
+        const variantClass = sheetBaseVariants({ side: this.side() });
+        const userClass = classInputToClass(this.userClass());
+        return twMerge(variantClass, userClass);
+    });
     protected readonly closeButtonClass = computed(() => sheetCloseButtonVariants());
     protected readonly contentClass = computed(() => sheetContentVariants());
     protected readonly descriptionClass = computed(() => sheetDescriptionVariants());
@@ -96,6 +103,11 @@ export class SheetComponent implements SheetVariantInput {
     /** @description Title displayed in the sheet header and used as its accessible name. */
     public readonly title = input<string>();
 
+    public readonly userClass = input<string, ClassInputType>(undefined, {
+        alias: "class",
+        transform: value => classInputToClass(value)
+    });
+
     /** @description Explicit sheet width. Numbers are interpreted as pixels. */
     public readonly width = input<number | string>();
 
@@ -113,11 +125,19 @@ export class SheetComponent implements SheetVariantInput {
         this.#popupRef?.close(new PopupCloseEvent({ via: PopupCloseSource.CloseButton }));
     }
 
+    /** Escape and backdrop clicks reach the popup unconditionally, so their inputs are honoured here. */
+    #isSuppressedCloseSource(via: PopupCloseSource | undefined): boolean {
+        return (
+            (via === PopupCloseSource.Escape && !this.closeOnEscape()) ||
+            (via === PopupCloseSource.BackdropClick && !this.closeOnBackdropClick())
+        );
+    }
+
     #open(): void {
         const activeElement = this.#document.activeElement;
         const anchor = activeElement instanceof HTMLElement ? activeElement : this.#document.body;
         const side = this.side();
-        const horizontal = side === "left" || side === "right";
+        this.#horizontal = side === "left" || side === "right";
 
         this.#popupRef = this.#popupService.create({
             anchor,
@@ -131,23 +151,33 @@ export class SheetComponent implements SheetVariantInput {
                 "[transition-duration:240ms]!"
             ],
             blockScroll: true,
-            closeOnBackdropClick: this.closeOnBackdropClick(),
-            closeOnEscape: this.closeOnEscape(),
+            /*
+             * Both close paths are wired up even when the matching input is currently `false`. PopupService
+             * decides once, at creation, whether to listen at all, so opting out there would freeze these
+             * inputs at their initial values. Vetoing in `beforeClose` instead keeps them live.
+             */
+            closeOnBackdropClick: true,
+            closeOnEscape: true,
             closeOnOutsideClick: false,
             content: this.sheetTemplate(),
             hasBackdrop: true,
-            height: this.height() ?? (horizontal ? "100dvh" : "auto"),
-            maxHeight: horizontal ? "100dvh" : "90dvh",
+            height: this.#resolveHeight(),
+            maxHeight: this.#horizontal ? "100dvh" : "90dvh",
             maxWidth: "100dvw",
             popupClass: "overflow-clip",
             popupWrapperClass: "mona-popup-constrain-height",
             positionStrategy: "global",
             restoreFocus: true,
-            width: this.width() ?? (horizontal ? "min(100dvw, 24rem)" : "100dvw")
+            width: this.#resolveWidth()
         });
 
         this.#positionOverlay(this.#popupRef, side);
+        this.#trackSize(this.#popupRef);
         this.#popupRef.beforeClose.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(event => {
+            if (this.#isSuppressedCloseSource(event.via)) {
+                event.preventDefault();
+                return;
+            }
             if (!this.#destroyed) {
                 this.close.emit(event);
             }
@@ -188,5 +218,20 @@ export class SheetComponent implements SheetVariantInput {
             case "left":
                 return slideFromLeftPopupAnimation;
         }
+    }
+
+    #resolveHeight(): number | string {
+        return this.height() ?? (this.#horizontal ? "100dvh" : "auto");
+    }
+
+    #resolveWidth(): number | string {
+        return this.width() ?? (this.#horizontal ? "min(100dvw, 24rem)" : "100dvw");
+    }
+
+    /** Keeps the overlay in sync with later `width`/`height` changes; `side` stays fixed at open time. */
+    #trackSize(ref: PopupRef): void {
+        effect(() => ref.overlayRef.updateSize({ height: this.#resolveHeight(), width: this.#resolveWidth() }), {
+            injector: this.#injector
+        });
     }
 }
