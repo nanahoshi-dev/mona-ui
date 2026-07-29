@@ -1,20 +1,8 @@
-import {
-    afterNextRender,
-    contentChildren,
-    DestroyRef,
-    Directive,
-    effect,
-    inject,
-    input,
-    model,
-    output,
-    untracked
-} from "@angular/core";
+import { afterNextRender, DestroyRef, Directive, effect, inject, input, model, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { type SortDescriptor, SortDirection } from "@nanahoshi/mona-ui/query";
 import type { Column } from "../models/Column";
 import type { ColumnSortEvent } from "../models/ColumnSortEvent";
-import { GRID_COLUMN_DEFINITION, GridColumnDefinition } from "../models/GridColumnDefinition";
 import type { SortableOptions } from "../models/SortableOptions";
 import { GridService } from "../services/grid.service";
 
@@ -24,7 +12,6 @@ import { GridService } from "../services/grid.service";
 export class GridSortableDirective {
     readonly #destroyRef = inject(DestroyRef);
     readonly #gridService = inject(GridService);
-    private readonly columnDefinitions = contentChildren<GridColumnDefinition>(GRID_COLUMN_DEFINITION);
 
     /**
      * @description Emitted when a column header is activated to change its sort direction. Call `preventDefault()` on the event to cancel the sort.
@@ -53,15 +40,6 @@ export class GridSortableDirective {
                     this.#gridService.setSortableOptions(options);
                 } else if (options === "") {
                     this.#gridService.setSortableOptions({ enabled: true });
-                }
-            });
-        });
-        effect(() => {
-            const columns = this.columnDefinitions().map(c => c.getColumn());
-            untracked(() => {
-                this.#gridService.setColumnDefinitions(columns);
-                if (this.sort().length !== 0) {
-                    this.#gridService.loadSorts(this.sort());
                 }
             });
         });
