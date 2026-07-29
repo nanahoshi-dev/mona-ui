@@ -142,7 +142,8 @@ export class PopupService {
                 width: settings.width,
                 panelClass,
                 backdropClass: settings.backdropClass ?? "transparent",
-                direction
+                direction,
+                scrollStrategy: settings.blockScroll ? this.#overlay.scrollStrategies.block() : undefined
             })
         );
     }
@@ -192,6 +193,7 @@ export class PopupService {
 
         const subscription = this.setupCloseSubscriptions(settings, popupReference, overlayRef);
         this.setupCleanupSubscription(popupReference, subscription, settings, originallyFocusedElement);
+        this.setupBackdropFadeOut(settings, popupReference, overlayRef);
         if (settings.closeOnScroll) {
             this.setupScrollClosing(settings, popupReference, overlayRef);
         }
@@ -345,6 +347,21 @@ export class PopupService {
                 backdropSubject.next();
                 backdropSubject.complete();
             });
+    }
+
+    /**
+     * Starts the backdrop fade-out as soon as the close begins, so it runs alongside the popup's leave
+     * animation. Without it the backdrop stays fully opaque until `dispose()` removes it in one frame.
+     */
+    private setupBackdropFadeOut(
+        settings: PopupSettings,
+        popupReference: PopupReference,
+        overlayRef: OverlayRef
+    ): void {
+        if (!settings.hasBackdrop) {
+            return;
+        }
+        popupReference.closeStart.pipe(take(1)).subscribe(() => overlayRef.detachBackdrop());
     }
 
     private setupCleanupSubscription(

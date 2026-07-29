@@ -1338,7 +1338,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -1350,7 +1350,7 @@
       {
         "name": "userClass",
         "type": "string",
-        "description": "",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -1381,18 +1381,36 @@
   },
   "SidebarMenuButtonDirective": {
     "name": "SidebarMenuButtonDirective",
-    "selector": "\"button[monaSidebarMenuButton]\"",
+    "selector": "\"a[monaSidebarMenuButton], button[monaSidebarMenuButton]\"",
     "inputs": [
+      {
+        "name": "closeOnSelect",
+        "type": "boolean",
+        "description": "Closes the overlay drawer after this row is activated. Only applies on compact\nviewports, where the drawer covers the destination being navigated to. Set to `false` for rows\nthat do not navigate, such as a disclosure trigger.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Renders the row as unavailable and suppresses activation.",
+        "kind": "input"
+      },
       {
         "name": "size",
         "type": "SidebarMenuButtonSize",
-        "description": "How much room this button's leading visual needs. Use `\"large\"` when it opens with\nsomething avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it.",
+        "description": "How much room this row's leading visual needs. Use `\"large\"` when it opens with\nsomething avatar sized, so the icon rail lets it fill the square instead of insetting and clipping it.",
         "kind": "input"
       },
       {
         "name": "tooltip",
         "type": "string",
         "description": "Text identifying this item while the sidebar is collapsed to its icon rail, where the\nlabel is clipped away. Applied as the host's `title`, so the browser surfaces it on hover, and an\nancestor carrying `monaTooltip` with `mode=\"content\"` renders it as a styled tooltip instead.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
         "kind": "input"
       }
     ]
@@ -1404,7 +1422,7 @@
       {
         "name": "active",
         "type": "boolean",
-        "description": "Marks this row as the current sidebar destination. The row owns the selected\nsurface so trailing badges and actions remain inside one continuous highlight.",
+        "description": "Marks this row as the current sidebar destination. The row owns the selected\r\nsurface so trailing badges and actions remain inside one continuous highlight.",
         "kind": "input"
       },
       {
@@ -1447,6 +1465,18 @@
         "name": "userClass",
         "type": "string",
         "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SidebarTriggerDirective": {
+    "name": "SidebarTriggerDirective",
+    "selector": "\"[monaSidebarTrigger]\"",
+    "inputs": [
+      {
+        "name": "for",
+        "type": "string",
+        "description": "Id of the `mona-sidebar` to toggle. Leave unset to toggle the sidebar this trigger\r\nis written inside.",
         "kind": "input"
       }
     ]
@@ -6251,15 +6281,99 @@
       }
     ]
   },
+  "SheetComponent": {
+    "name": "SheetComponent",
+    "selector": "\"mona-sheet\"",
+    "inputs": [
+      {
+        "name": "side",
+        "type": "SheetSide",
+        "description": "Edge of the viewport from which the sheet opens.",
+        "kind": "input"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "description": "Title displayed in the sheet header and used as its accessible name.",
+        "kind": "input"
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "description": "Supporting text displayed below the title.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible name used when no visible title is provided.",
+        "kind": "input"
+      },
+      {
+        "name": "closable",
+        "type": "boolean",
+        "description": "Whether the close button is displayed.",
+        "kind": "input"
+      },
+      {
+        "name": "closeOnEscape",
+        "type": "boolean",
+        "description": "Whether pressing Escape requests that the sheet close.",
+        "kind": "input"
+      },
+      {
+        "name": "closeOnBackdropClick",
+        "type": "boolean",
+        "description": "Whether clicking the backdrop requests that the sheet close.",
+        "kind": "input"
+      },
+      {
+        "name": "width",
+        "type": "number | string",
+        "description": "Explicit sheet width. Numbers are interpreted as pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "height",
+        "type": "number | string",
+        "description": "Explicit sheet height. Numbers are interpreted as pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "close",
+        "type": "PopupCloseEvent",
+        "description": "Emitted before the sheet closes. Call preventDefault() to keep it open.",
+        "kind": "output"
+      },
+      {
+        "name": "closed",
+        "type": "void",
+        "description": "Emitted after the leave animation completes and the popup is disposed.",
+        "kind": "output"
+      }
+    ]
+  },
   "SidebarComponent": {
     "name": "SidebarComponent",
     "selector": "\"mona-sidebar\"",
     "inputs": [
       {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible name for the sidebar region. Required when `role` is set, and used as the\ndrawer's name on compact viewports.",
+        "kind": "input"
+      },
+      {
         "name": "collapsible",
         "type": "SidebarCollapsibleMode",
         "description": "How the sidebar behaves when collapsed. `\"icon\"` keeps a narrow rail of icons visible,\n`\"offcanvas\"` removes it from the layout entirely, and `\"none\"` disables collapsing altogether.",
         "kind": "input"
+      },
+      {
+        "name": "expanded",
+        "type": "boolean",
+        "description": "Sets whether this sidebar is open. Supports two-way binding. While the viewport is\ncompact this reflects the drawer, so one binding drives both presentations.",
+        "kind": "model"
       },
       {
         "name": "iconWidth",
@@ -6268,9 +6382,33 @@
         "kind": "input"
       },
       {
+        "name": "id",
+        "type": "string",
+        "description": "Id for the sidebar element, referenced by triggers through `aria-controls`. Supply a\nstable value when the markup is server rendered, so the client does not hydrate onto a different\ngenerated id. Falls back to a generated id.",
+        "kind": "input"
+      },
+      {
+        "name": "mobileWidth",
+        "type": "string | number",
+        "description": "Width of the overlay drawer on compact viewports. Numbers are treated as pixels.",
+        "kind": "input"
+      },
+      {
+        "name": "persistKey",
+        "type": "string",
+        "description": "Remembers whether this sidebar was left open, under this key. Unset means nothing is\nstored — no key, no storage written.\n\nOnly the docked state is kept. A drawer is never restored open: on the viewport that makes one,\nit would cover the page on load. A stored value wins over `expanded`, and is pushed back out\nthrough that binding, so do not set a key on a sidebar whose state is already restored elsewhere.\n\nWhere it is kept is `SIDEBAR_STORAGE`, which defaults to `localStorage`. A server-rendered\napplication cannot read that until hydration and so flashes the default first; supply storage the\nserver can read through `provideSidebarStorage()`.",
+        "kind": "input"
+      },
+      {
+        "name": "role",
+        "type": "string",
+        "description": "ARIA role for the sidebar region. Leave unset and wrap the menus in a labelled `nav`\nwhen the sidebar holds more than navigation; set `\"navigation\"` with an `aria-label` when it does\nnot. Ignored on compact viewports, where the drawer is a `dialog`.",
+        "kind": "input"
+      },
+      {
         "name": "side",
         "type": "SidebarSide",
-        "description": "Which edge the sidebar sits on. Also controls its order within the layout.",
+        "description": "Which edge the sidebar sits on. Prefer `\"start\"` and `\"end\"`, which follow the\ndocument's writing direction; `\"left\"` and `\"right\"` are aliases of them.",
         "kind": "input"
       },
       {
@@ -6298,10 +6436,10 @@
     "selector": "\"mona-sidebar-layout\"",
     "inputs": [
       {
-        "name": "expanded",
-        "type": "boolean",
-        "description": "Sets whether the sidebar is expanded. Supports two-way binding.",
-        "kind": "model"
+        "name": "mobileBreakpoint",
+        "type": "number",
+        "description": "Viewport width, in pixels, below which the sidebar presents as an overlay drawer.\r\nSet to `0` to keep the docked presentation at every size.",
+        "kind": "input"
       },
       {
         "name": "userClass",
@@ -6318,7 +6456,7 @@
       {
         "name": "labelWidth",
         "type": "string | number",
-        "description": "Width of the label bar. Varying it across a list keeps the placeholder from looking\r\nlike a rigid grid. Numbers are treated as pixels.",
+        "description": "Width of the label bar. Varying it across a list keeps the placeholder from looking\nlike a rigid grid. Numbers are treated as pixels.",
         "kind": "input"
       },
       {

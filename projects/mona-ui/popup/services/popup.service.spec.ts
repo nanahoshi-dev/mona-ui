@@ -1,4 +1,4 @@
-import { Overlay } from "@angular/cdk/overlay";
+import { Overlay, OverlayContainer } from "@angular/cdk/overlay";
 import { ApplicationRef, Component, ElementRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { PopupRef } from "../models/PopupRef";
@@ -31,6 +31,23 @@ describe("PopupService", () => {
 
     it("should be created", () => {
         expect(service).toBeTruthy();
+    });
+
+    it("uses the CDK block scroll strategy when requested", () => {
+        const anchor = createAnchor();
+        const overlay = TestBed.inject(Overlay);
+        const blockScrollStrategy = overlay.scrollStrategies.block();
+        const blockSpy = vi.spyOn(overlay.scrollStrategies, "block").mockReturnValue(blockScrollStrategy);
+
+        popupRef = service.create({
+            anchor,
+            animation: false,
+            blockScroll: true,
+            content: PopupTestContentComponent
+        });
+
+        expect(blockSpy).toHaveBeenCalledOnce();
+        expect(popupRef.overlayRef.getConfig().scrollStrategy).toBe(blockScrollStrategy);
     });
 
     it("should update position when a plain scrollable ancestor scrolls", () => {
@@ -154,6 +171,64 @@ describe("PopupService", () => {
         anchor.dispatchEvent(new PointerEvent("click", { bubbles: true }));
 
         expect(closed).toBe(false);
+    });
+
+    /*
+     * The backdrop is detached at the start of the close so it fades out alongside the leave animation
+     * instead of vanishing in one frame when the overlay is disposed. It must not wait for the animation.
+     */
+    it("detaches the backdrop when the close starts, before the popup is disposed", () => {
+        const anchor = createAnchor();
+        const overlayContainer = TestBed.inject(OverlayContainer).getContainerElement();
+
+        popupRef = service.create({
+            anchor,
+            animation: { enter: "mona-popup-enter", leave: "mona-popup-leave" },
+            content: PopupTestContentComponent,
+            hasBackdrop: true
+        });
+        TestBed.inject(ApplicationRef).tick();
+
+        const backdrop = overlayContainer.querySelector<HTMLElement>(".cdk-overlay-backdrop");
+        expect(backdrop).not.toBeNull();
+        expect(backdrop?.style.pointerEvents).toBe("");
+
+        popupRef.close();
+        TestBed.inject(ApplicationRef).tick();
+
+        // CDK keeps the element until its own fade-out finishes; detaching is what starts that fade.
+        expect(backdrop?.style.pointerEvents).toBe("none");
+        expect(popupRef.overlayRef.hasAttached()).toBe(true);
+    });
+
+    /*
+     * An `animationcancel` is also raised when the enter animation is replaced by the leave animation, so
+     * it must not be treated as the leave having completed — the fallback timer owns that case instead.
+     */
+    it("does not dispose the popup when the leave animation is cancelled", async () => {
+        const anchor = createAnchor();
+        const overlayContainer = TestBed.inject(OverlayContainer).getContainerElement();
+        let closed = false;
+
+        popupRef = service.create({
+            anchor,
+            animation: { enter: "mona-popup-enter", leave: "mona-popup-leave" },
+            content: PopupTestContentComponent
+        });
+        popupRef.closed.subscribe(() => (closed = true));
+        TestBed.inject(ApplicationRef).tick();
+
+        popupRef.close();
+        const animationElement = overlayContainer.querySelector(".mona-popup-wrapper > div");
+        animationElement?.dispatchEvent(new Event("animationcancel", { bubbles: true }));
+        TestBed.inject(ApplicationRef).tick();
+
+        expect(closed).toBe(false);
+
+        await new Promise(resolve => setTimeout(resolve));
+        TestBed.inject(ApplicationRef).tick();
+
+        expect(closed).toBe(true);
     });
 
     it("should use custom positions array when provided", () => {
