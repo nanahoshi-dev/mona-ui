@@ -25,6 +25,32 @@ export class GridNavigationService {
         return true;
     }
 
+    public focusAdjacentEditableCell(rowUid: string, columnId: string, direction: "next" | "previous"): boolean {
+        const editableCells = this.#cellElementDict()
+            .where(
+                e =>
+                    e.value.section === "body" &&
+                    e.value.cellKind === "data" &&
+                    e.value.editable &&
+                    e.value.rowUid != null &&
+                    e.value.columnId != null
+            )
+            .orderBy(e => e.value.rowIndex)
+            .thenBy(e => e.value.colIndex)
+            .toArray();
+        const currentIndex = editableCells.findIndex(e => e.value.rowUid === rowUid && e.value.columnId === columnId);
+        if (currentIndex === -1) {
+            return false;
+        }
+        const target = editableCells[currentIndex + (direction === "next" ? 1 : -1)];
+        if (!target) {
+            return false;
+        }
+        this.#focusCell(target.key, target.value);
+        target.value.startEdit?.();
+        return true;
+    }
+
     public focusFirstCell(): void {
         const firstCell = this.#findFirstHeaderCell() ?? this.#findFirstCell();
         if (firstCell) {
@@ -305,6 +331,7 @@ export class GridNavigationService {
             left.cellKind === right.cellKind &&
             left.colIndex === right.colIndex &&
             left.columnId === right.columnId &&
+            left.editable === right.editable &&
             left.element === right.element &&
             left.firstInRow === right.firstInRow &&
             left.groupHeader === right.groupHeader &&
@@ -312,7 +339,8 @@ export class GridNavigationService {
             left.lastInRow === right.lastInRow &&
             left.rowIndex === right.rowIndex &&
             left.rowUid === right.rowUid &&
-            left.section === right.section
+            left.section === right.section &&
+            left.startEdit === right.startEdit
         );
     }
 
@@ -361,6 +389,7 @@ export interface NavigationData {
     cellKind: GridCellKind;
     colIndex: number;
     columnId?: string;
+    editable: boolean;
     element: HTMLTableCellElement;
     firstInRow: boolean;
     groupHeader: boolean;
@@ -369,6 +398,7 @@ export interface NavigationData {
     rowIndex: number;
     rowUid?: string;
     section: GridNavigationSection;
+    startEdit?: () => void;
 }
 
 interface NavigationCellSnapshot {

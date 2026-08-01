@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import type { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
+import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 
 import { GridCellComponent } from "./grid-cell.component";
@@ -47,7 +48,7 @@ describe("GridCellComponent", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [GridCellComponent],
-            providers: [GridService]
+            providers: [GridNavigationService, GridService]
         });
         fixture = TestBed.createComponent(GridCellComponent);
         component = fixture.componentInstance;

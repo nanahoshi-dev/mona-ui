@@ -85,6 +85,12 @@
                                 [cellKind]="column.kind"
                                 [colIndex]="colIndex"
                                 [columnId]="column.id"
+                                [editable]="
+                                    gridService.editableOptions().enabled === true &&
+                                    gridService.editableOptions().mode === 'cell' &&
+                                    column.kind === 'data' &&
+                                    column.editable === true
+                                "
                                 [rowIndex]="rowIndex"
                                 [rowUid]="row.uid"
                                 [section]="'body'"
@@ -278,6 +284,12 @@
                                     [cellKind]="column.kind"
                                     [colIndex]="colIndex"
                                     [columnId]="column.id"
+                                    [editable]="
+                                        gridService.editableOptions().enabled === true &&
+                                        gridService.editableOptions().mode === 'cell' &&
+                                        column.kind === 'data' &&
+                                        column.editable === true
+                                    "
                                     [firstInRow]="colIndex === 0"
                                     [lastInRow]="
                                         colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)

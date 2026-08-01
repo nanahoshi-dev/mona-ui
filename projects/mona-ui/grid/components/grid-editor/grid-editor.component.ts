@@ -24,6 +24,8 @@ import type { GridEditSession } from "../../models/GridEditSession";
 import type { GridEditTemplateContext } from "../../models/GridEditTemplateContext";
 import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } from "../../styles/grid.styles";
 
+const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
+
 @Component({
     selector: "mona-grid-editor",
     templateUrl: "./grid-editor.component.html",
@@ -38,7 +40,8 @@ import { gridCellEditorBaseThemeVariants, gridCellEditorInputThemeVariants } fro
         TooltipComponent
     ],
     host: {
-        "[class]": "baseClass()"
+        "[class]": "baseClass()",
+        "(keydown)": "onHostKeydown($event)"
     }
 })
 export class GridEditorComponent {
@@ -94,6 +97,13 @@ export class GridEditorComponent {
     public readonly commit = output<void>();
     public readonly isNew = input(false);
     public readonly session = input.required<GridEditSession>();
+
+    public readonly tabNavigate = output<"next" | "previous">();
+
+    /**
+     * @description Enables Tab and Shift+Tab traversal between editable cells while cell editing.
+     */
+    public readonly tabNavigationEnabled = input(false);
 
     public constructor() {
         effect(() => {
@@ -170,6 +180,15 @@ export class GridEditorComponent {
         }
     }
 
+    protected onHostKeydown(event: KeyboardEvent): void {
+        if (event.key !== "Tab" || !this.tabNavigationEnabled() || event.defaultPrevented) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.tabNavigate.emit(event.shiftKey ? "previous" : "next");
+    }
+
     #coerceNumberValue(value: unknown): number | null {
         if (typeof value === "number") {
             return Number.isFinite(value) ? value : null;
@@ -196,6 +215,10 @@ export class GridEditorComponent {
         if (!this.autoFocus()) {
             return;
         }
+        if (this.column().editTemplate) {
+            this.#focusTemplateTarget();
+            return;
+        }
         this.textBoxRef()?.focus();
         this.numericTextBoxRef()?.focus();
         const type = this.column().dataType;
@@ -206,6 +229,16 @@ export class GridEditorComponent {
         if (type === "boolean") {
             this.#focusBooleanInput();
         }
+    }
+
+    #focusTemplateTarget(): void {
+        const targets = Array.from(
+            this.#elementRef.nativeElement.querySelectorAll(FOCUSABLE_TARGET_SELECTOR)
+        ) as HTMLElement[];
+        const target = targets.find(
+            candidate => !candidate.hasAttribute("disabled") && candidate.getAttribute("aria-hidden") !== "true"
+        );
+        target?.focus();
     }
 
     #setFieldValue(value: unknown): void {

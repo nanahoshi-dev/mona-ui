@@ -38,6 +38,7 @@ export class GridLogicalCellDirective {
             cellKind: this.resolvedCellKind(),
             colIndex: this.colIndex(),
             columnId: this.columnId(),
+            editable: this.editable(),
             element: this.#hostElementRef.nativeElement,
             firstInRow: this.firstInRow(),
             groupHeader: this.groupHeader(),
@@ -45,7 +46,8 @@ export class GridLogicalCellDirective {
             lastInRow: this.lastInRow(),
             rowIndex: this.rowIndex(),
             rowUid: this.rowUid(),
-            section: this.resolvedSection()
+            section: this.resolvedSection(),
+            startEdit: this.editable() ? this.#startEdit : undefined
         };
         return data;
     });
@@ -55,6 +57,9 @@ export class GridLogicalCellDirective {
     readonly #gridNavigationService = inject(GridNavigationService);
     readonly #gridService = inject(GridService);
     readonly #hostElementRef = inject(ElementRef<HTMLTableCellElement>);
+    readonly #startEdit = (): void => {
+        this.edit.emit();
+    };
     protected readonly ariaColIndex = computed(() => this.colIndex() + this.#gridService.groupColumns().length + 1);
     protected readonly baseClass = computed(() => {
         if (this.#hostElementRef.nativeElement.tagName === "TH") {
@@ -96,6 +101,11 @@ export class GridLogicalCellDirective {
     public readonly colIndex = input.required<number>();
     public readonly columnId = input<string>();
     public readonly edit = output();
+
+    /**
+     * @description Marks the cell as a participant in Tab-driven cell edit traversal.
+     */
+    public readonly editable = input(false);
     public readonly firstInRow = input.required<boolean>();
     public readonly groupHeader = input<boolean>(false);
     public readonly groupKey = input<string>();
@@ -132,6 +142,21 @@ export class GridLogicalCellDirective {
         });
     }
 
+    public focusNextPageTabTarget(backwards: boolean): boolean {
+        const host = this.#hostElementRef.nativeElement;
+        const targets = this.#getPageTabTargets();
+        const orderedTargets = backwards ? targets.reverse() : targets;
+        const documentPosition = backwards ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
+        const target = orderedTargets.find(
+            candidate => (host.compareDocumentPosition(candidate) & documentPosition) !== 0
+        );
+        if (!target) {
+            return false;
+        }
+        target.focus();
+        return true;
+    }
+
     #focusInnerTarget(target: HTMLElement): void {
         target.focus();
     }
@@ -153,21 +178,6 @@ export class GridLogicalCellDirective {
             return false;
         }
         this.#focusInnerTarget(target);
-        return true;
-    }
-
-    #focusNextPageTabTarget(backwards: boolean): boolean {
-        const host = this.#hostElementRef.nativeElement;
-        const targets = this.#getPageTabTargets();
-        const orderedTargets = backwards ? targets.reverse() : targets;
-        const documentPosition = backwards ? Node.DOCUMENT_POSITION_PRECEDING : Node.DOCUMENT_POSITION_FOLLOWING;
-        const target = orderedTargets.find(
-            candidate => (host.compareDocumentPosition(candidate) & documentPosition) !== 0
-        );
-        if (!target) {
-            return false;
-        }
-        target.focus();
         return true;
     }
 
@@ -279,7 +289,7 @@ export class GridLogicalCellDirective {
         }
 
         if (event.key === "Tab") {
-            if (this.#focusNextPageTabTarget(event.shiftKey)) {
+            if (this.focusNextPageTabTarget(event.shiftKey)) {
                 event.preventDefault();
             }
             return;

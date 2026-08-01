@@ -1459,8 +1459,16 @@ export class GridService {
 
     private validateSessionForSave(session: GridEditSession): boolean {
         const rootField = session.form();
-        rootField.markAsTouched();
-        return !rootField.invalid() && !rootField.pending();
+        const editedField = session.mode === "cell" && session.field != null ? session.form[session.field] : null;
+        if (editedField == null) {
+            rootField.markAsTouched();
+            return !rootField.invalid() && !rootField.pending();
+        }
+        // A cell edit can only fix its own field. Row-level errors still block the save, but an invalid
+        // sibling field must not trap the user in a cell whose own value is valid.
+        const field = editedField();
+        field.markAsTouched();
+        return !field.invalid() && !field.pending() && rootField.errors().length === 0;
     }
 
     private serializeFilter(

@@ -1,8 +1,10 @@
 import { A11yModule } from "@angular/cdk/a11y";
 import { formatDate, NgTemplateOutlet } from "@angular/common";
-import { Component, computed, ElementRef, inject, input, LOCALE_ID } from "@angular/core";
+import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, LOCALE_ID } from "@angular/core";
+import { GridLogicalCellDirective } from "../../directives/grid-logical-cell.directive";
 import { Column } from "../../models/Column";
 import { Row } from "../../models/Row";
+import { GridNavigationService } from "../../services/grid-navigation.service";
 import { GridService } from "../../services/grid.service";
 import {
     gridCellBaseThemeVariants,
@@ -25,7 +27,10 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
 })
 export class GridCellComponent {
     readonly #elementRef = inject(ElementRef<HTMLElement>);
+    readonly #gridNavigationService = inject(GridNavigationService);
+    readonly #injector = inject(Injector);
     readonly #locale = inject(LOCALE_ID);
+    readonly #logicalCell = inject(GridLogicalCellDirective, { optional: true });
     protected readonly baseClass = computed(() => {
         return gridCellBaseThemeVariants();
     });
@@ -46,6 +51,7 @@ export class GridCellComponent {
         const effectiveRowData = editedRowData ?? rowData;
         return effectiveRowData[this.column().field];
     });
+    protected readonly editContextIsCellMode = computed(() => this.gridService.editContext()?.mode === "cell");
     protected readonly formattedDisplayValue = computed(() => {
         const column = this.column();
         const value = this.displayValue();
@@ -146,6 +152,30 @@ export class GridCellComponent {
         if (this.#elementRef.nativeElement.contains(this.#elementRef.nativeElement.ownerDocument.activeElement)) {
             this.focusHostCell();
         }
+    }
+
+    protected onEditTabNavigate(direction: "next" | "previous"): void {
+        const context = this.gridService.editContext();
+        if (context?.mode !== "cell") {
+            return;
+        }
+        const rowUid = this.row().uid;
+        const columnId = this.column().id;
+        if (!this.gridService.stopCellEdit()) {
+            return;
+        }
+        // The commit may replace the row data, so wait for the grid to re-render before starting the next edit.
+        afterNextRender(
+            {
+                read: () => {
+                    if (this.#gridNavigationService.focusAdjacentEditableCell(rowUid, columnId, direction)) {
+                        return;
+                    }
+                    this.#logicalCell?.focusNextPageTabTarget(direction === "previous");
+                }
+            },
+            { injector: this.#injector }
+        );
     }
 
     private focusHostCell(): void {

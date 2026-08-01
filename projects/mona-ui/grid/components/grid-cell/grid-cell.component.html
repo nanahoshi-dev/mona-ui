@@ -19,8 +19,10 @@
                 [column]="column()"
                 [autoFocus]="shouldAutoFocusEditor()"
                 [session]="session"
+                [tabNavigationEnabled]="editContextIsCellMode()"
                 (commit)="onEditCommit()"
-                (cancel)="onEditCancel()"></mona-grid-editor>
+                (cancel)="onEditCancel()"
+                (tabNavigate)="onEditTabNavigate($event)"></mona-grid-editor>
         } @else if (column().cellTemplate) {
             <ng-container
                 [ngTemplateOutlet]="column().cellTemplate"

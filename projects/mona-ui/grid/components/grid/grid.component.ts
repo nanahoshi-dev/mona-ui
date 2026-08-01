@@ -617,7 +617,13 @@ export class GridComponent<T> implements GridVariantInput {
             if (shouldRestoreGridFocus) {
                 afterNextRender(
                     {
-                        read: () => this.#gridNavigationService.focusActiveCellOrFirstHeader()
+                        read: () => {
+                            // An open editor owns its own focus; restoring the logical cell would steal it.
+                            if (this.gridService.editContext() != null) {
+                                return;
+                            }
+                            this.#gridNavigationService.focusActiveCellOrFirstHeader();
+                        }
                     },
                     { injector: this.#injector }
                 );
