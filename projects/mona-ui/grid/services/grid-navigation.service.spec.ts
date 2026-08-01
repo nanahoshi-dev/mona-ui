@@ -14,6 +14,7 @@ function createData(
 ): NavigationData {
     return {
         cellKind: "data",
+        editable: false,
         element: createElement(),
         firstInRow: false,
         groupHeader: false,
@@ -253,6 +254,189 @@ describe("GridNavigationService", () => {
 
             expect(focused).toBe(true);
             expect(second.element.focus).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("adjacent editable cell navigation", () => {
+        function createEditableRow(rowIndex: number, rowUid: string): NavigationData[] {
+            return [
+                createData({
+                    rowIndex,
+                    colIndex: 0,
+                    rowUid,
+                    columnId: "name",
+                    editable: true,
+                    startEdit: vi.fn(),
+                    firstInRow: true
+                }),
+                createData({
+                    rowIndex,
+                    colIndex: 1,
+                    rowUid,
+                    columnId: "amount",
+                    editable: true,
+                    startEdit: vi.fn(),
+                    lastInRow: true
+                })
+            ];
+        }
+
+        it("moves to the next editable cell in the same row", () => {
+            const [name, amount] = createEditableRow(0, "row-1");
+            service.registerCell(name);
+            service.registerCell(amount);
+
+            expect(service.focusAdjacentEditableCell("row-1", "name", "next")).toBe(true);
+            expect(amount.element.focus).toHaveBeenCalledTimes(1);
+        });
+
+        it("moves to the previous editable cell in the same row", () => {
+            const [name, amount] = createEditableRow(0, "row-1");
+            service.registerCell(name);
+            service.registerCell(amount);
+
+            expect(service.focusAdjacentEditableCell("row-1", "amount", "previous")).toBe(true);
+            expect(name.element.focus).toHaveBeenCalledTimes(1);
+        });
+
+        it("moves from the last editable cell of a row to the first editable cell of the next row", () => {
+            const [firstName, firstAmount] = createEditableRow(0, "row-1");
+            const [secondName, secondAmount] = createEditableRow(1, "row-2");
+            [firstName, firstAmount, secondName, secondAmount].forEach(cell => service.registerCell(cell));
+
+            expect(service.focusAdjacentEditableCell("row-1", "amount", "next")).toBe(true);
+            expect(secondName.element.focus).toHaveBeenCalledTimes(1);
+        });
+
+        it("moves from the first editable cell of a row to the last editable cell of the previous row", () => {
+            const [firstName, firstAmount] = createEditableRow(0, "row-1");
+            const [secondName, secondAmount] = createEditableRow(1, "row-2");
+            [firstName, firstAmount, secondName, secondAmount].forEach(cell => service.registerCell(cell));
+
+            expect(service.focusAdjacentEditableCell("row-2", "name", "previous")).toBe(true);
+            expect(firstAmount.element.focus).toHaveBeenCalledTimes(1);
+        });
+
+        it("skips non-editable data cells", () => {
+            const name = createData({
+                rowIndex: 0,
+                colIndex: 0,
+                rowUid: "row-1",
+                columnId: "name",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            const readOnly = createData({ rowIndex: 0, colIndex: 1, rowUid: "row-1", columnId: "id" });
+            const amount = createData({
+                rowIndex: 0,
+                colIndex: 2,
+                rowUid: "row-1",
+                columnId: "amount",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            [name, readOnly, amount].forEach(cell => service.registerCell(cell));
+
+            expect(service.focusAdjacentEditableCell("row-1", "name", "next")).toBe(true);
+            expect(readOnly.element.focus).not.toHaveBeenCalled();
+            expect(amount.element.focus).toHaveBeenCalledTimes(1);
+        });
+
+        it("skips command and structural cells", () => {
+            const name = createData({
+                rowIndex: 0,
+                colIndex: 0,
+                rowUid: "row-1",
+                columnId: "name",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            const detail = createData({
+                rowIndex: 0,
+                colIndex: 1,
+                rowUid: "row-1",
+                columnId: "detail",
+                cellKind: "detail",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            const command = createData({
+                rowIndex: 0,
+                colIndex: 2,
+                rowUid: "row-1",
+                columnId: "commands",
+                cellKind: "command",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            const nextRowName = createData({
+                rowIndex: 1,
+                colIndex: 0,
+                rowUid: "row-2",
+                columnId: "name",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            [name, detail, command, nextRowName].forEach(cell => service.registerCell(cell));
+
+            expect(service.focusAdjacentEditableCell("row-1", "name", "next")).toBe(true);
+            expect(detail.element.focus).not.toHaveBeenCalled();
+            expect(command.element.focus).not.toHaveBeenCalled();
+            expect(nextRowName.element.focus).toHaveBeenCalledTimes(1);
+        });
+
+        it("returns false after the last editable cell without wrapping", () => {
+            const [name, amount] = createEditableRow(0, "row-1");
+            service.registerCell(name);
+            service.registerCell(amount);
+
+            expect(service.focusAdjacentEditableCell("row-1", "amount", "next")).toBe(false);
+            expect(name.element.focus).not.toHaveBeenCalled();
+        });
+
+        it("returns false before the first editable cell without wrapping", () => {
+            const [name, amount] = createEditableRow(0, "row-1");
+            service.registerCell(name);
+            service.registerCell(amount);
+
+            expect(service.focusAdjacentEditableCell("row-1", "name", "previous")).toBe(false);
+            expect(amount.element.focus).not.toHaveBeenCalled();
+        });
+
+        it("returns false when the source cell is not a registered editable cell", () => {
+            const [name, amount] = createEditableRow(0, "row-1");
+            service.registerCell(name);
+            service.registerCell(amount);
+
+            expect(service.focusAdjacentEditableCell("row-9", "name", "next")).toBe(false);
+        });
+
+        it("ignores add-row cells", () => {
+            const addCell = createData({
+                rowIndex: -1,
+                colIndex: 0,
+                rowUid: "add-row",
+                columnId: "name",
+                section: "add",
+                editable: true,
+                startEdit: vi.fn()
+            });
+            const [name, amount] = createEditableRow(0, "row-1");
+            [addCell, name, amount].forEach(cell => service.registerCell(cell));
+
+            expect(service.focusAdjacentEditableCell("row-1", "name", "previous")).toBe(false);
+            expect(addCell.element.focus).not.toHaveBeenCalled();
+        });
+
+        it("invokes the destination startEdit callback", () => {
+            const [name, amount] = createEditableRow(0, "row-1");
+            service.registerCell(name);
+            service.registerCell(amount);
+
+            service.focusAdjacentEditableCell("row-1", "name", "next");
+
+            expect(amount.startEdit).toHaveBeenCalledTimes(1);
+            expect(name.startEdit).not.toHaveBeenCalled();
         });
     });
 

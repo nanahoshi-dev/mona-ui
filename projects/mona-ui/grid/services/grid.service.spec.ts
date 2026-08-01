@@ -1,5 +1,5 @@
 import { TestBed } from "@angular/core/testing";
-import { type FieldTree, validate } from "@angular/forms/signals";
+import { type FieldTree, type SchemaPathTree, validate } from "@angular/forms/signals";
 import { ImmutableList } from "@mirei/ts-collections";
 import type { Column } from "../models/Column";
 import type { GridEditSchemaFactory } from "../models/GridEditFormContext";
@@ -56,6 +56,15 @@ function getSessionField(session: GridEditSession, field: string): FieldTree<unk
     }
     return fieldTree as FieldTree<unknown>;
 }
+
+const requiredNameFieldSchema: GridEditSchemaFactory = () => row => {
+    validate(row["name"] as SchemaPathTree<unknown>, ({ value }) => {
+        const name = value();
+        return typeof name === "string" && name.trim() !== ""
+            ? undefined
+            : { kind: "required", message: "Name is required." };
+    });
+};
 
 const requiredNameSchema: GridEditSchemaFactory = () => row => {
     validate(row, ({ value }) => {
@@ -300,6 +309,66 @@ describe("GridService", () => {
             expect(saveEvents[0].rowData["name"]).toBe("Janet");
             expect(saveEvents[0].session).toBe(session);
             expect(service.editSession()).toBeNull();
+        });
+
+        it("blocks a cell save when the edited field itself is invalid", () => {
+            service.setEditableOptions({ enabled: true, mode: "cell", schema: requiredNameFieldSchema });
+            const row = service.rows().firstOrDefault();
+            const column = service.columns().firstOrDefault(c => c.field === "name");
+            if (row == null || column == null) {
+                throw new Error("Expected row and column");
+            }
+
+            expect(service.startCellEdit(`${row.uid}_name`, row, column)).toBe(true);
+            const session = service.editSession();
+            if (session == null) {
+                throw new Error("Expected edit session");
+            }
+            getSessionField(session, "name")().value.set("");
+
+            expect(service.stopCellEdit()).toBe(false);
+            expect(service.editSession()).toBe(session);
+        });
+
+        it("saves a valid cell even when another field in the row is invalid", () => {
+            const saveEvents: GridSaveEvent[] = [];
+            service.save$.subscribe(event => saveEvents.push(event));
+            service.setRows([{ id: 1, name: "" }]);
+            service.setEditableOptions({ enabled: true, mode: "cell", schema: requiredNameFieldSchema });
+            const row = service.rows().firstOrDefault();
+            const column = service.columns().firstOrDefault(c => c.field === "id");
+            if (row == null || column == null) {
+                throw new Error("Expected row and column");
+            }
+
+            expect(service.startCellEdit(`${row.uid}_id`, row, column)).toBe(true);
+            const session = service.editSession();
+            if (session == null) {
+                throw new Error("Expected edit session");
+            }
+            getSessionField(session, "id")().value.set(2);
+
+            expect(service.stopCellEdit()).toBe(true);
+
+            expect(saveEvents).toHaveLength(1);
+            expect(saveEvents[0].rowData["id"]).toBe(2);
+            expect(service.editSession()).toBeNull();
+        });
+
+        it("blocks a cell save when a row-level validator reports an error", () => {
+            service.setRows([{ id: 1, name: "" }]);
+            service.setEditableOptions({ enabled: true, mode: "cell", schema: requiredNameSchema });
+            const row = service.rows().firstOrDefault();
+            const column = service.columns().firstOrDefault(c => c.field === "id");
+            if (row == null || column == null) {
+                throw new Error("Expected row and column");
+            }
+
+            expect(service.startCellEdit(`${row.uid}_id`, row, column)).toBe(true);
+            const session = service.editSession();
+
+            expect(service.stopCellEdit()).toBe(false);
+            expect(service.editSession()).toBe(session);
         });
 
         it("blocks row save and keeps the session open when signal-form validation fails", () => {
