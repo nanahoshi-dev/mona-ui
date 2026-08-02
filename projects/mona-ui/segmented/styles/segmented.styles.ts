@@ -24,7 +24,7 @@ export const segmentedOptionThemeVariants = cva(
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:text-disabled-foreground
-        data-[selected='true']:bg-selected data-[selected='true']:text-selected-foreground
+        data-[selected='true']:bg-primary data-[selected='true']:text-primary-foreground
         data-[selected='true']:shadow-sm data-[selected='true']:ring-1 data-[selected='true']:ring-selected-border
         data-[selected='false']:text-muted-foreground
         data-[selected='false']:hover:bg-hover data-[selected='false']:hover:text-foreground

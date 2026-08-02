@@ -47,23 +47,22 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
 
 @Component({
     imports: [SegmentedComponent],
-    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
-        <div class="flex w-full flex-col gap-4">
+        <div class="flex w-full flex-col items-center gap-4">
             <mona-segmented
                 aria-label="Course section"
                 [disabled]="disabled()"
                 [options]="options()"
                 [size]="size()"
                 [(value)]="value"
-                class="w-full">
+                class="w-lg">
             </mona-segmented>
             <span>Selected value: {{ value() }}</span>
         </div>
     `
 })
 class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComponent> {
-    public readonly options = input<readonly SegmentedOption<SegmentedValue>[]>([
+    public readonly options = input<readonly SegmentedOption[]>([
         { label: "Discover", value: "discover" },
         { label: "My courses", value: "courses" },
         { label: "Archived", value: "archived", disabled: true }

@@ -73,11 +73,11 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
-            class="w-full"
+            class="w-96"
             [class.h-96]="position() === 'left' || position() === 'right'">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
-                    <div class="p-4 flex flex-col gap-3 bg-surface-muted">
+                    <div class="p-4 flex flex-col gap-3">
                         <div class="p-4 flex flex-col gap-1 items-center justify-center">
                             <h1 class="text-lg font-extrabold">Create an account</h1>
                             <span class="text-sm">Enter your email below to create your account.</span>
@@ -99,7 +99,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             </mona-tab>
             <mona-tab title="Login">
                 <ng-template monaTabContentTemplate>
-                    <div class="p-4 pt-8 flex flex-col gap-3 bg-surface-muted">
+                    <div class="p-4 pt-8 flex flex-col gap-3">
                         <div class="flex flex-col gap-1 items-center justify-center">
                             <h1 class="text-lg font-extrabold">Login</h1>
                         </div>
