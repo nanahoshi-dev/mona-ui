@@ -47,7 +47,7 @@ export const tabListListThemeVariants = cva(
 
 export const tabListListItemThemeVariants = cva(
     `
-        relative flex cursor-pointer outline-none
+        relative flex shrink-0 cursor-pointer outline-none
         focus-visible:ring-2 focus-visible:ring-focus-indicator/35
         transition-colors duration-(--mona-motion-standard) ease-out
     `,
