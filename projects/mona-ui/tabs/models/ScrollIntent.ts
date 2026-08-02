@@ -1,7 +1,7 @@
-import { ScrollDirection } from "@nanahoshi/mona-ui/common";
+export type TabScrollDirection = "previous" | "next";
 
 export interface ScrollIntent {
-    direction: ScrollDirection;
+    direction: TabScrollDirection;
     element: HTMLElement;
     type: "single" | "continuous";
 }

@@ -363,9 +363,7 @@ function createProfile(primary: string, includeLightOnly = false): ThemeProfile 
             "--mona-menubar-background": "raised",
             "--mona-menubar-shadow": "none",
             "--mona-pager-background": "raised",
-            "--mona-slider-handle-border-color": "transparent",
-            "--mona-tab-list-background": "raised",
-            "--mona-tab-content-background": "transparent"
+            "--mona-slider-handle-border-color": "transparent"
         },
         custom: includeLightOnly ? { "--example-light-only": "present" } : undefined
     };

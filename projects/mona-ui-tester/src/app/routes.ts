@@ -294,6 +294,13 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "segmented",
+                loadComponent: () =>
+                    import("./docs/components/segmented-doc/segmented-doc.component").then(
+                        m => m.SegmentedDocComponent
+                    )
+            },
+            {
                 path: "sidebar",
                 loadComponent: () =>
                     import("./docs/components/sidebar-doc/sidebar-doc.component").then(m => m.SidebarDocComponent)

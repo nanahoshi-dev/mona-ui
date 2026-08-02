@@ -1,19 +1,24 @@
-@if (scrollsVisible()) {
+@if (overflowControlsVisible()) {
     <button
         monaButton
         look="link"
         size="small"
         [class]="scrollButtonClass()"
-        (click)="startScrolling(tabListElement, 'left', 'single')"
-        (pointerdown)="startContinuousScroll($event, tabListElement, 'left')"
+        (click)="startScrolling(tabListElement, 'previous', 'single')"
+        (pointerdown)="startContinuousScroll($event, tabListElement, 'previous')"
         (pointerup)="stopScrolling()"
+        (pointercancel)="stopScrolling()"
         [attr.aria-hidden]="true"
         tabindex="-1">
-        <svg lucideChevronLeft [size]="16"></svg>
+        @if (orientation() === 'vertical') {
+            <svg lucideChevronUp [size]="16"></svg>
+        } @else {
+            <svg lucideChevronLeft [size]="16"></svg>
+        }
     </button>
 }
-<div class="w-full h-full overflow-hidden">
-    <ul [class]="listClass()" #tabListElement role="tablist">
+<div [class]="listWrapperClass()">
+    <ul [class]="listClass()" #tabListElement role="tablist" [attr.aria-orientation]="orientation()">
         @for (tab of tabList(); track tab) {
             @let selected = tab.id === selectedTabId();
             @let itemDisabled = tab.disabled || disabled();
@@ -22,7 +27,8 @@
                 [id]="tab.id + '-tab'"
                 [active]="selected"
                 [disabled]="itemDisabled"
-                [rounded]="rounded()"
+                [position]="position()"
+                [size]="size()"
                 role="tab"
                 [tabindex]="selected ? 0 : -1"
                 [attr.aria-selected]="selected"
@@ -53,17 +59,22 @@
         }
     </ul>
 </div>
-@if (scrollsVisible()) {
+@if (overflowControlsVisible()) {
     <button
         monaButton
         look="link"
         size="small"
         [class]="scrollButtonClass()"
-        (click)="startScrolling(tabListElement, 'right', 'single')"
-        (pointerdown)="startContinuousScroll($event, tabListElement, 'right')"
+        (click)="startScrolling(tabListElement, 'next', 'single')"
+        (pointerdown)="startContinuousScroll($event, tabListElement, 'next')"
         (pointerup)="stopScrolling()"
+        (pointercancel)="stopScrolling()"
         [attr.aria-hidden]="true"
         tabindex="-1">
-        <svg lucideChevronRight [size]="16"></svg>
+        @if (orientation() === 'vertical') {
+            <svg lucideChevronDown [size]="16"></svg>
+        } @else {
+            <svg lucideChevronRight [size]="16"></svg>
+        }
     </button>
 }

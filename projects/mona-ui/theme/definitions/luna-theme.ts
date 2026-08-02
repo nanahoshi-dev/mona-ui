@@ -51,9 +51,7 @@ export const lunaTheme = Object.freeze({
                 "--mona-menubar-background": "var(--mona-effect-control-background-color)",
                 "--mona-menubar-shadow": "var(--shadow-control)",
                 "--mona-pager-background": "var(--mona-effect-raised-background-color)",
-                "--mona-slider-handle-border-color": "var(--color-border-control)",
-                "--mona-tab-list-background": "#f5f5f6",
-                "--mona-tab-content-background": "var(--color-surface)"
+                "--mona-slider-handle-border-color": "var(--color-border-control)"
             })
         }),
         dark: Object.freeze({
@@ -99,9 +97,7 @@ export const lunaTheme = Object.freeze({
                 "--mona-menubar-background": "var(--mona-effect-control-background-color)",
                 "--mona-menubar-shadow": "var(--shadow-control)",
                 "--mona-pager-background": "var(--mona-effect-raised-background-color)",
-                "--mona-slider-handle-border-color": "var(--color-border-control)",
-                "--mona-tab-list-background": "var(--mona-effect-raised-background-color)",
-                "--mona-tab-content-background": "var(--color-surface)"
+                "--mona-slider-handle-border-color": "var(--color-border-control)"
             })
         })
     }

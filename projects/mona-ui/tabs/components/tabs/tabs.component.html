@@ -1,7 +1,7 @@
 <mona-tab-list
     [closable]="closable()"
     [disabled]="disabled()"
-    [rounded]="rounded()"
+    [position]="position()"
     [size]="size()"
     [tabList]="tabList()"
     [selectedTabId]="selectedTabId()"
@@ -15,7 +15,7 @@
         @let tabHidden = keepTabContent() && !selected;
         @if (tabLoaded) {
             <div
-                class="w-full h-full outline-none"
+                class="w-full h-full outline-none rounded-sm focus-visible:outline-2 focus-visible:outline-focus-indicator focus-visible:outline-offset-2"
                 [class.hidden]="tabHidden"
                 role="tabpanel"
                 [id]="tab.id + '-panel'"

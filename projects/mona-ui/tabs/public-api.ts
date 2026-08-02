@@ -4,6 +4,7 @@
 
 export * from "./models/TabCloseEvent";
 export * from "./models/TabSelectEvent";
+export * from "./models/TabsPosition";
 export * from "./directives/tab-content-template.directive";
 export * from "./directives/tab-title-template.directive";
 export * from "./components/tabs/tabs.component";

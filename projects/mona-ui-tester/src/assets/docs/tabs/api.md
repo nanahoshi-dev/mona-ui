@@ -104,16 +104,52 @@ Closing a tab is entirely the consumer's responsibility — see [Tabs are remove
 </mona-tabs>
 ```
 
-### Sizing and border radius
+### Position
 
-`size` controls the tab strip's height; `rounded` controls the border radius applied to both the tab strip and the content area.
+`position` places the tab strip on one of the four edges of the tab content. Top and bottom strips lay out horizontally; left and right strips lay out vertically.
 
 ```html
-<mona-tabs size="small" rounded="full">
+<mona-tabs position="top">
     <mona-tab title="A"><ng-template monaTabContentTemplate>A</ng-template></mona-tab>
     <mona-tab title="B"><ng-template monaTabContentTemplate>B</ng-template></mona-tab>
 </mona-tabs>
 ```
+
+```html
+<mona-tabs position="left" class="h-96">
+    <mona-tab title="A"><ng-template monaTabContentTemplate>A</ng-template></mona-tab>
+    <mona-tab title="B"><ng-template monaTabContentTemplate>B</ng-template></mona-tab>
+</mona-tabs>
+```
+
+A left or right strip requires a constrained available height so its tabs can scroll vertically when they overflow — see [Vertical layout constraints](#vertical-layout-constraints).
+
+### Size
+
+`size` controls the tab strip's dimensions.
+
+```html
+<mona-tabs size="small">
+    <mona-tab title="A"><ng-template monaTabContentTemplate>A</ng-template></mona-tab>
+    <mona-tab title="B"><ng-template monaTabContentTemplate>B</ng-template></mona-tab>
+</mona-tabs>
+```
+
+### Migrating from the removed `rounded` input
+
+The `rounded` input has been removed. Tabs are line-based: the tab strip is separated from the content by a rule and the active tab is marked by an indicator line, so no radius is applied to the strip or the content.
+
+```text
+Before:
+<mona-tabs rounded="large">
+
+After:
+<mona-tabs>
+```
+
+Tab content no longer receives a default card-like surface. Consumers that need that appearance should wrap their tab content in `mona-card` or apply their own surface styles.
+
+For compact value selection that does not switch panels — `List | Grid`, `Day | Week | Month`, `Discover | My courses` — use `SegmentedComponent` instead.
 
 ### Reacting to and canceling tab selection
 
@@ -152,9 +188,13 @@ Each `mona-tab` accepts a two-way `selected` model. `TabsComponent` selects the 
 
 A tab's own `closable` input always wins when it disagrees with the parent `mona-tabs`'s `closable`: setting a tab's `closable` to `true` shows its close button even if the parent's `closable` is `false`. There is no equivalent per-tab override to hide the close button on one tab when the parent's `closable` is `true`.
 
-### Horizontal scrolling is automatic and pointer-only
+### Scrolling is automatic and pointer-only
 
-When the tab strip is wider than its container, left/right scroll buttons appear automatically — this is not controlled by a public input. The scroll buttons are hidden from assistive technology and are not a Tab stop. Keyboard users can still reach tabs outside the visible area because moving focus with the arrow keys scrolls the newly focused tab into view.
+When the tab strip overflows its container, scroll buttons appear automatically — this is not controlled by a public input. Top and bottom strips overflow horizontally (left/right scroll buttons); left and right strips overflow vertically (up/down scroll buttons). The scroll buttons are hidden from assistive technology and are not a Tab stop. Keyboard users can still reach tabs outside the visible area because moving focus with the arrow keys scrolls the newly focused tab into view.
+
+### Vertical layout constraints
+
+A left or right tab strip needs a constrained available height. If the strip is as tall as its content, the tabs have no room to scroll and overflow tabs become unreachable. Give the `mona-tabs` host a bounded height (for example `class="h-96"`) when using `position="left"` or `position="right"`.
 
 ## Accessibility & Forms Integration
 
@@ -162,7 +202,8 @@ When the tab strip is wider than its container, left/right scroll buttons appear
 
 | Key                                            | Action                                                                                        |
 |------------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `ArrowLeft` / `ArrowRight`                     | Select the previous/next enabled tab, wrapping around at the ends. Disabled tabs are skipped. |
+| `ArrowLeft` / `ArrowRight` (top/bottom)        | Select the previous/next enabled tab, wrapping around at the ends. Disabled tabs are skipped. |
+| `ArrowUp` / `ArrowDown` (left/right)           | Select the previous/next enabled tab, wrapping around at the ends. Disabled tabs are skipped. |
 | `Home` / `End`                                 | Select the first/last enabled tab.                                                            |
 | `Delete` / `Backspace`                         | Close the selected tab, if it is closable and not disabled.                                   |
 | `Tab`                                          | Moves focus from the selected tab into its panel.                                             |
@@ -176,10 +217,11 @@ The selected tab is the only tab in the Tab order (`tabindex="0"`); all other ta
 
 ### ARIA
 
-| Element  | Attribute         | When present                                                   | Value                                                                                    |
-|----------|-------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| Tab list | `role`            | Always                                                         | `"tablist"`                                                                              |
-| Tab      | `role`            | Always                                                         | `"tab"`                                                                                  |
+| Element  | Attribute          | When present                                                   | Value                                                                                    |
+|----------|--------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| Tab list | `role`             | Always                                                         | `"tablist"`                                                                              |
+| Tab list | `aria-orientation` | Always                                                         | `"horizontal"` for top/bottom positions, `"vertical"` for left/right                     |
+| Tab      | `role`             | Always                                                         | `"tab"`                                                                                  |
 | Tab      | `aria-selected`   | Always                                                         | Reflects whether the tab is the active tab                                               |
 | Tab      | `aria-disabled`   | Always                                                         | Reflects the tab's effective disabled state (own `disabled`, or the parent's `disabled`) |
 | Tab      | `aria-controls`   | Always                                                         | The corresponding panel's element id                                                     |
@@ -207,7 +249,7 @@ Not applicable. `TabsComponent` and `TabComponent` are not form controls and do 
 | `closable`       | `boolean`                                            | `false`    | Displays a close button on each tab, unless overridden per tab — see [`closable` precedence](#closable-precedence).                                                             |
 | `disabled`       | `boolean`                                            | `false`    | Renders every tab with reduced visual emphasis and removes pointer and keyboard interaction.                                                                                    |
 | `keepTabContent` | `boolean`                                            | `true`     | Keeps a tab's content in the DOM after it is deselected instead of removing it — see [Preserving tab content when switching tabs](#preserving-tab-content-when-switching-tabs). |
-| `rounded`        | `"none" \| "small" \| "medium" \| "large" \| "full"` | `"medium"` | Border-radius preset applied to the tabs and the tab content area.                                                                                                              |
+| `position`       | `"top" \| "bottom" \| "left" \| "right"`             | `"top"`    | Placement of the tab list relative to the tab content — see [Position](#position).                                                                                              |
 | `size`           | `"small" \| "medium" \| "large"`                     | `"medium"` | Size preset controlling the tabs' dimensions.                                                                                                                                   |
 
 #### Outputs
@@ -276,19 +318,21 @@ Extends `PreventableEvent`.
 ---
 
 <!-- verification-checklist
-- [x] TabsComponent inputs/outputs/defaults verified against tabs.component.ts source and cross-checked against component-metadata.json's TabsComponent entry (class, closable, disabled, keepTabContent, rounded, size, tabClose, tabSelect)
+- [x] TabsComponent inputs/outputs/defaults verified against tabs.component.ts source and cross-checked against component-metadata.json's TabsComponent entry (class, closable, disabled, keepTabContent, position, size, tabClose, tabSelect); rounded input confirmed removed from source and metadata
+- [x] position input type "top" | "bottom" | "left" | "right" and default "top" verified against tabs.component.ts
 - [x] TabComponent inputs/defaults verified against tab.component.ts source and cross-checked against component-metadata.json's TabComponent entry (closable, disabled, selected, title); confirmed no outputs
 - [x] Confirmed TabsComponent, TabComponent, TabCloseEvent, TabSelectEvent, TabContentTemplateDirective, TabTitleTemplateDirective are exported via lib/index.ts; confirmed TabListComponent, TabListItemDirective, TabItem, ScrollIntent are NOT exported and were excluded from public API docs
 - [x] "A tab renders no content without monaTabContentTemplate" verified against tab.component.ts (template: "") and tabs.component.html ([ngTemplateOutlet]="tab.contentTemplate")
 - [x] Template contexts for TabContentTemplateDirective/TabTitleTemplateDirective confirmed as none: [ngTemplateOutlet] bindings in tabs.component.html and tab-list.component.html pass no context object
-- [x] Keyboard map verified against tab-list.component.ts's handleKeyboardEvents (ArrowLeft/ArrowRight/Home/End filtered to enabled tabs, Delete/Backspace guarded by disabled/closable) and tabs.component.ts's handlePanelKeyDown (Shift+Tab only when event.target === event.currentTarget)
+- [x] Keyboard map verified against tab-list.component.ts's handleKeyboardEvents (ArrowLeft/ArrowRight/ArrowUp/ArrowDown via getNavigationDirection based on orientation, Home/End filtered to enabled tabs, Delete/Backspace guarded by disabled/closable) and tabs.component.ts's handlePanelKeyDown (Shift+Tab only when event.target === event.currentTarget)
 - [x] Roving tabindex and panel tabindex verified against tab-list.component.html ([tabindex]="selected ? 0 : -1") and tabs.component.html (tabindex="0" on the panel)
-- [x] ARIA table verified against tab-list.component.html (role="tablist" on the <ul>, role="tab", aria-selected, aria-disabled, aria-controls) and tabs.component.html (role="tabpanel", aria-hidden, aria-labelledby, id)
+- [x] ARIA table verified against tab-list.component.html (role="tablist" on the <ul>, [attr.aria-orientation]="orientation()", role="tab", aria-selected, aria-disabled, aria-controls) and tabs.component.html (role="tabpanel", aria-hidden, aria-labelledby, id); getTabOrientation maps top/bottom to horizontal and left/right to vertical
 - [x] Close button icon-only/no accessible name verified: no aria-label or visually hidden text in the close <button> in tab-list.component.html; flagged as owner-review rather than asserted as intentional
 - [x] "tabClose is not preventable" verified: emitTabClose's return value (tabCloseEvent.isDefaultPrevented()) is discarded by both call sites (onTabClose, and the Delete/Backspace branch of handleKeyboardEvents) in tab-list.component.ts
 - [x] "selected does not drive the active tab" verified: grepped all reads of `.selected` in projects/mona-ui/src/lib/layout/tabs — the only read is inside tab.component.ts's own #tabItem computed; selectedTabId's linkedSignal computation in tabs.component.ts does not reference tab.selected
 - [x] "closable precedence" verified against tab-list.component.html's close button *ngIf-equivalent condition (tab.closable || closable()) and the Delete/Backspace guard in tab-list.component.ts
-- [x] Automatic horizontal scrolling and scroll button aria-hidden/tabindex=-1 verified against tab-list.component.ts's ResizeObserver-driven scrollsVisible signal and tab-list.component.html's scroll button markup
+- [x] Automatic scrolling (horizontal for top/bottom, vertical for left/right) and scroll button aria-hidden/tabindex=-1 verified against tab-list.component.ts's ResizeObserver-driven overflowControlsVisible signal, updateScrollVisibility (scrollWidth/scrollHeight), performScroll (scrollBy left/top), and tab-list.component.html's scroll button markup
+- [x] Vertical layout constraints verified against tabs.styles.ts position recipes and the left/right overflow detection path (scrollHeight > clientHeight)
 - [x] Form interaction "not applicable" verified: no ControlValueAccessor, NG_VALUE_ACCESSOR provider, formField input, or signal-forms control interface implemented by TabsComponent or TabComponent
 - [x] No internal-only symbols (TabListComponent, TabListItemDirective, TabItem, ScrollIntent, Tailwind class names, data-tab-id/data-selected attributes) documented as public API
 -->

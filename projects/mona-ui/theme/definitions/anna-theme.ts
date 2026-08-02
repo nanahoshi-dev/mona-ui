@@ -19,9 +19,7 @@ const components: ThemeComponents = Object.freeze({
     "--mona-menubar-background": "var(--color-surface-muted)",
     "--mona-menubar-shadow": "none",
     "--mona-pager-background": "var(--color-surface-muted)",
-    "--mona-slider-handle-border-color": "var(--color-focus-indicator)",
-    "--mona-tab-list-background": "var(--color-surface-muted)",
-    "--mona-tab-content-background": "transparent"
+    "--mona-slider-handle-border-color": "var(--color-focus-indicator)"
 });
 
 export const annaTheme = Object.freeze({

@@ -1,20 +1,23 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { TabsPosition } from "../../models/TabsPosition";
 import { TabListComponent } from "../tab-list/tab-list.component";
 import { TabComponent } from "../tab/tab.component";
 import { TabsComponent } from "./tabs.component";
 
 @Component({
     template: `
-        <mona-tabs>
+        <mona-tabs [position]="position()">
             <mona-tab title="Tab 1">Content 1</mona-tab>
             <mona-tab title="Tab 2">Content 2</mona-tab>
         </mona-tabs>
     `,
     imports: [TabsComponent, TabComponent]
 })
-class TestHostComponent {}
+class TestHostComponent {
+    public readonly position = signal<TabsPosition>("top");
+}
 
 @Component({
     template: `
@@ -109,6 +112,29 @@ describe("TabsComponent", () => {
 
         expect(tabElement.id).toBe(panelElement.getAttribute("aria-labelledby"));
         expect(panelElement.getAttribute("aria-labelledby")).not.toBe(panelElement.id);
+    });
+
+    it("should default position to top", () => {
+        const debugElement = fixture.debugElement.query(By.directive(TabsComponent));
+        const tabListDe = debugElement.query(By.directive(TabListComponent));
+        const tabListComponent = tabListDe.componentInstance as TabListComponent;
+        expect(tabListComponent.position()).toBe("top");
+    });
+
+    it("should propagate position to TabListComponent", () => {
+        component.position.set("right");
+        fixture.detectChanges();
+
+        const debugElement = fixture.debugElement.query(By.directive(TabsComponent));
+        const tabListDe = debugElement.query(By.directive(TabListComponent));
+        const tabListComponent = tabListDe.componentInstance as TabListComponent;
+        expect(tabListComponent.position()).toBe("right");
+    });
+
+    it("should not expose a rounded input", () => {
+        const debugElement = fixture.debugElement.query(By.directive(TabsComponent));
+        const tabsComponent = debugElement.componentInstance as TabsComponent & Record<string, unknown>;
+        expect("rounded" in tabsComponent).toBe(false);
     });
 });
 

@@ -37,13 +37,12 @@ export class TabsComponent implements TabsVariantInput {
     private readonly tabListComponent = viewChild.required(TabListComponent);
     private readonly tabs = contentChildren(TabComponent);
     protected readonly baseClass = computed(() => {
-        const variantClass = tabsBaseThemeVariants();
+        const variantClass = tabsBaseThemeVariants({ position: this.position() });
         const userClass = this.userClass();
         return twMerge(variantClass, userClass);
     });
     protected readonly contentClass = computed(() => {
-        const rounded = this.rounded() === "full" ? "large" : this.rounded();
-        return tabContentThemeVariants({ rounded });
+        return tabContentThemeVariants();
     });
     protected readonly selectedTabId = linkedSignal<ImmutableSet<TabItem>, string | null>({
         source: () => this.tabList(),
@@ -81,10 +80,10 @@ export class TabsComponent implements TabsVariantInput {
     public readonly keepTabContent = input(true);
 
     /**
-     * @description Border-radius preset applied to the tabs and the tab content area.
-     * @default "medium"
+     * @description Placement of the tab list relative to the tab content.
+     * @default "top"
      */
-    public readonly rounded = input<TabsVariantProps["rounded"]>("medium");
+    public readonly position = input<TabsVariantProps["position"]>("top");
 
     /**
      * @description Size preset controlling the tabs' dimensions.

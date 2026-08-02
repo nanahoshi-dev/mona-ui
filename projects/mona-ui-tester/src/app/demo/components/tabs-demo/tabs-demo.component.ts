@@ -45,10 +45,10 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                 type: "boolean",
                 value: true
             },
-            rounded: {
+            position: {
                 type: "dropdown",
-                value: ["none", "small", "medium", "large", "full"],
-                defaultValue: "large"
+                value: ["top", "bottom", "left", "right"],
+                defaultValue: "top"
             },
             size: {
                 type: "dropdown",
@@ -69,11 +69,12 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
         <mona-tabs
             [closable]="closable()"
             [keepTabContent]="keepTabContent()"
-            [rounded]="rounded()"
+            [position]="position()"
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
-            class="w-92 items-center">
+            class="w-full"
+            [class.h-96]="position() === 'left' || position() === 'right'">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
                     <div class="p-4 flex flex-col gap-3 bg-surface-muted">
@@ -132,7 +133,7 @@ export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsCompone
     });
     public readonly closable = input<ReturnType<TabsComponent["closable"]>>(false);
     public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(true);
-    public readonly rounded = input<ReturnType<TabsComponent["rounded"]>>("large");
+    public readonly position = input<ReturnType<TabsComponent["position"]>>("top");
     public readonly size = input<ReturnType<TabsComponent["size"]>>("medium");
 
     protected onTabClose(event: TabCloseEvent): void {
