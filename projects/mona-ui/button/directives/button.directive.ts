@@ -33,7 +33,7 @@ import { buttonThemeVariants, ButtonVariantProps, ButtonVariantsInput } from "..
         "[attr.data-size]": "effectiveSize()",
         "[attr.disabled]": "effectiveDisabled() || loading() ? '' : undefined",
         "[attr.tabindex]": "effectiveDisabled() || loading() ? -1 : tabindex()",
-        "[attr.type]": "'button'",
+        "[attr.type]": "type()",
         "[class]": "baseClass()"
     }
 })
@@ -143,6 +143,13 @@ export class ButtonDirective implements ButtonVariantsInput {
     public readonly tabindex = input<number, number | string>(0, {
         transform: (value: number | string) => (typeof value === "string" ? parseInt(value, 10) : value)
     });
+
+    /**
+     * @description Native `type` attribute of the button. Defaults to `"button"` to prevent accidental
+     * form submission; set to `"submit"` or `"reset"` explicitly when that behavior is intended.
+     * @default "button"
+     */
+    public readonly type = input<"button" | "reset" | "submit">("button");
 
     /**
      * @description Enables toggle behavior — each click flips the `selected` state and `aria-pressed` is managed.

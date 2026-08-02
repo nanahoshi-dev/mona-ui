@@ -25,6 +25,7 @@ import { ButtonDirective } from "./button.directive";
             [toggleable]="toggleable()"
             [aria-haspopup]="ariaHasPopup()"
             [class]="userClass()"
+            [type]="type()"
             (selectedChange)="onSelectedChange($event)">
             Test Button
         </button>
@@ -43,6 +44,7 @@ class TestButtonHostComponent {
     toggleable = signal(false);
     ariaHasPopup = signal("false");
     userClass = signal("");
+    type = signal<"button" | "reset" | "submit">("button");
 
     onSelectedChange = vi.fn();
     buttonDirective = viewChild.required(ButtonDirective);
@@ -526,10 +528,31 @@ describe("ButtonDirective", () => {
     });
 
     // =========================================================================
+    // Type Input Tests
+    // =========================================================================
+    describe("type input", () => {
+        it("should set type='button' by default", () => {
+            expect(buttonElement.getAttribute("type")).toBe("button");
+        });
+
+        it("should set type='submit' when type='submit'", () => {
+            component.type.set("submit");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("type")).toBe("submit");
+        });
+
+        it("should set type='reset' when type='reset'", () => {
+            component.type.set("reset");
+            fixture.detectChanges();
+            expect(buttonElement.getAttribute("type")).toBe("reset");
+        });
+    });
+
+    // =========================================================================
     // Accessibility Tests
     // =========================================================================
     describe("accessibility", () => {
-        it("should always have type='button'", () => {
+        it("should default to type='button' for accidental-submit safety", () => {
             expect(buttonElement.getAttribute("type")).toBe("button");
         });
 
