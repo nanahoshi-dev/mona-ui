@@ -8,7 +8,7 @@
         [disabled]="disabled()"
         [indeterminate]="indeterminate()"
         [required]="required()"
-        [ngModel]="checked()"
+        [checked]="checked()"
         [tabindex]="disabled() ? -1 : tabIndex()"
         [class]="checkBoxClasses()"
         [attr.aria-checked]="indeterminate() ? 'mixed' : null"
@@ -17,7 +17,6 @@
         (change)="onInputChange($event)"
         (blur)="onInputBlur($event)"
         (focus)="inputFocus.emit($event)"
-        (ngModelChange)="onCheckedChange($event)"
         #checkBox />
 
     <span [class]="checkMarkClasses()" [attr.data-invalid]="invalidState() || null" aria-hidden="true">

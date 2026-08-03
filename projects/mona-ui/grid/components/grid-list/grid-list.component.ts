@@ -29,6 +29,7 @@ import {
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
+import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
 import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 
 @Component({
@@ -49,7 +50,8 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         GridFooterTableCellDirective,
         GridLogicalCellDirective,
         GridLockedCellDirective,
-        GridFooterCellComponent
+        GridFooterCellComponent,
+        GridSelectionCheckboxComponent
     ],
     host: {
         "[class]": "baseClass()"

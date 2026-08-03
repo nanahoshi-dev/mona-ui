@@ -112,6 +112,11 @@ export class GridService {
     });
     public readonly addRowVisible = computed(() => this.addRowData() != null);
     public readonly add$ = new Subject<GridAddEvent>();
+    public readonly allBulkSelectionRowsSelected = computed(() => {
+        const rows = this.bulkSelectionRows();
+        return rows.any() && rows.all(row => this.isRowSelected(row));
+    });
+
     public readonly aggregateColumns = computed(() => {
         return this.visibleColumns()
             .where(column => column.kind === "data" && column.aggregate != null)
@@ -134,6 +139,13 @@ export class GridService {
     public readonly appliedSorts = signal(ImmutableDictionary.create<string, ColumnSortState>());
     public readonly bodyScrollElement = signal<HTMLElement | null>(null);
     public readonly bodyTableElement = signal<HTMLTableElement | null>(null);
+    public readonly bulkSelectionRows = computed(() => {
+        const options = this.selectableOptions();
+        if (options.selectAllScope === "page" && !this.virtualScrollOptions().enabled) {
+            return this.viewPageRows();
+        }
+        return this.viewRows();
+    });
     public readonly cellEdit$ = new Subject<CellEditEvent>();
     public readonly cancel$ = new Subject<GridCancelEvent>();
     /** Set of currently collapsed group keys (global, shared by both paginated and virtual list). */
@@ -144,6 +156,9 @@ export class GridService {
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 36;
+    public readonly detailStructuralWidth = computed(() =>
+        this.masterDetailTemplate() != null ? this.detailColumnWidth : 0
+    );
     public readonly editBaseDict = computed(() => {
         const pairs = this.#editSource().select(item => new KeyValuePair(item.$rowId, item));
         return ImmutableDictionary.create(pairs);
@@ -196,9 +211,12 @@ export class GridService {
             .where(column => column != null)
             .toImmutableList();
     });
+    public readonly groupStructuralWidth = computed(() => this.groupColumns().length * this.groupColumnWidth);
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false, showFooter: false });
-    public readonly hasLeftLockedColumns = computed(() =>
-        this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
+    public readonly hasLeftLockedColumns = computed(
+        () =>
+            this.selectionColumnVisible() ||
+            this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
     public readonly hasFooter = computed(() => this.aggregateColumns().any());
     public readonly hasLiveScrollbarGutterWidth = computed(() => this.#scrollbarGutterMeasurementSource() === "body");
@@ -209,16 +227,14 @@ export class GridService {
         if (!this.hasLeftLockedColumns()) {
             return 0;
         }
-        const groupWidth = this.groupColumnWidth * this.groupColumns().length;
-        const detailWidth = this.masterDetailTemplate() != null ? this.detailColumnWidth : 0;
-        return groupWidth + detailWidth;
+        return this.leadingStructuralWidth();
     });
     public readonly lockedColumnStates = computed<ReadonlyMap<string, GridLockedColumnState>>(() => {
         const states = new Map<string, GridLockedColumnState>();
         const columns = this.visibleColumns().toArray();
         const leftColumns = columns.filter(column => column.locked && column.lockedPosition === "left");
         const rightColumns = columns.filter(column => column.locked && column.lockedPosition === "right");
-        let leftOffset = this.leftLockedStructuralWidth();
+        let leftOffset = this.leadingStructuralWidth();
         for (const [index, column] of leftColumns.entries()) {
             states.set(column.id, {
                 edge: index === leftColumns.length - 1,
@@ -239,16 +255,25 @@ export class GridService {
         }
         return states;
     });
+    public readonly leadingStructuralWidth = computed(
+        () => this.groupStructuralWidth() + this.detailStructuralWidth() + this.selectionStructuralWidth()
+    );
+    public readonly leadingStructuralColumnCount = computed(
+        () =>
+            this.groupColumns().length +
+            (this.masterDetailTemplate() != null ? 1 : 0) +
+            (this.selectionColumnVisible() ? 1 : 0)
+    );
+    public readonly leadingLogicalColumnCount = computed(
+        () => (this.masterDetailTemplate() != null ? 1 : 0) + (this.selectionColumnVisible() ? 1 : 0)
+    );
     public readonly masterDetailEmptyCellWidth = computed(() => {
         return this.detailColumnWidth * (this.groupColumns().length + 1);
     });
     public readonly masterDetailRowWidth = computed(() => {
-        const groupColumns = this.groupColumns();
         const columns = this.visibleColumns();
-        const groupColumnWidth = this.groupColumnWidth;
-        const groupColumnCount = groupColumns.length;
         const columnListWidth = columns.aggregate((acc, c) => acc + this.getColumnWidth(c), 0);
-        return this.normalizeRenderedWidth(groupColumnWidth * (groupColumnCount + 1) + columnListWidth);
+        return this.normalizeRenderedWidth(this.leadingStructuralWidth() + columnListWidth);
     });
     public readonly masterDetailTemplate = signal<TemplateRef<unknown> | null>(null);
     public readonly newRowFactory = signal<() => Record<PropertyKey, unknown>>(() => ({}));
@@ -263,16 +288,41 @@ export class GridService {
     public readonly scrollEndThreshold = signal<number>(5);
     public readonly scrollbarGutterWidth = this.#scrollbarGutterWidth.asReadonly();
     public readonly selectBy = signal<GridKeySelector<unknown>>("");
-    public readonly selectableOptions = signal<SelectableOptions>({ enabled: false, mode: "single" });
+    public readonly selectableOptions = signal<SelectableOptions>({
+        enabled: false,
+        mode: "single",
+        selectAllScope: "page",
+        selectOnRowClick: true,
+        showCheckboxes: false,
+        showSelectAll: true
+    });
+
     public readonly selectedKeys = signal(ImmutableSet.create());
     public readonly selectedKeysChange$ = toObservable(this.selectedKeys);
     public readonly selectedKeysLoad$ = new BehaviorSubject<ImmutableSet<unknown>>(ImmutableSet.create());
     public readonly selectedRows = computed(() => {
         const selectedKeys = this.selectedKeys();
-        return selectedKeys
-            .select(key => this.rows().firstOrDefault(r => this.getRowSelectionKey(r) === key))
-            .where(i => i != null)
+        return this.rows()
+            .where(row => selectedKeys.contains(this.getRowSelectionKey(row)))
             .toImmutableSet();
+    });
+    public readonly selectionColumnWidth = 40;
+    public readonly selectionColumnVisible = computed(() => {
+        const options = this.selectableOptions();
+        return options.enabled === true && options.showCheckboxes === true;
+    });
+    public readonly selectionColumnOffset = computed(() => this.groupStructuralWidth() + this.detailStructuralWidth());
+    public readonly selectionStructuralWidth = computed(() =>
+        this.selectionColumnVisible() ? this.selectionColumnWidth : 0
+    );
+
+    public readonly someBulkSelectionRowsSelected = computed(() => {
+        const rows = this.bulkSelectionRows();
+        if (!rows.any()) {
+            return false;
+        }
+        const selectedCount = rows.count(row => this.isRowSelected(row));
+        return selectedCount > 0 && selectedCount < rows.size();
     });
     public readonly sortableOptions = signal<SortableOptions>({
         enabled: false,
@@ -289,9 +339,7 @@ export class GridService {
             return null;
         }
         const dataWidth = columns.aggregate((acc, c) => acc + this.getColumnWidth(c), 0);
-        const groupWidth = this.groupColumnWidth * this.groupColumns().length;
-        const detailWidth = this.masterDetailTemplate() != null ? this.detailColumnWidth : 0;
-        return this.normalizeRenderedWidth(dataWidth + groupWidth + detailWidth);
+        return this.normalizeRenderedWidth(dataWidth + this.leadingStructuralWidth());
     });
     public readonly viewPageRows = computed(() => {
         const skip = this.paginationState().skip;
@@ -546,6 +594,10 @@ export class GridService {
         this.selectedKeys.update(set => set.clear());
     }
 
+    public deselectRow(row: Row): void {
+        this.setRowSelected(row, false);
+    }
+
     public findTextWidthOfColumn(column: Column, element: HTMLTableCellElement): number {
         if (!isPlatformBrowser(this.#platformId)) {
             return 0;
@@ -598,18 +650,21 @@ export class GridService {
     }
 
     public handleMultipleSelection(event: MouseEvent, row: Row): void {
-        if (!this.selectedRows().contains(row)) {
-            this.selectRow(row);
-        } else if (event.ctrlKey || event.metaKey) {
-            this.selectedKeys.update(set => set.remove(this.getRowSelectionKey(row)));
+        if (this.isRowSelected(row)) {
+            if (event.ctrlKey || event.metaKey) {
+                this.deselectRow(row);
+            }
+            return;
         }
+        this.selectRow(row);
     }
 
     public handleRowClick(event: MouseEvent, row: Row): void {
-        if (!this.isSelectableGrid()) {
+        const options = this.selectableOptions();
+        if (!options.enabled || options.selectOnRowClick === false) {
             return;
         }
-        if (this.selectableOptions().mode === "single") {
+        if (options.mode === "single") {
             this.handleSingleSelection(event, row);
         } else {
             this.handleMultipleSelection(event, row);
@@ -619,10 +674,10 @@ export class GridService {
     public handleSingleSelection(event: MouseEvent, row: Row): void {
         if (this.isRowSelected(row) && (event.ctrlKey || event.metaKey)) {
             this.deselectAllRows();
-        } else {
-            this.deselectAllRows();
-            this.selectRow(row);
+            return;
         }
+        this.deselectAllRows();
+        this.selectRow(row);
     }
 
     public isGroupCollapsed(groupKey: string): boolean {
@@ -634,11 +689,7 @@ export class GridService {
     }
 
     public isRowSelected(row: Row): boolean {
-        return this.selectedRows().contains(row);
-    }
-
-    public isSelectableGrid(): boolean {
-        return !!this.selectableOptions().enabled;
+        return this.selectedKeys().contains(this.getRowSelectionKey(row));
     }
 
     public loadFilters(filters: CompositeFilterDescriptor[]): void {
@@ -833,8 +884,26 @@ export class GridService {
     }
 
     public selectRow(row: Row): void {
-        const key = this.getRowSelectionKey(row);
-        this.selectedKeys.update(set => set.add(key));
+        this.setRowSelected(row, true);
+    }
+
+    public setBulkSelection(selected: boolean): void {
+        if (this.selectableOptions().mode !== "multiple") {
+            return;
+        }
+        const keys = this.bulkSelectionRows()
+            .select(row => this.getRowSelectionKey(row))
+            .toArray();
+        if (selected) {
+            this.selectedKeys.update(currentKeys => currentKeys.addAll(keys));
+            return;
+        }
+        // ImmutableSet#exceptWith scans the removal list per retained element (O(n*m)); for large
+        // virtualized grids that pairing is expensive, so filter through a native Set (O(n)) instead.
+        const keysToRemove = new Set(keys);
+        this.selectedKeys.update(currentKeys =>
+            ImmutableSet.create([...currentKeys].filter(key => !keysToRemove.has(key)))
+        );
     }
 
     public setCalculatedWidth(columnId: string, value: number | null): void {
@@ -950,6 +1019,22 @@ export class GridService {
 
     public setSelectableOptions(options: SelectableOptions): void {
         this.selectableOptions.update(v => ({ ...v, ...options }));
+    }
+
+    public setRowSelected(row: Row, selected: boolean): void {
+        const key = this.getRowSelectionKey(row);
+        const mode = this.selectableOptions().mode;
+
+        if (selected) {
+            if (mode === "single") {
+                this.selectedKeys.set(ImmutableSet.create([key]));
+            } else {
+                this.selectedKeys.update(keys => keys.add(key));
+            }
+            return;
+        }
+
+        this.selectedKeys.update(keys => keys.remove(key));
     }
 
     public setSortableOptions(options: Partial<SortableOptions>): void {

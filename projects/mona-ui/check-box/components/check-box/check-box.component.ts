@@ -1,6 +1,5 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component, computed, inject, input, model, output } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { type FormCheckboxControl } from "@angular/forms/signals";
 import { twMerge } from "tailwind-merge";
 import {
@@ -15,7 +14,7 @@ import {
 
 @Component({
     selector: "mona-check-box",
-    imports: [FormsModule, NgTemplateOutlet],
+    imports: [NgTemplateOutlet],
     templateUrl: "./check-box.component.html",
     host: {
         "[class]": "'flex'",
@@ -136,17 +135,15 @@ export class CheckBoxComponent implements CheckboxVariantInput, CheckmarkVariant
      */
     public readonly userClass = input<string>("", { alias: "class" });
 
-    protected onCheckedChange(checked: boolean): void {
-        this.checked.set(checked);
-    }
-
-    protected onInputChange(event: Event): void {
-        this.inputChange.emit(event);
+    protected onInputBlur(event: FocusEvent): void {
+        this.inputBlur.emit(event);
         this.touch.emit();
     }
 
-    protected onInputBlur(event: FocusEvent): void {
-        this.inputBlur.emit(event);
+    protected onInputChange(event: Event): void {
+        const checked = (event.target as HTMLInputElement).checked;
+        this.checked.set(checked);
+        this.inputChange.emit(event);
         this.touch.emit();
     }
 }

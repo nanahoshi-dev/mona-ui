@@ -486,6 +486,201 @@ describe("GridService", () => {
             expect(service.isRowSelected(first)).toBe(true);
             expect(service.isRowSelected(second)).toBe(true);
         });
+
+        it("does nothing on handleRowClick when selectOnRowClick is false", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single", selectOnRowClick: false });
+            const row = service.rows().firstOrDefault()!;
+
+            service.handleRowClick(new MouseEvent("click"), row);
+
+            expect(service.isRowSelected(row)).toBe(false);
+        });
+
+        it("selects one row via setRowSelected", () => {
+            const row = service.rows().firstOrDefault()!;
+
+            service.setRowSelected(row, true);
+
+            expect(service.isRowSelected(row)).toBe(true);
+            expect(service.selectedKeys().size()).toBe(1);
+        });
+
+        it("deselects one row via setRowSelected", () => {
+            const row = service.rows().firstOrDefault()!;
+            service.selectRow(row);
+
+            service.setRowSelected(row, false);
+
+            expect(service.isRowSelected(row)).toBe(false);
+            expect(service.selectedKeys().isEmpty()).toBe(true);
+        });
+
+        it("deselects one row via deselectRow", () => {
+            const row = service.rows().firstOrDefault()!;
+            service.selectRow(row);
+
+            service.deselectRow(row);
+
+            expect(service.isRowSelected(row)).toBe(false);
+        });
+
+        it("clears the previous selection in single mode when selecting a row", () => {
+            const [first, second] = service.rows().toArray();
+            service.selectRow(first);
+
+            service.setRowSelected(second, true);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("preserves prior selections in multiple mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            const [first, second] = service.rows().toArray();
+            service.setRowSelected(first, true);
+
+            service.setRowSelected(second, true);
+
+            expect(service.isRowSelected(first)).toBe(true);
+            expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("derives selectedRows only from currently available rows", () => {
+            service.selectBy.set("id");
+            service.setRows(createRowData(3));
+            const [first, second] = service.rows().toArray();
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            service.setRowSelected(first, true);
+            service.setRowSelected(second, true);
+
+            service.setRows(createRowData(1));
+
+            expect(service.selectedRows().size()).toBe(1);
+            expect(service.selectedKeys().size()).toBe(2);
+        });
+    });
+
+    describe("selection key resolution", () => {
+        it("uses a string selectBy to derive selection keys", () => {
+            service.selectBy.set("id");
+            service.setRows(createRowData(2));
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            const row = service.rows().firstOrDefault()!;
+
+            service.selectRow(row);
+
+            expect(service.isRowSelected(row)).toBe(true);
+            expect(service.selectedKeys().firstOrDefault()).toBe(0);
+        });
+
+        it("uses a selector function to derive selection keys", () => {
+            service.selectBy.set(data => (data as Record<PropertyKey, unknown>)["id"]);
+            service.setRows(createRowData(2));
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            const row = service.rows().firstOrDefault()!;
+
+            service.selectRow(row);
+
+            expect(service.isRowSelected(row)).toBe(true);
+            expect(service.selectedKeys().firstOrDefault()).toBe(0);
+        });
+    });
+
+    describe("bulk selection", () => {
+        beforeEach(() => {
+            service.columns.set(ImmutableList.create([createColumn({ field: "id" })]));
+            service.setRows(createRowData(25));
+            service.setSelectableOptions({ enabled: true, mode: "multiple", showCheckboxes: true });
+        });
+
+        it("selects all rows on the current page via setBulkSelection", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().size()).toBe(10);
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+        });
+
+        it("deselects only the current page via setBulkSelection", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            service.setBulkSelection(true);
+            const pageOneKeys = service.selectedKeys();
+
+            service.setPageState({ page: 2, skip: 10, take: 10 });
+            service.setBulkSelection(false);
+
+            expect(service.selectedKeys().size()).toBe(10);
+            expect(service.selectedKeys().all(key => pageOneKeys.contains(key))).toBe(true);
+        });
+
+        it("preserves keys selected on other pages when selecting the current page", () => {
+            service.setPageState({ page: 2, skip: 10, take: 10 });
+            service.setBulkSelection(true);
+            const pageTwoKeys = service.selectedKeys();
+
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().size()).toBe(20);
+            expect(pageTwoKeys.all(key => service.selectedKeys().contains(key))).toBe(true);
+        });
+
+        it("affects only the filtered view for view scope", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", showCheckboxes: true, selectAllScope: "view" });
+            service.loadFilters([
+                {
+                    logic: "and",
+                    filters: [{ field: "id", operator: "gte", value: 10 }]
+                }
+            ]);
+
+            service.setBulkSelection(true);
+
+            expect(service.viewRows().size()).toBe(15);
+            expect(service.selectedKeys().size()).toBe(15);
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+        });
+
+        it("reports indeterminate state when only some scope rows are selected", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            const row = service.viewPageRows().firstOrDefault()!;
+
+            service.selectRow(row);
+
+            expect(service.someBulkSelectionRowsSelected()).toBe(true);
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("reports empty scope as not checked and not indeterminate", () => {
+            service.setRows([]);
+
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("reports all rows selected only when every scope row is selected", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            const rows = service.viewPageRows().toArray();
+            rows.forEach(row => service.selectRow(row));
+
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("resolves page scope to the full view in virtual mode", () => {
+            service.setVirtualScrollOptions({ enabled: true, height: 32 });
+            service.setPageState({ page: 1, skip: 0, take: 5 });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().size()).toBe(25);
+        });
+
+        it("does nothing in single mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single", showCheckboxes: true });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().isEmpty()).toBe(true);
+        });
     });
 
     describe("aggregation", () => {

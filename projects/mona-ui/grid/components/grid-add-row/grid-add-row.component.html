@@ -22,12 +22,27 @@
             [colIndex]="0"
             [cellKind]="'detail'"
             [firstInRow]="true"
-            [lastInRow]="columns().length === 0"
+            [lastInRow]="columns().length === 0 && !gridService.selectionColumnVisible()"
             [section]="'add'"
             [style.width.px]="gridService.detailColumnWidth"></td>
     }
+    @if (gridService.selectionColumnVisible()) {
+        <td
+            monaGridCell
+            monaGridLogicalCell
+            monaGridLockedCell
+            [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+            [rowIndex]="-1"
+            [colIndex]="gridService.masterDetailTemplate() ? 1 : 0"
+            [cellKind]="'command'"
+            [columnId]="'$selection'"
+            [firstInRow]="!gridService.masterDetailTemplate()"
+            [lastInRow]="columns().length === 0"
+            [section]="'add'"
+            [style.width.px]="gridService.selectionColumnWidth"></td>
+    }
     @for (column of columns(); track $index) {
-        @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
+        @let colIndex = $index + gridService.leadingLogicalColumnCount();
         <td
             monaGridCell
             monaGridLockedCell
@@ -39,8 +54,8 @@
             [columnId]="column.id"
             [rowIndex]="-1"
             [section]="'add'"
-            [firstInRow]="colIndex === 0"
-            [lastInRow]="colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)"
+            [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
+            [lastInRow]="colIndex === gridService.leadingLogicalColumnCount() + columns().length - 1"
             [attr.colspan]="1"
             [style.width.px]="column.calculatedWidth"
             [style.min-width.px]="column.minWidth">

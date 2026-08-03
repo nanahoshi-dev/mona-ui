@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from "@angular/common";
-import { ChangeDetectionStrategy, Component, input, model, signal } from "@angular/core";
+import { Component, input, model, signal } from "@angular/core";
 import { SegmentedComponent, type SegmentedOption, type SegmentedValue } from "@nanahoshi/mona-ui/segmented";
 import { ComponentConfig, ComponentInputsAsSignal } from "../../utils/componentConfig";
 import { AbstractDemoComponent } from "../base/abstract-demo.component";
@@ -62,12 +62,12 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
     `
 })
 class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComponent> {
+    public readonly disabled = input(false);
     public readonly options = input<readonly SegmentedOption[]>([
         { label: "Discover", value: "discover" },
         { label: "My courses", value: "courses" },
         { label: "Archived", value: "archived", disabled: true }
     ]);
-    public readonly disabled = input(false);
     public readonly size = input<ReturnType<SegmentedComponent["size"]>>("medium");
     public readonly value = model<SegmentedValue | null>("discover");
 }
