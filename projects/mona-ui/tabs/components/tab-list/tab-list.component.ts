@@ -16,19 +16,26 @@ import {
     viewChildren
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { LucideChevronLeft, LucideChevronRight, LucideX } from "@lucide/angular";
+import {
+    LucideChevronDown,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideChevronUp,
+    LucideX
+} from "@lucide/angular";
 import { firstOrDefault } from "@mirei/ts-collections";
 import { ButtonDirective } from "@nanahoshi/mona-ui/button";
-import { ScrollDirection } from "@nanahoshi/mona-ui/common";
 import { asapScheduler, EMPTY, interval, Subject, switchMap, tap, timer } from "rxjs";
 import { TabListItemDirective } from "../../directives/tab-list-item.directive";
-import { ScrollIntent } from "../../models/ScrollIntent";
+import { getTabOrientation } from "../../models/TabOrientation";
+import { ScrollIntent, TabScrollDirection } from "../../models/ScrollIntent";
 import { TabCloseEvent } from "../../models/TabCloseEvent";
 import { TabItem } from "../../models/TabItem";
 import { TabSelectEvent } from "../../models/TabSelectEvent";
 import {
     tabListBaseThemeVariants,
     tabListListThemeVariants,
+    tabListListWrapperThemeVariants,
     tabListScrollButtonThemeVariants,
     TabListVariantInput,
     TabListVariantProps
@@ -36,7 +43,16 @@ import {
 
 @Component({
     selector: "mona-tab-list",
-    imports: [ButtonDirective, NgTemplateOutlet, TabListItemDirective, LucideChevronLeft, LucideChevronRight, LucideX],
+    imports: [
+        ButtonDirective,
+        NgTemplateOutlet,
+        TabListItemDirective,
+        LucideChevronDown,
+        LucideChevronLeft,
+        LucideChevronRight,
+        LucideChevronUp,
+        LucideX
+    ],
     templateUrl: "./tab-list.component.html",
     host: {
         "[class]": "baseClass()",
@@ -46,36 +62,51 @@ import {
 export class TabListComponent implements TabListVariantInput {
     readonly #destroyRef = inject(DestroyRef);
     readonly #keydown$ = new Subject<KeyboardEvent>();
-    #resizeObserver: ResizeObserver | null = null;
     readonly #scrollIntent$ = new Subject<ScrollIntent | null>();
+    #resizeObserver: ResizeObserver | null = null;
     protected readonly baseClass = computed(() => {
-        const rounded = this.rounded();
-        const size = this.size();
-        return tabListBaseThemeVariants({ rounded, size });
+        return tabListBaseThemeVariants({ position: this.position() });
     });
     protected readonly listClass = computed(() => {
-        return tabListListThemeVariants();
+        return tabListListThemeVariants({ position: this.position() });
     });
+    protected readonly listWrapperClass = computed(() => {
+        return tabListListWrapperThemeVariants();
+    });
+    protected readonly orientation = computed(() => {
+        return getTabOrientation(this.position() ?? "top");
+    });
+    protected readonly overflowControlsVisible = signal(false);
     protected readonly scrollButtonClass = computed(() => {
         return tabListScrollButtonThemeVariants();
     });
-    protected readonly scrollsVisible = signal(false);
     protected readonly tabListElement = viewChild.required<ElementRef<HTMLUListElement>>("tabListElement");
     protected readonly tabListItems = viewChildren(TabListItemDirective, { read: ElementRef });
 
     public readonly closable = input(false);
     public readonly disabled = input(false);
-    public readonly rounded = input.required<TabListVariantProps["rounded"]>();
+
+    /**
+     * @description Placement of the tab list relative to the tab content.
+     * @default "top"
+     */
+    public readonly position = input.required<TabListVariantProps["position"]>();
     public readonly selectedTabId = model<string | null>(null);
+
+    /**
+     * @description Size preset controlling the tabs' dimensions.
+     * @default "medium"
+     */
     public readonly size = input.required<TabListVariantProps["size"]>();
     public readonly tabClose = output<TabCloseEvent>();
-    public readonly tabSelect = output<TabSelectEvent>();
     public readonly tabList = input.required<Iterable<TabItem>>();
+    public readonly tabSelect = output<TabSelectEvent>();
 
     public constructor() {
         afterRenderEffect({
             read: () => {
                 this.tabList();
+                this.position();
                 untracked(() => {
                     this.updateScrollVisibility();
                 });
@@ -122,7 +153,7 @@ export class TabListComponent implements TabListVariantInput {
         window.setTimeout(() => {
             const listElement = tabListElement.querySelector("li[data-selected='true']");
             if (listElement) {
-                listElement.scrollIntoView({ behavior: "auto", block: "center" });
+                listElement.scrollIntoView({ behavior: "auto", block: "nearest", inline: "nearest" });
             }
         });
     }
@@ -132,12 +163,12 @@ export class TabListComponent implements TabListVariantInput {
         this.emitTabClose(tab, event);
     }
 
-    protected startContinuousScroll(event: PointerEvent, element: HTMLElement, direction: ScrollDirection): void {
+    protected startContinuousScroll(event: PointerEvent, element: HTMLElement, direction: TabScrollDirection): void {
         (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
         this.startScrolling(element, direction, "continuous");
     }
 
-    protected startScrolling(element: HTMLElement, direction: ScrollDirection, type: "single" | "continuous"): void {
+    protected startScrolling(element: HTMLElement, direction: TabScrollDirection, type: "single" | "continuous"): void {
         this.#scrollIntent$.next({ element, direction, type });
     }
 
@@ -166,17 +197,20 @@ export class TabListComponent implements TabListVariantInput {
         }
         const selectedEnabledIndex = enabledTabs.indexOf(selectedTab);
         const selectedIndex = selectedEnabledIndex === -1 ? 0 : selectedEnabledIndex;
-        let nextIndex = selectedIndex;
+
+        const navigationDirection = this.getNavigationDirection(event);
+        if (navigationDirection === "previous") {
+            event.preventDefault();
+            this.activateTab(enabledTabs[selectedIndex === 0 ? enabledTabs.length - 1 : selectedIndex - 1], event);
+            return;
+        }
+        if (navigationDirection === "next") {
+            event.preventDefault();
+            this.activateTab(enabledTabs[selectedIndex === enabledTabs.length - 1 ? 0 : selectedIndex + 1], event);
+            return;
+        }
 
         switch (event.key) {
-            case "ArrowLeft":
-                nextIndex = selectedIndex === 0 ? enabledTabs.length - 1 : selectedIndex - 1;
-                this.activateTab(enabledTabs[nextIndex], event);
-                break;
-            case "ArrowRight":
-                nextIndex = selectedIndex === enabledTabs.length - 1 ? 0 : selectedIndex + 1;
-                this.activateTab(enabledTabs[nextIndex], event);
-                break;
             case "Home":
                 this.activateTab(enabledTabs[0], event);
                 break;
@@ -219,6 +253,25 @@ export class TabListComponent implements TabListVariantInput {
         tabListItem?.nativeElement.focus();
     }
 
+    private getNavigationDirection(event: KeyboardEvent): TabScrollDirection | null {
+        if (this.orientation() === "vertical") {
+            if (event.key === "ArrowUp") {
+                return "previous";
+            }
+            if (event.key === "ArrowDown") {
+                return "next";
+            }
+            return null;
+        }
+        if (event.key === "ArrowLeft") {
+            return "previous";
+        }
+        if (event.key === "ArrowRight") {
+            return "next";
+        }
+        return null;
+    }
+
     private handleTabKey(tab: TabItem, event: KeyboardEvent): void {
         event.preventDefault();
         const panelId = tab.id + "-panel";
@@ -228,18 +281,13 @@ export class TabListComponent implements TabListVariantInput {
         }
     }
 
-    private performScroll(element: HTMLElement, direction: ScrollDirection): void {
-        let left: number = 0;
-        switch (direction) {
-            case "left":
-                left = Math.max(element.scrollLeft - 100, 0);
-                element.scrollTo({ left, behavior: "smooth" });
-                break;
-            case "right":
-                left = Math.min(element.scrollLeft + 100, element.scrollWidth);
-                element.scrollTo({ left, behavior: "smooth" });
-                break;
+    private performScroll(element: HTMLElement, direction: TabScrollDirection): void {
+        const offset = direction === "previous" ? -100 : 100;
+        if (this.orientation() === "vertical") {
+            element.scrollBy({ top: offset, behavior: "smooth" });
+            return;
         }
+        element.scrollBy({ left: offset, behavior: "smooth" });
     }
 
     private selectTab(tab: TabItem): void {
@@ -280,8 +328,10 @@ export class TabListComponent implements TabListVariantInput {
 
     private updateScrollVisibility(): void {
         asapScheduler.schedule(() => {
-            this.scrollsVisible.set(
-                this.tabListElement().nativeElement.scrollWidth > this.tabListElement().nativeElement.clientWidth
+            const element = this.tabListElement().nativeElement;
+            const isVertical = this.orientation() === "vertical";
+            this.overflowControlsVisible.set(
+                isVertical ? element.scrollHeight > element.clientHeight : element.scrollWidth > element.clientWidth
             );
         });
     }

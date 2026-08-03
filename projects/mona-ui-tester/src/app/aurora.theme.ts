@@ -126,9 +126,7 @@ export const auroraTheme = Object.freeze({
                 "--mona-menubar-background": "var(--color-surface-muted)",
                 "--mona-menubar-shadow": "var(--shadow-raised)",
                 "--mona-pager-background": "var(--color-surface-muted)",
-                "--mona-slider-handle-border-color": "var(--color-focus-indicator)",
-                "--mona-tab-list-background": "var(--color-surface-muted)",
-                "--mona-tab-content-background": "var(--color-surface)"
+                "--mona-slider-handle-border-color": "var(--color-focus-indicator)"
             })
         })
     }

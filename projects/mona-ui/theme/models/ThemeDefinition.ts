@@ -36,9 +36,7 @@ export type ThemeComponentVariable =
     | "--mona-menubar-background"
     | "--mona-menubar-shadow"
     | "--mona-pager-background"
-    | "--mona-slider-handle-border-color"
-    | "--mona-tab-list-background"
-    | "--mona-tab-content-background";
+    | "--mona-slider-handle-border-color";
 export type ThemeComponents = Readonly<Record<ThemeComponentVariable, string>>;
 
 export interface ThemeProfile {

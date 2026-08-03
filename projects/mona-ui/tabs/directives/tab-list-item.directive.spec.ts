@@ -1,52 +1,116 @@
-import { TestBed } from "@angular/core/testing";
-import { annaTheme } from "../../theme/definitions/anna-theme";
-import { monaTheme } from "../../theme/definitions/mona-theme";
-import { tabContentThemeVariants, tabListBaseThemeVariants, tabListListItemThemeVariants } from "../styles/tabs.styles";
+import { Component, signal } from "@angular/core";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
+import { TabListListItemVariantProps } from "../styles/tabs.styles";
 import { TabListItemDirective } from "./tab-list-item.directive";
 
+@Component({
+    template: `
+        <li
+            monaTabListItem
+            [active]="active()"
+            [disabled]="disabled()"
+            [position]="position()"
+            [size]="size()"></li>
+    `,
+    imports: [TabListItemDirective]
+})
+class HostComponent {
+    public readonly active = signal(true);
+    public readonly disabled = signal(false);
+    public readonly position = signal<TabListListItemVariantProps["position"]>("top");
+    public readonly size = signal<TabListListItemVariantProps["size"]>("medium");
+}
+
 describe("TabListItemDirective", () => {
-    let directive: TabListItemDirective;
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [TabListItemDirective]
-        });
-        directive = TestBed.runInInjectionContext(() => new TabListItemDirective());
+    let host: HostComponent;
+    let fixture: ComponentFixture<HostComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [HostComponent]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(HostComponent);
+        host = fixture.componentInstance;
+        fixture.detectChanges();
     });
+
+    const tabItem = (): HTMLElement => fixture.debugElement.query(By.css("li[monaTabListItem]")).nativeElement;
+
     it("should create an instance", () => {
+        const directive = fixture.debugElement.query(By.directive(TabListItemDirective)).injector.get(TabListItemDirective);
         expect(directive).toBeTruthy();
     });
 
-    it("uses a distinct surface and boundary for the selected tab", () => {
-        const classes = tabListListItemThemeVariants({
-            active: true,
-            disabled: false,
-            rounded: "medium"
-        });
-        const tokens = classes.split(/\s+/);
-
-        expect(tokens).toContain(
-            "[background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
-        );
-        expect(tokens).toContain("font-semibold");
-        expect(tokens).toContain("shadow-(--shadow-control)");
-        expect(tokens).toContain("inset-ring-border-subtle");
-        expect(tokens).toContain("focus-visible:ring-focus-indicator/35");
-        expect(tokens).not.toContain("bg-accent");
+    it("applies the active indicator classes for an active tab", () => {
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("after:bg-primary");
+        expect(classes).toContain("after:absolute");
+        expect(classes).toContain("text-foreground");
+        expect(classes).toContain("font-semibold");
     });
 
-    it("uses a muted rail and a token-driven bordered panel", () => {
-        const railClasses = tabListBaseThemeVariants({ rounded: "medium", size: "medium" }).split(/\s+/);
-        const panelClasses = tabContentThemeVariants({ rounded: "medium" }).split(/\s+/);
-
-        expect(railClasses).toContain("bg-(--mona-tab-list-background)");
-        expect(panelClasses).toContain("bg-(--mona-tab-content-background)");
-        expect(panelClasses).toContain("border");
-        expect(panelClasses).toContain("border-border");
-        expect(panelClasses).toContain("shadow-(--shadow-raised)");
+    it("applies muted styles for an inactive tab", () => {
+        host.active.set(false);
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("text-muted-foreground");
+        expect(classes).toContain("hover:bg-hover");
+        expect(classes).not.toContain("after:bg-primary");
     });
 
-    it("keeps Mona and Anna tab backgrounds in their independent profiles", () => {
-        expect(monaTheme.variants.dark.components["--mona-tab-content-background"]).toBe("var(--color-surface)");
-        expect(annaTheme.variants.dark.components["--mona-tab-content-background"]).toBe("transparent");
+    it("applies bottom-aligned indicator for bottom position", () => {
+        host.position.set("bottom");
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("after:inset-x-0");
+        expect(classes).toContain("after:top-0");
+        expect(classes).toContain("after:h-[2px]");
+    });
+
+    it("applies right-side indicator for left position", () => {
+        host.position.set("left");
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("after:inset-y-0");
+        expect(classes).toContain("after:right-0");
+        expect(classes).toContain("after:w-[2px]");
+    });
+
+    it("applies left-side indicator for right position", () => {
+        host.position.set("right");
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("after:inset-y-0");
+        expect(classes).toContain("after:left-0");
+        expect(classes).toContain("after:w-[2px]");
+    });
+
+    it("applies small size classes", () => {
+        host.size.set("small");
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("h-8");
+        expect(classes).toContain("px-2");
+        expect(classes).toContain("text-xs");
+    });
+
+    it("applies large size classes", () => {
+        host.size.set("large");
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("h-10");
+        expect(classes).toContain("px-4");
+    });
+
+    it("hides the indicator and disables interaction for a disabled tab", () => {
+        host.disabled.set(true);
+        fixture.detectChanges();
+        const classes = tabItem().className.split(/\s+/);
+        expect(classes).toContain("pointer-events-none");
+        expect(classes).toContain("cursor-not-allowed");
+        expect(classes).toContain("text-disabled-foreground");
+        expect(classes).toContain("after:hidden");
     });
 });

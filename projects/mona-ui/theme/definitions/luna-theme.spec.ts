@@ -29,7 +29,6 @@ describe("Luna theme", () => {
             expect(profile.components["--mona-menubar-background"]).toBe("var(--mona-effect-control-background-color)");
             expect(profile.components["--mona-menubar-shadow"]).toBe("var(--shadow-control)");
             expect(profile.components["--mona-list-background"]).toBe("var(--color-surface)");
-            expect(profile.components["--mona-tab-content-background"]).toBe("var(--color-surface)");
             expect(profile.custom?.["--mona-menubar-background-image"]).toBe(
                 "var(--mona-effect-control-background-image)"
             );
@@ -62,7 +61,6 @@ describe("Luna theme", () => {
             "--mona-effect-raised-fallback-background-color": "#fbfbfb",
             "--mona-effect-overlay-fallback-background-color": "#f9f9fa"
         });
-        expect(lunaTheme.variants.light.components["--mona-tab-list-background"]).toBe("#f5f5f6");
         expect(lunaTheme.variants.light.components["--mona-list-group-background"]).toBe("rgb(37 37 37 / 0.05)");
         expect(lunaTheme.variants.dark.components["--mona-list-group-background"]).toBe("rgb(255 255 255 / 0.04)");
         expect(lunaTheme.variants.light.custom?.["--mona-menu-item-hover-background"]).toBe("rgb(37 37 37 / 0.06)");

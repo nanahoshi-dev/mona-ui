@@ -1,74 +1,91 @@
 import { cva } from "class-variance-authority";
-import { themeRaisedBackdropClasses, themeRaisedSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/internal";
+import { VariantInputs } from "@nanahoshi/mona-ui/internal";
 import { VariantProps } from "class-variance-authority";
+import type { TabsPosition } from "../models/TabsPosition";
 
 export const tabListBaseThemeVariants = cva(
     `
-        flex w-fit max-w-full overflow-hidden
-        text-sm font-medium
-        bg-(--mona-tab-list-background) ${themeRaisedBackdropClasses}
+        flex max-w-full min-w-0 overflow-hidden
     `,
     {
         variants: {
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full",
-                none: "rounded-none"
-            },
-            size: {
-                small: "h-8",
-                medium: "h-9",
-                large: "h-10"
+            position: {
+                top: "flex-row border-b border-border",
+                bottom: "flex-row border-t border-border",
+                left: "flex-col max-h-full min-h-0 border-r border-border",
+                right: "flex-col max-h-full min-h-0 border-l border-border"
             }
+        },
+        defaultVariants: {
+            position: "top"
         }
     }
 );
 
-export const tabListListWrapperThemeVariants = cva(`h-full w-full overflow-hidden`);
+export const tabListListWrapperThemeVariants = cva(`flex-1 min-w-0 min-h-0 overflow-hidden`);
 
 export const tabListListThemeVariants = cva(
     `
-        flex h-full w-full list-none overflow-hidden p-[3px]
+        flex list-none overflow-hidden
         cursor-default select-none whitespace-nowrap
         transition-colors duration-(--mona-motion-standard) ease-out
-    `
+    `,
+    {
+        variants: {
+            position: {
+                top: "flex-row max-w-full min-w-0",
+                bottom: "flex-row max-w-full min-w-0",
+                left: "flex-col max-h-full min-h-0",
+                right: "flex-col max-h-full min-h-0"
+            }
+        },
+        defaultVariants: {
+            position: "top"
+        }
+    }
 );
 
 export const tabListListItemThemeVariants = cva(
     `
-        flex items-center justify-center px-2
-        cursor-pointer outline-none
+        relative flex shrink-0 cursor-pointer outline-none
         focus-visible:ring-2 focus-visible:ring-focus-indicator/35
+        transition-colors duration-(--mona-motion-standard) ease-out
     `,
     {
         variants: {
             active: {
-                true: `${themeRaisedSurfaceClasses} font-semibold text-foreground shadow-(--shadow-control) inset-ring-1 inset-ring-border-subtle`,
-                false: ""
+                true: `
+                    text-foreground font-semibold
+                    after:absolute after:content-[''] after:bg-primary
+                `,
+                false: "text-muted-foreground hover:bg-hover hover:text-foreground"
             },
             disabled: {
-                true: "pointer-events-none cursor-not-allowed select-none text-disabled-foreground",
+                true: "pointer-events-none cursor-not-allowed select-none text-disabled-foreground after:hidden",
                 false: ""
             },
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full",
-                none: "rounded-none"
+            position: {
+                top: "items-center justify-center whitespace-nowrap after:inset-x-0 after:bottom-0 after:h-[2px]",
+                bottom: "items-center justify-center whitespace-nowrap after:inset-x-0 after:top-0 after:h-[2px]",
+                left: "w-full items-center justify-start text-start after:inset-y-0 after:right-0 after:w-[2px]",
+                right: "w-full items-center justify-start text-start after:inset-y-0 after:left-0 after:w-[2px]"
+            },
+            size: {
+                small: "h-8 px-2 text-xs",
+                medium: "h-9 px-3 text-sm",
+                large: "h-10 px-4 text-sm"
             }
         },
         defaultVariants: {
-            rounded: "medium"
+            position: "top",
+            size: "medium"
         }
     }
 );
 
 export const tabListScrollButtonThemeVariants = cva(
     `
-        flex h-full items-center justify-center px-2
+        flex self-stretch items-center justify-center px-2
         text-muted-foreground
         hover:bg-hover hover:text-foreground
         active:bg-active
@@ -77,31 +94,29 @@ export const tabListScrollButtonThemeVariants = cva(
 
 export const tabContentThemeVariants = cva(
     `
-        flex-1 w-full overflow-auto
+        flex-1 min-w-0 min-h-0 overflow-auto
         [scrollbar-color:var(--color-scrollbar-thumb)_var(--color-scrollbar-track)] [scrollbar-width:thin]
-        bg-(--mona-tab-content-background) ${themeRaisedBackdropClasses} text-foreground
-        border border-border shadow-(--shadow-raised)
-    `,
-    {
-        variants: {
-            rounded: {
-                small: "rounded-sm",
-                medium: "rounded-md",
-                large: "rounded-lg",
-                full: "rounded-full",
-                none: "rounded-none"
-            }
-        },
-        defaultVariants: {
-            rounded: "medium"
-        }
-    }
+        text-foreground
+    `
 );
 
 export const tabsBaseThemeVariants = cva(
     `
-        flex max-w-full flex-col gap-2
-    `
+        flex max-w-full min-w-0 min-h-0
+    `,
+    {
+        variants: {
+            position: {
+                top: "flex-col",
+                bottom: "flex-col-reverse",
+                left: "flex-row",
+                right: "flex-row-reverse"
+            }
+        },
+        defaultVariants: {
+            position: "top"
+        }
+    }
 );
 
 type TabListBaseVariantProps = VariantProps<typeof tabListBaseThemeVariants>;

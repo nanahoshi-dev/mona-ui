@@ -5,7 +5,6 @@ import { gridBaseThemeVariants } from "../../grid/styles/grid.styles";
 import { listItemContentThemeVariants, listThemeVariants } from "../../internal/list/styles/list.styles";
 import { menubarBaseThemeVariants } from "../../menubar/styles/menu.styles";
 import { sliderHandleThemeVariants, sliderSelectionThemeVariants } from "../../slider/styles/slider.styles";
-import { tabContentThemeVariants } from "../../tabs/styles/tabs.styles";
 import { timeSelectorListThemeVariants } from "../../time-selector/styles/time-selector.styles";
 import { annaTheme } from "../definitions/anna-theme";
 import { monaTheme } from "../definitions/mona-theme";
@@ -35,7 +34,6 @@ describe("canonical recipe and built-in profile contract", () => {
         expect(listThemeVariants()).toContain("bg-(--mona-list-background)");
         expect(sliderSelectionThemeVariants()).toContain("duration-(--mona-motion-fast)");
         expect(sliderHandleThemeVariants()).toContain("border-(--mona-slider-handle-border-color)");
-        expect(tabContentThemeVariants()).toContain("bg-(--mona-tab-content-background)");
         expect(timeSelectorListThemeVariants()).toContain("focus-visible:bg-(--color-focus-surface)");
         expect(gridBaseThemeVariants()).not.toContain("backdrop-filter");
     });

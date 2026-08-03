@@ -45,10 +45,10 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
                 type: "boolean",
                 value: true
             },
-            rounded: {
+            position: {
                 type: "dropdown",
-                value: ["none", "small", "medium", "large", "full"],
-                defaultValue: "large"
+                value: ["top", "bottom", "left", "right"],
+                defaultValue: "top"
             },
             size: {
                 type: "dropdown",
@@ -69,14 +69,15 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
         <mona-tabs
             [closable]="closable()"
             [keepTabContent]="keepTabContent()"
-            [rounded]="rounded()"
+            [position]="position()"
             [size]="size()"
             (tabClose)="onTabClose($event)"
             (tabSelect)="onTabSelect($event)"
-            class="w-92 items-center">
+            class="w-96"
+            [class.h-96]="position() === 'left' || position() === 'right'">
             <mona-tab title="Register" [selected]="true">
                 <ng-template monaTabContentTemplate>
-                    <div class="p-4 flex flex-col gap-3 bg-surface-muted">
+                    <div class="p-4 flex flex-col gap-3">
                         <div class="p-4 flex flex-col gap-1 items-center justify-center">
                             <h1 class="text-lg font-extrabold">Create an account</h1>
                             <span class="text-sm">Enter your email below to create your account.</span>
@@ -98,7 +99,7 @@ export class TabsDemoComponent extends AbstractDemoComponent<TabsComponent> {
             </mona-tab>
             <mona-tab title="Login">
                 <ng-template monaTabContentTemplate>
-                    <div class="p-4 pt-8 flex flex-col gap-3 bg-surface-muted">
+                    <div class="p-4 pt-8 flex flex-col gap-3">
                         <div class="flex flex-col gap-1 items-center justify-center">
                             <h1 class="text-lg font-extrabold">Login</h1>
                         </div>
@@ -132,7 +133,7 @@ export class TabsWrapperComponent implements ComponentInputsAsSignal<TabsCompone
     });
     public readonly closable = input<ReturnType<TabsComponent["closable"]>>(false);
     public readonly keepTabContent = input<ReturnType<TabsComponent["keepTabContent"]>>(true);
-    public readonly rounded = input<ReturnType<TabsComponent["rounded"]>>("large");
+    public readonly position = input<ReturnType<TabsComponent["position"]>>("top");
     public readonly size = input<ReturnType<TabsComponent["size"]>>("medium");
 
     protected onTabClose(event: TabCloseEvent): void {

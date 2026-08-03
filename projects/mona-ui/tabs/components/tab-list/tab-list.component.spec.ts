@@ -7,6 +7,14 @@ describe("TabListComponent", () => {
     let component: TabListComponent;
     let fixture: ComponentFixture<TabListComponent>;
 
+    const makeTabs = () => [
+        { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
+        { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
+        { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: false }
+    ];
+
+    const flushAsync = () => new Promise(resolve => setTimeout(resolve, 0));
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [TabListComponent]
@@ -14,13 +22,9 @@ describe("TabListComponent", () => {
 
         fixture = TestBed.createComponent(TabListComponent);
         component = fixture.componentInstance;
-        fixture.componentRef.setInput("rounded", "medium");
+        fixture.componentRef.setInput("position", "top");
         fixture.componentRef.setInput("size", "medium");
-        fixture.componentRef.setInput("tabList", [
-            { id: "tab1", index: 0, selected: true, title: "Tab 1", closable: true, disabled: false },
-            { id: "tab2", index: 1, selected: false, title: "Tab 2", closable: true, disabled: false },
-            { id: "tab3", index: 2, selected: false, title: "Tab 3", closable: true, disabled: false }
-        ]);
+        fixture.componentRef.setInput("tabList", makeTabs());
         fixture.detectChanges();
         await fixture.whenStable();
     });
@@ -29,23 +33,25 @@ describe("TabListComponent", () => {
         expect(component).toBeTruthy();
     });
 
-    it("should navigate with ArrowRight", () => {
+    it("should navigate with ArrowRight in horizontal orientation", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        const debugElement = fixture.debugElement;
-        debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
+        const preventDefaultSpy = vi.fn();
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
         fixture.detectChanges();
+        expect(preventDefaultSpy).toHaveBeenCalled();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
     });
 
-    it("should navigate with ArrowLeft", () => {
+    it("should navigate with ArrowLeft in horizontal orientation", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        const debugElement = fixture.debugElement;
-        debugElement.triggerEventHandler("keydown", { key: "ArrowLeft" });
+        const preventDefaultSpy = vi.fn();
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowLeft", preventDefault: preventDefaultSpy });
         fixture.detectChanges();
+        expect(preventDefaultSpy).toHaveBeenCalled();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
     });
 
@@ -140,7 +146,8 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab1");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
+        const preventDefaultSpy = vi.fn();
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
     });
@@ -154,7 +161,8 @@ describe("TabListComponent", () => {
         fixture.componentRef.setInput("selectedTabId", "tab3");
         fixture.detectChanges();
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowLeft" });
+        const preventDefaultSpy = vi.fn();
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowLeft", preventDefault: preventDefaultSpy });
         fixture.detectChanges();
         expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 0 }));
     });
@@ -221,7 +229,7 @@ describe("TabListComponent", () => {
         fixture.detectChanges();
 
         const emitSpy = vi.spyOn(component.tabSelect, "emit");
-        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight" });
+        fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: vi.fn() });
         fixture.detectChanges();
         expect(emitSpy).not.toHaveBeenCalled();
 
@@ -239,5 +247,174 @@ describe("TabListComponent", () => {
 
         const closeButton = fixture.debugElement.query(By.css("li[data-tab-id='tab1'] button"));
         expect(closeButton).toBeTruthy();
+    });
+
+    describe("orientation", () => {
+        it("should expose a horizontal orientation for top position", () => {
+            const ul = fixture.debugElement.query(By.css("ul[role='tablist']")).nativeElement;
+            expect(ul.getAttribute("aria-orientation")).toBe("horizontal");
+        });
+
+        it("should expose a vertical orientation for left position", () => {
+            fixture.componentRef.setInput("position", "left");
+            fixture.detectChanges();
+            const ul = fixture.debugElement.query(By.css("ul[role='tablist']")).nativeElement;
+            expect(ul.getAttribute("aria-orientation")).toBe("vertical");
+        });
+
+        it("should expose a vertical orientation for right position", () => {
+            fixture.componentRef.setInput("position", "right");
+            fixture.detectChanges();
+            const ul = fixture.debugElement.query(By.css("ul[role='tablist']")).nativeElement;
+            expect(ul.getAttribute("aria-orientation")).toBe("vertical");
+        });
+
+        it("should navigate with ArrowDown and prevent default in vertical orientation", () => {
+            fixture.componentRef.setInput("position", "left");
+            fixture.componentRef.setInput("selectedTabId", "tab1");
+            fixture.detectChanges();
+            const emitSpy = vi.spyOn(component.tabSelect, "emit");
+            const preventDefaultSpy = vi.fn();
+            fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowDown", preventDefault: preventDefaultSpy });
+            fixture.detectChanges();
+            expect(preventDefaultSpy).toHaveBeenCalled();
+            expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 1 }));
+        });
+
+        it("should navigate with ArrowUp and prevent default in vertical orientation", () => {
+            fixture.componentRef.setInput("position", "left");
+            fixture.componentRef.setInput("selectedTabId", "tab1");
+            fixture.detectChanges();
+            const emitSpy = vi.spyOn(component.tabSelect, "emit");
+            const preventDefaultSpy = vi.fn();
+            fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowUp", preventDefault: preventDefaultSpy });
+            fixture.detectChanges();
+            expect(preventDefaultSpy).toHaveBeenCalled();
+            expect(emitSpy).toHaveBeenCalledWith(expect.objectContaining({ index: 2 }));
+        });
+
+        it("should not prevent default for perpendicular arrow keys in horizontal orientation", () => {
+            fixture.componentRef.setInput("selectedTabId", "tab1");
+            fixture.detectChanges();
+            const emitSpy = vi.spyOn(component.tabSelect, "emit");
+            const preventDefaultSpy = vi.fn();
+            fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowUp", preventDefault: preventDefaultSpy });
+            fixture.detectChanges();
+            expect(preventDefaultSpy).not.toHaveBeenCalled();
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+
+        it("should not prevent default for perpendicular arrow keys in vertical orientation", () => {
+            fixture.componentRef.setInput("position", "left");
+            fixture.componentRef.setInput("selectedTabId", "tab1");
+            fixture.detectChanges();
+            const emitSpy = vi.spyOn(component.tabSelect, "emit");
+            const preventDefaultSpy = vi.fn();
+            fixture.debugElement.triggerEventHandler("keydown", { key: "ArrowRight", preventDefault: preventDefaultSpy });
+            fixture.detectChanges();
+            expect(preventDefaultSpy).not.toHaveBeenCalled();
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("overflow controls", () => {
+        const mockOverflow = (axis: "x" | "y") => {
+            const ul = fixture.debugElement.query(By.css("ul[role='tablist']")).nativeElement;
+            if (axis === "x") {
+                Object.defineProperty(ul, "scrollWidth", { value: 200, configurable: true });
+                Object.defineProperty(ul, "clientWidth", { value: 100, configurable: true });
+            } else {
+                Object.defineProperty(ul, "scrollHeight", { value: 200, configurable: true });
+                Object.defineProperty(ul, "clientHeight", { value: 100, configurable: true });
+            }
+        };
+
+        const overflowButtons = () => fixture.debugElement.queryAll(By.css("button[aria-hidden='true']"));
+
+        it("should not render overflow controls when content fits", async () => {
+            fixture.detectChanges();
+            await flushAsync();
+            expect(overflowButtons().length).toBe(0);
+        });
+
+        it("should render overflow controls when content overflows horizontally", async () => {
+            mockOverflow("x");
+            fixture.componentRef.setInput("tabList", makeTabs());
+            fixture.detectChanges();
+            await flushAsync();
+            fixture.detectChanges();
+            const buttons = overflowButtons();
+            expect(buttons.length).toBe(2);
+            expect(buttons[0].nativeElement.querySelector("svg[lucideChevronLeft]")).toBeTruthy();
+            expect(buttons[1].nativeElement.querySelector("svg[lucideChevronRight]")).toBeTruthy();
+        });
+
+        it("should render vertical overflow controls when content overflows vertically", async () => {
+            fixture.componentRef.setInput("position", "left");
+            fixture.detectChanges();
+            mockOverflow("y");
+            fixture.componentRef.setInput("tabList", makeTabs());
+            fixture.detectChanges();
+            await flushAsync();
+            fixture.detectChanges();
+            const buttons = overflowButtons();
+            expect(buttons.length).toBe(2);
+            expect(buttons[0].nativeElement.querySelector("svg[lucideChevronUp]")).toBeTruthy();
+            expect(buttons[1].nativeElement.querySelector("svg[lucideChevronDown]")).toBeTruthy();
+        });
+
+        it("should scroll horizontally when clicking the next control", async () => {
+            const scrollBy = vi.fn();
+            (Element.prototype as unknown as { scrollBy: unknown }).scrollBy = scrollBy;
+            mockOverflow("x");
+            fixture.componentRef.setInput("tabList", makeTabs());
+            fixture.detectChanges();
+            await flushAsync();
+            fixture.detectChanges();
+            const nextButton = overflowButtons()[1];
+            nextButton.triggerEventHandler("click", {});
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(scrollBy).toHaveBeenCalledWith({ left: 100, behavior: "smooth" });
+        });
+
+        it("should scroll vertically when clicking the next control", async () => {
+            const scrollBy = vi.fn();
+            (Element.prototype as unknown as { scrollBy: unknown }).scrollBy = scrollBy;
+            fixture.componentRef.setInput("position", "left");
+            fixture.detectChanges();
+            mockOverflow("y");
+            fixture.componentRef.setInput("tabList", makeTabs());
+            fixture.detectChanges();
+            await flushAsync();
+            fixture.detectChanges();
+            const nextButton = overflowButtons()[1];
+            nextButton.triggerEventHandler("click", {});
+            await new Promise(resolve => setTimeout(resolve, 100));
+            expect(scrollBy).toHaveBeenCalledWith({ top: 100, behavior: "smooth" });
+        });
+
+        it("should stop continuous scrolling on pointercancel", async () => {
+            mockOverflow("x");
+            fixture.componentRef.setInput("tabList", makeTabs());
+            fixture.detectChanges();
+            await flushAsync();
+            fixture.detectChanges();
+            const stopScrollingSpy = vi.spyOn(component as unknown as { stopScrolling(): void }, "stopScrolling");
+            const nextButton = overflowButtons()[1];
+            nextButton.triggerEventHandler("pointercancel", {});
+            expect(stopScrollingSpy).toHaveBeenCalled();
+        });
+    });
+
+    it("should scroll the selected tab into view when clicking a tab", async () => {
+        const scrollIntoView = vi.fn();
+        (Element.prototype as unknown as { scrollIntoView: unknown }).scrollIntoView = scrollIntoView;
+        fixture.componentRef.setInput("selectedTabId", "tab1");
+        fixture.detectChanges();
+        const tab2 = fixture.debugElement.query(By.css("li[data-tab-id='tab2']"));
+        tab2.triggerEventHandler("click", {});
+        fixture.detectChanges();
+        await flushAsync();
+        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "nearest", inline: "nearest" });
     });
 });
