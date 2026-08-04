@@ -456,6 +456,7 @@ describe("GridService", () => {
         });
 
         it("replaces the current selection in single mode via handleRowClick", () => {
+            service.setSelectableOptions({ selectOnRowClick: true });
             const [first, second] = service.rows().toArray();
             const event = new MouseEvent("click");
 
@@ -464,6 +465,15 @@ describe("GridService", () => {
 
             expect(service.isRowSelected(first)).toBe(false);
             expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("does nothing on handleRowClick by default, since selectOnRowClick defaults to false", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single" });
+            const row = service.rows().firstOrDefault()!;
+
+            service.handleRowClick(new MouseEvent("click"), row);
+
+            expect(service.isRowSelected(row)).toBe(false);
         });
 
         it("does nothing on handleRowClick when the grid is not selectable", () => {
@@ -476,7 +486,7 @@ describe("GridService", () => {
         });
 
         it("supports additive multi-selection via ctrl/meta click", () => {
-            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
             const [first, second] = service.rows().toArray();
             const ctrlClick = new MouseEvent("click", { ctrlKey: true });
 
@@ -485,6 +495,291 @@ describe("GridService", () => {
 
             expect(service.isRowSelected(first)).toBe(true);
             expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("replaces the selection on a plain click in multiple mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            const [first, second] = service.rows().toArray();
+            const plainClick = new MouseEvent("click");
+
+            service.handleRowClick(plainClick, first);
+            service.handleRowClick(plainClick, second);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(true);
+            expect(service.selectedKeys().size()).toBe(1);
+        });
+
+        it("toggles an individual row without disturbing others via ctrl/meta click", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            const [first, second] = service.rows().toArray();
+            const ctrlClick = new MouseEvent("click", { ctrlKey: true });
+
+            service.handleRowClick(ctrlClick, first);
+            service.handleRowClick(ctrlClick, second);
+            service.handleRowClick(ctrlClick, first);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("range-selects between the anchor and target row via shift-click", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            service.setRows(createRowData(5));
+            const [first, , third, , fifth] = service.rows().toArray();
+            const plainClick = new MouseEvent("click");
+            const shiftClick = new MouseEvent("click", { shiftKey: true });
+
+            service.handleRowClick(plainClick, first);
+            service.handleRowClick(shiftClick, third);
+
+            expect(service.selectedKeys().size()).toBe(3);
+            expect(service.isRowSelected(third)).toBe(true);
+            expect(service.isRowSelected(fifth)).toBe(false);
+        });
+
+        it("recomputes the shift-click range from the last plain- or ctrl-clicked anchor", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            service.setRows(createRowData(5));
+            const rows = service.rows().toArray();
+            const [first, second, third, fourth, fifth] = rows;
+            const plainClick = new MouseEvent("click");
+            const shiftClick = new MouseEvent("click", { shiftKey: true });
+
+            service.handleRowClick(plainClick, third);
+            service.handleRowClick(shiftClick, first);
+            expect(service.selectedKeys().size()).toBe(3);
+
+            service.handleRowClick(plainClick, fourth);
+            service.handleRowClick(shiftClick, fifth);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(false);
+            expect(service.isRowSelected(third)).toBe(false);
+            expect(service.isRowSelected(fourth)).toBe(true);
+            expect(service.isRowSelected(fifth)).toBe(true);
+            expect(service.selectedKeys().size()).toBe(2);
+        });
+
+        it("does nothing on handleRowClick when selectOnRowClick is false", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single", selectOnRowClick: false });
+            const row = service.rows().firstOrDefault()!;
+
+            service.handleRowClick(new MouseEvent("click"), row);
+
+            expect(service.isRowSelected(row)).toBe(false);
+        });
+
+        it("selects one row via setRowSelected", () => {
+            const row = service.rows().firstOrDefault()!;
+
+            service.setRowSelected(row, true);
+
+            expect(service.isRowSelected(row)).toBe(true);
+            expect(service.selectedKeys().size()).toBe(1);
+        });
+
+        it("deselects one row via setRowSelected", () => {
+            const row = service.rows().firstOrDefault()!;
+            service.selectRow(row);
+
+            service.setRowSelected(row, false);
+
+            expect(service.isRowSelected(row)).toBe(false);
+            expect(service.selectedKeys().isEmpty()).toBe(true);
+        });
+
+        it("deselects one row via deselectRow", () => {
+            const row = service.rows().firstOrDefault()!;
+            service.selectRow(row);
+
+            service.deselectRow(row);
+
+            expect(service.isRowSelected(row)).toBe(false);
+        });
+
+        it("clears the previous selection in single mode when selecting a row", () => {
+            const [first, second] = service.rows().toArray();
+            service.selectRow(first);
+
+            service.setRowSelected(second, true);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("preserves prior selections in multiple mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            const [first, second] = service.rows().toArray();
+            service.setRowSelected(first, true);
+
+            service.setRowSelected(second, true);
+
+            expect(service.isRowSelected(first)).toBe(true);
+            expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("derives selectedRows only from currently available rows", () => {
+            service.selectBy.set("id");
+            service.setRows(createRowData(3));
+            const [first, second] = service.rows().toArray();
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            service.setRowSelected(first, true);
+            service.setRowSelected(second, true);
+
+            service.setRows(createRowData(1));
+
+            expect(service.selectedRows().size()).toBe(1);
+            expect(service.selectedKeys().size()).toBe(2);
+        });
+    });
+
+    describe("selection key resolution", () => {
+        it("uses a string selectBy to derive selection keys", () => {
+            service.selectBy.set("id");
+            service.setRows(createRowData(2));
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            const row = service.rows().firstOrDefault()!;
+
+            service.selectRow(row);
+
+            expect(service.isRowSelected(row)).toBe(true);
+            expect(service.selectedKeys().firstOrDefault()).toBe(0);
+        });
+
+        it("uses a selector function to derive selection keys", () => {
+            service.selectBy.set(data => (data as Record<PropertyKey, unknown>)["id"]);
+            service.setRows(createRowData(2));
+            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            const row = service.rows().firstOrDefault()!;
+
+            service.selectRow(row);
+
+            expect(service.isRowSelected(row)).toBe(true);
+            expect(service.selectedKeys().firstOrDefault()).toBe(0);
+        });
+    });
+
+    describe("bulk selection", () => {
+        beforeEach(() => {
+            service.columns.set(ImmutableList.create([createColumn({ field: "id" })]));
+            service.setRows(createRowData(25));
+            service.setSelectableOptions({ enabled: true, mode: "multiple", showCheckboxes: true });
+        });
+
+        it("selects all rows on the current page via setBulkSelection", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().size()).toBe(10);
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+        });
+
+        it("deselects only the current page via setBulkSelection", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            service.setBulkSelection(true);
+            const pageOneKeys = service.selectedKeys();
+
+            service.setPageState({ page: 2, skip: 10, take: 10 });
+            service.setBulkSelection(false);
+
+            expect(service.selectedKeys().size()).toBe(10);
+            expect(service.selectedKeys().all(key => pageOneKeys.contains(key))).toBe(true);
+        });
+
+        it("preserves keys selected on other pages when selecting the current page", () => {
+            service.setPageState({ page: 2, skip: 10, take: 10 });
+            service.setBulkSelection(true);
+            const pageTwoKeys = service.selectedKeys();
+
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().size()).toBe(20);
+            expect(pageTwoKeys.all(key => service.selectedKeys().contains(key))).toBe(true);
+        });
+
+        it("affects only the filtered view for view scope", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", showCheckboxes: true, selectAllScope: "view" });
+            service.loadFilters([
+                {
+                    logic: "and",
+                    filters: [{ field: "id", operator: "gte", value: 10 }]
+                }
+            ]);
+
+            service.setBulkSelection(true);
+
+            expect(service.viewRows().size()).toBe(15);
+            expect(service.selectedKeys().size()).toBe(15);
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+        });
+
+        it("reports indeterminate state when only some scope rows are selected", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            const row = service.viewPageRows().firstOrDefault()!;
+
+            service.selectRow(row);
+
+            expect(service.someBulkSelectionRowsSelected()).toBe(true);
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("reports empty scope as not checked and not indeterminate", () => {
+            service.setRows([]);
+
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("reports all rows selected only when every scope row is selected", () => {
+            service.setPageState({ page: 1, skip: 0, take: 10 });
+            const rows = service.viewPageRows().toArray();
+            rows.forEach(row => service.selectRow(row));
+
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("keeps header state correct as individual rows are toggled in and out", () => {
+            service.setSelectableOptions({
+                enabled: true,
+                mode: "multiple",
+                showCheckboxes: true,
+                selectAllScope: "view"
+            });
+            const rows = service.viewRows().toArray();
+
+            for (const row of rows) {
+                service.selectRow(row);
+            }
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+
+            service.deselectRow(rows[0]);
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+            expect(service.someBulkSelectionRowsSelected()).toBe(true);
+
+            for (const row of rows) {
+                service.deselectRow(row);
+            }
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("resolves page scope to the full view in virtual mode", () => {
+            service.setVirtualScrollOptions({ enabled: true, height: 32 });
+            service.setPageState({ page: 1, skip: 0, take: 5 });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().size()).toBe(25);
+        });
+
+        it("does nothing in single mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single", showCheckboxes: true });
+            service.setBulkSelection(true);
+
+            expect(service.selectedKeys().isEmpty()).toBe(true);
         });
     });
 

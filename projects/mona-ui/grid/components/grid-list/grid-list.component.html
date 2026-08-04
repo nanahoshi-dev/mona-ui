@@ -6,6 +6,9 @@
         @if (gridService.masterDetailTemplate()) {
             <col [style.width.px]="gridService.groupColumnWidth" />
         }
+        @if (gridService.selectionColumnVisible()) {
+            <col [style.width.px]="gridService.selectionColumnWidth" />
+        }
         @for (col of columns(); track $index) {
             <col [style.width.px]="col.calculatedWidth" />
         }
@@ -34,7 +37,7 @@
                             [cellKind]="'detail'"
                             [colIndex]="0"
                             [firstInRow]="true"
-                            [lastInRow]="columns().length === 0"
+                            [lastInRow]="columns().length === 0 && !gridService.selectionColumnVisible()"
                             [rowIndex]="rowIndex"
                             [rowUid]="row.uid"
                             [section]="'body'"
@@ -49,8 +52,27 @@
                             </span>
                         </td>
                     }
+                    @if (gridService.selectionColumnVisible()) {
+                        <td
+                            monaGridCell
+                            monaGridLockedCell
+                            [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                            monaGridLogicalCell
+                            [cellKind]="'command'"
+                            [columnId]="'$selection'"
+                            [rowIndex]="rowIndex"
+                            [rowUid]="row.uid"
+                            [section]="'body'"
+                            [colIndex]="gridService.masterDetailTemplate() ? 1 : 0"
+                            [firstInRow]="!gridService.masterDetailTemplate()"
+                            [lastInRow]="columns().length === 0"
+                            [style.width.px]="gridService.selectionColumnWidth"
+                            [attr.colspan]="1">
+                            <mona-grid-selection-checkbox [row]="row" [rowIndex]="rowIndex" />
+                        </td>
+                    }
                     @for (column of columns(); track $index) {
-                        @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
+                        @let colIndex = $index + gridService.leadingLogicalColumnCount();
                         <td
                             monaGridCell
                             monaGridLockedCell
@@ -69,8 +91,11 @@
                             [rowIndex]="rowIndex"
                             [rowUid]="row.uid"
                             [section]="'body'"
-                            [firstInRow]="colIndex === 0"
-                            [lastInRow]="colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)"
+                            [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
+                            [lastInRow]="
+                                colIndex ===
+                                gridService.leadingLogicalColumnCount() + columns().length - 1
+                            "
                             [attr.colspan]="1"
                             [style.width.px]="column.calculatedWidth"
                             [style.min-width.px]="column.minWidth"
@@ -94,6 +119,14 @@
                             [indentCell]="true"
                             [attr.colspan]="1"
                             [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
+                        @if (gridService.selectionColumnVisible()) {
+                            <td
+                                monaGridCell
+                                monaGridLockedCell
+                                [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                                [attr.colspan]="1"
+                                [style.width.px]="gridService.selectionColumnWidth"></td>
+                        }
                         <td monaGridCell [masterDetailContent]="true" [attr.colspan]="columns().length">
                             <ng-container
                                 [ngTemplateOutlet]="gridService.masterDetailTemplate()"
@@ -128,7 +161,8 @@
                         @let colspan =
                             columns().length +
                             gridService.groupColumns().length +
-                            (gridService.masterDetailTemplate() ? 1 : 0) -
+                            (gridService.masterDetailTemplate() ? 1 : 0) +
+                            (gridService.selectionColumnVisible() ? 1 : 0) -
                             viewRow.depth +
                             1;
 
@@ -176,6 +210,14 @@
                                     gridService.groupColumns().length * gridService.groupColumnWidth
                                 "
                                 [footerCellWidth]="gridService.detailColumnWidth"></td>
+                        }
+                        @if (gridService.selectionColumnVisible()) {
+                            <td
+                                monaGridFooterTableCell
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                                [footerCellWidth]="gridService.selectionColumnWidth"></td>
                         }
                         @for (column of columns(); track $index) {
                             <td
@@ -230,7 +272,7 @@
                                 [cellKind]="'detail'"
                                 [colIndex]="0"
                                 [firstInRow]="true"
-                                [lastInRow]="columns().length === 0"
+                                [lastInRow]="columns().length === 0 && !gridService.selectionColumnVisible()"
                                 [style.width.px]="gridService.detailColumnWidth">
                                 <span class="flex h-full w-full items-stretch justify-center">
                                     <mona-grid-toggle
@@ -241,8 +283,29 @@
                                 </span>
                             </td>
                         }
+                        @if (gridService.selectionColumnVisible()) {
+                            <td
+                                monaGridCell
+                                monaGridLockedCell
+                                [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                                [grouped]="true"
+                                monaGridLogicalCell
+                                [cellKind]="'command'"
+                                [columnId]="'$selection'"
+                                [prevRowType]="prevRow?.type"
+                                [nextRowType]="nextRow?.type"
+                                [rowIndex]="rowIndex"
+                                [rowUid]="viewRow.row.uid"
+                                [section]="'body'"
+                                [colIndex]="gridService.masterDetailTemplate() ? 1 : 0"
+                                [firstInRow]="!gridService.masterDetailTemplate()"
+                                [lastInRow]="columns().length === 0"
+                                [style.width.px]="gridService.selectionColumnWidth">
+                                <mona-grid-selection-checkbox [row]="viewRow.row" [rowIndex]="rowIndex" />
+                            </td>
+                        }
                         @for (column of columns(); track $index) {
-                            @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
+                            @let colIndex = $index + gridService.leadingLogicalColumnCount();
                             <td
                                 monaGridCell
                                 monaGridLockedCell
@@ -261,9 +324,10 @@
                                     column.kind === 'data' &&
                                     column.editable === true
                                 "
-                                [firstInRow]="colIndex === 0"
+                                [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
                                 [lastInRow]="
-                                    colIndex === columns().length - (gridService.masterDetailTemplate() ? 0 : 1)
+                                    colIndex ===
+                                    gridService.leadingLogicalColumnCount() + columns().length - 1
                                 "
                                 [rowIndex]="rowIndex"
                                 [rowUid]="viewRow.row.uid"
@@ -306,6 +370,14 @@
                                 [nextRowType]="nextRow?.type"
                                 [attr.colspan]="1"
                                 [style.width.px]="gridService.masterDetailEmptyCellWidth()"></td>
+                            @if (gridService.selectionColumnVisible()) {
+                                <td
+                                    monaGridCell
+                                    monaGridLockedCell
+                                    [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                                    [attr.colspan]="1"
+                                    [style.width.px]="gridService.selectionColumnWidth"></td>
+                            }
                             <td monaGridDetailContentCell [nextRowType]="nextRow?.type" [attr.colspan]="colspan">
                                 <ng-container
                                     [ngTemplateOutlet]="gridService.masterDetailTemplate()"

@@ -135,6 +135,32 @@ protected readonly filter = signal<CompositeFilterDescriptor[]>([]);
 </mona-grid>
 ```
 
+Set `showCheckboxes: true` to render a built-in checkbox selection column. The column is fixed at the left of the grid, is locked while horizontally scrolling, and never participates in sorting, filtering, grouping, resizing, reordering, or the column chooser.
+
+```html
+<mona-grid
+    [data]="orders()"
+    [monaGridSelectable]="{
+        mode: 'multiple',
+        showCheckboxes: true,
+        selectOnRowClick: false
+    }"
+    selectBy="orderId"
+    [selectedKeys]="selectedKeys()"
+    (selectedKeysChange)="selectedKeys.set($event)">
+</mona-grid>
+```
+
+Options:
+
+- `mode`: `"single"` (default) or `"multiple"`.
+- `showCheckboxes`: display the built-in checkbox selection column (default `false`).
+- `showSelectAll`: display the select-all checkbox in the selection column header (default `true`, multiple mode only).
+- `selectAllScope`: which rows the header checkbox affects — `"page"` (default) selects only rows on the current page; `"view"` selects every row in the current filtered and sorted view. Virtual scrolling has no logical pages, so `"page"` resolves to the full current view there. The header checkbox is checked when every row in scope is selected and indeterminate when only some are.
+- `selectOnRowClick`: whether clicking a row changes its selection (default `false`, so clicking a row's content — a link, a button, an editable cell — never silently discards the current selection). Set to `true` to also select rows via a plain click, in addition to checkboxes or application code.
+
+Selection state always lives in `selectedKeys`. Row clicks and checkbox clicks mutate the same state. When `selectOnRowClick` is enabled: in single mode, clicking a row replaces the previous selection; in multiple mode, a plain click replaces the selection with just that row, Ctrl/Cmd-click toggles a single row without disturbing the rest, and Shift-click range-selects from the last clicked row. Checkbox clicks always toggle the clicked row in place, regardless of `selectOnRowClick`. Bulk (de)selection preserves keys that are outside the current scope. Provide a stable `selectBy` when selection must survive data reloads, pagination, or remote data fetching.
+
 ### Virtualization
 
 `monaGridVirtualScroll` renders only the rows currently in view, for large data sets. `scrollEndThreshold` (rows from the bottom) controls when `scrollEnd` fires, useful for loading more data incrementally.

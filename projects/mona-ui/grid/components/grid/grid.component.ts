@@ -86,6 +86,7 @@ import { GridFilterMenuComponent } from "../grid-filter-menu/grid-filter-menu.co
 import { GridFilterRowCellComponent } from "../grid-filter-row-cell/grid-filter-row-cell.component";
 import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
 import { GridListComponent } from "../grid-list/grid-list.component";
+import { GridSelectAllCheckboxComponent } from "../grid-select-all-checkbox/grid-select-all-checkbox.component";
 import { GridVirtualListComponent } from "../grid-virtual-list/grid-virtual-list.component";
 
 const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [tabindex]";
@@ -119,7 +120,8 @@ const FOCUSABLE_TARGET_SELECTOR = "button, input, select, textarea, a[href], [ta
         GridLockedCellDirective,
         ButtonDirective,
         PopupComponent,
-        GridColumnChooserComponent
+        GridColumnChooserComponent,
+        GridSelectAllCheckboxComponent
     ],
     host: {
         "[class]": "baseClass()",
@@ -569,6 +571,9 @@ export class GridComponent<T> implements GridVariantInput {
         if (this.gridService.masterDetailTemplate()) {
             headerCells.shift();
         }
+        if (this.gridService.selectionColumnVisible()) {
+            headerCells.shift();
+        }
         for (const _ of this.gridService.groupColumns()) {
             headerCells.shift();
         }
@@ -699,6 +704,9 @@ export class GridComponent<T> implements GridVariantInput {
             }
             if (this.gridService.masterDetailTemplate()) {
                 headerWidth -= this.gridService.detailColumnWidth;
+            }
+            if (this.gridService.selectionColumnVisible()) {
+                headerWidth -= this.gridService.selectionColumnWidth;
             }
             headerWidth -= this.gridService.groupColumnWidth * this.gridService.groupColumns().length;
             const fitViewWidthByColumn =

@@ -1,6 +1,6 @@
 import { afterNextRender, DestroyRef, Directive, effect, inject, input, output, untracked } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { orderBy, sequenceEqual } from "@mirei/ts-collections";
+import { ImmutableSet } from "@mirei/ts-collections";
 import { pairwise, startWith } from "rxjs";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { GridService } from "../services/grid.service";
@@ -57,12 +57,7 @@ export class GridSelectableDirective {
             const selectedKeys = this.selectedKeys();
             untracked(() => {
                 const alreadySelectedKeys = this.#gridService.selectedKeys();
-                if (
-                    sequenceEqual(
-                        orderBy(alreadySelectedKeys, k => k),
-                        orderBy(selectedKeys, k => k)
-                    )
-                ) {
+                if (setsEqual(alreadySelectedKeys, ImmutableSet.create(selectedKeys))) {
                     return;
                 }
                 this.#gridService.loadSelectedKeys(selectedKeys);
@@ -77,10 +72,14 @@ export class GridSelectableDirective {
         this.#gridService.selectedKeysChange$
             .pipe(startWith(this.#gridService.selectedKeys()), pairwise(), takeUntilDestroyed(this.#destroyRef))
             .subscribe(([oldKeys, newKeys]) => {
-                if (oldKeys.order().sequenceEqual(newKeys.order())) {
+                if (setsEqual(oldKeys, newKeys)) {
                     return;
                 }
                 this.selectedKeysChange.emit(newKeys.toArray());
             });
     }
+}
+
+function setsEqual<T>(left: ImmutableSet<T>, right: ImmutableSet<T>): boolean {
+    return left.size() === right.size() && left.all(value => right.contains(value));
 }

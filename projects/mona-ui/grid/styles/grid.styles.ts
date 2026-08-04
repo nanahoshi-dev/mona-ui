@@ -72,6 +72,15 @@ export const gridCellTextThemeVariants = cva(`
     truncate cursor-default select-none
 `);
 
+export const gridSelectAllCellThemeVariants = cva(`
+    absolute inset-0 flex h-full w-full items-center justify-center
+`);
+
+export const gridSelectionCellThemeVariants = cva(`
+    absolute inset-0 flex h-full w-full items-center justify-center
+    shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]
+`);
+
 export const gridColumnActionsThemeVariants = cva(`
     flex items-center justify-center
     text-xs [&_i]:text-xs

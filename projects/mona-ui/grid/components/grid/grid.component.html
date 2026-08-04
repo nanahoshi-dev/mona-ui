@@ -80,6 +80,9 @@
                 @if (gridService.masterDetailTemplate()) {
                     <col [style.width.px]="gridService.groupColumnWidth" />
                 }
+                @if (gridService.selectionColumnVisible()) {
+                    <col [style.width.px]="gridService.selectionColumnWidth" />
+                }
                 @for (col of gridService.visibleColumns(); track $index) {
                     <col [style.width.px]="col.calculatedWidth" />
                 }
@@ -110,8 +113,36 @@
                             [attr.colspan]="1"
                             [style.width.px]="gridService.detailColumnWidth"></th>
                     }
+                    @if (gridService.selectionColumnVisible()) {
+                        <th
+                            monaGridLockedCell
+                            [lockedCellHeader]="true"
+                            [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                            monaGridLogicalCell
+                            [cellKind]="'command'"
+                            [columnId]="'$selection'"
+                            [rowIndex]="-1"
+                            [colIndex]="gridService.masterDetailTemplate() ? 1 : 0"
+                            [section]="'header'"
+                            [firstInRow]="
+                                !gridService.masterDetailTemplate() &&
+                                gridService.groupColumns().length === 0
+                            "
+                            [lastInRow]="gridService.visibleColumns().length === 0"
+                            scope="col"
+                            class="border-r border-border"
+                            [attr.colspan]="1"
+                            [style.width.px]="gridService.selectionColumnWidth">
+                            @if (
+                                gridService.selectableOptions().mode === "multiple" &&
+                                gridService.selectableOptions().showSelectAll !== false
+                            ) {
+                                <mona-grid-select-all-checkbox />
+                            }
+                        </th>
+                    }
                     @for (column of gridService.visibleColumns(); track $index) {
-                        @let colIndex = gridService.masterDetailTemplate() ? $index + 1 : $index;
+                        @let colIndex = $index + gridService.leadingLogicalColumnCount();
                         <th
                             scope="col"
                             role="columnheader"
@@ -125,10 +156,12 @@
                             [rowIndex]="-1"
                             [colIndex]="colIndex"
                             [section]="'header'"
-                            [firstInRow]="colIndex === 0"
+                            [firstInRow]="colIndex === gridService.leadingLogicalColumnCount()"
                             [lastInRow]="
                                 colIndex ===
-                                gridService.visibleColumns().length - (gridService.masterDetailTemplate() ? 0 : 1)
+                                gridService.leadingLogicalColumnCount() +
+                                    gridService.visibleColumns().length -
+                                    1
                             "
                             (toggle)="onColumnSort(column)"
                             [cdkDragData]="column"
@@ -263,6 +296,15 @@
                                 class="border-r border-border"
                                 [style.width.px]="gridService.detailColumnWidth"></th>
                         }
+                        @if (gridService.selectionColumnVisible()) {
+                            <th
+                                monaGridLockedCell
+                                [lockedCellHeader]="true"
+                                [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                                scope="col"
+                                class="border-r border-border"
+                                [style.width.px]="gridService.selectionColumnWidth"></th>
+                        }
                         @for (column of gridService.visibleColumns(); track $index) {
                             <th
                                 monaGridLockedCell
@@ -315,6 +357,9 @@
                                 @if (gridService.masterDetailTemplate()) {
                                     <col [style.width.px]="gridService.groupColumnWidth" />
                                 }
+                                @if (gridService.selectionColumnVisible()) {
+                                    <col [style.width.px]="gridService.selectionColumnWidth" />
+                                }
                                 @for (col of gridService.visibleColumns(); track $index) {
                                     <col [style.width.px]="col.calculatedWidth" />
                                 }
@@ -338,6 +383,14 @@
                                                 gridService.groupColumns().length * gridService.groupColumnWidth
                                             "
                                             [footerCellWidth]="gridService.detailColumnWidth"></td>
+                                    }
+                                    @if (gridService.selectionColumnVisible()) {
+                                        <td
+                                            monaGridFooterTableCell
+                                            monaGridLockedCell
+                                            [lockedCellHeader]="true"
+                                            [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+                                            [footerCellWidth]="gridService.selectionColumnWidth"></td>
                                     }
                                     @for (column of gridService.visibleColumns(); track $index) {
                                         <td

@@ -267,6 +267,27 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
                     type: "dropdown",
                     dropdownDataSource: ["single", "multiple"] as const,
                     dropdownValue: "single"
+                },
+                showCheckboxes: {
+                    code: ``,
+                    active: false,
+                    description: "Display a built-in checkbox selection column",
+                    name: "Show Checkboxes"
+                },
+                selectOnRowClick: {
+                    code: ``,
+                    active: false,
+                    description: "Change selection when clicking the row itself",
+                    name: "Select On Row Click"
+                },
+                selectAllScope: {
+                    code: ``,
+                    active: false,
+                    description: "Rows affected by the header select-all checkbox",
+                    name: "Select All Scope",
+                    type: "dropdown",
+                    dropdownDataSource: ["page", "view"] as const,
+                    dropdownValue: "page"
                 }
             }
         },
@@ -766,7 +787,11 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         const subFeatures = features["selection"].subFeatures || {};
         const selectableOptions: SelectableOptions = {
             enabled: features["selection"].active ?? false,
-            mode: subFeatures["mode"].dropdownValue ?? "single"
+            mode: subFeatures["mode"].dropdownValue ?? "single",
+            selectAllScope: subFeatures["selectAllScope"].dropdownValue ?? "page",
+            selectOnRowClick: subFeatures["selectOnRowClick"].active ?? false,
+            showCheckboxes: subFeatures["showCheckboxes"].active ?? false,
+            showSelectAll: true
         };
         return selectableOptions;
     });
