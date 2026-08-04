@@ -110,6 +110,147 @@ describe("GridService", () => {
 
             expect(updatedUid).toBe(initialUid);
         });
+
+        it("preserves row uids when rebinding reordered objects with the same row key", () => {
+            const first = { id: 1, name: "Jane" };
+            const second = { id: 2, name: "John" };
+            service.setRows([first, second], "id");
+            const uidByKey = new Map(
+                service
+                    .rows()
+                    .select(row => [row.data["id"], row.uid] as const)
+                    .toArray()
+            );
+
+            service.setRows([{ id: 2, name: "John moved" }, { id: 1, name: "Jane moved" }], "id");
+
+            const reordered = service.rows().toArray();
+            expect(reordered.map(row => row.data["id"])).toEqual([2, 1]);
+            expect(reordered[0]?.uid).toBe(uidByKey.get(2));
+            expect(reordered[1]?.uid).toBe(uidByKey.get(1));
+        });
+
+        it("derives row identity from rowKey without any editing configuration", () => {
+            service.setRows([{ id: 1, name: "Jane" }], "id");
+            const initialUid = service.rows().firstOrDefault()?.uid;
+
+            service.setRows([{ id: 1, name: "Jane updated" }], "id");
+
+            expect(service.rows().firstOrDefault()?.uid).toBe(initialUid);
+        });
+    });
+
+    describe("ordered row model", () => {
+        it("preserves the iterable order of setRows", () => {
+            service.setRows(createRowData(5, i => ({ order: 5 - i })));
+
+            expect(
+                service
+                    .rows()
+                    .select(row => row.data["order"])
+                    .toArray()
+            ).toEqual([5, 4, 3, 2, 1]);
+        });
+
+        it("keeps duplicate data objects as separate rows", () => {
+            const duplicate = { id: 1, name: "Jane" };
+            service.setRows([duplicate, duplicate, { id: 2, name: "John" }]);
+
+            expect(service.rows().size()).toBe(3);
+            expect(
+                service
+                    .rows()
+                    .select(row => row.data["id"])
+                    .toArray()
+            ).toEqual([1, 1, 2]);
+        });
+
+        it("preserves source order in viewRows without sorting", () => {
+            service.setRows([{ id: 3 }, { id: 1 }, { id: 2 }]);
+
+            expect(
+                service
+                    .viewRows()
+                    .select(row => row.data["id"])
+                    .toArray()
+            ).toEqual([3, 1, 2]);
+        });
+
+        it("returns the correct ordered page slice", () => {
+            service.setRows(createRowData(10));
+            service.setPageState({ skip: 3, take: 4 });
+
+            expect(
+                service
+                    .viewPageRows()
+                    .select(row => row.data["id"])
+                    .toArray()
+            ).toEqual([3, 4, 5, 6]);
+        });
+
+        it("preserves relative order when filtering without sorting", () => {
+            service.columns.set(ImmutableList.create([createColumn({ field: "name" })]));
+            service.setRows([{ name: "Charlie" }, { name: "Alice" }, { name: "Bob" }, { name: "Alice" }]);
+            service.loadFilters([
+                {
+                    logic: "and",
+                    filters: [{ field: "name", operator: "eq", value: "Alice" }]
+                }
+            ]);
+
+            expect(
+                service
+                    .viewRows()
+                    .select(row => row.data["name"])
+                    .toArray()
+            ).toEqual(["Alice", "Alice"]);
+        });
+    });
+
+    describe("expansion identity", () => {
+        beforeEach(() => {
+            service.setRows([{ id: 1, name: "Jane" }, { id: 2, name: "John" }], "id");
+        });
+
+        it("keys expansion state by row uid instead of the selection key", () => {
+            const [first] = service.rows().toArray();
+            service.selectBy.set("name");
+            service.setRowExpanded(first, true);
+
+            expect(service.isRowExpanded(first)).toBe(true);
+            expect(service.expandedKeys().contains("Jane")).toBe(false);
+            expect(service.expandedKeys().contains(first.uid)).toBe(true);
+        });
+
+        it("keeps expansion state when the selection configuration changes", () => {
+            const [first] = service.rows().toArray();
+            service.setRowExpanded(first, true);
+            service.selectBy.set("name");
+
+            expect(service.isRowExpanded(first)).toBe(true);
+        });
+
+        it("keeps expansion state on the reordered row after a data rebind", () => {
+            const rows = service.rows().toArray();
+            const second = rows[1]!;
+            service.setRowExpanded(second, true);
+            const expandedUid = second.uid;
+
+            service.setRows([{ id: 2, name: "John" }, { id: 1, name: "Jane" }], "id");
+
+            const reordered = service.rows().toArray();
+            expect(reordered[0]?.uid).toBe(expandedUid);
+            expect(service.isRowExpanded(reordered[0]!)).toBe(true);
+            expect(service.isRowExpanded(reordered[1]!)).toBe(false);
+        });
+
+        it("collapses a row when setRowExpanded is called with false", () => {
+            const [first] = service.rows().toArray();
+            service.setRowExpanded(first, true);
+            service.setRowExpanded(first, false);
+
+            expect(service.isRowExpanded(first)).toBe(false);
+        });
     });
 
     describe("sorting", () => {
@@ -832,6 +973,75 @@ describe("GridService", () => {
 
             const column = service.columns().firstOrDefault(c => c.field === "id");
             expect(column?.calculatedWidth).toBe(150);
+        });
+    });
+
+    describe("structural columns", () => {
+        it("keeps reorder, detail, and selection in a fixed left-to-right order", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.masterDetailTemplate.set({} as never);
+            service.setSelectableOptions({
+                enabled: true,
+                mode: "multiple",
+                selectAllScope: "page",
+                selectOnRowClick: false,
+                showCheckboxes: true,
+                showSelectAll: true
+            });
+
+            expect(service.visibleStructuralColumns().map(c => c.kind)).toEqual(["reorder", "detail", "selection"]);
+            expect(service.rowReorderColumnOffset()).toBe(0);
+            expect(service.detailColumnOffset()).toBe(36);
+            expect(service.selectionColumnOffset()).toBe(72);
+        });
+
+        it("omits invisible structural columns from the offset chain", () => {
+            service.setRowReorderableOptions({ enabled: false });
+            service.setSelectableOptions({
+                enabled: true,
+                mode: "multiple",
+                selectAllScope: "page",
+                selectOnRowClick: false,
+                showCheckboxes: true,
+                showSelectAll: true
+            });
+
+            expect(service.visibleStructuralColumns().map(c => c.kind)).toEqual(["selection"]);
+            expect(service.selectionColumnOffset()).toBe(0);
+        });
+
+        it("offsets structuralColumnOffset by an explicit group-prefix width, independent of the full group width", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.columns.set(
+                ImmutableList.create([createColumn({ field: "a" }), createColumn({ field: "b" })])
+            );
+            service.addGroupColumn(service.columns().get(0));
+            service.addGroupColumn(service.columns().get(1));
+
+            expect(service.groupStructuralWidth()).toBe(72);
+            expect(service.structuralColumnOffset("reorder", 0)).toBe(0);
+            expect(service.structuralColumnOffset("reorder", service.groupColumnWidth)).toBe(36);
+            expect(service.rowReorderColumnOffset()).toBe(72);
+        });
+
+        it("derives colIndex/firstInRow/lastInRow from the same memoized registry", () => {
+            service.setRowReorderableOptions({ enabled: true });
+            service.masterDetailTemplate.set({} as never);
+
+            expect(service.structuralColIndexMap().get("reorder")).toBe(0);
+            expect(service.structuralColIndexMap().get("detail")).toBe(1);
+            expect(service.structuralColIndexMap().get("reorder") === 0).toBe(true);
+            expect(service.structuralColIndexMap().get("detail") === 0).toBe(false);
+            expect(service.structuralLastKind()).toBe("detail");
+        });
+
+        it("keeps the structuralColIndexMap reference stable across reads when nothing structural changed", () => {
+            service.setRowReorderableOptions({ enabled: true });
+
+            const first = service.structuralColIndexMap();
+            const second = service.structuralColIndexMap();
+
+            expect(first).toBe(second);
         });
     });
 

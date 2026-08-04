@@ -44,6 +44,7 @@ import {
     GridRemoveEvent,
     GridReorderableDirective,
     GridResizableDirective,
+    GridRowReorderableDirective,
     GridSaveEvent,
     GridSelectableDirective,
     GridSortableDirective,
@@ -54,7 +55,9 @@ import {
     type GroupableOptions,
     type ReorderableOptions,
     type ResizableOptions,
+    type RowReorderableOptions,
     RowEditEvent,
+    type RowReorderEvent,
     type SelectableOptions
 } from "@nanahoshi/mona-ui/grid";
 import { type CompositeFilterDescriptor } from "@nanahoshi/mona-ui/query";
@@ -247,6 +250,12 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             description: "Enable column reordering for the grid",
             active: false
         },
+        rowReordering: {
+            code: ``,
+            name: "Row Reordering",
+            description: "Enable row reordering through the row reorder handle column",
+            active: false
+        },
         resizing: {
             code: ``,
             name: "Column Resizing",
@@ -429,6 +438,7 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
         GridStatePersistenceDirective,
         GridToolbarTemplateDirective,
         GridHeaderTemplateDirective,
+        GridRowReorderableDirective,
         LucideContainer,
         GridSortableDirective,
         GridReorderableDirective,
@@ -471,6 +481,8 @@ export class GridDemoComponent extends AbstractDemoComponent<GridComponent<unkno
             [monaGridGroupable]="groupable()"
             [monaGridReorderable]="reordering()"
             (columnReorder)="onColumnReorder($event)"
+            [monaGridRowReorderable]="rowReorderOptions()"
+            (rowReorder)="onRowReorder($event)"
             [monaGridResizable]="resizing()"
             (columnResize)="onColumnResize($event)"
             [monaGridSelectable]="selection()"
@@ -775,6 +787,11 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
         };
         return options;
     });
+    protected readonly rowReorderOptions = computed<RowReorderableOptions>(() => {
+        const features = this.features();
+        const active = features["rowReordering"]?.active ?? false;
+        return active ? { enabled: true } : { enabled: false };
+    });
     protected readonly resizing = computed(() => {
         const features = this.features();
         const options: ResizableOptions = {
@@ -902,6 +919,11 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
 
     protected onRowEdit(event: RowEditEvent): void {
         console.log("Row edited:", event);
+    }
+
+    protected onRowReorder(event: RowReorderEvent): void {
+        const data = [...event.reorderedData];
+        this.virtualization().enabled ? this.virtualGridData.set(data) : this.gridData.set(data);
     }
 
     protected onRemove(event: GridRemoveEvent): void {

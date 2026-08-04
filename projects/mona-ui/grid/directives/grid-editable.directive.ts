@@ -5,7 +5,6 @@ import { EditableOptions } from "../models/EditableOptions";
 import { GridAddEvent } from "../models/GridAddEvent";
 import { GridCancelEvent } from "../models/GridCancelEvent";
 import type { GridEditEvent } from "../models/GridEditEvent";
-import { GridKeySelector } from "../models/GridKeySelector";
 import { GridRemoveEvent } from "../models/GridRemoveEvent";
 import { GridSaveEvent } from "../models/GridSaveEvent";
 import { RowEditEvent } from "../models/RowEditEvent";
@@ -57,10 +56,6 @@ export class GridEditableDirective {
      */
     public readonly rowEdit = output<RowEditEvent>();
     /**
-     * @description Field name or selector used to keep edited row identity stable when data is rebound.
-     */
-    public readonly rowKey = input<GridKeySelector<unknown> | null>(null);
-    /**
      * @description Emitted before an edited or new row is saved.
      */
     public readonly save = output<GridSaveEvent>();
@@ -75,10 +70,6 @@ export class GridEditableDirective {
                     this.#gridService.setEditableOptions({ enabled: true, mode: "cell" });
                 }
             });
-        });
-        effect(() => {
-            const rowKey = this.rowKey();
-            untracked(() => this.#gridService.editableRowKey.set(rowKey));
         });
         effect(() => {
             const factory = this.newRowFactory();

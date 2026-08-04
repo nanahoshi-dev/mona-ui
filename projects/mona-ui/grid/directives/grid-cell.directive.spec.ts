@@ -13,8 +13,9 @@ describe("GridCellDirective", () => {
         const cellContentClasses = gridCellBaseThemeVariants();
         const tableCellClasses = gridListTableCellThemeVariants({ lastInRow: false });
 
-        expect(cellContentClasses).toContain("shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]");
+        expect(cellContentClasses).not.toContain("shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]");
         expect(cellContentClasses).not.toContain("border-b");
+        expect(tableCellClasses).toContain("border-b-border-subtle");
         expect(tableCellClasses).toContain("border-r-border-subtle");
         expect(tableCellClasses).toContain("focus:after:ring-focus-indicator/35");
         expect(tableCellClasses).not.toContain("ring-primary");

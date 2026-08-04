@@ -1,7 +1,8 @@
+import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDragPreview, CdkDragStart, CdkDropList } from "@angular/cdk/drag-drop";
 import { NgTemplateOutlet } from "@angular/common";
 import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, input, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ImmutableList, ImmutableSet, span } from "@mirei/ts-collections";
+import { ImmutableList, span } from "@mirei/ts-collections";
 import { SlicePipe } from "@nanahoshi/mona-ui/common";
 import { ContextMenuComponent } from "@nanahoshi/mona-ui/contextmenu";
 import { fromEvent } from "rxjs";
@@ -24,11 +25,14 @@ import {
     gridGroupRowThemeVariants,
     gridListBaseThemeVariants,
     gridListTableThemeVariants,
+    gridRowDragPlaceholderThemeVariants,
+    gridRowDragPreviewThemeVariants,
     GridListVariantInput
 } from "../../styles/grid.styles";
 import { GridAddRowComponent } from "../grid-add-row/grid-add-row.component";
 import { GridCellComponent } from "../grid-cell/grid-cell.component";
 import { GridFooterCellComponent } from "../grid-footer-cell/grid-footer-cell.component";
+import { GridRowReorderHandleComponent } from "../grid-row-reorder-handle/grid-row-reorder-handle.component";
 import { GridSelectionCheckboxComponent } from "../grid-selection-checkbox/grid-selection-checkbox.component";
 import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
 
@@ -51,7 +55,11 @@ import { GridToggleComponent } from "../grid-toggle/grid-toggle.component";
         GridLogicalCellDirective,
         GridLockedCellDirective,
         GridFooterCellComponent,
-        GridSelectionCheckboxComponent
+        GridSelectionCheckboxComponent,
+        GridRowReorderHandleComponent,
+        CdkDropList,
+        CdkDrag,
+        CdkDragPreview
     ],
     host: {
         "[class]": "baseClass()"
@@ -86,12 +94,18 @@ export class GridListComponent implements GridListVariantInput {
     protected readonly groupRowClass = computed(() => {
         return gridGroupRowThemeVariants();
     });
+    protected readonly rowDragPlaceholderClass = computed(() => {
+        return gridRowDragPlaceholderThemeVariants();
+    });
+    protected readonly rowDragPreviewClass = computed(() => {
+        return gridRowDragPreviewThemeVariants();
+    });
     protected readonly tableClass = computed(() => {
         return gridListTableThemeVariants();
     });
 
     public readonly columns = input<ImmutableList<Column>>(ImmutableList.create());
-    public readonly data = input<ImmutableSet<Row>>(ImmutableSet.create());
+    public readonly data = input<ImmutableList<Row>>(ImmutableList.create());
 
     public constructor() {
         afterNextRender({
@@ -119,6 +133,19 @@ export class GridListComponent implements GridListVariantInput {
 
     public onGroupExpandChange(groupKey: string): void {
         this.gridService.toggleGroupCollapse(groupKey);
+    }
+
+    public onRowDragEnded(_event: CdkDragEnd<Row>): void {
+        this.gridService.draggingRowUid.set(null);
+    }
+
+    public onRowDragStarted(event: CdkDragStart<Row>): void {
+        this.gridService.draggingRowUid.set(event.source.data.uid);
+    }
+
+    public onRowDrop(event: CdkDragDrop<Row[]>): void {
+        this.gridService.draggingRowUid.set(null);
+        this.gridService.requestRowReorder(event.item.data, event.previousIndex, event.currentIndex);
     }
 
     public onToggleDetailClick(row: Row): void {
