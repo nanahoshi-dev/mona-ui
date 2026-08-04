@@ -826,12 +826,6 @@
         "kind": "output"
       },
       {
-        "name": "rowKey",
-        "type": "GridKeySelector<unknown> | null",
-        "description": "Field name or selector used to keep edited row identity stable when data is rebound.",
-        "kind": "input"
-      },
-      {
         "name": "save",
         "type": "GridSaveEvent",
         "description": "Emitted before an edited or new row is saved.",
@@ -1046,6 +1040,24 @@
         "type": "ResizableOptions | \"\"",
         "description": "Enables column resizing on the grid. Pass a `ResizableOptions` object to configure it explicitly.",
         "kind": "input"
+      }
+    ]
+  },
+  "GridRowReorderableDirective": {
+    "name": "GridRowReorderableDirective",
+    "selector": "\"mona-grid[monaGridRowReorderable]\"",
+    "inputs": [
+      {
+        "name": "options",
+        "type": "RowReorderableOptions | \"\"",
+        "description": "Enables row reordering via the reorder-handle column. Pass a `RowReorderableOptions`\nobject to configure it explicitly.",
+        "kind": "input"
+      },
+      {
+        "name": "rowReorder",
+        "type": "RowReorderEvent",
+        "description": "Emitted when a row is moved to a new position. The event carries the moved row,\nsource- and page-relative indices, and the complete reordered application data.",
+        "kind": "output"
       }
     ]
   },
@@ -4252,6 +4264,12 @@
         "kind": "input"
       },
       {
+        "name": "rowKey",
+        "type": "GridKeySelector<unknown> | null",
+        "description": "Field name or selector used to derive a stable identity for each row.\nThe resolved value must be unique within the grid data.",
+        "kind": "input"
+      },
+      {
         "name": "responsivePager",
         "type": "boolean",
         "description": "Whether the pager is responsive.\nIf set to `true`, the pager will be displayed as a dropdown when the grid width gets smaller.",
@@ -4619,8 +4637,26 @@
       },
       {
         "name": "data",
-        "type": "ImmutableSet<Row>",
+        "type": "ImmutableList<Row>",
         "description": "",
+        "kind": "input"
+      }
+    ]
+  },
+  "GridRowReorderHandleComponent": {
+    "name": "GridRowReorderHandleComponent",
+    "selector": "\"mona-grid-row-reorder-handle\"",
+    "inputs": [
+      {
+        "name": "row",
+        "type": "Row",
+        "description": "The grid row whose reorder handle this button controls.",
+        "kind": "input"
+      },
+      {
+        "name": "pageIndex",
+        "type": "number",
+        "description": "The row's position within the current page, used to move the row and derive its accessible label.",
         "kind": "input"
       }
     ]
@@ -4633,6 +4669,12 @@
         "name": "row",
         "type": "Row",
         "description": "The grid row whose selected state this checkbox controls.",
+        "kind": "input"
+      },
+      {
+        "name": "rowIndex",
+        "type": "number",
+        "description": "The row's position within its rendered list, used to derive a default accessible label.",
         "kind": "input"
       }
     ]
@@ -4673,7 +4715,7 @@
       },
       {
         "name": "data",
-        "type": "ImmutableSet<Row>",
+        "type": "ImmutableList<Row>",
         "description": "",
         "kind": "input"
       }

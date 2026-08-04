@@ -1,5 +1,6 @@
 import { computed, Directive, ElementRef, inject, input } from "@angular/core";
 import type { Column } from "../models/Column";
+import type { StructuralColumnKind } from "../models/StructuralColumn";
 import { GridService } from "../services/grid.service";
 
 @Directive({
@@ -56,12 +57,26 @@ export class GridLockedCellDirective {
             return this.#gridService.lockedColumnStates().get(column.id) ?? null;
         }
 
+        const structuralColumn = this.structuralColumn();
+        if (structuralColumn != null) {
+            if (!this.#gridService.hasLeftLockedColumns()) {
+                return null;
+            }
+            const groupPrefixWidth = this.groupPrefixWidth() ?? this.#gridService.groupStructuralWidth();
+            const offset = this.#gridService.structuralColumnOffset(structuralColumn, groupPrefixWidth);
+            return {
+                edge: offset === this.#gridService.lastLeftStructuralOffset(),
+                offset,
+                side: "left" as const
+            };
+        }
+
         const structuralOffset = this.lockedStructuralOffset();
         if (structuralOffset == null || !this.#gridService.hasLeftLockedColumns()) {
             return null;
         }
         return {
-            edge: false,
+            edge: structuralOffset === this.#gridService.lastLeftStructuralOffset(),
             offset: structuralOffset,
             side: "left" as const
         };
@@ -74,6 +89,8 @@ export class GridLockedCellDirective {
     });
 
     public readonly column = input<Column>();
+    public readonly groupPrefixWidth = input<number | null>(null);
     public readonly lockedCellHeader = input(false);
     public readonly lockedStructuralOffset = input<number | null>(null);
+    public readonly structuralColumn = input<StructuralColumnKind | null>(null);
 }

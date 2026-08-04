@@ -6,6 +6,42 @@ import type { GridColumnLockedPosition } from "../models/GridColumnLockedPositio
 import { GridService } from "../services/grid.service";
 import { GridLockedCellDirective } from "./grid-locked-cell.directive";
 
+@Component({
+    template: `
+        <table>
+            <tbody>
+                <tr>
+                    <td id="reorder" monaGridLockedCell [structuralColumn]="'reorder'"></td>
+                    <td id="detail" monaGridLockedCell [structuralColumn]="'detail'"></td>
+                    <td id="selection" monaGridLockedCell [structuralColumn]="'selection'"></td>
+                    <td
+                        id="reorder-with-group-prefix"
+                        monaGridLockedCell
+                        [structuralColumn]="'reorder'"
+                        [groupPrefixWidth]="36"></td>
+                </tr>
+            </tbody>
+        </table>
+    `,
+    imports: [GridLockedCellDirective]
+})
+class StructuralColumnHostComponent {
+    protected readonly gridService = inject(GridService);
+
+    public constructor() {
+        this.gridService.setRowReorderableOptions({ enabled: true });
+        this.gridService.masterDetailTemplate.set({} as never);
+        this.gridService.setSelectableOptions({
+            enabled: true,
+            mode: "multiple",
+            selectAllScope: "page",
+            selectOnRowClick: false,
+            showCheckboxes: true,
+            showSelectAll: true
+        });
+    }
+}
+
 function createColumn(field: string, locked: boolean, lockedPosition: GridColumnLockedPosition = "left"): Column {
     return {
         aggregate: null,
@@ -158,4 +194,41 @@ describe("GridLockedCellDirective", () => {
         expect(cell).not.toBeNull();
         return cell as HTMLTableCellElement;
     }
+});
+
+describe("GridLockedCellDirective structuralColumn input mode", () => {
+    let fixture: ComponentFixture<StructuralColumnHostComponent>;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [StructuralColumnHostComponent],
+            providers: [GridService]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(StructuralColumnHostComponent);
+        fixture.detectChanges();
+    });
+
+    function getCell(id: string): HTMLTableCellElement {
+        const hostElement = fixture.nativeElement as HTMLElement;
+        const cell = hostElement.querySelector(`#${id}`);
+        expect(cell).not.toBeNull();
+        return cell as HTMLTableCellElement;
+    }
+
+    it("resolves the offset for each kind from the registry, without a raw lockedStructuralOffset input", () => {
+        expect(getCell("reorder").style.left).toBe("0px");
+        expect(getCell("detail").style.left).toBe("36px");
+        expect(getCell("selection").style.left).toBe("72px");
+    });
+
+    it("treats the last visible structural column as the sticky edge", () => {
+        expect(getCell("reorder").style.borderRight).toBe("");
+        expect(getCell("selection").style.borderRight).toBe("1px solid var(--color-border)");
+    });
+
+    it("offsets by an explicit groupPrefixWidth instead of the full group width", () => {
+        expect(getCell("reorder-with-group-prefix").style.left).toBe("36px");
+        expect(getCell("reorder-with-group-prefix").style.borderRight).toBe("");
+    });
 });

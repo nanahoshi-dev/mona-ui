@@ -27,7 +27,6 @@ export const gridCellBaseThemeVariants = cva(
     `
         absolute inset-0
         flex w-full
-        shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]
     `
 );
 
@@ -78,7 +77,6 @@ export const gridSelectAllCellThemeVariants = cva(`
 
 export const gridSelectionCellThemeVariants = cva(`
     absolute inset-0 flex h-full w-full items-center justify-center
-    shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]
 `);
 
 export const gridColumnActionsThemeVariants = cva(`
@@ -126,8 +124,28 @@ export const gridDetailIndentCellThemeVariants = cva(
     }
 );
 
-export const gridDetailRowThemeVariants = cva(`
-    border-b border-b-border-subtle
+export const gridDetailRowThemeVariants = cva(``);
+
+export const gridRowReorderHandleThemeVariants = cva(`
+    flex h-full w-full items-center justify-center
+    cursor-grab select-none touch-none
+    text-muted-foreground
+    hover:text-foreground
+    active:cursor-grabbing
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-indicator/50
+    disabled:cursor-not-allowed disabled:text-muted-foreground/35 disabled:hover:text-muted-foreground/35
+`);
+
+export const gridRowDragPreviewThemeVariants = cva(`
+    flex items-center gap-2
+    px-2! py-1!
+    bg-surface-raised! text-foreground!
+    border! border-border! rounded-md shadow-(--shadow-overlay)!
+`);
+
+export const gridRowDragPlaceholderThemeVariants = cva(`
+    opacity-40
+    [&>td]:bg-hover! [&>td]:border-dashed! [&>td]:border-border!
 `);
 
 export const gridFilterRowCellThemeVariants = cva(`flex items-center px-1 py-0.5 w-full`);
@@ -241,6 +259,8 @@ export const gridListBaseThemeVariants = cva(
 export const gridListTableThemeVariants = cva(
     `
         border-separate border-spacing-0 w-full table-fixed
+        [&_.cdk-drag-dragging]:z-10! [&_.cdk-drag-dragging]:shadow-(--shadow-overlay)
+        [&_.cdk-drag-animating]:transition-transform
     `
 );
 
@@ -262,6 +282,7 @@ export const gridListTableCellThemeVariants = cva(
         ${gridRowHeightClass}
         outline-none z-1
         align-top
+        border-b border-b-border-subtle
         after:content-[''] after:block
         after:absolute after:inset-0 after:pointer-events-none
         focus:after:ring-1 focus:after:ring-inset focus:after:ring-focus-indicator/35
@@ -339,12 +360,12 @@ export const gridListTableCellThemeVariants = cva(
             {
                 grouped: true,
                 indentCell: true,
-                class: "bg-surface-muted shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]"
+                class: "bg-surface-muted"
             },
             {
                 grouped: true,
                 indentCell: false,
-                class: "shadow-[inset_0_-1px_0_0_var(--color-border-subtle)]"
+                class: ""
             },
             {
                 grouped: true,

@@ -11,18 +11,33 @@
             [attr.colspan]="1"
             [style.width.px]="gridService.groupColumnWidth"></td>
     }
+    @if (gridService.rowReorderColumnVisible()) {
+        <td
+            monaGridCell
+            monaGridLogicalCell
+            monaGridLockedCell
+            [structuralColumn]="'reorder'"
+            [rowIndex]="-1"
+            [colIndex]="gridService.structuralColIndexMap().get('reorder') ?? 0"
+            [cellKind]="'command'"
+            [columnId]="'$rowReorder'"
+            [firstInRow]="gridService.structuralColIndexMap().get('reorder') === 0"
+            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'reorder'"
+            [section]="'add'"
+            [style.width.px]="gridService.rowReorderColumnWidth"></td>
+    }
     @if (gridService.masterDetailTemplate()) {
         <td
             monaGridCell
             monaGridLogicalCell
             monaGridLockedCell
-            [lockedStructuralOffset]="gridService.groupColumns().length * gridService.groupColumnWidth"
+            [structuralColumn]="'detail'"
             [masterDetailToggle]="true"
             [rowIndex]="-1"
-            [colIndex]="0"
+            [colIndex]="gridService.structuralColIndexMap().get('detail') ?? 0"
             [cellKind]="'detail'"
-            [firstInRow]="true"
-            [lastInRow]="columns().length === 0 && !gridService.selectionColumnVisible()"
+            [firstInRow]="gridService.structuralColIndexMap().get('detail') === 0"
+            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'detail'"
             [section]="'add'"
             [style.width.px]="gridService.detailColumnWidth"></td>
     }
@@ -31,13 +46,13 @@
             monaGridCell
             monaGridLogicalCell
             monaGridLockedCell
-            [lockedStructuralOffset]="gridService.selectionColumnOffset()"
+            [structuralColumn]="'selection'"
             [rowIndex]="-1"
-            [colIndex]="gridService.masterDetailTemplate() ? 1 : 0"
+            [colIndex]="gridService.structuralColIndexMap().get('selection') ?? 0"
             [cellKind]="'command'"
             [columnId]="'$selection'"
-            [firstInRow]="!gridService.masterDetailTemplate()"
-            [lastInRow]="columns().length === 0"
+            [firstInRow]="gridService.structuralColIndexMap().get('selection') === 0"
+            [lastInRow]="columns().length === 0 && gridService.structuralLastKind() === 'selection'"
             [section]="'add'"
             [style.width.px]="gridService.selectionColumnWidth"></td>
     }

@@ -68,8 +68,11 @@ import type { ReorderableOptions } from "../models/ReorderableOptions";
 import type { ResizableOptions } from "../models/ResizableOptions";
 import { Row } from "../models/Row";
 import { RowEditEvent } from "../models/RowEditEvent";
+import type { RowReorderableOptions } from "../models/RowReorderableOptions";
+import { RowReorderEvent } from "../models/RowReorderEvent";
 import { SelectableOptions } from "../models/SelectableOptions";
 import { SortableOptions } from "../models/SortableOptions";
+import type { StructuralColumnDescriptor, StructuralColumnKind } from "../models/StructuralColumn";
 
 // Flat projection of a Row used as the IterablePatchStore item type.
 // $rowId is injected to carry the row identity without modifying Row.data.
@@ -93,7 +96,7 @@ export class GridService {
     readonly #editSource = computed(() =>
         this.rows()
             .select<RowEditDataItem>(r => ({ $rowId: r.uid, ...r.data }))
-            .toImmutableSet()
+            .toImmutableList()
     );
     readonly #filterableOptions = signal<FilterableOptions>({ enabled: false, type: "menu" });
     readonly #groupColumnIds = signal<ImmutableList<string>>(ImmutableList.create());
@@ -102,6 +105,7 @@ export class GridService {
     readonly #platformId = inject(PLATFORM_ID);
     readonly #reorderableOptions = signal<ReorderableOptions>({ enabled: false });
     readonly #resizableOptions = signal<ResizableOptions>({ enabled: false });
+    readonly #rowReorderableOptions = signal<RowReorderableOptions>({ enabled: false });
     readonly #scrollbarGutterMeasurementSource = signal<"body" | "fallback">("fallback");
     readonly #scrollbarGutterWidth = signal(0);
     readonly #rowUidByData = new WeakMap<Record<PropertyKey, unknown>, string>();
@@ -178,6 +182,9 @@ export class GridService {
     public readonly columns = signal<ImmutableList<Column>>(ImmutableList.create());
     public readonly contextMenuItems = signal(ImmutableSet.create<PopupMenuItem>());
     public readonly detailColumnWidth = 36;
+    public readonly detailColumnOffset = computed(() =>
+        this.structuralColumnOffset("detail", this.groupStructuralWidth())
+    );
     public readonly detailStructuralWidth = computed(() =>
         this.masterDetailTemplate() != null ? this.detailColumnWidth : 0
     );
@@ -198,9 +205,8 @@ export class GridService {
     });
     public readonly editSession = this.#editSession.asReadonly();
     public readonly editableOptions = signal<EditableOptions>({ enabled: false, mode: "cell" });
-    public readonly editableRowKey = signal<GridKeySelector<unknown> | null>(null);
     public readonly editingRowUid = computed(() => this.#editContext()?.rowUid ?? null);
-    public readonly expandedKeys = signal(ImmutableSet.create());
+    public readonly expandedKeys = signal(ImmutableSet.create<string>());
     public readonly filterChange$ = new Subject<CompositeFilterDescriptor[]>();
     public readonly filterableOptions = this.#filterableOptions.asReadonly();
     public readonly footerScrollElement = signal<HTMLElement | null>(null);
@@ -237,6 +243,7 @@ export class GridService {
     public readonly groupableOptions = signal<GroupableOptions>({ enabled: false, showFooter: false });
     public readonly hasLeftLockedColumns = computed(
         () =>
+            this.rowReorderColumnVisible() ||
             this.selectionColumnVisible() ||
             this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")
     );
@@ -245,6 +252,18 @@ export class GridService {
     public readonly headerTableElement = signal<HTMLTableElement | null>(null);
     public readonly horizontalScrollLeft = this.#horizontalScrollLeft.asReadonly();
     public readonly isInEditMode = computed(() => this.#editSession() != null);
+    public readonly lastLeftStructuralOffset = computed<number | null>(() => {
+        if (this.visibleColumns().any(column => column.locked && column.lockedPosition === "left")) {
+            return null;
+        }
+        const visible = this.visibleStructuralColumns();
+        const lastVisible = visible[visible.length - 1];
+        if (lastVisible != null) {
+            return this.structuralColumnOffset(lastVisible.kind, this.groupStructuralWidth());
+        }
+        const groupCount = this.groupColumns().length;
+        return groupCount > 0 ? (groupCount - 1) * this.groupColumnWidth : null;
+    });
     public readonly leftLockedStructuralWidth = computed(() => {
         if (!this.hasLeftLockedColumns()) {
             return 0;
@@ -278,17 +297,14 @@ export class GridService {
         return states;
     });
     public readonly leadingStructuralWidth = computed(
-        () => this.groupStructuralWidth() + this.detailStructuralWidth() + this.selectionStructuralWidth()
+        () =>
+            this.groupStructuralWidth() +
+            this.visibleStructuralColumns().reduce((total, column) => total + column.width, 0)
     );
     public readonly leadingStructuralColumnCount = computed(
-        () =>
-            this.groupColumns().length +
-            (this.masterDetailTemplate() != null ? 1 : 0) +
-            (this.selectionColumnVisible() ? 1 : 0)
+        () => this.groupColumns().length + this.visibleStructuralColumns().length
     );
-    public readonly leadingLogicalColumnCount = computed(
-        () => (this.masterDetailTemplate() != null ? 1 : 0) + (this.selectionColumnVisible() ? 1 : 0)
-    );
+    public readonly leadingLogicalColumnCount = computed(() => this.visibleStructuralColumns().length);
     public readonly masterDetailEmptyCellWidth = computed(() => {
         return this.detailColumnWidth * (this.groupColumns().length + 1);
     });
@@ -303,9 +319,47 @@ export class GridService {
     public readonly remove$ = new Subject<GridRemoveEvent>();
     public readonly reorderableOptions = this.#reorderableOptions.asReadonly();
     public readonly resizableOptions = this.#resizableOptions.asReadonly();
+    public readonly rowDragInProgress = computed(() => this.draggingRowUid() != null);
     public readonly rowEdit$ = new Subject<RowEditEvent>();
-    public readonly rows = signal<ImmutableSet<Row>>(ImmutableSet.create());
+    public readonly rowKey = signal<GridKeySelector<unknown> | null>(null);
+    public readonly rowReorder$ = new Subject<RowReorderEvent>();
+    public readonly rowReorderColumnOffset = computed(() =>
+        this.structuralColumnOffset("reorder", this.groupStructuralWidth())
+    );
+    public readonly rowReorderColumnVisible = computed(() => this.rowReorderableOptions().enabled === true);
+    public readonly rowReorderColumnWidth = 36;
+    public readonly rowReorderDisabledReason = computed<RowReorderDisabledReason>(() => {
+        if (!this.rowReorderableOptions().enabled) {
+            return "disabled";
+        }
+        if (this.virtualScrollOptions().enabled) {
+            return "virtual-scroll";
+        }
+        if (this.groupColumns().any()) {
+            return "grouped";
+        }
+        if (!this.appliedSorts().isEmpty()) {
+            return "sorted";
+        }
+        if (!this.appliedFilters().isEmpty()) {
+            return "filtered";
+        }
+        if (this.isInEditMode()) {
+            return "editing";
+        }
+        if (this.viewPageRows().length < 2) {
+            return "single-row";
+        }
+        return null;
+    });
+    public readonly rowReorderInteractionEnabled = computed(() => this.rowReorderDisabledReason() == null);
+    public readonly rowReorderStructuralWidth = computed(() =>
+        this.rowReorderColumnVisible() ? this.rowReorderColumnWidth : 0
+    );
+    public readonly rowReorderableOptions = this.#rowReorderableOptions.asReadonly();
+    public readonly rows = signal<ImmutableList<Row>>(ImmutableList.create());
     public readonly save$ = new Subject<GridSaveEvent>();
+    public readonly draggingRowUid = signal<string | null>(null);
     public readonly scrollEnd$ = new Subject<void>();
     public readonly scrollEndThreshold = signal<number>(5);
     public readonly scrollbarGutterWidth = this.#scrollbarGutterWidth.asReadonly();
@@ -333,7 +387,9 @@ export class GridService {
         const options = this.selectableOptions();
         return options.enabled === true && options.showCheckboxes === true;
     });
-    public readonly selectionColumnOffset = computed(() => this.groupStructuralWidth() + this.detailStructuralWidth());
+    public readonly selectionColumnOffset = computed(() =>
+        this.structuralColumnOffset("selection", this.groupStructuralWidth())
+    );
     public readonly selectionStructuralWidth = computed(() =>
         this.selectionColumnVisible() ? this.selectionColumnWidth : 0
     );
@@ -348,6 +404,22 @@ export class GridService {
         mode: "single",
         allowUnsort: true,
         showIndices: true
+    });
+    public readonly structuralColIndexMap = computed(() => {
+        const map = new Map<StructuralColumnKind, number>();
+        this.visibleStructuralColumns().forEach((column, index) => map.set(column.kind, index));
+        return map;
+    });
+    // Single source of truth for structural-column left-to-right order; every offset/colIndex
+    // consumer derives its answer from this array instead of independently re-deriving the order.
+    public readonly structuralColumns = computed<readonly StructuralColumnDescriptor[]>(() => [
+        { kind: "reorder", visible: this.rowReorderColumnVisible(), width: this.rowReorderColumnWidth },
+        { kind: "detail", visible: this.masterDetailTemplate() != null, width: this.detailColumnWidth },
+        { kind: "selection", visible: this.selectionColumnVisible(), width: this.selectionColumnWidth }
+    ]);
+    public readonly structuralLastKind = computed<StructuralColumnKind | null>(() => {
+        const visible = this.visibleStructuralColumns();
+        return visible.length > 0 ? visible[visible.length - 1].kind : null;
     });
     public readonly tableWidth = computed(() => {
         const columns = this.visibleColumns();
@@ -365,9 +437,9 @@ export class GridService {
         const take = this.paginationState().take;
         const viewRows = this.viewRows();
         if (!viewRows.any()) {
-            return ImmutableSet.create<Row>();
+            return ImmutableList.create<Row>();
         }
-        return viewRows.skip(skip).take(take).toImmutableSet();
+        return viewRows.skip(skip).take(take).toImmutableList();
     });
     public readonly viewRowCount = computed(() => this.viewRows().size());
     public readonly viewRows = computed(() => {
@@ -398,7 +470,7 @@ export class GridService {
             queryEnumerable = queryEnumerable.sort(sortState, r => r.data);
         }
         const result = queryEnumerable.run();
-        return ImmutableSet.create(result);
+        return ImmutableList.create(result);
     });
     public readonly virtualGridMaxBuffer = computed(() => this.virtualGridMinBuffer() * 1.42857);
     public readonly virtualGridMinBuffer = signal(0);
@@ -408,6 +480,7 @@ export class GridService {
             .where(column => !column.hidden)
             .toImmutableList()
     );
+    public readonly visibleStructuralColumns = computed(() => this.structuralColumns().filter(c => c.visible));
 
     public constructor() {
         this.#scrollbarGutterWidth.set(this.measureFallbackScrollbarGutter());
@@ -494,6 +567,14 @@ export class GridService {
         }
 
         return { ignoredColumns, missingColumns, status: "applied" };
+    }
+
+    public canReorderRow(row: Row): boolean {
+        if (!this.rowReorderInteractionEnabled()) {
+            return false;
+        }
+        const predicate = this.rowReorderableOptions().canReorder;
+        return predicate?.(row.data) !== false;
     }
 
     public cancelAddRow(originalEvent?: Event): boolean {
@@ -668,6 +749,12 @@ export class GridService {
         })).toArray();
     }
 
+    public getRowReorderAriaLabel(row: Row, absoluteIndex: number): string {
+        const options = this.rowReorderableOptions();
+        const label = options.rowAriaLabel?.(row.data, absoluteIndex);
+        return label ?? `Reorder row ${absoluteIndex + 1}`;
+    }
+
     public handleMultipleSelection(event: MouseEvent, row: Row): void {
         if (event.shiftKey) {
             this.selectRowRange(row);
@@ -713,7 +800,7 @@ export class GridService {
     }
 
     public isRowExpanded(row: Row): boolean {
-        return this.expandedKeys().contains(this.getRowSelectionKey(row));
+        return this.expandedKeys().contains(row.uid);
     }
 
     public isRowSelected(row: Row): boolean {
@@ -869,6 +956,52 @@ export class GridService {
     public removeRow(row: Row, originalEvent?: Event): boolean {
         const event = new GridRemoveEvent({ originalEvent, rowData: row.data });
         this.remove$.next(event);
+        return !event.isDefaultPrevented();
+    }
+
+    public requestRowReorder(row: Row, previousPageIndex: number, currentPageIndex: number): boolean {
+        if (!this.rowReorderInteractionEnabled()) {
+            return false;
+        }
+        if (previousPageIndex === currentPageIndex) {
+            return false;
+        }
+        if (!this.canReorderRow(row)) {
+            return false;
+        }
+        const pageRows = this.viewPageRows();
+        if (
+            previousPageIndex < 0 ||
+            previousPageIndex >= pageRows.length ||
+            currentPageIndex < 0 ||
+            currentPageIndex >= pageRows.length
+        ) {
+            return false;
+        }
+        const pageRow = pageRows.get(previousPageIndex);
+        if (pageRow == null || pageRow.uid !== row.uid) {
+            return false;
+        }
+        const skip = this.paginationState().skip;
+        const previousIndex = skip + previousPageIndex;
+        const currentIndex = skip + currentPageIndex;
+        const reorderedData = this.rows()
+            .select(sourceRow => sourceRow.data)
+            .toArray();
+        const [moved] = reorderedData.splice(previousIndex, 1);
+        if (moved == null) {
+            return false;
+        }
+        reorderedData.splice(currentIndex, 0, moved);
+        const event = new RowReorderEvent({
+            currentIndex,
+            currentPageIndex,
+            previousIndex,
+            previousPageIndex,
+            reorderedData,
+            rowData: row.data
+        });
+        this.rowReorder$.next(event);
         return !event.isDefaultPrevented();
     }
 
@@ -1034,15 +1167,18 @@ export class GridService {
     }
 
     public setRowExpanded(row: Row, expanded: boolean): void {
-        const key = this.getRowSelectionKey(row);
-        this.expandedKeys.update(set => (expanded ? set.add(key) : set.remove(key)));
+        this.expandedKeys.update(keys => (expanded ? keys.add(row.uid) : keys.remove(row.uid)));
+    }
+
+    public setRowReorderableOptions(options: RowReorderableOptions): void {
+        this.#rowReorderableOptions.set(options);
     }
 
     public setRows(
         value: Iterable<Record<PropertyKey, unknown>>,
         rowKey: GridKeySelector<unknown> | null = null
     ): void {
-        this.rows.set(ImmutableSet.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
+        this.rows.set(ImmutableList.create(select(value, r => new Row(r, this.getRowUid(r, rowKey)))));
     }
 
     public setSelectableOptions(options: SelectableOptions): void {
@@ -1210,6 +1346,17 @@ export class GridService {
         }
         this.clearEditSession();
         return true;
+    }
+
+    public structuralColumnOffset(kind: StructuralColumnKind, groupPrefixWidth: number): number {
+        let offset = groupPrefixWidth;
+        for (const column of this.visibleStructuralColumns()) {
+            if (column.kind === kind) {
+                return offset;
+            }
+            offset += column.width;
+        }
+        return offset;
     }
 
     public toggleGroupCollapse(groupKey: string): void {
@@ -1756,3 +1903,13 @@ export class GridService {
         return columns.map((column, index) => ({ ...column, index }));
     }
 }
+
+export type RowReorderDisabledReason =
+    | "disabled"
+    | "editing"
+    | "filtered"
+    | "grouped"
+    | "single-row"
+    | "sorted"
+    | "virtual-scroll"
+    | null;

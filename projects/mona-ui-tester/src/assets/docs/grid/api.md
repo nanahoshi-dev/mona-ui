@@ -238,6 +238,41 @@ Set `locked` and `lockedPosition` on a `mona-grid-column` (or `mona-grid-command
 <mona-grid-column field="orderId" title="Order ID" [locked]="true" lockedPosition="left"></mona-grid-column>
 ```
 
+### Row Reordering
+
+`monaGridRowReorderable` adds a built-in reorder-handle column as the first grid column. Rows can be moved only by dragging that handle, or with `Alt + ArrowUp` / `Alt + ArrowDown` while the handle is focused. The consumer owns the row order: `rowReorder` carries the complete reordered application data, and the grid never mutates the `[data]` input.
+
+```html
+<mona-grid
+    [data]="products()"
+    [rowKey]="'id'"
+    monaGridRowReorderable
+    (rowReorder)="onRowReorder($event)">
+    <mona-grid-column field="name" title="Name"></mona-grid-column>
+    <mona-grid-column field="price" title="Price"></mona-grid-column>
+</mona-grid>
+```
+
+```typescript
+protected readonly products = signal<Product[]>([...PRODUCTS]);
+
+protected onRowReorder(event: RowReorderEvent<Product>): void {
+    this.products.set([...event.reorderedData]);
+}
+```
+
+An options object can restrict which rows move and customize the handle's accessible label:
+
+```html
+<mona-grid
+    [data]="products()"
+    [rowKey]="'id'"
+    [monaGridRowReorderable]="{ enabled: true, canReorder: canReorderProduct }"
+    (rowReorder)="onRowReorder($event)">
+</mona-grid>
+```
+
+Row reordering works with pagination (moving rows within the current page), master-detail rows, selection, locked columns, footers, and the add-row editor. It is intentionally disabled while sorting, filtering, grouping, virtual scrolling, or an edit session is active, because those features change the source-to-view mapping. Row order is application data and is not stored in `GridState`.
 ### Master-Detail Rows
 
 `monaGridDetailTemplate` renders projected content for each row that the consumer can expand.
@@ -369,6 +404,7 @@ Inline editing is built exclusively on Angular Signal Forms: the built-in editor
 | `pageSizeValues`  | `number[]`                                 | `[]`        | The page sizes that the user can select from, shown in the page size dropdown.                                                                    |
 | `resizeMethod`    | `ResizeMethod`                             | `"fitView"` | The method used to set initial column widths — see [`resizeMethod` controls initial column widths](#resizemethod-controls-initial-column-widths). |
 | `responsivePager` | `boolean`                                  | `true`      | Whether the pager collapses into a dropdown when the grid narrows.                                                                                |
+| `rowKey`          | `GridKeySelector<unknown> \| null`        | `null`      | Field name or selector used to derive a stable identity for each row; the resolved value must be unique within the grid data.                     |
 | `rounded`         | `"none" \| "small" \| "medium" \| "large"` | `"medium"`  | The border radius of the grid.                                                                                                                    |
 
 No outputs — see [`GridComponent` has no outputs of its own](#gridcomponent-has-no-outputs-of-its-own).
@@ -506,7 +542,6 @@ No outputs.
 |--------------------|--------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `monaGridEditable` | `EditableOptions \| ""`              | `""`         | Enables inline editing. An empty string enables cell-mode editing with default settings; pass an object to choose `"cell"` or `"row"` mode and an optional validation `schema`. |
 | `newRowFactory`    | `() => Record<PropertyKey, unknown>` | `() => ({})` | Creates the initial data object used by the add-row editor.                                                                                                                     |
-| `rowKey`           | `GridKeySelector<unknown> \| null`   | `null`       | Field name or selector used to keep edited row identity stable when data is rebound.                                                                                            |
 
 #### Outputs
 
@@ -555,6 +590,24 @@ No outputs.
 | Name            | Type                 | Description                                                       |
 |-----------------|----------------------|-------------------------------------------------------------------|
 | `columnReorder` | `ColumnReorderEvent` | Emitted when a column is dropped into a new position. Cancelable. |
+
+---
+
+### `GridRowReorderableDirective`
+
+**Selector:** `mona-grid[monaGridRowReorderable]`
+
+#### Inputs
+
+| Name                      | Type                         | Default | Description                                                                                                                                          |
+|---------------------------|------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `monaGridRowReorderable`  | `RowReorderableOptions \| ""` | `""`    | Enables row reordering through the built-in reorder-handle column. An empty string enables it with default settings; pass an object to configure it explicitly. |
+
+#### Outputs
+
+| Name         | Type              | Description                                                                                          |
+|--------------|-------------------|------------------------------------------------------------------------------------------------------|
+| `rowReorder` | `RowReorderEvent` | Emitted when a row is moved. Carries the moved row, source- and page-relative indices, and the complete reordered application data. |
 
 ---
 

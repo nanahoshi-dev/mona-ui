@@ -55,6 +55,7 @@ import { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GRID_COLUMN_DEFINITION, type GridColumnDefinition } from "../../models/GridColumnDefinition";
+import type { GridKeySelector } from "../../models/GridKeySelector";
 import { ResizeMethod } from "../../models/ResizeMethod";
 import { ColumnAriaSortPipe } from "../../pipes/column-aria-sort.pipe";
 import { GridNavigationService } from "../../services/grid-navigation.service";
@@ -263,6 +264,13 @@ export class GridComponent<T> implements GridVariantInput {
      * @default "fitView"
      */
     public readonly resizeMethod = input<ResizeMethod>("fitView");
+
+    /**
+     * @description Field name or selector used to derive a stable identity for each row.
+     * The resolved value must be unique within the grid data.
+     * @default null
+     */
+    public readonly rowKey = input<GridKeySelector<unknown> | null>(null);
 
     /**
      * @description Whether the pager is responsive.
@@ -568,6 +576,9 @@ export class GridComponent<T> implements GridVariantInput {
         }
         const thList = headerElement.nativeElement.querySelectorAll("thead > tr:first-child > th");
         const headerCells = Array.from(thList) as HTMLTableCellElement[];
+        if (this.gridService.rowReorderColumnVisible()) {
+            headerCells.shift();
+        }
         if (this.gridService.masterDetailTemplate()) {
             headerCells.shift();
         }
@@ -614,11 +625,14 @@ export class GridComponent<T> implements GridVariantInput {
     private setDataEffect(): void {
         effect(() => {
             const data = this.data();
-            const rowKey = this.gridService.editableRowKey();
+            const rowKey = this.rowKey();
             const shouldRestoreGridFocus = this.#hostElementRef.nativeElement.contains(
                 this.#hostElementRef.nativeElement.ownerDocument.activeElement
             );
-            untracked(() => this.gridService.setRows(data as Iterable<Record<PropertyKey, unknown>>, rowKey));
+            untracked(() => {
+                this.gridService.setRows(data as Iterable<Record<PropertyKey, unknown>>, rowKey);
+                this.gridService.rowKey.set(rowKey);
+            });
             if (shouldRestoreGridFocus) {
                 afterNextRender(
                     {
@@ -701,6 +715,9 @@ export class GridComponent<T> implements GridVariantInput {
             const columnsWithWidth = this.gridService.visibleColumns().where(c => c.width != null);
             if (columnsWithWidth.any()) {
                 headerWidth -= columnsWithWidth.sum(c => c.width ?? 0);
+            }
+            if (this.gridService.rowReorderColumnVisible()) {
+                headerWidth -= this.gridService.rowReorderColumnWidth;
             }
             if (this.gridService.masterDetailTemplate()) {
                 headerWidth -= this.gridService.detailColumnWidth;

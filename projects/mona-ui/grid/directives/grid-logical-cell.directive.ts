@@ -279,6 +279,9 @@ export class GridLogicalCellDirective {
     }
 
     #onHostKeydown(event: KeyboardEvent): void {
+        if (event.defaultPrevented) {
+            return;
+        }
         const target = event.target as HTMLElement | null;
         const host = this.#hostElementRef.nativeElement;
         if (target && target !== host) {
