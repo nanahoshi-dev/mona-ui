@@ -12,6 +12,13 @@ export interface SelectableOptions {
     mode?: "single" | "multiple";
 
     /**
+     * Derives the accessible label for a row's selection checkbox from its data.
+     *
+     * When omitted, the checkbox falls back to a positional label (e.g. "Select row 3").
+     */
+    rowAriaLabel?: (rowData: Record<PropertyKey, unknown>) => string;
+
+    /**
      * Determines which rows are affected by the header checkbox.
      *
      * - "page": rows on the current paginated page
@@ -27,10 +34,11 @@ export interface SelectableOptions {
     /**
      * Whether clicking the row itself changes selection.
      *
-     * Set this to false when selection should only be changed through
-     * checkboxes or application code.
+     * Off by default so that clicking a row to interact with its content (a link, a button,
+     * an editable cell) never silently discards the current selection. Set this to true to
+     * also select rows via a plain click, in addition to checkboxes or application code.
      *
-     * @default true
+     * @default false
      */
     selectOnRowClick?: boolean;
 

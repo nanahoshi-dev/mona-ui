@@ -789,7 +789,7 @@ class GridWrapperComponent implements ComponentInputsAsSignal<GridComponent<unkn
             enabled: features["selection"].active ?? false,
             mode: subFeatures["mode"].dropdownValue ?? "single",
             selectAllScope: subFeatures["selectAllScope"].dropdownValue ?? "page",
-            selectOnRowClick: subFeatures["selectOnRowClick"].active ?? true,
+            selectOnRowClick: subFeatures["selectOnRowClick"].active ?? false,
             showCheckboxes: subFeatures["showCheckboxes"].active ?? false,
             showSelectAll: true
         };

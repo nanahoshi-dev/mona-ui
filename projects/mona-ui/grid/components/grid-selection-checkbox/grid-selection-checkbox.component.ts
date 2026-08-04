@@ -15,6 +15,13 @@ import { gridSelectionCellThemeVariants } from "../../styles/grid.styles";
 })
 export class GridSelectionCheckboxComponent {
     readonly #gridService = inject(GridService);
+    protected readonly ariaLabel = computed(() => {
+        const labelFn = this.#gridService.selectableOptions().rowAriaLabel;
+        if (labelFn) {
+            return labelFn(this.row().data);
+        }
+        return `Select row ${this.rowIndex() + 1}`;
+    });
     protected readonly checked = computed(() => this.#gridService.isRowSelected(this.row()));
     protected readonly hostClass = computed(() => gridSelectionCellThemeVariants());
 
@@ -22,6 +29,11 @@ export class GridSelectionCheckboxComponent {
      * @description The grid row whose selected state this checkbox controls.
      */
     public readonly row = input.required<Row>();
+
+    /**
+     * @description The row's position within its rendered list, used to derive a default accessible label.
+     */
+    public readonly rowIndex = input.required<number>();
 
     protected onCheckedChange(checked: boolean): void {
         this.#gridService.setRowSelected(this.row(), checked);

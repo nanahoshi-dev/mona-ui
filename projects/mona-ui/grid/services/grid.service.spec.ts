@@ -456,6 +456,7 @@ describe("GridService", () => {
         });
 
         it("replaces the current selection in single mode via handleRowClick", () => {
+            service.setSelectableOptions({ selectOnRowClick: true });
             const [first, second] = service.rows().toArray();
             const event = new MouseEvent("click");
 
@@ -464,6 +465,15 @@ describe("GridService", () => {
 
             expect(service.isRowSelected(first)).toBe(false);
             expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("does nothing on handleRowClick by default, since selectOnRowClick defaults to false", () => {
+            service.setSelectableOptions({ enabled: true, mode: "single" });
+            const row = service.rows().firstOrDefault()!;
+
+            service.handleRowClick(new MouseEvent("click"), row);
+
+            expect(service.isRowSelected(row)).toBe(false);
         });
 
         it("does nothing on handleRowClick when the grid is not selectable", () => {
@@ -476,7 +486,7 @@ describe("GridService", () => {
         });
 
         it("supports additive multi-selection via ctrl/meta click", () => {
-            service.setSelectableOptions({ enabled: true, mode: "multiple" });
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
             const [first, second] = service.rows().toArray();
             const ctrlClick = new MouseEvent("click", { ctrlKey: true });
 
@@ -485,6 +495,70 @@ describe("GridService", () => {
 
             expect(service.isRowSelected(first)).toBe(true);
             expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("replaces the selection on a plain click in multiple mode", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            const [first, second] = service.rows().toArray();
+            const plainClick = new MouseEvent("click");
+
+            service.handleRowClick(plainClick, first);
+            service.handleRowClick(plainClick, second);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(true);
+            expect(service.selectedKeys().size()).toBe(1);
+        });
+
+        it("toggles an individual row without disturbing others via ctrl/meta click", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            const [first, second] = service.rows().toArray();
+            const ctrlClick = new MouseEvent("click", { ctrlKey: true });
+
+            service.handleRowClick(ctrlClick, first);
+            service.handleRowClick(ctrlClick, second);
+            service.handleRowClick(ctrlClick, first);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(true);
+        });
+
+        it("range-selects between the anchor and target row via shift-click", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            service.setRows(createRowData(5));
+            const [first, , third, , fifth] = service.rows().toArray();
+            const plainClick = new MouseEvent("click");
+            const shiftClick = new MouseEvent("click", { shiftKey: true });
+
+            service.handleRowClick(plainClick, first);
+            service.handleRowClick(shiftClick, third);
+
+            expect(service.selectedKeys().size()).toBe(3);
+            expect(service.isRowSelected(third)).toBe(true);
+            expect(service.isRowSelected(fifth)).toBe(false);
+        });
+
+        it("recomputes the shift-click range from the last plain- or ctrl-clicked anchor", () => {
+            service.setSelectableOptions({ enabled: true, mode: "multiple", selectOnRowClick: true });
+            service.setRows(createRowData(5));
+            const rows = service.rows().toArray();
+            const [first, second, third, fourth, fifth] = rows;
+            const plainClick = new MouseEvent("click");
+            const shiftClick = new MouseEvent("click", { shiftKey: true });
+
+            service.handleRowClick(plainClick, third);
+            service.handleRowClick(shiftClick, first);
+            expect(service.selectedKeys().size()).toBe(3);
+
+            service.handleRowClick(plainClick, fourth);
+            service.handleRowClick(shiftClick, fifth);
+
+            expect(service.isRowSelected(first)).toBe(false);
+            expect(service.isRowSelected(second)).toBe(false);
+            expect(service.isRowSelected(third)).toBe(false);
+            expect(service.isRowSelected(fourth)).toBe(true);
+            expect(service.isRowSelected(fifth)).toBe(true);
+            expect(service.selectedKeys().size()).toBe(2);
         });
 
         it("does nothing on handleRowClick when selectOnRowClick is false", () => {
@@ -664,6 +738,32 @@ describe("GridService", () => {
             rows.forEach(row => service.selectRow(row));
 
             expect(service.allBulkSelectionRowsSelected()).toBe(true);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+        });
+
+        it("keeps header state correct as individual rows are toggled in and out", () => {
+            service.setSelectableOptions({
+                enabled: true,
+                mode: "multiple",
+                showCheckboxes: true,
+                selectAllScope: "view"
+            });
+            const rows = service.viewRows().toArray();
+
+            for (const row of rows) {
+                service.selectRow(row);
+            }
+            expect(service.allBulkSelectionRowsSelected()).toBe(true);
+            expect(service.someBulkSelectionRowsSelected()).toBe(false);
+
+            service.deselectRow(rows[0]);
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
+            expect(service.someBulkSelectionRowsSelected()).toBe(true);
+
+            for (const row of rows) {
+                service.deselectRow(row);
+            }
+            expect(service.allBulkSelectionRowsSelected()).toBe(false);
             expect(service.someBulkSelectionRowsSelected()).toBe(false);
         });
 

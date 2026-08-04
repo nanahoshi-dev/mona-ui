@@ -1,5 +1,5 @@
 <mona-check-box
     [checked]="checked()"
     (checkedChange)="onCheckedChange($event)">
-    <span class="sr-only">Select row</span>
+    <span class="sr-only">{{ ariaLabel() }}</span>
 </mona-check-box>

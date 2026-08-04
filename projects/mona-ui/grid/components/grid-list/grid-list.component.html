@@ -68,7 +68,7 @@
                             [lastInRow]="columns().length === 0"
                             [style.width.px]="gridService.selectionColumnWidth"
                             [attr.colspan]="1">
-                            <mona-grid-selection-checkbox [row]="row" />
+                            <mona-grid-selection-checkbox [row]="row" [rowIndex]="rowIndex" />
                         </td>
                     }
                     @for (column of columns(); track $index) {
@@ -301,7 +301,7 @@
                                 [firstInRow]="!gridService.masterDetailTemplate()"
                                 [lastInRow]="columns().length === 0"
                                 [style.width.px]="gridService.selectionColumnWidth">
-                                <mona-grid-selection-checkbox [row]="viewRow.row" />
+                                <mona-grid-selection-checkbox [row]="viewRow.row" [rowIndex]="rowIndex" />
                             </td>
                         }
                         @for (column of columns(); track $index) {

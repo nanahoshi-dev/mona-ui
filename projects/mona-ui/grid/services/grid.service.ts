@@ -86,6 +86,7 @@ const GRID_STATE_VERSION = 1;
 
 @Injectable()
 export class GridService {
+    readonly #anchorRowKey = signal<unknown>(null);
     readonly #document = inject(DOCUMENT);
     readonly #editContext = signal<GridEditContext | null>(null);
     readonly #editSession = signal<GridEditSession | null>(null);
@@ -112,11 +113,32 @@ export class GridService {
     });
     public readonly addRowVisible = computed(() => this.addRowData() != null);
     public readonly add$ = new Subject<GridAddEvent>();
-    public readonly allBulkSelectionRowsSelected = computed(() => {
-        const rows = this.bulkSelectionRows();
-        return rows.any() && rows.all(row => this.isRowSelected(row));
+    // Counts how many *selected* keys fall inside the current selection scope, iterating the
+    // (usually much smaller) selection rather than rescanning the whole scope on every toggle.
+    readonly #bulkSelectionRowKeys = computed(() => {
+        const keys = new Set<unknown>();
+        for (const row of this.bulkSelectionRows()) {
+            keys.add(this.getRowSelectionKey(row));
+        }
+        return keys;
     });
-
+    readonly #bulkSelectionSelectedCount = computed(() => {
+        const scopeKeys = this.#bulkSelectionRowKeys();
+        if (scopeKeys.size === 0) {
+            return 0;
+        }
+        let count = 0;
+        for (const key of this.selectedKeys()) {
+            if (scopeKeys.has(key)) {
+                count++;
+            }
+        }
+        return count;
+    });
+    public readonly allBulkSelectionRowsSelected = computed(() => {
+        const scopeSize = this.#bulkSelectionRowKeys().size;
+        return scopeSize > 0 && this.#bulkSelectionSelectedCount() === scopeSize;
+    });
     public readonly aggregateColumns = computed(() => {
         return this.visibleColumns()
             .where(column => column.kind === "data" && column.aggregate != null)
@@ -292,7 +314,7 @@ export class GridService {
         enabled: false,
         mode: "single",
         selectAllScope: "page",
-        selectOnRowClick: true,
+        selectOnRowClick: false,
         showCheckboxes: false,
         showSelectAll: true
     });
@@ -317,12 +339,9 @@ export class GridService {
     );
 
     public readonly someBulkSelectionRowsSelected = computed(() => {
-        const rows = this.bulkSelectionRows();
-        if (!rows.any()) {
-            return false;
-        }
-        const selectedCount = rows.count(row => this.isRowSelected(row));
-        return selectedCount > 0 && selectedCount < rows.size();
+        const scopeSize = this.#bulkSelectionRowKeys().size;
+        const count = this.#bulkSelectionSelectedCount();
+        return count > 0 && count < scopeSize;
     });
     public readonly sortableOptions = signal<SortableOptions>({
         enabled: false,
@@ -650,13 +669,22 @@ export class GridService {
     }
 
     public handleMultipleSelection(event: MouseEvent, row: Row): void {
-        if (this.isRowSelected(row)) {
-            if (event.ctrlKey || event.metaKey) {
-                this.deselectRow(row);
-            }
+        if (event.shiftKey) {
+            this.selectRowRange(row);
             return;
         }
+        if (event.ctrlKey || event.metaKey) {
+            if (this.isRowSelected(row)) {
+                this.deselectRow(row);
+            } else {
+                this.selectRow(row);
+            }
+            this.#anchorRowKey.set(this.getRowSelectionKey(row));
+            return;
+        }
+        this.deselectAllRows();
         this.selectRow(row);
+        this.#anchorRowKey.set(this.getRowSelectionKey(row));
     }
 
     public handleRowClick(event: MouseEvent, row: Row): void {
@@ -1484,6 +1512,33 @@ export class GridService {
             minWidth: config.minWidth,
             sortIndex: previous?.sortIndex ?? null
         };
+    }
+
+    // Range selection is scoped to bulkSelectionRows() (current page, or full view when virtualized/
+    // view-scoped) since that's the same click-reachable ordering used for the select-all checkbox.
+    private selectRowRange(row: Row): void {
+        const anchorKey = this.#anchorRowKey();
+        const targetKey = this.getRowSelectionKey(row);
+        if (anchorKey == null) {
+            this.deselectAllRows();
+            this.selectRow(row);
+            this.#anchorRowKey.set(targetKey);
+            return;
+        }
+
+        const rows = this.bulkSelectionRows().toArray();
+        const anchorIndex = rows.findIndex(r => this.getRowSelectionKey(r) === anchorKey);
+        const targetIndex = rows.findIndex(r => this.getRowSelectionKey(r) === targetKey);
+        if (anchorIndex === -1 || targetIndex === -1) {
+            this.deselectAllRows();
+            this.selectRow(row);
+            this.#anchorRowKey.set(targetKey);
+            return;
+        }
+
+        const [start, end] = anchorIndex <= targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex];
+        const rangeKeys = rows.slice(start, end + 1).map(r => this.getRowSelectionKey(r));
+        this.selectedKeys.set(ImmutableSet.create(rangeKeys));
     }
 
     private clearEditSession(): void {

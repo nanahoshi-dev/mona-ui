@@ -125,7 +125,7 @@ describe("GridSelectableDirective", () => {
             enabled: true,
             mode: "multiple",
             selectAllScope: "page",
-            selectOnRowClick: true,
+            selectOnRowClick: false,
             showCheckboxes: false,
             showSelectAll: true
         });

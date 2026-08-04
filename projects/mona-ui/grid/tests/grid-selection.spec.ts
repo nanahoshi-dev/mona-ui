@@ -143,23 +143,23 @@ describe("grid selection integration", () => {
         expect(firstCheckbox.checked).toBe(true);
     });
 
-    it("still selects via row click by default", () => {
+    it("does not select via row click by default", () => {
         const firstRow = getRequiredElement(fixture.nativeElement, "tbody tr[monaGridRow]");
         firstRow.click();
         fixture.detectChanges();
 
-        expect(gridService.selectedKeys().size()).toBe(1);
+        expect(gridService.selectedKeys().isEmpty()).toBe(true);
     });
 
-    it("prevents row-click selection when selectOnRowClick is false", async () => {
-        host.selectable.set({ enabled: true, mode: "multiple", showCheckboxes: true, selectOnRowClick: false });
+    it("selects via row click when selectOnRowClick is explicitly enabled", async () => {
+        host.selectable.set({ enabled: true, mode: "multiple", showCheckboxes: true, selectOnRowClick: true });
         await settleFixture(fixture);
 
         const firstRow = getRequiredElement(fixture.nativeElement, "tbody tr[monaGridRow]");
         firstRow.click();
         fixture.detectChanges();
 
-        expect(gridService.selectedKeys().isEmpty()).toBe(true);
+        expect(gridService.selectedKeys().size()).toBe(1);
     });
 
     it("keeps the row checkbox in sync with controlled selectedKeys", async () => {

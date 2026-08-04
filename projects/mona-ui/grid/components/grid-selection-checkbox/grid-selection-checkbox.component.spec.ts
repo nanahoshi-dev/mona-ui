@@ -20,6 +20,7 @@ describe("GridSelectionCheckboxComponent", () => {
             throw new Error("Expected rows");
         }
         fixture.componentRef.setInput("row", row);
+        fixture.componentRef.setInput("rowIndex", 0);
         fixture.detectChanges();
     });
 
@@ -75,9 +76,30 @@ describe("GridSelectionCheckboxComponent", () => {
         expect(gridService.isRowSelected(second)).toBe(true);
     });
 
-    it("exposes an accessible row label", () => {
+    it("exposes a positional accessible row label by default", () => {
         const label = fixture.nativeElement.querySelector("label");
-        expect(label?.textContent).toContain("Select row");
+        expect(label?.textContent).toContain("Select row 1");
+    });
+
+    it("uses a distinct positional label for each row index", () => {
+        fixture.componentRef.setInput("rowIndex", 4);
+        fixture.detectChanges();
+
+        const label = fixture.nativeElement.querySelector("label");
+        expect(label?.textContent).toContain("Select row 5");
+    });
+
+    it("prefers a custom rowAriaLabel over the positional default", () => {
+        gridService.setSelectableOptions({
+            enabled: true,
+            mode: "multiple",
+            showCheckboxes: true,
+            rowAriaLabel: rowData => `Select ${(rowData as { id: number }).id}`
+        });
+        fixture.detectChanges();
+
+        const label = fixture.nativeElement.querySelector("label");
+        expect(label?.textContent).toContain("Select 1");
     });
 
     it("stops click propagation so the row handler does not run", () => {
