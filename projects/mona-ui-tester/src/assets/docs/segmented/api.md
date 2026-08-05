@@ -95,6 +95,26 @@ The control stretches to its container by default. Use the `class` input to appl
 <mona-segmented aria-label="Period" size="small" [options]="periods"></mona-segmented>
 ```
 
+### Roundness
+
+`rounded` controls the border radius of the container and its options.
+
+| Value    | Appearance              |
+|----------|-------------------------|
+| `none`   | Square corners          |
+| `small`  | Slightly rounded        |
+| `medium` | Moderately rounded      |
+| `large`  | Default rounded style   |
+| `full`   | Pill-shaped             |
+
+```html
+<mona-segmented
+    aria-label="Period"
+    rounded="full"
+    [options]="periods">
+</mona-segmented>
+```
+
 ## Segmented vs. Tabs
 
 | Concern                 | Segmented                                                                  | Tabs                                                                          |
@@ -155,6 +175,7 @@ Native radio behavior applies. Arrow keys move the selection within the group, a
 | `disabled`       | `boolean`                                                  | `false`    | Disables every option in the group and prevents value changes.                                                                                                                                              |
 | `invalid`        | `boolean`                                                  | `false`    | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
 | `options`        | `readonly SegmentedOption<T>[]`                            | —          | **Required.** The list of selectable options. Exactly one option is selected at a time.                                                                                                                     |
+| `rounded`        | `"none" \| "small" \| "medium" \| "large" \| "full"`   | `"large"`  | Border-radius preset applied to the segmented container and its options.                                                                                                                                     |
 | `size`           | `"small" \| "medium" \| "large"`                           | `"medium"` | Size preset controlling the height, horizontal padding, text size, and spacing of each option.                                                                                                              |
 | `touched`        | `boolean`                                                  | `false`    | Marks the component as touched. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.                                                                  |
 | `value`          | `T \| null`                                                | `null`     | Two-way bindable. The currently selected value. When it matches no current option, no option is checked. A `null` value is allowed initially but cannot be restored through segmented interaction.           |
@@ -200,13 +221,14 @@ When bound to a `Field`, the `Field` directive writes `invalid` and `touched` th
 ---
 
 <!-- verification-checklist
-- [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source and cross-checked against component-metadata.json's SegmentedComponent entry (ariaLabel, ariaLabelledBy, class, disabled, invalid, options, size, touched, value, touch)
+- [x] SegmentedComponent inputs/outputs/defaults verified against segmented.component.ts source and cross-checked against component-metadata.json's SegmentedComponent entry (ariaLabel, ariaLabelledBy, class, disabled, invalid, options, rounded, size, touched, value, touch)
 - [x] SegmentedValue and SegmentedOption exported types verified against models/SegmentedValue.ts and models/SegmentedOption.ts
 - [x] Two-way value model behavior (no option checked when value matches nothing; null allowed initially) verified against segmented.component.ts's onOptionChange and value model declaration
 - [x] ARIA table verified against host bindings in segmented.component.ts (role="radiogroup", aria-label, aria-labelledby, aria-disabled, aria-invalid)
 - [x] Native radio keyboard semantics verified against template's <input type="radio"> with shared name
 - [x] Options/labels/disabled per-option behavior verified against segmented.component.ts's optionDisabled computed and onOptionChange guard
 - [x] size preset semantics verified against segmented.styles.ts segmentedOptionThemeVariants
+- [x] rounded preset semantics verified against segmented.styles.ts segmentedContainerThemeVariants and segmentedOptionThemeVariants, with the focus ring inheriting the option radius
 - [x] FormValueControl signal-forms integration verified against the `implements FormValueControl<T | null>` declaration and Field-driven invalid/touched writes
 - [x] Import paths use @nanahoshi/mona-ui/segmented per repo markdown convention
 - [x] No internal computed signals, private methods, or Tailwind class names documented as public API

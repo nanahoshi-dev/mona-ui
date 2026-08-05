@@ -31,6 +31,7 @@ const mixedOptions = [
             [disabled]="disabled()"
             [invalid]="invalid()"
             [options]="options()"
+            [rounded]="rounded()"
             [size]="size()"
             [touched]="touched()"
             [(value)]="value"></mona-segmented>
@@ -43,6 +44,7 @@ class HostComponent {
     public readonly disabled = signal(false);
     public readonly invalid = signal(false);
     public readonly options = signal<readonly SegmentedOption[]>(stringOptions);
+    public readonly rounded = signal<"none" | "small" | "medium" | "large" | "full">("large");
     public readonly size = signal<"small" | "medium" | "large">("medium");
     public readonly touched = signal(false);
     public readonly value = signal<string | number | null>("discover");
@@ -146,6 +148,44 @@ describe("SegmentedComponent", () => {
 
         it("sets role=radiogroup on the host", () => {
             expect(getHostElement(fixture).getAttribute("role")).toBe("radiogroup");
+        });
+    });
+
+    describe("roundness", () => {
+        let fixture: ComponentFixture<HostComponent>;
+        let component: HostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(HostComponent);
+            component = fixture.componentInstance;
+            await waitForStable(fixture);
+        });
+
+        it.each([
+            ["none", "rounded-none", "rounded-none"],
+            ["small", "rounded-sm", "rounded-xs"],
+            ["medium", "rounded-md", "rounded-sm"],
+            ["large", "rounded-lg", "rounded-md"],
+            ["full", "rounded-full", "rounded-full"]
+        ] as const)("applies the %s roundness preset", (rounded, containerClass, optionClass) => {
+            component.rounded.set(rounded);
+            fixture.detectChanges();
+
+            expect(getHostElement(fixture).classList.contains(containerClass)).toBe(true);
+            getLabels(fixture).forEach(label => {
+                expect(label.classList.contains(optionClass)).toBe(true);
+            });
+        });
+
+        it("defaults to the large roundness preset", () => {
+            expect(getHostElement(fixture).classList.contains("rounded-lg")).toBe(true);
+            getLabels(fixture).forEach(label => {
+                expect(label.classList.contains("rounded-md")).toBe(true);
+            });
         });
     });
 

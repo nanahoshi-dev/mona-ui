@@ -6430,6 +6430,12 @@
         "kind": "input"
       },
       {
+        "name": "rounded",
+        "type": "SegmentedVariantProps[\"rounded\"]",
+        "description": "Border-radius preset applied to the segmented container and its options.",
+        "kind": "input"
+      },
+      {
         "name": "size",
         "type": "SegmentedVariantProps[\"size\"]",
         "description": "Size preset controlling the height, horizontal padding, text size, and spacing of each option.",

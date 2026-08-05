@@ -30,15 +30,16 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     implements SegmentedVariantInput, FormValueControl<T | null>
 {
     protected readonly containerClasses = computed(() => {
-        const classes = segmentedContainerThemeVariants();
+        const classes = segmentedContainerThemeVariants({ rounded: this.rounded() });
         return twMerge(classes, this.userClass());
     });
     protected readonly groupName = createElementControlId();
     protected readonly inputClasses = computed(() => segmentedInputThemeVariants());
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly optionClasses = computed(() => {
+        const rounded = this.rounded();
         const size = this.size();
-        return segmentedOptionThemeVariants({ size });
+        return segmentedOptionThemeVariants({ rounded, size });
     });
 
     /**
@@ -70,6 +71,12 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * @description The list of selectable options. Exactly one option is selected at a time.
      */
     public readonly options = input.required<readonly SegmentedOption<T>[]>();
+
+    /**
+     * @description Border-radius preset applied to the segmented container and its options.
+     * @default "large"
+     */
+    public readonly rounded = input<SegmentedVariantProps["rounded"]>("medium");
 
     /**
      * @description Size preset controlling the height, horizontal padding, text size, and spacing of each option.
