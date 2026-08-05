@@ -165,6 +165,10 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             valueField: {
                 type: "string",
                 value: "value"
+            },
+            valuePrimitive: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -211,6 +215,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
             [size]="size()"
             [textField]="textField()"
             [valueField]="valueField()"
+            [valuePrimitive]="valuePrimitive()"
             [monaDropDownFilterable]="filtering()"
             [monaDropDownGroupable]="grouping()"
             [monaDropDownVirtualScroll]="virtualization()"
@@ -275,7 +280,7 @@ export class MultiSelectDemoComponent extends AbstractDemoComponent<MultiSelectC
     `
 })
 class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelectComponent> {
-    readonly #formModel = signal<MultiSelectFormModel>({ value: [14] });
+    readonly #formModel = signal<MultiSelectFormModel>({ value: [dropdownFoodData[1]] });
     protected readonly features = inject(FeatureConfigHandler).data;
     protected readonly form = form(this.#formModel, schema => {
         disabled(schema.value, { when: () => this.disabled() });
@@ -295,10 +300,13 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     });
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
-        const textField = this.textField();
         if (!value) {
             return "";
         }
+        if (this.valuePrimitive()) {
+            return value.map(item => String(item)).join(", ");
+        }
+        const textField = this.textField();
         return value.map(item => getFormValueText(item, textField)).join(", ");
     });
     protected readonly groupBy = computed(() => {
@@ -370,6 +378,7 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
     public readonly tagCount = input<ReturnType<MultiSelectComponent["tagCount"]>>(-1);
     public readonly textField = input<ReturnType<MultiSelectComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<MultiSelectComponent["valueField"]>>("value");
+    public readonly valuePrimitive = input<ReturnType<MultiSelectComponent["valuePrimitive"]>>(false);
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;
@@ -397,5 +406,5 @@ class MultiSelectWrapperComponent implements ComponentInputsAsSignal<MultiSelect
 }
 
 interface MultiSelectFormModel {
-    value: unknown[];
+    value: (typeof dropdownFoodData)[number][];
 }

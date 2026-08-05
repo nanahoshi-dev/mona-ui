@@ -117,14 +117,14 @@ import {
         "(blur)": "onBlur()"
     }
 })
-export class DropdownListComponent<TData = unknown>
-    implements FormValueControl<TData | null>, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
+export class DropdownListComponent<TData = unknown, TValue = TData>
+    implements FormValueControl<TValue | null>, DropDownListVariantInput, DropdownDataInput<TData>, DropdownPopupInput
 {
     readonly #destroyRef = inject(DestroyRef);
     readonly #dropdownListService = inject(DropdownListService);
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef<HTMLElement>);
-    readonly #navigatedValue = linkedSignal(() => this.value());
+    readonly #navigatedItem = linkedSignal<TData | null>(() => this.selectedDataItem());
     readonly #listService = inject<ListService<TData>>(ListService);
     readonly #typeaheadKey = new Subject<string>();
 
@@ -324,7 +324,7 @@ export class DropdownListComponent<TData = unknown>
      * If omitted, the item itself is used as the display text.
      * @default undefined
      */
-    public readonly textField = input<DropdownFieldSelectorType<TData>>();
+    public readonly textField = input<DropdownFieldSelectorType<TData, string>>();
 
     /**
      * @description Emitted when the control is interacted with via blur, selection, or clear.
@@ -346,29 +346,41 @@ export class DropdownListComponent<TData = unknown>
 
     /**
      * @description Property name or accessor used to derive the value from a data item.
-     * If omitted, the item itself is used as the value.
+     * It is used for stable item identity, matching externally supplied values, and primitive
+     * value projection when {@link valuePrimitive} is enabled.
+     * When omitted, the item itself is used as the value.
+     * Should resolve to a stable, unique scalar.
      * @default undefined
      */
-    public readonly valueField = input<DropdownFieldSelectorType<TData>>();
+    public readonly valueField = input<DropdownFieldSelectorType<TData, unknown>>();
+
+    /**
+     * @description Determines whether the bound value contains complete data items
+     * or values extracted through {@link valueField}.
+     *
+     * When `false`, selecting an item writes the complete data item.
+     * When `true`, selecting an item writes the value resolved through `valueField`.
+     *
+     * @default false
+     */
+    public readonly valuePrimitive = input(false);
 
     /**
      * @description Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.
-     * When `valueField` is set, this may hold the primitive field value instead of the full data item.
+     * Object mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value
+     * resolved through {@link valueField}. `null` represents no selection.
      * @default null
      */
-    public readonly value = model<TData | null>(null);
+    public readonly value = model<TValue | null>(null);
 
     public constructor() {
         effect(() => {
             const value = this.value();
             const valueField = this.valueField();
+            this.valuePrimitive();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                if (value != null) {
-                    this.#listService.setSelectedDataItems([value]);
-                } else {
-                    this.#listService.clearSelections();
-                }
+                this.synchronizeSelection(value);
             });
         });
         effect(() => {
@@ -393,7 +405,7 @@ export class DropdownListComponent<TData = unknown>
         });
     }
 
-    public setValue(value: TData): void {
+    public setValue(value: TValue): void {
         this.updateValue(value);
     }
 
@@ -407,10 +419,10 @@ export class DropdownListComponent<TData = unknown>
             event.source.via === "keyboard" &&
             event.source.key !== "Enter"
         ) {
-            this.#navigatedValue.set(event.item.data);
+            this.#navigatedItem.set(event.item.data);
             return;
         }
-        this.updateValue(event.item.data, true);
+        this.updateValue(this.getControlValue(event.item.data), true);
         if (event.source.via === "mouse" || event.source.key === "Enter" || event.source.key === "NumpadEnter") {
             this.closePopup();
         }
@@ -443,10 +455,10 @@ export class DropdownListComponent<TData = unknown>
         this.#listService.selectItem(nextItem);
         const expanded = this.expanded();
         if (!expanded) {
-            this.updateValue(nextItem.data, true);
+            this.updateValue(this.getControlValue(nextItem.data), true);
         } else {
             this.scrollToSelectedItem();
-            this.#navigatedValue.set(nextItem.data);
+            this.#navigatedItem.set(nextItem.data);
         }
     }
 
@@ -454,13 +466,19 @@ export class DropdownListComponent<TData = unknown>
         this.#hostElementRef.nativeElement?.focus();
     }
 
+    private getControlValue(dataItem: TData): TValue {
+        const value = this.valuePrimitive() ? this.#listService.getDataItemValue(dataItem) : dataItem;
+        return value as TValue;
+    }
+
     private handleEnterKey(): void {
         if (!this.expanded()) {
             this.#dropdownService.triggerPopupOpen$.next({});
             return;
         }
-        if (this.expanded() && this.value() !== this.#navigatedValue()) {
-            this.updateValue(this.#navigatedValue(), true);
+        const navigatedItem = this.#navigatedItem();
+        if (navigatedItem && this.value() !== this.getControlValue(navigatedItem)) {
+            this.updateValue(this.getControlValue(navigatedItem), true);
         }
         this.closePopup();
     }
@@ -475,9 +493,9 @@ export class DropdownListComponent<TData = unknown>
         }
         this.#listService.selectItem(itemToSelect, true, false);
         if (!this.expanded()) {
-            this.updateValue(itemToSelect.data, true);
+            this.updateValue(this.getControlValue(itemToSelect.data), true);
         } else {
-            this.#navigatedValue.set(itemToSelect.data);
+            this.#navigatedItem.set(itemToSelect.data);
         }
     }
 
@@ -497,9 +515,9 @@ export class DropdownListComponent<TData = unknown>
     private setArrowKeyNavigationSubscription(): void {
         this.#dropdownListService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
             if (!this.expanded()) {
-                this.updateValue(item.data, true);
+                this.updateValue(this.getControlValue(item.data), true);
             } else {
-                this.#navigatedValue.set(item.data);
+                this.#navigatedItem.set(item.data);
             }
         });
     }
@@ -531,7 +549,8 @@ export class DropdownListComponent<TData = unknown>
 
     private setPopupCloseSubscriptions(): void {
         this.#dropdownService.popupCloseComplete$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(() => {
-            this.updateValue(this.#navigatedValue(), true);
+            const navigatedItem = this.#navigatedItem();
+            this.updateValue(navigatedItem ? this.getControlValue(navigatedItem) : null, true);
             window.setTimeout(() => this.focus());
         });
     }
@@ -550,7 +569,19 @@ export class DropdownListComponent<TData = unknown>
             .subscribe(buffer => this.cycleThroughMatchedItems(buffer));
     }
 
-    private updateValue(value: TData | null, notify: boolean = true): void {
+    private synchronizeSelection(value: TValue | null): void {
+        if (value == null) {
+            this.#listService.clearSelections();
+            return;
+        }
+        if (this.valuePrimitive()) {
+            this.#listService.setSelectedKeys([value]);
+        } else {
+            this.#listService.setSelectedDataItems([value as unknown as TData]);
+        }
+    }
+
+    private updateValue(value: TValue | null, notify: boolean = true): void {
         const oldValue = this.value();
         if (oldValue !== value) {
             this.value.set(value);

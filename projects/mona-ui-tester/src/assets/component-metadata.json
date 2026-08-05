@@ -6,13 +6,13 @@
       {
         "name": "ariaDescribedBy",
         "type": "string",
-        "description": "ID of an element that provides an extended description for the input.\nUse this to associate error messages or help text with the input.",
+        "description": "ID of an element that provides an extended description for the input.\r\nUse this to associate error messages or help text with the input.",
         "kind": "input"
       },
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the input. Describe what the autocomplete represents.\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
+        "description": "Accessible name for the input. Describe what the autocomplete represents.\r\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
         "kind": "input"
       },
       {
@@ -54,7 +54,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the autocomplete as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -137,20 +137,20 @@
       },
       {
         "name": "textField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the display text from a data item.\nIf null, the item itself is used as the display text.",
+        "type": "DropdownFieldSelectorType<TData, string>",
+        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf null, the item itself is used as the display text.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the autocomplete. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -161,14 +161,14 @@
       },
       {
         "name": "valueField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the value from a data item.\nIf null, the item itself is used as the value.",
+        "type": "DropdownFieldSelectorType<TData, unknown>",
+        "description": "Property name or accessor used to derive the value from a data item.\r\nIf null, the item itself is used as the value.",
         "kind": "input"
       },
       {
         "name": "value",
         "type": "string | null",
-        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\nenabling signal forms `[formField]` binding.",
+        "description": "Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,\r\nenabling signal forms `[formField]` binding.",
         "kind": "model"
       }
     ]
@@ -910,6 +910,12 @@
         "kind": "input"
       },
       {
+        "name": "groupPrefixWidth",
+        "type": "number | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
         "name": "lockedCellHeader",
         "type": "boolean",
         "description": "",
@@ -918,6 +924,12 @@
       {
         "name": "lockedStructuralOffset",
         "type": "number | null",
+        "description": "",
+        "kind": "input"
+      },
+      {
+        "name": "structuralColumn",
+        "type": "StructuralColumnKind | null",
         "description": "",
         "kind": "input"
       }
@@ -2844,7 +2856,7 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the input. Describe what the combo box represents.\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
+        "description": "Accessible name for the input. Describe what the combo box represents.\r\nFalls back to {@link placeholder} when neither this nor {@link ariaLabelledBy} is set.",
         "kind": "input"
       },
       {
@@ -2886,7 +2898,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the combo box as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the combo box as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2963,20 +2975,20 @@
       },
       {
         "name": "textField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the display text from a data item.\nIf not set, the item itself is used as the text representation.",
+        "type": "DropdownFieldSelectorType<TData, string>",
+        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf not set, the item itself is used as the text representation.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the combo box is interacted with on blur, selection, clear, or committed input.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the combo box is interacted with on blur, selection, clear, or committed input.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the combo box. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the combo box. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -2988,19 +3000,25 @@
       {
         "name": "valueAdd",
         "type": "string",
-        "description": "Emitted with the entered text when the user presses Enter on unmatched input.\nOnly emitted when {@link allowCustomValue} is true.",
+        "description": "Emitted with the entered text when the user presses Enter on unmatched input.\r\nOnly emitted when {@link allowCustomValue} is true.",
         "kind": "output"
       },
       {
         "name": "valueField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the value from a data item.\nIf not set, the item itself is used as the value representation.",
+        "type": "DropdownFieldSelectorType<TData, unknown>",
+        "description": "Property name or accessor used to derive the value from a data item.\r\nIt is used for stable item identity, matching externally supplied values, and primitive\r\nvalue projection when {@link valuePrimitive} is enabled.\r\nWhen omitted, the item itself is used as the value representation.\r\nShould resolve to a stable, unique scalar.",
+        "kind": "input"
+      },
+      {
+        "name": "valuePrimitive",
+        "type": "boolean",
+        "description": "Determines whether the bound value contains complete data items\r\nor values extracted through {@link valueField}.\r\n\r\nWhen `false`, selecting an item writes the complete data item.\r\nWhen `true`, selecting an item writes the value resolved through `valueField`.",
         "kind": "input"
       },
       {
         "name": "value",
-        "type": "TData | null",
-        "description": "Two-way bindable current selected value. Implements `FormValueControl<TData | null>`,\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\nwritten into this model to restore a matching selected item.",
+        "type": "TValue | null",
+        "description": "Two-way bindable current selected value. Implements `FormValueControl<TValue | null>`,\r\nenabling signal forms `[formField]` binding.\r\nObject mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value\r\nresolved through {@link valueField}. `null` represents no selection.",
         "kind": "model"
       }
     ]
@@ -3870,7 +3888,7 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Describe what the component represents.\nWhen empty, falls back to the placeholder text.",
+        "description": "Accessible name for the host element. Describe what the component represents.\r\nWhen empty, falls back to the placeholder text.",
         "kind": "input"
       },
       {
@@ -3989,14 +4007,14 @@
       },
       {
         "name": "textField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the display text from a data item.\nIf omitted, the item itself is used as the display text.",
+        "type": "DropdownFieldSelectorType<TData, string>",
+        "description": "Property name or accessor used to derive the display text from a data item.\r\nIf omitted, the item itself is used as the display text.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the control is interacted with via blur, selection, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the control is interacted with via blur, selection, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
@@ -4013,14 +4031,20 @@
       },
       {
         "name": "valueField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Property name or accessor used to derive the value from a data item.\nIf omitted, the item itself is used as the value.",
+        "type": "DropdownFieldSelectorType<TData, unknown>",
+        "description": "Property name or accessor used to derive the value from a data item.\r\nIt is used for stable item identity, matching externally supplied values, and primitive\r\nvalue projection when {@link valuePrimitive} is enabled.\r\nWhen omitted, the item itself is used as the value.\r\nShould resolve to a stable, unique scalar.",
+        "kind": "input"
+      },
+      {
+        "name": "valuePrimitive",
+        "type": "boolean",
+        "description": "Determines whether the bound value contains complete data items\r\nor values extracted through {@link valueField}.\r\n\r\nWhen `false`, selecting an item writes the complete data item.\r\nWhen `true`, selecting an item writes the value resolved through `valueField`.",
         "kind": "input"
       },
       {
         "name": "value",
-        "type": "TData | null",
-        "description": "Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.\nWhen `valueField` is set, this may hold the primitive field value instead of the full data item.",
+        "type": "TValue | null",
+        "description": "Currently selected value, two-way bindable and compatible with Signal Forms via `[formField]`.\r\nObject mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value\r\nresolved through {@link valueField}. `null` represents no selection.",
         "kind": "model"
       }
     ]
@@ -4648,15 +4672,15 @@
     "selector": "\"mona-grid-row-reorder-handle\"",
     "inputs": [
       {
-        "name": "row",
-        "type": "Row",
-        "description": "The grid row whose reorder handle this button controls.",
-        "kind": "input"
-      },
-      {
         "name": "pageIndex",
         "type": "number",
         "description": "The row's position within the current page, used to move the row and derive its accessible label.",
+        "kind": "input"
+      },
+      {
+        "name": "row",
+        "type": "Row",
+        "description": "The grid row whose reorder handle this button controls.",
         "kind": "input"
       }
     ]
@@ -5220,7 +5244,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the multi select as invalid. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Marks the multi select as invalid. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5291,20 +5315,20 @@
       },
       {
         "name": "textField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the text field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the text representation.",
+        "type": "DropdownFieldSelectorType<TData, string>",
+        "description": "Sets the text field of the multi select component.\r\nIt can be null, string, or a function that takes an item and returns a string.\r\nIf null, the item itself will be used as the text representation.",
         "kind": "input"
       },
       {
         "name": "touch",
         "type": "void",
-        "description": "Emitted when the multi select is interacted with on blur, selection, remove, or clear.\nThe `FormField` directive listens to this to mark the field as touched.",
+        "description": "Emitted when the multi select is interacted with on blur, selection, remove, or clear.\r\nThe `FormField` directive listens to this to mark the field as touched.",
         "kind": "output"
       },
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Sets the touched state of the multi select. When bound to a signal form field via `[formField]`,\nthis is written by the `FormField` directive.",
+        "description": "Sets the touched state of the multi select. When bound to a signal form field via `[formField]`,\r\nthis is written by the `FormField` directive.",
         "kind": "input"
       },
       {
@@ -5315,14 +5339,20 @@
       },
       {
         "name": "valueField",
-        "type": "DropdownFieldSelectorType<TData>",
-        "description": "Sets the value field of the multi select component.\nIt can be null, string, or a function that takes an item and returns a string.\nIf null, the item itself will be used as the value representation.",
+        "type": "DropdownFieldSelectorType<TData, unknown>",
+        "description": "Sets the value field of the multi select component.\r\nIt is used for stable item identity, matching externally supplied values, and primitive\r\nvalue projection when {@link valuePrimitive} is enabled.\r\nIt can be null, string, or a function that takes an item and returns a value.\r\nIf null, the item itself will be used as the value representation.\r\nShould resolve to a stable, unique scalar.",
+        "kind": "input"
+      },
+      {
+        "name": "valuePrimitive",
+        "type": "boolean",
+        "description": "Determines whether the bound value contains complete data items\r\nor values extracted through {@link valueField}.\r\n\r\nWhen `false`, selecting an item writes the complete data item.\r\nWhen `true`, selecting an item writes the value resolved through `valueField`.",
         "kind": "input"
       },
       {
         "name": "value",
-        "type": "Iterable<TData>",
-        "description": "Two-way bindable current selected values. Implements `FormValueControl<Iterable<TData>>`,\nenabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be\nwritten into this model to restore matching selected items.",
+        "type": "Iterable<TValue>",
+        "description": "Two-way bindable current selected values. Implements `FormValueControl<Iterable<TValue>>`,\r\nenabling signal forms `[formField]` binding.\r\nObject mode contains selected data items; primitive mode (see {@link valuePrimitive}) contains values\r\nresolved through {@link valueField}. An empty selection is represented by an empty iterable/array.",
         "kind": "model"
       }
     ]
