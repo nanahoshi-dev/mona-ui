@@ -17,6 +17,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
                 aria-label="Course section"
                 [disabled]="disabled()"
                 [options]="options"
+                [rounded]="rounded()"
                 [size]="size()"
                 [(value)]="value"
                 class="w-full">
@@ -28,6 +29,11 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
             disabled: {
                 type: "boolean",
                 value: false
+            },
+            rounded: {
+                type: "dropdown",
+                value: ["none", "small", "medium", "large", "full"],
+                defaultValue: "medium"
             },
             size: {
                 type: "dropdown",
@@ -53,6 +59,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
                 aria-label="Course section"
                 [disabled]="disabled()"
                 [options]="options()"
+                [rounded]="rounded()"
                 [size]="size()"
                 [(value)]="value">
             </mona-segmented>
@@ -67,6 +74,7 @@ class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComp
         { label: "My courses", value: "courses" },
         { label: "Archived", value: "archived", disabled: true }
     ]);
+    public readonly rounded = input<ReturnType<SegmentedComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<SegmentedComponent["size"]>>("medium");
     public readonly value = model<SegmentedValue | null>("discover");
 }

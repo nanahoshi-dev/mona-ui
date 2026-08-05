@@ -7,30 +7,51 @@ export const segmentedContainerThemeVariants = cva(
         inline-flex items-center gap-0.5
         ${themeControlSurfaceClasses}
         border border-input-border
-        rounded-lg
         p-1
         data-[invalid='true']:border-error
         data-[invalid='true']:ring-2 data-[invalid='true']:ring-error/35
         transition-colors duration-(--mona-motion-fast)
-    `
+    `,
+    {
+        variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-sm",
+                medium: "rounded-md",
+                large: "rounded-lg",
+                full: "rounded-full"
+            }
+        },
+        defaultVariants: {
+            rounded: "medium"
+        }
+    }
 );
 
 export const segmentedOptionThemeVariants = cva(
     `
         relative flex flex-1 cursor-pointer items-center justify-center gap-1
         whitespace-nowrap
-        rounded-md
         transition-colors duration-(--mona-motion-fast)
         data-[disabled='true']:pointer-events-none
         data-[disabled='true']:cursor-not-allowed
+        data-[disabled='true']:opacity-50
         data-[disabled='true']:text-disabled-foreground
         data-[selected='true']:bg-primary data-[selected='true']:text-primary-foreground
         data-[selected='true']:shadow-sm data-[selected='true']:ring-1 data-[selected='true']:ring-selected-border
         data-[selected='false']:text-muted-foreground
         data-[selected='false']:hover:bg-hover data-[selected='false']:hover:text-foreground
+        data-[disabled='true']:data-[selected='false']:text-disabled-foreground
     `,
     {
         variants: {
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-xs",
+                medium: "rounded-sm",
+                large: "rounded-md",
+                full: "rounded-full"
+            },
             size: {
                 small: "h-6 px-1.5 text-sm",
                 medium: "h-8 px-2.5 text-sm",
@@ -38,6 +59,7 @@ export const segmentedOptionThemeVariants = cva(
             }
         },
         defaultVariants: {
+            rounded: "medium",
             size: "medium"
         }
     }
