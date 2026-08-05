@@ -129,6 +129,10 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
             valueField: {
                 type: "string",
                 value: "value"
+            },
+            valuePrimitive: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -174,6 +178,7 @@ export class ComboBoxDemoComponent extends AbstractDemoComponent<ComboBoxCompone
             [size]="size()"
             [textField]="textField()"
             [valueField]="valueField()"
+            [valuePrimitive]="valuePrimitive()"
             [monaDropDownGroupable]="grouping()"
             [monaDropDownFilterable]="filtering()"
             [monaDropDownVirtualScroll]="virtualization()"
@@ -268,6 +273,9 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     });
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
+        if (this.valuePrimitive()) {
+            return value == null ? "" : String(value);
+        }
         const textField = this.textField();
         return getFormValueText(value, textField);
     });
@@ -312,6 +320,7 @@ class ComboBoxWrapperComponent implements ComponentInputsAsSignal<ComboBoxCompon
     public readonly size = input<ReturnType<ComboBoxComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<ComboBoxComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<ComboBoxComponent["valueField"]>>("value");
+    public readonly valuePrimitive = input<ReturnType<ComboBoxComponent["valuePrimitive"]>>(false);
 
     protected onValueAdd(value: string): void {
         const newItem: (typeof dropdownFoodData)[0] = {

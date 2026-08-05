@@ -50,7 +50,7 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 </mona-combo-box>
 ```
 
-`textField` and `valueField` each accept a property name or an accessor function. Unlike Auto Complete, setting `valueField` on Combo Box lets a primitive field value be written into `value` (for example, restoring `value` to `2` from a signal forms field) to select the matching item — see [`valueField`-based restoration](#valuefield-based-restoration).
+`textField` and `valueField` each accept a property name or an accessor function. `valueField` identifies each item for selection matching and, when `valuePrimitive` is enabled, is also what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding).
 
 ## Anatomy & Public Structural Templates
 
@@ -76,14 +76,22 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 ## Feature Examples
 
-### `valueField`-based restoration
+### Primitive value binding
 
-Setting `value` to a primitive field value (matching `valueField`) selects the item whose field matches, and updates the displayed text to that item's `textField`.
+By default `value` holds the complete selected data item. Set `valuePrimitive` to `true` to have `value` hold the value resolved through `valueField` instead — useful for storing just an id rather than the whole object. Setting `value` to a matching field value (for example, restoring it from a signal forms field) also selects the corresponding item and updates the displayed text to that item's `textField`.
 
 ```html
 
-<mona-combo-box [data]="countries" textField="name" valueField="id" [(value)]="selectedCountryId"></mona-combo-box>
+<mona-combo-box
+    [data]="countries"
+    textField="name"
+    valueField="id"
+    [valuePrimitive]="true"
+    [(value)]="selectedCountryId">
+</mona-combo-box>
 ```
+
+`selectedCountryId` becomes the matching `id` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`. Custom values via `allowCustomValue`/`valueAdd` are unaffected — see [Allowing custom values](#allowing-custom-values).
 
 ### Allowing custom values
 
@@ -260,7 +268,7 @@ The control also renders a visually hidden live region that announces the highli
 
 ### Form Interaction
 
-`ComboBoxComponent` implements the signal forms `FormValueControl<TData | null>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+`ComboBoxComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 ## API
 
@@ -293,8 +301,9 @@ The control also renders a visually hidden live region that announces the highli
 | `textField`        | `DropdownFieldSelectorType<TData>`                   | `undefined` | Property name or accessor used to derive the display text from a data item. Uses the item itself when unset.                                                                                                                                                                                |
 | `touched`          | `boolean`                                            | `false`     | Sets the touched state of the combo box. Set automatically by `[formField]`.                                                                                                                                                                                                                |
 | `class`            | `string`                                             | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                                                                                                   |
-| `value`            | `TData \| null`                                      | `null`      | Two-way bindable, and compatible with Signal Forms via `[formField]`. Currently selected value; when `valueField` is set, a primitive field value can be written into this model to restore a matching selected item — see [`valueField`-based restoration](#valuefield-based-restoration). |
-| `valueField`       | `DropdownFieldSelectorType<TData>`                   | `undefined` | Property name or accessor used to derive the value from a data item. Uses the item itself when unset.                                                                                                                                                                                       |
+| `value`            | `TValue \| null`                                     | `null`      | Two-way bindable, and compatible with Signal Forms via `[formField]`. Holds the complete selected data item, or the value resolved through `valueField` when `valuePrimitive` is `true` — see [Primitive value binding](#primitive-value-binding).                                          |
+| `valueField`       | `DropdownFieldSelectorType<TData, unknown>`          | `undefined` | Property name or accessor used to derive the value from a data item. Used for item identity, matching externally supplied values, and primitive projection when `valuePrimitive` is `true`. Uses the item itself when unset.                                                              |
+| `valuePrimitive`   | `boolean`                                             | `false`     | When `true`, `value` holds the value resolved through `valueField` instead of the complete data item — see [Primitive value binding](#primitive-value-binding).                                                                                                                              |
 
 #### Outputs
 
@@ -392,8 +401,8 @@ No outputs.
 ---
 
 <!-- verification-checklist
-- [x] ComboBoxComponent inputs/outputs/defaults verified against combo-box.component.ts source and cross-checked against component-metadata.json's ComboBoxComponent entry (all 27 members matched, including showClearButton defaulting to false, matching DropdownList)
-- [x] valueField-based restoration confirmed working (unlike AutoComplete): combo-box.component.ts's constructor effect calls this.#listService.setSelectedDataItems([value]) when value != null, same pattern as DropdownListComponent
+- [x] ComboBoxComponent inputs/outputs/defaults verified against combo-box.component.ts source and cross-checked against component-metadata.json's ComboBoxComponent entry (all 30 members matched, including showClearButton defaulting to false, matching DropdownList)
+- [x] valuePrimitive and TValue-generic value binding verified against combo-box.component.ts's getControlValue() (returns getDataItemValue(dataItem) when valuePrimitive() else dataItem) and synchronizeSelection() (setSelectedKeys([value]) when valuePrimitive() else setSelectedDataItems([value])); confirmed value-restoration by primitive field only takes effect when valuePrimitive is true, unlike the pre-valuePrimitive behavior this doc previously described
 - [x] filterPlaceholder's no-op confirmed against combo-box.component.ts's initialize() (this.#listService.filterInputVisible.set(false))
 - [x] Enter key resolution (4-branch logic) verified against combo-box.component.ts's handleEnterKey(): userNavigatedViaArrows branch, highlighted-item-matches-text branch, matchingFilteredItem fallback, allowCustomValue valueAdd branch
 - [x] Clear button visibility verified: @if (showClearButton() && selectedListItem() && !loading()) in combo-box.component.html, gated on selectedListItem() not on typed text presence
@@ -401,7 +410,7 @@ No outputs.
 - [x] Tab behavior verified against setKeydownSubscription(): only closePopup() is called, no commit/revert — flagged as owner-review since it may be an oversight rather than intended
 - [x] Seven ARIA rows for host vs. six for input verified against combo-box.component.ts's host object and combo-box.component.html's [attr.*] bindings on the <input>; confirmed host has no aria-haspopup (unlike AutoComplete's host) and input carries native required attribute in addition to aria-required on host
 - [x] Focus behavior verified: host has [attr.tabindex]="-1"; focus() method explicitly queries and focuses the inner <input>
-- [x] Form integration verified: ComboBoxComponent implements FormValueControl<TData | null>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
+- [x] Form integration verified: ComboBoxComponent implements FormValueControl<TValue | null>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
 - [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported; only ComboBoxComponent itself is exported for this component family
 - [x] No internal-only symbols (ListService, DropdownService, DropdownListService, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names, data-disabled/data-invalid attributes) documented as public API
 -->

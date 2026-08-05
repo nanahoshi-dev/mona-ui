@@ -97,7 +97,7 @@ export class ListService<TData> {
     });
     public readonly selectionChange$ = new Subject<ListItem<TData>>();
     public readonly textField = signal<string | Selector<TData, string>>("");
-    public readonly valueField = signal<string | Selector<TData, any>>("");
+    public readonly valueField = signal<string | Selector<TData, unknown>>("");
     public readonly viewItems = computed(() => {
         const listItems = this.#listItems();
         const filterText = this.filterText();
@@ -161,6 +161,29 @@ export class ListService<TData> {
 
     public getItemPosition(item: ListItem<TData>): { position: number; total: number } | null {
         return this.itemPositions().get(item.uid) ?? null;
+    }
+
+    /**
+     * Resolves the selection value of a data item through `valueField`.
+     *
+     * When no `valueField` is configured, the data item itself is the value.
+     * When `valueField` is a string, the item property is read with a nullish fallback to the item.
+     * When `valueField` is a function, its result is used as-is.
+     *
+     * Falsy results such as `0`, `false`, and `""` are valid values and do not fall back to the item.
+     */
+    public getDataItemValue(dataItem: TData): unknown {
+        const valueField = this.valueField();
+
+        if (!valueField) {
+            return dataItem;
+        }
+
+        if (typeof valueField === "string") {
+            return (dataItem as Record<string, unknown> | null)?.[valueField] ?? dataItem;
+        }
+
+        return valueField(dataItem);
     }
 
     public clearFilter(): void {
@@ -372,18 +395,13 @@ export class ListService<TData> {
     }
 
     public setSelectedDataItems(dataItems: Iterable<TData>): void {
-        const valueField = this.valueField();
-        if (!valueField) {
-            this.selectedKeys.update(set => set.clear().addAll(dataItems));
-        } else {
-            const selectedKeys = from(dataItems)
-                .select(item => this.getDataItemSelectionKey(item))
-                .toImmutableSet();
-            this.selectedKeys.update(set => set.clear().addAll(selectedKeys));
-        }
+        const selectedKeys = from(dataItems)
+            .select(item => this.getDataItemValue(item))
+            .toImmutableSet();
+        this.selectedKeys.update(set => set.clear().addAll(selectedKeys));
     }
 
-    public setSelectedKeys(selectedKeys: Iterable<any>): void {
+    public setSelectedKeys(selectedKeys: Iterable<unknown>): void {
         this.selectedKeys.update(set => set.clear().addAll(selectedKeys));
     }
 
@@ -391,7 +409,7 @@ export class ListService<TData> {
         this.textField.set(textField);
     }
 
-    public setValueField(valueField: string | Selector<TData, any>): void {
+    public setValueField(valueField: string | Selector<TData, unknown>): void {
         this.valueField.set(valueField);
     }
 
@@ -426,17 +444,6 @@ export class ListService<TData> {
         }
     }
 
-    private getDataItemSelectionKey(dataItem: TData): any {
-        const valueField = this.valueField();
-        if (!valueField) {
-            return dataItem;
-        }
-        if (typeof valueField === "string") {
-            return (dataItem as any)?.[valueField] ?? dataItem;
-        }
-        return valueField(dataItem);
-    }
-
     private getOrderKey(item: ListItem<TData>): any {
         const orderBy = this.groupableOptions().orderBy;
         if (orderBy) {
@@ -466,7 +473,7 @@ export class ListService<TData> {
     }
 
     private getSelectionKey(item: ListItem<TData>): any {
-        return this.getDataItemSelectionKey(item.data);
+        return this.getDataItemValue(item.data);
     }
 
     private navigateForMultipleSelection(

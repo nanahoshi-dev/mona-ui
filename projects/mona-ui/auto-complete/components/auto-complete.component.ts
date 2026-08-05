@@ -328,7 +328,7 @@ export class AutoCompleteComponent<TData = unknown>
      * If null, the item itself is used as the display text.
      * @default null
      */
-    public readonly textField = input<DropdownFieldSelectorType<TData>>(null);
+    public readonly textField = input<DropdownFieldSelectorType<TData, string>>(null);
 
     /**
      * @description Emitted when the autocomplete is interacted with on blur, selection, clear, or committed input.
@@ -354,7 +354,7 @@ export class AutoCompleteComponent<TData = unknown>
      * If null, the item itself is used as the value.
      * @default null
      */
-    public readonly valueField = input<DropdownFieldSelectorType<TData>>(null);
+    public readonly valueField = input<DropdownFieldSelectorType<TData, unknown>>(null);
 
     /**
      * @description Two-way bindable current autocomplete value. Implements `FormValueControl<string | null>`,

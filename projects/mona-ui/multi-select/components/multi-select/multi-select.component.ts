@@ -120,9 +120,9 @@ import {
         "(blur)": "onBlur()"
     }
 })
-export class MultiSelectComponent<TData = unknown>
+export class MultiSelectComponent<TData = unknown, TValue = TData>
     implements
-        FormValueControl<Iterable<TData>>,
+        FormValueControl<Iterable<TValue>>,
         MultiSelectVariantInput,
         DropdownDataInput<TData>,
         DropdownPopupInput,
@@ -338,7 +338,7 @@ export class MultiSelectComponent<TData = unknown>
      * If null, the item itself will be used as the text representation.
      * @default null
      */
-    public readonly textField = input<DropdownFieldSelectorType<TData>>();
+    public readonly textField = input<DropdownFieldSelectorType<TData, string>>();
 
     /**
      * @description Emitted when the multi select is interacted with on blur, selection, remove, or clear.
@@ -361,19 +361,34 @@ export class MultiSelectComponent<TData = unknown>
 
     /**
      * @description Sets the value field of the multi select component.
-     * It can be null, string, or a function that takes an item and returns a string.
+     * It is used for stable item identity, matching externally supplied values, and primitive
+     * value projection when {@link valuePrimitive} is enabled.
+     * It can be null, string, or a function that takes an item and returns a value.
      * If null, the item itself will be used as the value representation.
+     * Should resolve to a stable, unique scalar.
      * @default null
      */
-    public readonly valueField = input<DropdownFieldSelectorType<TData>>();
+    public readonly valueField = input<DropdownFieldSelectorType<TData, unknown>>();
 
     /**
-     * @description Two-way bindable current selected values. Implements `FormValueControl<Iterable<TData>>`,
-     * enabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be
-     * written into this model to restore matching selected items.
+     * @description Determines whether the bound value contains complete data items
+     * or values extracted through {@link valueField}.
+     *
+     * When `false`, selecting an item writes the complete data item.
+     * When `true`, selecting an item writes the value resolved through `valueField`.
+     *
+     * @default false
+     */
+    public readonly valuePrimitive = input(false);
+
+    /**
+     * @description Two-way bindable current selected values. Implements `FormValueControl<Iterable<TValue>>`,
+     * enabling signal forms `[formField]` binding.
+     * Object mode contains selected data items; primitive mode (see {@link valuePrimitive}) contains values
+     * resolved through {@link valueField}. An empty selection is represented by an empty iterable/array.
      * @default []
      */
-    public readonly value = model<Iterable<TData>>([]);
+    public readonly value = model<Iterable<TValue>>([]);
 
     public constructor() {
         afterNextRender({
@@ -390,9 +405,10 @@ export class MultiSelectComponent<TData = unknown>
         effect(() => {
             const valueField = this.valueField();
             const value = this.value();
+            const valuePrimitive = this.valuePrimitive();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                this.#listService.setSelectedDataItems(value);
+                this.synchronizeSelection(value);
             });
         });
         effect(() => {
@@ -410,7 +426,7 @@ export class MultiSelectComponent<TData = unknown>
     }
 
     protected onItemSelect(): void {
-        this.updateValue(this.selectedDataItems().toArray());
+        this.updateValue(this.getSelectedControlValues());
         if (this.autoClose()) {
             this.#popupRef()?.close();
         }
@@ -422,7 +438,7 @@ export class MultiSelectComponent<TData = unknown>
             return;
         }
         this.#listService.deselectItems([listItem]);
-        this.updateValue(this.selectedDataItems().toArray());
+        this.updateValue(this.getSelectedControlValues());
         this.focus();
     }
 
@@ -436,7 +452,7 @@ export class MultiSelectComponent<TData = unknown>
             .takeLast(selectedItemCount - this.visibleTagCount())
             .toArray();
         this.#listService.deselectItems(removedItems);
-        this.updateValue(this.selectedDataItems().toArray());
+        this.updateValue(this.getSelectedControlValues());
         this.focus();
     }
 
@@ -449,6 +465,18 @@ export class MultiSelectComponent<TData = unknown>
         this.updateValue([]);
         this.#listService.clearSelections();
         this.focus();
+    }
+
+    private getSelectedControlValues(): TValue[] {
+        return this.selectedListItems()
+            .select(item => {
+                const value = this.valuePrimitive()
+                    ? this.#listService.getDataItemValue(item.data)
+                    : item.data;
+
+                return value as TValue;
+            })
+            .toArray();
     }
 
     private handleEnterKey(): void {
@@ -466,7 +494,7 @@ export class MultiSelectComponent<TData = unknown>
         } else {
             this.#listService.selectItem(highlightedItem);
         }
-        this.updateValue(this.selectedDataItems().toArray());
+        this.updateValue(this.getSelectedControlValues());
         if (this.autoClose()) {
             this.#popupRef()?.close();
         }
@@ -499,7 +527,7 @@ export class MultiSelectComponent<TData = unknown>
                 }
                 const lastSelectedItem = selectedItems.last();
                 this.#listService.deselectItems([lastSelectedItem]);
-                this.updateValue(this.selectedDataItems().toArray());
+                this.updateValue(this.getSelectedControlValues());
             });
     }
 
@@ -524,7 +552,15 @@ export class MultiSelectComponent<TData = unknown>
         this.setEnterKeySubscription();
     }
 
-    private updateValue(value: Iterable<TData>, notify: boolean = true): void {
+    private synchronizeSelection(value: Iterable<TValue>): void {
+        if (this.valuePrimitive()) {
+            this.#listService.setSelectedKeys(value);
+        } else {
+            this.#listService.setSelectedDataItems(value as unknown as Iterable<TData>);
+        }
+    }
+
+    private updateValue(value: Iterable<TValue>, notify: boolean = true): void {
         this.value.set(value);
         if (notify) {
             this.touch.emit();

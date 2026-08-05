@@ -31,8 +31,8 @@ const FOOD_ITEMS: readonly FoodItem[] = [
     `,
     imports: [ComboBoxComponent, FormField]
 })
-class SignalFormComboBoxHostComponent {
-    readonly #formModel = signal<ComboBoxFormModel>({ value: 2 });
+class ObjectModeHostComponent {
+    readonly #formModel = signal<ComboBoxFormModel>({ value: FOOD_ITEMS[1] });
     protected readonly data = FOOD_ITEMS;
     public readonly disabled = signal(false);
     public readonly loading = signal(false);
@@ -43,6 +43,55 @@ class SignalFormComboBoxHostComponent {
         fieldReadonly(schema.value, { when: () => this.readonlyState() });
         required(schema.value, { when: () => this.requiredState() });
     });
+}
+
+@Component({
+    template: `
+        <mona-combo-box
+            [data]="data()"
+            textField="text"
+            valueField="value"
+            [valuePrimitive]="true"
+            [loading]="loading()"
+            [showClearButton]="true"
+            [formField]="form.value">
+        </mona-combo-box>
+    `,
+    imports: [ComboBoxComponent, FormField]
+})
+class PrimitiveModeHostComponent {
+    readonly #formModel = signal<PrimitiveComboBoxFormModel>({ value: 2 });
+    public readonly data = signal<readonly FoodItem[]>(FOOD_ITEMS);
+    public readonly disabled = signal(false);
+    public readonly loading = signal(false);
+    public readonly readonlyState = signal(false);
+    public readonly requiredState = signal(false);
+    public readonly form = form(this.#formModel, schema => {
+        fieldDisabled(schema.value, { when: () => this.disabled() });
+        fieldReadonly(schema.value, { when: () => this.readonlyState() });
+        required(schema.value, { when: () => this.requiredState() });
+    });
+}
+
+@Component({
+    template: `
+        <mona-combo-box
+            [data]="data"
+            textField="text"
+            valueField="value"
+            [allowCustomValue]="true"
+            (valueAdd)="onValueAdd($event)">
+        </mona-combo-box>
+    `,
+    imports: [ComboBoxComponent]
+})
+class CustomValueHostComponent {
+    protected readonly data = FOOD_ITEMS;
+    public addedValue: string | null = null;
+
+    public onValueAdd(value: string): void {
+        this.addedValue = value;
+    }
 }
 
 describe("ComboBoxComponent", () => {
@@ -61,7 +110,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("uses the shared input shell and semantic state precedence", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createObjectModeFixture();
         const host = getHost(fixture);
 
         expect(
@@ -75,27 +124,180 @@ describe("ComboBoxComponent", () => {
         expect(host.classList.contains("opacity-50")).toBe(false);
     });
 
-    it("hydrates the input from a signal form primitive valueField value", async () => {
-        const fixture = await createSignalFormFixture();
+    describe("object mode", () => {
+        it("displays the initial object value text", async () => {
+            const fixture = await createObjectModeFixture();
 
-        expect(getInput(fixture).value).toBe("Banana");
-        expect(fixture.componentInstance.form.value().value()).toBe(2);
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[1]);
+        });
+
+        it("writes the complete object when an existing item is selected", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await openPopup(fixture);
+            getOption("Carrot").click();
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
+            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(getInput(fixture).value).toBe("Carrot");
+        });
+
+        it("clears the signal form value from the clear button", async () => {
+            const fixture = await createObjectModeFixture();
+
+            getClearButton(fixture).dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBeNull();
+            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(getInput(fixture).value).toBe("");
+        });
+
+        it("escape restores the object-backed selection display", async () => {
+            const fixture = await createObjectModeFixture();
+
+            await typeText(fixture, "X");
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[1]);
+        });
     });
 
-    it("updates the signal form value and touched state when an option is selected", async () => {
-        const fixture = await createSignalFormFixture();
+    describe("primitive mode", () => {
+        it("hydrates the input text from a primitive value", async () => {
+            const fixture = await createPrimitiveModeFixture();
 
-        await openPopup(fixture);
-        getOption("Carrot").click();
-        await waitForStable(fixture);
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(fixture.componentInstance.form.value().value()).toBe(2);
+        });
 
-        expect(fixture.componentInstance.form.value().value()).toEqual(FOOD_ITEMS[2]);
-        expect(fixture.componentInstance.form.value().touched()).toBe(true);
-        expect(getInput(fixture).value).toBe("Carrot");
+        it("writes the primitive value when an option is selected with the mouse", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            getOption("Carrot").click();
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(getInput(fixture).value).toBe("Carrot");
+        });
+
+        it("writes the primitive value when an option is committed with Enter", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await typeText(fixture, "Car");
+            pressKey(fixture, "Enter");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+            expect(getInput(fixture).value).toBe("Carrot");
+        });
+
+        it("writes the primitive value for an exact text match", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await typeText(fixture, "Carrot");
+            pressKey(fixture, "Enter");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+        });
+
+        it("writes the primitive value when selecting with arrows and Enter", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            pressKey(fixture, "ArrowDown");
+            pressKey(fixture, "Enter");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(3);
+            expect(getInput(fixture).value).toBe("Carrot");
+        });
+
+        it("escape does not replace the primitive value with an object", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await typeText(fixture, "X");
+            pressKey(fixture, "Escape");
+            await waitForStable(fixture);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await waitForStable(fixture);
+
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(fixture.componentInstance.form.value().value()).toBe(2);
+        });
+
+        it("clears the signal form value from the clear button", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            getClearButton(fixture).dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBeNull();
+            expect(fixture.componentInstance.form.value().touched()).toBe(true);
+            expect(getInput(fixture).value).toBe("");
+        });
+
+        it("treats zero as a valid selected value", async () => {
+            const fixture = await createPrimitiveModeFixture();
+
+            await openPopup(fixture);
+            getOption("Date").click();
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.form.value().value()).toBe(0);
+            expect(getInput(fixture).value).toBe("Date");
+        });
+
+        it("hydrates the display text when data arrives asynchronously", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            const host = fixture.componentInstance;
+
+            host.data.set([]);
+            await waitForStable(fixture);
+
+            host.data.set(FOOD_ITEMS);
+            await waitForStable(fixture);
+
+            expect(getInput(fixture).value).toBe("Banana");
+            expect(host.form.value().value()).toBe(2);
+            expect(host.form.value().touched()).toBe(false);
+        });
+
+        it("external primitive synchronization does not mark the field touched", async () => {
+            const fixture = await createPrimitiveModeFixture();
+            const field = fixture.componentInstance.form.value();
+
+            field.value.set(3);
+            await waitForStable(fixture);
+
+            expect(getInput(fixture).value).toBe("Carrot");
+            expect(field.touched()).toBe(false);
+        });
+    });
+
+    describe("custom values", () => {
+        it("valueAdd emits the unmatched text and leaves the model unchanged", async () => {
+            const fixture = await createObjectFixture(CustomValueHostComponent);
+
+            await typeText(fixture, "Pineapple");
+            pressKey(fixture, "Enter");
+            await waitForStable(fixture);
+
+            expect(fixture.componentInstance.addedValue).toBe("Pineapple");
+        });
     });
 
     it("emits touch on input blur", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createObjectModeFixture();
 
         getInput(fixture).dispatchEvent(new FocusEvent("blur"));
         await waitForStable(fixture);
@@ -104,7 +306,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("reflects disabled state and does not open the popup", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createPrimitiveModeFixture();
         fixture.componentInstance.disabled.set(true);
         await waitForStable(fixture);
 
@@ -122,7 +324,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("reflects readonly state and does not open the popup", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createPrimitiveModeFixture();
         fixture.componentInstance.readonlyState.set(true);
         await waitForStable(fixture);
 
@@ -136,19 +338,8 @@ describe("ComboBoxComponent", () => {
         expect(fixture.componentInstance.form.value().value()).toBe(2);
     });
 
-    it("clears the signal form value from the clear button", async () => {
-        const fixture = await createSignalFormFixture();
-
-        getClearButton(fixture).dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-        await waitForStable(fixture);
-
-        expect(fixture.componentInstance.form.value().value()).toBeNull();
-        expect(fixture.componentInstance.form.value().touched()).toBe(true);
-        expect(getInput(fixture).value).toBe("");
-    });
-
     it("renders clear and toggle indicators when a value is selected and not loading", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createObjectModeFixture();
 
         expect(getIndicator(fixture, "clear")).toBeTruthy();
         expect(getIndicator(fixture, "loading")).toBeNull();
@@ -156,7 +347,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("renders the loading indicator instead of the clear indicator while loading", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createObjectModeFixture();
         fixture.componentInstance.loading.set(true);
         await waitForStable(fixture);
 
@@ -166,7 +357,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("reflects required invalid state from signal forms", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createObjectModeFixture();
         const field = fixture.componentInstance.form.value();
         fixture.componentInstance.requiredState.set(true);
         field.value.set(null);
@@ -181,7 +372,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("does not report a required field as invalid when a falsy primitive value is selected", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createPrimitiveModeFixture();
         const field = fixture.componentInstance.form.value();
         fixture.componentInstance.requiredState.set(true);
         field.value.set(0);
@@ -205,7 +396,7 @@ describe("ComboBoxComponent", () => {
     });
 
     it("exposes a single combobox role and tab stop on the input, not the host", async () => {
-        const fixture = await createSignalFormFixture();
+        const fixture = await createObjectModeFixture();
 
         expect(getHost(fixture).getAttribute("role")).toBeNull();
         expect(getHost(fixture).getAttribute("tabindex")).toBe("-1");
@@ -214,12 +405,30 @@ describe("ComboBoxComponent", () => {
     });
 });
 
-async function createSignalFormFixture(): Promise<ComponentFixture<SignalFormComboBoxHostComponent>> {
+async function createObjectModeFixture(): Promise<ComponentFixture<ObjectModeHostComponent>> {
+    return createSignalFormFixture(ObjectModeHostComponent);
+}
+
+async function createPrimitiveModeFixture(): Promise<ComponentFixture<PrimitiveModeHostComponent>> {
+    return createSignalFormFixture(PrimitiveModeHostComponent);
+}
+
+async function createSignalFormFixture<T>(component: new () => T): Promise<ComponentFixture<T>> {
     await TestBed.configureTestingModule({
-        imports: [SignalFormComboBoxHostComponent]
+        imports: [component]
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(SignalFormComboBoxHostComponent);
+    const fixture = TestBed.createComponent(component);
+    await waitForStable(fixture);
+    return fixture;
+}
+
+async function createObjectFixture<T>(component: new () => T): Promise<ComponentFixture<T>> {
+    await TestBed.configureTestingModule({
+        imports: [component]
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(component);
     await waitForStable(fixture);
     return fixture;
 }
@@ -235,6 +444,20 @@ async function openPopup(fixture: ComponentFixture<unknown>): Promise<void> {
     await waitForStable(fixture);
     await new Promise(resolve => setTimeout(resolve, 0));
     await waitForStable(fixture);
+}
+
+async function typeText(fixture: ComponentFixture<unknown>, text: string): Promise<void> {
+    const input = getInput(fixture);
+    input.value = text;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    fixture.detectChanges();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await waitForStable(fixture);
+}
+
+function pressKey(fixture: ComponentFixture<unknown>, key: string): void {
+    const input = getInput(fixture);
+    input.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
 }
 
 function getHost(fixture: ComponentFixture<unknown>): HTMLElement {
@@ -276,5 +499,9 @@ interface FoodItem {
 }
 
 interface ComboBoxFormModel {
-    value: FoodItem | number | null;
+    value: FoodItem | null;
+}
+
+interface PrimitiveComboBoxFormModel {
+    value: number | null;
 }

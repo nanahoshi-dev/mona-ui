@@ -45,7 +45,7 @@ protected readonly selectedCountries = signal<{ id: number; name: string }[]>([]
 </mona-multi-select>
 ```
 
-`textField` and `valueField` each accept a property name or an accessor function. Setting `valueField` lets an array of primitive field values be written into `value` (for example, restoring `value` to `[2, 3]`) to select the matching items — see [`valueField`-based restoration](#valuefield-based-restoration).
+`textField` and `valueField` each accept a property name or an accessor function. `valueField` identifies each item for selection matching and, when `valuePrimitive` is enabled, is also what gets read from and written into `value` instead of the full items — see [Primitive value binding](#primitive-value-binding).
 
 ## Anatomy & Public Structural Templates
 
@@ -76,14 +76,22 @@ Each structural directive below is an `ng-template` placed as projected content 
 
 ## Feature Examples
 
-### `valueField`-based restoration
+### Primitive value binding
 
-Setting `value` to an array of primitive field values (matching `valueField`) selects the items whose fields match.
+By default `value` holds the complete selected data items. Set `valuePrimitive` to `true` to have `value` hold an array of the values resolved through `valueField` instead — useful for storing just ids rather than the whole objects. Setting `value` to an array of matching field values (for example, restoring it from a signal forms field) also selects the corresponding items.
 
 ```html
 
-<mona-multi-select [data]="countries" textField="name" valueField="id" [(value)]="selectedCountryIds"></mona-multi-select>
+<mona-multi-select
+    [data]="countries"
+    textField="name"
+    valueField="id"
+    [valuePrimitive]="true"
+    [(value)]="selectedCountryIds">
+</mona-multi-select>
 ```
+
+`selectedCountryIds` becomes the matching `id`s (for example, `[2, 3]`) as items are selected, and an empty array again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
 
 ### Collapsing tags into a summary
 
@@ -251,7 +259,7 @@ The control also renders a visually hidden live region that announces the highli
 
 ### Form Interaction
 
-`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TData>>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+`MultiSelectComponent` implements the signal forms `FormValueControl<Iterable<TValue>>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 ## API
 
@@ -283,8 +291,9 @@ The control also renders a visually hidden live region that announces the highli
 | `textField`       | `DropdownFieldSelectorType<TData>`                   | `null`      | Property name or accessor used to derive the display text from a data item. Uses the item itself when unset.                                                                                                                                                                               |
 | `touched`         | `boolean`                                            | `false`     | Sets the touched state of the multi select. Set automatically by `[formField]`.                                                                                                                                                                                                            |
 | `class`           | `string`                                             | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                                                                                                                                  |
-| `value`           | `Iterable<TData>`                                    | `[]`        | Two-way bindable, and compatible with Signal Forms via `[formField]`. Currently selected values; when `valueField` is set, primitive field values can be written into this model to restore matching selected items — see [`valueField`-based restoration](#valuefield-based-restoration). |
-| `valueField`      | `DropdownFieldSelectorType<TData>`                   | `null`      | Property name or accessor used to derive the value from a data item. Uses the item itself when unset.                                                                                                                                                                                      |
+| `value`           | `Iterable<TValue>`                                   | `[]`        | Two-way bindable, and compatible with Signal Forms via `[formField]`. Holds the complete selected data items, or the values resolved through `valueField` when `valuePrimitive` is `true` — see [Primitive value binding](#primitive-value-binding).                                       |
+| `valueField`      | `DropdownFieldSelectorType<TData, unknown>`          | `null`      | Property name or accessor used to derive the value from a data item. Used for item identity, matching externally supplied values, and primitive projection when `valuePrimitive` is `true`. Uses the item itself when unset.                                                              |
+| `valuePrimitive`  | `boolean`                                            | `false`     | When `true`, `value` holds an array of the values resolved through `valueField` instead of the complete data items — see [Primitive value binding](#primitive-value-binding).                                                                                                              |
 
 #### Outputs
 
@@ -395,16 +404,16 @@ No outputs.
 ---
 
 <!-- verification-checklist
-- [x] MultiSelectComponent inputs/outputs/defaults verified against multi-select.component.ts source and cross-checked against component-metadata.json's MultiSelectComponent entry
+- [x] MultiSelectComponent inputs/outputs/defaults verified against multi-select.component.ts source and cross-checked against component-metadata.json's MultiSelectComponent entry (all 28 members matched, including the valuePrimitive input added alongside value/valueField)
 - [x] Confirmed no placeholder input exists (absent from both the source's public input list and component-metadata.json), and that aria-label has no fallback (bound directly to ariaLabel(), unlike DropdownList/ComboBox/AutoComplete's effectiveAriaLabel computed)
 - [x] MultiSelectSummaryTagDirective and its tagCount input/monaMultiSelectSummaryTagTemplate contentChild verified against multi-select-summary-tag.directive.ts; template context { $implicit, tagCount } verified against multi-select.component.html's ngTemplateOutletContext binding
 - [x] MultiSelectTagTemplateDirective verified against multi-select-tag-template.directive.ts and its usage/context in multi-select.component.html
-- [x] valueField-based restoration with arrays confirmed: constructor effect calls this.#listService.setSelectedDataItems(value) for the full Iterable<TData>; spec's [formField]="form.value" test uses a numeric array field ({ value: [2] })
+- [x] valuePrimitive and TValue-generic value binding verified against multi-select.component.ts's getSelectedControlValues() (maps each selected item through getDataItemValue when valuePrimitive() else uses item.data) and synchronizeSelection() (setSelectedKeys(value) when valuePrimitive() else setSelectedDataItems(value)); confirmed value-restoration by primitive field array only takes effect when valuePrimitive is true; multi-select.component.spec.ts's dedicated PrimitiveMultiSelectFormModel host ([valuePrimitive]="true", form model { value: [2] }) tests this separately from the default object-mode host ({ value: [FOOD_ITEMS[1]] })
 - [x] showClearButton clearing all selections verified against onValueClear() calling updateValue([]) and listService.clearSelections()
 - [x] Keyboard map verified: ArrowUp/ArrowDown/Alt+Arrow/Escape/Tab/Space fall through to dropdown-list-popup-handler.directive.ts's shared defaults (not intercepted by MultiSelectComponent, unlike ComboBox/AutoComplete); Enter and Backspace verified against multi-select.component.ts's setEnterKeySubscription/setBackspaceKeySubscription/handleEnterKey; wrap: true verified against initialize()'s setNavigableOptions call
 - [x] Focus behavior verified: host has [attr.tabindex]="disabled() ? null : 0" (host itself is the focusable element, unlike ComboBox/AutoComplete's inner <input> pattern); chips have [tabindex]="-1" and [removeTabIndex]="-1" in multi-select.component.html
 - [x] ARIA attributes (single-element table, not host/input split) verified against multi-select.component.ts's host object
-- [x] Form integration verified: MultiSelectComponent implements FormValueControl<Iterable<TData>>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
+- [x] Form integration verified: MultiSelectComponent implements FormValueControl<Iterable<TValue>>; no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
 - [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported; MultiSelectComponent, MultiSelectTagTemplateDirective, MultiSelectSummaryTagDirective, MultiSelectSummaryTagTemplateDirective all confirmed exported
 - [x] No internal-only symbols (ListService, DropdownService, MultiSelectService, ChipComponent's own internal styling, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names, data-invalid attribute) documented as public API beyond the mona-chip content-projection mention needed to explain tag rendering
 -->

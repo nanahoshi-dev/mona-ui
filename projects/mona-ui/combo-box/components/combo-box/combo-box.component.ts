@@ -10,7 +10,6 @@ import {
     forwardRef,
     inject,
     input,
-    linkedSignal,
     model,
     output,
     signal,
@@ -115,9 +114,9 @@ import {
         "[class]": "baseClass()"
     }
 })
-export class ComboBoxComponent<TData = unknown>
+export class ComboBoxComponent<TData = unknown, TValue = TData>
     implements
-        FormValueControl<TData | null>,
+        FormValueControl<TValue | null>,
         ComboBoxVariantInput,
         DropdownDataInput<TData>,
         DropdownPopupInput,
@@ -128,7 +127,7 @@ export class ComboBoxComponent<TData = unknown>
     readonly #dropdownService = inject(DropdownService);
     readonly #hostElementRef = inject(ElementRef);
     readonly #listService = inject(ListService);
-    readonly #navigatedValue = linkedSignal(() => this.value());
+    readonly #navigatedItem = signal<TData | null>(null);
     readonly #popupRef = this.#dropdownService.popupRef;
     readonly #userNavigatedViaArrows = signal(false);
 
@@ -329,7 +328,7 @@ export class ComboBoxComponent<TData = unknown>
      * If not set, the item itself is used as the text representation.
      * @default undefined
      */
-    public readonly textField = input<DropdownFieldSelectorType<TData>>();
+    public readonly textField = input<DropdownFieldSelectorType<TData, string>>();
 
     /**
      * @description Emitted when the combo box is interacted with on blur, selection, clear, or committed input.
@@ -358,18 +357,33 @@ export class ComboBoxComponent<TData = unknown>
 
     /**
      * @description Property name or accessor used to derive the value from a data item.
-     * If not set, the item itself is used as the value representation.
+     * It is used for stable item identity, matching externally supplied values, and primitive
+     * value projection when {@link valuePrimitive} is enabled.
+     * When omitted, the item itself is used as the value representation.
+     * Should resolve to a stable, unique scalar.
      * @default undefined
      */
-    public readonly valueField = input<DropdownFieldSelectorType<TData>>();
+    public readonly valueField = input<DropdownFieldSelectorType<TData, unknown>>();
 
     /**
-     * @description Two-way bindable current selected value. Implements `FormValueControl<TData | null>`,
-     * enabling signal forms `[formField]` binding. When `valueField` is set, primitive field values can be
-     * written into this model to restore a matching selected item.
+     * @description Determines whether the bound value contains complete data items
+     * or values extracted through {@link valueField}.
+     *
+     * When `false`, selecting an item writes the complete data item.
+     * When `true`, selecting an item writes the value resolved through `valueField`.
+     *
+     * @default false
+     */
+    public readonly valuePrimitive = input(false);
+
+    /**
+     * @description Two-way bindable current selected value. Implements `FormValueControl<TValue | null>`,
+     * enabling signal forms `[formField]` binding.
+     * Object mode returns the selected data item; primitive mode (see {@link valuePrimitive}) returns the value
+     * resolved through {@link valueField}. `null` represents no selection.
      * @default null
      */
-    public readonly value = model<TData | null>(null);
+    public readonly value = model<TValue | null>(null);
 
     public constructor() {
         effect(() => {
@@ -380,13 +394,11 @@ export class ComboBoxComponent<TData = unknown>
         effect(() => {
             const value = this.value();
             const valueField = this.valueField();
+            const valuePrimitive = this.valuePrimitive();
+            const selectedListItem = this.selectedListItem();
             untracked(() => {
                 this.#listService.setValueField(valueField ?? "");
-                if (value != null) {
-                    this.#listService.setSelectedDataItems([value]);
-                } else {
-                    this.#listService.clearSelections();
-                }
+                this.synchronizeSelection(value);
                 this.comboBoxValue.set(this.valueText());
             });
         });
@@ -414,10 +426,10 @@ export class ComboBoxComponent<TData = unknown>
             event.source.via === "keyboard" &&
             event.source.key !== "Enter"
         ) {
-            this.#navigatedValue.set(event.item.data);
+            this.#navigatedItem.set(event.item.data);
             return;
         }
-        this.updateValue(event.item.data, true);
+        this.updateValue(this.getControlValue(event.item.data), true);
         this.closePopup();
     }
 
@@ -434,7 +446,7 @@ export class ComboBoxComponent<TData = unknown>
     }
 
     private clear(): void {
-        this.#navigatedValue.set(null);
+        this.#navigatedItem.set(null);
         this.updateValue(null);
         this.comboBoxValue.set("");
         this.#listService.clearSelections();
@@ -472,9 +484,9 @@ export class ComboBoxComponent<TData = unknown>
         this.#dropdownListService.navigate$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(({ item }) => {
             if (!this.expanded()) {
                 this.#listService.selectItem(item);
-                this.updateValue(item.data, true);
+                this.updateValue(this.getControlValue(item.data), true);
             } else {
-                this.#navigatedValue.set(item.data);
+                this.#navigatedItem.set(item.data);
                 this.#userNavigatedViaArrows.set(true);
             }
         });
@@ -508,7 +520,7 @@ export class ComboBoxComponent<TData = unknown>
                 this.comboBoxValue.set(value ?? "");
                 const item = this.#listService.getMatchingFilteredItem(value);
                 if (item) {
-                    this.#navigatedValue.set(item.data);
+                    this.#navigatedItem.set(item.data);
                     this.#listService.highlightedItem.set(item);
 
                     if (this.#popupRef()) {
@@ -568,7 +580,7 @@ export class ComboBoxComponent<TData = unknown>
 
     private selectItem(item: ListItem<TData>): void {
         this.#listService.selectItem(item);
-        this.updateValue(item.data);
+        this.updateValue(this.getControlValue(item.data));
     }
 
     private setEscapeKeySubscription(): void {
@@ -583,7 +595,7 @@ export class ComboBoxComponent<TData = unknown>
                     const selectedItem = this.selectedListItem();
                     if (selectedItem) {
                         this.comboBoxValue.set(this.#listService.getItemText(selectedItem));
-                        this.#navigatedValue.set(selectedItem.data);
+                        this.#navigatedItem.set(selectedItem.data);
                     } else {
                         this.clear();
                     }
@@ -609,7 +621,7 @@ export class ComboBoxComponent<TData = unknown>
 
     private setNavigatedItemSubscription(): void {
         this.#listService.navigatedItem$.pipe(takeUntilDestroyed(this.#destroyRef)).subscribe(e => {
-            this.#navigatedValue.set(e?.data ?? null);
+            this.#navigatedItem.set(e?.data ?? null);
         });
     }
 
@@ -643,7 +655,7 @@ export class ComboBoxComponent<TData = unknown>
         this.setSpaceKeySubscription();
     }
 
-    private updateValue(value: TData | null, notify: boolean = true) {
+    private updateValue(value: TValue | null, notify: boolean = true) {
         const oldValue = this.value();
         if (oldValue !== value) {
             this.value.set(value);
@@ -651,6 +663,23 @@ export class ComboBoxComponent<TData = unknown>
         this.comboBoxValue.set(this.valueText());
         if (notify && oldValue !== value) {
             this.touch.emit();
+        }
+    }
+
+    private getControlValue(dataItem: TData): TValue {
+        const value = this.valuePrimitive() ? this.#listService.getDataItemValue(dataItem) : dataItem;
+        return value as TValue;
+    }
+
+    private synchronizeSelection(value: TValue | null): void {
+        if (value == null) {
+            this.#listService.clearSelections();
+            return;
+        }
+        if (this.valuePrimitive()) {
+            this.#listService.setSelectedKeys([value]);
+        } else {
+            this.#listService.setSelectedDataItems([value as unknown as TData]);
         }
     }
 }

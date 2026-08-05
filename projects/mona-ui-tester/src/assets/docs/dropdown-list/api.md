@@ -52,7 +52,7 @@ protected readonly selectedCountry = signal<{ id: number; name: string } | null>
 </mona-dropdown-list>
 ```
 
-`textField` and `valueField` each accept a property name or an accessor function; when either is omitted, the data item itself is used as the display text or the value, respectively. Without any behavior directive applied, the popup renders the full `data` collection with no filter box — see [Feature Examples](#feature-examples) for filtering, grouping, and virtual scrolling.
+`textField` and `valueField` each accept a property name or an accessor function; when either is omitted, the data item itself is used as the display text or the value, respectively. `valueField` also identifies each item for selection matching and, when `valuePrimitive` is enabled, is what gets read from and written into `value` instead of the full item — see [Primitive value binding](#primitive-value-binding). Without any behavior directive applied, the popup renders the full `data` collection with no filter box — see [Feature Examples](#feature-examples) for filtering, grouping, and virtual scrolling.
 
 ## Anatomy & Public Structural Templates
 
@@ -85,6 +85,23 @@ Each structural directive below is an `ng-template` placed as projected content 
 ```
 
 ## Feature Examples
+
+### Primitive value binding
+
+By default `value` holds the complete selected data item. Set `valuePrimitive` to `true` to have `value` hold the value resolved through `valueField` instead — useful for storing just an id rather than the whole object. Setting `value` to a matching field value (for example, restoring it from a signal forms field) also selects the corresponding item.
+
+```html
+
+<mona-dropdown-list
+    [data]="countries"
+    textField="name"
+    valueField="id"
+    [valuePrimitive]="true"
+    [(value)]="selectedCountryId">
+</mona-dropdown-list>
+```
+
+`selectedCountryId` becomes the matching `id` once an item is selected, and `null` again once cleared. `valueField` should resolve to a stable, unique scalar; without it, the item itself is used as the value, which naturally supports primitive data such as `["One", "Two", "Three"]`.
 
 ### Custom value display
 
@@ -265,7 +282,7 @@ The control also renders a visually hidden live region that announces the highli
 
 ### Form Interaction
 
-`DropdownListComponent` implements the signal forms `FormValueControl<TData | null>` interface and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
+`DropdownListComponent` implements the signal forms `FormValueControl<TValue | null>` interface (`TValue` defaults to `TData`, or the `valueField` type when `valuePrimitive` is `true`) and synchronizes with a field bound through `[formField]` (see [Signal Forms integration](#signal-forms-integration)). It does not implement `ControlValueAccessor` — there is no `NG_VALUE_ACCESSOR` provider and no `writeValue`/`registerOnChange`/`registerOnTouched` methods — so it cannot be used with `[(ngModel)]`, `[formControl]`, or `formControlName`.
 
 ## API
 
@@ -296,8 +313,9 @@ The control also renders a visually hidden live region that announces the highli
 | `textField`       | `DropdownFieldSelectorType<TData>`                   | `undefined` | Property name or accessor used to derive the display text from a data item. Uses the item itself when omitted.                                                                          |
 | `touched`         | `boolean`                                            | `false`     | Marks the control as touched. Set automatically by `[formField]`.                                                                                                                       |
 | `class`           | `string`                                             | `""`        | Additional CSS classes merged onto the host element via `tailwind-merge`.                                                                                                               |
-| `value`           | `TData \| null`                                      | `null`      | Two-way bindable, and compatible with Signal Forms via `[formField]`. Currently selected value; holds the primitive field value instead of the full data item when `valueField` is set. |
-| `valueField`      | `DropdownFieldSelectorType<TData>`                   | `undefined` | Property name or accessor used to derive the value from a data item. Uses the item itself when omitted.                                                                                 |
+| `value`           | `TValue \| null`                                     | `null`      | Two-way bindable, and compatible with Signal Forms via `[formField]`. Holds the complete selected data item, or the value resolved through `valueField` when `valuePrimitive` is `true` — see [Primitive value binding](#primitive-value-binding).                                    |
+| `valueField`      | `DropdownFieldSelectorType<TData, unknown>`          | `undefined` | Property name or accessor used to derive the value from a data item. Used for item identity, matching externally supplied values, and primitive projection when `valuePrimitive` is `true`. Uses the item itself when omitted.                                                        |
+| `valuePrimitive`  | `boolean`                                             | `false`     | When `true`, `value` holds the value resolved through `valueField` instead of the complete data item — see [Primitive value binding](#primitive-value-binding).                                                                                                                        |
 
 #### Outputs
 
@@ -394,14 +412,15 @@ No outputs.
 ---
 
 <!-- verification-checklist
-- [x] DropdownListComponent inputs/outputs/defaults verified against dropdown-list.component.ts source and cross-checked against component-metadata.json's DropdownListComponent entry (all 25 members matched: ariaLabel, ariaLabelledBy, data, disabled(model), invalid, itemDisabled, loading, placeholder, popupClass, popupHeight, popupWidth, readonly, required, rounded, showClearButton, size, textField, touched, userClass(class), value(model), valueField, close, closed, open, opened, touch)
+- [x] DropdownListComponent inputs/outputs/defaults verified against dropdown-list.component.ts source and cross-checked against component-metadata.json's DropdownListComponent entry (all 27 members matched: ariaLabel, ariaLabelledBy, data, disabled(model), invalid, itemDisabled, loading, placeholder, popupClass, popupHeight, popupWidth, readonly, required, rounded, showClearButton, size, textField, touched, userClass(class), value(model), valueField, valuePrimitive, close, closed, open, opened, touch)
+- [x] valuePrimitive and TValue-generic value binding verified against dropdown-list.component.ts's getControlValue() (returns getDataItemValue(dataItem) when valuePrimitive() else dataItem) and synchronizeSelection() (setSelectedKeys([value]) when valuePrimitive() else setSelectedDataItems([value])); confirmed value-restoration by primitive field only takes effect when valuePrimitive is true, unlike the pre-valuePrimitive behavior this doc previously described
 - [x] Three behavior directives (Filterable, Groupable, VirtualScroll) inputs/outputs and default option objects verified against dropdown-filterable.directive.ts, dropdown-groupable.directive.ts, dropdown-virtual-scroll.directive.ts
 - [x] Seven structural template directives and their selectors verified against dropdowns/directives/*-template.directive.ts and dropdowns/dropdown-list/directives/dropdown-list-value-template.directive.ts; template contexts verified against dropdown-list.component.html's ngTemplateOutletContext bindings
 - [x] Keyboard map (ArrowDown/ArrowUp/Alt+ArrowDown/Alt+ArrowUp/Home/End/Enter/Space/Escape/Tab/typeahead) verified against dropdown-list-popup-handler.directive.ts (handleKeyDown/handleArrowKeys) and dropdown-list.component.ts (setKeydownSubscription/handleEnterKey/handleHomeEndKeys)
 - [x] Staged-vs-committed value behavior verified against dropdown-list.component.ts's #navigatedValue linkedSignal, setArrowKeyNavigationSubscription, and setPopupCloseSubscriptions
 - [x] Single Tab-stop focus behavior verified against dropdown-list-popup-handler.directive.ts's keydown listener bound to the host element (not to popup items) plus list-item.directive.ts's rovingTabIndex (roving -1 on all items since the combobox never delegates DOM focus into the popup)
 - [x] ARIA attributes verified against dropdown-list.component.ts's host object bindings
-- [x] Form integration verified: DropdownListComponent implements FormValueControl<TData | null> (dropdown-list.component.ts class declaration); no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
+- [x] Form integration verified: DropdownListComponent implements FormValueControl<TValue | null> (dropdown-list.component.ts class declaration); no NG_VALUE_ACCESSOR provider or writeValue/registerOnChange/registerOnTouched methods found
 - [x] FilterableOptions, GroupableOptions, VirtualScrollOptions, PopupCloseEvent, PreventableEvent, FilterChangeEvent confirmed exported via lib/index.ts; DropdownFieldSelectorType, DropdownFieldPredicateType, ListSizeInputType confirmed NOT exported
 - [x] hostDirectives (DropdownDataHandlerDirective, DropdownListPopupHandlerDirective) confirmed to expose no public inputs/outputs of their own — omitted from API tables
 - [x] No internal-only symbols (ListService, DropdownService, DropdownListService, monaDropdownLiveRegion, indicator-icon presets, Tailwind class names) documented as public API

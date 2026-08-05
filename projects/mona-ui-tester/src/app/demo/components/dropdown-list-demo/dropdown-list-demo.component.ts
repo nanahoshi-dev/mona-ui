@@ -153,6 +153,10 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             valueField: {
                 type: "string",
                 value: "value"
+            },
+            valuePrimitive: {
+                type: "boolean",
+                value: false
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -198,6 +202,7 @@ export class DropdownListDemoComponent extends AbstractDemoComponent<DropdownLis
             [size]="size()"
             [textField]="textField()"
             [valueField]="valueField()"
+            [valuePrimitive]="valuePrimitive()"
             [formField]="form.value"
             [monaDropDownGroupable]="grouping()"
             [monaDropDownFilterable]="filtering()"
@@ -298,6 +303,9 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     });
     protected readonly formValueText = computed(() => {
         const value = this.form.value().value();
+        if (this.valuePrimitive()) {
+            return value == null ? "" : String(value);
+        }
         const textField = this.textField();
         return getFormValueText(value, textField);
     });
@@ -341,6 +349,7 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
     public readonly size = input<ReturnType<DropdownListComponent["size"]>>("medium");
     public readonly textField = input<ReturnType<DropdownListComponent["textField"]>>("text");
     public readonly valueField = input<ReturnType<DropdownListComponent["valueField"]>>("value");
+    public readonly valuePrimitive = input<ReturnType<DropdownListComponent["valuePrimitive"]>>(false);
 
     protected onPopupClose(event: PreventableEvent) {
         const preventClose = this.features()["preventClose"].active;
@@ -359,5 +368,5 @@ export class DropdownListWrapperComponent implements ComponentInputsAsSignal<Dro
 }
 
 interface DropdownListFormModel {
-    value: (typeof dropdownFoodData)[number] | number | null;
+    value: (typeof dropdownFoodData)[number] | null;
 }
