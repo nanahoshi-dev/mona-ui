@@ -156,9 +156,9 @@ export class ChipComponent implements ChipVariantInputs {
 
     /**
      * @description Border-radius preset applied to the chip.
-     * @default "full"
+     * @default "medium"
      */
-    public readonly rounded = input<ChipVariantProps["rounded"]>("full");
+    public readonly rounded = input<ChipVariantProps["rounded"]>("medium");
 
     /**
      * @description Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.

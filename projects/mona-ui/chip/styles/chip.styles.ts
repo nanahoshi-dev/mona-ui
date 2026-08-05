@@ -186,6 +186,7 @@ export const chipThemeVariants = cva(
             }
         ],
         defaultVariants: {
+            rounded: "medium",
             selected: false
         }
     }
