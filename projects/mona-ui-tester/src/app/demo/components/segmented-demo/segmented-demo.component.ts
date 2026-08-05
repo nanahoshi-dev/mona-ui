@@ -54,8 +54,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
                 [disabled]="disabled()"
                 [options]="options()"
                 [size]="size()"
-                [(value)]="value"
-                class="w-lg">
+                [(value)]="value">
             </mona-segmented>
             <span>Selected value: {{ value() }}</span>
         </div>
