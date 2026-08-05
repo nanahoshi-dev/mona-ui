@@ -44,7 +44,7 @@ class HostComponent {
     public readonly disabled = signal(false);
     public readonly invalid = signal(false);
     public readonly options = signal<readonly SegmentedOption[]>(stringOptions);
-    public readonly rounded = signal<"none" | "small" | "medium" | "large" | "full">("large");
+    public readonly rounded = signal<"none" | "small" | "medium" | "large" | "full">("medium");
     public readonly size = signal<"small" | "medium" | "large">("medium");
     public readonly touched = signal(false);
     public readonly value = signal<string | number | null>("discover");
@@ -181,10 +181,10 @@ describe("SegmentedComponent", () => {
             });
         });
 
-        it("defaults to the large roundness preset", () => {
-            expect(getHostElement(fixture).classList.contains("rounded-lg")).toBe(true);
+        it("defaults to the medium roundness preset", () => {
+            expect(getHostElement(fixture).classList.contains("rounded-md")).toBe(true);
             getLabels(fixture).forEach(label => {
-                expect(label.classList.contains("rounded-md")).toBe(true);
+                expect(label.classList.contains("rounded-sm")).toBe(true);
             });
         });
     });

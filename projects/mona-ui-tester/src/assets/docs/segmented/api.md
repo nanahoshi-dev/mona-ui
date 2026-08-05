@@ -103,8 +103,8 @@ The control stretches to its container by default. Use the `class` input to appl
 |----------|-------------------------|
 | `none`   | Square corners          |
 | `small`  | Slightly rounded        |
-| `medium` | Moderately rounded      |
-| `large`  | Default rounded style   |
+| `medium` | Default rounded style   |
+| `large`  | Pronounced rounding     |
 | `full`   | Pill-shaped             |
 
 ```html
@@ -175,7 +175,7 @@ Native radio behavior applies. Arrow keys move the selection within the group, a
 | `disabled`       | `boolean`                                                  | `false`    | Disables every option in the group and prevents value changes.                                                                                                                                              |
 | `invalid`        | `boolean`                                                  | `false`    | Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive. |
 | `options`        | `readonly SegmentedOption<T>[]`                            | —          | **Required.** The list of selectable options. Exactly one option is selected at a time.                                                                                                                     |
-| `rounded`        | `"none" \| "small" \| "medium" \| "large" \| "full"`   | `"large"`  | Border-radius preset applied to the segmented container and its options.                                                                                                                                     |
+| `rounded`        | `"none" \| "small" \| "medium" \| "large" \| "full"`   | `"medium"` | Border-radius preset applied to the segmented container and its options.                                                                                                                                   |
 | `size`           | `"small" \| "medium" \| "large"`                           | `"medium"` | Size preset controlling the height, horizontal padding, text size, and spacing of each option.                                                                                                              |
 | `touched`        | `boolean`                                                  | `false`    | Marks the component as touched. When bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.                                                                  |
 | `value`          | `T \| null`                                                | `null`     | Two-way bindable. The currently selected value. When it matches no current option, no option is checked. A `null` value is allowed initially but cannot be restored through segmented interaction.           |

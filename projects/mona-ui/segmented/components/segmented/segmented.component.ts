@@ -74,7 +74,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
 
     /**
      * @description Border-radius preset applied to the segmented container and its options.
-     * @default "large"
+     * @default "medium"
      */
     public readonly rounded = input<SegmentedVariantProps["rounded"]>("medium");
 
