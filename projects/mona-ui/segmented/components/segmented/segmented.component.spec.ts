@@ -182,6 +182,11 @@ describe("SegmentedComponent", () => {
         });
 
         it("defaults to the medium roundness preset", () => {
+            const componentInstance = fixture.debugElement
+                .query(By.directive(SegmentedComponent))
+                .componentInstance as SegmentedComponent;
+            expect(componentInstance.rounded()).toBe("medium");
+
             expect(getHostElement(fixture).classList.contains("rounded-md")).toBe(true);
             getLabels(fixture).forEach(label => {
                 expect(label.classList.contains("rounded-sm")).toBe(true);
