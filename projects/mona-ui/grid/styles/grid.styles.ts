@@ -148,7 +148,13 @@ export const gridRowDragPlaceholderThemeVariants = cva(`
     [&>td]:bg-hover! [&>td]:border-dashed! [&>td]:border-border!
 `);
 
-export const gridFilterRowCellThemeVariants = cva(`flex items-center px-1 py-0.5 w-full`);
+export const gridFilterRowCellThemeVariants = cva(`
+    flex items-center px-1 py-0.5 w-full
+    [--mona-effect-control-background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]
+    [--mona-effect-control-fallback-background-color:var(--mona-effect-raised-fallback-background-color,var(--color-surface-raised))]
+    [--mona-effect-control-background-image:var(--mona-effect-raised-background-image,none)]
+    [--mona-effect-control-backdrop-filter:var(--mona-effect-raised-backdrop-filter,none)]
+`);
 
 export const gridFooterThemeVariants = cva(
     `
