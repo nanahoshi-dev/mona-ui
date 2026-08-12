@@ -24,6 +24,7 @@ export class GridCommandColumnComponent implements GridColumnDefinition {
             editTemplate: null,
             editable: false,
             field: stateKey ?? "commands",
+            filterable: false,
             filtered: false,
             footerTemplate: null,
             format: null,

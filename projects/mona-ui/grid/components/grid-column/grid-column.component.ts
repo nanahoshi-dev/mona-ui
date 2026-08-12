@@ -39,6 +39,7 @@ export class GridColumnComponent implements GridColumnDefinition {
         editTemplate: this.editTemplate() ?? null,
         editable: this.editable(),
         field: this.field(),
+        filterable: this.filterable(),
         filtered: false,
         footerTemplate: this.footerTemplate() ?? null,
         format: this.format() ?? null,
@@ -80,6 +81,11 @@ export class GridColumnComponent implements GridColumnDefinition {
      * @description The field name of the data property to display in this column.
      */
     public readonly field = input<string>("");
+
+    /**
+     * @description Whether this column can be filtered when grid filtering is enabled. Has no effect if filtering is disabled on the grid.
+     */
+    public readonly filterable = input<boolean>(true);
 
     /**
      * @description Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.

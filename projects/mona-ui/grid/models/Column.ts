@@ -15,6 +15,7 @@ export interface ColumnConfig {
     readonly editTemplate: TemplateRef<unknown> | null;
     readonly editable: boolean;
     readonly field: string;
+    readonly filterable: boolean;
     readonly format: ColumnFormat | null;
     readonly footerTemplate: TemplateRef<unknown> | null;
     readonly groupFooterTemplate: TemplateRef<unknown> | null;

@@ -234,7 +234,7 @@
                                         <i class="ri-arrow-up-line"></i>
                                     }
                                     @if (filterMenuEnabled()) {
-                                        @if (column.kind === "data") {
+                                        @if (column.kind === "data" && column.filterable) {
                                             <mona-grid-filter-menu
                                                 [column]="column"
                                                 [type]="column.dataType"
@@ -351,7 +351,7 @@
                                 class="border-r border-border overflow-hidden"
                                 [style.width.px]="column.calculatedWidth"
                                 [attr.aria-label]="'Filter by ' + column.title">
-                                @if (column.kind === "data" && column.field) {
+                                @if (column.kind === "data" && column.field && column.filterable) {
                                     <mona-grid-filter-row-cell
                                         [column]="column"
                                         (apply)="onColumnFilter(column, $event)" />
