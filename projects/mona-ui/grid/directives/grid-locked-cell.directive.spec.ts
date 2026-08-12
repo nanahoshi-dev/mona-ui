@@ -54,6 +54,7 @@ function createColumn(field: string, locked: boolean, lockedPosition: GridColumn
         editTemplate: null,
         editable: false,
         field,
+        filterable: true,
         filtered: false,
         format: null,
         footerTemplate: null,

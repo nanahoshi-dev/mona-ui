@@ -19,6 +19,7 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
         dataType: "string",
         editTemplate: null,
         editable: false,
+        filterable: true,
         filtered: false,
         format: null,
         footerTemplate: null,

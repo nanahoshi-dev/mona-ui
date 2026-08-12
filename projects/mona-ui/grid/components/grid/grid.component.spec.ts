@@ -10,7 +10,11 @@ import type { ColumnReorderEvent } from "../../models/ColumnReorderEvent";
 import type { ColumnResizeEvent } from "../../models/ColumnResizeEvent";
 import type { ColumnSortEvent } from "../../models/ColumnSortEvent";
 import { GridService } from "../../services/grid.service";
-import { gridBaseThemeVariants, gridHeaderTableCellThemeVariants } from "../../styles/grid.styles";
+import {
+    gridBaseThemeVariants,
+    gridFilterRowCellThemeVariants,
+    gridHeaderTableCellThemeVariants
+} from "../../styles/grid.styles";
 import { GridColumnComponent } from "../grid-column/grid-column.component";
 
 import { GridComponent } from "./grid.component";
@@ -49,6 +53,7 @@ function createColumn(overrides: Partial<Column> & Pick<Column, "field">): Colum
         dataType: "string",
         editTemplate: null,
         editable: false,
+        filterable: true,
         filtered: false,
         format: null,
         footerTemplate: null,
@@ -133,6 +138,23 @@ describe("GridComponent", () => {
         expect(headerCellClasses).toContain("border-r-border-subtle");
         expect(headerCellClasses).toContain("focus:after:ring-focus-indicator/35");
         expect(headerCellClasses).not.toContain("ring-primary");
+    });
+
+    it("lifts filter-row controls onto the theme's raised surface", () => {
+        const filterRowCellClasses = gridFilterRowCellThemeVariants();
+
+        expect(filterRowCellClasses).toContain(
+            "[--mona-effect-control-background-color:var(--mona-effect-raised-background-color,var(--color-surface-raised))]"
+        );
+        expect(filterRowCellClasses).toContain(
+            "[--mona-effect-control-fallback-background-color:var(--mona-effect-raised-fallback-background-color,var(--color-surface-raised))]"
+        );
+        expect(filterRowCellClasses).toContain(
+            "[--mona-effect-control-background-image:var(--mona-effect-raised-background-image,none)]"
+        );
+        expect(filterRowCellClasses).toContain(
+            "[--mona-effect-control-backdrop-filter:var(--mona-effect-raised-backdrop-filter,none)]"
+        );
     });
 
     describe("onColumnSort", () => {
