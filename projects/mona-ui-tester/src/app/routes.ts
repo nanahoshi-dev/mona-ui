@@ -280,6 +280,11 @@ export const routes: Routes = [
                     )
             },
             {
+                path: "rating",
+                loadComponent: () =>
+                    import("./docs/components/rating-doc/rating-doc.component").then(m => m.RatingDocComponent)
+            },
+            {
                 path: "range-slider",
                 loadComponent: () =>
                     import("./docs/components/range-slider-doc/range-slider-doc.component").then(
