@@ -21,6 +21,7 @@ function createColumn(): Column {
         editTemplate: null,
         editable: false,
         field: "test",
+        filterable: true,
         filtered: false,
         format: null,
         footerTemplate: null,
