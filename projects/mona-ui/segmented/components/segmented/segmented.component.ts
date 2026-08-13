@@ -1,14 +1,31 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, computed, contentChild, input, model, output, TemplateRef } from "@angular/core";
+import {
+    afterNextRender,
+    afterRenderEffect,
+    Component,
+    computed,
+    contentChild,
+    DestroyRef,
+    ElementRef,
+    inject,
+    input,
+    model,
+    output,
+    signal,
+    TemplateRef,
+    viewChildren
+} from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
 import { SegmentedItemTemplateDirective } from "../../directives/segmented-item-template.directive";
+import type { SegmentedIndicatorGeometry } from "../../models/SegmentedIndicatorGeometry";
 import type { SegmentedItemTemplateContext } from "../../models/SegmentedItemTemplateContext";
 import type { SegmentedOption } from "../../models/SegmentedOption";
 import type { SegmentedValue } from "../../models/SegmentedValue";
 import {
     segmentedContainerThemeVariants,
+    segmentedIndicatorThemeVariants,
     segmentedInputThemeVariants,
     segmentedOptionThemeVariants,
     type SegmentedVariantInput,
@@ -33,11 +50,26 @@ import {
 export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     implements SegmentedVariantInput, FormValueControl<T | null>
 {
+    readonly #destroyRef = inject(DestroyRef);
+    readonly #hostElementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    #lastAnimatedIndex: number | null = null;
+    #lastOptions: readonly SegmentedOption<T>[] | null = null;
+    #lastSize: SegmentedVariantProps["size"] | null = null;
+    #resizeObserver: ResizeObserver | null = null;
+
     protected readonly containerClasses = computed(() => {
         const classes = segmentedContainerThemeVariants({ rounded: this.rounded() });
         return twMerge(classes, this.userClass());
     });
     protected readonly groupName = createElementControlId();
+    protected readonly indicatorClasses = computed(() => {
+        const animate = this.animate() && this.indicatorTransitionEnabled();
+        const rounded = this.rounded();
+        return segmentedIndicatorThemeVariants({ animate, rounded });
+    });
+    protected readonly indicatorGeometry = signal<SegmentedIndicatorGeometry | null>(null);
+    protected readonly indicatorInitialized = signal(false);
+    protected readonly indicatorTransitionEnabled = signal(false);
     protected readonly inputClasses = computed(() => segmentedInputThemeVariants());
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
     protected readonly itemTemplate = contentChild(SegmentedItemTemplateDirective, { read: TemplateRef });
@@ -46,6 +78,26 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         const size = this.size();
         return segmentedOptionThemeVariants({ rounded, size });
     });
+    protected readonly optionElements = viewChildren<ElementRef<HTMLLabelElement>>("optionElement");
+    protected readonly selectedIndex = computed(() => {
+        const value = this.value();
+        return this.options().findIndex(option => option.value === value);
+    });
+    protected readonly selectedOptionDisabled = computed(() => {
+        const selectedIndex = this.selectedIndex();
+        if (selectedIndex === -1) {
+            return false;
+        }
+        const option = this.options()[selectedIndex];
+        return this.disabled() || !!option?.disabled;
+    });
+
+    /**
+     * @description Controls whether the selection indicator animates between selected options.
+     * When false, selection changes are applied immediately without transition.
+     * @default true
+     */
+    public readonly animate = input(true);
 
     /**
      * @description Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.
@@ -114,6 +166,37 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      */
     public readonly value = model<T | null>(null);
 
+    public constructor() {
+        afterRenderEffect({
+            read: () => {
+                this.selectedIndex();
+                this.optionElements();
+                this.rounded();
+                this.animate();
+
+                const size = this.size();
+                const options = this.options();
+                const isSizeChange = this.#lastSize !== null && this.#lastSize !== size;
+                const isOptionsChange = this.#lastOptions !== null && this.#lastOptions !== options;
+                const suppressTransition = isSizeChange || isOptionsChange;
+
+                this.#lastSize = size;
+                this.#lastOptions = options;
+                this.updateIndicatorGeometry({ suppressTransition });
+            }
+        });
+
+        afterNextRender({
+            read: () => {
+                this.setupResizeObserver();
+            }
+        });
+
+        this.#destroyRef.onDestroy(() => {
+            this.#resizeObserver?.disconnect();
+        });
+    }
+
     protected createOptionContext(option: SegmentedOption<T>, index: number): SegmentedItemTemplateContext<T> {
         return {
             $implicit: option,
@@ -134,5 +217,66 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
         }
         this.value.set(option.value);
         this.touch.emit();
+    }
+
+    private setupResizeObserver(): void {
+        if (typeof ResizeObserver === "undefined") {
+            return;
+        }
+        this.#resizeObserver = new ResizeObserver(() => {
+            this.updateIndicatorGeometry({ suppressTransition: true });
+        });
+        this.#resizeObserver.observe(this.#hostElementRef.nativeElement);
+    }
+
+    private updateIndicatorGeometry(options?: { suppressTransition?: boolean }): void {
+        const selectedIndex = this.selectedIndex();
+        if (selectedIndex === -1) {
+            this.#lastAnimatedIndex = null;
+            this.indicatorGeometry.set(null);
+            this.indicatorTransitionEnabled.set(false);
+            return;
+        }
+
+        const optionElements = this.optionElements();
+        const selectedElementRef = optionElements[selectedIndex];
+        if (!selectedElementRef?.nativeElement) {
+            this.#lastAnimatedIndex = null;
+            this.indicatorGeometry.set(null);
+            this.indicatorTransitionEnabled.set(false);
+            return;
+        }
+
+        const host = this.#hostElementRef.nativeElement;
+        const option = selectedElementRef.nativeElement;
+
+        const hostRect = host.getBoundingClientRect();
+        const optionRect = option.getBoundingClientRect();
+
+        const x = optionRect.left - hostRect.left - (host.clientLeft || 0);
+        const y = optionRect.top - hostRect.top - (host.clientTop || 0);
+        const width = optionRect.width;
+        const height = optionRect.height;
+
+        const shouldAnimate =
+            !options?.suppressTransition &&
+            this.animate() &&
+            this.indicatorInitialized() &&
+            this.#lastAnimatedIndex !== null &&
+            this.#lastAnimatedIndex !== selectedIndex;
+
+        this.indicatorTransitionEnabled.set(shouldAnimate);
+
+        this.indicatorGeometry.set({
+            height,
+            transform: `translate3d(${x}px, ${y}px, 0)`,
+            width
+        });
+
+        this.#lastAnimatedIndex = selectedIndex;
+
+        if (!this.indicatorInitialized()) {
+            this.indicatorInitialized.set(true);
+        }
     }
 }

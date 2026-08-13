@@ -2,7 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SegmentedOption } from "../../models/SegmentedOption";
 import { SegmentedComponent } from "./segmented.component";
 
@@ -26,6 +26,7 @@ const mixedOptions = [
 @Component({
     template: `
         <mona-segmented
+            [animate]="animate()"
             [aria-label]="ariaLabel()"
             [aria-labelledby]="ariaLabelledBy()"
             [disabled]="disabled()"
@@ -39,6 +40,7 @@ const mixedOptions = [
     imports: [SegmentedComponent]
 })
 class HostComponent {
+    public readonly animate = signal(true);
     public readonly ariaLabel = signal<string | null>(null);
     public readonly ariaLabelledBy = signal<string | null>(null);
     public readonly disabled = signal(false);
@@ -75,6 +77,13 @@ function getHostElement(fixture: ComponentFixture<HostComponent>): HTMLElement {
     return fixture.debugElement.query(By.directive(SegmentedComponent)).nativeElement as HTMLElement;
 }
 
+function getIndicator(fixture: ComponentFixture<unknown>): HTMLDivElement | null {
+    return (
+        (fixture.debugElement.query(By.css("div[aria-hidden='true']"))?.nativeElement as HTMLDivElement | undefined) ??
+        null
+    );
+}
+
 function getRadios(fixture: ComponentFixture<unknown>): HTMLInputElement[] {
     return fixture.debugElement
         .queryAll(By.css('input[type="radio"]'))
@@ -91,6 +100,39 @@ function selectRadio(fixture: ComponentFixture<unknown>, index: number): void {
     const radio = getRadios(fixture)[index];
     radio.click();
     fixture.detectChanges();
+}
+
+function mockOptionBounds(
+    fixture: ComponentFixture<HostComponent>,
+    bounds: { height: number; left: number; top: number; width: number }[]
+): void {
+    const host = getHostElement(fixture);
+    vi.spyOn(host, "getBoundingClientRect").mockReturnValue({
+        bottom: 40,
+        height: 40,
+        left: 0,
+        right: 300,
+        top: 0,
+        width: 300,
+        x: 0,
+        y: 0,
+        toJSON: () => ({})
+    });
+    const labels = getLabels(fixture);
+    labels.forEach((label, i) => {
+        const bound = bounds[i] ?? { height: 32, left: 4 + i * 140, top: 4, width: 140 };
+        vi.spyOn(label, "getBoundingClientRect").mockReturnValue({
+            bottom: bound.top + bound.height,
+            height: bound.height,
+            left: bound.left,
+            right: bound.left + bound.width,
+            top: bound.top,
+            width: bound.width,
+            x: bound.left,
+            y: bound.top,
+            toJSON: () => ({})
+        });
+    });
 }
 
 describe("SegmentedComponent", () => {
@@ -149,6 +191,110 @@ describe("SegmentedComponent", () => {
         it("sets role=radiogroup on the host", () => {
             expect(getHostElement(fixture).getAttribute("role")).toBe("radiogroup");
         });
+
+        it("renders exactly one selection indicator element", () => {
+            const indicator = getIndicator(fixture);
+            expect(indicator).not.toBeNull();
+        });
+
+        it("keeps exactly one indicator regardless of option count", async () => {
+            component.options.set(numberOptions);
+            await waitForStable(fixture);
+
+            const allIndicators = fixture.debugElement.queryAll(By.css("div[aria-hidden='true']"));
+            expect(allIndicators.length).toBe(0); // value "discover" is unmatched, so 0
+
+            component.value.set(7);
+            await waitForStable(fixture);
+
+            const matchingIndicators = fixture.debugElement.queryAll(By.css("div[aria-hidden='true']"));
+            expect(matchingIndicators.length).toBe(1);
+        });
+
+        it("sets aria-hidden=true and pointer-events-none on the indicator", () => {
+            const indicator = getIndicator(fixture);
+            expect(indicator?.getAttribute("aria-hidden")).toBe("true");
+            expect(indicator?.classList.contains("pointer-events-none")).toBe(true);
+        });
+
+        it("owns selected surface styling on the indicator", () => {
+            const indicator = getIndicator(fixture);
+            expect(indicator?.classList.contains("bg-primary")).toBe(true);
+            expect(indicator?.classList.contains("shadow-sm")).toBe(true);
+            expect(indicator?.classList.contains("ring-1")).toBe(true);
+            expect(indicator?.classList.contains("ring-selected-border")).toBe(true);
+        });
+
+        it("does not apply selected background, shadow, or ring directly to option labels", () => {
+            const labels = getLabels(fixture);
+            labels.forEach(label => {
+                expect(label.classList.contains("bg-primary")).toBe(false);
+                expect(label.classList.contains("shadow-sm")).toBe(false);
+                expect(label.classList.contains("ring-1")).toBe(false);
+                expect(label.classList.contains("ring-selected-border")).toBe(false);
+            });
+        });
+
+        it("drives selected and unselected text colors on option labels", () => {
+            const labels = getLabels(fixture);
+            expect(labels[0].getAttribute("data-selected")).toBe("true");
+            expect(labels[0].classList.contains("data-[selected='true']:text-primary-foreground")).toBe(true);
+            expect(labels[1].getAttribute("data-selected")).toBe("false");
+            expect(labels[1].classList.contains("data-[selected='false']:text-muted-foreground")).toBe(true);
+        });
+    });
+
+    describe("animate input", () => {
+        let fixture: ComponentFixture<HostComponent>;
+        let component: HostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(HostComponent);
+            component = fixture.componentInstance;
+            await waitForStable(fixture);
+        });
+
+        it("defaults animate to true", () => {
+            const componentInstance = fixture.debugElement
+                .query(By.directive(SegmentedComponent))
+                .componentInstance as SegmentedComponent;
+            expect(componentInstance.animate()).toBe(true);
+        });
+
+        it("disables indicator transition when animate is false", async () => {
+            component.animate.set(false);
+            await waitForStable(fixture);
+
+            selectRadio(fixture, 1);
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator?.classList.contains("transition-none")).toBe(true);
+        });
+
+        it("supports toggling animate at runtime", async () => {
+            component.animate.set(false);
+            await waitForStable(fixture);
+
+            let indicator = getIndicator(fixture);
+            expect(indicator?.classList.contains("transition-none")).toBe(true);
+
+            component.animate.set(true);
+            await waitForStable(fixture);
+
+            selectRadio(fixture, 1);
+            await waitForStable(fixture);
+
+            indicator = getIndicator(fixture);
+            expect(
+                indicator?.classList.contains("transition-[transform,width,height]") ||
+                    !indicator?.classList.contains("transition-none")
+            ).toBe(true);
+        });
     });
 
     describe("roundness", () => {
@@ -179,6 +325,8 @@ describe("SegmentedComponent", () => {
             getLabels(fixture).forEach(label => {
                 expect(label.classList.contains(optionClass)).toBe(true);
             });
+            const indicator = getIndicator(fixture);
+            expect(indicator?.classList.contains(optionClass)).toBe(true);
         });
 
         it("defaults to the medium roundness preset", () => {
@@ -191,6 +339,8 @@ describe("SegmentedComponent", () => {
             getLabels(fixture).forEach(label => {
                 expect(label.classList.contains("rounded-sm")).toBe(true);
             });
+            const indicator = getIndicator(fixture);
+            expect(indicator?.classList.contains("rounded-sm")).toBe(true);
         });
 
         it("keeps the focus ring on the option label radius", () => {
@@ -200,6 +350,198 @@ describe("SegmentedComponent", () => {
             expect(span?.classList.contains("peer-focus-visible:ring-2")).toBe(true);
             expect(span?.classList.contains("peer-focus-visible:ring-focus-indicator/35")).toBe(true);
             expect(span?.classList.contains("[border-radius:inherit]")).toBe(true);
+        });
+    });
+
+    describe("selection and indicator geometry", () => {
+        let fixture: ComponentFixture<HostComponent>;
+        let component: HostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(HostComponent);
+            component = fixture.componentInstance;
+        });
+
+        it("positions the indicator over the initial selected option without transition", async () => {
+            fixture.detectChanges();
+            mockOptionBounds(fixture, [
+                { height: 32, left: 4, top: 4, width: 140 },
+                { height: 32, left: 148, top: 4, width: 140 }
+            ]);
+            component.options.set([...stringOptions]);
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator).not.toBeNull();
+            expect(indicator?.style.transform).toBe("translate3d(4px, 4px, 0)");
+            expect(indicator?.style.width).toBe("140px");
+            expect(indicator?.style.height).toBe("32px");
+            expect(indicator?.classList.contains("transition-none")).toBe(true);
+        });
+
+        it("updates indicator geometry when selection changes via radio click", async () => {
+            fixture.detectChanges();
+            mockOptionBounds(fixture, [
+                { height: 32, left: 4, top: 4, width: 140 },
+                { height: 32, left: 148, top: 4, width: 140 }
+            ]);
+            component.options.set([...stringOptions]);
+            await waitForStable(fixture);
+
+            selectRadio(fixture, 1);
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator?.style.transform).toBe("translate3d(148px, 4px, 0)");
+            expect(indicator?.classList.contains("transition-[transform,width,height]")).toBe(true);
+        });
+
+        it("updates indicator geometry when value changes programmatically", async () => {
+            fixture.detectChanges();
+            mockOptionBounds(fixture, [
+                { height: 32, left: 4, top: 4, width: 140 },
+                { height: 32, left: 148, top: 4, width: 140 }
+            ]);
+            component.options.set([...stringOptions]);
+            await waitForStable(fixture);
+
+            component.value.set("courses");
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator?.style.transform).toBe("translate3d(148px, 4px, 0)");
+        });
+
+        it("hides indicator when value is null", async () => {
+            await waitForStable(fixture);
+            component.value.set(null);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture)).toBeNull();
+        });
+
+        it("hides indicator when value is unmatched", async () => {
+            await waitForStable(fixture);
+            component.value.set("non-existent");
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture)).toBeNull();
+            expect(component.value()).toBe("non-existent");
+        });
+
+        it("hides indicator when selected option disappears from options", async () => {
+            await waitForStable(fixture);
+            expect(getIndicator(fixture)).not.toBeNull();
+
+            component.options.set(numberOptions);
+            await waitForStable(fixture);
+
+            expect(getIndicator(fixture)).toBeNull();
+            expect(component.value()).toBe("discover");
+        });
+
+        it("restores indicator when matching option reappears without sliding from stale coords", async () => {
+            component.value.set("archived");
+            component.options.set(stringOptions);
+            await waitForStable(fixture);
+            expect(getIndicator(fixture)).toBeNull();
+
+            component.options.set(mixedOptions);
+            await waitForStable(fixture);
+            mockOptionBounds(fixture, [
+                { height: 32, left: 4, top: 4, width: 90 },
+                { height: 32, left: 98, top: 4, width: 90 },
+                { height: 32, left: 192, top: 4, width: 90 }
+            ]);
+            component.options.set([...mixedOptions]);
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator).not.toBeNull();
+            expect(indicator?.style.transform).toBe("translate3d(192px, 4px, 0)");
+            expect(indicator?.classList.contains("transition-none")).toBe(true);
+        });
+    });
+
+    describe("disabled state", () => {
+        let fixture: ComponentFixture<HostComponent>;
+        let component: HostComponent;
+
+        beforeEach(async () => {
+            await TestBed.configureTestingModule({
+                imports: [HostComponent]
+            }).compileComponents();
+
+            fixture = TestBed.createComponent(HostComponent);
+            component = fixture.componentInstance;
+            await waitForStable(fixture);
+        });
+
+        it("disables every radio when the group is disabled", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+
+            getRadios(fixture).forEach(radio => {
+                expect(radio.disabled).toBe(true);
+            });
+        });
+
+        it("disables only the matching option when an option is disabled", () => {
+            component.options.set(mixedOptions);
+            fixture.detectChanges();
+
+            const radios = getRadios(fixture);
+            expect(radios[0].disabled).toBe(false);
+            expect(radios[1].disabled).toBe(false);
+            expect(radios[2].disabled).toBe(true);
+        });
+
+        it("does not change the value when a disabled option is selected", () => {
+            component.options.set(mixedOptions);
+            fixture.detectChanges();
+
+            selectRadio(fixture, 2);
+            expect(component.value()).toBe("discover");
+        });
+
+        it("does not change the value when the group is disabled", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+
+            selectRadio(fixture, 1);
+            expect(component.value()).toBe("discover");
+        });
+
+        it("exposes aria-disabled and data attributes for the group", () => {
+            component.disabled.set(true);
+            fixture.detectChanges();
+
+            const host = getHostElement(fixture);
+            expect(host.getAttribute("aria-disabled")).toBe("true");
+            expect(host.getAttribute("data-disabled")).toBe("true");
+        });
+
+        it("applies disabled styling to the indicator when the entire group is disabled", async () => {
+            component.disabled.set(true);
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator?.getAttribute("data-disabled")).toBe("true");
+            expect(indicator?.classList.contains("data-[disabled='true']:opacity-50")).toBe(true);
+        });
+
+        it("applies disabled styling to the indicator when selected option is individually disabled", async () => {
+            component.options.set(mixedOptions);
+            component.value.set("archived");
+            await waitForStable(fixture);
+
+            const indicator = getIndicator(fixture);
+            expect(indicator?.getAttribute("data-disabled")).toBe("true");
+            expect(indicator?.classList.contains("data-[disabled='true']:opacity-50")).toBe(true);
         });
     });
 
@@ -288,65 +630,6 @@ describe("SegmentedComponent", () => {
             getRadios(fixture).forEach(radio => {
                 expect(radio.checked).toBe(false);
             });
-        });
-    });
-
-    describe("disabled state", () => {
-        let fixture: ComponentFixture<HostComponent>;
-        let component: HostComponent;
-
-        beforeEach(async () => {
-            await TestBed.configureTestingModule({
-                imports: [HostComponent]
-            }).compileComponents();
-
-            fixture = TestBed.createComponent(HostComponent);
-            component = fixture.componentInstance;
-            await waitForStable(fixture);
-        });
-
-        it("disables every radio when the group is disabled", () => {
-            component.disabled.set(true);
-            fixture.detectChanges();
-
-            getRadios(fixture).forEach(radio => {
-                expect(radio.disabled).toBe(true);
-            });
-        });
-
-        it("disables only the matching option when an option is disabled", () => {
-            component.options.set(mixedOptions);
-            fixture.detectChanges();
-
-            const radios = getRadios(fixture);
-            expect(radios[0].disabled).toBe(false);
-            expect(radios[1].disabled).toBe(false);
-            expect(radios[2].disabled).toBe(true);
-        });
-
-        it("does not change the value when a disabled option is selected", () => {
-            component.options.set(mixedOptions);
-            fixture.detectChanges();
-
-            selectRadio(fixture, 2);
-            expect(component.value()).toBe("discover");
-        });
-
-        it("does not change the value when the group is disabled", () => {
-            component.disabled.set(true);
-            fixture.detectChanges();
-
-            selectRadio(fixture, 1);
-            expect(component.value()).toBe("discover");
-        });
-
-        it("exposes aria-disabled and data attributes for the group", () => {
-            component.disabled.set(true);
-            fixture.detectChanges();
-
-            const host = getHostElement(fixture);
-            expect(host.getAttribute("aria-disabled")).toBe("true");
-            expect(host.getAttribute("data-disabled")).toBe("true");
         });
     });
 
