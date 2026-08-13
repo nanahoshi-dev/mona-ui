@@ -1,8 +1,22 @@
+@if (indicatorGeometry(); as geometry) {
+    <div
+        aria-hidden="true"
+        [class]="indicatorClasses()"
+        [attr.data-disabled]="selectedOptionDisabled() ? 'true' : null"
+        [style.transform]="geometry.transform"
+        [style.width.px]="geometry.width"
+        [style.height.px]="geometry.height"></div>
+}
+
 @for (option of options(); track option.value) {
     @let selected = option.value === value();
     @let optionDisabled = disabled() || option.disabled;
 
-    <label [class]="optionClasses()" [attr.data-selected]="selected" [attr.data-disabled]="optionDisabled">
+    <label
+        #optionElement
+        [class]="optionClasses()"
+        [attr.data-selected]="selected"
+        [attr.data-disabled]="optionDisabled">
         <input
             type="radio"
             [name]="groupName"
@@ -28,3 +42,4 @@
         </span>
     </label>
 }
+

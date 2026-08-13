@@ -4,7 +4,7 @@ import { themeControlSurfaceClasses, VariantInputs } from "@nanahoshi/mona-ui/in
 
 export const segmentedContainerThemeVariants = cva(
     `
-        inline-flex items-center gap-0.5
+        relative inline-flex items-center gap-0.5
         ${themeControlSurfaceClasses}
         border border-input-border
         p-1
@@ -37,11 +37,11 @@ export const segmentedOptionThemeVariants = cva(
         data-[disabled='true']:cursor-not-allowed
         data-[disabled='true']:opacity-50
         data-[disabled='true']:text-disabled-foreground
-        data-[selected='true']:bg-primary data-[selected='true']:text-primary-foreground
-        data-[selected='true']:shadow-sm data-[selected='true']:ring-1 data-[selected='true']:ring-selected-border
+        data-[selected='true']:text-primary-foreground
         data-[selected='false']:text-muted-foreground
         data-[selected='false']:hover:bg-hover data-[selected='false']:hover:text-foreground
         data-[disabled='true']:data-[selected='false']:text-disabled-foreground
+        data-[selected='true']:transition-none
     `,
     {
         variants: {
@@ -65,6 +65,34 @@ export const segmentedOptionThemeVariants = cva(
     }
 );
 
+export const segmentedIndicatorThemeVariants = cva(
+    `
+        pointer-events-none absolute top-0 left-0
+        bg-primary shadow-sm ring-1 ring-selected-border
+        data-[disabled='true']:opacity-50
+        motion-reduce:transition-none
+    `,
+    {
+        variants: {
+            animate: {
+                true: "transition-[transform,width,height] duration-(--mona-motion-fast) ease-out",
+                false: "transition-none"
+            },
+            rounded: {
+                none: "rounded-none",
+                small: "rounded-xs",
+                medium: "rounded-sm",
+                large: "rounded-md",
+                full: "rounded-full"
+            }
+        },
+        defaultVariants: {
+            animate: true,
+            rounded: "medium"
+        }
+    }
+);
+
 export const segmentedInputThemeVariants = cva(
     `
         peer absolute inset-0 z-10 h-full w-full
@@ -81,6 +109,10 @@ export type SegmentedContainerVariantInput = VariantInputs<SegmentedContainerVar
 export type SegmentedOptionVariantProps = VariantProps<typeof segmentedOptionThemeVariants>;
 
 export type SegmentedOptionVariantInput = VariantInputs<SegmentedOptionVariantProps>;
+
+export type SegmentedIndicatorVariantProps = VariantProps<typeof segmentedIndicatorThemeVariants>;
+
+export type SegmentedIndicatorVariantInput = VariantInputs<SegmentedIndicatorVariantProps>;
 
 export type SegmentedVariantProps = SegmentedContainerVariantProps & SegmentedOptionVariantProps;
 

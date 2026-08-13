@@ -1,6 +1,17 @@
 import { NgComponentOutlet } from "@angular/common";
 import { Component, inject, input, model, signal } from "@angular/core";
 import {
+    LucideBell,
+    LucideDollarSign,
+    LucideDynamicIcon,
+    type LucideIconInput,
+    LucideLock,
+    LucidePlus,
+    LucideUser,
+    LucideUser2,
+    LucideUserCog
+} from "@lucide/angular";
+import {
     SegmentedComponent,
     SegmentedItemTemplateDirective,
     type SegmentedOption,
@@ -28,6 +39,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
         code: `
             <mona-segmented
                 aria-label="Course section"
+                [animate]="animate()"
                 [disabled]="disabled()"
                 [options]="options"
                 [rounded]="rounded()"
@@ -39,6 +51,10 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
             <span>Selected value: {{ value() }}</span>
         `,
         inputs: {
+            animate: {
+                type: "boolean",
+                value: true
+            },
             disabled: {
                 type: "boolean",
                 value: false
@@ -55,8 +71,8 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
             },
             value: {
                 type: "dropdown",
-                value: ["discover", "courses", "archived"],
-                defaultValue: "discover"
+                value: ["personal", "premium", "account", "security", "notifications"],
+                defaultValue: "security"
             }
         },
         featureHandler: this.#injector.get(FeatureConfigHandler)
@@ -67,12 +83,13 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
 }
 
 @Component({
-    imports: [SegmentedComponent, SegmentedItemTemplateDirective],
+    imports: [SegmentedComponent, SegmentedItemTemplateDirective, LucideDynamicIcon],
     template: `
         @let featureData = features();
         <div class="flex w-full flex-col items-center gap-4">
             <mona-segmented
                 aria-label="Course section"
+                [animate]="animate()"
                 [disabled]="disabled()"
                 [options]="options()"
                 [rounded]="rounded()"
@@ -81,7 +98,7 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
                 @if (featureData["itemTemplate"].active) {
                     <ng-template monaSegmentedItemTemplate let-option>
                         <span class="flex items-center gap-1.5">
-                            <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                            <svg [lucideIcon]="iconMap[option.value]" [size]="16"></svg>
                             {{ option.label }}
                         </span>
                     </ng-template>
@@ -93,13 +110,24 @@ export class SegmentedDemoComponent extends AbstractDemoComponent<SegmentedCompo
 })
 class SegmentedWrapperComponent implements ComponentInputsAsSignal<SegmentedComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    protected readonly iconMap: Record<SegmentedOption["value"], LucideIconInput> = {
+        personal: LucideUser,
+        premium: LucidePlus,
+        account: LucideUserCog,
+        security: LucideLock,
+        notifications: LucideBell
+    };
+
+    public readonly animate = input(true);
     public readonly disabled = input(false);
     public readonly options = input<readonly SegmentedOption[]>([
-        { label: "Discover", value: "discover" },
-        { label: "My courses", value: "courses" },
-        { label: "Archived", value: "archived", disabled: true }
+        { label: "Personal", value: "personal" },
+        { label: "Premium Features", value: "premium", disabled: true },
+        { label: "Account", value: "account" },
+        { label: "Security", value: "security" },
+        { label: "Notifications", value: "notifications" }
     ]);
     public readonly rounded = input<ReturnType<SegmentedComponent["rounded"]>>("medium");
     public readonly size = input<ReturnType<SegmentedComponent["size"]>>("medium");
-    public readonly value = model<SegmentedValue | null>("discover");
+    public readonly value = model<SegmentedValue | null>("security");
 }

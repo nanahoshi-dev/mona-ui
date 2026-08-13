@@ -6347,7 +6347,7 @@
       },
       {
         "name": "color",
-        "type": "string | null | undefined",
+        "type": "string | null",
         "description": "CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the\nprimary theme color.",
         "kind": "input"
       },
@@ -6532,6 +6532,12 @@
     "selector": "\"mona-segmented\"",
     "inputs": [
       {
+        "name": "animate",
+        "type": "boolean",
+        "description": "Controls whether the selection indicator animates between selected options.\nWhen false, selection changes are applied immediately without transition.",
+        "kind": "input"
+      },
+      {
         "name": "ariaLabel",
         "type": "string | null",
         "description": "Accessible name for the radio group. Provide either `aria-label` or `aria-labelledby`.",
@@ -6552,7 +6558,7 @@
       {
         "name": "invalid",
         "type": "boolean",
-        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\r\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.",
+        "description": "Marks the component as invalid. Error styling requires both `invalid` and `touched` to be `true`.\nWhen bound to a signal form field via `[formField]`, this is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -6582,7 +6588,7 @@
       {
         "name": "touched",
         "type": "boolean",
-        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\r\nthis is written by the signal forms `Field` directive.",
+        "description": "Marks the component as touched. When bound to a signal form field via `[formField]`,\nthis is written by the signal forms `Field` directive.",
         "kind": "input"
       },
       {
@@ -6594,7 +6600,7 @@
       {
         "name": "value",
         "type": "T | null",
-        "description": "The currently selected value. When it matches no current option, no option is checked.\r\nA `null` value is allowed initially but cannot be restored through segmented interaction.",
+        "description": "The currently selected value. When it matches no current option, no option is checked.\nA `null` value is allowed initially but cannot be restored through segmented interaction.",
         "kind": "model"
       }
     ]
