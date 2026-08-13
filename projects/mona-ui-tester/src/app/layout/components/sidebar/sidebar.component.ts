@@ -75,6 +75,7 @@ export class SidebarComponent {
                 { text: "Sidebar", path: "/sidebar" },
                 { text: "Skeleton", path: "/skeleton" },
                 { text: "Slider", path: "/slider" },
+                { text: "Spinner", path: "/spinner" },
                 { text: "Split Button", path: "/split-button" },
                 { text: "Splitter", path: "/splitter" },
                 { text: "Stepper", path: "/stepper" },

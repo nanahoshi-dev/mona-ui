@@ -328,6 +328,11 @@ export const routes: Routes = [
                     import("./docs/components/slider-doc/slider-doc.component").then(m => m.SliderDocComponent)
             },
             {
+                path: "spinner",
+                loadComponent: () =>
+                    import("./docs/components/spinner-doc/spinner-doc.component").then(m => m.SpinnerDocComponent)
+            },
+            {
                 path: "split-button",
                 loadComponent: () =>
                     import("./docs/components/split-button-doc/split-button-doc.component").then(

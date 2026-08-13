@@ -1,0 +1,26 @@
+@switch (appearance()) {
+    @case ("default") {
+        <svg [lucideIcon]="loaderIcon" [size]="pixelSize()" class="animate-[spin_1.5s_linear_infinite] motion-reduce:animate-none"></svg>
+    }
+    @case ("pulsing") {
+        <span class="mona-spinner-pulsing-container">
+            <span data-segment class="mona-spinner-pulsing-segment mona-spinner-pulsing-1"></span>
+            <span data-segment class="mona-spinner-pulsing-segment mona-spinner-pulsing-2"></span>
+        </span>
+    }
+    @case ("infinite-spinner") {
+        <span class="mona-spinner-infinite-container">
+            <span data-segment class="mona-spinner-infinite-segment mona-spinner-infinite-1"></span>
+            <span data-segment class="mona-spinner-infinite-segment mona-spinner-infinite-2"></span>
+            <span data-segment class="mona-spinner-infinite-segment mona-spinner-infinite-3"></span>
+        </span>
+    }
+    @case ("converging-spinner") {
+        <span class="mona-spinner-converge-container">
+            <span data-segment class="mona-spinner-converge-segment mona-spinner-converge-1"></span>
+            <span data-segment class="mona-spinner-converge-segment mona-spinner-converge-2"></span>
+            <span data-segment class="mona-spinner-converge-segment mona-spinner-converge-3"></span>
+            <span data-segment class="mona-spinner-converge-segment mona-spinner-converge-4"></span>
+        </span>
+    }
+}
