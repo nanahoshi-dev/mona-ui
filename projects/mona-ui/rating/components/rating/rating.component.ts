@@ -12,7 +12,15 @@ import {
     viewChild
 } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
-import { LucideDynamicIcon, LucideStar, type LucideIconInput } from "@lucide/angular";
+import {
+    LucideCircle,
+    LucideDiamond,
+    LucideDynamicIcon,
+    LucideFlame,
+    LucideHeart,
+    LucideStar,
+    type LucideIcon
+} from "@lucide/angular";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { range } from "@mirei/ts-collections";
 import { twMerge } from "tailwind-merge";
@@ -20,6 +28,7 @@ import { RatingHoveredItemTemplateDirective } from "../../directives/rating-hove
 import { RatingItemTemplateDirective } from "../../directives/rating-item-template.directive";
 import { RatingSelectedItemTemplateDirective } from "../../directives/rating-selected-item-template.directive";
 import type { RatingItemTemplateContext } from "../../models/RatingItemTemplateContext";
+import type { RatingIconName } from "../../models/RatingIconName";
 import type { RatingLabelPosition } from "../../models/RatingLabelPosition";
 import type { RatingPrecision } from "../../models/RatingPrecision";
 import type { RatingSelectionMode } from "../../models/RatingSelectionMode";
@@ -31,6 +40,7 @@ import {
     ratingLabelThemeVariants,
     ratingOverlayClipThemeVariants,
     ratingOverlayContentThemeVariants,
+    ratingOverlayIconThemeVariants,
     type RatingVariantInput,
     type RatingVariantProps
 } from "../../styles/rating.styles";
@@ -49,6 +59,14 @@ interface RatingItemDescriptor {
 }
 
 type RatingKeyAction = "decrease" | "end" | "home" | "increase";
+
+const ratingIcons = {
+    circle: LucideCircle,
+    diamond: LucideDiamond,
+    flame: LucideFlame,
+    heart: LucideHeart,
+    star: LucideStar
+} satisfies Record<RatingIconName, LucideIcon>;
 
 @Component({
     selector: "mona-rating",
@@ -84,6 +102,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         read: TemplateRef
     });
     protected readonly iconClasses = computed(() => ratingIconThemeVariants({ size: this.size() }));
+    protected readonly iconToRender = computed(() => ratingIcons[this.icon()]);
     protected readonly interactionDisabled = computed(() => this.disabled() || this.readonly());
     protected readonly interactionStep = computed(() => getRatingStep(this.precision()));
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
@@ -101,6 +120,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     );
     protected readonly overlayClipClasses = computed(() => ratingOverlayClipThemeVariants());
     protected readonly overlayContentClasses = computed(() => ratingOverlayContentThemeVariants({ size: this.size() }));
+    protected readonly overlayIconClasses = computed(() => ratingOverlayIconThemeVariants({ size: this.size() }));
     protected readonly overlayTemplate = computed<TemplateRef<RatingItemTemplateContext> | undefined>(() =>
         this.activeState() === "hovered" ? this.hoveredTemplate() : this.selectedTemplate()
     );
@@ -145,10 +165,11 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
     public readonly disabled = input(false);
 
     /**
-     * @description Icon used for selected and hovered item overlays.
-     * @default LucideStar
+     * @description Built-in icon used for the default rating visuals. Choose `star`, `heart`,
+     * `circle`, `diamond`, or `flame`; use item templates to supply a custom icon.
+     * @default "star"
      */
-    public readonly icon = input<LucideIconInput>(LucideStar);
+    public readonly icon = input<RatingIconName>("star");
 
     /**
      * @description Marks the component as invalid. Error styling requires both `invalid` and
@@ -180,12 +201,6 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * @default "after"
      */
     public readonly labelPosition = input<RatingLabelPosition>("after");
-
-    /**
-     * @description Icon used for the unselected base state of every item.
-     * @default LucideStar
-     */
-    public readonly outlineIcon = input<LucideIconInput>(LucideStar);
 
     /**
      * @description Selection granularity of the rating.

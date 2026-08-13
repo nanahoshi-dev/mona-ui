@@ -67,6 +67,19 @@ export const ratingIconThemeVariants = cva(
     }
 );
 
+export const ratingOverlayIconThemeVariants = cva(`block shrink-0`, {
+    variants: {
+        size: {
+            small: "h-4 w-4",
+            medium: "h-5 w-5",
+            large: "h-6 w-6"
+        }
+    },
+    defaultVariants: {
+        size: "medium"
+    }
+});
+
 export const ratingOverlayClipThemeVariants = cva(`
     absolute bottom-0 start-0 top-0
     pointer-events-none
@@ -75,8 +88,7 @@ export const ratingOverlayClipThemeVariants = cva(`
 
 export const ratingOverlayContentThemeVariants = cva(
     `
-        flex items-center justify-start
-        fill-current
+        flex items-center justify-center
         text-warning
         transition-colors duration-(--mona-motion-fast)
         group-data-[disabled="true"]:text-disabled-foreground

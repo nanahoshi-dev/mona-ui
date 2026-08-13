@@ -4366,6 +4366,12 @@
         "kind": "input"
       },
       {
+        "name": "filterable",
+        "type": "boolean",
+        "description": "Whether this column can be filtered when grid filtering is enabled. Has no effect if filtering is disabled on the grid.",
+        "kind": "input"
+      },
+      {
         "name": "format",
         "type": "ColumnFormat | null",
         "description": "Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.",
@@ -6347,8 +6353,8 @@
       },
       {
         "name": "icon",
-        "type": "LucideIconInput",
-        "description": "Icon used for selected and hovered item overlays.",
+        "type": "RatingIconName",
+        "description": "Built-in icon used for the default rating visuals. Choose `star`, `heart`,\n`circle`, `diamond`, or `flame`; use item templates to supply a custom icon.",
         "kind": "input"
       },
       {
@@ -6373,12 +6379,6 @@
         "name": "labelPosition",
         "type": "RatingLabelPosition",
         "description": "Places the visible label before or after the item group.",
-        "kind": "input"
-      },
-      {
-        "name": "outlineIcon",
-        "type": "LucideIconInput",
-        "description": "Icon used for the unselected base state of every item.",
         "kind": "input"
       },
       {

@@ -41,7 +41,7 @@
                             [ngTemplateOutletContext]="createItemContext(item)">
                         </ng-container>
                     } @else {
-                        <svg lucideIcon [lucideIcon]="outlineIcon()" [class]="iconClasses()"></svg>
+                        <svg lucideIcon [lucideIcon]="iconToRender()" [class]="iconClasses()" fill="none"></svg>
                     }
                 </span>
 
@@ -56,7 +56,11 @@
                                     [ngTemplateOutletContext]="createItemContext(item)">
                                 </ng-container>
                             } @else {
-                                <svg lucideIcon [lucideIcon]="icon()" class="h-full w-full"></svg>
+                                <svg
+                                    lucideIcon
+                                    [lucideIcon]="iconToRender()"
+                                    [class]="overlayIconClasses()"
+                                    fill="currentColor"></svg>
                             }
                         </span>
                     </span>

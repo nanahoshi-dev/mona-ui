@@ -43,6 +43,11 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 type: "boolean",
                 value: false
             },
+            icon: {
+                type: "dropdown",
+                value: ["star", "heart", "circle", "diamond", "flame"],
+                defaultValue: "star"
+            },
             itemsCount: {
                 type: "number",
                 min: 1,
@@ -108,6 +113,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
             <mona-rating
                 aria-label="Product rating"
                 [disabled]="disabled()"
+                [icon]="icon()"
                 [itemsCount]="itemsCount()"
                 [label]="label()"
                 [labelPosition]="labelPosition()"
@@ -126,12 +132,12 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 }
                 @if (featureData["hoveredTemplate"].active) {
                     <ng-template monaRatingHoveredItemTemplate>
-                        <svg lucideFlame class="h-full w-full text-amber-500"></svg>
+                        <svg lucideFlame class="h-full w-full text-amber-500" fill="currentColor"></svg>
                     </ng-template>
                 }
                 @if (featureData["selectedTemplate"].active) {
                     <ng-template monaRatingSelectedItemTemplate>
-                        <svg lucideHeart class="h-full w-full text-rose-500"></svg>
+                        <svg lucideHeart class="h-full w-full text-rose-500" fill="currentColor"></svg>
                     </ng-template>
                 }
             </mona-rating>
@@ -142,6 +148,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
 class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
     public readonly disabled = input<ReturnType<RatingComponent["disabled"]>>(false);
+    public readonly icon = input<ReturnType<RatingComponent["icon"]>>("star");
     public readonly itemsCount = input<ReturnType<RatingComponent["itemsCount"]>>(5);
     public readonly label = input<ReturnType<RatingComponent["label"]>>(null);
     public readonly labelPosition = input<ReturnType<RatingComponent["labelPosition"]>>("after");

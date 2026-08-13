@@ -2,16 +2,15 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { disabled as fieldDisabled, form, FormField, min } from "@angular/forms/signals";
 import { By } from "@angular/platform-browser";
-import { LucideHeart, LucideStar, type LucideIconInput } from "@lucide/angular";
 import axe from "axe-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RatingHoveredItemTemplateDirective } from "../../directives/rating-hovered-item-template.directive";
 import { RatingItemTemplateDirective } from "../../directives/rating-item-template.directive";
 import { RatingSelectedItemTemplateDirective } from "../../directives/rating-selected-item-template.directive";
+import type { RatingIconName } from "../../models/RatingIconName";
 import { RatingComponent } from "./rating.component";
 
-const STAR_PATH = "11.525";
-const HEART_PATH = "9.591-3.676";
+const RATING_ICON_NAMES = ["star", "heart", "circle", "diamond", "flame"] as const satisfies readonly RatingIconName[];
 
 @Component({
     template: `
@@ -27,7 +26,6 @@ const HEART_PATH = "9.591-3.676";
             [itemsCount]="itemsCount()"
             [label]="label()"
             [labelPosition]="labelPosition()"
-            [outlineIcon]="outlineIcon()"
             [precision]="precision()"
             [readonly]="readOnly()"
             [selection]="selection()"
@@ -44,12 +42,11 @@ class HostComponent {
     public readonly ariaLabelledBy = signal<string | null>(null);
     public readonly ariaValueText = signal<((value: number, maximum: number) => string) | null>(null);
     public readonly disabled = signal(false);
-    public readonly icon = signal<LucideIconInput>(LucideStar);
+    public readonly icon = signal<RatingIconName>("star");
     public readonly invalid = signal(false);
     public readonly itemsCount = signal(5);
     public readonly label = signal<string | null>(null);
     public readonly labelPosition = signal<"before" | "after">("after");
-    public readonly outlineIcon = signal<LucideIconInput>(LucideStar);
     public readonly precision = signal<"item" | "half">("item");
     public readonly readOnly = signal(false);
     public readonly selection = signal<"continuous" | "single">("continuous");
@@ -61,9 +58,7 @@ class HostComponent {
 }
 
 @Component({
-    template: `
-        <mona-rating aria-label="Review rating" [formField]="form.rating"></mona-rating>
-    `,
+    template: ` <mona-rating aria-label="Review rating" [formField]="form.rating"></mona-rating> `,
     imports: [RatingComponent, FormField]
 })
 class SignalFormHostComponent {
@@ -76,9 +71,7 @@ class SignalFormHostComponent {
 }
 
 @Component({
-    template: `
-        <mona-rating aria-label="Review rating" precision="half" [formField]="form.rating"></mona-rating>
-    `,
+    template: ` <mona-rating aria-label="Review rating" precision="half" [formField]="form.rating"></mona-rating> `,
     imports: [RatingComponent, FormField]
 })
 class HalfSignalFormHostComponent {
@@ -186,9 +179,7 @@ function getItems(fixture: ComponentFixture<unknown>): HTMLElement[] {
 }
 
 function getItemChildren(item: HTMLElement): HTMLElement[] {
-    return Array.from(item.children).filter(
-        (element): element is HTMLElement => element.tagName === "SPAN"
-    );
+    return Array.from(item.children).filter((element): element is HTMLElement => element.tagName === "SPAN");
 }
 
 function getBaseLayer(item: HTMLElement): HTMLElement | null {
@@ -296,31 +287,68 @@ describe("RatingComponent", () => {
             expect(values).toEqual(["1", "2", "3", "4", "5"]);
         });
 
-        it("renders the default outline star icon under every item", () => {
+        it("renders the default outlined star preset under every item", () => {
             getItems(fixture).forEach(item => {
                 const svg = getBaseLayer(item)?.querySelector("svg");
-                expect(svg?.outerHTML).toContain(STAR_PATH);
+                expect(svg?.classList.contains("lucide-star")).toBe(true);
+                expect(svg?.getAttribute("fill")).toBe("none");
             });
         });
 
-        it("renders the custom outline icon underneath", () => {
-            component.outlineIcon.set(LucideHeart);
-            component.value.set(2);
-            fixture.detectChanges();
+        it("renders each preset for both default layers", () => {
+            component.value.set(1);
 
-            const baseSvg = getBaseLayer(getItems(fixture)[0] as HTMLElement)?.querySelector("svg");
-            expect(baseSvg?.outerHTML).toContain(HEART_PATH);
-            expect(baseSvg?.outerHTML).not.toContain(STAR_PATH);
+            RATING_ICON_NAMES.forEach(icon => {
+                component.icon.set(icon);
+                fixture.detectChanges();
+
+                const item = getItems(fixture)[0] as HTMLElement;
+                const baseSvg = getBaseLayer(item)?.querySelector("svg");
+                const overlaySvg = getOverlayContent(item)?.querySelector("svg");
+
+                expect(baseSvg?.classList.contains(`lucide-${icon}`)).toBe(true);
+                expect(overlaySvg?.classList.contains(`lucide-${icon}`)).toBe(true);
+            });
         });
 
-        it("renders the custom icon in the selected overlay", () => {
-            component.icon.set(LucideHeart);
-            component.value.set(3);
+        it("matches default overlay icon dimensions to the base icon", () => {
+            component.value.set(1);
+
+            const dimensions = [
+                { size: "small", classes: ["h-4", "w-4"] },
+                { size: "medium", classes: ["h-5", "w-5"] },
+                { size: "large", classes: ["h-6", "w-6"] }
+            ] as const;
+
+            for (const { size, classes } of dimensions) {
+                component.size.set(size);
+                fixture.detectChanges();
+
+                const item = getItems(fixture)[0] as HTMLElement;
+                const baseSvg = getBaseLayer(item)?.querySelector("svg");
+                const overlayContent = getOverlayContent(item);
+                const overlaySvg = overlayContent?.querySelector("svg");
+
+                classes.forEach(className => {
+                    expect(baseSvg?.classList.contains(className)).toBe(true);
+                    expect(overlaySvg?.classList.contains(className)).toBe(true);
+                });
+                expect(overlayContent?.classList.contains("justify-center")).toBe(true);
+            }
+        });
+
+        it("fills selected and hovered preset overlays directly on the SVG", () => {
+            component.value.set(1);
             fixture.detectChanges();
 
             const overlaySvg = getOverlayContent(getItems(fixture)[0] as HTMLElement)?.querySelector("svg");
-            expect(overlaySvg?.outerHTML).toContain(HEART_PATH);
-            expect(overlaySvg?.outerHTML).not.toContain(STAR_PATH);
+            expect(overlaySvg?.getAttribute("fill")).toBe("currentColor");
+
+            mockItemRects(fixture);
+            movePointerToItem(fixture, 0, 10);
+
+            const hoveredSvg = getOverlayContent(getItems(fixture)[0] as HTMLElement)?.querySelector("svg");
+            expect(hoveredSvg?.getAttribute("fill")).toBe("currentColor");
         });
 
         it("renders no selected overlay when the value is zero", () => {
@@ -550,15 +578,11 @@ describe("RatingComponent", () => {
             movePointerToItem(fixture, 2, 70);
             clickItem(fixture, 2, 70);
 
-            expect(getOverlayContent(getItems(fixture)[2] as HTMLElement)?.getAttribute("data-state")).toBe(
-                "hovered"
-            );
+            expect(getOverlayContent(getItems(fixture)[2] as HTMLElement)?.getAttribute("data-state")).toBe("hovered");
 
             getControl(fixture).dispatchEvent(new PointerEvent("pointerleave", { bubbles: true }));
             fixture.detectChanges();
-            expect(getOverlayContent(getItems(fixture)[2] as HTMLElement)?.getAttribute("data-state")).toBe(
-                "selected"
-            );
+            expect(getOverlayContent(getItems(fixture)[2] as HTMLElement)?.getAttribute("data-state")).toBe("selected");
         });
 
         it("maps RTL half selection correctly", () => {
@@ -716,9 +740,7 @@ describe("RatingComponent", () => {
 
             pressKey(fixture, "ArrowRight");
 
-            expect(getOverlayContent(getItems(fixture)[0] as HTMLElement)?.getAttribute("data-state")).toBe(
-                "selected"
-            );
+            expect(getOverlayContent(getItems(fixture)[0] as HTMLElement)?.getAttribute("data-state")).toBe("selected");
         });
 
         it("emits one model change per key press", () => {
