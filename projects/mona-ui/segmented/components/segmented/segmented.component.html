@@ -18,7 +18,13 @@
                    [border-radius:inherit]
                    peer-focus-visible:ring-2
                    peer-focus-visible:ring-focus-indicator/35">
-            {{ option.label }}
+            @if (itemTemplate(); as template) {
+                <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="createOptionContext(option, $index)"></ng-container>
+            } @else {
+                {{ option.label }}
+            }
         </span>
     </label>
 }

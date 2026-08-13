@@ -14,7 +14,7 @@
 ## Import & Quick Start
 
 ```typescript
-import { SegmentedComponent } from "@nanahoshi/mona-ui/segmented";
+import { SegmentedComponent, SegmentedItemTemplateDirective } from "@nanahoshi/mona-ui/segmented";
 ```
 
 ```typescript
@@ -157,6 +157,40 @@ Native radio behavior applies. Arrow keys move the selection within the group, a
 - Keep option labels concise. Long labels crowd the group and overflow its container.
 - `value` may be initialized to `null`, but no option will be checked until a matching option value is selected.
 
+## Templates
+
+Provide a `monaSegmentedItemTemplate` to replace the default label text with custom content, for example an icon paired with the label:
+
+| Directive                   | Overrides                | Rendered when   |
+|------------------------------|---------------------------|-----------------|
+| `monaSegmentedItemTemplate` | The default label text   | Every option    |
+
+```html
+<mona-segmented aria-label="View mode" [options]="viewModes" [(value)]="viewMode">
+    <ng-template monaSegmentedItemTemplate let-option let-selected="selected">
+        <span class="flex items-center gap-1.5">
+            <span class="h-1.5 w-1.5 rounded-full" [class.bg-current]="selected"></span>
+            {{ option.label }}
+        </span>
+    </ng-template>
+</mona-segmented>
+```
+
+When no template is projected, the option renders its plain `label` text, exactly as before.
+
+### Template Context
+
+The template receives a `SegmentedItemTemplateContext<T>`:
+
+| Property             | Type                | Description                                             |
+|-----------------------|---------------------|-----------------------------------------------------------|
+| `$implicit` / `option` | `SegmentedOption<T>` | The option rendered by this item.                        |
+| `index`               | `number`            | Zero-based option index.                                 |
+| `selected`            | `boolean`           | Whether this option is currently selected.                |
+| `disabled`            | `boolean`           | Whether this option is disabled, individually or via the group. |
+
+The component still owns the radio input, selection, and disabled semantics; the template only supplies the visual content inside the label span.
+
 ## API
 
 ### `SegmentedComponent`
@@ -233,4 +267,5 @@ When bound to a `Field`, the `Field` directive writes `invalid` and `touched` th
 - [x] Import paths use @nanahoshi/mona-ui/segmented per repo markdown convention
 - [x] No internal computed signals, private methods, or Tailwind class names documented as public API
 - [x] Inputs table sorted A→Z
+- [x] Templates section verified against segmented-item-template.directive.ts (selector monaSegmentedItemTemplate) and SegmentedItemTemplateContext.ts ($implicit/option, index, selected, disabled)
 -->

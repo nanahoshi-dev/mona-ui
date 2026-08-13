@@ -1,7 +1,10 @@
-import { Component, computed, input, model, output } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
+import { Component, computed, contentChild, input, model, output, TemplateRef } from "@angular/core";
 import type { FormValueControl } from "@angular/forms/signals";
 import { createElementControlId } from "@nanahoshi/mona-ui/internal";
 import { twMerge } from "tailwind-merge";
+import { SegmentedItemTemplateDirective } from "../../directives/segmented-item-template.directive";
+import type { SegmentedItemTemplateContext } from "../../models/SegmentedItemTemplateContext";
 import type { SegmentedOption } from "../../models/SegmentedOption";
 import type { SegmentedValue } from "../../models/SegmentedValue";
 import {
@@ -15,6 +18,7 @@ import {
 @Component({
     selector: "mona-segmented",
     templateUrl: "./segmented.component.html",
+    imports: [NgTemplateOutlet],
     host: {
         "[attr.aria-disabled]": "disabled() || undefined",
         "[attr.aria-invalid]": "invalidState() ? 'true' : null",
@@ -36,6 +40,7 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
     protected readonly groupName = createElementControlId();
     protected readonly inputClasses = computed(() => segmentedInputThemeVariants());
     protected readonly invalidState = computed(() => this.touched() && this.invalid());
+    protected readonly itemTemplate = contentChild(SegmentedItemTemplateDirective, { read: TemplateRef });
     protected readonly optionClasses = computed(() => {
         const rounded = this.rounded();
         const size = this.size();
@@ -108,6 +113,16 @@ export class SegmentedComponent<T extends SegmentedValue = SegmentedValue>
      * @default null
      */
     public readonly value = model<T | null>(null);
+
+    protected createOptionContext(option: SegmentedOption<T>, index: number): SegmentedItemTemplateContext<T> {
+        return {
+            $implicit: option,
+            disabled: this.disabled() || !!option.disabled,
+            index,
+            option,
+            selected: option.value === this.value()
+        };
+    }
 
     protected onOptionBlur(): void {
         this.touch.emit();
