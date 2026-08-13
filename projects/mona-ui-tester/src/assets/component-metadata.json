@@ -6346,6 +6346,12 @@
         "kind": "input"
       },
       {
+        "name": "color",
+        "type": "string | null | undefined",
+        "description": "CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the\nprimary theme color.",
+        "kind": "input"
+      },
+      {
         "name": "disabled",
         "type": "boolean",
         "description": "Disables pointer and keyboard interaction and removes the control from the tab\nsequence. When bound to a signal form field via `[formField]`, this is written by the signal\nforms `Field` directive.",

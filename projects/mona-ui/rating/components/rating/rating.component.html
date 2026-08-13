@@ -49,7 +49,10 @@
 
                 @if (fill > 0) {
                     <span [class]="overlayClipClasses()" [style.inline-size.%]="fill * 100">
-                        <span [class]="overlayContentClasses()" [attr.data-state]="activeState()">
+                        <span
+                            [class]="overlayContentClasses()"
+                            [attr.data-state]="activeState()"
+                            [style.color]="disabled() ? null : overlayColor()">
                             @if (overlayTemplate()) {
                                 <ng-container
                                     [ngTemplateOutlet]="overlayTemplate()!"

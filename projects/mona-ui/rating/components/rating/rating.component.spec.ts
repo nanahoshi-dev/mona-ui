@@ -20,6 +20,7 @@ const RATING_ICON_NAMES = ["star", "heart", "circle", "diamond", "flame"] as con
             [aria-labelledby]="ariaLabelledBy()"
             [ariaValueText]="ariaValueText()"
             [class]="userClass()"
+            [color]="color()"
             [disabled]="disabled()"
             [icon]="icon()"
             [invalid]="invalid()"
@@ -41,6 +42,7 @@ class HostComponent {
     public readonly ariaLabel = signal<string | null>(null);
     public readonly ariaLabelledBy = signal<string | null>(null);
     public readonly ariaValueText = signal<((value: number, maximum: number) => string) | null>(null);
+    public readonly color = signal<string | null | undefined>(null);
     public readonly disabled = signal(false);
     public readonly icon = signal<RatingIconName>("star");
     public readonly invalid = signal(false);
@@ -335,6 +337,35 @@ describe("RatingComponent", () => {
                 });
                 expect(overlayContent?.classList.contains("justify-center")).toBe(true);
             }
+        });
+
+        it("uses the primary color for empty selected color inputs", () => {
+            component.value.set(1);
+
+            const emptyColors: readonly (string | null | undefined)[] = [null, undefined, ""];
+
+            emptyColors.forEach(color => {
+                component.color.set(color);
+                fixture.detectChanges();
+
+                const overlayContent = getOverlayContent(getItems(fixture)[0] as HTMLElement);
+                expect(overlayContent?.style.color).toBe("var(--color-primary)");
+            });
+        });
+
+        it("applies a custom color to selected and hovered overlays", () => {
+            component.value.set(1);
+            component.color.set("var(--rating-accent)");
+            fixture.detectChanges();
+
+            const selectedOverlay = getOverlayContent(getItems(fixture)[0] as HTMLElement);
+            expect(selectedOverlay?.style.color).toBe("var(--rating-accent)");
+
+            mockItemRects(fixture);
+            movePointerToItem(fixture, 0, 10);
+
+            const hoveredOverlay = getOverlayContent(getItems(fixture)[0] as HTMLElement);
+            expect(hoveredOverlay?.style.color).toBe("var(--rating-accent)");
         });
 
         it("fills selected and hovered preset overlays directly on the SVG", () => {

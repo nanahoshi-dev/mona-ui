@@ -1,6 +1,6 @@
 ## Overview
 
-`RatingComponent` lets users choose a numeric value from a visual scale of items. The component renders a focusable `role="slider"` control; preset icons or custom item visuals are decorative layers driven by the accessible value.
+`RatingComponent` lets users choose a numeric value from a visual scale of items. The component renders a focusable `role="slider"` control; preset icons or custom item visuals are decorative layers driven by the accessible value. Selected and hovered visuals use the primary theme color unless `color` is set.
 
 **Import path:**
 
@@ -40,6 +40,7 @@ All inputs are listed alphabetically.
 | `aria-labelledby`  | `string \| null`                                       | `null`         | IDs of external elements providing the accessible name.                                    |
 | `ariaValueText`    | `((value: number, maximum: number) => string) \| null` | `null`         | Custom screen-reader value announcement.                                                   |
 | `class`            | `string`                                               | `""`           | Additional host classes merged through `tailwind-merge`.                                   |
+| `color`            | `string \| null \| undefined`                          | `null`         | CSS color for selected and hovered visuals; empty values use the primary theme color.      |
 | `disabled`         | `boolean`                                              | `false`        | Disables interaction and removes the control from the tab sequence.                        |
 | `icon`             | `RatingIconName`                                       | `"star"`       | Built-in icon for the default visuals: `star`, `heart`, `circle`, `diamond`, or `flame`.   |
 | `invalid`          | `boolean`                                              | `false`        | Signal Forms validation state. Error styling requires `touched` too.                       |
@@ -194,13 +195,13 @@ The component owns overlay width, overflow clipping, continuous vs. single behav
 
 ## Icon Presets and Custom Visuals
 
-Use `icon` to select one built-in shape. The default base icon stays outlined, while committed and pointer-preview values use the same shape filled with the current rating color:
+Use `icon` to select one built-in shape. The default base icon stays outlined, while committed and pointer-preview values use the same shape filled with the rating color. It defaults to the primary theme color; set `color` to any CSS color value to override it:
 
 ```html
-<mona-rating aria-label="Favorite level" icon="heart" [(value)]="value"> </mona-rating>
+<mona-rating aria-label="Favorite level" icon="heart" color="#e11d48" [(value)]="value"> </mona-rating>
 ```
 
-The available values are `star`, `heart`, `circle`, `diamond`, and `flame`.
+The available icon values are `star`, `heart`, `circle`, `diamond`, and `flame`. Set `color` to `null`, `undefined`, or an empty string to restore the primary theme color.
 
 For any other icon or visual, use the item templates. Provide all three templates to replace every default layer; omitted templates continue to use the selected preset:
 

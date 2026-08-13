@@ -119,6 +119,7 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
         normalizeRatingValue(this.value(), this.itemsCount(), this.precision())
     );
     protected readonly overlayClipClasses = computed(() => ratingOverlayClipThemeVariants());
+    protected readonly overlayColor = computed(() => this.color() || "var(--color-primary)");
     protected readonly overlayContentClasses = computed(() => ratingOverlayContentThemeVariants({ size: this.size() }));
     protected readonly overlayIconClasses = computed(() => ratingOverlayIconThemeVariants({ size: this.size() }));
     protected readonly overlayTemplate = computed<TemplateRef<RatingItemTemplateContext> | undefined>(() =>
@@ -155,6 +156,13 @@ export class RatingComponent implements RatingVariantInput, FormValueControl<num
      * @default null
      */
     public readonly ariaValueText = input<((value: number, maximum: number) => string) | null>(null);
+
+    /**
+     * @description CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the
+     * primary theme color.
+     * @default undefined
+     */
+    public readonly color = input<string | null>();
 
     /**
      * @description Disables pointer and keyboard interaction and removes the control from the tab

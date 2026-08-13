@@ -43,6 +43,10 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
                 type: "boolean",
                 value: false
             },
+            color: {
+                type: "color",
+                value: ""
+            },
             icon: {
                 type: "dropdown",
                 value: ["star", "heart", "circle", "diamond", "flame"],
@@ -112,6 +116,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
         <div class="flex w-full flex-col items-center gap-4">
             <mona-rating
                 aria-label="Product rating"
+                [color]="color()"
                 [disabled]="disabled()"
                 [icon]="icon()"
                 [itemsCount]="itemsCount()"
@@ -147,6 +152,7 @@ export class RatingDemoComponent extends AbstractDemoComponent<RatingComponent> 
 })
 class RatingWrapperComponent implements ComponentInputsAsSignal<RatingComponent> {
     protected readonly features = inject(FeatureConfigHandler).data;
+    public readonly color = input<ReturnType<RatingComponent["color"]>>(null);
     public readonly disabled = input<ReturnType<RatingComponent["disabled"]>>(false);
     public readonly icon = input<ReturnType<RatingComponent["icon"]>>("star");
     public readonly itemsCount = input<ReturnType<RatingComponent["itemsCount"]>>(5);

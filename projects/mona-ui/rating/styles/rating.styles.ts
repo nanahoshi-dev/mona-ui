@@ -89,10 +89,8 @@ export const ratingOverlayClipThemeVariants = cva(`
 export const ratingOverlayContentThemeVariants = cva(
     `
         flex items-center justify-center
-        text-warning
         transition-colors duration-(--mona-motion-fast)
         group-data-[disabled="true"]:text-disabled-foreground
-        data-[state="hovered"]:text-warning-hover
     `,
     {
         variants: {
