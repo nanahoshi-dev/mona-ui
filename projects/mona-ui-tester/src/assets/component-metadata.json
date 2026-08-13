@@ -456,13 +456,13 @@
       {
         "name": "ariaLabel",
         "type": "string",
-        "description": "Accessible name for the host element. Describe what the chip represents.\nWhen empty, assistive technology announces the role without a label.",
+        "description": "Accessible name for the host element. Describe what the chip represents.\r\nWhen empty, assistive technology announces the role without a label.",
         "kind": "input"
       },
       {
         "name": "contentClick",
         "type": "void",
-        "description": "Emitted when the chip body is clicked or activated via Enter or Space.\nNot emitted when the remove button is activated.",
+        "description": "Emitted when the chip body is clicked or activated via Enter or Space.\r\nNot emitted when the remove button is activated.",
         "kind": "output"
       },
       {
@@ -492,19 +492,19 @@
       {
         "name": "remove",
         "type": "Event",
-        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\nEmits the originating `Event`.",
+        "description": "Emitted when the remove button is clicked. Only fires when `removable` is `true`.\r\nEmits the originating `Event`.",
         "kind": "output"
       },
       {
         "name": "removeLabel",
         "type": "string",
-        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\nUse when the chip shows only projected content and the default label is not descriptive enough.",
+        "description": "Accessible label for the remove button, overriding the auto-computed `\"Remove, <label>\"` fallback.\r\nUse when the chip shows only projected content and the default label is not descriptive enough.",
         "kind": "input"
       },
       {
         "name": "removeTabIndex",
         "type": "number | string",
-        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
+        "description": "Tab index for the remove button, independent of the chip host's own tabindex.\r\nSet to `-1` to exclude the remove button from tab order when an equivalent keyboard path exists elsewhere.",
         "kind": "input"
       },
       {
@@ -516,7 +516,7 @@
       {
         "name": "selected",
         "type": "boolean",
-        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\nSupports two-way binding via `[(selected)]`.",
+        "description": "Whether the chip is selected. When `toggleable` is `true`, each activation flips this value.\r\nSupports two-way binding via `[(selected)]`.",
         "kind": "model"
       },
       {
@@ -528,13 +528,13 @@
       {
         "name": "tabindex",
         "type": "number | string",
-        "description": "Tab index override for the chip host element. When not set, computed automatically:\n`0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
+        "description": "Tab index override for the chip host element. When not set, computed automatically:\r\n`0` when `toggleable` or `removable` is `true`, `-1` otherwise. Overridden to `-1` when `disabled` is `true`.",
         "kind": "input"
       },
       {
         "name": "toggleable",
         "type": "boolean",
-        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
+        "description": "Enables toggle behavior. When `true`, each activation flips `selected`\r\nand the host receives `role=\"checkbox\"` with `aria-checked`.",
         "kind": "input"
       },
       {
@@ -546,7 +546,7 @@
       {
         "name": "value",
         "type": "unknown",
-        "description": "Arbitrary value associated with this chip.\nUseful for identifying which chip was selected or removed in a collection.",
+        "description": "Arbitrary value associated with this chip.\r\nUseful for identifying which chip was selected or removed in a collection.",
         "kind": "input"
       }
     ]
@@ -4366,6 +4366,12 @@
         "kind": "input"
       },
       {
+        "name": "filterable",
+        "type": "boolean",
+        "description": "Whether this column can be filtered when grid filtering is enabled. Has no effect if filtering is disabled on the grid.",
+        "kind": "input"
+      },
+      {
         "name": "format",
         "type": "ColumnFormat | null",
         "description": "Formats the displayed cell value. String formats apply to date, datetime, and time columns; formatter functions replace the cell text.",
@@ -6307,6 +6313,132 @@
         "name": "value",
         "type": "any",
         "description": "The currently selected value in the radio group.\nWhen bound via `[control]` (signal forms), the `Field` directive keeps this in sync with the form field.\nWhen bound via `[(ngModel)]` or `[formControl]`, the CVA layer manages this value.",
+        "kind": "model"
+      }
+    ]
+  },
+  "RatingComponent": {
+    "name": "RatingComponent",
+    "selector": "\"mona-rating\"",
+    "inputs": [
+      {
+        "name": "ariaDescribedBy",
+        "type": "string | null",
+        "description": "Associates help text or an error description with the focusable rating control.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string | null",
+        "description": "Explicit accessible name for the rating control. Provide `aria-label`,\n`aria-labelledby`, or `label` so assistive technology can announce the control.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabelledBy",
+        "type": "string | null",
+        "description": "IDs of external elements providing the accessible name for the rating control.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaValueText",
+        "type": "((value: number, maximum: number) => string) | null",
+        "description": "Custom screen-reader value announcement. Receives the normalized value and the\nitem count and returns the string to expose through `aria-valuetext`.",
+        "kind": "input"
+      },
+      {
+        "name": "color",
+        "type": "string | null | undefined",
+        "description": "CSS color for selected and hovered rating visuals. Empty, `null`, and `undefined` values use the\nprimary theme color.",
+        "kind": "input"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables pointer and keyboard interaction and removes the control from the tab\nsequence. When bound to a signal form field via `[formField]`, this is written by the signal\nforms `Field` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "icon",
+        "type": "RatingIconName",
+        "description": "Built-in icon used for the default rating visuals. Choose `star`, `heart`,\n`circle`, `diamond`, or `flame`; use item templates to supply a custom icon.",
+        "kind": "input"
+      },
+      {
+        "name": "invalid",
+        "type": "boolean",
+        "description": "Marks the component as invalid. Error styling requires both `invalid` and\n`touched` to be `true`. When bound to a signal form field via `[formField]`, this is written\nby the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "itemsCount",
+        "type": "number",
+        "description": "Number of rating items. Fractional values are floored and values below one are\nraised to one.",
+        "kind": "input"
+      },
+      {
+        "name": "label",
+        "type": "string | null",
+        "description": "Optional visible label rendered before or after the rating items. When no\nexplicit `aria-label` or `aria-labelledby` is supplied, the label provides the accessible\nname.",
+        "kind": "input"
+      },
+      {
+        "name": "labelPosition",
+        "type": "RatingLabelPosition",
+        "description": "Places the visible label before or after the item group.",
+        "kind": "input"
+      },
+      {
+        "name": "precision",
+        "type": "RatingPrecision",
+        "description": "Selection granularity of the rating.",
+        "kind": "input"
+      },
+      {
+        "name": "readonly",
+        "type": "boolean",
+        "description": "Prevents value changes while preserving focusability and normal visual emphasis.",
+        "kind": "input"
+      },
+      {
+        "name": "selection",
+        "type": "RatingSelectionMode",
+        "description": "Controls cumulative or single-item filling.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "RatingVariantProps[\"size\"]",
+        "description": "Size preset controlling the icon dimensions, item hitboxes, spacing, and label\ntypography.",
+        "kind": "input"
+      },
+      {
+        "name": "tabindex",
+        "type": "number",
+        "description": "Tab index applied to the focusable rating control when not disabled. Accepts a\nnumeric string and converts it to a number.",
+        "kind": "input"
+      },
+      {
+        "name": "touch",
+        "type": "void",
+        "description": "Emitted when the user interacts with the control, marking the field as touched.",
+        "kind": "output"
+      },
+      {
+        "name": "touched",
+        "type": "boolean",
+        "description": "Marks the component as touched. When bound to a signal form field via\n`[formField]`, this is written by the signal forms `Field` directive.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      },
+      {
+        "name": "value",
+        "type": "number",
+        "description": "Current rating value. `0` represents an unrated state. Values are normalized\nfor rendering but are not rewritten until the user interacts with the component.",
         "kind": "model"
       }
     ]

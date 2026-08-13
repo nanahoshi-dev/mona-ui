@@ -1,0 +1,78 @@
+<div [class]="containerClasses()">
+    @if (label() && labelPosition() === "before") {
+        <span [id]="labelId" [class]="labelClasses()">{{ label() }}</span>
+    }
+
+    <div
+        #ratingControl
+        role="slider"
+        [class]="controlClasses()"
+        [attr.tabindex]="effectiveTabIndex()"
+        [attr.aria-valuemin]="0"
+        [attr.aria-valuemax]="itemsCount()"
+        [attr.aria-valuenow]="normalizedValue()"
+        [attr.aria-valuetext]="effectiveAriaValueText()"
+        [attr.aria-label]="ariaLabel()"
+        [attr.aria-labelledby]="effectiveAriaLabelledBy()"
+        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.aria-disabled]="disabled() || null"
+        [attr.aria-readonly]="readonly() || null"
+        [attr.aria-invalid]="invalidState() || null"
+        [attr.data-disabled]="disabled() || null"
+        [attr.data-readonly]="readonly() || null"
+        [attr.data-invalid]="invalidState() || null"
+        [attr.data-precision]="precision()"
+        [attr.data-selection]="selection()"
+        (keydown)="onKeydown($event)"
+        (blur)="onBlur()"
+        (pointermove)="onPointerMove($event)"
+        (pointerleave)="onPointerLeave()"
+        (click)="onClick($event)">
+        @for (item of items(); track item.itemValue) {
+            <span
+                [class]="itemClasses()"
+                [attr.data-rating-index]="item.index"
+                [attr.data-rating-value]="item.itemValue"
+                aria-hidden="true">
+                <span class="flex h-full w-full items-center justify-center">
+                    @if (itemTemplate()) {
+                        <ng-container
+                            [ngTemplateOutlet]="itemTemplate()!"
+                            [ngTemplateOutletContext]="createItemContext(item)">
+                        </ng-container>
+                    } @else {
+                        <svg lucideIcon [lucideIcon]="iconToRender()" [class]="iconClasses()" fill="none"></svg>
+                    }
+                </span>
+
+                @let fill = getItemFill(item.itemValue);
+
+                @if (fill > 0) {
+                    <span [class]="overlayClipClasses()" [style.inline-size.%]="fill * 100">
+                        <span
+                            [class]="overlayContentClasses()"
+                            [attr.data-state]="activeState()"
+                            [style.color]="disabled() ? null : overlayColor()">
+                            @if (overlayTemplate()) {
+                                <ng-container
+                                    [ngTemplateOutlet]="overlayTemplate()!"
+                                    [ngTemplateOutletContext]="createItemContext(item)">
+                                </ng-container>
+                            } @else {
+                                <svg
+                                    lucideIcon
+                                    [lucideIcon]="iconToRender()"
+                                    [class]="overlayIconClasses()"
+                                    fill="currentColor"></svg>
+                            }
+                        </span>
+                    </span>
+                }
+            </span>
+        }
+    </div>
+
+    @if (label() && labelPosition() === "after") {
+        <span [id]="labelId" [class]="labelClasses()">{{ label() }}</span>
+    }
+</div>
