@@ -7259,6 +7259,96 @@
       }
     ]
   },
+  "SpinnerComponent": {
+    "name": "SpinnerComponent",
+    "selector": "\"mona-spinner\"",
+    "inputs": [
+      {
+        "name": "appearance",
+        "type": "SpinnerAppearance",
+        "description": "Visual appearance of the spinner animation.",
+        "kind": "input"
+      },
+      {
+        "name": "ariaLabel",
+        "type": "string",
+        "description": "Accessible text announced by assistive technology when the spinner is not decorative.",
+        "kind": "input"
+      },
+      {
+        "name": "decorative",
+        "type": "boolean",
+        "description": "When `true`, removes the `status` role and hides the spinner from assistive technology with `aria-hidden=\"true\"`.\nUseful when a parent element already manages loading semantics (such as `aria-busy=\"true\"` on a button).",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "SpinnerSize",
+        "description": "Size preset controlling the dimensions of the indicator.",
+        "kind": "input"
+      },
+      {
+        "name": "userClass",
+        "type": "string",
+        "description": "Additional CSS classes merged onto the host element via `tailwind-merge`.",
+        "kind": "input"
+      }
+    ]
+  },
+  "SpinnerOverlayComponent": {
+    "name": "SpinnerOverlayComponent",
+    "selector": "\"mona-spinner-overlay\"",
+    "inputs": [
+      {
+        "name": "appearance",
+        "type": "SpinnerAppearance",
+        "description": "Visual appearance of the nested spinner animation.",
+        "kind": "input"
+      },
+      {
+        "name": "cancel",
+        "type": "void",
+        "description": "Emits when the consumer clicks the cancellation action button.",
+        "kind": "output"
+      },
+      {
+        "name": "cancellable",
+        "type": "boolean",
+        "description": "Whether the cancellation button is displayed in the overlay.",
+        "kind": "input"
+      },
+      {
+        "name": "cancelText",
+        "type": "string",
+        "description": "Label text displayed inside the cancellation button.",
+        "kind": "input"
+      },
+      {
+        "name": "fullPage",
+        "type": "boolean",
+        "description": "Whether the overlay is fixed across the viewport or absolute within a target container.",
+        "kind": "input"
+      },
+      {
+        "name": "size",
+        "type": "SpinnerSize",
+        "description": "Size preset passed to the nested spinner.",
+        "kind": "input"
+      },
+      {
+        "name": "text",
+        "type": "string | undefined",
+        "description": "Status text displayed below the spinner indicator.",
+        "kind": "input"
+      },
+      {
+        "name": "zIndex",
+        "type": "number | undefined",
+        "description": "Custom z-index value for unusual stacking contexts.",
+        "kind": "input"
+      }
+    ]
+  },
   "SplitButtonComponent": {
     "name": "SplitButtonComponent",
     "selector": "\"mona-split-button\"",

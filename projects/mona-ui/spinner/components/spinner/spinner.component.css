@@ -1,0 +1,234 @@
+:host {
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+/* Pulsing loader */
+.mona-spinner-pulsing-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mona-spinner-pulsing-segment {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background-color: currentColor;
+    opacity: 0.6;
+    animation: mona-spinner-pulse 1.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.mona-spinner-pulsing-2 {
+    animation-delay: -0.6s;
+}
+
+@keyframes mona-spinner-pulse {
+    0% {
+        transform: scale(0.1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* Pulsing triad loader (3 segments) — fixed symmetric triangle, each segment breathing in place */
+.mona-spinner-pulsing-triad-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.mona-spinner-pulsing-triad-segment {
+    position: absolute;
+    width: 32%;
+    height: 32%;
+    border-radius: 9999px;
+    background-color: currentColor;
+    animation: mona-spinner-dot-pulse 1.4s ease-in-out infinite;
+}
+
+.mona-spinner-pulsing-triad-1 {
+    top: 0;
+    left: 34%;
+    animation-delay: -0.933s;
+}
+
+.mona-spinner-pulsing-triad-2 {
+    bottom: 0;
+    left: 0;
+    animation-delay: -0.467s;
+}
+
+.mona-spinner-pulsing-triad-3 {
+    bottom: 0;
+    right: 0;
+    animation-delay: 0s;
+}
+
+@keyframes mona-spinner-dot-pulse {
+    0%,
+    100% {
+        transform: scale(0.4);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Pulsing ring loader (8 segments) — fixed symmetric octagon ring, pulse wave travels around it */
+.mona-spinner-pulsing-ring-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.mona-spinner-pulsing-ring-segment {
+    position: absolute;
+    width: 22%;
+    height: 22%;
+    border-radius: 9999px;
+    background-color: currentColor;
+    animation: mona-spinner-dot-pulse 1.6s ease-in-out infinite;
+}
+
+.mona-spinner-pulsing-ring-1 {
+    top: 5%;
+    left: 39%;
+    animation-delay: 0s;
+}
+
+.mona-spinner-pulsing-ring-2 {
+    top: 14.96%;
+    left: 63.04%;
+    animation-delay: -0.2s;
+}
+
+.mona-spinner-pulsing-ring-3 {
+    top: 39%;
+    left: 73%;
+    animation-delay: -0.4s;
+}
+
+.mona-spinner-pulsing-ring-4 {
+    top: 63.04%;
+    left: 63.04%;
+    animation-delay: -0.6s;
+}
+
+.mona-spinner-pulsing-ring-5 {
+    top: 73%;
+    left: 39%;
+    animation-delay: -0.8s;
+}
+
+.mona-spinner-pulsing-ring-6 {
+    top: 63.04%;
+    left: 14.96%;
+    animation-delay: -1s;
+}
+
+.mona-spinner-pulsing-ring-7 {
+    top: 39%;
+    left: 5%;
+    animation-delay: -1.2s;
+}
+
+.mona-spinner-pulsing-ring-8 {
+    top: 14.96%;
+    left: 14.96%;
+    animation-delay: -1.4s;
+}
+
+/* Converging loader (4 segments) */
+.mona-spinner-converge-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: mona-spinner-rotate 1.5s linear infinite;
+}
+
+.mona-spinner-converge-segment {
+    position: absolute;
+    width: 32%;
+    height: 32%;
+    border-radius: 9999px;
+    background-color: currentColor;
+    animation: mona-spinner-converge 1.5s ease-in-out infinite;
+}
+
+.mona-spinner-converge-1 {
+    top: 0;
+    left: 0;
+}
+
+.mona-spinner-converge-2 {
+    top: 0;
+    right: 0;
+}
+
+.mona-spinner-converge-3 {
+    bottom: 0;
+    right: 0;
+}
+
+.mona-spinner-converge-4 {
+    bottom: 0;
+    left: 0;
+}
+
+@keyframes mona-spinner-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes mona-spinner-converge {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.4);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .mona-spinner-pulsing-segment,
+    .mona-spinner-pulsing-triad-segment,
+    .mona-spinner-pulsing-ring-segment,
+    .mona-spinner-converge-container,
+    .mona-spinner-converge-segment {
+        animation: none !important;
+    }
+
+    .mona-spinner-pulsing-segment {
+        opacity: 0.6;
+        transform: scale(0.85);
+    }
+
+    .mona-spinner-pulsing-2 {
+        opacity: 0.3;
+        transform: scale(0.5);
+    }
+
+    .mona-spinner-pulsing-triad-segment,
+    .mona-spinner-pulsing-ring-segment {
+        opacity: 0.7;
+        transform: scale(0.8);
+    }
+}
