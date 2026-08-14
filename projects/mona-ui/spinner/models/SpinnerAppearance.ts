@@ -1,1 +1,1 @@
-export type SpinnerAppearance = "default" | "pulsing" | "infinite-spinner" | "converging-spinner";
+export type SpinnerAppearance = "default" | "pulsing" | "pulsing-triad" | "pulsing-ring" | "converging-spinner";

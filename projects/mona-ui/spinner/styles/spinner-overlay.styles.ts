@@ -3,7 +3,7 @@ import type { VariantInputs } from "@nanahoshi/mona-ui/internal";
 
 export const spinnerOverlayThemeVariants = cva(
     `
-        flex items-center justify-center
+        isolate flex items-center justify-center
         pointer-events-auto select-none
         bg-background/60 backdrop-blur-xs
         text-foreground

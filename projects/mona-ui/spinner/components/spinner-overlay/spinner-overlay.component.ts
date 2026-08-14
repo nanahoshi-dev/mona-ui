@@ -12,7 +12,6 @@ import { SpinnerComponent } from "../spinner/spinner.component";
 @Component({
     selector: "mona-spinner-overlay",
     templateUrl: "./spinner-overlay.component.html",
-    styleUrls: ["./spinner-overlay.component.css"],
     imports: [SpinnerComponent],
     host: {
         "[class]": "baseClass()",

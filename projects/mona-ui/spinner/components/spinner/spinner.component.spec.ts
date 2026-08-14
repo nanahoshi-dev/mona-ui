@@ -31,13 +31,22 @@ describe("SpinnerComponent", () => {
         expect(host.querySelector(".mona-spinner-pulsing-container")).toBeTruthy();
     });
 
-    it("should render 3 segments for infinite-spinner appearance", () => {
-        fixture.componentRef.setInput("appearance", "infinite-spinner");
+    it("should render 3 segments for pulsing-triad appearance", () => {
+        fixture.componentRef.setInput("appearance", "pulsing-triad");
         fixture.detectChanges();
 
         const segments = host.querySelectorAll("[data-segment]");
         expect(segments.length).toBe(3);
-        expect(host.querySelector(".mona-spinner-infinite-container")).toBeTruthy();
+        expect(host.querySelector(".mona-spinner-pulsing-triad-container")).toBeTruthy();
+    });
+
+    it("should render 8 segments for pulsing-ring appearance", () => {
+        fixture.componentRef.setInput("appearance", "pulsing-ring");
+        fixture.detectChanges();
+
+        const segments = host.querySelectorAll("[data-segment]");
+        expect(segments.length).toBe(8);
+        expect(host.querySelector(".mona-spinner-pulsing-ring-container")).toBeTruthy();
     });
 
     it("should render 4 segments for converging-spinner appearance", () => {

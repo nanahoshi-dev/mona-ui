@@ -145,7 +145,7 @@ When multiple independent operations target the same element:
 
 | Name         | Type                                                                       | Default     | Description |
 |--------------|----------------------------------------------------------------------------|-------------|-------------|
-| `appearance` | `'default' \| 'pulsing' \| 'infinite-spinner' \| 'converging-spinner'`     | `'default'` | Visual appearance of the spinner animation. |
+| `appearance` | `'default' \| 'pulsing' \| 'pulsing-triad' \| 'pulsing-ring' \| 'converging-spinner'` | `'default'` | Visual appearance of the spinner animation. |
 | `aria-label` | `string`                                                                   | `'Loading'` | Accessible text announced by assistive technology when non-decorative. |
 | `class`      | `string`                                                                   | `''`        | Additional CSS classes merged via `tailwind-merge`. |
 | `decorative` | `boolean`                                                                  | `false`     | When `true`, removes status semantics and sets `aria-hidden="true"`. |

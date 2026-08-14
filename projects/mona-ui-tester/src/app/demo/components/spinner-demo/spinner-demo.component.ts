@@ -31,7 +31,7 @@ export class SpinnerDemoComponent extends AbstractDemoComponent<SpinnerComponent
         inputs: {
             appearance: {
                 type: "dropdown",
-                value: ["default", "pulsing", "infinite-spinner", "converging-spinner"],
+                value: ["default", "pulsing", "pulsing-triad", "pulsing-ring", "converging-spinner"],
                 defaultValue: "default"
             },
             decorative: {
